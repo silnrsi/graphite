@@ -6,6 +6,8 @@ class GlyphFace
 {
 public:
     Position advance() { return m_advance; }
+    void advance(Position a) { m_advance = a; }
+    void bbox(Rect a) { m_bbox = a; }
 
 protected:
     Rect m_bbox;          // bounding box metrics in design units

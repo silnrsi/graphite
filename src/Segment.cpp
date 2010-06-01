@@ -27,18 +27,21 @@ Segment::~Segment()
 Segment::Segment(const Segment &other)
 {
     memcpy(this, &other, sizeof(Segment));
-    m_charinfo = new CharInfo[m_numCharinfo];
+    m_charinfo = (CharInfo *)(operator new(m_numCharinfo * sizeof(CharInfo)));
     memcpy(m_charinfo, other.m_charinfo, m_numCharinfo * sizeof(CharInfo));
-    m_slots = new Slot[m_maxSlots];
+    m_slots = (Slot *)(operator new(m_maxSlots * sizeof(Slot)));
     memcpy(m_slots, other.m_slots + 1, m_numSlots * sizeof(Slot));
     m_slots--;
 }
 
 void Segment::growSlots(int num)
 {
-    m_slots = (Slot *)realloc((Slot *)m_slots + 1, (m_maxSlots + num) * sizeof(Slot)) - 1;
-    memset(m_slots + m_maxSlots + 1, num * sizeof(Slot), 0);
+    Slot *newslots = (Slot *)(operator new((m_maxSlots + num) * sizeof(Slot)));
     m_maxSlots += num;
+    memcpy(newslots, m_slots + 1, m_numSlots * sizeof(Slot));
+    memset(newslots + m_numSlots + 1, (m_maxSlots - m_numSlots) * sizeof(Slot), 0);     // or is it m_numSlots + 1?
+    delete m_slots;
+    m_slots = newslots;
 }
 
 void Segment::append(const Segment &other)

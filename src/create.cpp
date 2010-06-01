@@ -36,7 +36,7 @@ Segment create_rangesegment(Font *font, TextSource *txt)
 
 void read_text(Font *font, TextSource *txt, Segment *seg, int numchars)
 {
-    void *cmap = font->getTable(ktiCmap);
+    void *cmap = font->getTable(ktiCmap, NULL);
     void *ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
     int form = txt->utfEncodingForm();
     void *pBuffer, *pChar;

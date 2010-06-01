@@ -10,7 +10,7 @@ class Font
 {
 
 public:
-    void *getTable(TableId name) { return m_face->getTable(name); }
+    void *getTable(TableId name, size_t *len) { return m_face->getTable(name, len); }
     float advance(unsigned short glyphid) {
         if (m_advances[glyphid] == NAN)
             m_advances[glyphid] = m_face->getAdvance(glyphid, m_scale);

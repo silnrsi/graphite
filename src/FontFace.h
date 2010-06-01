@@ -7,7 +7,7 @@
 class FontFace
 {
 public:
-    void *getTable(TableId name);
+    virtual void *getTable(TableId name, size_t *len);
     virtual float pixelAdvance(unsigned short id, float ppm);
     virtual GlyphFace *readGlyph(unsigned short glyphid);
 
@@ -21,10 +21,13 @@ public:
             return m_glyphs + idx;
     }
     float getAdvance(unsigned short glyphid, float scale) { return pixelAdvance(glyphid, scale * m_upem); }
+    GlyphFace *addGlyph(unsigned short gid);
 
 protected:
     unsigned short m_numglyphs;     // number of glyphs in the font
     unsigned short *m_glyphidx;     // index for each glyph id in the font
+    unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
+    unsigned short m_capacity;      // how big is m_glyphs
     GlyphFace *m_glyphs;            // list of actual glyphs indexed by glyphidx, 1 base
     unsigned short m_upem;          // design units per em
 };
