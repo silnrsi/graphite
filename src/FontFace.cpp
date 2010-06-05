@@ -3,13 +3,14 @@
 
 float FontFace::pixelAdvance(unsigned short id, float ppm)
 {
-    GlyphFace *g = newGlyph(id);
+    // GlyphFace *g = newGlyph(id);
+    GlyphFace *g = m_glyphs + id;
     return g->advance().x * ppm / m_upem;
 }
 
-GlyphFace *FontFace::readGlyph(unsigned short gid)
+void FontFace::readFont()
 {
-    size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat;
+    size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
     void *pHead = getTable(ktiHead, &lHead);
     void *pHHea = getTable(ktiHhea, &lHHea);
     void *pLoca = getTable(ktiLoca, &lLoca);
@@ -17,33 +18,29 @@ GlyphFace *FontFace::readGlyph(unsigned short gid)
     void *pHmtx = getTable(ktiHmtx, &lHmtx);
     void *pGloc = getTable(ktiGloc, &lGloc);
     void *pGlat = getTable(ktiGlat, &lGlat);
-    size_t locidx = TtfUtil::LocaLookup(gid, pLoca, lLoca, pHead);
-    void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
-    int xMin, yMin, xMax, yMax;
-    int nLsb;
-    unsigned int nAdvWid;
-    GlyphFace *glyph = addGlyph(gid);
+    void *pMaxp = getTable(ktiMaxp, &lMaxp);
+    m_numglyphs = TtfUtil::GlyphCount(pMaxp);
+    m_upem = TtfUtil::DesignUnits(pHead);
+    // m_glyphidx = new unsigned short[m_numglyphs];        // only need this if doing occasional glyph reads
+    m_glyphs = static_cast<GlyphFace *>(operator new(m_numglyphs * sizeof(GlyphFace)));
 
-    if (TtfUtil::HorMetrics(gid, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
-        glyph->advance(Position(nAdvWid, 0));
-    if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-        glyph->bbox(Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin)));
-    return glyph;
-}
-
-GlyphFace *FontFace::addGlyph(unsigned short gid) 
-{
-    if (m_readglyphs >= m_capacity)
+    for (int i = 0; i < m_numglyphs; i++)
     {
-        m_capacity *= 2;
-        if (m_capacity > m_numglyphs) m_capacity = m_numglyphs;
-        GlyphFace *newglyphs = static_cast<GlyphFace *>(operator new (m_capacity * sizeof(GlyphFace)));
-        memcpy(newglyphs, m_glyphs, m_readglyphs * sizeof(GlyphFace));
-        delete m_glyphs;
-        m_glyphs = newglyphs;
+        int nLsb, xMin, yMin, xMax, yMax;
+        unsigned int nAdvWid;
+        Position pos(0, 0);
+        Rect bbox(pos, pos);
+        GlyphFace *g;
+        size_t locidx = TtfUtil::LocaLookup(i, pLoca, lLoca, pHead);
+        void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
+        if (TtfUtil::HorMetrics(i, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
+            pos = Position(nAdvWid, 0);
+        if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+            bbox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+        g = new(m_glyphs + i) GlyphFace(pos, bbox);
+        // m_glyphidx[i] = i;
+        // read glyph attributes here
+        // calculate FSM columns here
     }
-    m_readglyphs++;
-    m_glyphidx[gid] = m_readglyphs;
-    return m_glyphs + m_readglyphs;
 }
 
