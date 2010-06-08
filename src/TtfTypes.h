@@ -16,7 +16,6 @@ Provides types required to represent the TTF basic types.
 //**********************************************************************************************
 //	Include files
 //**********************************************************************************************
-#include "GrPlatform.h"
 
 namespace TtfUtil
 {
@@ -28,12 +27,13 @@ namespace TtfUtil
 //**********************************************************************************************
 //	Type declarations
 //**********************************************************************************************
-typedef gr::data8	uint8;
-typedef gr::sdata8	int8;
-typedef gr::data16	uint16;
-typedef gr::sdata16 	int16;
-typedef gr::data32	uint32;
-typedef gr::sdata32 	int32;
+typedef char	uint8;
+typedef char    byte;
+typedef signed char	int8;
+typedef unsigned short	uint16;
+typedef short 	int16;
+typedef unsigned long	uint32;
+typedef long 	int32;
 
 typedef int16	short_frac;
 typedef int32	fixed;
@@ -242,7 +242,7 @@ namespace Sfnt
 	};
 
 
-	typedef gr::byte	Panose[10];
+	typedef byte	Panose[10];
 
 	struct Compatibility0
 	{

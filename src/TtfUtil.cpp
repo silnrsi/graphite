@@ -804,7 +804,7 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) throw (std::invalid_argum
 		throw std::invalid_argument("null pointer given");
 
 	uint16 * pStr = reinterpret_cast<uint16 *>(pWStr);
-	uint16 * const pStrEnd = pStr + (nSize == 0 ? utf16len(pStr) : nSize);
+	uint16 * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
 
 	std::transform(pStr, pStrEnd, pStr, read<uint16>);
 
