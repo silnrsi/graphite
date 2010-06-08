@@ -8,7 +8,7 @@ float FontFace::pixelAdvance(unsigned short id, float ppm)
     return g->advance().x * ppm / m_upem;
 }
 
-void FontFace::readFont()
+void FontFace::readGlyphs()
 {
     size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
     void *pHead = getTable(ktiHead, &lHead);

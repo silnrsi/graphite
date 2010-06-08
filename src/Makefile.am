@@ -10,5 +10,8 @@ libgraphiteng_la_SOURCES = create.cpp \
     Slot.cpp \
     TtfUtil.cpp
 
+libgraphiteng_la_SOURCES += ../common/FileFont.cpp
+
 EXTRA_DIST = *.h
 
+EXTRA_DIST += ../common/*.h

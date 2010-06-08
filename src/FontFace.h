@@ -9,11 +9,13 @@ class FontFace
 public:
     virtual void *getTable(TableId name, size_t *len);
     virtual float pixelAdvance(unsigned short id, float ppm);
-    virtual void readFont();
+    virtual void readGlyphs();
 
 public:
     GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) { return pixelAdvance(glyphid, scale * m_upem); }
+    unsigned short upem() { return m_upem; }
+    unsigned short numGlyphs() { return m_numglyphs; }
 
 protected:
 
