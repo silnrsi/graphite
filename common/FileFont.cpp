@@ -29,9 +29,9 @@ FileFont::FileFont(const char *fname) :
     }
 }
 
-void *FileFont::getTable(TableId name, size_t *len)
+void *FileFont::getTable(unsigned int name, size_t *len)
 {
-    std::map<TableId, std::pair<void *, size_t> >::iterator res;
+    std::map<unsigned int, std::pair<void *, size_t> >::iterator res;
     if ((res = m_tables.find(name)) == m_tables.end())
     {
         void *tptr;
@@ -40,10 +40,10 @@ void *FileFont::getTable(TableId name, size_t *len)
         if (fseek(m_pfile, lOffset, SEEK_SET)) return NULL;
         tptr = new char[tlen];
         if (fread(tptr, 1, tlen, m_pfile) != tlen) return NULL;
-        if (!TtfUtil::CheckTable(name, tptr, tlen)) return NULL;
+//        if (!TtfUtil::CheckTable(name, tptr, tlen)) return NULL;
 
-        std::pair<TableId, std::pair<void *, size_t> > kvalue = std::pair<TableId, std::pair<void *, size_t> >(name, std::pair<void *, size_t>(tptr, tlen));
-        std::pair<std::map<TableId, std::pair<void *, size_t> >::iterator, bool> result = m_tables.insert(kvalue);
+        std::pair<unsigned int, std::pair<void *, size_t> > kvalue = std::pair<unsigned int, std::pair<void *, size_t> >(name, std::pair<void *, size_t>(tptr, tlen));
+        std::pair<std::map<unsigned int, std::pair<void *, size_t> >::iterator, bool> result = m_tables.insert(kvalue);
         if (result.second)
             res = result.first;
     }

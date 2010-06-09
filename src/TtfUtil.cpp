@@ -229,17 +229,9 @@ bool GetTableDirInfo(const void * pHdr, size_t & lOffset, size_t & lSize)
 	Get offset and size of the specified table.
 	Return true if successful, false otherwise. On false, offset and size will be 0.
 ----------------------------------------------------------------------------------------------*/
-bool GetTableInfo(TableId ktiTableId, const void * pHdr, const void * pTableDir, 
+bool GetTableInfo(unsigned int lTableTag, const void * pHdr, const void * pTableDir, 
 						   size_t & lOffset, size_t & lSize)
 {
-	fontTableId32 lTableTag = TableIdTag(ktiTableId);
-	if (!lTableTag)
-	{
-		lOffset = 0;
-		lSize = 0;
-		return false;
-	}
-
 	const Sfnt::OffsetSubTable * pOffsetTable 
 		= reinterpret_cast<const Sfnt::OffsetSubTable *>(pHdr);
 	const Sfnt::OffsetSubTable::Entry 

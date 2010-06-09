@@ -1,11 +1,12 @@
 #include "Segment.h"
 #include "Misc.h"
-#include "TextSource.h"
+#include "graphiteng/ITextSource.h"
 #include "TtfUtil.h"
+#include "FontFace.h"       // for table names
 
-void read_text(Font *font, TextSource *txt, Segment *seg, int numchars);
-void prepare_pos(Font *font, Segment *seg);
-void finalise(Font *font, Segment *seg);
+void read_text(IFont *font, ITextSource *txt, Segment *seg, int numchars);
+void prepare_pos(IFont *font, Segment *seg);
+void finalise(IFont *font, Segment *seg);
 
 
 #define GET_UTF8(p) \
@@ -20,21 +21,21 @@ void finalise(Font *font, Segment *seg);
 
 #define GET_UTF32(p) *p++
 
-Segment create_rangesegment(Font *font, TextSource *txt)
+ISegment *create_rangesegment(IFont *font, ITextSource *txt)
 {
     int numchars = txt->getLength();
-    Segment seg(numchars, font);
+    Segment *seg = new Segment(numchars, font);
 
-    read_text(font, txt, &seg, numchars);
+    read_text(font, txt, seg, numchars);
     // run the line break passes
     // run the substitution passes
-    prepare_pos(font, &seg);
+    prepare_pos(font, seg);
     // run the positioning passes
-    finalise(font, &seg);
+    finalise(font, seg);
     return seg;
 }
 
-void read_text(Font *font, TextSource *txt, Segment *seg, int numchars)
+void read_text(IFont *font, ITextSource *txt, Segment *seg, int numchars)
 {
     void *cmap = font->getTable(ktiCmap, NULL);
     void *ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
@@ -62,7 +63,7 @@ void read_text(Font *font, TextSource *txt, Segment *seg, int numchars)
         unsigned short gid;
         unsigned char *pUChar;
         unsigned short *pUShort;
-        unsigned long *pULong;
+        unsigned int *pULong;
 
         switch (form)
         {   // this is oh so ugly
@@ -78,7 +79,7 @@ void read_text(Font *font, TextSource *txt, Segment *seg, int numchars)
             break;
         case kutf32 :
         default:
-            pULong = reinterpret_cast<unsigned long *>(pChar);
+            pULong = reinterpret_cast<unsigned int *>(pChar);
             cid = GET_UTF32(pULong);
             pChar = reinterpret_cast<void *>(pULong);
             break;
@@ -88,13 +89,13 @@ void read_text(Font *font, TextSource *txt, Segment *seg, int numchars)
     }
 }
 
-void prepare_pos(Font *font, Segment *seg)
+void prepare_pos(IFont *font, Segment *seg)
 {
     // reorder for bidi
     // copy key changeable metrics into slot (if any);
 }
 
-void finalise(Font *font, Segment *seg)
+void finalise(IFont *font, Segment *seg)
 {
     seg->positionSlots();
 }

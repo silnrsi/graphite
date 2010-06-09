@@ -44,7 +44,7 @@ namespace TtfUtil
 	bool GetHeaderInfo(size_t & lOffset, size_t & lSize);
 	bool CheckHeader(const void * pHdr);
 	bool GetTableDirInfo(const void * pHdr, size_t & lOffset, size_t & lSize);
-	bool GetTableInfo(TableId ktiTableId, const void * pHdr, const void * pTableDir, 
+	bool GetTableInfo(unsigned int lTableTag, const void * pHdr, const void * pTableDir, 
 		size_t & lOffset, size_t & lSize);
 	bool CheckTable(TableId ktiTableId, const void * pTable, size_t lTableSize);
 

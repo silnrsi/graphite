@@ -1,5 +1,6 @@
 #include "FontFace.h"
 #include <string.h>
+#include "graphiteng/Types.h"
 
 float FontFace::pixelAdvance(unsigned short id, float ppm)
 {

@@ -7,11 +7,11 @@
 #include "Slot.h"
 #include "Misc.h"
 
-Segment::Segment(int numchars, Font *font) :
-        m_maxSlots(numchars),
+Segment::Segment(int numchars, IFont *font) :
+        m_maxSlots(numchars + 1),
         m_numCharinfo(numchars),
         m_font(font),
-        m_slots(new Slot[numchars]),
+        m_slots(new Slot[numchars + 1]),
         m_charinfo(new CharInfo[numchars]),
         m_bbox(Rect(Position(0, 0), Position(0, 0))),
         m_last(0),

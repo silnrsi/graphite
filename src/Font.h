@@ -1,23 +1,25 @@
 #ifndef FONT_INCLUDE
 #define FONT_INCLUDE
 
-#include <limits>
+// #include <limits>
 #include <cmath>
+#include "graphiteng/IFont.h"
 #include "FontFace.h"
 #include "TtfUtil.h"
-#define NAN std::numeric_limits<float>::signaling_NaN()
+// #define NAN std::numeric_limits<float>::signaling_NaN()
 
-class Font
+class Font : public IFont
 {
 
 public:
-    Font(FontFace *face, float ppm);
-    void *getTable(TableId name, size_t *len) { return m_face->getTable(name, len); }
-    float advance(unsigned short glyphid) {
+    virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
+    virtual float advance(unsigned short glyphid) {
         if (isnan(m_advances[glyphid]))
             m_advances[glyphid] = m_face->getAdvance(glyphid, m_scale);
         return m_advances[glyphid];
     }
+
+    Font(FontFace *face, float ppm);
 
 protected :
     float m_scale;      // scales from design units to ppm

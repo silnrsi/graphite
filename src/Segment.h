@@ -1,17 +1,24 @@
 #ifndef SEGMENT_INCLUDE
 #define SEGMENT_INCLUDE
 
+#include "graphiteng/ISegment.h"
+#include "graphiteng/ISlot.h"
 #include "Slot.h"
+#include "graphiteng/IFont.h"
 #include "CharInfo.h"
-#include "TextSource.h"
 
-class Segment // : ISegment
+class Segment : public ISegment
 {
 public:
-    Segment(int numSlots, Font *font);
+    virtual int numSlots() { return m_numSlots; }
+    virtual Position advance() { return m_advance; }
+    virtual ISlot *slot(int index) { return m_slots + index; }
+    virtual int first() { return m_first; }
+    virtual int end() { return 0; }
+
+    Segment(int numSlots, IFont *font);
     Segment(const Segment &other);
     ~Segment();
-    Slot *slot(int index) { return m_slots + index; }
     Slot *newSlot(int before, int after) {
         Slot *res;
         if (m_numSlots == m_maxSlots) growSlots(1);
@@ -23,8 +30,6 @@ public:
         res->next(after);
         return res;
     }
-    int numSlots() { return m_numSlots; }
-    Position advance() { return m_advance; }
     void growSlots(int num);
     void initslots(int index, int cid, int gid);
     void positionSlots();
@@ -39,11 +44,9 @@ protected:
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 
-    Font *m_font;          // Reference to font to get metrics from
+    IFont *m_font;          // Reference to font to get metrics from
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
 };
-
-extern Segment create_rangesegment(Font *font, TextSource *txt);
 
 #endif // SEGMENT_INCLUDE
