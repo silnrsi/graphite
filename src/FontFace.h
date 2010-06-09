@@ -7,7 +7,7 @@
 class FontFace
 {
 public:
-    virtual void *getTable(TableId name, size_t *len);
+    virtual void *getTable(TableId name, size_t *len) = 0;
     virtual float pixelAdvance(unsigned short id, float ppm);
     virtual void readGlyphs();
 

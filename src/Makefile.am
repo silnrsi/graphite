@@ -6,6 +6,7 @@ libgraphiteng_la_LDFLAGS = -version-info 4:0:0
 
 libgraphiteng_la_SOURCES = create.cpp \
     FontFace.cpp \
+    Font.cpp \
     Segment.cpp \
     Slot.cpp \
     TtfUtil.cpp

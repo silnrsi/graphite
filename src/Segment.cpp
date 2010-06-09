@@ -13,15 +13,17 @@ Segment::Segment(int numchars, Font *font) :
         m_font(font),
         m_slots(new Slot[numchars]),
         m_charinfo(new CharInfo[numchars]),
-        m_bbox(Rect(Position(0, 0), Position(0, 0)))
+        m_bbox(Rect(Position(0, 0), Position(0, 0))),
+        m_last(0),
+        m_first(0)
 {
 
 }
 
 Segment::~Segment()
 {
-    delete[] m_slots;
-    delete[] m_charinfo;
+//    delete[] m_slots;
+//    delete[] m_charinfo;
 }
 
 Segment::Segment(const Segment &other)
@@ -66,17 +68,19 @@ void Segment::append(const Segment &other)
 void Segment::initslots(int index, int cid, int gid)
 {
     CharInfo *c = m_charinfo + index;
-    m_charinfo[index].init(cid, index + 1);
-    index++;                                // slots start at 1
-    m_slots[index].init(index);
-    m_slots[index].glyph(gid);
+    m_charinfo[index].init(cid, m_numSlots + 1);
+    m_numSlots++;
+    m_slots[m_numSlots].init(m_numSlots);
+    m_slots[m_numSlots].glyph(gid);
+    m_slots[m_numSlots].before(index);
+    m_slots[m_numSlots].after(index);
     if (m_last)
     {
-        m_slots[index].prev(m_last);
-        m_slots[m_last].next(index);
+        m_slots[m_numSlots].prev(m_last);
+        m_slots[m_last].next(m_numSlots);
     }
-    if (!m_first) m_first = index;
-    m_last = index;
+    if (!m_first) m_first = m_numSlots;
+    m_last = m_numSlots;
 }
 
 void Segment::positionSlots()
@@ -88,7 +92,8 @@ void Segment::positionSlots()
     for ((i = m_first), s = m_slots + i; i != 0; (i = s->next()), s = m_slots + i)
     {
         s->origin(currpos);
-        currpos = Position(s->advance(m_font), 0);
+        currpos = currpos + Position(s->advance(m_font), 0);
     }
+    m_advance = currpos;
 }
 

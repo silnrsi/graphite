@@ -8,11 +8,11 @@ enum encform {
 class TextSource
 {
 public :
-    encform utfEncodingForm();
-    int getLength();
-    unsigned char *get_utf8_buffer();
-    unsigned short *get_utf16_buffer();
-    unsigned long *get_utf32_buffer();
+    virtual encform utfEncodingForm() = 0;
+    virtual int getLength() = 0;
+    virtual unsigned char *get_utf8_buffer() = 0;
+    virtual unsigned short *get_utf16_buffer() = 0;
+    virtual unsigned long *get_utf32_buffer() = 0;
 };
 
 #endif

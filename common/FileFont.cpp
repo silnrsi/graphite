@@ -1,6 +1,6 @@
 #include "FileFont.h"
 
-FileFont::FileFont(char *fname) :
+FileFont::FileFont(const char *fname) :
     FontFace(),
     m_pfile(NULL),
     m_tables(),
@@ -20,10 +20,16 @@ FileFont::FileFont(char *fname) :
         m_pTableDir = new char[lSize];
         if (fseek(m_pfile, lOffset, SEEK_SET)) return;
         if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
+
+        void *pHead = getTable(ktiHead, NULL);
+        void *pMaxp = getTable(ktiMaxp, NULL);
+        m_upem = TtfUtil::DesignUnits(pHead);
+        m_numglyphs = TtfUtil::GlyphCount(pMaxp);
+        readGlyphs();
     }
 }
 
-void *FileFont::getTable(TableId name, size_t &len)
+void *FileFont::getTable(TableId name, size_t *len)
 {
     std::map<TableId, std::pair<void *, size_t> >::iterator res;
     if ((res = m_tables.find(name)) == m_tables.end())
@@ -41,7 +47,7 @@ void *FileFont::getTable(TableId name, size_t &len)
         if (result.second)
             res = result.first;
     }
-    len = res->second.second;
+    if (len) *len = res->second.second;
     return res->second.first;
 }
 

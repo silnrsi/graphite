@@ -5,8 +5,8 @@
 class FileFont : public FontFace
 {
 public:
-    FileFont(char *name);
-    void *getTable(TableId name, size_t &len);
+    FileFont(const char *name);
+    void *getTable(TableId name, size_t *len);
 
 protected:
     FILE *m_pfile;

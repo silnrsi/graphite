@@ -5,7 +5,7 @@ class Position
 {
 public:
 
-    Position() {x = 0; y = 0;}
+    Position() : x(0), y(0) { }
     Position(const Position &other) {x = other.x, y = other.y;}
     Position(float inx, float iny) { x = inx; y = iny; }
     Position operator + (Position a) { return Position(x + a.x, y + a.y); }

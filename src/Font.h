@@ -2,6 +2,7 @@
 #define FONT_INCLUDE
 
 #include <limits>
+#include <cmath>
 #include "FontFace.h"
 #include "TtfUtil.h"
 #define NAN std::numeric_limits<float>::signaling_NaN()
@@ -13,7 +14,7 @@ public:
     Font(FontFace *face, float ppm);
     void *getTable(TableId name, size_t *len) { return m_face->getTable(name, len); }
     float advance(unsigned short glyphid) {
-        if (m_advances[glyphid] == NAN)
+        if (isnan(m_advances[glyphid]))
             m_advances[glyphid] = m_face->getAdvance(glyphid, m_scale);
         return m_advances[glyphid];
     }

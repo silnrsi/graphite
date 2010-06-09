@@ -3,6 +3,7 @@
 
 #include "Slot.h"
 #include "CharInfo.h"
+#include "TextSource.h"
 
 class Segment // : ISegment
 {
@@ -22,6 +23,8 @@ public:
         res->next(after);
         return res;
     }
+    int numSlots() { return m_numSlots; }
+    Position advance() { return m_advance; }
     void growSlots(int num);
     void initslots(int index, int cid, int gid);
     void positionSlots();
@@ -40,5 +43,7 @@ protected:
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
 };
+
+extern Segment create_rangesegment(Font *font, TextSource *txt);
 
 #endif // SEGMENT_INCLUDE

@@ -7,15 +7,20 @@
 class Slot // : ISlot
 {
 public:
+    Slot();
     void init(int id) { m_id = id; }
     void glyph(unsigned short gid) { m_glyphid = gid; }
+    unsigned short gid() { return m_glyphid; }
     void next(int index) { m_next = index; }
     int next() { return m_next; }
     void prev(int index) { m_prev = index; }
     void origin(Position &pos) { m_position = pos + m_shift + m_kern; }
+    Position origin() { return m_position; }
     float advance(Font *font) { return font->advance(m_glyphid) + m_kern.x; }
     void before(int index) { m_before = index; }
+    int before() { return m_before; }
     void after(int index) { m_after = index; }
+    int after() { return m_after; }
     void update(int numSlots, int numCharInfo, Position &relpos);
 
 protected:
