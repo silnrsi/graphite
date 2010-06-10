@@ -528,8 +528,7 @@ int testFileFont(Parameters parameters)
         int i = 0;
         fprintf(parameters.log, "pos  gid attach\t     x\t     y\tins bw\t  chars\tUnicode\t");
         fprintf(parameters.log, "\n");
-       
-        for (i = 0; i < seg->numSlots(); i++)
+        for (i = seg->first(); i != 0; )
         {
             ISlot *slot = seg->slot(i);
             Position org = slot->origin();
@@ -564,6 +563,7 @@ int testFileFont(Parameters parameters)
             ++gi;
 #endif
             fprintf(parameters.log, "\n");
+            i = slot->next();
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
