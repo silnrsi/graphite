@@ -81,6 +81,7 @@ struct Parameters
     unsigned int * pText32;
     size_t charLength;
     size_t offset;
+    FILE * log;
 };
 
 #ifdef HAVE_ICONV
@@ -133,6 +134,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
     int mainArgOffset = 0;
     parameters.pText32 = NULL;
     parameters.features = NULL;
+    parameters.log = stdout;
     bool argError = false;
     char* pText = NULL;
     typedef enum 
@@ -144,7 +146,8 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
         LINE_END,
         LINE_FILL,
         CODES,
-                FEAT
+        FEAT,
+        LOG
     } TestOptions;
     TestOptions option = NONE;
     char * pIntEnd = NULL;
@@ -198,10 +201,19 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             }
             option = NONE;
             break;
-                case FEAT:
-                        parameters.features = argv[a];
-                        option = NONE;
-                        break;
+        case FEAT:
+                parameters.features = argv[a];
+                option = NONE;
+                break;
+        case LOG:
+            parameters.log = fopen(argv[a], "w");
+            if (parameters.log == NULL)
+            {
+                fprintf(stderr,"Failed to open %s\n", argv[a]);
+                parameters.log = stdout;
+            }
+            option = NONE;
+            break;
         default:
             option = NONE;
             if (argv[a][0] == '-')
@@ -249,7 +261,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
                     parameters.useCodes = true;
                     // must be less than argc
                     parameters.pText32 = new unsigned int[argc];
-                    printf("\nText codes\n");
+                    fprintf(parameters.log, "Text codes\n");
                 }
                 else if (strcmp(argv[a], "-linefill") == 0)
                 {
@@ -260,6 +272,10 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
                 {
                     option = NONE;
                     parameters.justification = true;
+                }
+                else if (strcmp(argv[a], "-log") == 0)
+                {
+                    option = LOG;
                 }
                 else
                 {
@@ -282,9 +298,9 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
 // convert text to utfOut using iconv because its easier to debug string placements
                     parameters.pText32[parameters.charLength++] = code;
                     if (parameters.charLength % 10 == 0)
-                        printf("%4x\n",code);
+                        fprintf(parameters.log, "%4x\n",code);
                     else
-                        printf("%4x\t",code);
+                        fprintf(parameters.log, "%4x\t",code);
                 }
                 else
                 {
@@ -312,20 +328,20 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
 #ifdef HAVE_ICONV
             //parameters.charLength = convertUtf8ToUtf32(pText, parameters.pText32);
             parameters.charLength = convertUtf("utf8","utf32",pText, parameters.pText32);
-            std::cout << "String has " << parameters.charLength << " characters" << std::endl;
+            fprintf(parameters.log, "String has %d characters\n", parameters.charLength);
             size_t ci;
             for (ci = 0; ci < 10 && ci < parameters.charLength; ci++)
             {
-                    std::cout << std::setw(4) << ci << '\t';
+                    fprintf(parameters.log, "%d\t", ci)
             }
-            std::cout << std::endl;
+            fprintf(parameters.log, "\n");
             for (ci = 0; ci < parameters.charLength; ci++)
             {
-                    std::cout << std::setw(4) << std::hex 
-                            << parameters.pText32[ci] << '\t';
-                    if (((ci + 1) % 10) == 0)  std::cout << std::endl;
+                    fprintf(parameters.log, "%04x\t");
+                    if (((ci + 1) % 10) == 0)
+                        fprintf(parameters.log, "\n");
             }
-            std::cout << std::endl;
+            fprintf(parameters.log, "\n");
 #else
             fprintf(stderr,"Only the -codes option is supported on Win32\r\n");
             argError = true;
@@ -334,7 +350,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
         else 
         {
             parameters.pText32[parameters.charLength] = 0;
-            printf("\n");
+            fprintf(parameters.log, "\n");
         }
     }
     return (argError) ? false : true;
@@ -358,6 +374,7 @@ void initParameters(Parameters & parameters)
     parameters.textArgIndex = 0;
     parameters.charLength = 0;
     parameters.offset = 0;
+    parameters.log = stdout;
 }
 
 #if 0
@@ -509,19 +526,19 @@ int testFileFont(Parameters parameters)
         ISegment *seg = create_rangesegment(sizeFont, &textSrc);
 
         int i = 0;
-        printf("pos  gid attach\t     x\t     y\tins bw\t  chars\tUnicode\t");
-        printf("\n");
+        fprintf(parameters.log, "pos  gid attach\t     x\t     y\tins bw\t  chars\tUnicode\t");
+        fprintf(parameters.log, "\n");
        
         for (i = 0; i < seg->numSlots(); i++)
         {
             ISlot *slot = seg->slot(i);
             Position org = slot->origin();
-            printf("%02d  %4d %3d@%02d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
+            fprintf(parameters.log, "%02d  %4d %3d@%02d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot->gid(), 0 /*attachedTo*/, 0 /*attachedAt*/, org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
             
             if (parameters.pText32 != NULL)
             {
-                printf("%7x\t%7x",
+                fprintf(parameters.log, "%7x\t%7x",
                     parameters.pText32[slot->before() + parameters.offset],
                     parameters.pText32[slot->after() + parameters.offset]);
             }
@@ -546,12 +563,12 @@ int testFileFont(Parameters parameters)
             ++i;
             ++gi;
 #endif
-            printf("\n");
+            fprintf(parameters.log, "\n");
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
         float advanceWidth = seg->advance().x;
-        printf("Advance width = %6.1f\n", advanceWidth);
+        fprintf(parameters.log, "Advance width = %6.1f\n", advanceWidth);
         
         delete seg;
         delete sizeFont;
@@ -560,6 +577,8 @@ int testFileFont(Parameters parameters)
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;
 //        logStream.close();
+        if (parameters.log != stdout)
+            fclose(parameters.log);
     }
     catch (...)
     {
@@ -590,7 +609,8 @@ int _tmain(int argc, _TCHAR* argv[])
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
         fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\r\n");
         fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\r\n");
-                fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
+        fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
+        fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"\r\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\r\ntracing support.\r\n");
         return 1;
     }
@@ -639,6 +659,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
+        fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
         return 1;
     }

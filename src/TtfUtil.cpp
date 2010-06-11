@@ -414,7 +414,7 @@ size_t  MaxCompositeLevelCount(const void * pMaxp)
 
 	Note: this method is not currently used by the Graphite engine.
 ----------------------------------------------------------------------------------------------*/
-size_t LocaGlyphCount(size_t lLocaSize, const void * pHead) throw(std::domain_error)
+size_t LocaGlyphCount(size_t lLocaSize, const void * pHead) //throw(std::domain_error)
 {
 
 	const Sfnt::FontHeader * pTable 
@@ -430,8 +430,8 @@ size_t LocaGlyphCount(size_t lLocaSize, const void * pHead) throw(std::domain_er
 	 // loca entries are four bytes
 		return (lLocaSize >> 2) - 1;
 
-	//return -1;
-	throw std::domain_error("head table in inconsistent state. The font may be corrupted");
+	return -1;
+	//throw std::domain_error("head table in inconsistent state. The font may be corrupted");
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -790,10 +790,14 @@ int PostLookup(const void * pPost, size_t lPostSize, const void * pMaxp,
 	defaults to 0.
 	Return true if successful, false otherwise. 
 ----------------------------------------------------------------------------------------------*/
-void SwapWString(void * pWStr, size_t nSize /* = 0 */) throw (std::invalid_argument)
+void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_argument)
 {
 	if (pWStr == 0)
-		throw std::invalid_argument("null pointer given");
+	{
+	    assert(pWStr);
+//		throw std::invalid_argument("null pointer given");
+        return;
+	}
 
 	uint16 * pStr = reinterpret_cast<uint16 *>(pWStr);
 	uint16 * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
@@ -1119,7 +1123,7 @@ unsigned int Cmap310NextCodepoint(const void *pCmap310, unsigned int nUnicodeId,
 ----------------------------------------------------------------------------------------------*/
 size_t LocaLookup(gid16 nGlyphId, 
 		const void * pLoca, size_t lLocaSize, 
-		const void * pHead) throw (std::out_of_range)
+		const void * pHead) // throw (std::out_of_range)
 {
 	const Sfnt::FontHeader * pTable = reinterpret_cast<const Sfnt::FontHeader *>(pHead);
 
@@ -1143,8 +1147,8 @@ size_t LocaLookup(gid16 nGlyphId,
 	}
 
 	// only get here if glyph id was bad
-	//return -1;
-	throw std::out_of_range("glyph id out of range for font");
+	return -1;
+	//throw std::out_of_range("glyph id out of range for font");
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1554,12 +1558,18 @@ void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 	if (read(pTable->index_to_loc_format) == Sfnt::FontHeader::ShortIndexLocFormat)
 	{ // loca entries are two bytes (and have been divided by two)
 		if (nGlyphId >= (lLocaSize >> 1) - 1) // don't allow nGlyphId to access sentinel
-			throw std::out_of_range("glyph id out of range for font");
+		{
+//			throw std::out_of_range("glyph id out of range for font");
+            return NULL;
+		}
 	}
 	if (read(pTable->index_to_loc_format) == Sfnt::FontHeader::LongIndexLocFormat)
 	{ // loca entries are four bytes
 		if (nGlyphId >= (lLocaSize >> 2) - 1)
-			throw std::out_of_range("glyph id out of range for font");
+		{
+//			throw std::out_of_range("glyph id out of range for font");
+            return NULL;
+		}
 	}
 
 	long lGlyfOffset = LocaLookup(nGlyphId, pLoca, lLocaSize, pHead);
