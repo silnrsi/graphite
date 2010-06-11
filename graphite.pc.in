@@ -1,0 +1,7 @@
+
+Name: Graphite
+Description: Font rendering engine for Complex Scripts
+Version: ${version}
+Libs: -L${libdir} -lgraphiteng
+Cflags: -I${includedir}
+

@@ -1,0 +1,14 @@
+syntax:glob
+*~
+*.bak
+m4
+autom4te.cache
+config
+configure
+config.status
+aclocal.m4
+Makefile.in
+build
+msvs9
+nmake*
+
