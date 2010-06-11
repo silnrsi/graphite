@@ -60,3 +60,9 @@ deb-release: deb-base
 deb-local: deb-base
 	dch -D ${DISTRIB_CODENAME} -v ${SVNWITH_EPOCH} -m -c${SVNDEBPACKAGE}/debian/changelog "This is a debuild direct from svn"
 	cd ${SVNDEBPACKAGE} && debuild -us -uc
+
+# hack to remove stdc++
+libtool-nostdc++: config.status
+	cat libtool | sed s/-lstdc++// > libtool.nostdc++
+	mv libtool.nostdc++ libtool
+

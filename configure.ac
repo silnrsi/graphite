@@ -63,7 +63,7 @@ AC_CHECK_FUNCS(fabsf)
 # Setup the build compiler flags and linker flags.
 # Enable debug
 # (note: the flags here are gcc-specific and may fail with other compilers)
-build_flags=""
+build_flags=" -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs"
 if test "$enable_debug" = yes; then
   build_flags="$build_flags -D_DEBUG -O0 -g -Wall -Wno-unknown-pragmas -Wparentheses"
 elif test "$enable_strict" = yes; then
