@@ -24,7 +24,7 @@ FileFont::FileFont(const char *fname) :
         void *pHead = getTable(ktiHead, NULL);
         void *pMaxp = getTable(ktiMaxp, NULL);
         m_upem = TtfUtil::DesignUnits(pHead);
-        m_numglyphs = TtfUtil::GlyphCount(pMaxp);
+        m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
         readGlyphs();
     }
 }

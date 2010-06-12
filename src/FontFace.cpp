@@ -20,17 +20,17 @@ bool FontFace::readGlyphs()
     if ((pGloc = getTable(ktiGloc, &lGloc)) == NULL) return false;
     if ((pGlat = getTable(ktiGlat, &lGlat)) == NULL) return false;
     if ((pMaxp = getTable(ktiMaxp, &lMaxp)) == NULL) return false;
-    m_numglyphs = TtfUtil::GlyphCount(pMaxp);
+    m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
     m_upem = TtfUtil::DesignUnits(pHead);
-    // m_glyphidx = new unsigned short[m_numglyphs];        // only need this if doing occasional glyph reads
-    m_glyphs = static_cast<GlyphFace *>(operator new(m_numglyphs * sizeof(GlyphFace)));
+    // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
+    m_glyphs = static_cast<GlyphFace *>(operator new(m_numGlyphs * sizeof(GlyphFace)));
 
     int version = swap32(*((uint32 *)pGloc));
     if (version != 0x00010000) return false;
     unsigned short locFlags = swap16(((uint16 *)pGloc)[2]);
     m_numAttrs = swap16(((uint16 *)pGloc)[3]);
 
-    for (int i = 0; i < m_numglyphs; i++)
+    for (int i = 0; i < m_numGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
         unsigned int nAdvWid;
@@ -72,7 +72,7 @@ bool FontFace::readGraphite()
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + ((uint32 *)pSilf)[4 + i]))) return false;
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + ((uint32 *)pSilf)[4 + i]), m_numGlyphs)) return false;
     }
     return true;
 }

@@ -35,6 +35,8 @@ add_library(graphiteng SHARED
     Font.cpp
     Segment.cpp
     Slot.cpp
+    Silf.cpp
+    Pass.cpp
     TtfUtil.cpp
     ../common/FileFont.h
     ../common/FileFont.cpp

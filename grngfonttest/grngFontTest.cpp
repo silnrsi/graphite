@@ -328,16 +328,16 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
 #ifdef HAVE_ICONV
             //parameters.charLength = convertUtf8ToUtf32(pText, parameters.pText32);
             parameters.charLength = convertUtf("utf8","utf32",pText, parameters.pText32);
-            fprintf(parameters.log, "String has %d characters\n", parameters.charLength);
+            fprintf(parameters.log, "String has %d characters\n", (int)parameters.charLength);
             size_t ci;
             for (ci = 0; ci < 10 && ci < parameters.charLength; ci++)
             {
-                    fprintf(parameters.log, "%d\t", ci)
+                    fprintf(parameters.log, "%d\t", (int)ci);
             }
             fprintf(parameters.log, "\n");
             for (ci = 0; ci < parameters.charLength; ci++)
             {
-                    fprintf(parameters.log, "%04x\t");
+                    fprintf(parameters.log, "%04x\t", (int)ci);
                     if (((ci + 1) % 10) == 0)
                         fprintf(parameters.log, "\n");
             }

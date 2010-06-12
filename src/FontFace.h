@@ -36,13 +36,13 @@ public:
     GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) { return advance(glyphid) * scale; }
     unsigned short upem() { return m_upem; }
-    unsigned short numGlyphs() { return m_numglyphs; }
+    unsigned short numGlyphs() { return m_numGlyphs; }
     bool readGlyphs();
     bool readGraphite();
 
 protected:
 
-    unsigned short m_numglyphs;     // number of glyphs in the font
+    unsigned short m_numGlyphs;     // number of glyphs in the font
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs

@@ -52,7 +52,7 @@ namespace TtfUtil
 	size_t  GlyphCount(const void * pMaxp); 
 	size_t  MaxCompositeComponentCount(const void * pMaxp);
 	size_t  MaxCompositeLevelCount(const void * pMaxp);
-	size_t  LocaGlyphCount(size_t lLocaSize, const void * pHead) throw (std::domain_error); 
+	size_t  LocaGlyphCount(size_t lLocaSize, const void * pHead); // throw (std::domain_error); 
 	int DesignUnits(const void * pHead);
 	int HeadTableCheckSum(const void * pHead);
 	void HeadTableCreateTime(const void * pHead, unsigned int * pnDateBC, unsigned int * pnDateAD);
@@ -74,7 +74,7 @@ namespace TtfUtil
 	//size_t NameTableLength(const byte * pTable);
 	int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
 		int *nameIdList, int cNameIds, short *langIdList);
-	void SwapWString(void * pWStr, size_t nSize = 0) throw (std::invalid_argument);
+	void SwapWString(void * pWStr, size_t nSize = 0); // throw (std::invalid_argument);
 
 	////////////////////////////////// cmap lookup tools 
 	void * FindCmapSubtable(const void * pCmap, int nPlatformId = 3, 
@@ -97,7 +97,7 @@ namespace TtfUtil
 
 	////////////////////////////////// primitives for loca and glyf lookup 
 	size_t LocaLookup(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, 
-		const void * pHead) throw (std::out_of_range); 
+		const void * pHead); // throw (std::out_of_range); 
 	void * GlyfLookup(const void * pGlyf, size_t lGlyfOffset);
 
 	////////////////////////////////// primitves for simple glyph data
