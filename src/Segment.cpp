@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "Segment.h"
-#include "Font.h"
+#include "graphiteng/IFont.h"
 #include "CharInfo.h"
 #include "Slot.h"
-#include "Misc.h"
+#include "Main.h"
 
 Segment::Segment(int numchars, IFont *font) :
         m_maxSlots(numchars + 1),

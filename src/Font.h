@@ -5,7 +5,6 @@
 #include <cmath>
 #include "graphiteng/IFont.h"
 #include "FontFace.h"
-#include "TtfUtil.h"
 // #define NAN std::numeric_limits<float>::signaling_NaN()
 
 class Font : public IFont

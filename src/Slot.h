@@ -36,6 +36,9 @@ protected:
     Position m_shift;       // .shift slot attribute
     Position m_kern;        // .kern slot attribute
     Position m_attach;      // shift relative to parent due to attachment
+    union {
+        uint16 state;
+    } m_multi;
 };
 
 #endif // SLOT_INCLUDE

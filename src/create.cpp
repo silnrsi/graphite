@@ -1,5 +1,5 @@
 #include "Segment.h"
-#include "Misc.h"
+#include "Main.h"
 #include "graphiteng/ITextSource.h"
 #include "TtfUtil.h"
 #include "FontFace.h"       // for table names

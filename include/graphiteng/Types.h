@@ -1,10 +1,15 @@
-#define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
-
 #ifndef GRTYPES_INCLUDE
 #define GRTYPES_INCLUDE
 
 #include <cstddef>
 
+typedef char    uint8;
+typedef char    byte;
+typedef signed char int8;
+typedef unsigned short uint16;
+typedef short   int16;
+typedef unsigned int    uint32;
+typedef int     int32;
 
 class Position
 {

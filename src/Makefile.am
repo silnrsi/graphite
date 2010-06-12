@@ -10,6 +10,8 @@ libgraphiteng_la_SOURCES = create.cpp \
     Font.cpp \
     Segment.cpp \
     Slot.cpp \
+    Silf.cpp \
+    Pass.cpp \
     TtfUtil.cpp
 
 libgraphiteng_la_SOURCES += ../common/FileFont.cpp

@@ -2,8 +2,10 @@
 #define FONTFACE_INCLUDE
 
 #include "GlyphFace.h"
+#include "Silf.h"
 #include "TtfUtil.h"
-#include "graphiteng/Types.h"
+#include "Main.h"
+#include "graphiteng/IFont.h"
 
 #define ktiCmap MAKE_TAG('c','m','a','p')
 #define ktiHead MAKE_TAG('h','e','a','d')
@@ -24,18 +26,19 @@
 #define ktiSile MAKE_TAG('S','i','l','e')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-class FontFace
+class FontFace : public IFont
 {
 public:
     virtual void *getTable(unsigned int name, size_t *len) = 0;
-    virtual float pixelAdvance(unsigned short id, float ppm);
-    virtual void readGlyphs();
+    virtual float advance(unsigned short id);
 
 public:
     GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
-    float getAdvance(unsigned short glyphid, float scale) { return pixelAdvance(glyphid, scale * m_upem); }
+    float getAdvance(unsigned short glyphid, float scale) { return advance(glyphid) * scale; }
     unsigned short upem() { return m_upem; }
     unsigned short numGlyphs() { return m_numglyphs; }
+    bool readGlyphs();
+    bool readGraphite();
 
 protected:
 
@@ -45,6 +48,9 @@ protected:
     // unsigned short m_capacity;      // how big is m_glyphs
     GlyphFace *m_glyphs;            // list of actual glyphs indexed by glyphidx, 1 base
     unsigned short m_upem;          // design units per em
+    unsigned short m_numAttrs;      // number of glyph attributes per glyph
+    unsigned short m_numSilf;       // number of silf subtables in the silf table
+    Silf *m_silfs;                   // silf subtables.
 };
 
 #endif // FONTFACE_INCLUDE
