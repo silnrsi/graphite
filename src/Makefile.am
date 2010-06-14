@@ -7,7 +7,7 @@ libgraphiteng_la_CPPFLAGS = -I ../include
 
 libgraphiteng_la_SOURCES = create.cpp \
     FontFace.cpp \
-    Font.cpp \
+    FontImpl.cpp \
     Segment.cpp \
     Slot.cpp \
     Silf.cpp \

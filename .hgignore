@@ -6,9 +6,23 @@ autom4te.cache
 config
 configure
 config.status
+config.log
 aclocal.m4
+libtool
 Makefile.in
+Makefile
 build
 msvs9
 nmake*
+*.o
+*.lo
+*.Plo
+*.swp
+*.la
+*.kdev4
+
+syntax:regexp
+\.libs/
+\.deps/
+
 

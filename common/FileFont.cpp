@@ -1,33 +1,23 @@
 #include "FileFont.h"
+#include "TtfUtil.h"
 
 FileFont::FileFont(const char *fname) :
-    FontFace(),
     m_pfile(NULL),
     m_tables(),
     m_pHeader(NULL),
     m_pTableDir(NULL)
 {
-    m_pfile = fopen(fname, "rb");
-    if (m_pfile)
-    {
-        size_t lOffset, lSize;
-        if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
-        m_pHeader = new char[lSize];
-        if (fseek(m_pfile, lOffset, SEEK_SET)) return;
-        if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
-        if (!TtfUtil::CheckHeader(m_pHeader)) return;
-        if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
-        m_pTableDir = new char[lSize];
-        if (fseek(m_pfile, lOffset, SEEK_SET)) return;
-        if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
-
-        void *pHead = getTable(ktiHead, NULL);
-        void *pMaxp = getTable(ktiMaxp, NULL);
-        m_upem = TtfUtil::DesignUnits(pHead);
-        m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
-        readGlyphs();
-        readGraphite();
-    }
+    if (!(m_pfile = fopen(fname, "rb"))) return;
+    size_t lOffset, lSize;
+    if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
+    m_pHeader = new char[lSize];
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
+    if (!TtfUtil::CheckHeader(m_pHeader)) return;
+    if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
+    m_pTableDir = new char[lSize];
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
 
 void *FileFont::getTable(unsigned int name, size_t *len)

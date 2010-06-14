@@ -7,8 +7,8 @@ class IFont
 {
 
 public:
-    virtual void *getTable(unsigned int name, size_t *len) = 0;
-    virtual float advance(unsigned short glyphid) = 0;
+    virtual float advance(uint16 glyphid) = 0;
+    virtual float ppm() = 0;
 };
 
 #endif // FONT_INCLUDE

@@ -5,6 +5,9 @@
 #include "graphiteng/ISlot.h"
 #include "graphiteng/ITextSource.h"
 
+class IFontImpl;
+class IFaceImpl;
+
 class ISegment 
 {
 public:
@@ -16,6 +19,7 @@ public:
     virtual int end() = 0;
 };
 
-extern ISegment *create_rangesegment(IFont *font, ITextSource *txt);
+extern ISegment *create_rangesegment(IFontImpl *font, IFaceImpl *face, ITextSource *txt);
+extern void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

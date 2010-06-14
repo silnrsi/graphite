@@ -4,26 +4,26 @@
 // #include <limits>
 #include <cmath>
 #include "graphiteng/IFont.h"
-#include "FontFace.h"
+#include "graphiteng/IFaceImpl.h"
+#include "graphiteng/IFontImpl.h"
 // #define NAN std::numeric_limits<float>::signaling_NaN()
 
-class Font : public IFont
+class FontImpl : public IFontImpl
 {
 
 public:
-    virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
+    FontImpl (IFont *font, IFaceImpl *face, float ppm);
     virtual float advance(unsigned short glyphid) {
         if (isnan(m_advances[glyphid]))
-            m_advances[glyphid] = m_face->getAdvance(glyphid, m_scale);
+            m_advances[glyphid] = m_font ? m_font->advance(glyphid) : m_face->getAdvance(glyphid, m_scale);
         return m_advances[glyphid];
     }
 
-    Font(FontFace *face, float ppm);
-
 protected :
+    IFont *m_font;      // Application interface
     float m_scale;      // scales from design units to ppm
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
-    FontFace *m_face;   // FontFace to get the rest of the info from
+    IFaceImpl *m_face;   // FontFace to get the rest of the info from
 };
 
 #endif // FONT_INCLUDE

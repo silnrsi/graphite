@@ -5,7 +5,8 @@
 #include "Silf.h"
 #include "TtfUtil.h"
 #include "Main.h"
-#include "graphiteng/IFont.h"
+#include "graphiteng/IFace.h"
+#include "graphiteng/IFaceImpl.h"
 
 #define ktiCmap MAKE_TAG('c','m','a','p')
 #define ktiHead MAKE_TAG('h','e','a','d')
@@ -26,13 +27,14 @@
 #define ktiSile MAKE_TAG('S','i','l','e')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-class FontFace : public IFont
+class FontFace : public IFaceImpl
 {
 public:
-    virtual void *getTable(unsigned int name, size_t *len) = 0;
+    virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
     virtual float advance(unsigned short id);
 
 public:
+    FontFace(IFace *face) : m_face(face) {}
     GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) { return advance(glyphid) * scale; }
     unsigned short upem() { return m_upem; }
@@ -42,6 +44,7 @@ public:
 
 protected:
 
+    IFace *m_face;                  // Where to get tables
     unsigned short m_numGlyphs;     // number of glyphs in the font
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?

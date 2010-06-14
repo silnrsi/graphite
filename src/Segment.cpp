@@ -7,10 +7,11 @@
 #include "Slot.h"
 #include "Main.h"
 
-Segment::Segment(int numchars, IFont *font) :
+Segment::Segment(int numchars, IFontImpl *font, IFaceImpl *face) :
         m_maxSlots(numchars + 1),
         m_numCharinfo(numchars),
         m_font(font),
+        m_face(face),
         m_slots(new Slot[numchars + 1]),
         m_numSlots(0),
         m_charinfo(new CharInfo[numchars]),

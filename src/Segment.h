@@ -16,7 +16,7 @@ public:
     virtual int first() { return m_first; }
     virtual int end() { return 0; }
 
-    Segment(int numSlots, IFont *font);
+    Segment(int numSlots, IFontImpl *font, IFaceImpl *face);
     Segment(const Segment &other);
     ~Segment();
     Slot *newSlot(int before, int after) {
@@ -44,7 +44,8 @@ protected:
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 
-    IFont *m_font;          // Reference to font to get metrics from
+    IFontImpl *m_font;      // Reference to font to get metrics from
+    IFaceImpl *m_face;      // Fontface
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
 };

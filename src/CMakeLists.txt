@@ -23,6 +23,9 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
 set(GRAPHITE_HEADERS 
     ../include/graphiteng/IFont.h
+    ../include/graphiteng/IFontImpl.h
+    ../include/graphiteng/IFace.h
+    ../include/graphiteng/IFaceImpl.h
     ../include/graphiteng/ISegment.h
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
@@ -32,7 +35,7 @@ set(GRAPHITE_HEADERS
 add_library(graphiteng SHARED
     create.cpp
     FontFace.cpp
-    Font.cpp
+    FontImpl.cpp
     Segment.cpp
     Slot.cpp
     Silf.cpp

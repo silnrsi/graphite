@@ -1,12 +1,12 @@
 #include <cstdio>
 #include <map>
-#include "FontFace.h"
+#include "graphiteng/IFace.h"
 
-class FileFont : public FontFace
+class FileFont : public IFace
 {
 public:
     FileFont(const char *name);
-    void *getTable(unsigned int name, size_t *len);
+    virtual void *getTable(unsigned int name, size_t *len);
 
 protected:
     FILE *m_pfile;

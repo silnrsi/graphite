@@ -1,12 +1,15 @@
 #include "Segment.h"
 #include "Main.h"
 #include "graphiteng/ITextSource.h"
+#include "graphiteng/IFont.h"
+#include "graphiteng/IFace.h"
+#include "FontFace.h"
 #include "TtfUtil.h"
-#include "FontFace.h"       // for table names
+#include "FontImpl.h"
 
-void read_text(IFont *font, ITextSource *txt, Segment *seg, int numchars);
-void prepare_pos(IFont *font, Segment *seg);
-void finalise(IFont *font, Segment *seg);
+void read_text(IFaceImpl *font, ITextSource *txt, Segment *seg, int numchars);
+void prepare_pos(IFontImpl *font, Segment *seg);
+void finalise(IFontImpl *font, Segment *seg);
 
 
 #define GET_UTF8(p) \
@@ -21,12 +24,39 @@ void finalise(IFont *font, Segment *seg);
 
 #define GET_UTF32(p) *p++
 
-ISegment *create_rangesegment(IFont *font, ITextSource *txt)
+
+IFaceImpl *create_fontface(IFace *face)
+{
+    FontFace *res = new FontFace(face);
+    res->readGlyphs();
+    res->readGraphite();
+    return res;
+}
+
+void destroy_fontface(IFaceImpl *face)
+{
+    delete face;
+}
+
+// font my be NULL, but needs ppm in that case
+IFontImpl *create_font(IFont *font, IFaceImpl *face, float ppm)
+{
+    IFontImpl *res = new FontImpl(font, face, ppm);
+    return res;
+}
+
+void destroy_font(IFontImpl *font)
+{
+    delete font;
+}
+
+
+ISegment *create_rangesegment(IFontImpl *font, IFaceImpl *face, ITextSource *txt)
 {
     int numchars = txt->getLength();
-    Segment *seg = new Segment(numchars, font);
+    Segment *seg = new Segment(numchars, font, face);
 
-    read_text(font, txt, seg, numchars);
+    read_text(face, txt, seg, numchars);
     // run the line break passes
     // run the substitution passes
     prepare_pos(font, seg);
@@ -35,9 +65,16 @@ ISegment *create_rangesegment(IFont *font, ITextSource *txt)
     return seg;
 }
 
-void read_text(IFont *font, ITextSource *txt, Segment *seg, int numchars)
+void destroy_segment(ISegment *seg)
 {
-    void *cmap = font->getTable(ktiCmap, NULL);
+    delete seg;
+}
+
+/* Now we go private */
+
+void read_text(IFaceImpl *face, ITextSource *txt, Segment *seg, int numchars)
+{
+    void *cmap = face->getTable(ktiCmap, NULL);
     void *ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
     int form = txt->utfEncodingForm();
     void *pBuffer, *pChar;
@@ -89,13 +126,13 @@ void read_text(IFont *font, ITextSource *txt, Segment *seg, int numchars)
     }
 }
 
-void prepare_pos(IFont *font, Segment *seg)
+void prepare_pos(IFontImpl *font, Segment *seg)
 {
     // reorder for bidi
     // copy key changeable metrics into slot (if any);
 }
 
-void finalise(IFont *font, Segment *seg)
+void finalise(IFontImpl *font, Segment *seg)
 {
     seg->positionSlots();
 }

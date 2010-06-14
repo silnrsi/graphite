@@ -26,7 +26,8 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "FileFont.h"
-#include "Font.h"
+#include "graphiteng/IFaceImpl.h"
+#include "graphiteng/IFontImpl.h"
 #include "graphiteng/ISegment.h"
 #include "graphiteng/ITextSource.h"
 #include "graphiteng/ISlot.h"
@@ -445,7 +446,8 @@ int testFileFont(Parameters parameters)
 {
     int returnCode = 0;
     FileFont *fileFont;
-    Font *sizeFont;
+    IFaceImpl *face;
+    IFontImpl *sizeFont;
     try
     {
         fileFont = new FileFont(parameters.fileName);
@@ -468,7 +470,8 @@ int testFileFont(Parameters parameters)
         }
 #endif
         GrngTextSrc textSrc(parameters.pText32, parameters.charLength);
-        sizeFont = new Font(fileFont, parameters.pointSize * parameters.dpi / 72);
+        face = create_fontface(fileFont);
+        sizeFont = create_font(NULL, face, parameters.pointSize * parameters.dpi / 72);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -523,7 +526,7 @@ int testFileFont(Parameters parameters)
                        pSegment->rightToLeft());
           }
 #endif
-        ISegment *seg = create_rangesegment(sizeFont, &textSrc);
+        ISegment *seg = create_rangesegment(sizeFont, face, &textSrc);
 
         int i = 0;
         fprintf(parameters.log, "pos  gid attach\t     x\t     y\tins bw\t  chars\tUnicode\t");
