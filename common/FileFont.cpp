@@ -26,6 +26,7 @@ FileFont::FileFont(const char *fname) :
         m_upem = TtfUtil::DesignUnits(pHead);
         m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
         readGlyphs();
+        readGraphite();
     }
 }
 

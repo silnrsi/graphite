@@ -61,18 +61,23 @@ bool FontFace::readGlyphs()
 
 bool FontFace::readGraphite()
 {
-    void *pSilf;
+    char *pSilf;
     size_t lSilf;
-    if ((pSilf = getTable(ktiSilf, &lSilf)) == NULL) return false;
+    if ((pSilf = (char *)getTable(ktiSilf, &lSilf)) == NULL) return false;
     uint32 version, compilerVersion;
     version = swap32(*(uint32 *)pSilf);
-    if (version < 0x00030000) return false;
-    compilerVersion = swap32(((uint32 *)pSilf)[1]);
-    m_numSilf = swap16(((uint16 *)pSilf)[4]);
+    if (version < 0x00020000) return false;
+    if (version >= 0x00030000)
+    {
+        compilerVersion = swap32(((uint32 *)pSilf)[1]);
+        pSilf += 4;
+    }
+    else
+        m_numSilf = swap16(((uint16 *)pSilf)[2]);
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + ((uint32 *)pSilf)[4 + i]), m_numGlyphs)) return false;
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + swap32(((uint32 *)pSilf)[2 + i])), m_numGlyphs, version)) return false;
     }
     return true;
 }

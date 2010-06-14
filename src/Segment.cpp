@@ -12,6 +12,7 @@ Segment::Segment(int numchars, IFont *font) :
         m_numCharinfo(numchars),
         m_font(font),
         m_slots(new Slot[numchars + 1]),
+        m_numSlots(0),
         m_charinfo(new CharInfo[numchars]),
         m_bbox(Rect(Position(0, 0), Position(0, 0))),
         m_last(0),
