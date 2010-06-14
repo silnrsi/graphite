@@ -18,7 +18,7 @@ public:
             int count = ((char *)pGlat)[start + 1];
             for (int i = 0; i < count; i++)
             {
-                m_attrs[attr + i] = swap16(((uint16 *)pGlat)[start + 1 + i]);
+                m_attrs[attr + i] = swap16(((uint16 *)(pGlat + start))[1 + i]);
             }
             start += 2 * (count + 1);
         }
