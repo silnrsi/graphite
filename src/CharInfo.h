@@ -6,7 +6,7 @@ class CharInfo // : ICharInfo
 
 public:
     void init(int cid, int gindex) { m_char = cid; m_before = m_after = gindex; }
-    void update(int offset, int slot_offset) { m_before += offset; m_after += offset; } 
+    void update(int offset) { m_before += offset; m_after += offset; } 
 
 protected:
     int m_char;     // Unicode character in character stream

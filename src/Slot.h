@@ -17,7 +17,7 @@ public:
 
     Slot();
     void init(int id) { m_id = id; }
-    void glyph(unsigned short gid) { m_glyphid = gid; }
+    void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
     void next(int index) { m_next = index; }
     void prev(int index) { m_prev = index; }
     void origin(Position &pos) { m_position = pos + m_shift + m_kern; }

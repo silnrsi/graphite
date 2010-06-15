@@ -5,7 +5,7 @@
 class GlyphFace
 {
 public:
-    GlyphFace(Position pos, Rect bbox) : m_bbox(bbox), m_advance(pos), m_attrs(NULL) { }
+    GlyphFace(Position pos, Rect box) : m_bbox(box), m_advance(pos), m_attrs(NULL) { }
     ~GlyphFace() { if (m_attrs) delete[] m_attrs; }
     Position advance() { return m_advance; }
     void advance(Position a) { m_advance = a; }

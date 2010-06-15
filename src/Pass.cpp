@@ -28,10 +28,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         if (last >= numGlyphs) last = numGlyphs - 1;
         uint16 col = read16(p);
         while (first <= last)
-        {
-            assert(first >= 0 && first < numGlyphs);
             m_cols[first++] = col;
-        }
     }
     m_ruleidx = new uint16[m_sSuccess + 1];
     for (int i = 0; i <= m_sSuccess; i++)
