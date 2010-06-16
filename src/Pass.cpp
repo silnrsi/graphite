@@ -16,7 +16,9 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     p += 16;         // ignore offsets for now
     m_sRows = read16(p);
     m_sTransition = read16(p);
+    if (m_sTransition > m_sRows) return false;
     m_sSuccess = read16(p);
+    if (m_sSuccess > m_sRows) return false;
     m_sColumns = read16(p);
     numRanges = read16(p);
     p += 6;
@@ -30,41 +32,32 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         while (first <= last)
             m_cols[first++] = col;
     }
+    if (p - (char *)pPass >= lPass) return false;
     m_ruleidx = new uint16[m_sSuccess + 1];
     for (int i = 0; i <= m_sSuccess; i++)
+    {
         m_ruleidx[i] = read16(p);
+        if (m_ruleidx[i] < 0 || m_ruleidx[i] > lPass) return false;
+    }
     numEntries = m_ruleidx[m_sSuccess];
     m_ruleMap = new uint16[numEntries];
-    // read them later in sort order. Leave a marker here:
-    uint16 *pRuleMap = (uint16 *)p;
-    p += 2 * numEntries;
+    for (int i = 0; i < numEntries; i++)
+    {
+        m_ruleMap[i] = read16(p);
+    }
+    if (p - (char *)pPass >= lPass) return false;
     m_minPreCtxt = *p++;
     m_maxPreCtxt = *p++;
     m_startStates = new uint16[m_maxPreCtxt - m_minPreCtxt + 1];
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
-        m_startStates[i] = read16(p);
-
-    int16 *pSorts = (int16 *)p;
-    for (int i = 0; i < m_sSuccess; i++)
     {
-        uint16 first = m_ruleidx[i];
-        uint16 num = m_ruleidx[i + 1] - first;
-        for (int j = 0; j < num; j++)
-        {
-            int k;
-            uint16 val = swap16(pRuleMap[first + j]);
-            int16 sort = swap16(pSorts[val]);
-            for (k = j - 1; k >= 0; k--)
-            {
-                if (swap16(pSorts[m_ruleMap[first + k]]) > sort)
-                    m_ruleMap[first + k + 1] = m_ruleMap[first + k];
-                else
-                    break;
-            }
-            m_ruleMap[first + k + 1] = val;
-        }
+        m_startStates[i] = read16(p);
+        if (m_startStates[i] < 0 || m_startStates[i] >= lPass) return false;
     }
-    p += m_numRules * 2;
+
+    m_ruleSorts = new uint16[m_numRules];
+    for (int i = 0; i < m_numRules; i++)
+        m_ruleSorts[i] = read16(p);
     m_rulePreCtxt = new byte[m_numRules];
     memcpy(m_rulePreCtxt, p, m_numRules);
     p += m_numRules;

@@ -27,10 +27,22 @@ bool FontFace::readGlyphs()
 
     int version = swap32(*((uint32 *)pGloc));
     if (version != 0x00010000) return false;
+    if (lGloc < 6) return false;
     unsigned short locFlags = swap16(((uint16 *)pGloc)[2]);
     m_numAttrs = swap16(((uint16 *)pGloc)[3]);
+    int numGlyphs = m_numGlyphs;
+    if (locFlags)
+    {
+        if (lGloc < 4 * m_numGlyphs + 10)
+            numGlyphs = (lGloc - 10) / 4;
+    }
+    else
+    {
+        if (lGloc < 2 * m_numGlyphs + 8)
+            numGlyphs = (lGloc - 8) / 4;
+    }
 
-    for (int i = 0; i < m_numGlyphs; i++)
+    for (int i = 0; i < numGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
         unsigned int nAdvWid;
@@ -77,7 +89,14 @@ bool FontFace::readGraphite()
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + swap32(((uint32 *)pSilf)[2 + i])), m_numGlyphs, version)) return false;
+        uint32 offset = swap32(((uint32 *)pSilf)[2 + i]);
+        uint32 next;
+        if (i == m_numSilf - 1)
+            next = lSilf;
+        else
+            next = swap32(((uint32 *)pSilf)[3 + i]);
+        if (offset < 0 || offset > lSilf || next < 0 || next > lSilf) return false;
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_numGlyphs, version)) return false;
     }
     return true;
 }

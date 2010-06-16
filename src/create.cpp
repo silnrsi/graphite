@@ -28,9 +28,9 @@ void finalise(IFontImpl *font, Segment *seg);
 IFaceImpl *create_fontface(IFace *face)
 {
     FontFace *res = new FontFace(face);
-    res->readGlyphs();
-    res->readGraphite();
-    return res;
+    if (res->readGlyphs() && res->readGraphite()) return res;
+    delete res;
+    return NULL;
 }
 
 void destroy_fontface(IFaceImpl *face)

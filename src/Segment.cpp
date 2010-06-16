@@ -15,7 +15,8 @@ Segment::Segment(int numchars, IFontImpl *font, IFaceImpl *face) :
         m_charinfo(new CharInfo[numchars]),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
-
+    Slot aSlot;
+    m_slots.insert(m_slots.begin(), numchars - 2, aSlot);    // multiple redundant initialisation
 }
 
 Segment::~Segment()

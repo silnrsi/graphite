@@ -7,7 +7,7 @@
 class Silf
 {
 public:
-    bool readGraphite(void *pSilf, int numGlyphs, uint32 version);
+    bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
 
 protected:
     size_t readClassMap(void *pClass, size_t lClass);

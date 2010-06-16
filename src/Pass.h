@@ -16,6 +16,7 @@ protected:
     uint16 *m_cols;
     uint16 *m_ruleidx;
     uint16 *m_ruleMap;
+    uint16 *m_ruleSorts;
     byte m_minPreCtxt;
     byte m_maxPreCtxt;
     uint16 *m_startStates;
