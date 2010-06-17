@@ -6,7 +6,8 @@
 #include "TtfUtil.h"
 #include "Main.h"
 #include "graphiteng/IFace.h"
-#include "graphiteng/IFaceImpl.h"
+
+class Segment;
 
 #define ktiCmap MAKE_TAG('c','m','a','p')
 #define ktiHead MAKE_TAG('h','e','a','d')
@@ -27,11 +28,13 @@
 #define ktiSile MAKE_TAG('S','i','l','e')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-class FontFace : public IFaceImpl
+class FontFace 
 {
 public:
     virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
     virtual float advance(unsigned short id);
+    virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
+    virtual void runGraphite(Segment *seg, FontImpl *font);
 
 public:
     FontFace(IFace *face) : m_face(face) {}

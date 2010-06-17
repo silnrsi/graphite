@@ -71,3 +71,12 @@ size_t Silf::readClassMap(void *pClass, size_t lClass)
     return swap16(*p);
 }
 
+void Silf::runGraphite(Segment *seg, FontImpl *font, FontFace *face, VMScratch *vms)
+{
+    for (int i = 0; i < m_numPasses; i++)
+    {
+        // test whether to reorder, prepare for positioning
+        m_passes[i].runGraphite(seg, font, face, this, vms);
+    }
+}
+

@@ -7,7 +7,7 @@
 #include "Slot.h"
 #include "Main.h"
 
-Segment::Segment(int numchars, IFontImpl *font, IFaceImpl *face) :
+Segment::Segment(int numchars, FontImpl *font, FontFace *face) :
         m_numCharinfo(numchars),
         m_font(font),
         m_face(face),

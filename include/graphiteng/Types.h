@@ -11,6 +11,9 @@ typedef short   int16;
 typedef unsigned int    uint32;
 typedef int     int32;
 
+class FontImpl;
+class FontFace;
+
 class Position
 {
 public:

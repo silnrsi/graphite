@@ -1,5 +1,7 @@
 #include "FontFace.h"
+#include "VMScratch.h"
 #include <string.h>
+#include "Segment.h"
 
 float FontFace::advance(unsigned short id)
 {
@@ -30,19 +32,19 @@ bool FontFace::readGlyphs()
     if (lGloc < 6) return false;
     unsigned short locFlags = swap16(((uint16 *)pGloc)[2]);
     m_numAttrs = swap16(((uint16 *)pGloc)[3]);
-    int numGlyphs = m_numGlyphs;
+    int nGlyphs = m_numGlyphs;
     if (locFlags)
     {
         if (lGloc < 4 * m_numGlyphs + 10)
-            numGlyphs = (lGloc - 10) / 4;
+            nGlyphs = (lGloc - 10) / 4;
     }
     else
     {
         if (lGloc < 2 * m_numGlyphs + 8)
-            numGlyphs = (lGloc - 8) / 4;
+            nGlyphs = (lGloc - 8) / 4;
     }
 
-    for (int i = 0; i < numGlyphs; i++)
+    for (int i = 0; i < nGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
         unsigned int nAdvWid;
@@ -101,3 +103,10 @@ bool FontFace::readGraphite()
     return true;
 }
 
+void FontFace::runGraphite(Segment *seg, FontImpl *font)
+{
+    VMScratch vms;
+
+    if (m_numSilf > 0)
+        m_silfs[0].runGraphite(seg, font, this, &vms);
+}

@@ -11,4 +11,7 @@ public:
     virtual float ppm() = 0;
 };
 
+extern FontImpl *create_font(IFont *font, FontFace *face, float ppm);
+extern void destroy_font(FontImpl *font);
+
 #endif // FONT_INCLUDE

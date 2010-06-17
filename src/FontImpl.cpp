@@ -1,8 +1,8 @@
 #include "FontImpl.h"
-#include "graphiteng/IFaceImpl.h"
 #include "graphiteng/IFont.h"
+#include "FontFace.h"
 
-FontImpl::FontImpl(IFont *font, IFaceImpl *face, float ppm) :
+FontImpl::FontImpl(IFont *font, FontFace *face, float ppm) :
     m_font(font),
     m_face(face),
     m_scale((font ? font->ppm() : ppm) / face->upem())

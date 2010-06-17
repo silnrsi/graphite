@@ -6,9 +6,6 @@
 #include "graphiteng/ITextSource.h"
 #include <vector>
 
-class IFontImpl;
-class IFaceImpl;
-
 class ISegment 
 {
 public:
@@ -16,9 +13,10 @@ public:
     virtual Position advance() = 0;
     virtual ISlot & operator[] (int index) = 0;
     virtual const ISlot & operator[] (int index) const = 0;
+    virtual void runGraphite() = 0;
 };
 
-extern ISegment *create_rangesegment(IFontImpl *font, IFaceImpl *face, ITextSource *txt);
+extern ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt);
 extern void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

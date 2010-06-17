@@ -26,11 +26,12 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "FileFont.h"
-#include "graphiteng/IFaceImpl.h"
-#include "graphiteng/IFontImpl.h"
+#include "graphiteng/Types.h"
 #include "graphiteng/ISegment.h"
 #include "graphiteng/ITextSource.h"
 #include "graphiteng/ISlot.h"
+#include "graphiteng/IFont.h"
+#include "graphiteng/IFace.h"
 
 typedef unsigned int utf32;
 
@@ -446,8 +447,8 @@ int testFileFont(Parameters parameters)
 {
     int returnCode = 0;
     FileFont *fileFont;
-    IFaceImpl *face;
-    IFontImpl *sizeFont;
+    FontFace *face;
+    FontImpl *sizeFont;
     try
     {
         fileFont = new FileFont(parameters.fileName);

@@ -1,9 +1,9 @@
 #ifndef SLOT_INCLUDE
 #define SLOT_INCLUDE
 
-#include "graphiteng/IFontImpl.h"
 #include "graphiteng/ISlot.h"
 #include "graphiteng/Types.h"
+#include "FontImpl.h"
 
 class Slot : public ISlot
 {
@@ -11,7 +11,7 @@ public:
     virtual unsigned short gid() { return m_glyphid; }
     virtual int next() { return m_next; }
     virtual Position origin() { return m_position; }
-    virtual float advance(IFontImpl *font) { return font->advance(m_glyphid) + m_kern.x; }
+    virtual float advance(FontImpl *font) { return font->advance(m_glyphid) + m_kern.x; }
     virtual int before() { return m_before; }
     virtual int after() { return m_after; }
 
@@ -36,9 +36,6 @@ protected:
     Position m_shift;       // .shift slot attribute
     Position m_kern;        // .kern slot attribute
     Position m_attach;      // shift relative to parent due to attachment
-    union {
-        uint16 state;
-    } m_multi;
 };
 
 #endif // SLOT_INCLUDE
