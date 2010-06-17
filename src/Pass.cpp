@@ -148,6 +148,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
                 return res;
         }
     }
+    return -1;
 }
 
 int Pass::testConstraint(byte *code, size_t len, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
