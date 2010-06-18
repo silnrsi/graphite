@@ -92,7 +92,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     return true;
 }
 
-void Pass::runGraphite(Segment *seg, FontImpl *font, FontFace *face, Silf *silf, VMScratch *vms)
+void Pass::runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms)
 {
     if (m_nPConstraint && !testConstraint(m_cPConstraint, m_nPConstraint, 0, seg, silf, vms))
         return;

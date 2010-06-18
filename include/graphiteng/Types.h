@@ -22,6 +22,7 @@ public:
     Position(const Position &other) {x = other.x, y = other.y;}
     Position(float inx, float iny) { x = inx; y = iny; }
     Position operator + (Position a) { return Position(x + a.x, y + a.y); }
+    Position &operator += (const Position &a) { x += a.x; y += a.y; return *this; }
 
     float x;
     float y;

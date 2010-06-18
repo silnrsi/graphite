@@ -34,7 +34,7 @@ public:
     virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
     virtual float advance(unsigned short id);
     virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
-    virtual void runGraphite(Segment *seg, FontImpl *font);
+    virtual void runGraphite(Segment *seg);
 
 public:
     FontFace(IFace *face) : m_face(face) {}

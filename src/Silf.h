@@ -13,7 +13,7 @@ class Silf
 {
 public:
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(Segment *seg, FontImpl *font, FontFace *face, VMScratch *vms);
+    void runGraphite(Segment *seg, FontFace *face, VMScratch *vms);
 
 protected:
     size_t readClassMap(void *pClass, size_t lClass);

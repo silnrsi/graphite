@@ -16,13 +16,13 @@ public:
     virtual Position advance() { return m_advance; }
     virtual Slot & operator[] (int index) { return m_slots[index]; }
     virtual const Slot & operator[] (int index) const { return m_slots[index]; }
-    virtual void runGraphite() { m_face->runGraphite(this, m_font); };
+    virtual void runGraphite() { m_face->runGraphite(this); };
 
-    Segment(int numSlots, FontImpl *font, FontFace *face);
+    Segment(int numSlots, FontFace *face);
     Segment(const Segment &other);
     ~Segment();
-    void initslots(int index, int cid, int gid);
-    void positionSlots();
+    void appendSlot(int i, int cid, int gid);
+    void positionSlots(FontImpl *font);
     void append(const Segment &other);
 
 protected:
@@ -30,7 +30,6 @@ protected:
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 
-    FontImpl *m_font;      // Reference to font to get metrics from
     FontFace *m_face;      // Fontface
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment

@@ -103,10 +103,10 @@ bool FontFace::readGraphite()
     return true;
 }
 
-void FontFace::runGraphite(Segment *seg, FontImpl *font)
+void FontFace::runGraphite(Segment *seg)
 {
     VMScratch vms;
 
     if (m_numSilf > 0)
-        m_silfs[0].runGraphite(seg, font, this, &vms);
+        m_silfs[0].runGraphite(seg, this, &vms);
 }

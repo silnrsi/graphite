@@ -3,11 +3,12 @@
 
 #include "graphiteng/Types.h"
 
+class ISegment;
+
 class ISlot
 {
 public:
     virtual unsigned short gid() = 0;
-    virtual int next() = 0;
     virtual Position origin() = 0;
     virtual float advance(FontImpl *font) = 0;
     virtual int before() = 0;

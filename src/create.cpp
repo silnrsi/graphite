@@ -54,7 +54,7 @@ void destroy_font(FontImpl *font)
 ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt)
 {
     int numchars = txt->getLength();
-    Segment *seg = new Segment(numchars, font, face);
+    Segment *seg = new Segment(numchars, face);
 
     read_text(face, txt, seg, numchars);
     seg->runGraphite();
@@ -123,7 +123,7 @@ void read_text(FontFace *face, ITextSource *txt, Segment *seg, int numchars)
             break;
         }
         gid = TtfUtil::Cmap31Lookup(ctable, cid);
-        seg->initslots(i, cid, gid);
+        seg->appendSlot(i, cid, gid);
     }
 }
 
@@ -135,5 +135,5 @@ void prepare_pos(FontImpl *font, Segment *seg)
 
 void finalise(FontImpl *font, Segment *seg)
 {
-    seg->positionSlots();
+    seg->positionSlots(font);
 }

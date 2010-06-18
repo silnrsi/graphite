@@ -7,16 +7,13 @@
 #include "Slot.h"
 #include "Main.h"
 
-Segment::Segment(int numchars, FontImpl *font, FontFace *face) :
+Segment::Segment(int numchars, FontFace *face) :
         m_numCharinfo(numchars),
-        m_font(font),
         m_face(face),
         m_slots(numchars),
         m_charinfo(new CharInfo[numchars]),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
-    Slot aSlot;
-    m_slots.insert(m_slots.begin(), numchars - 2, aSlot);    // multiple redundant initialisation
 }
 
 Segment::~Segment()
@@ -46,25 +43,29 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void Segment::initslots(int index, int cid, int gid)
+void Segment::appendSlot(int id, int cid, int gid)
 {
-    CharInfo *c = m_charinfo + index;
-    m_charinfo[index].init(cid, index);
-    m_slots[index].init(index);
-    m_slots[index].glyph(gid);
-    m_slots[index].before(index);
-    m_slots[index].after(index);
+    m_charinfo[id].init(cid, id);
+    
+    m_slots[id].glyph(gid);
+    m_slots[id].before(id);
+    m_slots[id].after(id);
 }
 
-void Segment::positionSlots()
+void Segment::positionSlots(FontImpl *font)
 {
     std::vector<Slot>::iterator s;
     Position currpos;
 
     for (s = m_slots.begin(); s != m_slots.end(); s++)
     {
-        s->origin(currpos);
-        currpos = currpos + Position(s->advance(m_font), 0);
+        if (s->isBase())
+        {
+            float cMin = currpos.x;
+            float cMax = currpos.x;
+            s->finalise(this, font, currpos, &cMin, &cMax);
+            currpos = Position(cMax, 0);
+        }
     }
     m_advance = currpos;
 }

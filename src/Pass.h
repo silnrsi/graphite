@@ -12,7 +12,7 @@ class Pass
 {
 public:
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
-    void runGraphite(Segment *seg, FontImpl *font, FontFace *face, Silf *silf, VMScratch *vms);
+    void runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms);
     int findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf);
     int testConstraint(byte *codeptr, size_t codelen, int iSlot, Segment *seg, Silf *silf, VMScratch *vms);
     int doAction(byte *m_cAction, size_t numAction, int startSlot, Segment *seg, Silf *silf, VMScratch *vms);
