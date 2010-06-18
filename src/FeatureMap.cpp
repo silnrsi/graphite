@@ -15,10 +15,12 @@ bool FeatureMap::readFont(IFace *face)
     char *pFeat = (char *)(face->getTable(ktiFeat, &lFeat));
     char *pOrig = pFeat;
     uint16 *defVals;
+    uint32 version;
     if (!pFeat) return true;
     if (lFeat < 12) return false;
 
-    if (read32(pFeat) < 0x00020000) return false;
+    version = read32(pFeat);
+    if (version < 0x00010000) return false;
     m_numFeats = read16(pFeat);
     read16(pFeat);
     read32(pFeat);
@@ -30,10 +32,20 @@ bool FeatureMap::readFont(IFace *face)
 
     for (int i = 0; i < m_numFeats; i++)
     {
-        uint32 name = read32(pFeat);
+        uint32 name;
+        if (version < 0x00020000)
+            name = read16(pFeat);
+        else
+            name = read32(pFeat);
         uint16 numSet = read16(pFeat);
-        read16(pFeat);
-        uint32 offset = read32(pFeat);
+        uint32 offset;
+        if (version < 0x00020000)
+            offset = read32(pFeat);
+        else
+        {
+            read16(pFeat);
+            offset = read32(pFeat);
+        }
         uint16 flags = read16(pFeat);
         uint16 uiName = read16(pFeat);
         char *pSet = pOrig + offset;
@@ -68,6 +80,7 @@ bool FeatureMap::readFont(IFace *face)
     m_defaultFeatures = new(currIndex + 1) Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
         m_defaultFeatures->addFeature(m_feats[i], defVals[i]);
+    return true;
 }
 
 FeatureRef *FeatureMap::featureRef(uint32 name)

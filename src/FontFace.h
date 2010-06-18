@@ -6,6 +6,7 @@
 #include "TtfUtil.h"
 #include "Main.h"
 #include "graphiteng/IFace.h"
+#include "FeatureMap.h"
 
 class Segment;
 
@@ -44,6 +45,7 @@ public:
     unsigned short numGlyphs() { return m_numGlyphs; }
     bool readGlyphs();
     bool readGraphite();
+    bool readFeatures() { return m_features.readFont(m_face); }
 
 protected:
 
@@ -57,6 +59,7 @@ protected:
     unsigned short m_numAttrs;      // number of glyph attributes per glyph
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.
+    FeatureMap m_features;
 };
 
 #endif // FONTFACE_INCLUDE
