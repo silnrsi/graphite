@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <graphiteng/Types.h>
 
-#define CHECK_STACK   TRUE
+//#define CHECK_STACK   TRUE
 
 // Forward declarations
 class Segment;
@@ -17,8 +17,8 @@ typedef void *  instr;
 
 struct opcode_t 
 { 
-    const instr     impl; 
-    const size_t    param_sz;
+    instr     impl; 
+    size_t    param_sz;
 };
 
 enum { VARARGS = size_t(-2), NILOP };
@@ -26,28 +26,18 @@ enum { VARARGS = size_t(-2), NILOP };
 namespace machine
 {
     extern const opcode_t *    get_opcode_table(bool constraint) throw();
-    extern uint32              run(const instr * program, 
+    extern uint32              run(const instr * program, const byte * data,
                                    uint32 * stack_base, const size_t length,
                                    Segment & seg, const int islot_idx);
 
-    inline void check_stack(const uint32 * const sp, 
-                            const uint32 * const base,
-                            const uint32 * const limit) {
-            if (sp <= base+2)     throw std::runtime_error("check_stack: stack underflow");
-            if (sp >= limit-2)    throw std::runtime_error("check_stack: stack overflow");
-    }
+    void check_stack(const uint32 * const sp, 
+                     const uint32 * const base,
+                     const uint32 * const limit) __attribute__ ((hot,regparm (3)));
 
-    inline void check_final_stack(const uint32 * const sp, 
-                            const uint32 * const base,
-                            const uint32 * const limit) {
-        if (sp > base + 2)
-            throw std::runtime_error("check_final_stack: stack not emptied");
-        if (sp < base + 2)
-            throw std::runtime_error("check_final_stack: stack underflowed");
-        if (sp >= limit - 2)
-            throw std::runtime_error("check_final_stack: stack overflowed");
-    }
-
+    void check_final_stack(const uint32 * const sp, 
+                           const uint32 * const base,
+                           const uint32 * const limit);
+    
     enum opcode {
 	    NOP = 0,
 
@@ -88,9 +78,26 @@ namespace machine
     };
 }
 
-#define use_params(n)       ip += (n + sizeof(instr)-1)/sizeof(instr)
-#define declare_params(n)   const byte * param = \
-                                    reinterpret_cast<const byte *>(ip+1); \
+inline void machine::check_stack(const uint32 * const sp, 
+                                 const uint32 * const base,
+                                 const uint32 * const limit) {
+        if (sp <= base+2)     throw std::runtime_error("check_stack: stack underflow");
+        if (sp >= limit-2)    throw std::runtime_error("check_stack: stack overflow");
+}
+
+inline void machine::check_final_stack(const uint32 * const sp, 
+                        const uint32 * const base,
+                        const uint32 * const limit) {
+    if (sp > base + 2)
+        throw std::runtime_error("check_final_stack: stack not emptied");
+    if (sp < base + 2)
+        throw std::runtime_error("check_final_stack: stack underflowed");
+    if (sp >= limit - 2)
+        throw std::runtime_error("check_final_stack: stack overflowed");
+}
+
+#define use_params(n)       dp += n
+#define declare_params(n)   const byte * param = dp; \
                             use_params(n);
   
 

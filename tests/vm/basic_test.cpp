@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     
     // Load the code.
     code prog(false, &big_prog[0], &big_prog[0] + big_prog.size());
-    std::cout << "loaded program size:    " << prog.size() << " bytes" << std::endl
+    std::cout << "loaded program size:    " << prog.data_size() + prog.instruction_count()*sizeof(instr) << " bytes" << std::endl
               << "                        " << prog.instruction_count() << " instructions" << std::endl;
     
     // run the program
