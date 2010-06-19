@@ -8,8 +8,16 @@
 #include "TtfUtil.h"
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
+#define ktiSill MAKE_TAG('S','i','l','l')
 
 bool FeatureMap::readFont(IFace *face)
+{
+    if (!readFeats(face)) return false;
+    if (!readSill(face)) return false;
+    return true;
+}
+
+bool FeatureMap::readFeats(IFace *face)
 {
     size_t lFeat;
     char *pFeat = (char *)(face->getTable(ktiFeat, &lFeat));
@@ -71,7 +79,7 @@ bool FeatureMap::readFont(IFace *face)
                     currBits = 0;
                 }
                 currBits += bits - 1;
-                m_feats[i].init(currBits, currIndex, mask - 1);
+                m_feats[i].init(currBits, currIndex, (mask - 1) << currBits);
                 break;
             }
         }
@@ -79,7 +87,43 @@ bool FeatureMap::readFont(IFace *face)
 
     m_defaultFeatures = new(currIndex + 1) Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
-        m_defaultFeatures->addFeature(m_feats[i], defVals[i]);
+        m_defaultFeatures->addFeature(m_feats + i, defVals[i]);
+    return true;
+}
+
+bool FeatureMap::readSill(IFace *face)
+{
+    size_t lSill;
+    char *pSill = (char *)(face->getTable(ktiSill, &lSill));
+    uint16 num;
+    char *pBase = pSill;
+
+    if (!pSill) return true;
+    if (lSill < 12) return false;
+    if (read32(pSill) != 0x00010000) return false;
+    num = read16(pSill);
+    pSill += 6;     // skip the fast search
+    if (lSill < num * 8 + 12) return false;
+
+    for (int i = 0; i < num; i++)
+    {
+        uint32 langid = read32(pSill);
+        uint16 numSettings = read16(pSill);
+        uint16 offset = read16(pSill);
+        if (offset + 8 * numSettings > lSill && numSettings > 0) return false;
+        IFeatures *feats = newFeatures(0);
+        char *pLSet = pBase + offset;
+
+        for (int j = 0; j < numSettings; j++)
+        {
+            uint32 name = read32(pLSet);
+            uint16 val = read16(pLSet);
+            pLSet += 2;
+            feats->addFeature(featureRef(name), val);
+        }
+        std::pair<uint32, IFeatures *>kvalue = std::pair<uint32, IFeatures *>(langid, feats);
+        m_langMap.insert(kvalue);
+    }
     return true;
 }
 
@@ -89,8 +133,13 @@ FeatureRef *FeatureMap::featureRef(uint32 name)
     return res == m_map.end() ? NULL : m_feats + res->second;
 }
 
-IFeatures *FeatureMap::newFeatures()
+IFeatures *FeatureMap::newFeatures(uint32 name)
 {
+    if (name)
+    {
+        std::map<uint32, IFeatures *>::iterator res = m_langMap.find(name);
+        if (res != m_langMap.end()) return res->second->newCopy();
+    }
     return m_defaultFeatures->newCopy();
 }
 

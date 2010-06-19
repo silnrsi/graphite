@@ -8,7 +8,7 @@ class FeatureRef;
 class IFeatures
 {
 public:
-    virtual void addFeature(FeatureRef &ref, uint16 value) = 0;
+    virtual void addFeature(FeatureRef *ref, uint16 value) = 0;
     virtual uint16 getFeature(FeatureRef &ref) = 0;
     virtual IFeatures *newCopy() = 0;
 };
