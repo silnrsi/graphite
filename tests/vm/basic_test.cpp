@@ -21,6 +21,18 @@ class Segment
     byte x;
 };
 
+#define _msg(m) #m
+
+const char * error_msg[] = {
+    _msg(loaded),
+    _msg(alloc_failed), 
+    _msg(invalid_opcode), 
+    _msg(unimplemented_opcode_used),
+    _msg(jump_past_end),
+    _msg(arguments_exhausted),
+    _msg(missing_return)
+};
+
 std::vector<byte> fuzzer(int);
 
 int main(int argc, char *argv[])
@@ -43,6 +55,11 @@ int main(int argc, char *argv[])
     
     // Load the code.
     code prog(false, &big_prog[0], &big_prog[0] + big_prog.size());
+    if (!prog) {    // Find out why it did't work
+        // For now just dump an error message.
+        std::cerr << "program failed to load due to: " << error_msg[prog.status()] << std::endl;
+        exit(1);
+    }
     std::cout << "loaded program size:    " << prog.data_size() + prog.instruction_count()*sizeof(instr) << " bytes" << std::endl
               << "                        " << prog.instruction_count() << " instructions" << std::endl;
     

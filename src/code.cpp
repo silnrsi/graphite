@@ -11,7 +11,7 @@
 
 
 code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
-: _code(0), _data_size(0), _instr_count(0)
+: _code(0), _data_size(0), _instr_count(0), _status(loaded)
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
@@ -24,6 +24,12 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     _code = static_cast<instr *>(std::malloc((bytecode_end - bytecode_begin)
                                              * sizeof(instr)));
     _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)));
+    
+    if (!_code || !_data) {
+        failure(alloc_failed);
+        return;
+    }
+    
     instr * ip = _code;
     byte  * dp = _data;
     
@@ -32,29 +38,29 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         
         // Do some basic sanity checks based on what we know about the opcodes.
         if (opc >= machine::MAX_OPCODE) {   // Is this even a valid opcode?
-            release_buffers();;
-            throw std::range_error("invalid opcode");
+            failure(invalid_opcode);
+            return;
         }
 
         const opcode_t op = op_to_fn[opc];
         if (op.param_sz == NILOP) {      // Is it implemented?
-            release_buffers();;
-            throw std::runtime_error("attempt to execute unimplemented opcode");
+            failure(unimplemented_opcode_used);
+            return;
         }
 
         if (opc == machine::CNTXT_ITEM)  // This is a really conditional forward jump,
         {                       // check it doesn't jump outside the program.
             const size_t skip = cd_ptr[1];
             if (cd_ptr + 2 + skip > bytecode_end) {
-                release_buffers();;
-                throw std::runtime_error("cntxt_item: jump past end of program");
+                failure(jump_past_end);
+                return;
             }
         }
         
         const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr++ : op.param_sz;
         if (cd_ptr + param_sz > bytecode_end) { // Is the requested size possible
-            release_buffers();;
-            throw std::runtime_error("arguments exhausted");
+            failure(arguments_exhausted);
+            return;
         }
         
         // Add this instruction
@@ -81,8 +87,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         case machine::RET_TRUE: 
             break;
         default:
-            release_buffers();
-            throw std::runtime_error("No return instruction found");
+            failure(missing_return);
+            return;
     }
     
     assert(ip - _code == _instr_count);
@@ -102,11 +108,18 @@ code::~code() throw ()
     release_buffers();
 }
 
+inline 
+void code::failure(const status_t s) throw() {
+    release_buffers();
+    _status = s;
+}
 
 void code::release_buffers() throw() 
 {
     std::free(_code);
     std::free(_data);
+    _code = 0;
+    _data = 0;
 }
 
 

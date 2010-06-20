@@ -389,10 +389,21 @@ STARTOP(iattr_sub)
     // TODO; Implement body
 ENDOP
 
+enum pstate_t { justify_mode = 1, justify_level };
+
 STARTOP(push_proc_state)
     declare_params(1);
-    const unsigned int  pstate = unsigned(*param);
-    // TODO; Implement body
+    const pstate_t  pstate = pstate_t(*param);
+    
+    switch (pstate) {
+        case justify_mode:
+            // TODO; Implement body
+            break;
+        case justify_level:
+            *--sp = 1; 
+            // TODO; Implement body
+        break;
+    }
 ENDOP
 
 STARTOP(push_version)
