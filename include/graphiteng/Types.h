@@ -3,8 +3,8 @@
 
 #include <cstddef>
 
-typedef char    uint8;
-typedef char    byte;
+typedef unsigned char uint8;
+typedef uint8    byte;
 typedef signed char int8;
 typedef unsigned short uint16;
 typedef short   int16;
