@@ -19,11 +19,11 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     const opcode_t *    op_to_fn = machine::get_opcode_table(constrained);
     const byte *        cd_ptr = bytecode_begin;
     
-    // Allocate a target buffer
+    // Allocate code and dat target buffers, these sizes are a worst case 
+    // estimate.  Once we know their real sizes the we'll shrink them.
     _code = static_cast<instr *>(std::malloc((bytecode_end - bytecode_begin)
                                              * sizeof(instr)));
-    _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)
-                                             * sizeof(instr)));
+    _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)));
     instr * ip = _code;
     byte  * dp = _data;
     
@@ -32,13 +32,13 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         
         // Do some basic sanity checks based on what we know about the opcodes.
         if (opc >= machine::MAX_OPCODE) {   // Is this even a valid opcode?
-            free(_code);
+            release_buffers();;
             throw std::range_error("invalid opcode");
         }
 
         const opcode_t op = op_to_fn[opc];
         if (op.param_sz == NILOP) {      // Is it implemented?
-            free(_code);
+            release_buffers();;
             throw std::runtime_error("attempt to execute unimplemented opcode");
         }
 
@@ -46,14 +46,14 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         {                       // check it doesn't jump outside the program.
             const size_t skip = cd_ptr[1];
             if (cd_ptr + 2 + skip > bytecode_end) {
-                free(_code);
+                release_buffers();;
                 throw std::runtime_error("cntxt_item: jump past end of program");
             }
         }
         
         const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr++ : op.param_sz;
         if (cd_ptr + param_sz > bytecode_end) { // Is the requested size possible
-            free(_code);
+            release_buffers();;
             throw std::runtime_error("arguments exhausted");
         }
         
@@ -81,11 +81,16 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         case machine::RET_TRUE: 
             break;
         default:
+            release_buffers();
             throw std::runtime_error("No return instruction found");
     }
     
     assert(ip - _code == _instr_count);
     _data_size = sizeof(byte)*(dp - _data);
+    
+    // Now we know exactly how much code and data the program really needs
+    // realloc the buffers to exactly the right size so we don't waste any 
+    // memory.
     _code = static_cast<instr *>(std::realloc(_code, _instr_count*sizeof(instr)));
     _data = static_cast<byte *>(std::realloc(_data, _data_size*sizeof(byte)));
 }
@@ -94,7 +99,14 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
 
 code::~code() throw ()
 {
+    release_buffers();
+}
+
+
+void code::release_buffers() throw() 
+{
     std::free(_code);
+    std::free(_data);
 }
 
 

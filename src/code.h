@@ -14,6 +14,10 @@ class code
     byte  * _data;
     size_t  _data_size, 
             _instr_count;
+    
+    code(const code &);
+    void release_buffers() throw ();
+    
 public:
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
     virtual ~code() throw();
