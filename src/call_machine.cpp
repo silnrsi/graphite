@@ -14,7 +14,8 @@
 typedef ptrdiff_t        (* ip_t)(registers);
 
 // These are required by opcodes.h and should not be changed
-#define STARTOP(name)       bool name(registers) {
+#define STARTOP(name)       bool name(registers) REGPARM(6);\
+                            bool name(registers) {
 #define ENDOP               return true; }
 #define EXIT(status)        *++sp = status; return false
 
@@ -72,5 +73,5 @@ const opcode_t * machine::get_opcode_table(bool constraint) throw()
 {
     return constraint ? opcode_table_constrained : opcode_table;
 }
-               
+
 

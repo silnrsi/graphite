@@ -9,6 +9,13 @@
 #include <graphiteng/Types.h>
 
 //#define CHECK_STACK   TRUE
+#if defined(__GNUC__)
+#define     HOT             __attribute__((hot))
+#define     REGPARM(n)      __attribute__((hot, regparm(n)))
+#else
+#define     HOT
+#define     REGPARM(n)
+#endif
 
 // Forward declarations
 class Segment;
@@ -28,11 +35,11 @@ namespace machine
     extern const opcode_t *    get_opcode_table(bool constraint) throw();
     extern uint32              run(const instr * program, const byte * data,
                                    uint32 * stack_base, const size_t length,
-                                   Segment & seg, const int islot_idx);
+                                   Segment & seg, const int islot_idx) HOT;
 
     void check_stack(const uint32 * const sp, 
                      const uint32 * const base,
-                     const uint32 * const limit) __attribute__ ((hot,regparm (3)));
+                     const uint32 * const limit) REGPARM(3);
 
     void check_final_stack(const uint32 * const sp, 
                            const uint32 * const base,
