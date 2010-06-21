@@ -33,7 +33,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         while (first <= last)
             m_cols[first++] = col;
     }
-    if (p - (char *)pPass >= lPass) return false;
+    if (p - (byte *)pPass >= lPass) return false;
     m_ruleidx = new uint16[m_sSuccess + 1];
     for (int i = 0; i <= m_sSuccess; i++)
     {
@@ -46,7 +46,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     {
         m_ruleMap[i] = read16(p);
     }
-    if (p - (char *)pPass >= lPass) return false;
+    if (p - (byte *)pPass >= lPass) return false;
     m_minPreCtxt = *p++;
     m_maxPreCtxt = *p++;
     m_startStates = new uint16[m_maxPreCtxt - m_minPreCtxt + 1];
@@ -87,7 +87,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     memcpy(m_cActions, p, m_pActions[m_numRules]);
     p += m_pActions[m_numRules];
 
-    assert(p - (char *)pPass <= lPass);
+    assert(p - (byte *)pPass <= lPass);
     // no debug
     return true;
 }

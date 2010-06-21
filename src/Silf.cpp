@@ -19,7 +19,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     m_jPass = *p++;
     if (m_jPass < m_pPass) return false;
     m_bPass = *p++;     // when do we reorder?
-    if (m_bPass != -1 && (m_bPass < m_jPass || m_bPass > m_numPasses)) return false;
+    if (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses)) return false;
     m_flags = *p++;
     p += 2;     // ignore line end contextuals for now
     p++;        // not sure what to do with attrPseudo
@@ -60,16 +60,79 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 
 size_t Silf::readClassMap(void *pClass, size_t lClass)
 {
-    uint16 *p = (uint16 *)pClass;
-    uint16 nClass, nLinear;
-    nClass = swap16(*p); p++;
-    nLinear = swap16(*p); p++;
-    
-    // quick find the length
-    p += nClass;
-    if (swap16(*p) < 0 || swap16(*p) > lClass) return -1;
-    return swap16(*p);
+    char *p = (char *)pClass;
+
+    m_nClass = read16(p);
+    m_nLinear = read16(p);
+    m_classOffsets = new uint16[m_nClass + 1];
+
+    for (int i = 0; i <= m_nClass; i++)
+        m_classOffsets[i] = read16(p) / 2 - (2 + m_nClass);     // uint16[] index
+ 
+    if (m_classOffsets[m_nClass] + (2 + m_nClass) * 2 > lClass) return -1;
+    m_classData = new uint16[m_classOffsets[m_nClass]];
+    for (int i = 0; i < m_classOffsets[m_nClass]; i++)
+        m_classData[i] = read16(p);
+    return (p - (char *)pClass);
 }
+
+uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
+{
+    if (cid > m_nClass || cid < 0) return -1;
+
+    uint16 loc = m_classOffsets[cid];
+    if (cid < m_nLinear)        // output class being used for input, shouldn't happen
+    {
+        for (int i = loc; i < m_classOffsets[cid + 1]; i++)
+            if (m_classData[i] == gid) return i - loc;
+    }
+    else
+    {
+        uint16 num = m_classData[loc];
+        uint16 search = m_classData[loc + 1] / 2;
+        uint16 selector = m_classData[loc + 2];
+        uint16 range = m_classData[loc + 3] / 2;
+
+        uint16 curr = loc + 4 + range;
+
+        while (search > 1)
+        {
+            int test;
+            if (curr < loc + 4)
+                test = -1;
+            else
+                test = m_classData[curr] - gid;
+
+            if (test == 0) return m_classData[curr + 1];
+
+            search >>= 1;
+            if (test < 0)
+                curr += search;
+            else
+                curr -= search;
+        }
+    }
+    return -1;
+}
+
+uint16 Silf::getClassGlyph(uint16 cid, uint16 index)
+{
+    if (cid > m_nClass || cid < 0) return 0;
+
+    uint16 loc = m_classOffsets[cid];
+    if (cid < m_nLinear)
+    {
+        if (index < m_classOffsets[cid + 1] - index)
+            return m_classData[index + loc];
+    }
+    else        // input class being used for output. Shouldn't happen
+    {
+        for (int i = loc + 4; i < m_classOffsets[cid + 1]; i += 2)
+            if (m_classData[i + 1] == index) return m_classData[i];
+    }
+    return 0;
+}
+
 
 void Silf::runGraphite(Segment *seg, FontFace *face, VMScratch *vms)
 {
