@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "Segment.h"
+#include "code.h"
 
 bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 {
@@ -63,29 +64,38 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     memcpy(m_rulePreCtxt, p, m_numRules);
     p += m_numRules;
     p++;
-    uint16 m_nPConstraint = read16(p);
-    m_pConstraint = new uint16[m_numRules + 1];
-    m_pActions = new uint16[m_numRules + 1];
-    for (int i = 0; i <= m_numRules; i++)
-        m_pConstraint[i] = read16(p);
-    for (int i = 0; i <= m_numRules; i++)
-        m_pActions[i] = read16(p);
+    uint16 nPConstraint = read16(p);
+    byte *pConstraint = p;
+    byte *pActions = p + (m_numRules + 1) * 2;
+    p += (m_numRules + 1) * 4;
     m_sTable = new int16[m_sTransition * m_sColumns];
     for (int i = 0; i < m_sTransition * m_sColumns; i++)
         m_sTable[i] = read16(p);
     p++;
-    if (m_nPConstraint)
+    if (nPConstraint)
     {
-        m_cPConstraint = new byte[m_nPConstraint];
-        memcpy(m_cPConstraint, p, m_nPConstraint);
-        p += m_nPConstraint;
+        m_cPConstraint = code(true, p, p + nPConstraint);
+        p += nPConstraint;
     }
-    m_cConstraint = new byte[m_pConstraint[m_numRules]];
-    memcpy(m_cConstraint, p, m_pConstraint[m_numRules]);
-    p += m_pConstraint[m_numRules];
-    m_cActions = new byte[m_pActions[m_numRules]];
-    memcpy(m_cActions, p, m_pActions[m_numRules]);
-    p += m_pActions[m_numRules];
+
+    m_cConstraint = new code[m_numRules];
+    uint16 loffset = read16(pConstraint);
+    for (int i = 0; i < m_numRules; i++)
+    {
+        uint16 noffset = read16(pConstraint);
+        if (noffset > loffset) m_cConstraint[i] = code(true, p + loffset, p + noffset);
+        loffset = noffset;
+    }
+    p += loffset;
+    m_cActions = new code[m_numRules];
+    loffset = read16(pActions);
+    for (int i = 0; i < m_numRules; i++)
+    {
+        uint16 noffset = read16(pActions);
+        if (noffset > loffset) m_cActions[i] = code(false, p + loffset, p + noffset);
+        loffset = noffset;
+    }
+    p += loffset;
 
     assert(p - (byte *)pPass <= lPass);
     // no debug
@@ -94,7 +104,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 
 void Pass::runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms)
 {
-    if (m_nPConstraint && !testConstraint(m_cPConstraint, m_nPConstraint, 0, seg, silf, vms))
+    if (!testConstraint(&m_cPConstraint, 0, seg, silf, vms))
         return;
 
     for (int i = 0; i < seg->length(); i++)
@@ -137,11 +147,9 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
     
     for (int i = 0; i < vms->ruleLength(); i++)
     {
-        int offset = m_pConstraint[vms->rule(i)];
-        if (testConstraint(m_cConstraint + offset, m_pConstraint[vms->rule(i) + 1] - offset, startSlot, seg, silf, vms))
+        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, seg, silf, vms))
         {
-            offset = m_pActions[vms->rule(i)];
-            int res = doAction(m_cActions + offset, m_pActions[vms->rule(i) + 1] - offset, startSlot, seg, silf, vms);
+            int res = doAction(m_cActions + vms->rule(i), startSlot, seg, silf, vms);
             if (res == -1)
                 return m_ruleSorts[vms->rule(i)];
             else
@@ -151,14 +159,14 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
     return -1;
 }
 
-int Pass::testConstraint(byte *code, size_t len, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
+int Pass::testConstraint(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return 1;
+    return code->run(vms->stack(), size_t(64), seg, iSlot);
 }
 
-int Pass::doAction(byte *code, size_t len, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
+int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return -1;
+    return code->run(vms->stack(), size_t(64), seg, iSlot);
 }
 
 

@@ -8,6 +8,7 @@
 #include "Main.h"
 
 Segment::Segment(int numchars, FontFace *face) :
+        m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
         m_slots(numchars),
@@ -39,6 +40,7 @@ void Segment::append(const Segment &other)
     for (int i = 0; i < other.m_numCharinfo; i++)
     { m_charinfo[m_numCharinfo + i].update(m_numCharinfo); }
     m_numCharinfo += other.m_numCharinfo;
+    m_numGlyphs += other.m_numGlyphs;
     m_advance = m_advance + other.m_advance;
     m_bbox = m_bbox.widen(bbox);
 }
@@ -54,11 +56,12 @@ void Segment::appendSlot(int id, int cid, int gid)
 
 void Segment::positionSlots(FontImpl *font)
 {
-    std::vector<Slot>::iterator s;
     Position currpos;
+    Slot *s;
 
-    for (s = m_slots.begin(); s != m_slots.end(); s++)
+    for (int i = 0; i < m_numGlyphs; i++)
     {
+        s = &(m_slots[i]);
         if (s->isBase())
         {
             float cMin = currpos.x;

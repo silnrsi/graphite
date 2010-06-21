@@ -35,6 +35,7 @@ private:
 
 public:
     
+    code() {};
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
     ~code() throw();
     
@@ -44,7 +45,7 @@ public:
     size_t instruction_count() const throw();
     
     uint32 run(uint32 * stack_base, const size_t length,
-                    Segment & seg, const int islot_idx);
+                    Segment * seg, const int islot_idx);
 };
 
 

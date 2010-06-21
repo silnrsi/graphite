@@ -43,8 +43,14 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     if (p - (char *)pSilf >= lSilf) return false;
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
-    uint16 numPseudo = read16(p);
-    p += numPseudo * 6 + 6;  // skip pseudo maps
+    m_numPseudo = read16(p);
+    p += 6;
+    m_pseudos = new Pseudo[m_numPseudo];
+    for (int i = 0; i < m_numPseudo; i++)
+    {
+        m_pseudos[i].uid = read32(p);
+        m_pseudos[i].gid = read16(p);
+    }
     if (p - (char *)pSilf >= lSilf) return false;
 
     int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (char *)pSilf));
@@ -53,7 +59,8 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 
     for (int i = 0; i < m_numPasses; i++)
     {
-        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + numPseudo)) return false;
+        m_passes[i].init(this);
+        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + m_numPseudo)) return false;
     }
     return true;
 }
@@ -74,6 +81,13 @@ size_t Silf::readClassMap(void *pClass, size_t lClass)
     for (int i = 0; i < m_classOffsets[m_nClass]; i++)
         m_classData[i] = read16(p);
     return (p - (char *)pClass);
+}
+
+uint16 Silf::findPseudo(uint32 uid)
+{
+    for (int i = 0; i < m_numPseudo; i++)
+        if (m_pseudos[i].uid == uid) return m_pseudos[i].gid;
+    return 0;
 }
 
 uint16 Silf::findClassIndex(uint16 cid, uint16 gid)

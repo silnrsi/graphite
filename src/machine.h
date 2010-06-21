@@ -35,7 +35,7 @@ namespace machine
     extern const opcode_t *    get_opcode_table(bool constraint) throw();
     extern uint32              run(const instr * program, const byte * data,
                                    uint32 * stack_base, const size_t length,
-                                   Segment & seg, const int islot_idx) HOT;
+                                   Segment * seg, const int islot_idx) HOT;
 
     void check_stack(const uint32 * const sp, 
                      const uint32 * const base,

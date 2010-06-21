@@ -12,7 +12,7 @@
 class Segment : public ISegment
 {
 public:
-    virtual int length() { return m_slots.size(); }
+    virtual int length() { return m_numGlyphs; }
     virtual Position advance() { return m_advance; }
     virtual Slot & operator[] (int index) { return m_slots[index]; }
     virtual const Slot & operator[] (int index) const { return m_slots[index]; }
@@ -27,6 +27,7 @@ public:
 
 protected:
     std::vector<Slot> m_slots;
+    int m_numGlyphs;
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 

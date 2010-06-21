@@ -2,6 +2,7 @@
 #define PASS_INCLUDE
 
 #include "VMScratch.h"
+#include "code.h"
 
 class Segment;
 class FontImpl;
@@ -14,10 +15,12 @@ public:
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
     void runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms);
     int findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf);
-    int testConstraint(byte *codeptr, size_t codelen, int iSlot, Segment *seg, Silf *silf, VMScratch *vms);
-    int doAction(byte *m_cAction, size_t numAction, int startSlot, Segment *seg, Silf *silf, VMScratch *vms);
+    int testConstraint(code *codeptr, int iSlot, Segment *seg, Silf *silf, VMScratch *vms);
+    int doAction(code *m_cAction, int startSlot, Segment *seg, Silf *silf, VMScratch *vms);
+    void init(Silf *silf) { m_silf = silf; }
 
 protected:
+    Silf *m_silf;
     byte m_iMaxLoop;
     uint16 m_numRules;
     uint16 m_sRows;
@@ -32,12 +35,9 @@ protected:
     byte m_maxPreCtxt;
     uint16 *m_startStates;
     byte *m_rulePreCtxt;
-    uint16 m_nPConstraint;
-    uint16 *m_pConstraint;
-    uint16 *m_pActions;
-    byte *m_cPConstraint;
-    byte *m_cConstraint;
-    byte *m_cActions;
+    code m_cPConstraint;
+    code *m_cConstraint;
+    code *m_cActions;
     int16 *m_sTable;
 };
 

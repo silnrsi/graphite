@@ -36,6 +36,7 @@ public:
     virtual float advance(unsigned short id);
     virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
     virtual void runGraphite(Segment *seg);
+    virtual uint16 findPseudo(uint32 uid) { m_numSilf ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
     FontFace(IFace *face) : m_face(face) {}

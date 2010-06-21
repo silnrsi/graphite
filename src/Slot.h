@@ -13,13 +13,13 @@ class Slot : public ISlot
 public:
     virtual unsigned short gid() { return m_glyphid; }
     virtual Position origin() { return m_position; }
-    virtual float advance(FontImpl *font) { return font->advance(m_glyphid) + m_kern.x; }
+    virtual float advance(FontImpl *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
     virtual int before() { return m_before; }
     virtual int after() { return m_after; }
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
-    void origin(Position &pos) { m_position = pos + m_shift + m_kern; }
+    void origin(Position &pos) { m_position = pos + m_shift; }
     void before(int index) { m_before = index; }
     void after(int index) { m_after = index; }
     bool isBase() { return (m_parent == -1); }
@@ -35,7 +35,7 @@ protected:
     int m_sibling;          // index to next child that attaches to our parent
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
-    Position m_kern;        // .kern slot attribute
+    Position m_advance;     // .advance slot attribute
     Position m_attach;      // shift relative to parent due to attachment
 };
 

@@ -9,7 +9,7 @@
 #include <cassert>
 #include "machine.h"
 
-#define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
+#define registers           const byte * & dp, uint32 * & sp, Segment * seg, \
                             uint32 & is, uint32 & os, const instr * & ip
 typedef ptrdiff_t        (* ip_t)(registers);
 
@@ -33,14 +33,13 @@ uint32  machine::run(const instr  * program,
                      const byte   * data,
                      uint32       * stack_base, 
                      const size_t   length,
-                     Segment & seg, 
+                     Segment * seg, 
                      const int      islot_idx)
 {
-    assert(program != 0);
-    assert(data != 0);
     assert(stack_base !=0);
     assert(length > 8);
 
+    if (!program || !data) return 0;
     // Declare virtual machine registers
     const instr   * ip = program-1;
     const byte    * dp = data;

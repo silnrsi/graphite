@@ -123,6 +123,8 @@ void read_text(FontFace *face, ITextSource *txt, Segment *seg, int numchars)
             break;
         }
         gid = TtfUtil::Cmap31Lookup(ctable, cid);
+        if (!gid)
+            gid = face->findPseudo(cid);
         seg->appendSlot(i, cid, gid);
     }
 }

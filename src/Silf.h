@@ -9,6 +9,13 @@ class FontImpl;
 class VMScratch;
 class Segment;
 
+class Pseudo
+{
+public:
+    uint32 uid;
+    uint32 gid;
+};
+
 class Silf
 {
 public:
@@ -16,6 +23,7 @@ public:
     void runGraphite(Segment *seg, FontFace *face, VMScratch *vms);
     uint16 findClassIndex(uint16 cid, uint16 gid);
     uint16 getClassGlyph(uint16 cid, uint16 index);
+    uint16 findPseudo(uint32 uid);
 
 protected:
     size_t readClassMap(void *pClass, size_t lClass);
@@ -32,6 +40,8 @@ protected:
     byte m_aUser;
     byte m_iMaxComp;
     uint16 m_aLig;
+    uint16 m_numPseudo;
+    Pseudo *m_pseudos;
     uint16 m_nClass;
     uint16 m_nLinear;
     uint16 *m_classOffsets;
