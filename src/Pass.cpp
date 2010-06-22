@@ -172,12 +172,24 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
 
 int Pass::testConstraint(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return (*code) ? code->run(vms->stack(), size_t(64), seg, iSlot) : 1;
+    if (!*code)
+        return 1;
+    
+    machine::status_t status;
+    const uint32 ret = code->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    
+    return status == machine::finished ? ret : 1;
 }
 
 int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return (*code) ? code->run(vms->stack(), size_t(64), seg, iSlot) : 1;
+    if (!*code)
+        return 1;
+    
+    machine::status_t status;
+    const uint32 ret = code->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    
+    return status == machine::finished ? iSlot + ret: 1;
 }
 
 
