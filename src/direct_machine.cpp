@@ -17,7 +17,7 @@
 
 #define STARTOP(name)           name: {
 #if defined(CHECK_STACK)
-#define ENDOP                   }; if (!machine::check_stack(sp, stack_base, sp_limit)) \
+#define ENDOP                   }; if (!machine::check_stack(sp, stack_base, stack_top)) \
                                         goto end; \
                                 goto **++ip;
 #else
