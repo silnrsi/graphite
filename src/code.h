@@ -44,7 +44,8 @@ public:
     size_t instruction_count() const throw();
     
     uint32 run(uint32 * stack_base, const size_t length,
-                    Segment & seg, const int islot_idx);
+                    Segment & seg, int & islot_idx,
+                    machine::status_t & status);
 };
 
 

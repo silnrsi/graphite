@@ -34,7 +34,8 @@ const void * direct_machine(const bool get_table_mode,
                             uint32        * stack_base, 
                             const size_t    length,
                             Segment * const seg_ptr,
-                            const int       islot_idx)
+                            int  &          is,
+                            machine::status_t &     status)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -45,8 +46,6 @@ const void * direct_machine(const bool get_table_mode,
     // Declare virtual machine registers
     const instr   * ip = program;
     const byte    * dp = data;
-    uint32          is = islot_idx, 
-                    os = islot_idx;
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
@@ -69,7 +68,9 @@ const void * direct_machine(const bool get_table_mode,
 
 const opcode_t * machine::get_opcode_table(bool constraint) throw()
 {
-    return static_cast<const opcode_t *>(direct_machine(true, constraint, 0, 0, 0, 0, 0, 0));
+    machine::status_t dummy;
+    int is_dummy;
+    return static_cast<const opcode_t *>(direct_machine(true, constraint, 0, 0, 0, 0, 0, is_dummy, dummy));
 }
 
 
@@ -78,7 +79,8 @@ uint32  machine::run(const instr  * program,
                      uint32       * stack_base, 
                      const size_t   length,
                      Segment & seg, 
-                     const int      islot_idx)
+                     int &          islot_idx,
+                     status_t &     status)
 {
     assert(program != 0);
     assert(data != 0);
@@ -87,7 +89,7 @@ uint32  machine::run(const instr  * program,
     
     const void * ret = direct_machine(false, false, program, data,
                                       stack_base, length, &seg, 
-                                      islot_idx);
+                                      islot_idx, status);
     return reinterpret_cast<ptrdiff_t>(ret);
 }
 

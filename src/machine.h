@@ -32,18 +32,27 @@ enum { VARARGS = size_t(-2), NILOP };
 
 namespace machine
 {
+    enum status_t {
+        finished,
+        stack_underflow,
+        stack_not_empty,
+        stack_overflow
+    };
+    
     extern const opcode_t *    get_opcode_table(bool constraint) throw();
     extern uint32              run(const instr * program, const byte * data,
                                    uint32 * stack_base, const size_t length,
-                                   Segment & seg, const int islot_idx) HOT;
+                                   Segment & seg, int & islot_idx,
+                                   status_t &status) HOT;
 
-    void check_stack(const uint32 * const sp, 
+    bool check_stack(const uint32 * const sp, 
                      const uint32 * const base,
                      const uint32 * const limit) REGPARM(3);
 
-    void check_final_stack(const uint32 * const sp, 
+    bool check_final_stack(const uint32 * const sp, 
                            const uint32 * const base,
-                           const uint32 * const limit);
+                           const uint32 * const limit,
+                           status_t &status);
     
     enum opcode {
 	    NOP = 0,
@@ -85,11 +94,10 @@ namespace machine
     };
 }
 
-inline void machine::check_stack(const uint32 * const sp, 
+inline bool machine::check_stack(const uint32 * const sp, 
                                  const uint32 * const base,
                                  const uint32 * const limit) {
-        if (sp <= base+2)     throw std::runtime_error("check_stack: stack underflow");
-        if (sp >= limit-2)    throw std::runtime_error("check_stack: stack overflow");
+    return (sp <= base && sp > limit);
 }
 
 inline void machine::check_final_stack(const uint32 * const sp, 
@@ -107,6 +115,5 @@ inline void machine::check_final_stack(const uint32 * const sp,
 #define declare_params(n)   const byte * param = dp; \
                             use_params(n);
   
-
 
 

@@ -10,7 +10,7 @@
 #include "machine.h"
 
 #define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
-                            uint32 & is, uint32 & os, const instr * & ip
+                            int & is, const instr * & ip
 typedef ptrdiff_t        (* ip_t)(registers);
 
 // These are required by opcodes.h and should not be changed
@@ -33,8 +33,9 @@ uint32  machine::run(const instr  * program,
                      const byte   * data,
                      uint32       * stack_base, 
                      const size_t   length,
-                     Segment & seg, 
-                     const int      islot_idx)
+                     Segment &      seg, 
+                     int &          is,
+                     status_t &     status)
 {
     assert(program != 0);
     assert(data != 0);
@@ -44,8 +45,6 @@ uint32  machine::run(const instr  * program,
     // Declare virtual machine registers
     const instr   * ip = program-1;
     const byte    * dp = data;
-    uint32          is = islot_idx, 
-                    os = islot_idx;
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
@@ -53,12 +52,11 @@ uint32  machine::run(const instr  * program,
     uint32 * const  sp_limit = stack_base + length - 2;
   
     // Run the program        
-    while((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, os, ip))
-    {
+    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ip)
 #if defined(CHECK_STACK)
         machine::check_stack(sp, stack_base, sp_limit);
 #endif
-    }
+           ) {}
 
     machine::check_final_stack(sp, stack_base+1, sp_limit);
     return *sp;

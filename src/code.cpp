@@ -124,11 +124,12 @@ void code::release_buffers() throw()
 
 
 uint32 code::run(uint32 * stack_base, const size_t length,
-                    Segment & seg, const int islot_idx)
+                    Segment & seg, int & islot_idx, 
+                    machine::status_t & status)
 {
     assert(stack_base != 0);
     assert(length >= 32);
-    
-    return machine::run(_code, _data, stack_base, length, seg, islot_idx);
+
+    return machine::run(_code, _data, stack_base, length, seg, islot_idx, status);
 }
 
