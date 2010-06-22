@@ -23,7 +23,7 @@ class Segment
 
 #define _msg(m) #m
 
-const char * error_msg[] = {
+const char * prog_error_msg[] = {
     _msg(loaded),
     _msg(alloc_failed), 
     _msg(invalid_opcode), 
@@ -31,6 +31,13 @@ const char * error_msg[] = {
     _msg(jump_past_end),
     _msg(arguments_exhausted),
     _msg(missing_return)
+};
+
+const char * run_error_msg[] = {
+    _msg(finished),
+    _msg(stack_underflow),
+    _msg(stack_not_empty),
+    _msg(stack_overflow)
 };
 
 std::vector<byte> fuzzer(int);
@@ -57,21 +64,46 @@ int main(int argc, char *argv[])
     code prog(false, &big_prog[0], &big_prog[0] + big_prog.size());
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.
-        std::cerr << "program failed to load due to: " << error_msg[prog.status()] << std::endl;
-        exit(1);
+        std::cerr << "program failed to load due to: " 
+                << prog_error_msg[prog.status()] << std::endl;
+        return 1;
     }
-    std::cout << "loaded program size:    " << prog.data_size() + prog.instruction_count()*sizeof(instr) << " bytes" << std::endl
-              << "                        " << prog.instruction_count() << " instructions" << std::endl;
+    std::cout << "loaded program size:    " 
+              << prog.data_size() + prog.instruction_count()*sizeof(instr) 
+              << " bytes" << std::endl
+              << "                        " 
+              << prog.instruction_count() << " instructions" << std::endl;
     
     // run the program
     uint32 * stack = new uint32 [64];
     Segment seg;
+    int is=0;
     uint32 ret;
-    for(int n = repeats; n; --n)
-        ret = prog.run(stack, 64, seg, 0);
+    machine::status_t status;
+    for(size_t n = repeats; n; --n) {
+        ret = prog.run(stack, 64, seg, is, status);
+        switch (status) {
+            case stack_underflow:
+            case stack_overflow:
+                std::cerr << "program terminated early: " 
+                          << run_error_msg[status] << std::endl;
+                std::cout << "--------" << std::endl
+                          << "between " << prog.instruction_count()*(repeats-n) 
+                          << " and "    << prog.instruction_count()*(repeats-std::min(n-1,repeats))
+                          << " instructions executed" << std::endl;
+                return 2;
+            case stack_not_empty:
+                std::cerr << "program completed but stack not empty." << std::endl;
+                repeats -= n-1;
+                n=1;
+                break;
+        }
+    }
+    
     std::cout << "result of program: " << ret << std::endl
               << "--------" << std::endl
-              << "equivalent of " << prog.instruction_count()*repeats << " instructions executed" << std::endl;
+              << "equivalent of " << prog.instruction_count()*repeats 
+              << " instructions executed" << std::endl;
     
     delete [] stack;
     

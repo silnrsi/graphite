@@ -32,8 +32,15 @@
 //                (Only if you use declare_params first).
      
      
-#define binop(op) const uint32 a = *sp, b = *--sp; *sp = b op a
+#define binop(op)           const uint32 a = pop(); *sp = *sp op a
+
 #define NOT_IMPLEMENTED     assert(false)
+#define use_params(n)       dp += n
+#define declare_params(n)   const byte * param = dp; \
+                            use_params(n);
+#define push(n)             *--sp = n
+#define pop()               *sp++
+#define drop(n)             sp += n
 
 STARTOP(nop)
     do {} while (0);
@@ -41,26 +48,26 @@ ENDOP
 
 STARTOP(push_byte)
     declare_params(1);
-    *++sp = signed(*param);
+    push(signed(*param));
 ENDOP
 
 STARTOP(push_byte_u)
     declare_params(1);
-    *++sp = unsigned(*param);
+    push(unsigned(*param));
 ENDOP
 
 STARTOP(push_short)
     declare_params(2);
     const uint16 r  = param[0] << 8 
                     | param[1];
-    *++sp = signed(r);
+    push(signed(r));
 ENDOP
 
 STARTOP(push_short_u)
     declare_params(2);
     const uint16 r  = param[0] << 8
                     | param[1];
-    *++sp = unsigned(r);
+    push(unsigned(r));
 ENDOP
 
 STARTOP(push_long)
@@ -69,7 +76,7 @@ STARTOP(push_long)
                     | param[1] << 16
                     | param[2] << 8
                     | param[4];
-    *++sp = unsigned(r);
+    push(unsigned(r));
 ENDOP
 
 STARTOP(add)
@@ -89,13 +96,13 @@ STARTOP(div)
 ENDOP
 
 STARTOP(min)
-    const uint32 a = *sp, b = *--sp;
-    *sp = a < b ? a : b;
+    const uint32 a = pop(), b = *sp;
+    if (a < b) *sp = a;
 ENDOP
 
 STARTOP(max)
-    const uint32 a = *sp, b = *--sp;
-    *sp = a > b ? a : b;
+    const uint32 a = pop(), b = *sp;
+    if (a > b) *sp = a;
 ENDOP
 
 STARTOP(neg)
@@ -111,8 +118,8 @@ STARTOP(trunc16)
 ENDOP
 
 STARTOP(cond)
-    if (*sp) sp[-2] = sp[-1];
-    sp -= 2;
+    const uint32 c = pop(), t = pop();
+    if (c) *sp = t;
 ENDOP
 
 STARTOP(and_)
@@ -212,14 +219,14 @@ STARTOP(cntxt_item)
 
     if (is_arg != is) {
         ip += count;
-        *++sp = true;
+        push(true);
     }
 ENDOP
 
 STARTOP(attr_set)
     declare_params(1);
     const unsigned int  slat = unsigned(*param);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -227,7 +234,7 @@ ENDOP
 STARTOP(attr_add)
     declare_params(1);
     const unsigned int  slat = unsigned(*param);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -235,7 +242,7 @@ ENDOP
 STARTOP(attr_sub)
     declare_params(1);
     const unsigned int  slat = unsigned(*param);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -243,7 +250,7 @@ ENDOP
 STARTOP(attr_set_slot)
     declare_params(1);
     const unsigned int  slat = unsigned(*param);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -252,7 +259,7 @@ STARTOP(iattr_set_slot)
     declare_params(2);
     const unsigned int  slat = unsigned(param[0]);
     const size_t        idx  = size_t(param[1]);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -262,7 +269,7 @@ STARTOP(push_slot_attr)
     const unsigned int  slat     = unsigned(param[0]);
     const size_t        slot_ref = size_t(param[1]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
@@ -270,7 +277,7 @@ STARTOP(push_slot_attr_constrained)
     const unsigned int  slat     = unsigned(param[0]);
     const size_t        slot_ref = size_t(param[1]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_obs)
@@ -278,7 +285,7 @@ STARTOP(push_glyph_attr_obs)
     const unsigned int  glyph_attr  = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_obs_constrained)
@@ -286,7 +293,7 @@ STARTOP(push_glyph_attr_obs_constrained)
     const unsigned int  glyph_attr  = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_glyph_metric)
@@ -295,7 +302,7 @@ STARTOP(push_glyph_metric)
     const size_t        slot_ref    = size_t(param[1]);
     const signed int    attr_level  = signed(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
@@ -304,7 +311,7 @@ STARTOP(push_glyph_metric_constrained)
     const size_t        slot_ref    = size_t(param[1]) + is + 1;
     const signed int    attr_level  = signed(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_feat)
@@ -312,7 +319,7 @@ STARTOP(push_feat)
     const unsigned int  feat        = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_feat_constrained)
@@ -320,7 +327,7 @@ STARTOP(push_feat_constrained)
     const unsigned int  feat        = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_gattr_obs)
@@ -328,7 +335,7 @@ STARTOP(push_att_to_gattr_obs)
     const unsigned int  glyph_attr  = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_gattr_obs_constrained)
@@ -336,7 +343,7 @@ STARTOP(push_att_to_gattr_obs_constrained)
     const unsigned int  glyph_attr  = unsigned(param[0]);
     const size_t        slot_ref    = size_t(param[1]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_metric)
@@ -345,7 +352,7 @@ STARTOP(push_att_to_glyph_metric)
     const size_t        slot_ref    = size_t(param[1]);
     const signed int    attr_level  = signed(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_metric_constrained)
@@ -354,7 +361,7 @@ STARTOP(push_att_to_glyph_metric_constrained)
     const size_t        slot_ref    = size_t(param[1]) + is + 1;
     const signed int    attr_level  = signed(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_islot_attr)
@@ -363,7 +370,7 @@ STARTOP(push_islot_attr)
     const size_t        slot_ref = size_t(param[1]),
                         idx      = size_t(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -372,7 +379,7 @@ STARTOP(push_islot_attr_constrained)
     const size_t        slot_ref = size_t(param[1]) + is + 1,
                         idx      = size_t(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_iglyph_attr) // not implemented
@@ -380,7 +387,7 @@ STARTOP(push_iglyph_attr) // not implemented
 ENDOP
       
 STARTOP(pop_ret)
-    const uint32 ret = *sp--;
+    const uint32 ret = pop();
     EXIT(ret);
 ENDOP
 
@@ -396,7 +403,7 @@ STARTOP(iattr_set)
     declare_params(2);
     const unsigned int  slat = unsigned(param[0]);
     const size_t        idx  = size_t(param[1]);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -405,7 +412,7 @@ STARTOP(iattr_add)
     declare_params(2);
     const unsigned int  slat = unsigned(param[0]);
     const size_t        idx  = size_t(param[1]);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -414,7 +421,7 @@ STARTOP(iattr_sub)
     declare_params(2);
     const unsigned int  slat = unsigned(param[0]);
     const size_t        idx  = size_t(param[1]);
-    const          int  val  = int(*sp--);
+    const          int  val  = int(pop());
 
     // TODO; Implement body
 ENDOP
@@ -423,11 +430,11 @@ STARTOP(push_proc_state)
     declare_params(1);
     const unsigned int  pstate = *param;
     // TODO; Implement body
-    *++sp = 1;
+    push(1);
 ENDOP
 
 STARTOP(push_version)
-    *++sp = 0x00030000;
+    push(0x00030000);
 ENDOP
 
 STARTOP(put_subs)
@@ -461,7 +468,7 @@ STARTOP(push_glyph_attr)
                                     | unsigned(param[1]);
     const size_t        slot_ref    = size_t(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_constrained)
@@ -470,7 +477,7 @@ STARTOP(push_glyph_attr_constrained)
                                     | unsigned(param[1]);
     const size_t        slot_ref    = size_t(param[2]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_attr)
@@ -479,7 +486,7 @@ STARTOP(push_att_to_glyph_attr)
                                     | unsigned(param[1]);
     const size_t        slot_ref    = size_t(param[2]);
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_attr_constrained)
@@ -488,6 +495,6 @@ STARTOP(push_att_to_glyph_attr_constrained)
                                     | unsigned(param[1]);
     const size_t        slot_ref    = size_t(param[2]) + is + 1;
     // TODO; Implement body
-    *++sp = 0;
+    push(0);
 ENDOP
 

@@ -17,11 +17,13 @@
 
 #define STARTOP(name)           name: {
 #if defined(CHECK_STACK)
-#define ENDOP                   }; machine::check_stack(sp, stack_base, sp_limit); goto **++ip;
+#define ENDOP                   }; if (!machine::check_stack(sp, stack_base, sp_limit)) \
+                                        goto end; \
+                                goto **++ip;
 #else
 #define ENDOP                   }; goto **++ip;
 #endif
-#define EXIT(status)            *++sp = status; goto end
+#define EXIT(status)            push(status); goto end
 
 #define action(name,param_sz)   {&&name, param_sz}
 
@@ -34,7 +36,8 @@ const void * direct_machine(const bool get_table_mode,
                             uint32        * stack_base, 
                             const size_t    length,
                             Segment * const seg_ptr,
-                            const int       islot_idx)
+                            int  &          is,
+                            machine::status_t &     status)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -45,15 +48,14 @@ const void * direct_machine(const bool get_table_mode,
     // Declare virtual machine registers
     const instr   * ip = program;
     const byte    * dp = data;
-    uint32          is = islot_idx, 
-                    os = islot_idx;
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    uint32        * sp = stack_base + 2;
-    uint32  * const sp_limit = stack_base + length - 2;
+    uint32        * sp        = stack_base + length - 2;
+    uint32 * const  stack_top = stack_base + 2;
     Segment &       seg = *seg_ptr;
-            
+    stack_base = sp;
+    
     // start the program
     goto **ip;
 
@@ -61,7 +63,7 @@ const void * direct_machine(const bool get_table_mode,
     #include "opcodes.h"
     
     end:
-    machine::check_final_stack(sp, stack_base+1, sp_limit);
+    machine::check_final_stack(sp, stack_base-1, stack_top, status);
     return reinterpret_cast<const void *>(*sp);
 }
 
@@ -69,7 +71,9 @@ const void * direct_machine(const bool get_table_mode,
 
 const opcode_t * machine::get_opcode_table(bool constraint) throw()
 {
-    return static_cast<const opcode_t *>(direct_machine(true, constraint, 0, 0, 0, 0, 0, 0));
+    machine::status_t dummy;
+    int is_dummy;
+    return static_cast<const opcode_t *>(direct_machine(true, constraint, 0, 0, 0, 0, 0, is_dummy, dummy));
 }
 
 
@@ -78,7 +82,8 @@ uint32  machine::run(const instr  * program,
                      uint32       * stack_base, 
                      const size_t   length,
                      Segment & seg, 
-                     const int      islot_idx)
+                     int &          islot_idx,
+                     status_t &     status)
 {
     assert(program != 0);
     assert(data != 0);
@@ -87,7 +92,7 @@ uint32  machine::run(const instr  * program,
     
     const void * ret = direct_machine(false, false, program, data,
                                       stack_base, length, &seg, 
-                                      islot_idx);
+                                      islot_idx, status);
     return reinterpret_cast<ptrdiff_t>(ret);
 }
 

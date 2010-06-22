@@ -13,8 +13,8 @@ class code
 public:
     enum status_t 
     {
-        empty = 0,
         loaded,
+        empty,
         alloc_failed, 
         invalid_opcode, 
         unimplemented_opcode_used,
@@ -36,7 +36,7 @@ private:
 
 public:
     
-    code() : _status(missing_return), _code(NULL), _data(NULL), _data_size(0), _instr_count(0) {};
+    code() throw();
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
     ~code() throw();
     
@@ -46,12 +46,16 @@ public:
     size_t instruction_count() const throw();
     
     uint32 run(uint32 * stack_base, const size_t length,
-                    Segment * seg, const int islot_idx);
+                    Segment & seg, int & islot_idx,
+                    machine::status_t & status);
 };
 
+inline code::code() throw()
+: _code(0), _data(0), _data_size(0), _instr_count(0), _status(empty) {
+}
 
 inline code::operator bool () throw () {
-    return bool(status() == loaded);
+    return _code && status() == loaded;
 }
 
 inline code::status_t code::status() throw() {
