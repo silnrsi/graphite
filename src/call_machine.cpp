@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include "machine.h"
+#include "Segment.h"
 
 #define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
                             int & is, const instr * & ip

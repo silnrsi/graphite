@@ -37,7 +37,7 @@ private:
 public:
     
     code() throw();
-    code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
+    code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cConstraints);
     ~code() throw();
     
     operator bool () throw();

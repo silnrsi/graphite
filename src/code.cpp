@@ -10,7 +10,7 @@
 #include "machine.h"
 
 
-code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
+code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
 : _code(0), _data_size(0), _instr_count(0), _status(loaded)
 {
     assert(bytecode_begin != 0);
@@ -18,6 +18,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     
     const opcode_t *    op_to_fn = machine::get_opcode_table(constrained);
     const byte *        cd_ptr = bytecode_begin;
+    byte                iSlot = 0;
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
@@ -32,7 +33,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     
     instr * ip = _code;
     byte  * dp = _data;
-    
+    cContexts[0] = 0;
+    cContexts[1] = 0;
     do {
         const machine::opcode opc = machine::opcode(*cd_ptr++);
         
@@ -72,9 +74,52 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             cd_ptr += param_sz;
             dp     += param_sz;
         }
-        
+
+        switch (opc)
+        {
+            case machine::NEXT :
+            case machine::COPY_NEXT :
+                iSlot++;
+                cContexts[iSlot * 2] = 0;
+                cContexts[iSlot * 2 + 1] = 0;
+                break;
+            case machine::INSERT :
+                for (char i = iSlot; i >= 0; i--)
+                    cContexts[i * 2]++;
+                break;
+            case machine::DELETE :
+                for (char i = iSlot; i >= 0; i--)
+                    cContexts[i * 2 + 1]++;
+                break;
+            case machine::PUT_COPY :
+            case machine::PUSH_SLOT_ATTR :
+            case machine::PUSH_GLYPH_ATTR :
+            case machine::PUSH_ATT_TOG_ATTR_OBS :
+                if (dp[-1] > 128)
+                    dp[-1] -= cContexts[2 * (iSlot + 256 - dp[-1])];
+                break;
+            case machine::CNTXT_ITEM :
+            case machine::PUSH_ISLOT_ATTR :
+            case machine::PUSH_GLYPH_METRIC :
+            case machine::PUSH_ATT_TOGLYPH_METRIC :
+                if (dp[-2] > 128)
+                    dp[-2] -= cContexts[2 * (iSlot + 256 - dp[-2])];
+                break;
+            case machine::PUT_SUBS :
+                if (dp[-3] > 128)
+                    dp[-3] -= cContexts[2 * (iSlot + 256 - dp[-3])];
+                break;
+            case machine::ASSOC :
+                for (byte i = 0; i < param_sz; i++)
+                    if (dp[-i] > 128)
+                        dp[-i] -= cContexts[2 * (iSlot + 256 - dp[-i])];
+                break;
+            default :
+                break;
+        }
+
         // Was this a return? stop processing any further.
-        if (opc == machine::POP_RET 
+        if (opc == machine::POP_RET
          || opc == machine::RET_ZERO 
          || opc == machine::RET_TRUE)
             break;

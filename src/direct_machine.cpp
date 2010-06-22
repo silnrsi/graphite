@@ -13,7 +13,7 @@
 
 #include <cassert>
 #include "machine.h"
-
+#include "Segment.h"
 
 #define STARTOP(name)           name: {
 #if defined(CHECK_STACK)
