@@ -11,7 +11,7 @@
 
 
 code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
-: _code(0), _data_size(0), _instr_count(0), _status(loaded)
+: _code(0), _data_size(0), _instr_count(0), _status(loaded), _own(true)
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
@@ -150,7 +150,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
 
 code::~code() throw ()
 {
-    release_buffers();
+    if (_own)
+        release_buffers();
 }
 
 inline 
@@ -165,6 +166,7 @@ void code::release_buffers() throw()
     std::free(_data);
     _code = 0;
     _data = 0;
+    _own  = false;
 }
 
 
