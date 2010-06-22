@@ -30,13 +30,16 @@ typedef enum {
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
     AttrVersion,
+    AttrMajor,
+    AttrMinor,
     AttrNum,
     AttrGlyphId,
     AttrAdvance,
     AttrAdvanceX,
     AttrAdvanceY,
     AttrAttrId,
-    AttrCompiler,
+    AttrCompilerMajor,
+    AttrCompilerMinor,
     AttrNumPasses,
     AttrSubPass,
     AttrPosPass,

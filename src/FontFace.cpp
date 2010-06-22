@@ -101,8 +101,10 @@ bool FontFace::readGraphite()
         m_numSilf = swap16(((uint16 *)pSilf)[2]);
 
     XmlTraceLog::get().openElement(ElementSilf);
-    XmlTraceLog::get().addAttributeFixed(AttrVersion, version);
-    XmlTraceLog::get().addAttributeFixed(AttrCompiler, compilerVersion);
+    XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
+    XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
+    XmlTraceLog::get().addAttribute(AttrCompilerMajor, compilerVersion >> 16);
+    XmlTraceLog::get().addAttribute(AttrCompilerMinor, compilerVersion & 0xFFFF);
     XmlTraceLog::get().addAttribute(AttrNum, m_numSilf);
     if (m_numSilf == 0)
         XmlTraceLog::get().warning("No Silf subtables!");

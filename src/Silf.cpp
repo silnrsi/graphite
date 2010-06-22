@@ -8,7 +8,8 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     XmlTraceLog::get().openElement(ElementSilfSub);
     if (version >= 0x00030000)
     {
-        XmlTraceLog::get().addAttributeFixed(AttrVersion, ((uint32*) p)[0]);
+        XmlTraceLog::get().addAttribute(AttrMajor, swap16(((uint16*) p)[0]));
+        XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
         p += 8;
     }
     p += 2;     // maxGlyphID

@@ -30,13 +30,16 @@ const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
 // start this at same line number as in XmlTraceLogTags.h
 const char * xmlTraceLogAttributes[NumAttributes] = {
     "version",
+    "major",
+    "minor",
     "num",
     "glyphId",
     "advance",
     "advanceX",
     "advanceY",
     "attrId",
-    "compiler",
+    "compilerMajor",
+    "compilerMinor",
     "numPasses",//AttrNumPasses,
     "subPass",//AttrSubPass,
     "posPass",//AttrPosPass,

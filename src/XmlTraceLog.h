@@ -29,14 +29,11 @@ public:
     void warning(const char * msg, ...);
     static XmlTraceLog & get()
     {
-        if (sLog == NULL)
-        {
-            sLog = new XmlTraceLog(NULL, "", GRLOG_NONE);
-        }
         return *sLog;
     }
 protected:
-    static XmlTraceLog * sLog;    
+    static XmlTraceLog * sLog;
+    static XmlTraceLog sNullLog;
 private:
     XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask);
     void escapeIfNeeded(const char * text);

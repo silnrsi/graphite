@@ -5,11 +5,12 @@
 
 #include "XmlTraceLog.h"
 
-XmlTraceLog * XmlTraceLog::sLog = NULL;
+XmlTraceLog XmlTraceLog::sNullLog(NULL, "", GRLOG_NONE);
+XmlTraceLog * XmlTraceLog::sLog = &XmlTraceLog::sNullLog;
 
 void startGraphiteLogging(FILE * logFile, GrLogMask mask)
 {
-    if (XmlTraceLog::sLog)
+    if (XmlTraceLog::sLog != &XmlTraceLog::sNullLog)
     {
         delete XmlTraceLog::sLog;
     }
@@ -21,7 +22,7 @@ void stopGraphiteLogging()
     if (XmlTraceLog::sLog)
     {
         delete XmlTraceLog::sLog;
-        XmlTraceLog::sLog = NULL;
+        XmlTraceLog::sLog = &XmlTraceLog::sNullLog;
     }
 }
 
