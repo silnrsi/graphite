@@ -41,12 +41,12 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         while (first <= last)
             m_cols[first++] = col;
     }
-    if (p - (byte *)pPass >= lPass) return false;
+    if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_ruleidx = new uint16[m_sSuccess + 1];
     for (int i = 0; i <= m_sSuccess; i++)
     {
         m_ruleidx[i] = read16(p);
-        if (m_ruleidx[i] < 0 || m_ruleidx[i] > lPass) return false;
+        if (m_ruleidx[i] > lPass) return false;
     }
     numEntries = m_ruleidx[m_sSuccess];
     m_ruleMap = new uint16[numEntries];
@@ -54,7 +54,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     {
         m_ruleMap[i] = read16(p);
     }
-    if (p - (byte *)pPass >= lPass) return false;
+    if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_minPreCtxt = *p++;
     XmlTraceLog::get().addAttribute(AttrMinPrecontext, m_minPreCtxt);
     m_maxPreCtxt = *p++;
@@ -63,7 +63,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
     {
         m_startStates[i] = read16(p);
-        if (m_startStates[i] < 0 || m_startStates[i] >= lPass) return false;
+        if (m_startStates[i] >= lPass) return false;
     }
 
     m_ruleSorts = new uint16[m_numRules];
@@ -108,7 +108,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     }
     p += loffset;
 
-    assert(p - (byte *)pPass <= lPass);
+    assert(size_t(p - (byte *)pPass) <= lPass);
     // no debug
     return true;
 }
