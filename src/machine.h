@@ -100,20 +100,22 @@ inline bool machine::check_stack(const uint32 * const sp,
     return (sp <= base && sp > limit);
 }
 
-inline void machine::check_final_stack(const uint32 * const sp, 
-                        const uint32 * const base,
-                        const uint32 * const limit) {
-    if (sp > base + 2)
-        throw std::runtime_error("check_final_stack: stack not emptied");
-    if (sp < base + 2)
-        throw std::runtime_error("check_final_stack: stack underflowed");
-    if (sp >= limit - 2)
-        throw std::runtime_error("check_final_stack: stack overflowed");
+inline bool machine::check_final_stack(const uint32 * const sp, 
+                                       const uint32 * const base,
+                                       const uint32 * const limit,
+                                       status_t & status) {
+    if (sp != base) {
+        if (sp > base)
+            status = stack_underflow;
+        else if (sp <= limit)
+            status = stack_overflow;
+        else 
+            status = stack_not_empty;
+        return false;
+    }
+    status = machine::finished;
+    return true;
 }
 
-#define use_params(n)       dp += n
-#define declare_params(n)   const byte * param = dp; \
-                            use_params(n);
-  
 
 

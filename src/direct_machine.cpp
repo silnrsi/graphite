@@ -17,11 +17,13 @@
 
 #define STARTOP(name)           name: {
 #if defined(CHECK_STACK)
-#define ENDOP                   }; machine::check_stack(sp, stack_base, sp_limit); goto **++ip;
+#define ENDOP                   }; if (!machine::check_stack(sp, stack_base, sp_limit)) \
+                                        goto end; \
+                                goto **++ip;
 #else
 #define ENDOP                   }; goto **++ip;
 #endif
-#define EXIT(status)            *++sp = status; goto end
+#define EXIT(status)            push(status); goto end
 
 #define action(name,param_sz)   {&&name, param_sz}
 
@@ -49,10 +51,11 @@ const void * direct_machine(const bool get_table_mode,
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    uint32        * sp = stack_base + 2;
-    uint32  * const sp_limit = stack_base + length - 2;
+    uint32        * sp        = stack_base + length - 2;
+    uint32 * const  stack_top = stack_base + 2;
     Segment &       seg = *seg_ptr;
-            
+    stack_base = sp;
+    
     // start the program
     goto **ip;
 
@@ -60,7 +63,7 @@ const void * direct_machine(const bool get_table_mode,
     #include "opcodes.h"
     
     end:
-    machine::check_final_stack(sp, stack_base+1, sp_limit);
+    machine::check_final_stack(sp, stack_base-1, stack_top, status);
     return reinterpret_cast<const void *>(*sp);
 }
 

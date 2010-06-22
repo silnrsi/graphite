@@ -17,7 +17,7 @@ typedef ptrdiff_t        (* ip_t)(registers);
 #define STARTOP(name)       bool name(registers) REGPARM(6);\
                             bool name(registers) {
 #define ENDOP               return true; }
-#define EXIT(status)        *++sp = status; return false
+#define EXIT(status)        push(status); return false
 
 // This is required by opcode_table.h
 #define action(name,param_sz)   {instr(name), param_sz}
@@ -48,17 +48,18 @@ uint32  machine::run(const instr  * program,
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    uint32        * sp = stack_base+2;
-    uint32 * const  sp_limit = stack_base + length - 2;
-  
+    uint32        * sp        = stack_base + length - 2;
+    uint32 * const  stack_top = stack_base + 2;
+    stack_base = sp;
+
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ip)
 #if defined(CHECK_STACK)
-        machine::check_stack(sp, stack_base, sp_limit);
+           && machine::check_stack(sp, stack_base, stack_top)
 #endif
            ) {}
 
-    machine::check_final_stack(sp, stack_base+1, sp_limit);
+    machine::check_final_stack(sp, stack_base-1, stack_top, status);
     return *sp;
 }
 
