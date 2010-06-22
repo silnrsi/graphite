@@ -14,6 +14,7 @@ public:
     virtual ISlot & operator[] (int index) = 0;
     virtual const ISlot & operator[] (int index) const = 0;
     virtual void runGraphite() = 0;
+    virtual void chooseSilf(uint32 script) = 0;
 };
 
 extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt);

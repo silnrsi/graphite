@@ -6,6 +6,8 @@
 #include "graphiteng/Types.h"
 #include "FontImpl.h"
 
+#define SLOT_DELETED    1
+
 class Segment;
 
 class Slot : public ISlot
@@ -25,6 +27,8 @@ public:
     bool isBase() { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
+    bool isDeleted() { return (m_flags & SLOT_DELETED); }
+    bool markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
 
 protected:
     unsigned short m_glyphid;        // glyph id
@@ -37,6 +41,7 @@ protected:
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
     Position m_attach;      // shift relative to parent due to attachment
+    byte m_flags;           // holds bit flags
 };
 
 #endif // SLOT_INCLUDE

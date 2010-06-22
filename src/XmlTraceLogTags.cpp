@@ -38,6 +38,7 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "advanceX",
     "advanceY",
     "attrId",
+    "attrVal",
     "compilerMajor",
     "compilerMinor",
     "numPasses",//AttrNumPasses,

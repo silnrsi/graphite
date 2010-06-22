@@ -38,6 +38,7 @@ typedef enum {
     AttrAdvanceX,
     AttrAdvanceY,
     AttrAttrId,
+    AttrAttrVal,
     AttrCompilerMajor,
     AttrCompilerMinor,
     AttrNumPasses,
