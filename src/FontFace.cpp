@@ -135,10 +135,19 @@ bool FontFace::readGraphite()
     return true;
 }
 
-void FontFace::runGraphite(Segment *seg)
+void FontFace::runGraphite(Segment *seg, Silf *aSilf)
 {
     VMScratch vms;
 
-    if (m_numSilf > 0)
-        m_silfs[0].runGraphite(seg, this, &vms);
+    aSilf->runGraphite(seg, this, &vms);
+}
+
+Silf *FontFace::chooseSilf(uint32 script)
+{
+    if (m_numSilf == 0)
+        return NULL;
+    else if (m_numSilf == 1 || script == 0)
+        return m_silfs;
+    else // do more work here
+        return m_silfs;
 }

@@ -13,6 +13,7 @@ class code
 public:
     enum status_t 
     {
+        empty = 0,
         loaded,
         alloc_failed, 
         invalid_opcode, 
@@ -35,7 +36,7 @@ private:
 
 public:
     
-    code() {};
+    code() : _status(missing_return), _code(NULL), _data(NULL), _data_size(0), _instr_count(0) {};
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
     ~code() throw();
     

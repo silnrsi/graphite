@@ -63,6 +63,7 @@ ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt)
     int numchars = txt->getLength();
     Segment *seg = new Segment(numchars, face);
 
+    seg->chooseSilf(0);
     read_text(face, txt, seg, numchars);
     seg->runGraphite();
     // run the line break passes

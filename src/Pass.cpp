@@ -86,6 +86,8 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         m_cPConstraint = code(true, p, p + nPConstraint);
         p += nPConstraint;
     }
+    else
+        m_cPConstraint = code();
 
     m_cConstraint = new code[m_numRules];
     uint16 loffset = read16(pConstraint);
@@ -170,12 +172,12 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
 
 int Pass::testConstraint(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return code->run(vms->stack(), size_t(64), seg, iSlot);
+    return (*code) ? code->run(vms->stack(), size_t(64), seg, iSlot) : 1;
 }
 
 int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
 {
-    return code->run(vms->stack(), size_t(64), seg, iSlot);
+    return (*code) ? code->run(vms->stack(), size_t(64), seg, iSlot) : 1;
 }
 
 

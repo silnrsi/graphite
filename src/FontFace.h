@@ -35,7 +35,7 @@ public:
     virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
     virtual float advance(unsigned short id);
     virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
-    virtual void runGraphite(Segment *seg);
+    virtual void runGraphite(Segment *seg, Silf *silf);
     virtual uint16 findPseudo(uint32 uid) { m_numSilf ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
@@ -47,6 +47,7 @@ public:
     bool readGlyphs();
     bool readGraphite();
     bool readFeatures() { return m_features.readFont(m_face); }
+    Silf *chooseSilf(uint32 script);
 
 protected:
 

@@ -12,6 +12,9 @@ target_link_libraries(grngfonttest graphiteng)
 find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 
+add_test(NAME nostdc++ COMMAND ldd $<TARGET_FILE:grngfonttest>)
+set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
+
 # TODO need to set ENVIRONMENT property for Windows?
 add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -codes 1000 1031 102C)
 # TODO Add expected results to compare with

@@ -57,8 +57,6 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
      -fno-rtti -nodefaultlibs -nostdlibs)
      set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc -lm" LINKER_LANGUAGE C)
      set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-     add_test(NAME nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
-     set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

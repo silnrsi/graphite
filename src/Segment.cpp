@@ -72,4 +72,3 @@ void Segment::positionSlots(FontImpl *font)
     }
     m_advance = currpos;
 }
-
