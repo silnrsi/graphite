@@ -16,7 +16,7 @@ public:
     virtual void runGraphite() = 0;
 };
 
-extern ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt);
-extern void destroy_segment(ISegment *seg);
+extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt);
+extern GRNG_EXPORT void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

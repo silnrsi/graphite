@@ -25,7 +25,6 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <cstring>
 #include <iconv.h>
 
-#include "FileFont.h"
 #include "graphiteng/Types.h"
 #include "graphiteng/ISegment.h"
 #include "graphiteng/ITextSource.h"
@@ -99,7 +98,11 @@ convertUtf(const char * inType, const char * outType, A* pIn, B * & pOut)
     {
         outFactor = sizeof(A) / sizeof(B);
     }
+#ifdef WIN32
+    const char * pText = reinterpret_cast<char*>(pIn);
+#else
     char * pText = reinterpret_cast<char*>(pIn);
+#endif
     // It seems to be necessary to include the trailing null to prevent
     // stray characters appearing with utf16
     size_t bytesLeft = (length+1) * sizeof(A);
@@ -447,21 +450,20 @@ void listFeatures(gr::Font & font)
 int testFileFont(Parameters parameters)
 {
     int returnCode = 0;
-    FileFont *fileFont;
     FontFace *face;
     FontImpl *sizeFont;
     try
     {
         FILE * logFile = fopen("graphitengTrace.xml", "wb");
         startGraphiteLogging(logFile, GRLOG_ALL);
-        fileFont = new FileFont(parameters.fileName);
-        if (!fileFont)
-        {
-            fprintf(stderr,"graphitejni:Invalid font!");
-            delete fileFont;
-            fileFont = NULL;
-            return 2;
-        }
+        //fileFont = new FileFont(parameters.fileName);
+        //if (!fileFont)
+        //{
+        //    fprintf(stderr,"graphitejni:Invalid font!");
+        //    delete fileFont;
+        //    fileFont = NULL;
+        //    return 2;
+        //}
 //            bool isGraphite = fileFont->fontHasGraphiteTables();
 #if 0
         if (!isGraphite)
@@ -474,7 +476,7 @@ int testFileFont(Parameters parameters)
         }
 #endif
         GrngTextSrc textSrc(parameters.pText32, parameters.charLength);
-        if (!(face = create_fontface(fileFont)))
+        if (!(face = create_filefontface(parameters.fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables");
             return 2;
@@ -582,7 +584,7 @@ int testFileFont(Parameters parameters)
         
         destroy_segment(seg);
         destroy_font(sizeFont);
-        delete fileFont;
+        destroy_fontface(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;
@@ -599,55 +601,6 @@ int testFileFont(Parameters parameters)
     return returnCode;
 }
 
-#ifdef WIN32
-
-int _tmain(int argc, _TCHAR* argv[])
-{
-    Parameters parameters;
-    initParameters(parameters);
-    
-    
-    if (!parseArgs(argc, argv, parameters))
-    {
-        fprintf(stderr,"Usage: %s [options] fontfile -codes xxxx [yyyy]... \r\n",argv[0]);
-        fprintf(stderr,"Options: (default in brackets)\r\n");
-        fprintf(stderr,"-dpi d\tDots per Inch (72)\r\n");
-        fprintf(stderr,"-pt d\tPoint size (12)\r\n");
-        fprintf(stderr,"-codes\tEnter text as hex code points \r\n");
-        fprintf(stderr,"\te.g. %s font.ttf -codes 1000 102f\r\n",argv[0]);
-        fprintf(stderr,"-ls\tStart of line = true (false)\r\n");
-        fprintf(stderr,"-le\tEnd of line = true (false)\r\n");
-        fprintf(stderr,"-rtl\tRight to left = true (false)\n");
-        fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\r\n");
-        fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\r\n");
-        fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
-        fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
-        fprintf(stderr,"\r\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\r\ntracing support.\r\n");
-        return 1;
-    }
-    // UTF16 arguments
-    //if (parameters.textArgIndex > 0)
-    //{
-    //    parameters.pText16 = reinterpret_cast<wchar_t*>(argv[parameters.textArgIndex]);
-    //    std::wstring text(parameters.pText16);
-    //    parameters.charLength = text.size();
-    //    for (int i = 0; i < text.size(); i++)
-    //    {
-    //        if (i % 10 == 0)
-    //            printf("\r\n%4x", text[i]);
-    //        else
-    //            printf("\t%4x", text[i]);
-    //    }
-    //}
-    //else 
-    //{
-    //    assert(parameters.pText32);
-    //}
-
-    return testFileFont(parameters);
-}
-
-#else
 
 int main(int argc, char *argv[])
 {
@@ -677,4 +630,3 @@ int main(int argc, char *argv[])
     return testFileFont(parameters);
 }
 
-#endif

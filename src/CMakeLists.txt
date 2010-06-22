@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
-project(graphiteng-core)
+project(graphiteng_core)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckCXXSourceCompiles)
 
@@ -29,6 +29,7 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/Types.h
+	../include/graphiteng/XmlLog.h
     )
 
 add_library(graphiteng SHARED
@@ -70,6 +71,6 @@ set_target_properties(graphiteng PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
 
 set_target_properties(graphiteng PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
 install(TARGETS graphiteng EXPORT graphiteng LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphiteng)
-install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE gr_)
+install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE grng_)
 
 

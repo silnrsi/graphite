@@ -11,10 +11,16 @@ typedef short   int16;
 typedef unsigned int    uint32;
 typedef int     int32;
 
+#ifdef _MSC_VER
+#define GRNG_EXPORT __declspec(dllexport)
+#else
+#define GRNG_EXPORT
+#endif
+
 class FontImpl;
 class FontFace;
 
-class Position
+class GRNG_EXPORT Position
 {
 public:
 
@@ -28,7 +34,7 @@ public:
     float y;
 };
 
-class Rect
+class GRNG_EXPORT Rect
 {
 public :
 

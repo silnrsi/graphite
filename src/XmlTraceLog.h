@@ -6,6 +6,8 @@
 #include "XmlTraceLogTags.h"
 #include <graphiteng/XmlLog.h>
 
+class NullTraceLog;
+
 class XmlTraceLog
 {
     friend void startGraphiteLogging(FILE * logFile, GrLogMask mask);
@@ -33,9 +35,8 @@ public:
     }
 protected:
     static XmlTraceLog * sLog;
-    static XmlTraceLog sNullLog;
-private:
     XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask);
+private:
     void escapeIfNeeded(const char * text);
     enum {
         MAX_ELEMENT_DEPTH = 256
@@ -48,5 +49,27 @@ private:
     GrLogMask mMask;
     XmlTraceLogElement mElementStack[MAX_ELEMENT_DEPTH];
 };
+
+class NullTraceLog : public XmlTraceLog
+{
+public:
+    NullTraceLog() : XmlTraceLog(NULL, NULL, GRLOG_NONE){};
+    bool active() { return false; };
+    void openElement(XmlTraceLogElement eId) {};
+    void closeElement(XmlTraceLogElement eId) {};
+    void addAttribute(XmlTraceLogAttribute aId, const char * value) {};
+    void addAttribute(XmlTraceLogAttribute aId, byte value) {};
+    void addAttribute(XmlTraceLogAttribute aId, float value) {};
+    void addAttribute(XmlTraceLogAttribute aId, int32 value) {};
+    void addAttribute(XmlTraceLogAttribute aId, uint32 value) {};
+    void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value) {};
+    void addAttribute(XmlTraceLogAttribute aId, int16 value) {};
+    void addAttribute(XmlTraceLogAttribute aId, uint16 value) {};
+    void writeText(const char * utf8) {};
+    void writeUnicode(const uint32 code) {};
+    void error(const char * msg, ...) {};
+    void warning(const char * msg, ...) {};
+};
+
 
 #endif

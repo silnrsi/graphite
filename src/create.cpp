@@ -8,6 +8,10 @@
 #include "TtfUtil.h"
 #include "FontImpl.h"
 
+#ifndef DISABLE_FILE_FONT
+#include "FileFont.h"
+#endif
+
 void read_text(FontFace *font, ITextSource *txt, Segment *seg, int numchars);
 void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
@@ -29,6 +33,28 @@ void finalise(FontImpl *font, Segment *seg);
 FontFace *create_fontface(IFace *face)
 {
     FontFace *res = new FontFace(face);
+    XmlTraceLog::get().openElement(ElementFace);
+    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
+    {
+        XmlTraceLog::get().closeElement(ElementFace);
+        return res;
+    }
+    XmlTraceLog::get().closeElement(ElementFace);
+    delete res;
+    return NULL;
+}
+
+class FileFontFace : public FontFace
+{
+public:
+    FileFontFace(const char * filePath) : m_fileFont(filePath), FontFace(&m_fileFont) {}
+private:
+    FileFont m_fileFont;
+};
+
+FontFace *create_filefontface(const char *filePath)
+{
+    FontFace *res = new FileFontFace(filePath);
     XmlTraceLog::get().openElement(ElementFace);
     if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
     {
