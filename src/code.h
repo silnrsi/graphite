@@ -14,6 +14,7 @@ public:
     enum status_t 
     {
         loaded,
+        empty,
         alloc_failed, 
         invalid_opcode, 
         unimplemented_opcode_used,
@@ -35,6 +36,7 @@ private:
 
 public:
     
+    code() throw();
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end);
     ~code() throw();
     
@@ -48,9 +50,12 @@ public:
                     machine::status_t & status);
 };
 
+inline code::code() throw()
+: _code(0), _data(0), _data_size(0), _instr_count(0), _status(empty) {
+}
 
 inline code::operator bool () throw () {
-    return bool(status() == loaded);
+    return _code && status() == loaded;
 }
 
 inline code::status_t code::status() throw() {
