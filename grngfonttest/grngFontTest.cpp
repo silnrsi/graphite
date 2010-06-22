@@ -32,6 +32,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/ISlot.h"
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
+#include "graphiteng/XmlLog.h"
 
 typedef unsigned int utf32;
 
@@ -451,6 +452,8 @@ int testFileFont(Parameters parameters)
     FontImpl *sizeFont;
     try
     {
+        FILE * logFile = fopen("graphitengTrace.xml", "wb");
+        startGraphiteLogging(logFile, GRLOG_ALL);
         fileFont = new FileFont(parameters.fileName);
         if (!fileFont)
         {
@@ -577,8 +580,8 @@ int testFileFont(Parameters parameters)
         float advanceWidth = seg->advance().x;
         fprintf(parameters.log, "Advance width = %6.1f\n", advanceWidth);
         
-        delete seg;
-        delete sizeFont;
+        destroy_segment(seg);
+        destroy_font(sizeFont);
         delete fileFont;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
@@ -592,6 +595,7 @@ int testFileFont(Parameters parameters)
         printf("Exception occurred\n");
         returnCode = 5;
     }
+    stopGraphiteLogging();
     return returnCode;
 }
 
