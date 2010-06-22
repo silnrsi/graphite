@@ -9,20 +9,27 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 {
     byte *p = (byte *)pPass;
     uint16 numRanges, numEntries;
-
+    XmlTraceLog::get().addAttribute(AttrFlags, *p);
     p++;
     m_iMaxLoop = *p++;
+    XmlTraceLog::get().addAttribute(AttrMaxRuleLoop, m_iMaxLoop);
     p += 2;         // don't care about context
     m_numRules = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumRules, m_numRules);
     p += 2;         // not sure why we would want this
     p += 16;         // ignore offsets for now
     m_sRows = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumRows, m_sRows);
     m_sTransition = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumTransition, m_sTransition);
     if (m_sTransition > m_sRows) return false;
     m_sSuccess = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumSuccess, m_sSuccess);
     if (m_sSuccess > m_sRows) return false;
     m_sColumns = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumColumns, m_sColumns);
     numRanges = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumRanges, numRanges);
     p += 6;
     m_cols = new uint16[numGlyphs];
     for (int i = 0; i < numRanges; i++)
@@ -49,7 +56,9 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     }
     if (p - (byte *)pPass >= lPass) return false;
     m_minPreCtxt = *p++;
+    XmlTraceLog::get().addAttribute(AttrMinPrecontext, m_minPreCtxt);
     m_maxPreCtxt = *p++;
+    XmlTraceLog::get().addAttribute(AttrMaxPrecontext, m_maxPreCtxt);
     m_startStates = new uint16[m_maxPreCtxt - m_minPreCtxt + 1];
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
     {

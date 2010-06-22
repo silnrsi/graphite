@@ -3,6 +3,7 @@
 #include "graphiteng/ITextSource.h"
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
+#include "XmlTraceLog.h"
 #include "FontFace.h"
 #include "TtfUtil.h"
 #include "FontImpl.h"
@@ -28,7 +29,13 @@ void finalise(FontImpl *font, Segment *seg);
 FontFace *create_fontface(IFace *face)
 {
     FontFace *res = new FontFace(face);
-    if (res->readGlyphs() && res->readGraphite() && res->readFeatures()) return res;
+    XmlTraceLog::get().openElement(ElementFace);
+    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
+    {
+        XmlTraceLog::get().closeElement(ElementFace);
+        return res;
+    }
+    XmlTraceLog::get().closeElement(ElementFace);
     delete res;
     return NULL;
 }

@@ -1,6 +1,7 @@
 #ifndef GLYPHFACE_INCLUDE
 #define GLYPHFACE_INCLUDE
 #include "Main.h"
+#include "XmlTraceLog.h"
 
 class GlyphFace
 {
@@ -19,6 +20,9 @@ public:
             for (int i = 0; i < count; i++)
             {
                 m_attrs[attr + i] = swap16(((uint16 *)((char *)pGlat + start))[1 + i]);
+                XmlTraceLog::get().openElement(ElementAttr);
+                XmlTraceLog::get().addAttribute(AttrAttrId, m_attrs[attr+i]);
+                XmlTraceLog::get().closeElement(ElementAttr);
             }
             start += 2 * (count + 1);
         }

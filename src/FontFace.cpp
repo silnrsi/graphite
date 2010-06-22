@@ -2,6 +2,7 @@
 #include "VMScratch.h"
 #include <string.h>
 #include "Segment.h"
+#include "XmlTraceLog.h"
 
 float FontFace::advance(unsigned short id)
 {
@@ -43,7 +44,8 @@ bool FontFace::readGlyphs()
         if (lGloc < 2 * m_numGlyphs + 8)
             nGlyphs = (lGloc - 8) / 4;
     }
-
+    XmlTraceLog::get().openElement(ElementGlyphs);
+    XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
     for (int i = 0; i < nGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
@@ -68,8 +70,14 @@ bool FontFace::readGlyphs()
             glocs = swap16(((uint16 *)pGloc)[4+i]);
             gloce = swap16(((uint16 *)pGloc)[5+i]);
         }
+        XmlTraceLog::get().openElement(ElementGlyphFace);
+        XmlTraceLog::get().addAttribute(AttrGlyphId, i);
+        XmlTraceLog::get().addAttribute(AttrAdvanceX, g->advance().x);
+        XmlTraceLog::get().addAttribute(AttrAdvanceY, g->advance().y);
         g->readAttrs(pGlat, glocs, gloce, m_numAttrs);
+        XmlTraceLog::get().closeElement(ElementGlyphFace);
     }
+    XmlTraceLog::get().closeElement(ElementGlyphs);
     return true;
 }
 
@@ -78,28 +86,52 @@ bool FontFace::readGraphite()
     char *pSilf;
     size_t lSilf;
     if ((pSilf = (char *)getTable(ktiSilf, &lSilf)) == NULL) return false;
-    uint32 version, compilerVersion;
+    uint32 version;
+    uint32 compilerVersion = 0; // wasn't set before GTF version 3
+    uint32 offset32Pos = 2;
     version = swap32(*(uint32 *)pSilf);
     if (version < 0x00020000) return false;
     if (version >= 0x00030000)
     {
         compilerVersion = swap32(((uint32 *)pSilf)[1]);
-        pSilf += 4;
+        m_numSilf = swap16(((uint16 *)pSilf)[4]);
+        offset32Pos = 3;
     }
     else
         m_numSilf = swap16(((uint16 *)pSilf)[2]);
+
+    XmlTraceLog::get().openElement(ElementSilf);
+    XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
+    XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
+    XmlTraceLog::get().addAttribute(AttrCompilerMajor, compilerVersion >> 16);
+    XmlTraceLog::get().addAttribute(AttrCompilerMinor, compilerVersion & 0xFFFF);
+    XmlTraceLog::get().addAttribute(AttrNum, m_numSilf);
+    if (m_numSilf == 0)
+        XmlTraceLog::get().warning("No Silf subtables!");
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        uint32 offset = swap32(((uint32 *)pSilf)[2 + i]);
+        uint32 offset = swap32(((uint32 *)pSilf)[offset32Pos + i]);
         uint32 next;
         if (i == m_numSilf - 1)
             next = lSilf;
         else
-            next = swap32(((uint32 *)pSilf)[3 + i]);
-        if (offset < 0 || offset > lSilf || next < 0 || next > lSilf) return false;
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_numGlyphs, version)) return false;
+            next = swap32(((uint32 *)pSilf)[offset32Pos + 1 + i]);
+        if (offset < 0 || offset > lSilf || next < 0 || next > lSilf)
+        {
+            XmlTraceLog::get().error("Invalid table %d offset %d length %u", i, offset, lSilf);
+            XmlTraceLog::get().closeElement(ElementSilf);
+            return false;
+        }
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_numGlyphs, version))
+        {
+            XmlTraceLog::get().error("Error reading Graphite subtable %d", i);
+            XmlTraceLog::get().closeElement(ElementSilfSub); // for convenience
+            XmlTraceLog::get().closeElement(ElementSilf);
+            return false;
+        }
     }
+    XmlTraceLog::get().closeElement(ElementSilf);
     return true;
 }
 

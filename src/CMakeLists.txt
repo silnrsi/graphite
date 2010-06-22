@@ -43,6 +43,8 @@ add_library(graphiteng SHARED
     Silf.cpp
     Pass.cpp
     TtfUtil.cpp
+    XmlTraceLog.cpp
+    XmlTraceLogTags.cpp
     ../common/FileFont.h
     ../common/FileFont.cpp
 	${GRAPHITE_HEADERS}

@@ -1,40 +1,57 @@
 #include "Silf.h"
+#include "XmlTraceLog.h"
 
 bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
 {
     char *p = (char *)pSilf;
     uint32 *pPasses;
-
+    XmlTraceLog::get().openElement(ElementSilfSub);
     if (version >= 0x00030000)
+    {
+        XmlTraceLog::get().addAttribute(AttrMajor, swap16(((uint16*) p)[0]));
+        XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
         p += 8;
+    }
     p += 2;     // maxGlyphID
     p += 4;     // extra ascent/descent
     m_numPasses = *p++;
+    XmlTraceLog::get().addAttribute(AttrNumPasses, m_numPasses);
     if (m_numPasses < 0) return false;
     m_passes = new Pass[m_numPasses];
     m_sPass = *p++;
+    XmlTraceLog::get().addAttribute(AttrSubPass, m_sPass);
     if (m_sPass < 0) return false;
     m_pPass = *p++;
+    XmlTraceLog::get().addAttribute(AttrPosPass, m_pPass);
     if (m_pPass < m_sPass) return false;
     m_jPass = *p++;
+    XmlTraceLog::get().addAttribute(AttrJustPass, m_jPass);
     if (m_jPass < m_pPass) return false;
     m_bPass = *p++;     // when do we reorder?
+    XmlTraceLog::get().addAttribute(AttrBidiPass, m_bPass);
     if (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses)) return false;
     m_flags = *p++;
     p += 2;     // ignore line end contextuals for now
     p++;        // not sure what to do with attrPseudo
     m_aBreak = *p++;
+    XmlTraceLog::get().addAttribute(AttrBreakWeight, m_aBreak);
     if (m_aBreak < 0) return false;
+    XmlTraceLog::get().addAttribute(AttrDirectionality, *p);
     p++;        // we don't do bidi
     p += 2;     // skip reserved stuff
+    XmlTraceLog::get().addAttribute(AttrNumJustLevels, *p);
     p += *p * 8 + 1;     // ignore justification for now
     m_aLig = read16(p);
+    XmlTraceLog::get().addAttribute(AttrLigComp, *p);
     if (m_aLig > 127) return false;
     m_aUser = *p++;
+    XmlTraceLog::get().addAttribute(AttrUserDefn, m_aUser);
     if (m_aUser < 0) return false;
     m_iMaxComp = *p++;
+    XmlTraceLog::get().addAttribute(AttrNumLigComp, m_iMaxComp);
     if (m_iMaxComp < 0) return false;
     p += 5;     // skip direction and reserved
+    XmlTraceLog::get().addAttribute(AttrNumCritFeatures, *p);
     p += *p * 2 + 1;        // don't need critical features yet
     p++;        // reserved
     if (p - (char *)pSilf >= lSilf) return false;
@@ -44,6 +61,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
     m_numPseudo = read16(p);
+    XmlTraceLog::get().addAttribute(AttrNumPseudo, m_numPseudo);
     p += 6;
     m_pseudos = new Pseudo[m_numPseudo];
     for (int i = 0; i < m_numPseudo; i++)
@@ -60,8 +78,16 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     for (int i = 0; i < m_numPasses; i++)
     {
         m_passes[i].init(this);
-        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + m_numPseudo)) return false;
+        XmlTraceLog::get().openElement(ElementPass);
+        XmlTraceLog::get().addAttribute(AttrPassId, i);
+        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + m_numPseudo))
+        {
+            XmlTraceLog::get().closeElement(ElementPass);
+            return false;
+        }
+        XmlTraceLog::get().closeElement(ElementPass);
     }
+    XmlTraceLog::get().closeElement(ElementSilfSub);
     return true;
 }
 
