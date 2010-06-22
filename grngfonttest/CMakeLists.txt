@@ -38,8 +38,8 @@ find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk 
 find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	add_test(NAME nostdc++ COMMAND ldd $<TARGET_FILE:grngfonttest>)
-	set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
+	add_test(NAME nostdc++ COMMAND /bin/sh ../tests/libstdc++_usage ../common/*.cpp ../src/*.cpp)
+	set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "^.+:.+$")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
