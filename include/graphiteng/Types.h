@@ -17,8 +17,11 @@ typedef int     int32;
 #define GRNG_EXPORT
 #endif
 
+#define FIND_BROKEN_VIRTUALS
+
+
+
 class FontImpl;
-class FontFace;
 
 class GRNG_EXPORT Position
 {

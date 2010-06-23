@@ -11,7 +11,7 @@ public:
     Position advance() { return m_advance; }
     void advance(Position a) { m_advance = a; }
     void bbox(Rect a) { m_bbox = a; }
-    void readAttrs(void *pGlat, int start, int end, unsigned short num) {
+    void readAttrs(const void *pGlat, int start, int end, unsigned short num) {
         m_attrs = new unsigned short[num];
         while (start < end)
         {

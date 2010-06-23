@@ -31,9 +31,9 @@ protected:
 class FeatureMap
 {
 public:
-    bool readFont(IFace *face);
-    bool readFeats(IFace *face);
-    bool readSill(IFace *face);
+    bool readFont(const IFace *face);
+    bool readFeats(const IFace *face);
+    bool readSill(const IFace *face);
     FeatureRef *featureRef(uint32 name);
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
     IFeatures *newFeatures(uint32 name);

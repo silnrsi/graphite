@@ -10,14 +10,14 @@
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-bool FeatureMap::readFont(IFace *face)
+bool FeatureMap::readFont(const IFace *face)
 {
     if (!readFeats(face)) return false;
     if (!readSill(face)) return false;
     return true;
 }
 
-bool FeatureMap::readFeats(IFace *face)
+bool FeatureMap::readFeats(const IFace *face)
 {
     size_t lFeat;
     char *pFeat = (char *)(face->getTable(ktiFeat, &lFeat));
@@ -118,7 +118,7 @@ bool FeatureMap::readFeats(IFace *face)
     return true;
 }
 
-bool FeatureMap::readSill(IFace *face)
+bool FeatureMap::readSill(const IFace *face)
 {
     size_t lSill;
     char *pSill = (char *)(face->getTable(ktiSill, &lSill));

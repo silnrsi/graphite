@@ -14,7 +14,7 @@ float FontFace::advance(unsigned short id)
 bool FontFace::readGlyphs()
 {
     size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
-    void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
+    const void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
     if ((pHead = getTable(ktiHead, &lHead)) == NULL) return false;
     if ((pHHea = getTable(ktiHhea, &lHHea)) == NULL) return false;
     if ((pLoca = getTable(ktiLoca, &lLoca)) == NULL) return false;

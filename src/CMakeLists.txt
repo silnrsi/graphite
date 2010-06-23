@@ -56,6 +56,7 @@ add_library(graphiteng SHARED
     FeatureMap.cpp
     FontFace.cpp
     FontImpl.cpp
+    IFace.cpp
     Segment.cpp
     Slot.cpp
     Silf.cpp

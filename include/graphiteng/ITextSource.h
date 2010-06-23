@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define FIND_BROKEN_VIRTUALS
+#include "graphiteng/Types.h"		//for FIND_BROKEN_VIRTUALS
 
 class ITextSource
 {

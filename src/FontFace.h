@@ -32,14 +32,14 @@ class Segment;
 class FontFace 
 {
 public:
-    virtual void *getTable(unsigned int name, size_t *len) { return m_face->getTable(name, len); }
+    virtual const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
     virtual float advance(unsigned short id);
     virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
     virtual void runGraphite(Segment *seg, Silf *silf);
     virtual uint16 findPseudo(uint32 uid) { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    FontFace(IFace *face) : m_face(face) {}
+    FontFace(const IFace *face) : m_face(face) {}
     GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) { return advance(glyphid) * scale; }
     unsigned short upem() { return m_upem; }
@@ -49,9 +49,9 @@ public:
     bool readFeatures() { return m_features.readFont(m_face); }
     Silf *chooseSilf(uint32 script);
 
-protected:
+private:
 
-    IFace *m_face;                  // Where to get tables
+    const IFace *m_face;                  // Where to get tables
     unsigned short m_numGlyphs;     // number of glyphs in the font
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
