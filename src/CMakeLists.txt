@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 project(graphiteng_core)
 cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckTypeSize)
@@ -19,16 +19,22 @@ endif (HAVE_FABSF)
 #check sizeof wchar_t
 CHECK_TYPE_SIZE(wchar_t SIZEOF_WCHAR_T)
 add_definitions(-DSIZEOF_WCHAR_T=${SIZEOF_WCHAR_T})
+CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
+add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
+
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
 option(CHECK_STACK "Enable stack checking in FSM")
 
 if (${DISABLE_TRACING})
-	add_definitions(-DCHECK_STACK)
-	message(STATUS "Stack checking enabled")
+    add_definitions(-DCHECK_STACK)
+    message(STATUS "Stack checking enabled")
 endif (${DISABLE_TRACING})
 
+if (NOT ${DISABLE_TRACING})
+    set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)
+endif (NOT ${DISABLE_TRACING})
 
 set(GRAPHITE_HEADERS 
     ../include/graphiteng/IFont.h
@@ -38,6 +44,7 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/Types.h
+    ${TRACE_HEADERS}
     )
 
 file(GLOB PRIVATE_HEADERS *.h) 

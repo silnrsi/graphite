@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
 project(graphiteng)
 enable_language(CXX C)
@@ -10,8 +10,8 @@ enable_testing()
 option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
 
 if (${DISABLE_TRACING})
-	add_definitions(-DDISABLE_TRACING)
-	message(STATUS "Tracing disabled")
+    add_definitions(-DDISABLE_TRACING)
+    message(STATUS "Tracing disabled")
 endif (${DISABLE_TRACING})
 
 add_subdirectory(src)
