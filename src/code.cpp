@@ -97,14 +97,14 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             case machine::PUT_COPY :
             case machine::PUSH_SLOT_ATTR :
             case machine::PUSH_GLYPH_ATTR :
-            case machine::PUSH_ATT_TOG_ATTR_OBS :
+            case machine::PUSH_ATT_TO_GATTR_OBS :
                 if (dp[-1] > 128)
                     dp[-1] -= cContexts[2 * (iSlot + 256 - dp[-1])];
                 break;
             case machine::CNTXT_ITEM :
             case machine::PUSH_ISLOT_ATTR :
             case machine::PUSH_GLYPH_METRIC :
-            case machine::PUSH_ATT_TOGLYPH_METRIC :
+            case machine::PUSH_ATT_TO_GLYPH_METRIC :
                 if (dp[-2] > 128)
                     dp[-2] -= cContexts[2 * (iSlot + 256 - dp[-2])];
                 break;
