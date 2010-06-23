@@ -25,6 +25,9 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int32 value);
     void addAttribute(XmlTraceLogAttribute aId, uint32 value);
+#if SIZEOF_SIZE_T == 8
+    void addAttribute(XmlTraceLogAttribute aId, size_t value);
+#endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void addAttribute(XmlTraceLogAttribute aId, int16 value);
     void addAttribute(XmlTraceLogAttribute aId, uint16 value);
@@ -66,6 +69,9 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value) {};
     void addAttribute(XmlTraceLogAttribute aId, int32 value) {};
     void addAttribute(XmlTraceLogAttribute aId, uint32 value) {};
+#if SIZEOF_SIZE_T == 8
+    void addAttribute(XmlTraceLogAttribute aId, size_t value) {};
+#endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value) {};
     void addAttribute(XmlTraceLogAttribute aId, int16 value) {};
     void addAttribute(XmlTraceLogAttribute aId, uint16 value) {};

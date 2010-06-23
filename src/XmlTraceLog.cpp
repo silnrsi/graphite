@@ -160,6 +160,18 @@ void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, uint32 value)
     }
 }
 
+#if SIZEOF_SIZE_T == 8
+void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, size_t value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%lu\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+#endif
+
 void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
 {
     if (!m_file) return;
