@@ -33,22 +33,18 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/IFace.h"
 #include "graphiteng/XmlLog.h"
 
-typedef unsigned int utf32;
-
 class GrngTextSrc : public ITextSource
 {
 
 public:
-    GrngTextSrc(unsigned int *base, int len) : m_buff(base), m_len(len) { }
-    virtual encform utfEncodingForm() { return kutf32; }
-    virtual int getLength() { return m_len; }
-    virtual unsigned int *get_utf32_buffer() { return m_buff; }
-    virtual unsigned short *get_utf16_buffer() { return NULL; }
-    virtual unsigned char *get_utf8_buffer() { return NULL; }
+    GrngTextSrc(const uint32* base, size_t len) : m_buff(base), m_len(len) { }
+    virtual encform utfEncodingForm() const { return kutf32; }
+    virtual size_t getLength() const { return m_len; }
+    virtual const void* get_utf_buffer_begin() const { return m_buff; }
 
-protected:
-    unsigned int *m_buff;
-    int m_len;
+private:
+    const uint32* m_buff;
+    size_t m_len;
 };
 
 #ifndef HAVE_STRTOF
