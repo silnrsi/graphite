@@ -124,42 +124,39 @@ void destroy_segment(ISegment *seg)
 
 void read_text(FontFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
 {
-    void *cmap = face->getTable(ktiCmap, NULL);
-    void *ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
-    size_t form = txt->utfEncodingForm();
-    const void *pBuffer = txt->get_utf_buffer_begin();
-    const void *pChar = pBuffer;
-    for (size_t i = 0; i < numchars; i++)
-    {
-        int cid;
-        unsigned short gid;
-        const uint8* pUChar;
-        const uint16* pUShort;
-        const uint32* pULong;
-
-        switch (form)
-        {   // this is oh so ugly
-	case ITextSource::kutf8 :
-            pUChar = reinterpret_cast<const uint8*>(pChar);
-            cid = GET_UTF8(pUChar);
-            pChar = pUChar;
+    const void *const cmap = face->getTable(ktiCmap, NULL);
+    const void *const ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
+    const void *      pChar = txt->get_utf_buffer_begin();
+    unsigned int cid, gid;
+    
+    switch (txt->utfEncodingForm()) {
+        case ITextSource::kutf8 : {
+            const uint8 * p = static_cast<const uint8 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = GET_UTF8(p);
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+            }
             break;
-	case ITextSource::kutf16 :
-            pUShort = reinterpret_cast<const uint16*>(pChar);
-            cid = GET_UTF16(pUShort);
-            pChar = pUShort;
-           break;
-	case ITextSource::kutf32 :
-        default:
-            pULong = reinterpret_cast<const uint32*>(pChar);
-            cid = GET_UTF32(pULong);
-            pChar = pULong;
-	    break;
         }
-        gid = TtfUtil::Cmap31Lookup(ctable, cid);
-        if (!gid)
-            gid = face->findPseudo(cid);
-        seg->appendSlot(i, cid, gid);
+        case ITextSource::kutf16: {
+            const uint16 * p = static_cast<const uint16 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = GET_UTF16(p);
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+            }
+            break;
+        }
+        case ITextSource::kutf32 : default: {
+            const uint32 * p = static_cast<const uint32 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = GET_UTF32(p);
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+            }
+            break;
+        }
     }
 }
 
