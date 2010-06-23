@@ -27,8 +27,8 @@ public:
     void appendSlot(int i, int cid, int gid);
     void positionSlots(FontImpl *font);
     void append(const Segment &other);
-    void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); }
-    void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); }
+    void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
+    void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
 
 protected:
     std::vector<Slot> m_slots;

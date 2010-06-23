@@ -211,9 +211,9 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     return true;
 }
 
-void Pass::runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms)
+void Pass::runGraphite(Segment *seg, FontFace *face, VMScratch *vms)
 {
-    if (!testConstraint(&m_cPConstraint, 0, seg, silf, vms))
+    if (!testConstraint(&m_cPConstraint, 0, seg, vms))
         return;
 
     for (int i = 0; i < seg->length(); i++)
@@ -221,12 +221,12 @@ void Pass::runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms)
         int advance = 0;
         int loopCount = m_iMaxLoop;
         while (!advance && loopCount--)
-            advance = findNDoRule(seg, i, vms, silf);
+            advance = findNDoRule(seg, i, vms);
         if (advance > 0) i += advance - 1;
     }
 }
 
-int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
+int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms)
 {
     int state;
     int startSlot = iSlot;
@@ -256,19 +256,37 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf)
     
     for (int i = 0; i < vms->ruleLength(); i++)
     {
-        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, seg, silf, vms))
+#ifdef ENABLE_DEEP_TRACING
+	XmlTraceLog::get().openElement(ElementTestRule);
+	XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
+	XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+#endif
+        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, seg, vms))
         {
-            int res = doAction(m_cActions + vms->rule(i), startSlot, seg, silf, vms);
+#ifdef ENABLE_DEEP_TRACING
+	  XmlTraceLog::get().closeElement(ElementTestRule);
+	  XmlTraceLog::get().openElement(ElementDoRule);
+	  XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
+	  XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+#endif
+	  int res = doAction(m_cActions + vms->rule(i), startSlot, seg, vms);
+#ifdef ENABLE_DEEP_TRACING
+//	  XmlTraceLog::get().addAttribute(AttrResult, res);
+	  XmlTraceLog::get().closeElement(ElementDoRule);
+#endif
             if (res == -1)
                 return m_ruleSorts[vms->rule(i)];
             else
                 return res;
         }
+#ifdef ENABLE_DEEP_TRACING
+	XmlTraceLog::get().closeElement(ElementTestRule);
+#endif
     }
     return -1;
 }
 
-int Pass::testConstraint(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
+int Pass::testConstraint(code *code, int iSlot, Segment *seg, VMScratch *vms)
 {
     if (!*code)
         return 1;
@@ -279,7 +297,7 @@ int Pass::testConstraint(code *code, int iSlot, Segment *seg, Silf *silf, VMScra
     return status == machine::finished ? ret : 1;
 }
 
-int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *vms)
+int Pass::doAction(code *code, int iSlot, Segment *seg, VMScratch *vms)
 {
     if (!*code)
         return 1;

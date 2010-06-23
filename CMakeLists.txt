@@ -14,6 +14,13 @@ if (${DISABLE_TRACING})
     message(STATUS "Tracing disabled")
 endif (${DISABLE_TRACING})
 
+option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
+
+if (${ENABLE_DEEP_TRACING})
+    add_definitions(-DENABLE_DEEP_TRACING)
+    message(STATUS "Deep tracing enabled")
+endif (${ENABLE_DEEP_TRACING})
+
 add_subdirectory(src)
 add_subdirectory(grngfonttest)
 set(version 3.0.0)

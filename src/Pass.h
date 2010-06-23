@@ -13,10 +13,10 @@ class Pass
 {
 public:
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
-    void runGraphite(Segment *seg, FontFace *face, Silf *silf, VMScratch *vms);
-    int findNDoRule(Segment *seg, int iSlot, VMScratch *vms, Silf *silf);
-    int testConstraint(code *codeptr, int iSlot, Segment *seg, Silf *silf, VMScratch *vms);
-    int doAction(code *m_cAction, int startSlot, Segment *seg, Silf *silf, VMScratch *vms);
+    void runGraphite(Segment *seg, FontFace *face, VMScratch *vms);
+    int findNDoRule(Segment *seg, int iSlot, VMScratch *vms);
+    int testConstraint(code *codeptr, int iSlot, Segment *seg, VMScratch *vms);
+    int doAction(code *m_cAction, int startSlot, Segment *seg, VMScratch *vms);
     void init(Silf *silf) { m_silf = silf; }
 
 protected:

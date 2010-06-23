@@ -37,6 +37,10 @@ typedef enum {
     ElementSegment,
     ElementSlot,
     ElementText,
+    ElementOpCode,
+    ElementTestRule,
+    ElementDoRule,
+    ElementRunPass,
 
     ElementError,
     ElementWarning,
@@ -114,6 +118,8 @@ typedef enum {
     AttrBefore,
     AttrAfter,
     AttrEncoding,
+    AttrName,
+    AttrResult,
 
     NumAttributes // Last
 } XmlTraceLogAttribute;

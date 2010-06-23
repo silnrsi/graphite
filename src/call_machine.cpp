@@ -9,16 +9,30 @@
 #include <cassert>
 #include "machine.h"
 #include "Segment.h"
+#include "XmlTraceLog.h"
 
 #define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
                             int & is, const instr * & ip
 typedef ptrdiff_t        (* ip_t)(registers);
 
 // These are required by opcodes.h and should not be changed
+#ifdef ENABLE_DEEP_TRACING
+#define STARTOP(name)	    bool name(registers) REGPARM(6);\
+			    bool name(registers) { \
+			      if (XmlTraceLog::get().active()) { \
+				XmlTraceLog::get().openElement(ElementOpCode); \
+				XmlTraceLog::get().addAttribute(AttrName, # name); \
+				XmlTraceLog::get().addAttribute(AttrIndex, is); \
+			      }
+#define ENDOP		    XmlTraceLog::get().closeElement(ElementOpCode); \
+			    return true; }
+#define EXIT(status)        XmlTraceLog::get().closeElement(ElementOpCode); push(status); return false
+#else
 #define STARTOP(name)       bool name(registers) REGPARM(6);\
                             bool name(registers) {
 #define ENDOP               return true; }
 #define EXIT(status)        push(status); return false
+#endif
 
 // This is required by opcode_table.h
 #define do_(name)           instr(name)

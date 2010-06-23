@@ -306,8 +306,15 @@ void Silf::runGraphite(Segment *seg, FontFace *face, VMScratch *vms)
 {
     for (int i = 0; i < m_numPasses; i++)
     {
+#ifndef DISABLE_TRACING
+	XmlTraceLog::get().openElement(ElementRunPass);
+	XmlTraceLog::get().addAttribute(AttrNum, i);
+#endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, this, vms);
+        m_passes[i].runGraphite(seg, face, vms);
+#ifndef DISABLE_TRACING
+	XmlTraceLog::get().closeElement(ElementRunPass);
+#endif
     }
 }
 
