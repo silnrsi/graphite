@@ -31,8 +31,9 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    instr * ip = _code;
-    byte  * dp = _data;
+    instr *         ip = _code;
+    byte  *         dp = _data;
+    machine::opcode opc;
     cContexts[0] = 0;
     cContexts[1] = 0;
     do {
@@ -126,7 +127,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     } while (cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
-    switch (*(cd_ptr-1)) {
+    switch (opc) {
         case machine::POP_RET: 
         case machine::RET_ZERO: 
         case machine::RET_TRUE: 

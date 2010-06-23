@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
-project(graphiteng_core)
+project(graphiteng-core)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckCXXSourceCompiles)
 
@@ -29,7 +29,6 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/Types.h
-	../include/graphiteng/XmlLog.h
     )
 
 add_library(graphiteng SHARED
@@ -54,9 +53,12 @@ add_library(graphiteng SHARED
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
-     -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs)
+#     -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs)
+     -fno-rtti -nodefaultlibs -nostdlibs)
      set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc -lm" LINKER_LANGUAGE C)
      set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+#     add_test(NAME nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
+#     set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -68,6 +70,6 @@ set_target_properties(graphiteng PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
 
 set_target_properties(graphiteng PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
 install(TARGETS graphiteng EXPORT graphiteng LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphiteng)
-install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE grng_)
+install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE gr_)
 
 
