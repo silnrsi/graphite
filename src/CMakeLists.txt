@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
-project(graphiteng-core)
+project(graphiteng_core)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckCXXSourceCompiles)
 
