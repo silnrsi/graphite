@@ -16,6 +16,8 @@ public:
     virtual void chooseSilf(uint32 script) = 0;
 };
 
+
+//PR the following functions are still to be encapsulated properly
 class IFace;
 class FontFace;
 
@@ -23,7 +25,10 @@ extern GRNG_EXPORT FontFace *create_fontface(IFace *face);
 extern GRNG_EXPORT void destroy_fontface(FontFace *face);
 
 #ifndef DISABLE_FILE_FONT
-extern GRNG_EXPORT FontFace *create_filefontface(const char * filePath);
+class FileFontFace;
+extern GRNG_EXPORT FileFontFace *create_filefontface(const char * filePath);
+extern GRNG_EXPORT FontFace *the_fontface(FileFontFace *fileface);	//do not call destroy_fontface on this result
+extern GRNG_EXPORT void destroy_filefontface(FileFontFace *fileface);
 #endif
 
 

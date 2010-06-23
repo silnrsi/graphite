@@ -43,14 +43,14 @@ public:
     ~code() throw();
     
     code & operator=(const code &rhs) throw();
-    operator bool () throw();
+    operator bool () const throw();
     status_t    status() const throw();
     size_t      data_size() const throw();
     size_t      instruction_count() const throw();
     
     uint32 run(uint32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx,
-                    machine::status_t & status);
+                    machine::status_t & status) const;
 };
 
 inline code::code() throw()
@@ -73,7 +73,7 @@ inline code & code::operator=(const code &rhs) throw() {
     return *this;
 }
 
-inline code::operator bool () throw () {
+inline code::operator bool () const throw () {
     return _code && status() == loaded;
 }
 

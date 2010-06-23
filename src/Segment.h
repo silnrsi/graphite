@@ -21,7 +21,7 @@ public:
     virtual void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     virtual void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
 
-    Segment(int numSlots, FontFace *face);
+    Segment(int numSlots, const FontFace *face);
     Segment(const Segment &other);
     ~Segment();
     void appendSlot(int i, int cid, int gid);
@@ -30,15 +30,15 @@ public:
     void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
     void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
 
-protected:
+private:
     std::vector<Slot> m_slots;
     std::vector<uint16> m_user;
     int m_numGlyphs;
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 
-    FontFace *m_face;      // Fontface
-    Silf *m_silf;
+    const FontFace *m_face;      // Fontface
+    const Silf *m_silf;
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
 };

@@ -211,7 +211,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     return true;
 }
 
-void Pass::runGraphite(Segment *seg, FontFace *face, VMScratch *vms)
+void Pass::runGraphite(Segment *seg, const FontFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, seg, vms))
         return;
@@ -226,7 +226,7 @@ void Pass::runGraphite(Segment *seg, FontFace *face, VMScratch *vms)
     }
 }
 
-int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms)
+int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const
 {
     int state;
     int startSlot = iSlot;
@@ -286,25 +286,25 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms)
     return -1;
 }
 
-int Pass::testConstraint(code *code, int iSlot, Segment *seg, VMScratch *vms)
+int Pass::testConstraint(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
 {
-    if (!*code)
+    if (!*codeptr)
         return 1;
     
     machine::status_t status;
-    const uint32 ret = code->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
     return status == machine::finished ? ret : 1;
 }
 
-int Pass::doAction(code *code, int iSlot, Segment *seg, VMScratch *vms)
+int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
 {
-    if (!*code)
+    if (!*codeptr)
         return 1;
     
     machine::status_t status;
     int iStart = iSlot;
-    const uint32 ret = code->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
     while (iStart < iSlot)
     {

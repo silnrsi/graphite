@@ -20,7 +20,7 @@ class Silf
 {
 public:
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(Segment *seg, FontFace *face, VMScratch *vms);
+    void runGraphite(Segment *seg, const FontFace *face, VMScratch *vms) const;
     uint16 findClassIndex(uint16 cid, uint16 gid);
     uint16 getClassGlyph(uint16 cid, uint16 index);
     uint16 findPseudo(uint32 uid);

@@ -32,22 +32,23 @@ class Segment;
 class FontFace 
 {
 public:
-    virtual const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
-    virtual float advance(unsigned short id);
-    virtual Silf *silf(int i) { return ((i < m_numSilf) ? m_silfs + i : (Silf *)NULL); }
-    virtual void runGraphite(Segment *seg, Silf *silf);
-    virtual uint16 findPseudo(uint32 uid) { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
+    const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
+    float advance(unsigned short id) const { return m_glyphs[id].advance().x; }
+    const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
+    void runGraphite(Segment *seg, const Silf *silf) const;
+    uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    FontFace(const IFace *face) : m_face(face) {}
-    GlyphFace *glyph(unsigned short glyphid) { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
-    float getAdvance(unsigned short glyphid, float scale) { return advance(glyphid) * scale; }
-    unsigned short upem() { return m_upem; }
-    unsigned short numGlyphs() { return m_numGlyphs; }
+    FontFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
+    ~FontFace();
+    const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
+    float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
+    unsigned short upem() const { return m_upem; }
+    unsigned short numGlyphs() const { return m_numGlyphs; }
     bool readGlyphs();
     bool readGraphite();
     bool readFeatures() { return m_features.readFont(m_face); }
-    Silf *chooseSilf(uint32 script);
+    const Silf *chooseSilf(uint32 script) const;
 
 private:
 
@@ -62,6 +63,10 @@ private:
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.
     FeatureMap m_features;
+    
+  private:		//defensive on m_glyphs and m_silfs
+    FontFace(const FontFace&);
+    FontFace& operator=(const FontFace&);
 };
 
 #endif // FONTFACE_INCLUDE

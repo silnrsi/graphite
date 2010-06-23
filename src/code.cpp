@@ -243,7 +243,7 @@ void code::release_buffers() throw()
 
 uint32 code::run(uint32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx, 
-                    machine::status_t & status)
+                    machine::status_t & status) const
 {
     assert(stack_base != 0);
     assert(length >= 32);

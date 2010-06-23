@@ -46,21 +46,27 @@ FontFace *create_fontface(IFace *face)
     return NULL;
 }
 
-class FileFontFace : public FontFace
+class FileFontFace
 {
 public:
-    FileFontFace(const char * filePath) : FontFace(m_pFileFont/*nasty use before initialization*/), m_pFileFont(IFace::loadTTFFile(filePath)) {}
+    FileFontFace(const char * filePath) : m_pFileFont(IFace::loadTTFFile(filePath)), m_FontFace(m_pFileFont) {}
+    
+    const FontFace& theFontFace() const { return m_FontFace; }
+    FontFace& theFontFace() { return m_FontFace; }
+
 private:
     IFace* m_pFileFont;
+    FontFace m_FontFace;
     
 private:		//defensive on m_pFileFont
     FileFontFace(const FileFontFace&);
     FileFontFace& operator=(const FileFontFace&);
 };
 
-FontFace *create_filefontface(const char *filePath)
+FileFontFace *create_filefontface(const char *filePath)
 {
-    FontFace *res = new FileFontFace(filePath);
+    FileFontFace *res2 = new FileFontFace(filePath);
+    FontFace* res = &res2->theFontFace();
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
@@ -69,14 +75,26 @@ FontFace *create_filefontface(const char *filePath)
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementFace);
 #endif
-        return res;
+        return res2;
     }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFace);
 #endif
-    delete res;
+    delete res2;
     return NULL;
 }
+
+FontFace *the_fontface(FileFontFace *fileface)	//do not call destroy_fontface on this result
+{
+    return &fileface->theFontFace();
+}
+
+
+void destroy_filefontface(FileFontFace *fileface)
+{
+    delete fileface;
+}
+
 
 void destroy_fontface(FontFace *face)
 {

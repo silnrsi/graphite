@@ -4,12 +4,12 @@
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
-float FontFace::advance(unsigned short id)
+FontFace::~FontFace()
 {
-    // GlyphFace *g = newGlyph(id);
-    GlyphFace *g = m_glyphs + id;
-    return g->advance().x;
+    delete[] m_glyphs;
+    delete[] m_silfs;
 }
+
 
 bool FontFace::readGlyphs()
 {
@@ -153,14 +153,14 @@ bool FontFace::readGraphite()
     return true;
 }
 
-void FontFace::runGraphite(Segment *seg, Silf *aSilf)
+void FontFace::runGraphite(Segment *seg, const Silf *aSilf) const
 {
     VMScratch vms;
 
     aSilf->runGraphite(seg, this, &vms);
 }
 
-Silf *FontFace::chooseSilf(uint32 script)
+const Silf *FontFace::chooseSilf(uint32 script) const
 {
     if (m_numSilf == 0)
         return NULL;

@@ -485,7 +485,7 @@ void listFeatures(gr::Font & font)
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
-    FontFace *face;
+    FileFontFace *fileface;
     FontImpl *sizeFont;
     try
     {
@@ -513,11 +513,15 @@ int Parameters::testFileFont() const
         }
 #endif
         GrngTextSrc textSrc(pText32, charLength);
-        if (!(face = create_filefontface(fileName)))
+        if (!(fileface = create_filefontface(fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables");
             return 2;
         }
+        
+        FontFace *face =		//do not destroy this; destroy fileface instead
+			  the_fontface(fileface);
+
         sizeFont = create_font(NULL, face, pointSize * dpi / 72);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
@@ -621,7 +625,7 @@ int Parameters::testFileFont() const
         
         destroy_segment(seg);
         destroy_font(sizeFont);
-        destroy_fontface(face);
+        destroy_filefontface(fileface);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;
