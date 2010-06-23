@@ -22,13 +22,14 @@ class Segment;
 
 typedef void *  instr;
 
+enum {VARARGS = size_t(-1)};
+
 struct opcode_t 
 { 
-    instr     impl; 
-    size_t    param_sz;
+    instr   impl[2];
+    size_t  param_sz;
+    int     stack_delta;
 };
-
-enum { VARARGS = size_t(-2), NILOP };
 
 namespace machine
 {
@@ -39,7 +40,7 @@ namespace machine
         stack_overflow
     };
     
-    extern const opcode_t *    get_opcode_table(bool constraint) throw();
+    extern const opcode_t *    get_opcode_table() throw();
     extern uint32              run(const instr * program, const byte * data,
                                    uint32 * stack_base, const size_t length,
                                    Segment & seg, int & islot_idx,
@@ -55,42 +56,43 @@ namespace machine
                            status_t &status);
     
     enum opcode {
-	    NOP = 0,
+        NOP = 0,
 
-	    PUSH_BYTE,		PUSH_BYTEU,		PUSH_SHORT,	PUSH_SHORTU,	PUSH_LONG,
+        PUSH_BYTE,      PUSH_BYTEU,     PUSH_SHORT,     PUSH_SHORTU,    PUSH_LONG,
 
-	    ADD,				SUB,				MUL,			DIV,
-	    MIN_,				MAX_,
-	    NEG,
-	    TRUNC8,			TRUNC16,
+        ADD,            SUB,            MUL,            DIV,
+        MIN_,           MAX_,
+        NEG,
+        TRUNC8,         TRUNC16,
 
-	    COND,
-	
-	    AND,				OR,				NOT,
-	    EQUAL,			NOT_EQ,
-	    LESS,			GTR,				LESS_EQ,		GTR_EQ,
+        COND,
+    
+        AND,            OR,             NOT,
+        EQUAL,          NOT_EQ,
+        LESS,           GTR,            LESS_EQ,        GTR_EQ,
 
-	    NEXT,			NEXTN,			COPY_NEXT,
-	    PUT_GLYPH8BIT_OBS,	PUT_SUBS8BIT_OBS,	PUT_COPY,
-	    INSERT,			DELETE,
-	    ASSOC,
-	    CNTXT_ITEM,
+        NEXT,           NEXT_N,         COPY_NEXT,
+        PUT_GLYPH8BIT_OBS,              PUT_SUBS8BIT_OBS,   PUT_COPY,
+        INSERT,         DELETE,
+        ASSOC,
+        CNTXT_ITEM,
 
-	    ATTR_SET,			ATTR_ADD,			ATTR_SUB,
-	    ATTR_SET_SLOT,
-	    IATTR_SET_SLOT,
-	    PUSH_SLOT_ATTR,	PUSH_GLYPH_ATTR_OBS, PUSH_GLYPH_METRIC,		PUSH_FEAT,
-	    PUSH_ATT_TOG_ATTR_OBS,	PUSH_ATT_TOGLYPH_METRIC,
-	    PUSH_ISLOT_ATTR,
+        ATTR_SET,       ATTR_ADD,       ATTR_SUB,
+        ATTR_SET_SLOT,
+        IATTR_SET_SLOT,
+        PUSH_SLOT_ATTR,                 PUSH_GLYPH_ATTR_OBS,
+        PUSH_GLYPH_METRIC,              PUSH_FEAT,
+        PUSH_ATT_TO_GATTR_OBS,          PUSH_ATT_TO_GLYPH_METRIC,
+        PUSH_ISLOT_ATTR,
 
-	    PUSH_IGLYPH_ATTR,	// not implemented
+        PUSH_IGLYPH_ATTR,    // not implemented
 
-	    POP_RET,			RET_ZERO,			RET_TRUE,
-	    IATTR_SET,		IATTR_ADD,		IATTR_SUB,
-	    PUSH_PROC_STATE,	PUSH_VERSION,
-	    PUT_SUBS,			PUT_SUBS2,		PUT_SUBS3,
-	    PUT_GLYPH,		PUSH_GLYPH_ATTR,	PUSH_ATT_TOGLYPH_ATTR,
-	    MAX_OPCODE
+        POP_RET,                        RET_ZERO,           RET_TRUE,
+        IATTR_SET,                      IATTR_ADD,          IATTR_SUB,
+        PUSH_PROC_STATE,                PUSH_VERSION,
+        PUT_SUBS,                       PUT_SUBS2,          PUT_SUBS3,
+        PUT_GLYPH,                      PUSH_GLYPH_ATTR,    PUSH_ATT_TOGLYPH_ATTR,
+        MAX_OPCODE
     };
 }
 

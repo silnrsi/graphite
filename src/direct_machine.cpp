@@ -25,12 +25,11 @@
 #endif
 #define EXIT(status)            push(status); goto end
 
-#define action(name,param_sz)   {&&name, param_sz}
+#define do_(name)               &&name
 
 namespace {
 
 const void * direct_machine(const bool get_table_mode,
-                            const bool constrained,
                             const instr   * program,
                             const byte    * data,
                             uint32        * stack_base, 
@@ -43,7 +42,7 @@ const void * direct_machine(const bool get_table_mode,
     // other inorder to take the addresses of the instruction bodies.
     #include "opcode_table.h"
     if (get_table_mode)
-        return constrained ? opcode_table_constrained : opcode_table;
+        return opcode_table;
 
     // Declare virtual machine registers
     const instr   * ip = program;
@@ -69,11 +68,11 @@ const void * direct_machine(const bool get_table_mode,
 
 }
 
-const opcode_t * machine::get_opcode_table(bool constraint) throw()
+const opcode_t * machine::get_opcode_table() throw()
 {
     machine::status_t dummy;
     int is_dummy;
-    return static_cast<const opcode_t *>(direct_machine(true, constraint, 0, 0, 0, 0, 0, is_dummy, dummy));
+    return static_cast<const opcode_t *>(direct_machine(true, 0, 0, 0, 0, 0, is_dummy, dummy));
 }
 
 
@@ -90,12 +89,9 @@ uint32  machine::run(const instr  * program,
     assert(stack_base !=0);
     assert(length > 8);
     
-    const void * ret = direct_machine(false, false, program, data,
+    const void * ret = direct_machine(false, program, data,
                                       stack_base, length, &seg, 
                                       islot_idx, status);
     return reinterpret_cast<ptrdiff_t>(ret);
 }
-
-
-         
 

@@ -16,7 +16,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
     
-    const opcode_t *    op_to_fn = machine::get_opcode_table(constrained);
+    const opcode_t *    op_to_fn = machine::get_opcode_table();
     const byte *        cd_ptr = bytecode_begin;
     byte                iSlot = 0;
     
@@ -37,20 +37,20 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     cContexts[0] = 0;
     cContexts[1] = 0;
     do {
-        const machine::opcode opc = machine::opcode(*cd_ptr++);
+        opc = machine::opcode(*cd_ptr++);
         
         // Do some basic sanity checks based on what we know about the opcodes.
         if (opc >= machine::MAX_OPCODE) {   // Is this even a valid opcode?
             failure(invalid_opcode);
             return;
         }
-
+        
         const opcode_t op = op_to_fn[opc];
-        if (op.param_sz == NILOP) {      // Is it implemented?
+        if (op.impl[constrained] == 0) {      // Is it implemented?
             failure(unimplemented_opcode_used);
             return;
         }
-
+        
         if (opc == machine::CNTXT_ITEM)  // This is a really conditional forward jump,
         {                       // check it doesn't jump outside the program.
             const size_t skip = cd_ptr[1];
@@ -67,7 +67,9 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         }
         
         // Add this instruction
-        *ip++ = op.impl; ++_instr_count;
+        *ip++ = op.impl[constrained]; 
+        ++_instr_count;
+        
         // Grab the parameters
         if (param_sz)
         {
@@ -75,7 +77,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             cd_ptr += param_sz;
             dp     += param_sz;
         }
-
+        
         switch (opc)
         {
             case machine::NEXT :
@@ -118,7 +120,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             default :
                 break;
         }
-
+        
         // Was this a return? stop processing any further.
         if (opc == machine::POP_RET
          || opc == machine::RET_ZERO 

@@ -26,7 +26,7 @@ public:
 private:
     instr *     _code;
     byte  *     _data;
-    size_t      _data_size, 
+    size_t      _data_size,
                 _instr_count;
     status_t    _status;
     mutable bool _own;
@@ -42,9 +42,9 @@ public:
     
     code & operator=(const code &rhs) throw();
     operator bool () throw();
-    status_t status() throw();
-    size_t data_size() const throw();
-    size_t instruction_count() const throw();
+    status_t    status() const throw();
+    size_t      data_size() const throw();
+    size_t      instruction_count() const throw();
     
     uint32 run(uint32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx,
@@ -75,7 +75,7 @@ inline code::operator bool () throw () {
     return _code && status() == loaded;
 }
 
-inline code::status_t code::status() throw() {
+inline code::status_t code::status() const throw() {
     return _status;
 }
 
