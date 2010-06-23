@@ -64,8 +64,6 @@ add_library(graphiteng SHARED
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
-    ../common/FileFont.h
-    ../common/FileFont.cpp
 	${GRAPHITE_HEADERS}
 	${PRIVATE_HEADERS}
     )

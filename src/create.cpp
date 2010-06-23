@@ -8,10 +8,6 @@
 #include "TtfUtil.h"
 #include "FontImpl.h"
 
-#ifndef DISABLE_FILE_FONT
-#include "FileFont.h"
-#endif
-
 void read_text(FontFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
 void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
@@ -53,9 +49,13 @@ FontFace *create_fontface(IFace *face)
 class FileFontFace : public FontFace
 {
 public:
-    FileFontFace(const char * filePath) : m_fileFont(filePath), FontFace(&m_fileFont) {}
+    FileFontFace(const char * filePath) : FontFace(m_pFileFont/*nasty use before initialization*/), m_pFileFont(IFace::loadTTFFile(filePath)) {}
 private:
-    FileFont m_fileFont;
+    IFace* m_pFileFont;
+    
+private:		//defensive on m_pFileFont
+    FileFontFace(const FileFontFace&);
+    FileFontFace& operator=(const FileFontFace&);
 };
 
 FontFace *create_filefontface(const char *filePath)
