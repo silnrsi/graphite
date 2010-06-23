@@ -44,7 +44,7 @@ protected:
 };
 
 #ifndef DISABLE_TRACING
-extern void logSegment(ITextSource & textSrc, const ISegment & seg);
+extern void logSegment(const ITextSource & textSrc, const ISegment & seg);
 #endif
 
 #endif // SEGMENT_INCLUDE

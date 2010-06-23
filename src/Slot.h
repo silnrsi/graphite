@@ -28,7 +28,7 @@ public:
     void update(int numSlots, int numCharInfo, Position &relpos);
     void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED); }
-    bool markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
+    void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
 
 protected:
     unsigned short m_glyphid;        // glyph id

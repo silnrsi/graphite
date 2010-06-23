@@ -17,7 +17,7 @@ public:
     virtual void chooseSilf(uint32 script) = 0;
 };
 
-extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt);
+extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, FontFace *face, const ITextSource *txt);
 extern GRNG_EXPORT void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

@@ -22,7 +22,13 @@ add_definitions(-DSIZEOF_WCHAR_T=${SIZEOF_WCHAR_T})
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
-option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
+option(CHECK_STACK "Enable stack checking in FSM")
+
+if (${DISABLE_TRACING})
+	add_definitions(-DCHECK_STACK)
+	message(STATUS "Stack checking enabled")
+endif (${DISABLE_TRACING})
+
 
 set(GRAPHITE_HEADERS 
     ../include/graphiteng/IFont.h
@@ -32,7 +38,6 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/Types.h
-	../include/graphiteng/XmlLog.h
     )
 
 file(GLOB PRIVATE_HEADERS *.h) 
@@ -65,6 +70,8 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs)
      set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc -lm" LINKER_LANGUAGE C)
      set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+#     add_test(NAME nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
+#     set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -76,6 +83,6 @@ set_target_properties(graphiteng PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
 
 set_target_properties(graphiteng PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
 install(TARGETS graphiteng EXPORT graphiteng LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphiteng)
-install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE grng_)
+install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE gr_)
 
 

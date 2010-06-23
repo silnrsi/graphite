@@ -7,6 +7,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
 
+option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
+
 if (${DISABLE_TRACING})
 	add_definitions(-DDISABLE_TRACING)
 	message(STATUS "Tracing disabled")

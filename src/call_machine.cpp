@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include "machine.h"
+#include "Segment.h"
 
 #define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
                             int & is, const instr * & ip
@@ -20,7 +21,7 @@ typedef ptrdiff_t        (* ip_t)(registers);
 #define EXIT(status)        push(status); return false
 
 // This is required by opcode_table.h
-#define action(name,param_sz)   {instr(name), param_sz}
+#define do_(name)           instr(name)
 
 // Pull in the opcode definitions
 // We pull these into a private namespace so these otherwise common names dont
@@ -68,9 +69,9 @@ namespace {
 #include "opcode_table.h"
 }
 
-const opcode_t * machine::get_opcode_table(bool constraint) throw()
+const opcode_t * machine::get_opcode_table() throw()
 {
-    return constraint ? opcode_table_constrained : opcode_table;
+    return opcode_table;
 }
 
 

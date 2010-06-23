@@ -1,0 +1,11 @@
+#!/bin/sh
+
+g++ -nostdlibs -nodefaultlibs \
+        -I../include/ -I../common/ -I../src \
+        $* \
+        -lc -lgcc -lm \
+        -o /dev/null 2>&1 \
+    | grep -v '\(\.o:\|start\.S: main$\|ld returned 1 exit status$\)' \
+    | sed -r 's/^([^:]+):.*undefined reference to `(.*).$/\1: \2/' \
+    | sort -u | less
+

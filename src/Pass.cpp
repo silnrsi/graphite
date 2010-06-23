@@ -17,12 +17,13 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrMaxRuleLoop, m_iMaxLoop);
 #endif
-    p += 2;         // don't care about context
+    byte nMaxContext = *p++;
+    p++;             // don't care about context
     m_numRules = read16(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumRules, m_numRules);
 #endif
-    p += 2;         // not sure why we would want this
+    p += 2;          // not sure why we would want this
     p += 16;         // ignore offsets for now
     m_sRows = read16(p);
 #ifndef DISABLE_TRACING
@@ -143,12 +144,13 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     }
 #endif
     p++;
+    byte *cContexts = new byte[2 * nMaxContext];
     if (nPConstraint)
     {
-#ifndef DISABLE_TRACING
+#ifndef DISABLE_TRACING    
         XmlTraceLog::get().openElement(ElementConstraint);
 #endif
-        m_cPConstraint = code(true, p, p + nPConstraint);
+        m_cPConstraint = code(true, p, p + nPConstraint, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraint);
 #endif
@@ -169,7 +171,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().openElement(ElementConstraint);
         XmlTraceLog::get().addAttribute(AttrIndex, i);
 #endif
-        if (noffset > loffset) m_cConstraint[i] = code(true, p + loffset, p + noffset);
+        if (noffset > loffset) m_cConstraint[i] = code(true, p + loffset, p + noffset, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraint);
 #endif
@@ -193,7 +195,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
 #endif
         uint16 noffset = read16(pActions);
-        if (noffset > loffset) m_cActions[i] = code(false, p + loffset, p + noffset);
+        if (noffset > loffset) m_cActions[i] = code(false, p + loffset, p + noffset, cContexts);
         loffset = noffset;
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementRule);
@@ -283,8 +285,19 @@ int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *v
         return 1;
     
     machine::status_t status;
+    int iStart = iSlot;
     const uint32 ret = code->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
-    return status == machine::finished ? iSlot + ret: 1;
+    while (iStart < iSlot)
+    {
+        if ((*seg)[iStart].isDeleted())
+        {
+            seg->deleteSlot(iStart);
+            iSlot--;
+        }
+        else
+            iStart++;
+    }
+    return status == machine::finished ? iSlot + ret : iSlot ;
 }
 

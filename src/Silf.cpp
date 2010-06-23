@@ -82,13 +82,13 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #endif
     p += *p * 2 + 1;        // don't need critical features yet
     p++;        // reserved
-    if (p - (char *)pSilf >= lSilf) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumScripts, *p);
 #endif
     p += *p * 4 + 1;        // skip scripts
     p += 2;     // skip lbGID
-    if (p - (char *)pSilf >= lSilf) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
     m_numPseudo = read16(p);
@@ -109,7 +109,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         XmlTraceLog::get().closeElement(ElementPseudo);
 #endif
     }
-    if (p - (char *)pSilf >= lSilf) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
 
     int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (char *)pSilf), numGlyphs);
     if (clen < 0) return false;
@@ -165,7 +165,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
 #endif
         return -1;
     }
-    if (m_classOffsets[m_nClass] + (2 + m_nClass + 1) * 2 > lClass)
+    if (m_classOffsets[m_nClass] + (2u + m_nClass + 1u) * 2 > lClass)
     {
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().error("Invalid Class Offset %d max size %d",

@@ -33,22 +33,18 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/IFace.h"
 #include "graphiteng/XmlLog.h"
 
-typedef unsigned int utf32;
-
 class GrngTextSrc : public ITextSource
 {
 
 public:
-    GrngTextSrc(unsigned int *base, int len) : m_buff(base), m_len(len) { }
-    virtual encform utfEncodingForm() { return kutf32; }
-    virtual int getLength() { return m_len; }
-    virtual unsigned int *get_utf32_buffer() { return m_buff; }
-    virtual unsigned short *get_utf16_buffer() { return NULL; }
-    virtual unsigned char *get_utf8_buffer() { return NULL; }
+    GrngTextSrc(const uint32* base, size_t len) : m_buff(base), m_len(len) { }
+    virtual encform utfEncodingForm() const { return kutf32; }
+    virtual size_t getLength() const { return m_len; }
+    virtual const void* get_utf_buffer_begin() const { return m_buff; }
 
-protected:
-    unsigned int *m_buff;
-    int m_len;
+private:
+    const uint32* m_buff;
+    size_t m_len;
 };
 
 #ifndef HAVE_STRTOF
@@ -65,8 +61,16 @@ long strtol(char * text, char ** ignore)
 }
 #endif
 
-struct Parameters
+class Parameters
 {
+public:
+    Parameters();
+    ~Parameters();
+    void clear();
+    void closeLog();
+    bool loadFromArgs(int argc, char *argv[]);
+    int testFileFont() const;
+public:
     const char * fileName;
     const char * features;
     float pointSize;
@@ -84,7 +88,56 @@ struct Parameters
     size_t charLength;
     size_t offset;
     FILE * log;
+    
+private :  //defensive since log should not be copied
+    Parameters(const Parameters&);
+    Parameters& operator=(const Parameters&);
 };
+
+Parameters::Parameters()
+{
+  log = stdout ;
+  clear();
+}
+
+
+Parameters::~Parameters()
+{
+  closeLog();
+}
+
+void Parameters::clear()
+{
+    closeLog() ;
+    fileName = "";
+    pointSize = 12.0f;
+    dpi = 72;
+    lineStart = false;
+    lineEnd = false;
+    rtl = false;
+    ws = false;
+    useLineFill = false;
+    useCodes = false;
+    justification = false;
+    width = 100.0f;
+    pText32 = NULL;
+    textArgIndex = 0;
+    charLength = 0;
+    offset = 0;
+    log = stdout;
+}
+
+
+void Parameters::closeLog()
+{
+  if (log==stdout)
+    return ;
+  
+  fclose(log);
+  log = stdout;
+}
+
+
 
 #ifdef HAVE_ICONV
 
@@ -135,12 +188,12 @@ convertUtf(const char * inType, const char * outType, A* pIn, B * & pOut)
 
 #endif
 
-bool parseArgs(int argc, char *argv[], Parameters & parameters)
+bool Parameters::loadFromArgs(int argc, char *argv[])
 {
     int mainArgOffset = 0;
-    parameters.pText32 = NULL;
-    parameters.features = NULL;
-    parameters.log = stdout;
+    pText32 = NULL;
+    features = NULL;
+    log = stdout;
     bool argError = false;
     char* pText = NULL;
     typedef enum 
@@ -169,7 +222,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             lTestSize = strtol(argv[a],&pIntEnd, 10);
             if (lTestSize > 0 && lTestSize < INT_MAX && lTestSize != LONG_MAX)
             {
-                parameters.dpi = lTestSize;
+                dpi = lTestSize;
             }
             else
             {
@@ -183,7 +236,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             // what is a reasonable maximum here
             if (fTestSize > 0 && fTestSize < 5000.0f)
             {
-                parameters.pointSize = fTestSize;
+                pointSize = fTestSize;
             }
             else
             {
@@ -198,7 +251,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             // what is a good max width?
             if (fTestSize > 0 && fTestSize < 10000)
             {
-                parameters.width = fTestSize;
+                width = fTestSize;
             }
             else
             {
@@ -208,15 +261,16 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             option = NONE;
             break;
         case FEAT:
-                parameters.features = argv[a];
+                features = argv[a];
                 option = NONE;
                 break;
         case LOG:
-            parameters.log = fopen(argv[a], "w");
-            if (parameters.log == NULL)
+	    closeLog();
+            log = fopen(argv[a], "w");
+            if (log == NULL)
             {
                 fprintf(stderr,"Failed to open %s\n", argv[a]);
-                parameters.log = stdout;
+                log = stdout;
             }
             option = NONE;
             break;
@@ -235,27 +289,27 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
                 else if (strcmp(argv[a], "-ls") == 0)
                 {
                     option = NONE;
-                    parameters.lineStart = true;
+                    lineStart = true;
                 }
                 else if (strcmp(argv[a], "-le") == 0)
                 {
                     option = NONE;
-                    parameters.lineEnd = true;
+                    lineEnd = true;
                 }
                 else if (strcmp(argv[a], "-le") == 0)
                 {
                     option = NONE;
-                    parameters.lineEnd = true;
+                    lineEnd = true;
                 }
                 else if (strcmp(argv[a], "-rtl") == 0)
                 {
                     option = NONE;
-                    parameters.rtl = true;
+                    rtl = true;
                 }
                 else if (strcmp(argv[a], "-ws") == 0)
                 {
                     option = NONE;
-                    parameters.ws = true;
+                    ws = true;
                 }
                 else if (strcmp(argv[a], "-feat") == 0)
                 {
@@ -264,20 +318,20 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
                 else if (strcmp(argv[a], "-codes") == 0)
                 {
                     option = NONE;
-                    parameters.useCodes = true;
+                    useCodes = true;
                     // must be less than argc
-                    parameters.pText32 = new unsigned int[argc];
-                    fprintf(parameters.log, "Text codes\n");
+                    pText32 = new unsigned int[argc];
+                    fprintf(log, "Text codes\n");
                 }
                 else if (strcmp(argv[a], "-linefill") == 0)
                 {
                     option = LINE_FILL;
-                    parameters.useLineFill = true;
+                    useLineFill = true;
                 }
                 else if (strcmp(argv[a], "-j") == 0)
                 {
                     option = NONE;
-                    parameters.justification = true;
+                    justification = true;
                 }
                 else if (strcmp(argv[a], "-log") == 0)
                 {
@@ -291,10 +345,10 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             }
             else if (mainArgOffset == 0)
             {
-                parameters.fileName = argv[a];
+                fileName = argv[a];
                 mainArgOffset++;
             }
-            else if (parameters.useCodes)
+            else if (useCodes)
             {
                 pIntEnd = NULL;
                 mainArgOffset++;
@@ -302,11 +356,11 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
                 if (code > 0)
                 {
 // convert text to utfOut using iconv because its easier to debug string placements
-                    parameters.pText32[parameters.charLength++] = code;
-                    if (parameters.charLength % 10 == 0)
-                        fprintf(parameters.log, "%4x\n",code);
+                    pText32[charLength++] = code;
+                    if (charLength % 10 == 0)
+                        fprintf(log, "%4x\n",code);
                     else
-                        fprintf(parameters.log, "%4x\t",code);
+                        fprintf(log, "%4x\t",code);
                 }
                 else
                 {
@@ -317,7 +371,7 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
             {
                 mainArgOffset++;
                 pText = argv[a];
-                parameters.textArgIndex = a;
+                textArgIndex = a;
             }
             else
             {
@@ -329,25 +383,25 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
     if (mainArgOffset < 1) argError = true;
     else if (mainArgOffset > 1)
     {
-        if (!parameters.useCodes && pText != NULL)
+        if (!useCodes && pText != NULL)
         {
 #ifdef HAVE_ICONV
             //parameters.charLength = convertUtf8ToUtf32(pText, parameters.pText32);
-            parameters.charLength = convertUtf("utf8","utf32",pText, parameters.pText32);
-            fprintf(parameters.log, "String has %d characters\n", (int)parameters.charLength);
+            charLength = convertUtf("utf8","utf32",pText, pText32);
+            fprintf(log, "String has %d characters\n", (int)charLength);
             size_t ci;
-            for (ci = 0; ci < 10 && ci < parameters.charLength; ci++)
+            for (ci = 0; ci < 10 && ci < charLength; ci++)
             {
-                    fprintf(parameters.log, "%d\t", (int)ci);
+                    fprintf(log, "%d\t", (int)ci);
             }
-            fprintf(parameters.log, "\n");
-            for (ci = 0; ci < parameters.charLength; ci++)
+            fprintf(log, "\n");
+            for (ci = 0; ci < charLength; ci++)
             {
-                    fprintf(parameters.log, "%04x\t", (int)ci);
+                    fprintf(log, "%04x\t", (int)ci);
                     if (((ci + 1) % 10) == 0)
-                        fprintf(parameters.log, "\n");
+                        fprintf(log, "\n");
             }
-            fprintf(parameters.log, "\n");
+            fprintf(log, "\n");
 #else
             fprintf(stderr,"Only the -codes option is supported on Win32\r\n");
             argError = true;
@@ -355,33 +409,14 @@ bool parseArgs(int argc, char *argv[], Parameters & parameters)
         }
         else 
         {
-            parameters.pText32[parameters.charLength] = 0;
-            fprintf(parameters.log, "\n");
+            pText32[charLength] = 0;
+            fprintf(log, "\n");
         }
     }
     return (argError) ? false : true;
 }
 
 
-void initParameters(Parameters & parameters)
-{
-    parameters.fileName = "";
-    parameters.pointSize = 12.0f;
-    parameters.dpi = 72;
-    parameters.lineStart = false;
-    parameters.lineEnd = false;
-    parameters.rtl = false;
-    parameters.ws = false;
-    parameters.useLineFill = false;
-    parameters.useCodes = false;
-    parameters.justification = false;
-    parameters.width = 100.0f;
-    parameters.pText32 = NULL;
-    parameters.textArgIndex = 0;
-    parameters.charLength = 0;
-    parameters.offset = 0;
-    parameters.log = stdout;
-}
 
 #if 0
 void listFeatures(gr::Font & font)
@@ -447,7 +482,7 @@ void listFeatures(gr::Font & font)
 }
 #endif
 
-int testFileFont(Parameters parameters)
+int Parameters::testFileFont() const
 {
     int returnCode = 0;
     FontFace *face;
@@ -458,7 +493,7 @@ int testFileFont(Parameters parameters)
 #ifndef DISABLE_TRACING
         startGraphiteLogging(logFile, GRLOG_ALL);
 #endif
-        //fileFont = new FileFont(parameters.fileName);
+        //fileFont = new FileFont(fileName);
         //if (!fileFont)
         //{
         //    fprintf(stderr,"graphitejni:Invalid font!");
@@ -477,13 +512,13 @@ int testFileFont(Parameters parameters)
             return 3;
         }
 #endif
-        GrngTextSrc textSrc(parameters.pText32, parameters.charLength);
-        if (!(face = create_filefontface(parameters.fileName)))
+        GrngTextSrc textSrc(pText32, charLength);
+        if (!(face = create_filefontface(fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables");
             return 2;
         }
-        sizeFont = create_font(NULL, face, parameters.pointSize * parameters.dpi / 72);
+        sizeFont = create_font(NULL, face, pointSize * dpi / 72);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -541,20 +576,20 @@ int testFileFont(Parameters parameters)
         ISegment *seg = create_rangesegment(sizeFont, face, &textSrc);
 
         int i = 0;
-        fprintf(parameters.log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
-        fprintf(parameters.log, "\n");
+        fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
+        fprintf(log, "\n");
         for (i = 0; i < seg->length(); i++)
         {
             ISlot *slot = &((*seg)[i]);
             Position org = slot->origin();
-            fprintf(parameters.log, "%02d  %4d %3d@%2.1f,%2.1f\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
+            fprintf(log, "%02d  %4d %3d@%2.1f,%2.1f\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot->gid(), 0 /*attachedTo*/, 0., 0. /*attachedAt*/, org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
             
-            if (parameters.pText32 != NULL)
+            if (pText32 != NULL)
             {
-                fprintf(parameters.log, "%7x\t%7x",
-                    parameters.pText32[slot->before() + parameters.offset],
-                    parameters.pText32[slot->after() + parameters.offset]);
+                fprintf(log, "%7x\t%7x",
+                    pText32[slot->before() + offset],
+                    pText32[slot->after() + offset]);
             }
 #if 0
             if (parameters.justification)
@@ -577,12 +612,12 @@ int testFileFont(Parameters parameters)
             ++i;
             ++gi;
 #endif
-            fprintf(parameters.log, "\n");
+            fprintf(log, "\n");
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
         float advanceWidth = seg->advance().x;
-        fprintf(parameters.log, "Advance width = %6.1f\n", advanceWidth);
+        fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         
         destroy_segment(seg);
         destroy_font(sizeFont);
@@ -591,8 +626,6 @@ int testFileFont(Parameters parameters)
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;
 //        logStream.close();
-        if (parameters.log != stdout)
-            fclose(parameters.log);
     }
     catch (...)
     {
@@ -610,9 +643,8 @@ int main(int argc, char *argv[])
 {
     
     Parameters parameters;
-    initParameters(parameters);
     
-    if (!parseArgs(argc, argv, parameters))
+    if (!parameters.loadFromArgs(argc, argv))
     {
         fprintf(stderr,"Usage: %s [options] fontfile utf8text \n",argv[0]);
         fprintf(stderr,"Options: (default in brackets)\n");
@@ -631,6 +663,6 @@ int main(int argc, char *argv[])
         fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
         return 1;
     }
-    return testFileFont(parameters);
+    return parameters.testFileFont();
 }
 

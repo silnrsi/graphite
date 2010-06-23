@@ -12,7 +12,7 @@
 #include "FileFont.h"
 #endif
 
-void read_text(FontFace *font, ITextSource *txt, Segment *seg, int numchars);
+void read_text(FontFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
 void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
 
@@ -96,7 +96,7 @@ void destroy_font(FontImpl *font)
 }
 
 
-ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt)
+ISegment *create_rangesegment(FontImpl *font, FontFace *face, const ITextSource *txt)
 {
     int numchars = txt->getLength();
     Segment *seg = new Segment(numchars, face);
@@ -122,54 +122,39 @@ void destroy_segment(ISegment *seg)
 
 /* Now we go private */
 
-void read_text(FontFace *face, ITextSource *txt, Segment *seg, int numchars)
+void read_text(FontFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
 {
     void *cmap = face->getTable(ktiCmap, NULL);
     void *ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
-    int form = txt->utfEncodingForm();
-    void *pBuffer, *pChar;
-
-    switch (form)
-    {
-    case kutf8 :
-        pBuffer = reinterpret_cast<void *>(txt->get_utf8_buffer());
-        break;
-    case kutf16 :
-        pBuffer = reinterpret_cast<void *>(txt->get_utf16_buffer());
-        break;
-    case kutf32 :
-    default :
-        pBuffer = reinterpret_cast<void *>(txt->get_utf32_buffer());
-        break;
-    }
-
-    pChar = pBuffer;
-    for (int i = 0; i < numchars; i++)
+    size_t form = txt->utfEncodingForm();
+    const void *pBuffer = txt->get_utf_buffer_begin();
+    const void *pChar = pBuffer;
+    for (size_t i = 0; i < numchars; i++)
     {
         int cid;
         unsigned short gid;
-        unsigned char *pUChar;
-        unsigned short *pUShort;
-        unsigned int *pULong;
+        const uint8* pUChar;
+        const uint16* pUShort;
+        const uint32* pULong;
 
         switch (form)
         {   // this is oh so ugly
-        case kutf8 :
-            pUChar = reinterpret_cast<unsigned char *>(pChar);
+	case ITextSource::kutf8 :
+            pUChar = reinterpret_cast<const uint8*>(pChar);
             cid = GET_UTF8(pUChar);
-            pChar = reinterpret_cast<void *>(pUChar);
+            pChar = pUChar;
             break;
-        case kutf16 :
-            pUShort = reinterpret_cast<unsigned short *>(pChar);
+	case ITextSource::kutf16 :
+            pUShort = reinterpret_cast<const uint16*>(pChar);
             cid = GET_UTF16(pUShort);
-            pChar = reinterpret_cast<void *>(pUShort);
-            break;
-        case kutf32 :
+            pChar = pUShort;
+           break;
+	case ITextSource::kutf32 :
         default:
-            pULong = reinterpret_cast<unsigned int *>(pChar);
+            pULong = reinterpret_cast<const uint32*>(pChar);
             cid = GET_UTF32(pULong);
-            pChar = reinterpret_cast<void *>(pULong);
-            break;
+            pChar = pULong;
+	    break;
         }
         gid = TtfUtil::Cmap31Lookup(ctable, cid);
         if (!gid)

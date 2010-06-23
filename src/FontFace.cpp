@@ -36,12 +36,12 @@ bool FontFace::readGlyphs()
     int nGlyphs = m_numGlyphs;
     if (locFlags)
     {
-        if (lGloc < 4 * m_numGlyphs + 10)
+        if (lGloc < 4u * m_numGlyphs + 10u)
             nGlyphs = (lGloc - 10) / 4;
     }
     else
     {
-        if (lGloc < 2 * m_numGlyphs + 8)
+        if (lGloc < 2u * m_numGlyphs + 8u)
             nGlyphs = (lGloc - 8) / 4;
     }
 #ifndef DISABLE_TRACING

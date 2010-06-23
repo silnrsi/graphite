@@ -160,6 +160,7 @@ ENDOP
 
 STARTOP(next)
     // TODO: In the original graphite code this appears to do nothing: check.
+    is++;
 ENDOP
 
 STARTOP(next_n)
@@ -171,6 +172,7 @@ ENDOP
 
 STARTOP(copy_next)
     // TODO: Implement copy_next
+    is++;
 ENDOP
 
 STARTOP(put_glyph_8bit_obs)
@@ -194,10 +196,12 @@ STARTOP(put_copy)
 ENDOP
 
 STARTOP(insert)
+    seg.insertSlot(is);
     // TODO; Implement body;
 ENDOP
 
 STARTOP(delete_)
+    seg[is].markDeleted(true);
     // TODO; Implement body;
 ENDOP
 

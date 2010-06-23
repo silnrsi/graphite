@@ -42,14 +42,25 @@ static const char * sCodeNames[machine::MAX_OPCODE] = {
     };
 #endif
 
-code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
-: _code(0), _data_size(0), _instr_count(0), _status(loaded)
+namespace {
+
+inline bool is_return(const machine::opcode opc) {
+    using namespace machine;
+    return opc == POP_RET || opc == RET_ZERO || opc == RET_TRUE;
+}
+
+}
+
+
+code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
+: _code(0), _data_size(0), _instr_count(0), _status(loaded), _own(true)
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
     
-    const opcode_t *    op_to_fn = machine::get_opcode_table(constrained);
+    const opcode_t *    op_to_fn = machine::get_opcode_table();
     const byte *        cd_ptr = bytecode_begin;
+    byte                iSlot = 0;
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
@@ -62,31 +73,22 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    instr * ip = _code;
-    byte  * dp = _data;
-    
+    instr *         ip = _code;
+    byte  *         dp = _data;
+    machine::opcode opc;
+    cContexts[0] = 0;
+    cContexts[1] = 0;
     do {
-        const machine::opcode opc = machine::opcode(*cd_ptr++);
+        opc = machine::opcode(*cd_ptr++);
         
         // Do some basic sanity checks based on what we know about the opcodes.
-        if (opc >= machine::MAX_OPCODE) {   // Is this even a valid opcode?
-            failure(invalid_opcode);
+        if (!check_opcode(opc, cd_ptr, bytecode_end))
             return;
-        }
 
         const opcode_t op = op_to_fn[opc];
-        if (op.param_sz == NILOP) {      // Is it implemented?
+        if (op.impl[constrained] == 0) {      // Is it implemented?
             failure(unimplemented_opcode_used);
             return;
-        }
-
-        if (opc == machine::CNTXT_ITEM)  // This is a really conditional forward jump,
-        {                       // check it doesn't jump outside the program.
-            const size_t skip = cd_ptr[1];
-            if (cd_ptr + 2 + skip > bytecode_end) {
-                failure(jump_past_end);
-                return;
-            }
         }
         
         const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr++ : op.param_sz;
@@ -96,8 +98,9 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         }
         
         // Add this instruction
-        *ip++ = op.impl; ++_instr_count;
-
+        *ip++ = op.impl[constrained]; 
+        ++_instr_count;
+        
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -114,29 +117,19 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
 #endif
 
         // Grab the parameters
-        if (param_sz)
-        {
+        if (param_sz) {
             std::copy(cd_ptr, cd_ptr + param_sz, dp);
             cd_ptr += param_sz;
             dp     += param_sz;
         }
         
-        // Was this a return? stop processing any further.
-        if (opc == machine::POP_RET 
-         || opc == machine::RET_ZERO 
-         || opc == machine::RET_TRUE)
-            break;
-    } while (cd_ptr < bytecode_end);
+        fixup_instruction_offsets(opc, dp, param_sz, iSlot, cContexts);
+    } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
-    switch (*(cd_ptr-1)) {
-        case machine::POP_RET: 
-        case machine::RET_ZERO: 
-        case machine::RET_TRUE: 
-            break;
-        default:
-            failure(missing_return);
-            return;
+    if (!is_return(opc)) {
+        failure(missing_return);
+        return;
     }
     
     assert(ip - _code == _instr_count);
@@ -149,12 +142,88 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     _data = static_cast<byte *>(std::realloc(_data, _data_size*sizeof(byte)));
 }
 
-
-
 code::~code() throw ()
 {
-    release_buffers();
+    if (_own)
+        release_buffers();
 }
+
+
+// Validation check and fixups.
+//
+bool code::check_opcode(const machine::opcode opc, 
+                        const byte *cd_ptr, 
+                        const byte *const cd_end) 
+{
+    using namespace machine;
+    
+    if (opc >= MAX_OPCODE) {   // Is this even a valid opcode?
+        failure(invalid_opcode);
+        return false;
+    }
+    
+    if (opc == CNTXT_ITEM)  // This is a really conditional forward jump,
+    {                       // check it doesn't jump outside the program.
+        const size_t skip = cd_ptr[1];
+        if (cd_ptr + 2 + skip > cd_end) {
+            failure(jump_past_end);
+            return false;
+        }
+    }
+    return true;
+}
+
+
+void code::fixup_instruction_offsets(const machine::opcode opc, 
+                                     byte  * dp, size_t param_sz,
+                                     byte & iSlot, byte * cContexts)
+{
+    using namespace machine;
+    
+    switch (opc)
+    {
+        case NEXT :
+        case COPY_NEXT :
+            iSlot++;
+            cContexts[iSlot * 2] = 0;
+            cContexts[iSlot * 2 + 1] = 0;
+            break;
+        case INSERT :
+            for (char i = iSlot; i >= 0; i--)
+                cContexts[i * 2]++;
+            break;
+        case DELETE :
+            for (char i = iSlot; i >= 0; i--)
+                cContexts[i * 2 + 1]++;
+            break;
+        case PUT_COPY :
+        case PUSH_SLOT_ATTR :
+        case PUSH_GLYPH_ATTR :
+        case PUSH_ATT_TO_GATTR_OBS :
+            if (dp[-1] > 128)
+                dp[-1] -= cContexts[2 * (iSlot + 256 - dp[-1])];
+            break;
+        case CNTXT_ITEM :
+        case PUSH_ISLOT_ATTR :
+        case PUSH_GLYPH_METRIC :
+        case PUSH_ATT_TO_GLYPH_METRIC :
+            if (dp[-2] > 128)
+                dp[-2] -= cContexts[2 * (iSlot + 256 - dp[-2])];
+            break;
+        case PUT_SUBS :
+            if (dp[-3] > 128)
+                dp[-3] -= cContexts[2 * (iSlot + 256 - dp[-3])];
+            break;
+        case ASSOC :
+            for (byte i = 1; i < param_sz; i++)
+                if (dp[-i] > 128)
+                    dp[-i] -= cContexts[2 * (iSlot + 256 - dp[-i])];
+            break;
+        default :
+            break;
+    }
+}
+
 
 inline 
 void code::failure(const status_t s) throw() {
@@ -168,6 +237,7 @@ void code::release_buffers() throw()
     std::free(_data);
     _code = 0;
     _data = 0;
+    _own  = false;
 }
 
 

@@ -74,7 +74,7 @@ void Segment::positionSlots(FontImpl *font)
 }
 
 #ifndef DISABLE_TRACING
-void logSegment(ITextSource & textSrc, const ISegment & seg)
+void logSegment(const ITextSource & textSrc, const ISegment & seg)
 {
     if (XmlTraceLog::get().active())
     {
@@ -87,19 +87,19 @@ void logSegment(ITextSource & textSrc, const ISegment & seg)
         XmlTraceLog::get().addAttribute(AttrLength, textSrc.getLength());
         switch (textSrc.utfEncodingForm())
         {
-        case kutf8:
+        case ITextSource::kutf8:
             XmlTraceLog::get().writeText(
-                reinterpret_cast<const char *>(textSrc.get_utf8_buffer()));
+                reinterpret_cast<const char *>(textSrc.get_utf_buffer_begin()));
             break;
-        case kutf16:
+        case ITextSource::kutf16:
             for (int j = 0; j < textSrc.getLength(); j++)
             {
-                uint32 code = textSrc.get_utf16_buffer()[j];
+                uint32 code = reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
                 if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
                 {
                     j++;
                     // append low surrogate
-                    code = (code << 16) + textSrc.get_utf16_buffer()[j];
+                    code = (code << 16) + reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
                 }
                 else if (code >= 0xDC00 && code <= 0xDFFF)
                 {
@@ -108,10 +108,11 @@ void logSegment(ITextSource & textSrc, const ISegment & seg)
                 XmlTraceLog::get().writeUnicode(code);
             }
             break;
-        case kutf32:
+        case ITextSource::kutf32:
             for (int j = 0; j < textSrc.getLength(); j++)
             {
-                XmlTraceLog::get().writeUnicode(textSrc.get_utf32_buffer()[j]);
+                XmlTraceLog::get().writeUnicode(
+                    reinterpret_cast<const uint32 *>(textSrc.get_utf_buffer_begin())[j]);
             }
             break;
         }
