@@ -29,10 +29,12 @@ add_executable(grngfonttest grngFontTest.cpp)
 target_link_libraries(grngfonttest graphiteng)
 add_dependencies(grngfonttest graphiteng)
 
-if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
-	target_link_libraries(grngfonttest iconv)
-	add_dependencies(grngfonttest iconv)
-endif ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    if (NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
+        target_link_libraries(grngfonttest iconv)
+        add_dependencies(grngfonttest iconv)
+    endif (NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
@@ -44,8 +46,14 @@ endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
 add_custom_target(copy_dll ALL 
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}iconv${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    if (NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
+        add_custom_command(TARGET copy_dll POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}iconv${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    endif (NOT (${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND"))
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_dependencies(copy_dll graphiteng iconv)
 

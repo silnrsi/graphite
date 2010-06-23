@@ -110,7 +110,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
                     dp[-3] -= cContexts[2 * (iSlot + 256 - dp[-3])];
                 break;
             case machine::ASSOC :
-                for (byte i = 0; i < param_sz; i++)
+                for (byte i = 1; i < param_sz; i++)
                     if (dp[-i] > 128)
                         dp[-i] -= cContexts[2 * (iSlot + 256 - dp[-i])];
                 break;
