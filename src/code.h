@@ -33,7 +33,9 @@ private:
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
-
+    bool check_opcode(const machine::opcode, const byte *, const byte *const);
+    void fixup_instruction_offsets(const machine::opcode, byte  *, size_t, 
+                                   byte &, byte *);
 public:
     code() throw();
     code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cConstraints);
