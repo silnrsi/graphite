@@ -4,14 +4,22 @@
 
 const float FontImpl::INVALID_ADVANCE = -1e38f;
 
-FontImpl::FontImpl(IFont *font, FontFace *face, float ppm) :
+FontImpl::FontImpl(const IFont *font, FontFace *face, float ppm) :
     m_font(font),
     m_face(face),
     m_scale((font ? font->ppm() : ppm) / face->upem())
 {
-    m_advances = new float[face->numGlyphs()];
+    size_t nGlyphs=face->numGlyphs();
+    m_advances = new float[nGlyphs];
     float *advp = m_advances;
-    for (int i = 0; i < face->numGlyphs(); i++)
+    for (size_t i = 0; i < nGlyphs; i++)
     { *advp++ = INVALID_ADVANCE; }
 }
+
+FontImpl::~FontImpl()
+{
+    delete[] m_advances;
+}
+
+
 

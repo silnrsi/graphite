@@ -3,6 +3,7 @@
 
 #include "Segment.h"
 #include "graphiteng/IFont.h"
+#include "graphiteng/ITextSource.h"
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
