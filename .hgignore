@@ -11,8 +11,9 @@ aclocal.m4
 libtool
 Makefile.in
 Makefile
-build
+build*
 msvs9
+vs9
 nmake*
 *.o
 *.lo

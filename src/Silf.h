@@ -26,7 +26,7 @@ public:
     uint16 findPseudo(uint32 uid);
 
 protected:
-    size_t readClassMap(void *pClass, size_t lClass);
+    size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
 
     Pass *m_passes;
     byte m_numPasses;

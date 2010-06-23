@@ -4,7 +4,7 @@
 #include "Features.h"
 #include "graphiteng/IFace.h"
 #include "Main.h"
-
+#include "XmlTraceLog.h"
 #include "TtfUtil.h"
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
@@ -38,6 +38,12 @@ bool FeatureMap::readFeats(IFace *face)
     byte currIndex = 0;
     byte currBits = 0;
 
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().openElement(ElementFeatures);
+    XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
+    XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
+    XmlTraceLog::get().addAttribute(AttrNum, m_numFeats);
+#endif
     for (int i = 0; i < m_numFeats; i++)
     {
         uint32 name;
@@ -59,13 +65,27 @@ bool FeatureMap::readFeats(IFace *face)
         char *pSet = pOrig + offset;
         uint16 maxVal = 0;
 
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementFeature);
+        XmlTraceLog::get().addAttribute(AttrIndex, i);
+        XmlTraceLog::get().addAttribute(AttrNum, numSet);
+        XmlTraceLog::get().addAttribute(AttrFlags, flags);
+        XmlTraceLog::get().addAttribute(AttrLabel, uiName);
+#endif
         if (offset + numSet * 4 > lFeat) return false;
         for (int j = 0; j < numSet; j++)
         {
             uint16 val = read16(pSet);
             if (val > maxVal) maxVal = val;
             if (j == 0) defVals[i] = val;
-            read16(pSet);
+            uint16 label = read16(pSet);
+#ifndef DISABLE_TRACING
+            XmlTraceLog::get().openElement(ElementFeatureSetting);
+            XmlTraceLog::get().addAttribute(AttrIndex, j);
+            XmlTraceLog::get().addAttribute(AttrValue, val);
+            XmlTraceLog::get().addAttribute(AttrLabel, label);
+            XmlTraceLog::get().closeElement(ElementFeatureSetting);
+#endif
         }
         uint32 mask = 1;
         byte bits = 0;
@@ -83,11 +103,18 @@ bool FeatureMap::readFeats(IFace *face)
                 break;
             }
         }
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementFeature);
+#endif
     }
-
     m_defaultFeatures = new(currIndex + 1) Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
         m_defaultFeatures->addFeature(m_feats + i, defVals[i]);
+
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementFeatures);
+#endif
+
     return true;
 }
 

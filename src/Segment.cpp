@@ -72,3 +72,62 @@ void Segment::positionSlots(FontImpl *font)
     }
     m_advance = currpos;
 }
+
+#ifndef DISABLE_TRACING
+void logSegment(ITextSource & textSrc, const ISegment & seg)
+{
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementSegment);
+        XmlTraceLog::get().addAttribute(AttrLength, seg.length());
+        XmlTraceLog::get().addAttribute(AttrAdvanceX, seg.advance().x);
+        XmlTraceLog::get().addAttribute(AttrAdvanceY, seg.advance().y);
+        XmlTraceLog::get().openElement(ElementText);
+        XmlTraceLog::get().addAttribute(AttrEncoding, textSrc.utfEncodingForm());
+        XmlTraceLog::get().addAttribute(AttrLength, textSrc.getLength());
+        switch (textSrc.utfEncodingForm())
+        {
+        case kutf8:
+            XmlTraceLog::get().writeText(
+                reinterpret_cast<const char *>(textSrc.get_utf8_buffer()));
+            break;
+        case kutf16:
+            for (int j = 0; j < textSrc.getLength(); j++)
+            {
+                uint32 code = textSrc.get_utf16_buffer()[j];
+                if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
+                {
+                    j++;
+                    // append low surrogate
+                    code = (code << 16) + textSrc.get_utf16_buffer()[j];
+                }
+                else if (code >= 0xDC00 && code <= 0xDFFF)
+                {
+                    XmlTraceLog::get().warning("Unexpected low surrogate %x at %d", code, j);
+                }
+                XmlTraceLog::get().writeUnicode(code);
+            }
+            break;
+        case kutf32:
+            for (int j = 0; j < textSrc.getLength(); j++)
+            {
+                XmlTraceLog::get().writeUnicode(textSrc.get_utf32_buffer()[j]);
+            }
+            break;
+        }
+        XmlTraceLog::get().closeElement(ElementText);
+        for (int i = 0; i < seg.length(); i++)
+        {
+            XmlTraceLog::get().openElement(ElementSlot);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, seg[i].gid());
+            XmlTraceLog::get().addAttribute(AttrX, seg[i].origin().x);
+            XmlTraceLog::get().addAttribute(AttrY, seg[i].origin().y);
+            XmlTraceLog::get().addAttribute(AttrBefore, seg[i].before());
+            XmlTraceLog::get().addAttribute(AttrAfter, seg[i].after());
+            XmlTraceLog::get().closeElement(ElementSlot);
+        }
+        XmlTraceLog::get().closeElement(ElementSegment);
+    }
+}
+
+#endif

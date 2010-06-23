@@ -4,7 +4,7 @@
 #include <graphiteng/Types.h>
 #include <graphiteng/XmlLog.h>
 
-
+#ifndef DISABLE_TRACING
 
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
@@ -16,19 +16,36 @@ typedef enum {
     ElementSilf,
     ElementSilfSub,
     ElementPass,
+    ElementPseudo,
+    ElementClassMap,
+    ElementLookupClass,
+    ElementLookup,
+    ElementRange,
+    ElementRuleMap,
+    ElementRule,
+    ElementStartState,
+    ElementStateTransitions,
+    ElementRow,
+    ElementData,
+    ElementConstraint,
+    ElementConstraints,
+    ElementActions,
+    ElementAction,
+    ElementFeatures,
+    ElementFeature,
+    ElementFeatureSetting,
     ElementSegment,
+    ElementSlot,
+    ElementText,
 
     ElementError,
     ElementWarning,
     NumElements // Last
 } XmlTraceLogElement;
 
-
-
-
-
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
+    AttrIndex,
     AttrVersion,
     AttrMajor,
     AttrMinor,
@@ -56,8 +73,11 @@ typedef enum {
     AttrUserDefn,
     AttrNumLigComp,
     AttrNumCritFeatures,
+    AttrNumScripts,
     AttrLBGlyph,
     AttrNumPseudo,
+    AttrNumClasses,
+    AttrNumLinear,
     AttrPassId,
     AttrFlags,
     AttrMaxRuleLoop,
@@ -71,6 +91,30 @@ typedef enum {
     AttrNumRanges,
     AttrMinPrecontext,
     AttrMaxPrecontext,
+    AttrFirstId,
+    AttrLastId,
+    AttrColId,
+    AttrSuccessId,
+    AttrRuleId,
+    AttrContextLen,
+    AttrState,
+    AttrValue,
+    AttrSortKey,
+    AttrPrecontext,
+    AttrAction,
+    AttrActionCode,
+    Attr0,
+    Attr1,
+    Attr2,
+    Attr3,
+    AttrLabel,
+    AttrLength,
+    AttrX,
+    AttrY,
+    AttrBefore,
+    AttrAfter,
+    AttrEncoding,
+
     NumAttributes // Last
 } XmlTraceLogAttribute;
 
@@ -85,4 +129,5 @@ public:
 extern const XmlTraceLogTag xmlTraceLogElements[NumElements];
 extern const char * xmlTraceLogAttributes[NumAttributes];
 
+#endif
 #endif

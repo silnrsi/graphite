@@ -9,8 +9,8 @@
 class ISegment 
 {
 public:
-    virtual int length() = 0;
-    virtual Position advance() = 0;
+    virtual int length() const = 0;
+    virtual Position advance() const = 0;
     virtual ISlot & operator[] (int index) = 0;
     virtual const ISlot & operator[] (int index) const = 0;
     virtual void runGraphite() = 0;

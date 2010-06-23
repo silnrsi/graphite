@@ -33,13 +33,19 @@ void finalise(FontImpl *font, Segment *seg);
 FontFace *create_fontface(IFace *face)
 {
     FontFace *res = new FontFace(face);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
+#endif
     if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
     {
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementFace);
+#endif
         return res;
     }
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFace);
+#endif
     delete res;
     return NULL;
 }
@@ -55,13 +61,19 @@ private:
 FontFace *create_filefontface(const char *filePath)
 {
     FontFace *res = new FileFontFace(filePath);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
+#endif
     if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
     {
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementFace);
+#endif
         return res;
     }
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFace);
+#endif
     delete res;
     return NULL;
 }
@@ -97,6 +109,9 @@ ISegment *create_rangesegment(FontImpl *font, FontFace *face, ITextSource *txt)
     prepare_pos(font, seg);
     // run the positioning passes
     finalise(font, seg);
+#ifndef DISABLE_TRACING
+    logSegment(*txt, *seg);
+#endif
     return seg;
 }
 

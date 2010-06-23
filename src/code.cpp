@@ -8,7 +8,39 @@
 #include <stdexcept>
 #include "code.h"
 #include "machine.h"
+#include "XmlTraceLog.h"
 
+#ifndef DISABLE_TRACING
+static const char * sCodeNames[machine::MAX_OPCODE] = {
+	    "NOP",
+	    "PUSH_BYTE",		"PUSH_BYTEU",		"PUSH_SHORT",	"PUSH_SHORTU",	"PUSH_LONG",
+	    "ADD",				"SUB",				"MUL",			"DIV",
+	    "MIN",				"MAX",
+	    "NEG",
+	    "TRUNC8",			"TRUNC16",
+	    "COND",
+	    "AND",				"OR",				"NOT",
+	    "EQUAL",			"NOT_EQ",
+	    "LESS",			"GTR",				"LESS_EQ",		"GTR_EQ",
+	    "NEXT",			"NEXTN",			"COPY_NEXT",
+	    "PUT_GLYPH8BIT_OBS",	"PUT_SUBS8BIT_OBS",	"PUT_COPY",
+	    "INSERT",			"DELETE",
+	    "ASSOC",
+	    "CNTXT_ITEM",
+	    "ATTR_SET",			"ATTR_ADD",			"ATTR_SUB",
+	    "ATTR_SET_SLOT",
+	    "IATTR_SET_SLOT",
+	    "PUSH_SLOT_ATTR",	"PUSH_GLYPH_ATTR_OBS","PUSH_GLYPH_METRIC",		"PUSH_FEAT",
+	    "PUSH_ATT_TOG_ATTR_OBS",	"PUSH_ATT_TOGLYPH_METRIC",
+	    "PUSH_ISLOT_ATTR",
+	    "PUSH_IGLYPH_ATTR",	// not implemented
+	    "POP_RET",			"RET_ZERO",			"RET_TRUE",
+	    "IATTR_SET",		"IATTR_ADD",		"IATTR_SUB",
+	    "PUSH_PROC_STATE",	"PUSH_VERSION",
+	    "PUT_SUBS",			"PUT_SUBS2",		"PUT_SUBS3",
+	    "PUT_GLYPH",		"PUSH_GLYPH_ATTR",	"PUSH_ATT_TOGLYPH_ATTR"
+    };
+#endif
 
 code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
 : _code(0), _data_size(0), _instr_count(0), _status(loaded)
@@ -65,6 +97,22 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         
         // Add this instruction
         *ip++ = op.impl; ++_instr_count;
+
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementAction);
+            XmlTraceLog::get().addAttribute(AttrActionCode, opc);
+            XmlTraceLog::get().addAttribute(AttrAction, sCodeNames[opc]);
+            for (size_t param = 0; param < param_sz && param < 4; param++)
+            {
+                XmlTraceLog::get().addAttribute(
+                    static_cast<XmlTraceLogAttribute>(Attr0 + param), *(cd_ptr + param));
+            }
+            XmlTraceLog::get().closeElement(ElementAction);
+        }
+#endif
+
         // Grab the parameters
         if (param_sz)
         {

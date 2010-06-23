@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
 project(graphiteng_core)
+cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckCXXSourceCompiles)
 
@@ -21,6 +22,8 @@ add_definitions(-DSIZEOF_WCHAR_T=${SIZEOF_WCHAR_T})
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
+option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
+
 set(GRAPHITE_HEADERS 
     ../include/graphiteng/IFont.h
     ../include/graphiteng/IFace.h
@@ -31,6 +34,8 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/Types.h
 	../include/graphiteng/XmlLog.h
     )
+
+file(GLOB PRIVATE_HEADERS *.h) 
 
 add_library(graphiteng SHARED
     call_machine.cpp
@@ -49,7 +54,10 @@ add_library(graphiteng SHARED
     ../common/FileFont.h
     ../common/FileFont.cpp
 	${GRAPHITE_HEADERS}
+	${PRIVATE_HEADERS}
     )
+
+set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels

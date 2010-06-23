@@ -13,11 +13,11 @@ class Segment;
 class Slot : public ISlot
 {
 public:
-    virtual unsigned short gid() { return m_glyphid; }
-    virtual Position origin() { return m_position; }
+    virtual unsigned short gid() const { return m_glyphid; }
+    virtual Position origin() const { return m_position; }
     virtual float advance(FontImpl *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
-    virtual int before() { return m_before; }
-    virtual int after() { return m_after; }
+    virtual int before() const { return m_before; }
+    virtual int after() const { return m_after; }
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }

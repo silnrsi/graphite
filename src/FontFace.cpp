@@ -44,8 +44,10 @@ bool FontFace::readGlyphs()
         if (lGloc < 2 * m_numGlyphs + 8)
             nGlyphs = (lGloc - 8) / 4;
     }
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementGlyphs);
     XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
+#endif
     for (int i = 0; i < nGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
@@ -70,14 +72,20 @@ bool FontFace::readGlyphs()
             glocs = swap16(((uint16 *)pGloc)[4+i]);
             gloce = swap16(((uint16 *)pGloc)[5+i]);
         }
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementGlyphFace);
         XmlTraceLog::get().addAttribute(AttrGlyphId, i);
         XmlTraceLog::get().addAttribute(AttrAdvanceX, g->advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, g->advance().y);
+#endif
         g->readAttrs(pGlat, glocs, gloce, m_numAttrs);
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementGlyphFace);
+#endif
     }
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementGlyphs);
+#endif
     return true;
 }
 
@@ -100,6 +108,7 @@ bool FontFace::readGraphite()
     else
         m_numSilf = swap16(((uint16 *)pSilf)[2]);
 
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementSilf);
     XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
     XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
@@ -108,6 +117,8 @@ bool FontFace::readGraphite()
     XmlTraceLog::get().addAttribute(AttrNum, m_numSilf);
     if (m_numSilf == 0)
         XmlTraceLog::get().warning("No Silf subtables!");
+#endif
+
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
@@ -119,19 +130,26 @@ bool FontFace::readGraphite()
             next = swap32(((uint32 *)pSilf)[offset32Pos + 1 + i]);
         if (offset < 0 || offset > lSilf || next < 0 || next > lSilf)
         {
+#ifndef DISABLE_TRACING
             XmlTraceLog::get().error("Invalid table %d offset %d length %u", i, offset, lSilf);
             XmlTraceLog::get().closeElement(ElementSilf);
+#endif
             return false;
         }
         if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_numGlyphs, version))
         {
+#ifndef DISABLE_TRACING
             XmlTraceLog::get().error("Error reading Graphite subtable %d", i);
             XmlTraceLog::get().closeElement(ElementSilfSub); // for convenience
             XmlTraceLog::get().closeElement(ElementSilf);
+#endif
             return false;
         }
     }
+
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementSilf);
+#endif
     return true;
 }
 

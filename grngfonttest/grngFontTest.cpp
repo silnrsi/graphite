@@ -455,7 +455,9 @@ int testFileFont(Parameters parameters)
     try
     {
         FILE * logFile = fopen("graphitengTrace.xml", "wb");
+#ifndef DISABLE_TRACING
         startGraphiteLogging(logFile, GRLOG_ALL);
+#endif
         //fileFont = new FileFont(parameters.fileName);
         //if (!fileFont)
         //{
@@ -597,7 +599,9 @@ int testFileFont(Parameters parameters)
         printf("Exception occurred\n");
         returnCode = 5;
     }
+#ifndef DISABLE_TRACING
     stopGraphiteLogging();
+#endif
     return returnCode;
 }
 

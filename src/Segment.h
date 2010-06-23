@@ -14,8 +14,8 @@ class Silf;
 class Segment : public ISegment
 {
 public:
-    virtual int length() { return m_numGlyphs; }
-    virtual Position advance() { return m_advance; }
+    virtual int length() const { return m_numGlyphs; }
+    virtual Position advance() const { return m_advance; }
     virtual Slot & operator[] (int index) { return m_slots[index]; }
     virtual const Slot & operator[] (int index) const { return m_slots[index]; }
     virtual void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
@@ -42,5 +42,9 @@ protected:
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
 };
+
+#ifndef DISABLE_TRACING
+extern void logSegment(ITextSource & textSrc, const ISegment & seg);
+#endif
 
 #endif // SEGMENT_INCLUDE

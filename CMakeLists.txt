@@ -1,11 +1,16 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
-
+cmake_policy(SET CMP0012 NEW)
 project(graphiteng)
 enable_language(CXX C)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
+
+if (${DISABLE_TRACING})
+	add_definitions(-DDISABLE_TRACING)
+	message(STATUS "Tracing disabled")
+endif (${DISABLE_TRACING})
 
 add_subdirectory(src)
 add_subdirectory(grngfonttest)

@@ -9,27 +9,43 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 {
     byte *p = (byte *)pPass;
     uint16 numRanges, numEntries;
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrFlags, *p);
+#endif
     p++;
     m_iMaxLoop = *p++;
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrMaxRuleLoop, m_iMaxLoop);
+#endif
     p += 2;         // don't care about context
     m_numRules = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumRules, m_numRules);
+#endif
     p += 2;         // not sure why we would want this
     p += 16;         // ignore offsets for now
     m_sRows = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumRows, m_sRows);
+#endif
     m_sTransition = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumTransition, m_sTransition);
+#endif
     if (m_sTransition > m_sRows) return false;
     m_sSuccess = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumSuccess, m_sSuccess);
+#endif
     if (m_sSuccess > m_sRows) return false;
     m_sColumns = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumColumns, m_sColumns);
+#endif
     numRanges = read16(p);
+#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumRanges, numRanges);
+#endif
     p += 6;
     m_cols = new uint16[numGlyphs];
     for (int i = 0; i < numRanges; i++)
@@ -40,6 +56,13 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         uint16 col = read16(p);
         while (first <= last)
             m_cols[first++] = col;
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementRange);
+        XmlTraceLog::get().addAttribute(AttrFirstId, first);
+        XmlTraceLog::get().addAttribute(AttrLastId, last);
+        XmlTraceLog::get().addAttribute(AttrColId, col);
+        XmlTraceLog::get().closeElement(ElementRange);
+#endif
     }
     if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_ruleidx = new uint16[m_sSuccess + 1];
@@ -54,15 +77,36 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     {
         m_ruleMap[i] = read16(p);
     }
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        for (uint16 iSuccess = 0; iSuccess < m_sSuccess; iSuccess++)
+        {
+            XmlTraceLog::get().openElement(ElementRuleMap);
+            XmlTraceLog::get().addAttribute(AttrSuccessId, iSuccess);
+            for (uint16 j = m_ruleidx[iSuccess]; j < m_ruleidx[iSuccess+1]; j++)
+            {
+                XmlTraceLog::get().openElement(ElementRule);
+                XmlTraceLog::get().addAttribute(AttrRuleId, m_ruleMap[j]);
+                XmlTraceLog::get().closeElement(ElementRule);
+            }
+            XmlTraceLog::get().closeElement(ElementRuleMap);
+        }
+    }
+#endif
     if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_minPreCtxt = *p++;
-    XmlTraceLog::get().addAttribute(AttrMinPrecontext, m_minPreCtxt);
     m_maxPreCtxt = *p++;
-    XmlTraceLog::get().addAttribute(AttrMaxPrecontext, m_maxPreCtxt);
     m_startStates = new uint16[m_maxPreCtxt - m_minPreCtxt + 1];
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
     {
         m_startStates[i] = read16(p);
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementStartState);
+        XmlTraceLog::get().addAttribute(AttrContextLen, i + m_minPreCtxt);
+        XmlTraceLog::get().addAttribute(AttrState, m_startStates[i]);
+        XmlTraceLog::get().closeElement(ElementStartState);
+#endif
         if (m_startStates[i] >= lPass) return false;
     }
 
@@ -79,11 +123,35 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     p += (m_numRules + 1) * 4;
     m_sTable = new int16[m_sTransition * m_sColumns];
     for (int i = 0; i < m_sTransition * m_sColumns; i++)
+    {
         m_sTable[i] = read16(p);
+    }
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementStateTransitions);
+        for (size_t iRow = 0; iRow < m_sTransition; iRow++)
+        {
+            XmlTraceLog::get().openElement(ElementRow);
+            XmlTraceLog::get().addAttribute(AttrIndex, iRow);
+            size_t nRowOffset = iRow * m_sColumns;
+            XmlTraceLog::get().writeElementArray(ElementData, AttrValue, 
+                m_sTable + nRowOffset, m_sColumns);
+            XmlTraceLog::get().closeElement(ElementRow);
+        }
+        XmlTraceLog::get().closeElement(ElementStateTransitions);
+    }
+#endif
     p++;
     if (nPConstraint)
     {
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementConstraint);
+#endif
         m_cPConstraint = code(true, p, p + nPConstraint);
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementConstraint);
+#endif
         p += nPConstraint;
     }
     else
@@ -91,21 +159,49 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 
     m_cConstraint = new code[m_numRules];
     uint16 loffset = read16(pConstraint);
-    for (int i = 0; i < m_numRules; i++)
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementConstraints);
+#endif
+    for (uint16 i = 0; i < m_numRules; i++)
     {
         uint16 noffset = read16(pConstraint);
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementConstraint);
+        XmlTraceLog::get().addAttribute(AttrIndex, i);
+#endif
         if (noffset > loffset) m_cConstraint[i] = code(true, p + loffset, p + noffset);
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementConstraint);
+#endif
         loffset = noffset;
     }
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementConstraints);
+#endif
     p += loffset;
     m_cActions = new code[m_numRules];
     loffset = read16(pActions);
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().openElement(ElementActions);
+#endif
     for (int i = 0; i < m_numRules; i++)
     {
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementRule);
+        XmlTraceLog::get().addAttribute(AttrIndex, i);
+        XmlTraceLog::get().addAttribute(AttrSortKey, m_ruleSorts[i]);
+        XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
+#endif
         uint16 noffset = read16(pActions);
         if (noffset > loffset) m_cActions[i] = code(false, p + loffset, p + noffset);
         loffset = noffset;
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementRule);
+#endif
     }
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementActions);
+#endif
     p += loffset;
 
     assert(size_t(p - (byte *)pPass) <= lPass);
@@ -191,5 +287,4 @@ int Pass::doAction(code *code, int iSlot, Segment *seg, Silf *silf, VMScratch *v
     
     return status == machine::finished ? iSlot + ret: 1;
 }
-
 
