@@ -309,16 +309,14 @@ STARTOP(push_glyph_attr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    // TODO; Implement body
-    push(0);
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_attr_obs_constrained)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]) + is + 1;
-    // TODO; Implement body
-    push(0);
+    const int           slot_ref    = int8(param[1]);
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_metric)
@@ -344,7 +342,6 @@ STARTOP(push_feat)
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
-    // TODO; Implement body
     push(seg.getFeature(fid, feat));
 ENDOP
 
@@ -353,7 +350,6 @@ STARTOP(push_feat_constrained)
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
-    // TODO; Implement body
     push(seg.getFeature(fid, feat));
 ENDOP
 

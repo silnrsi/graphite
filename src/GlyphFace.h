@@ -12,6 +12,7 @@ public:
     void                advance(Position a);
     void    bbox(Rect a);
     void    readAttrs(const void *pGlat, int start, int end, size_t num);
+    uint16  getAttr(uint8 index) { return m_attrs[index]; }
 
 protected:
     Rect     m_bbox;        // bounding box metrics in design units

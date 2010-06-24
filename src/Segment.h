@@ -37,6 +37,7 @@ public:
     uint16 getFeature(int index, uint8 findex) { return m_feats[index].getFeature(const_cast<LoadedFace *>(m_face)->feature(findex)); }
     int8 dir() { return m_dir; }
     void dir(int8 val) { m_dir = val; }
+    uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
 
 private:
     std::vector<Slot> m_slots;
