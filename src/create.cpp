@@ -81,8 +81,9 @@ inline uchar_t consume_utf16(const uint16 *&p) {
     
     if (0xD800 > uh || uh > 0xDBFF)
         return uh;
+    ++p;
     if (0xDC00 > ul || ul > 0xDFFF) {
-        ++p; return 0xFFFD;
+        return 0xFFFD;
     }
     return (uh<<10) + ul - SURROGATE_OFFSET;
 }
