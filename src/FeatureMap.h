@@ -10,6 +10,8 @@ class Features;
 class FeatureRef
 {
 public:
+    FeatureRef(byte bits=0, byte i=0, uint32 mask=0) throw() 
+      : m_mask(mask), m_bits(bits), m_index(i), m_max(mask >> bits) {}
     void set(uint32 *vec, uint16 val, byte length) { 
         if (m_index < length && val <= m_max)
         {
@@ -19,7 +21,6 @@ public:
     }
     uint16 get(uint32 *vec, byte length) { if (m_index < length) return (vec[m_index] & m_mask) >> m_bits; else return 0; }
     void setMask(uint32 *vec, byte length) { vec[m_index] |= m_mask; }
-    void init(byte bits, byte i, uint32 mask) { m_mask = mask; m_bits = bits; m_index = i; m_max = mask >> bits; }
 
 protected:
     uint32 m_mask;

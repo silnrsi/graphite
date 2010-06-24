@@ -101,7 +101,7 @@ bool FeatureMap::readFeats(const IFace *face)
 		    mask = 1;
                 }
                 currBits += bits;
-                m_feats[i].init(currBits, currIndex, (mask - 1) << currBits);
+                m_feats[i] = FeatureRef(currBits, currIndex, (mask - 1) << currBits);
                 break;
             }
         }
@@ -109,7 +109,7 @@ bool FeatureMap::readFeats(const IFace *face)
     XmlTraceLog::get().closeElement(ElementFeature);
 #endif
     }
-    m_defaultFeatures = new(currIndex + 1) Features(currIndex + 1);
+    m_defaultFeatures = new Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
         m_defaultFeatures->addFeature(m_feats + i, defVals[i]);
 
@@ -167,8 +167,9 @@ Features *FeatureMap::newFeatures(uint32 name)
     if (name)
     {
         std::map<uint32, Features *>::iterator res = m_langMap.find(name);
-        if (res != m_langMap.end()) return res->second->newCopy();
+        if (res != m_langMap.end()) 
+            return new Features(*res->second);
     }
-    return m_defaultFeatures->newCopy();
+    return new Features(*m_defaultFeatures);
 }
 
