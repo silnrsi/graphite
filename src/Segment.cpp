@@ -95,9 +95,9 @@ void logSegment(const ITextSource & textSrc, const ISegment & seg)
                 reinterpret_cast<const char *>(textSrc.get_utf_buffer_begin()));
             break;
         case ITextSource::kutf16:
-            for (int j = 0; j < textSrc.getLength(); j++)
+            for (size_t j = 0; j < textSrc.getLength(); ++j)
             {
-                uint32 code = reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
+                uint32 code = static_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
                 if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
                 {
                     j++;
@@ -112,7 +112,7 @@ void logSegment(const ITextSource & textSrc, const ISegment & seg)
             }
             break;
         case ITextSource::kutf32:
-            for (int j = 0; j < textSrc.getLength(); j++)
+            for (size_t j = 0; j < textSrc.getLength(); ++j)
             {
                 XmlTraceLog::get().writeUnicode(
                     reinterpret_cast<const uint32 *>(textSrc.get_utf_buffer_begin())[j]);

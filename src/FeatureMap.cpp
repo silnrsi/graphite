@@ -32,7 +32,7 @@ bool FeatureMap::readFeats(const IFace *face)
     m_numFeats = read16(pFeat);
     read16(pFeat);
     read32(pFeat);
-    if (m_numFeats * 16 + 12 > lFeat) return false;
+    if (m_numFeats * 16U + 12 > lFeat) return false;
     m_feats = new FeatureRef[m_numFeats];
     defVals = new uint16[m_numFeats];
     byte currIndex = 0;
@@ -139,8 +139,8 @@ bool FeatureMap::readSill(const IFace *face)
         uint32 langid = read32(pSill);
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
-        if (offset + 8 * numSettings > lSill && numSettings > 0) return false;
-        Features *feats = newFeatures(0);
+        if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
+        IFeatures *feats = newFeatures(0);
         char *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)

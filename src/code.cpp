@@ -132,7 +132,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    assert(ip - _code == _instr_count);
+    assert(ip - _code == ptrdiff_t(_instr_count));
     _data_size = sizeof(byte)*(dp - _data);
     
     // Now we know exactly how much code and data the program really needs
@@ -243,12 +243,12 @@ void code::release_buffers() throw()
 
 uint32 code::run(uint32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx, 
-                    machine::status_t & status) const
+                    machine::status_t & status_out) const
 {
     assert(stack_base != 0);
     assert(length >= 32);
     assert(*this);          // Check we are actually runnable
     
-    return machine::run(_code, _data, stack_base, length, seg, islot_idx, status);
+    return machine::run(_code, _data, stack_base, length, seg, islot_idx, status_out);
 }
 

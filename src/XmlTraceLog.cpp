@@ -281,7 +281,7 @@ void XmlTraceLog::writeElementArray(XmlTraceLogElement eId, XmlTraceLogAttribute
                     fprintf(m_file, " ");
                 }
             }
-            fprintf(m_file, "<%s index=\"%d\" %s=\"%d\"/>", xmlTraceLogElements[eId].mName, i,
+            fprintf(m_file, "<%s index=\"%d\" %s=\"%d\"/>", xmlTraceLogElements[eId].mName, int(i),
                 xmlTraceLogAttributes[aId], (int)values[i]);
         }
     }

@@ -128,7 +128,7 @@ bool LoadedFace::readGraphite()
             next = lSilf;
         else
             next = swap32(((uint32 *)pSilf)[offset32Pos + 1 + i]);
-        if (offset < 0 || offset > lSilf || next < 0 || next > lSilf)
+        if (offset > lSilf || next > lSilf)
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().error("Invalid table %d offset %d length %u", i, offset, lSilf);
