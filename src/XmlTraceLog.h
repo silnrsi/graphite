@@ -20,6 +20,8 @@ public:
     bool active() { return (m_file != NULL); };
     void openElement(XmlTraceLogElement eId);
     void closeElement(XmlTraceLogElement eId);
+    void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
+    void addSingleElement(XmlTraceLogElement eId, const int value);
     void addAttribute(XmlTraceLogAttribute aId, const char * value);
     void addAttribute(XmlTraceLogAttribute aId, byte value);
     void addAttribute(XmlTraceLogAttribute aId, float value);
@@ -64,6 +66,8 @@ public:
     bool active() { return false; };
     void openElement(XmlTraceLogElement eId) {};
     void closeElement(XmlTraceLogElement eId) {};
+    void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
+    void addSingleElement(XmlTraceLogElement eId, const int value);
     void addAttribute(XmlTraceLogAttribute aId, const char * value) {};
     void addAttribute(XmlTraceLogAttribute aId, byte value) {};
     void addAttribute(XmlTraceLogAttribute aId, float value) {};

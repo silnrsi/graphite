@@ -280,7 +280,8 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const
                 return res;
         }
 #ifdef ENABLE_DEEP_TRACING
-	XmlTraceLog::get().closeElement(ElementTestRule);
+	else
+	    XmlTraceLog::get().closeElement(ElementTestRule);
 #endif
     }
     return -1;

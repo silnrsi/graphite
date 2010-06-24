@@ -29,6 +29,8 @@ public:
     void append(const Segment &other);
     void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
     void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
+    uint16 getClassGlyph(uint16 cid, uint16 offset) { return const_cast<Silf *>(m_silf)->getClassGlyph(cid, offset); }
+    uint16 findClassIndex(uint16 cid, uint16 gid) { return const_cast<Silf *>(m_silf)->findClassIndex(cid, gid); }
 
 private:
     std::vector<Slot> m_slots;

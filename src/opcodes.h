@@ -36,9 +36,18 @@
 
 #define NOT_IMPLEMENTED     assert(false)
 #define use_params(n)       dp += n
+
+#ifdef ENABLE_DEEP_TRACING
+#define declare_params(n)   const byte * param = dp; \
+			    XmlTraceLog::get().addArrayElement(ElementParams, param, n); \
+                            use_params(n);
+#define push(n)             XmlTraceLog::get().addSingleElement(ElementPush, n); *--sp = n
+#else
 #define declare_params(n)   const byte * param = dp; \
                             use_params(n);
 #define push(n)             *--sp = n
+#endif
+
 #define pop()               *sp++
 #define drop(n)             sp += n
 
@@ -159,7 +168,6 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-    // TODO: In the original graphite code this appears to do nothing: check.
     is++;
 ENDOP
 
@@ -171,7 +179,6 @@ STARTOP(next_n)
 ENDOP
 
 STARTOP(copy_next)
-    // TODO: Implement copy_next
     is++;
 ENDOP
 
@@ -179,6 +186,7 @@ STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = unsigned(*param);
     // TODO: Implement body
+    seg[is].glyph(seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -187,12 +195,16 @@ STARTOP(put_subs_8bit_obs)
     const unsigned int  input_class  = unsigned(param[1]),
                         output_class = unsigned(param[2]);
     // TODO; Implement body
+    uint16 index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
+    seg[is].glyph(seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_copy)
     declare_params(1);
     const unsigned int  slot_ref = unsigned(*param);
     // TODO; Implement body
+    if (slot_ref)
+	memcpy(&(seg[is]), &(seg[is + slot_ref]), sizeof(Slot));
 ENDOP
 
 STARTOP(insert)

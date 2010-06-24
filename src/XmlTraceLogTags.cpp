@@ -41,6 +41,8 @@ const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
     XmlTraceLogTag("TestRule", GRLOG_OPCODE),
     XmlTraceLogTag("DoRule", GRLOG_OPCODE),
     XmlTraceLogTag("RunPass", GRLOG_OPCODE),
+    XmlTraceLogTag("Params", GRLOG_OPCODE),
+    XmlTraceLogTag("Push", GRLOG_OPCODE),
 
     XmlTraceLogTag("Error", GRLOG_ALL),
     XmlTraceLogTag("Warning", GRLOG_ALL)
@@ -117,10 +119,9 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "y",
     "before",
     "after",
+    "encoding"
     "name",
     "result",
-    
-    "encoding"
 };
 
 #endif

@@ -41,6 +41,8 @@ typedef enum {
     ElementTestRule,
     ElementDoRule,
     ElementRunPass,
+    ElementParams,
+    ElementPush,
 
     ElementError,
     ElementWarning,
