@@ -146,6 +146,11 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     assert((bytecode_end - bytecode_begin)*sizeof(byte) >= _data_size*sizeof(byte));
     _code = static_cast<instr *>(std::realloc(_code, _instr_count*sizeof(instr)));
     _data = static_cast<byte *>(std::realloc(_data, _data_size*sizeof(byte)));
+    assert(_code);
+    if (!_code) {
+        failure(alloc_failed);
+        return;
+    }    
 }
 
 code::~code() throw ()

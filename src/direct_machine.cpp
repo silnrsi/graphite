@@ -85,7 +85,6 @@ uint32  machine::run(const instr  * program,
                      status_t &     status)
 {
     assert(program != 0);
-    assert(data != 0);
     assert(stack_base !=0);
     assert(length > 8);
     

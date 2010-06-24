@@ -38,13 +38,15 @@
 #define use_params(n)       dp += n
 
 #ifdef ENABLE_DEEP_TRACING
-#define declare_params(n)   const byte * param = dp; \
+#define declare_params(n)   assert(dp); \
+                            const byte * param = dp; \
                             XmlTraceLog::get().addArrayElement(ElementParams, param, n); \
                             use_params(n);
 
 #define push(n)             XmlTraceLog::get().addSingleElement(ElementPush, n); *--sp = n
 #else
-#define declare_params(n)   const byte * param = dp; \
+#define declare_params(n)   assert(dp); \
+                            const byte * param = dp; \
                             use_params(n);
 #define push(n)             *--sp = n
 #endif
