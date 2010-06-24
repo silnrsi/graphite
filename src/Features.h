@@ -24,6 +24,9 @@ public:
         memset(res, 0, sizeof(Features) + (num - 1) * sizeof(uint32));
         return res;
     }
+    void operator delete(void * res, int num) {
+        free(res);
+    }
 
 protected:
     uint32 m_length;

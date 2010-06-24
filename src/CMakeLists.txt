@@ -27,10 +27,10 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
 option(CHECK_STACK "Enable stack checking in FSM")
 
-if (${DISABLE_TRACING})
+if (${CHECK_STACK})
     add_definitions(-DCHECK_STACK)
     message(STATUS "Stack checking enabled")
-endif (${DISABLE_TRACING})
+endif (${CHECK_STACK})
 
 if (NOT ${DISABLE_TRACING})
     set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)

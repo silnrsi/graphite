@@ -8,6 +8,8 @@ LoadedFace::~LoadedFace()
 {
     delete[] m_glyphs;
     delete[] m_silfs;
+    m_glyphs = NULL;
+    m_silfs = NULL;
 }
 
 
