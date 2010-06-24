@@ -153,7 +153,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs);
+    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs + m_numPseudo);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -241,12 +241,13 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
                 {
                     XmlTraceLog::get().openElement(ElementLookup);
                     XmlTraceLog::get().addAttribute(AttrGlyphId, m_classData[j]);
-                    if (m_classData[j] >= numGlyphs)
-                    {
-                        XmlTraceLog::get().warning("GlyphId out of range %d",
-                            m_classData[j]);
-                        glyphsOk = false;
-                    }
+		    // out of range glyphids are allowed as place holders
+                    // if (m_classData[j] >= numGlyphs)
+                    // {
+                    //     XmlTraceLog::get().warning("GlyphId out of range %d",
+                    //         m_classData[j]);
+                    //         glyphsOk = false;
+                    // }
                     XmlTraceLog::get().closeElement(ElementLookup);
                 }
             }
@@ -264,13 +265,13 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
                     {
                         XmlTraceLog::get().warning("GlyphId out of range %d",
                             m_classData[j]);
-                        glyphsOk = false;
+                    //         glyphsOk = false;
                     }
                     if (m_classData[j+1] >= numIds)
                     {
-                        XmlTraceLog::get().warning("Index out of range %d",
-                            m_classData[j+1]);
-                        glyphsOk = false;
+                       XmlTraceLog::get().warning("Index out of range %d",
+                           m_classData[j+1]);
+                           glyphsOk = false;
                     }
                     XmlTraceLog::get().closeElement(ElementLookup);
                 }
