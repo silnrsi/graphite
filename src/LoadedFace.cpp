@@ -1,17 +1,17 @@
-#include "FontFace.h"
+#include "LoadedFace.h"
 #include "VMScratch.h"
 #include <string.h>
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
-FontFace::~FontFace()
+LoadedFace::~LoadedFace()
 {
     delete[] m_glyphs;
     delete[] m_silfs;
 }
 
 
-bool FontFace::readGlyphs()
+bool LoadedFace::readGlyphs()
 {
     size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
     const void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
@@ -89,7 +89,7 @@ bool FontFace::readGlyphs()
     return true;
 }
 
-bool FontFace::readGraphite()
+bool LoadedFace::readGraphite()
 {
     char *pSilf;
     size_t lSilf;
@@ -153,14 +153,14 @@ bool FontFace::readGraphite()
     return true;
 }
 
-void FontFace::runGraphite(Segment *seg, const Silf *aSilf) const
+void LoadedFace::runGraphite(Segment *seg, const Silf *aSilf) const
 {
     VMScratch vms;
 
     aSilf->runGraphite(seg, this, &vms);
 }
 
-const Silf *FontFace::chooseSilf(uint32 script) const
+const Silf *LoadedFace::chooseSilf(uint32 script) const
 {
     if (m_numSilf == 0)
         return NULL;

@@ -211,7 +211,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     return true;
 }
 
-void Pass::runGraphite(Segment *seg, const FontFace *face, VMScratch *vms) const
+void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, seg, vms))
         return;

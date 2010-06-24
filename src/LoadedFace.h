@@ -1,5 +1,5 @@
-#ifndef FONTFACE_INCLUDE
-#define FONTFACE_INCLUDE
+#ifndef LOADEDFACE_INCLUDE
+#define LOADEDFACE_INCLUDE
 
 #include "GlyphFace.h"
 #include "Silf.h"
@@ -29,7 +29,7 @@ class Segment;
 #define ktiSile MAKE_TAG('S','i','l','e')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-class FontFace 
+class LoadedFace 	// an IFace loaded into an object
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
@@ -39,8 +39,8 @@ public:
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    FontFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
-    ~FontFace();
+    LoadedFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
+    ~LoadedFace();
     const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
     unsigned short upem() const { return m_upem; }
@@ -65,8 +65,8 @@ private:
     FeatureMap m_features;
     
   private:		//defensive on m_glyphs and m_silfs
-    FontFace(const FontFace&);
-    FontFace& operator=(const FontFace&);
+    LoadedFace(const LoadedFace&);
+    LoadedFace& operator=(const LoadedFace&);
 };
 
-#endif // FONTFACE_INCLUDE
+#endif // LOADEDFACE_INCLUDE

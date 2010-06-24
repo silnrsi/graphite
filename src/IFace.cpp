@@ -1,12 +1,16 @@
 #include "graphiteng/IFace.h"
-#include <cstdio>
-#include <map>
+#include "XmlTraceLog.h"
+#include "LoadedFace.h"
 
 #ifndef DISABLE_FILE_FONT
 #include "TtfUtil.h"
+#include <cstdio>
+#include <map>
 
 class FileFont /*really a FileFace!*/: public IFace
 {
+friend class IFace;
+
 public:
     FileFont(const char *name);
     ~FileFont();
@@ -72,7 +76,42 @@ const void *FileFont::getTable(unsigned int name, size_t *len) const
 
 /*static*/ IFace* IFace::loadTTFFile(const char *name)		//when no longer needed, call delete
 {
-    return new FileFont(name);
+    FileFont* res = new FileFont(name);
+    if (res->m_pTableDir)
+	return res;
+    
+    //error when loading
+    delete res;
+    return NULL;
+}
+#endif			//!DISABLE_FILE_FONT
+
+LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time when the LoadedFace is alive. When finished with the LoadeFace, call IFace::destroyLoadedFace
+{
+    LoadedFace *res = new LoadedFace(this);
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().openElement(ElementFace);
+#endif
+    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
+    {
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementFace);
+#endif
+        return res;
+    }
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementFace);
+#endif
+    delete res;
+    return NULL;
 }
 
-#endif			//!DISABLE_FILE_FONT
+
+/*static*/ void IFace::destroyLoadedFace(LoadedFace *face)
+{
+    delete face;
+}
+
+
+
+

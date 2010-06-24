@@ -18,16 +18,12 @@ public:
 
 
 //PR the following functions are still to be encapsulated properly
-class IFace;
-class FontFace;
 
-extern GRNG_EXPORT FontFace *create_fontface(IFace *face);
-extern GRNG_EXPORT void destroy_fontface(FontFace *face);
-
+class LoadedFace;
 #ifndef DISABLE_FILE_FONT
 class FileFontFace;
 extern GRNG_EXPORT FileFontFace *create_filefontface(const char * filePath);
-extern GRNG_EXPORT FontFace *the_fontface(FileFontFace *fileface);	//do not call destroy_fontface on this result
+extern GRNG_EXPORT LoadedFace *the_fontface(FileFontFace *fileface);	//do not call destroy_fontface on this result
 extern GRNG_EXPORT void destroy_filefontface(FileFontFace *fileface);
 #endif
 
@@ -36,14 +32,14 @@ extern GRNG_EXPORT void destroy_filefontface(FileFontFace *fileface);
 class IFont;
 class FontImpl;
 
-extern GRNG_EXPORT FontImpl *create_font(IFont *font, FontFace *face, float ppm);
+extern GRNG_EXPORT FontImpl *create_font(IFont *font, LoadedFace *face, float ppm);
 extern GRNG_EXPORT void destroy_font(FontImpl *font);
 
 
 
 class ITextSource;
 
-extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, FontFace *face, const ITextSource *txt);
+extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, LoadedFace *face, const ITextSource *txt);
 extern GRNG_EXPORT void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

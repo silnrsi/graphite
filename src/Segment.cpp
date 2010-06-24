@@ -8,7 +8,7 @@
 #include "Slot.h"
 #include "Main.h"
 
-Segment::Segment(int numchars, const FontFace *face) :
+Segment::Segment(int numchars, const LoadedFace *face) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),

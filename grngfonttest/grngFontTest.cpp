@@ -519,7 +519,7 @@ int Parameters::testFileFont() const
             return 2;
         }
         
-        FontFace *face =		//do not destroy this; destroy fileface instead
+        LoadedFace *face =		//do not destroy this; destroy fileface instead
 			  the_fontface(fileface);
 
         sizeFont = create_font(NULL, face, pointSize * dpi / 72);

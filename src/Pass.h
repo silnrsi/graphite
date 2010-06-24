@@ -6,14 +6,14 @@
 
 class Segment;
 class FontImpl;
-class FontFace;
+class LoadedFace;
 class Silf;
 
 class Pass
 {
 public:
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
-    void runGraphite(Segment *seg, const FontFace *face, VMScratch *vms) const;
+    void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     int findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const;
     int testConstraint(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const;
     int doAction(const code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;

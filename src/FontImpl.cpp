@@ -1,10 +1,9 @@
 #include "FontImpl.h"
 #include "graphiteng/IFont.h"
-#include "FontFace.h"
 
 const float FontImpl::INVALID_ADVANCE = -1e38f;
 
-FontImpl::FontImpl(const IFont *font, FontFace *face, float ppm) :
+FontImpl::FontImpl(const IFont *font, LoadedFace *face, float ppm) :
     m_font(font),
     m_face(face),
     m_scale((font ? font->ppm() : ppm) / face->upem())

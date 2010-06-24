@@ -4,11 +4,11 @@
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
 #include "XmlTraceLog.h"
-#include "FontFace.h"
+#include "LoadedFace.h"
 #include "TtfUtil.h"
 #include "FontImpl.h"
 
-void read_text(FontFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
+void read_text(LoadedFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
 void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
 
@@ -26,37 +26,17 @@ void finalise(FontImpl *font, Segment *seg);
 #define GET_UTF32(p) *p++
 
 
-FontFace *create_fontface(IFace *face)
-{
-    FontFace *res = new FontFace(face);
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().openElement(ElementFace);
-#endif
-    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
-    {
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementFace);
-#endif
-        return res;
-    }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementFace);
-#endif
-    delete res;
-    return NULL;
-}
-
 class FileFontFace
 {
 public:
     FileFontFace(const char * filePath) : m_pFileFont(IFace::loadTTFFile(filePath)), m_FontFace(m_pFileFont) {}
     
-    const FontFace& theFontFace() const { return m_FontFace; }
-    FontFace& theFontFace() { return m_FontFace; }
+    const LoadedFace& theFontFace() const { return m_FontFace; }
+    LoadedFace& theFontFace() { return m_FontFace; }
 
 private:
     IFace* m_pFileFont;
-    FontFace m_FontFace;
+    LoadedFace m_FontFace;
     
 private:		//defensive on m_pFileFont
     FileFontFace(const FileFontFace&);
@@ -66,7 +46,7 @@ private:		//defensive on m_pFileFont
 FileFontFace *create_filefontface(const char *filePath)
 {
     FileFontFace *res2 = new FileFontFace(filePath);
-    FontFace* res = &res2->theFontFace();
+    LoadedFace* res = &res2->theFontFace();
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
@@ -84,7 +64,7 @@ FileFontFace *create_filefontface(const char *filePath)
     return NULL;
 }
 
-FontFace *the_fontface(FileFontFace *fileface)	//do not call destroy_fontface on this result
+LoadedFace *the_fontface(FileFontFace *fileface)	//do not call destroy_fontface on this result
 {
     return &fileface->theFontFace();
 }
@@ -96,13 +76,8 @@ void destroy_filefontface(FileFontFace *fileface)
 }
 
 
-void destroy_fontface(FontFace *face)
-{
-    delete face;
-}
-
 // font my be NULL, but needs ppm in that case
-FontImpl *create_font(IFont *font, FontFace *face, float ppm)
+FontImpl *create_font(IFont *font, LoadedFace *face, float ppm)
 {
     FontImpl *res = new FontImpl(font, face, ppm);
     return res;
@@ -114,7 +89,7 @@ void destroy_font(FontImpl *font)
 }
 
 
-ISegment *create_rangesegment(FontImpl *font, FontFace *face, const ITextSource *txt)
+ISegment *create_rangesegment(FontImpl *font, LoadedFace *face, const ITextSource *txt)
 {
     int numchars = txt->getLength();
     Segment *seg = new Segment(numchars, face);
@@ -140,7 +115,7 @@ void destroy_segment(ISegment *seg)
 
 /* Now we go private */
 
-void read_text(FontFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
+void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
 {
     const void *const cmap = face->getTable(ktiCmap, NULL);
     const void *const ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);

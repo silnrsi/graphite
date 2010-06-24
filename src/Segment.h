@@ -7,9 +7,9 @@
 #include "graphiteng/ISlot.h"
 #include "Slot.h"
 #include "CharInfo.h"
-#include "FontFace.h"
 
 class Silf;
+class LoadedFace;
 
 class Segment : public ISegment
 {
@@ -21,7 +21,7 @@ public:
     virtual void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     virtual void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
 
-    Segment(int numSlots, const FontFace *face);
+    Segment(int numSlots, const LoadedFace *face);
     Segment(const Segment &other);
     ~Segment();
     void appendSlot(int i, int cid, int gid);
@@ -37,7 +37,7 @@ private:
     CharInfo *m_charinfo;  // character info, one per input character
     int m_numCharinfo;      // size of the array and number of input characters
 
-    const FontFace *m_face;      // Fontface
+    const LoadedFace *m_face;      // LoadedFace
     const Silf *m_silf;
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
