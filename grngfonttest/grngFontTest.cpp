@@ -515,11 +515,16 @@ int Parameters::testFileFont() const
         GrngTextSrc textSrc(pText32, charLength);
         if (!(fileface = IFace::loadTTFFile(fileName)))
         {
-            fprintf(stderr, "Invalid font, failed to read tables");
+            fprintf(stderr, "Invalid font, failed to read tables\n");
             return 2;
         }
         
         LoadedFace *face = fileface->makeLoadedFace();
+        if (!face)
+        {
+            fprintf(stderr, "Invalid font, failed to parse tables\n");
+            return 3;
+        }
 
         sizeFont = create_font(NULL, face, pointSize * dpi / 72);
 #if 0
