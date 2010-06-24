@@ -18,7 +18,7 @@ static const opcode_t opcode_table[] =
     {{do2(add)},                        0, -1},         // ADD
     {{do2(sub)},                        0, -1},         // SUB
     {{do2(mul)},                        0, -1},         // MUL
-    {{do2(div)},                        0, -1},         // DIV
+    {{do2(div_)},                       0, -1},         // DIV
     {{do2(min)},                        0, -1},         // MIN
     {{do2(max)},                        0, -1},         // MAX
     {{do2(neg)},                        0, 0},          // NEG

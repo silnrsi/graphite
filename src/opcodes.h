@@ -103,7 +103,7 @@ STARTOP(mul)
     binop(*);
 ENDOP
 
-STARTOP(div)
+STARTOP(div_)
     binop(/);
 ENDOP
 
