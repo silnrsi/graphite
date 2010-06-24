@@ -26,55 +26,6 @@ void finalise(FontImpl *font, Segment *seg);
 #define GET_UTF32(p) *p++
 
 
-class FileFontFace
-{
-public:
-    FileFontFace(const char * filePath) : m_pFileFont(IFace::loadTTFFile(filePath)), m_FontFace(m_pFileFont) {}
-    
-    const LoadedFace& theFontFace() const { return m_FontFace; }
-    LoadedFace& theFontFace() { return m_FontFace; }
-
-private:
-    IFace* m_pFileFont;
-    LoadedFace m_FontFace;
-    
-private:		//defensive on m_pFileFont
-    FileFontFace(const FileFontFace&);
-    FileFontFace& operator=(const FileFontFace&);
-};
-
-FileFontFace *create_filefontface(const char *filePath)
-{
-    FileFontFace *res2 = new FileFontFace(filePath);
-    LoadedFace* res = &res2->theFontFace();
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().openElement(ElementFace);
-#endif
-    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
-    {
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementFace);
-#endif
-        return res2;
-    }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementFace);
-#endif
-    delete res2;
-    return NULL;
-}
-
-LoadedFace *the_fontface(FileFontFace *fileface)	//do not call destroy_fontface on this result
-{
-    return &fileface->theFontFace();
-}
-
-
-void destroy_filefontface(FileFontFace *fileface)
-{
-    delete fileface;
-}
-
 
 // font my be NULL, but needs ppm in that case
 FontImpl *create_font(IFont *font, LoadedFace *face, float ppm)

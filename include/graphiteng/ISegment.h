@@ -20,15 +20,6 @@ public:
 //PR the following functions are still to be encapsulated properly
 
 class LoadedFace;
-#ifndef DISABLE_FILE_FONT
-class FileFontFace;
-extern GRNG_EXPORT FileFontFace *create_filefontface(const char * filePath);
-extern GRNG_EXPORT LoadedFace *the_fontface(FileFontFace *fileface);	//do not call destroy_fontface on this result
-extern GRNG_EXPORT void destroy_filefontface(FileFontFace *fileface);
-#endif
-
-
-
 class IFont;
 class FontImpl;
 
