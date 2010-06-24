@@ -72,7 +72,7 @@ namespace machine
         LESS,           GTR,            LESS_EQ,        GTR_EQ,
 
         NEXT,           NEXT_N,         COPY_NEXT,
-        PUT_GLYPH8BIT_OBS,              PUT_SUBS8BIT_OBS,   PUT_COPY,
+        PUT_GLYPH_8BIT_OBS,              PUT_SUBS_8BIT_OBS,   PUT_COPY,
         INSERT,         DELETE,
         ASSOC,
         CNTXT_ITEM,
@@ -91,7 +91,7 @@ namespace machine
         IATTR_SET,                      IATTR_ADD,          IATTR_SUB,
         PUSH_PROC_STATE,                PUSH_VERSION,
         PUT_SUBS,                       PUT_SUBS2,          PUT_SUBS3,
-        PUT_GLYPH,                      PUSH_GLYPH_ATTR,    PUSH_ATT_TOGLYPH_ATTR,
+        PUT_GLYPH,                      PUSH_GLYPH_ATTR,    PUSH_ATT_TO_GLYPH_ATTR,
         MAX_OPCODE
     };
 }

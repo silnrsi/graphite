@@ -124,7 +124,7 @@ bool LoadedFace::readGraphite()
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        uint32 offset = swap32(((uint32 *)pSilf)[offset32Pos + i]);
+        const uint32 offset = swap32(((uint32 *)pSilf)[offset32Pos + i]);
         uint32 next;
         if (i == m_numSilf - 1)
             next = lSilf;

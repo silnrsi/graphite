@@ -10,6 +10,8 @@
 #include "machine.h"
 #include "XmlTraceLog.h"
 
+#include <cstdio>
+
 #ifndef DISABLE_TRACING
 static const char * sCodeNames[machine::MAX_OPCODE] = {
 	    "NOP",
@@ -66,7 +68,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     // estimate.  Once we know their real sizes the we'll shrink them.
     _code = static_cast<instr *>(std::malloc((bytecode_end - bytecode_begin)
                                              * sizeof(instr)));
-    _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)));
+    _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)
+                                             * sizeof(byte)));
     
     if (!_code || !_data) {
         failure(alloc_failed);
@@ -123,7 +126,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             dp     += param_sz;
         }
         
-        fixup_instruction_offsets(opc, dp, param_sz, iSlot, cContexts);
+//        fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
+//                                    iSlot, cContexts);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
@@ -138,6 +142,8 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     // Now we know exactly how much code and data the program really needs
     // realloc the buffers to exactly the right size so we don't waste any 
     // memory.
+    assert((bytecode_end - bytecode_begin)*sizeof(instr) >= _instr_count*sizeof(instr));
+    assert((bytecode_end - bytecode_begin)*sizeof(byte) >= _data_size*sizeof(byte));
     _code = static_cast<instr *>(std::realloc(_code, _instr_count*sizeof(instr)));
     _data = static_cast<byte *>(std::realloc(_data, _data_size*sizeof(byte)));
 }
@@ -173,51 +179,64 @@ bool code::check_opcode(const machine::opcode opc,
     return true;
 }
 
+#define ctxtins(n)  cContexts[(n)*2]
+#define ctxtdel(n)  cContexts[(n)*2+1]
+
+inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
+    *arg = *arg < 0 
+        ? *arg - ctxtins(is + *arg) 
+        : ctxtins(is);
+}
 
 void code::fixup_instruction_offsets(const machine::opcode opc, 
-                                     byte  * dp, size_t param_sz,
+                                     int8  * dp, size_t param_sz,
                                      byte & iSlot, byte * cContexts)
 {
+    
     using namespace machine;
+    uint8 *contexts = static_cast<uint8 *>(cContexts);
     
     switch (opc)
     {
         case NEXT :
         case COPY_NEXT :
             iSlot++;
-            cContexts[iSlot * 2] = 0;
-            cContexts[iSlot * 2 + 1] = 0;
+            ctxtins(iSlot) = 0;
+            ctxtdel(iSlot) = 0;
             break;
         case INSERT :
-            for (char i = iSlot; i >= 0; i--)
-                cContexts[i * 2]++;
+            for (int i = iSlot; i >= 0; --i)
+                ++ctxtins(i);
             break;
         case DELETE :
-            for (char i = iSlot; i >= 0; i--)
-                cContexts[i * 2 + 1]++;
+            for (int i = iSlot; i >= 0; --i)
+                ++ctxtdel(i);
             break;
         case PUT_COPY :
         case PUSH_SLOT_ATTR :
-        case PUSH_GLYPH_ATTR :
+        case PUSH_GLYPH_ATTR_OBS :
+        case PUSH_FEAT :
         case PUSH_ATT_TO_GATTR_OBS :
-            if (dp[-1] > 128)
-                dp[-1] -= cContexts[2 * (iSlot + 256 - dp[-1])];
+        case PUSH_GLYPH_ATTR :
+        case PUSH_ATT_TO_GLYPH_ATTR :
+            fixup_slotref(dp-1,iSlot,cContexts);
             break;
         case CNTXT_ITEM :
-        case PUSH_ISLOT_ATTR :
         case PUSH_GLYPH_METRIC :
         case PUSH_ATT_TO_GLYPH_METRIC :
-            if (dp[-2] > 128)
-                dp[-2] -= cContexts[2 * (iSlot + 256 - dp[-2])];
-            break;
+        case PUSH_ISLOT_ATTR :
+            fixup_slotref(dp-2,iSlot,cContexts);
+        case PUT_SUBS_8BIT_OBS:
+            fixup_slotref(dp-3,iSlot,cContexts);
         case PUT_SUBS :
-            if (dp[-3] > 128)
-                dp[-3] -= cContexts[2 * (iSlot + 256 - dp[-3])];
+            fixup_slotref(dp-5,iSlot,cContexts);
             break;
         case ASSOC :
-            for (byte i = 1; i < param_sz; i++)
-                if (dp[-i] > 128)
-                    dp[-i] -= cContexts[2 * (iSlot + 256 - dp[-i])];
+            printf("param_sz = %d\tiSlot = %d\n", unsigned(param_sz), iSlot);
+            for (size_t i = 1; i < param_sz; ++i) {
+                printf("\t-i = %d\t(iSlot + dp[-i]) = %d\n", int(-i), iSlot + dp[-i]);
+                fixup_slotref(dp-i,iSlot,cContexts);
+            }
             break;
         default :
             break;

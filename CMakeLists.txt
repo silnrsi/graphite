@@ -9,17 +9,17 @@ enable_testing()
 
 option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
 
-if (${DISABLE_TRACING})
+if (DISABLE_TRACING)
     add_definitions(-DDISABLE_TRACING)
     message(STATUS "Tracing disabled")
-endif (${DISABLE_TRACING})
+endif (DISABLE_TRACING)
 
 option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 
-if (${ENABLE_DEEP_TRACING})
+if (ENABLE_DEEP_TRACING)
     add_definitions(-DENABLE_DEEP_TRACING)
     message(STATUS "Deep tracing enabled")
-endif (${ENABLE_DEEP_TRACING})
+endif (ENABLE_DEEP_TRACING)
 
 add_subdirectory(src)
 add_subdirectory(grngfonttest)
