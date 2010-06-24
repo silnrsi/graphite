@@ -32,15 +32,16 @@
 //                (Only if you use declare_params first).
      
      
-#define binop(op)           const uint32 a = pop(); *sp = *sp op a
+#define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
 
 #define NOT_IMPLEMENTED     assert(false)
 #define use_params(n)       dp += n
 
 #ifdef ENABLE_DEEP_TRACING
 #define declare_params(n)   const byte * param = dp; \
-			    XmlTraceLog::get().addArrayElement(ElementParams, param, n); \
+                            XmlTraceLog::get().addArrayElement(ElementParams, param, n); \
                             use_params(n);
+
 #define push(n)             XmlTraceLog::get().addSingleElement(ElementPush, n); *--sp = n
 #else
 #define declare_params(n)   const byte * param = dp; \
@@ -57,35 +58,35 @@ ENDOP
 
 STARTOP(push_byte)
     declare_params(1);
-    push(signed(*param));
+    push(int8(*param));
 ENDOP
 
 STARTOP(push_byte_u)
     declare_params(1);
-    push(unsigned(*param));
+    push(uint8(*param));
 ENDOP
 
 STARTOP(push_short)
     declare_params(2);
-    const uint16 r  = param[0] << 8 
-                    | param[1];
-    push(signed(r));
+    const int16 r   = int8(param[0]) << 8 
+                    | int8(param[1]);
+    push(r);
 ENDOP
 
 STARTOP(push_short_u)
     declare_params(2);
-    const uint16 r  = param[0] << 8
-                    | param[1];
-    push(unsigned(r));
+    const uint16 r  = uint8(param[0]) << 8
+                    | uint8(param[1]);
+    push(r);
 ENDOP
 
 STARTOP(push_long)
     declare_params(4);
-    const uint32 r  = param[0] << 24 
-                    | param[1] << 16
-                    | param[2] << 8
-                    | param[4];
-    push(unsigned(r));
+    const uint32 r  = uint8(param[0]) << 24 
+                    | uint8(param[1]) << 16
+                    | uint8(param[2]) << 8
+                    | uint8(param[4]);
+    push(r);
 ENDOP
 
 STARTOP(add)
@@ -105,12 +106,12 @@ STARTOP(div)
 ENDOP
 
 STARTOP(min)
-    const uint32 a = pop(), b = *sp;
+    const int32 a = pop(), b = *sp;
     if (a < b) *sp = a;
 ENDOP
 
 STARTOP(max)
-    const uint32 a = pop(), b = *sp;
+    const int32 a = pop(), b = *sp;
     if (a > b) *sp = a;
 ENDOP
 
@@ -173,7 +174,7 @@ ENDOP
 
 STARTOP(next_n)
     declare_params(1);
-    const size_t    count = size_t(*param);
+    const size_t    count = uint8(*param);
     // TODO: In the original graphite this always asserts to false: check.
     NOT_IMPLEMENTED;
 ENDOP
@@ -184,16 +185,16 @@ ENDOP
 
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
-    const unsigned int output_class = unsigned(*param);
+    const unsigned int output_class = uint8(*param);
     // TODO: Implement body
     seg[is].glyph(seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
     declare_params(3);
-    const size_t        slot_ref     = size_t(param[0]);
-    const unsigned int  input_class  = unsigned(param[1]),
-                        output_class = unsigned(param[2]);
+    const int           slot_ref     = int8(param[0]);
+    const unsigned int  input_class  = uint8(param[1]),
+                        output_class = uint8(param[2]);
     // TODO; Implement body
     uint16 index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
     seg[is].glyph(seg.getClassGlyph(output_class, index));
@@ -201,7 +202,7 @@ ENDOP
 
 STARTOP(put_copy)
     declare_params(1);
-    const unsigned int  slot_ref = unsigned(*param);
+    const unsigned int  slot_ref = uint8(*param);
     // TODO; Implement body
     if (slot_ref)
 	memcpy(&(seg[is]), &(seg[is + slot_ref]), sizeof(Slot));
@@ -219,8 +220,8 @@ ENDOP
 
 STARTOP(assoc)
     declare_params(1);
-    const unsigned int  count = unsigned(*param);
-    const int8 * assocs = reinterpret_cast<const int8 *>(param+1);
+    const unsigned int  count = uint8(*param);
+    const int8 *        assocs = reinterpret_cast<const int8 *>(param+1);
     use_params(count);
     
     // TODO; Implement body;   
@@ -230,8 +231,8 @@ STARTOP(cntxt_item)
     // It turns out this is a cunningly disguised condition forward jump.
     // TODO: Put checks for this one to avoid jumping off the end of the program.
     declare_params(2);    
-    const size_t    is_arg = size_t(param[0]);
-    const size_t    count  = size_t(param[1]);
+    const int       is_arg = int8(param[0]);
+    const size_t    count  = uint8(param[1]);
 
     if (is_arg != is) {
         ip += count;
@@ -241,7 +242,7 @@ ENDOP
 
 STARTOP(attr_set)
     declare_params(1);
-    const unsigned int  slat = unsigned(*param);
+    const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -249,7 +250,7 @@ ENDOP
 
 STARTOP(attr_add)
     declare_params(1);
-    const unsigned int  slat = unsigned(*param);
+    const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -257,7 +258,7 @@ ENDOP
 
 STARTOP(attr_sub)
     declare_params(1);
-    const unsigned int  slat = unsigned(*param);
+    const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -265,7 +266,7 @@ ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
-    const unsigned int  slat = unsigned(*param);
+    const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -273,8 +274,8 @@ ENDOP
 
 STARTOP(iattr_set_slot)
     declare_params(2);
-    const unsigned int  slat = unsigned(param[0]);
-    const size_t        idx  = size_t(param[1]);
+    const unsigned int  slat = uint8(param[0]);
+    const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -282,118 +283,118 @@ ENDOP
 
 STARTOP(push_slot_attr)
     declare_params(2);
-    const unsigned int  slat     = unsigned(param[0]);
-    const size_t        slot_ref = size_t(param[1]);
+    const unsigned int  slat     = uint8(param[0]);
+    const int           slot_ref = int8(param[1]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
-    const unsigned int  slat     = unsigned(param[0]);
-    const size_t        slot_ref = size_t(param[1]) + is + 1;
+    const unsigned int  slat     = uint8(param[0]);
+    const int           slot_ref = int8(param[1]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_obs)
     declare_params(2);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_obs_constrained)
     declare_params(2);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]) + is + 1;
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_glyph_metric)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]);
-    const signed int    attr_level  = signed(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
+    const signed int    attr_level  = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]) + is + 1;
-    const signed int    attr_level  = signed(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]) + is + 1;
+    const signed int    attr_level  = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_feat)
     declare_params(2);
-    const unsigned int  feat        = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]);
+    const unsigned int  feat        = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_feat_constrained)
     declare_params(2);
-    const unsigned int  feat        = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]) + is + 1;
+    const unsigned int  feat        = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_gattr_obs)
     declare_params(2);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_gattr_obs_constrained)
     declare_params(2);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]) + is + 1;
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_metric)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]);
-    const signed int    attr_level  = signed(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
+    const signed int    attr_level  = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_metric_constrained)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0]);
-    const size_t        slot_ref    = size_t(param[1]) + is + 1;
-    const signed int    attr_level  = signed(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]) + is + 1;
+    const signed int    attr_level  = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_islot_attr)
     declare_params(3);
-    const unsigned int  slat     = unsigned(param[0]);
-    const size_t        slot_ref = size_t(param[1]),
-                        idx      = size_t(param[2]);
+    const unsigned int  slat     = uint8(param[0]);
+    const int           slot_ref = int8(param[1]),
+                        idx      = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
     declare_params(3);
-    const unsigned int  slat     = unsigned(param[0]);
-    const size_t        slot_ref = size_t(param[1]) + is + 1,
-                        idx      = size_t(param[2]);
+    const unsigned int  slat     = uint8(param[0]);
+    const int           slot_ref = int8(param[1]) + is + 1,
+                        idx      = uint8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
@@ -417,8 +418,8 @@ ENDOP
 
 STARTOP(iattr_set)
     declare_params(2);
-    const unsigned int  slat = unsigned(param[0]);
-    const size_t        idx  = size_t(param[1]);
+    const unsigned int  slat = uint8(param[0]);
+    const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -426,8 +427,8 @@ ENDOP
 
 STARTOP(iattr_add)
     declare_params(2);
-    const unsigned int  slat = unsigned(param[0]);
-    const size_t        idx  = size_t(param[1]);
+    const unsigned int  slat = uint8(param[0]);
+    const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -435,8 +436,8 @@ ENDOP
 
 STARTOP(iattr_sub)
     declare_params(2);
-    const unsigned int  slat = unsigned(param[0]);
-    const size_t        idx  = size_t(param[1]);
+    const unsigned int  slat = uint8(param[0]);
+    const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
 
     // TODO; Implement body
@@ -444,7 +445,7 @@ ENDOP
 
 STARTOP(push_proc_state)
     declare_params(1);
-    const unsigned int  pstate = *param;
+    const unsigned int  pstate = uint8(*param);
     // TODO; Implement body
     push(1);
 ENDOP
@@ -455,11 +456,11 @@ ENDOP
 
 STARTOP(put_subs)
     declare_params(5);
-    const size_t        slot_ref     = size_t(param[0]);
-    const unsigned int  input_class  = unsigned(param[1] << 8) 
-                                     | unsigned(param[2]);
-    const unsigned int  output_class = unsigned(param[3] << 8) 
-                                     | unsigned(param[4]);
+    const int        slot_ref     = int8(param[0]);
+    const unsigned int  input_class  = uint8(param[1]) << 8
+                                     | uint8(param[2]);
+    const unsigned int  output_class = uint8(param[3]) << 8
+                                     | uint8(param[4]);
     // TODO; Implement body
 ENDOP
 
@@ -473,43 +474,43 @@ ENDOP
 
 STARTOP(put_glyph)
     declare_params(2);
-    const unsigned int output_class  = unsigned(param[0] << 8) 
-                                     | unsigned(param[1]);
+    const unsigned int output_class  = uint8(param[0]) << 8
+                                     | uint8(param[1]);
     // TODO: Implement body
 ENDOP
 
 STARTOP(push_glyph_attr)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0])
-                                    | unsigned(param[1]);
-    const size_t        slot_ref    = size_t(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]) << 8
+                                    | uint8(param[1]);
+    const int           slot_ref    = int8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_glyph_attr_constrained)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0])
-                                    | unsigned(param[1]);
-    const size_t        slot_ref    = size_t(param[2]) + is + 1;
+    const unsigned int  glyph_attr  = uint8(param[0]) << 8
+                                    | uint8(param[1]);
+    const int           slot_ref    = int8(param[2]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_attr)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0])
-                                    | unsigned(param[1]);
-    const size_t        slot_ref    = size_t(param[2]);
+    const unsigned int  glyph_attr  = uint8(param[0]) << 8
+                                    | uint8(param[1]);
+    const int           slot_ref    = int8(param[2]);
     // TODO; Implement body
     push(0);
 ENDOP
 
 STARTOP(push_att_to_glyph_attr_constrained)
     declare_params(3);
-    const unsigned int  glyph_attr  = unsigned(param[0])
-                                    | unsigned(param[1]);
-    const size_t        slot_ref    = size_t(param[2]) + is + 1;
+    const unsigned int  glyph_attr  = uint8(param[0]) << 8
+                                    | uint8(param[1]);
+    const int           slot_ref    = int8(param[2]) + is + 1;
     // TODO; Implement body
     push(0);
 ENDOP
