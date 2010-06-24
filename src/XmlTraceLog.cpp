@@ -106,6 +106,9 @@ void XmlTraceLog::closeElement(XmlTraceLogElement eId)
     }
     m_inElement = false;
     m_lastNodeText = false;
+#ifdef ENABLE_DEEP_TRACING
+    fflush(m_file);
+#endif
 }
 
 void XmlTraceLog::addArrayElement(XmlTraceLogElement eId, const byte *start, int num)

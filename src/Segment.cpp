@@ -98,7 +98,7 @@ void logSegment(const ITextSource & textSrc, const ISegment & seg)
         case ITextSource::kutf16:
             for (size_t j = 0; j < textSrc.getLength(); ++j)
             {
-                uint32 code = static_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
+                uint32 code = reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
                 if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
                 {
                     j++;

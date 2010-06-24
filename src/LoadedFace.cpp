@@ -6,7 +6,8 @@
 
 LoadedFace::~LoadedFace()
 {
-    delete[] m_glyphs;
+    //delete[] m_glyphs;
+    delete m_glyphs;// since m_glyphs is allocated as new(m_numGlyphs * sizeof(GlyphFace))
     delete[] m_silfs;
     m_glyphs = NULL;
     m_silfs = NULL;
