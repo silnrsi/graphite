@@ -13,20 +13,6 @@ void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
 
 
-#define GET_UTF8(p) \
-    (*p < 0x80 ? *p++ : \
-    (*p < 0xC0 ? p++, 0 : \
-    (*p < 0xE0 ? ((unsigned int)(*p++ & 0x1F) << 6) + (*p++ & 0x3F) : \
-    (*p < 0xF0 ? ((unsigned int)(*p++ & 0x0F) << 12) + ((*p++ & 0x3F) << 6) + (*p++ & 0x3F) : \
-    (*p < 0xF8 ? ((unsigned int)(*p++ & 0x07) << 18) + ((*p++ & 0x3F) << 12) + ((*p++ & 0x3F) << 6) + (*p++ & 0x3F) : (*p++, 0))))))
-
-#define GET_UTF16(p) \
-    (*p < 0xDC00 && *p >= 0xD800 ? (p[1] >= 0xDC00 && p[1] < 0xE000 ? ((unsigned int)(*p++ & 0x3FF) << 10) + (*p++ & 0x3FF) : (p += 2, 0)) : *p++)
-
-#define GET_UTF32(p) *p++
-
-
-
 // font my be NULL, but needs ppm in that case
 FontImpl *create_font(IFont *font, LoadedFace *face, float ppm)
 {
@@ -65,19 +51,58 @@ void destroy_segment(ISegment *seg)
 }
 
 /* Now we go private */
+typedef unsigned int uchar_t;
+
+namespace {
+const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
+                                          0,0,0,0,  // trailing byte
+                                          2,2,            // 2 bytes
+                                          3,                 // 3 bytes
+                                          4};                // 4 bytes
+const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
+
+inline uchar_t consume_utf8(const uint8 *&p) {
+    const size_t    seq_sz = utf8_sz_lut[*p >> 4];
+    uchar_t         uc = *p ^ utf8_mask_lut[seq_sz];
+    
+    switch(seq_sz) {
+        case 4:     uc <<= 6; uc |= *++p & 0x7F;
+        case 3:     uc <<= 6; uc |= *++p & 0x7F;
+        case 2:     uc <<= 6; uc |= *++p & 0x7F; break;
+        case 1:     break;
+        case 0:     uc = 0xFFFD; break;
+    }
+    ++p; return uc;
+}
+
+const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+inline uchar_t consume_utf16(const uint16 *&p) {
+    const uchar_t   uh = *p, ul = *++p;
+    
+    if (0xD800 > uh || uh > 0xDBFF)
+        return uh;
+    if (0xDC00 > ul || ul > 0xDFFF) {
+        ++p; return 0xFFFD;
+    }
+    return (uh<<10) + ul - SURROGATE_OFFSET;
+}
+
+} // end of private namespace
+
 
 void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
 {
-    const void *const cmap = face->getTable(ktiCmap, NULL);
-    const void *const ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
-    const void *      pChar = txt->get_utf_buffer_begin();
-    unsigned int cid, gid;
+    const void *const   cmap = face->getTable(ktiCmap, NULL);
+    const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
+    const void *        pChar = txt->get_utf_buffer_begin();
+    uchar_t             cid;
+    unsigned int        gid;
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
             const uint8 * p = static_cast<const uint8 *>(pChar);
             for (size_t i = 0; i < numchars; ++i) {
-                cid = GET_UTF8(p);
+                cid = consume_utf8(p);
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
                 seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
             }
@@ -86,7 +111,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
         case ITextSource::kutf16: {
             const uint16 * p = static_cast<const uint16 *>(pChar);
             for (size_t i = 0; i < numchars; ++i) {
-                cid = GET_UTF16(p);
+                cid = consume_utf16(p);
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
                 seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
             }
@@ -95,7 +120,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
         case ITextSource::kutf32 : default: {
             const uint32 * p = static_cast<const uint32 *>(pChar);
             for (size_t i = 0; i < numchars; ++i) {
-                cid = GET_UTF32(p);
+                cid = *p++;
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
                 seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
             }
