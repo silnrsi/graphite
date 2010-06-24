@@ -7,8 +7,10 @@
 #include "FontImpl.h"
 
 #define SLOT_DELETED    1
+#define SLOT_INSERT	2
 
 class Segment;
+
 
 class Slot : public ISlot
 {
@@ -31,7 +33,35 @@ public:
     void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED); }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
+    bool isInsertBefore() { return (m_flags & SLOT_INSERT); }
+    void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
+    int getAttr(Segment *seg, uint8 index, uint8 subindex);
+    void setAttr(Segment *seg, uint8 index, uint8 subindex, int value);
 
+    enum attrCode {
+	kslatAdvX = 0, kslatAdvY,
+	kslatAttTo,
+	kslatAttX, kslatAttY,
+	kslatAttXOff, kslatAttYOff,
+	kslatAttWithX, kslatAttWithY,
+	kslatAttWithXOff, kslatAttWithYOff,
+	kslatAttLevel,
+	kslatBreak,
+	kslatCompRef,
+	kslatDir,
+	kslatInsert,
+	kslatPosX, kslatPosY,
+	kslatShiftX, kslatShiftY,
+	kslatUserDefnV1,
+	kslatMeasureSol, kslatMeasureEol,
+	kslatJStretch, kslatJShrink, kslatJStep, kslatJWeight, kslatJWidth,
+	
+	kslatUserDefn = kslatJStretch + 30,
+	
+	kslatMax,
+	kslatNoEffect = kslatMax + 1
+    };
+    
 protected:
     unsigned short m_glyphid;        // glyph id
     int m_original;	    // charinfo that originated this slot (e.g. for feature values)
@@ -43,7 +73,8 @@ protected:
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
-    Position m_attach;      // shift relative to parent due to attachment
+    Position m_attach;      // attachment point on us
+    Position m_with;	    // attachment point position on parent
     byte m_flags;           // holds bit flags
 };
 

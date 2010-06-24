@@ -35,6 +35,8 @@ public:
     uint16 findClassIndex(uint16 cid, uint16 gid) { return const_cast<Silf *>(m_silf)->findClassIndex(cid, gid); }
     int addFeatures(Features *feats) { m_feats.push_back(*feats); return m_feats.size() - 1; }
     uint16 getFeature(int index, uint8 findex) { return m_feats[index].getFeature(const_cast<LoadedFace *>(m_face)->feature(findex)); }
+    int8 dir() { return m_dir; }
+    void dir(int8 val) { m_dir = val; }
 
 private:
     std::vector<Slot> m_slots;
@@ -47,6 +49,7 @@ private:
     const Silf *m_silf;
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
+    int8 m_dir;
     std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
 };
 

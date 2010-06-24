@@ -308,16 +308,16 @@ int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     int iStart = iSlot;
     const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
-    while (iStart < iSlot)
+    for (int i = iStart; i <= iSlot; )
     {
-        if ((*seg)[iStart].isDeleted())
+        if ((*seg)[i].isDeleted())
         {
-            seg->deleteSlot(iStart);
+            seg->deleteSlot(i);
             iSlot--;
         }
         else
-            iStart++;
+            i++;
     }
-    return status == machine::finished ? iSlot + ret : iSlot ;
+    return (status == machine::finished ? iSlot + ret : iSlot) - iStart;
 }
 

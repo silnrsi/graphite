@@ -212,6 +212,7 @@ ENDOP
 
 STARTOP(insert)
     seg.insertSlot(is);
+    seg[is].originate(seg[is + 1].original());
     // TODO; Implement body;
 ENDOP
 
@@ -222,10 +223,20 @@ ENDOP
 
 STARTOP(assoc)
     declare_params(1);
-    const unsigned int  count = uint8(*param);
+    unsigned int  count = uint8(*param);
     const int8 *        assocs = reinterpret_cast<const int8 *>(param+1);
-    use_params(count);
+    use_params(count + 1);
+    int max = -1;
+    int min = -1;
     
+    while (count-- > 0)
+    {
+	int ts = is + *assocs++;
+	if (min == -1 || seg[ts].before() < min) min = seg[ts].before();
+	if (seg[ts].after() > max) max = seg[ts].after();
+    }
+    seg[is].before(min);
+    seg[is].after(max);
     // TODO; Implement body;   
 ENDOP
 
@@ -246,32 +257,30 @@ STARTOP(attr_set)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    seg[is].setAttr(&seg, slat, 0, val);
 ENDOP
 
 STARTOP(attr_add)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    int res = seg[is].getAttr(&seg, slat, 0);
+    seg[is].setAttr(&seg, slat, 0, val + res);
 ENDOP
 
 STARTOP(attr_sub)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    int res = seg[is].getAttr(&seg, slat, 0);
+    seg[is].setAttr(&seg, slat, 0, res - val);
 ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    seg[is].setAttr(&seg, slat, 0, val + is);
 ENDOP
 
 STARTOP(iattr_set_slot)
@@ -279,24 +288,21 @@ STARTOP(iattr_set_slot)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    seg[is].setAttr(&seg, slat, idx, val + is);
 ENDOP
 
 STARTOP(push_slot_attr)
     declare_params(2);
     const unsigned int  slat     = uint8(param[0]);
     const int           slot_ref = int8(param[1]);
-    // TODO; Implement body
-    push(0);
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0));
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
     const unsigned int  slat     = uint8(param[0]);
     const int           slot_ref = int8(param[1]) + is + 1;
-    // TODO; Implement body
-    push(0);
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0));
 ENDOP
 
 STARTOP(push_glyph_attr_obs)

@@ -231,8 +231,10 @@ void code::fixup_instruction_offsets(const machine::opcode opc,
         case PUSH_ATT_TO_GLYPH_METRIC :
         case PUSH_ISLOT_ATTR :
             fixup_slotref(dp-2,iSlot,cContexts);
+	    break;
         case PUT_SUBS_8BIT_OBS:
             fixup_slotref(dp-3,iSlot,cContexts);
+	    break;
         case PUT_SUBS :
             fixup_slotref(dp-5,iSlot,cContexts);
             break;
