@@ -7,6 +7,7 @@
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
+#include "XmlTraceLog.h"
 
 Segment::Segment(int numchars, const LoadedFace *face) :
         m_numGlyphs(numchars),

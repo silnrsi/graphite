@@ -1,43 +1,48 @@
 #ifndef GLYPHFACE_INCLUDE
 #define GLYPHFACE_INCLUDE
 #include "Main.h"
-#include "XmlTraceLog.h"
 
 class GlyphFace
 {
 public:
-    GlyphFace(Position pos, Rect box) : m_bbox(box), m_advance(pos), m_attrs(NULL) { }
-//    ~GlyphFace() { if (m_attrs) delete[] m_attrs; }
-    Position advance() { return m_advance; }
-    void advance(Position a) { m_advance = a; }
-    void bbox(Rect a) { m_bbox = a; }
-    void readAttrs(const void *pGlat, int start, int end, unsigned short num) {
-        m_attrs = new unsigned short[num];
-        while (start < end)
-        {
-            int attr = ((char *)pGlat)[start];
-            int count = ((char *)pGlat)[start + 1];
-            for (int i = 0; i < count; i++)
-            {
-                m_attrs[attr + i] = swap16(((uint16 *)((char *)pGlat + start))[1 + i]);
-#ifndef DISABLE_TRACING
-                XmlTraceLog::get().openElement(ElementAttr);
-                XmlTraceLog::get().addAttribute(AttrAttrId, attr + i);
-                XmlTraceLog::get().addAttribute(AttrAttrVal, m_attrs[attr+i]);
-                XmlTraceLog::get().closeElement(ElementAttr);
-#endif
-            }
-            start += 2 * (count + 1);
-        }
-    }
+    GlyphFace(Position pos=Position(), Rect box=Rect()) throw();
+    ~GlyphFace() throw();
+
+    const Position    & advance() const;
+    void                advance(Position a);
+    void    bbox(Rect a);
+    void    readAttrs(const void *pGlat, int start, int end, size_t num);
 
 protected:
-    Rect m_bbox;          // bounding box metrics in design units
-    Position m_advance;   // Advance width and height in design units
-    short *m_attribs;     // array of glyph attributes, fontface knows how many
-    short *m_columns;     // array of fsm column values
-    int m_gloc;           // glat offset
+    Rect     m_bbox;        // bounding box metrics in design units
+    Position m_advance;     // Advance width and height in design units
+    short  * m_attribs;     // array of glyph attributes, fontface knows how many
+    short  * m_columns;     // array of fsm column values
+    int      m_gloc;        // glat offset
     unsigned short *m_attrs;
 };
+
+
+inline GlyphFace::GlyphFace(Position pos, Rect box) throw()
+  : m_bbox(box), m_advance(pos), m_gloc(0),
+    m_attribs(0), m_columns(0), m_attrs(0) {
+}
+
+inline GlyphFace::~GlyphFace() throw() { 
+    delete [] m_attrs;
+}
+
+inline const Position & GlyphFace::advance() const { 
+    return m_advance;
+}
+
+inline void GlyphFace::advance(Position a) { 
+    m_advance = a;
+}
+
+inline void GlyphFace::bbox(Rect a) {
+    m_bbox = a;
+}
+
 
 #endif // GLYPHFACE_INCLUDE

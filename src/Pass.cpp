@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "Segment.h"
 #include "code.h"
+#include "XmlTraceLog.h"
 
 bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 {

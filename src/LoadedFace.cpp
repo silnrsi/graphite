@@ -26,7 +26,7 @@ bool LoadedFace::readGlyphs()
     m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
     m_upem = TtfUtil::DesignUnits(pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
-    m_glyphs = static_cast<GlyphFace *>(operator new(m_numGlyphs * sizeof(GlyphFace)));
+    m_glyphs = new GlyphFace [m_numGlyphs];
 
     int version = swap32(*((uint32 *)pGloc));
     if (version != 0x00010000) return false;

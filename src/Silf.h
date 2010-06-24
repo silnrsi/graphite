@@ -19,6 +19,9 @@ public:
 class Silf
 {
 public:
+    Silf() throw();
+    ~Silf() throw();
+    
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     uint16 findClassIndex(uint16 cid, uint16 gid);
@@ -28,25 +31,22 @@ public:
 protected:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
 
-    Pass *m_passes;
-    byte m_numPasses;
-    byte m_sPass;
-    byte m_pPass;
-    byte m_jPass;
-    byte m_bPass;
-    byte m_flags;
+    Pass          * m_passes;
+    Pseudo        * m_pseudos;
+    uint16        * m_classOffsets, 
+                  * m_classData;
+    size_t          m_numPasses;
+    unsigned int    m_sPass, m_pPass, m_jPass, m_bPass,
+                    m_flags;
 
-    byte m_aBreak;
-    byte m_aUser;
-    byte m_iMaxComp;
-    uint16 m_aLig;
-    uint16 m_numPseudo;
-    Pseudo *m_pseudos;
-    uint16 m_nClass;
-    uint16 m_nLinear;
-    uint16 *m_classOffsets;
-    uint16 *m_classData;
-
+    uint8   m_aBreak, m_aUser, 
+            m_iMaxComp;
+    uint16  m_aLig,
+            m_numPseudo,
+            m_nClass,
+            m_nLinear;
+    
+    void releaseBuffers() throw();
 };
 
 #endif

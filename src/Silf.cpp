@@ -1,6 +1,32 @@
 #include "Silf.h"
 #include "XmlTraceLog.h"
 
+Silf::Silf() throw()
+: m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
+  m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
+  m_aBreak(0), m_aUser(0), m_iMaxComp(0),
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0)
+{
+}
+
+Silf::~Silf() throw()
+{
+    releaseBuffers();
+}
+
+void Silf::releaseBuffers() throw()
+{
+    delete [] m_passes;
+    delete [] m_pseudos;
+    delete [] m_classOffsets;
+    delete [] m_classData;
+    m_passes= 0;
+    m_pseudos = 0;
+    m_classOffsets = 0;
+    m_classData = 0;
+}
+
+
 bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
 {
     char *p = (char *)pSilf;
@@ -22,37 +48,43 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumPasses, m_numPasses);
 #endif
-    if (m_numPasses < 0) return false;
+    if (m_numPasses > 128)
+        return false;
     m_passes = new Pass[m_numPasses];
     m_sPass = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrSubPass, m_sPass);
 #endif
-    if (m_sPass < 0) return false;
     m_pPass = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrPosPass, m_pPass);
 #endif
-    if (m_pPass < m_sPass) return false;
+    if (m_pPass < m_sPass) {
+        releaseBuffers();
+        return false;
+    }
     m_jPass = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrJustPass, m_jPass);
 #endif
-    if (m_jPass < m_pPass) return false;
+    if (m_jPass < m_pPass) {
+        releaseBuffers();
+        return false;
+    }
     m_bPass = *p++;     // when do we reorder?
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrBidiPass, m_bPass);
 #endif
-    if (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses)) return false;
+    if (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses)) {
+        releaseBuffers();
+        return false;
+    }
     m_flags = *p++;
     p += 2;     // ignore line end contextuals for now
     p++;        // not sure what to do with attrPseudo
     m_aBreak = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrBreakWeight, m_aBreak);
-#endif
-    if (m_aBreak < 0) return false;
-#ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrDirectionality, *p);
 #endif
     p++;        // we don't do bidi
@@ -65,30 +97,37 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrLigComp, *p);
 #endif
-    if (m_aLig > 127) return false;
+    if (m_aLig > 127) {
+        releaseBuffers();
+        return false;
+    }
     m_aUser = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrUserDefn, m_aUser);
 #endif
-    if (m_aUser < 0) return false;
     m_iMaxComp = *p++;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumLigComp, m_iMaxComp);
 #endif
-    if (m_iMaxComp < 0) return false;
     p += 5;     // skip direction and reserved
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumCritFeatures, *p);
 #endif
     p += *p * 2 + 1;        // don't need critical features yet
     p++;        // reserved
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+        releaseBuffers();
+        return false;
+    }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumScripts, *p);
 #endif
     p += *p * 4 + 1;        // skip scripts
     p += 2;     // skip lbGID
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+        releaseBuffers();
+        return false;
+    }
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
     m_numPseudo = read16(p);
@@ -109,13 +148,19 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         XmlTraceLog::get().closeElement(ElementPseudo);
 #endif
     }
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) return false;
+    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+        releaseBuffers();
+        return false;
+    }
 
     int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (char *)pSilf), numGlyphs);
-    if (clen < 0) return false;
+    if (clen < 0) {
+        releaseBuffers();
+        return false;
+    }
     p += clen;
 
-    for (int i = 0; i < m_numPasses; i++)
+    for (size_t i = 0; i < m_numPasses; ++i)
     {
         m_passes[i].init(this);
 #ifndef DISABLE_TRACING
@@ -127,7 +172,10 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);
 #endif
-            return false;
+            {
+        releaseBuffers();
+        return false;
+    }
         }
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementPass);
@@ -246,7 +294,7 @@ uint16 Silf::findPseudo(uint32 uid)
 
 uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
 {
-    if (cid > m_nClass || cid < 0) return -1;
+    if (cid > m_nClass) return -1;
 
     uint16 loc = m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
@@ -285,7 +333,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
 
 uint16 Silf::getClassGlyph(uint16 cid, uint16 index)
 {
-    if (cid > m_nClass || cid < 0) return 0;
+    if (cid > m_nClass) return 0;
 
     uint16 loc = m_classOffsets[cid];
     if (cid < m_nLinear)
@@ -301,19 +349,18 @@ uint16 Silf::getClassGlyph(uint16 cid, uint16 index)
     return 0;
 }
 
-
 void Silf::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const
 {
-    for (int i = 0; i < m_numPasses; i++)
+    for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
-	XmlTraceLog::get().openElement(ElementRunPass);
-	XmlTraceLog::get().addAttribute(AttrNum, i);
+	    XmlTraceLog::get().openElement(ElementRunPass);
+	    XmlTraceLog::get().addAttribute(AttrNum, i);
 #endif
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(seg, face, vms);
 #ifndef DISABLE_TRACING
-	XmlTraceLog::get().closeElement(ElementRunPass);
+	    XmlTraceLog::get().closeElement(ElementRunPass);
 #endif
     }
 }
