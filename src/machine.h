@@ -119,5 +119,18 @@ inline bool machine::check_final_stack(const uint32 * const sp,
     return true;
 }
 
+#ifdef ENABLE_DEEP_TRACING
+#define STARTTRACE(name,is)     if (XmlTraceLog::get().active()) { \
+				                    XmlTraceLog::get().openElement(ElementOpCode); \
+				                    XmlTraceLog::get().addAttribute(AttrName, # name); \
+				                    XmlTraceLog::get().addAttribute(AttrIndex, is); \
+			                    }
+
+#define ENDTRACE                XmlTraceLog::get().closeElement(ElementOpCode);
+#else
+#define STARTTRACE(name,is)
+#define ENDTRACE
+#endif
+
 
 

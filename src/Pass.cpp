@@ -249,8 +249,10 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const
         if (iSlot >= seg->length()) break;
         state = m_sTable[state * m_sColumns + m_cols[(*seg)[iSlot].gid()]];
         if (state > m_sSuccess)
-            for (int i = m_ruleidx[state - m_sSuccess]; i < m_ruleidx[state - m_sSuccess + 1]; i++)
-                vms->addRule(m_ruleMap[i], m_ruleSorts[i]);
+            for (int i = m_ruleidx[state - m_sSuccess]; i < m_ruleidx[state - m_sSuccess + 1]; ++i) {
+                const uint16 rule = m_ruleMap[i];
+                vms->addRule(rule, m_ruleSorts[rule]);
+            }            
         if (!state || state >= m_sTransition) break;
         iSlot++;
     }

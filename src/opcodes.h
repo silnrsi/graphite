@@ -35,21 +35,21 @@
 #define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
 
 #define NOT_IMPLEMENTED     assert(false)
-#define use_params(n)       dp += n
 
 #ifdef ENABLE_DEEP_TRACING
-#define declare_params(n)   assert(dp); \
-                            const byte * param = dp; \
-                            XmlTraceLog::get().addArrayElement(ElementParams, param, n); \
+#define TRACEPARAM(n)       XmlTraceLog::get().addArrayElement(ElementParams, param, n)
+#define TRACEPUSH(n)        XmlTraceLog::get().addSingleElement(ElementPush, n)
+#else
+#define TRACEPARAM(n)
+#define TRACEPUSH(n)
+#endif
+
+#define use_params(n)       dp += n; TRACEPARAM(n)
+
+#define declare_params(n)   const byte * param = dp; \
                             use_params(n);
 
-#define push(n)             XmlTraceLog::get().addSingleElement(ElementPush, n); *--sp = n
-#else
-#define declare_params(n)   assert(dp); \
-                            const byte * param = dp; \
-                            use_params(n);
-#define push(n)             *--sp = n
-#endif
+#define push(n)             *--sp = n; TRACEPUSH(n)
 
 #define pop()               *sp++
 #define drop(n)             sp += n
@@ -103,7 +103,7 @@ STARTOP(mul)
     binop(*);
 ENDOP
 
-STARTOP(div)
+STARTOP(div_)
     binop(/);
 ENDOP
 
