@@ -29,7 +29,7 @@ void Silf::releaseBuffers() throw()
 
 bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
 {
-    char *p = (char *)pSilf;
+    byte *p = (byte *)pSilf;
     uint32 *pPasses;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementSilfSub);
@@ -44,18 +44,18 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     }
     p += 2;     // maxGlyphID
     p += 4;     // extra ascent/descent
-    m_numPasses = *p++;
+    m_numPasses = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumPasses, m_numPasses);
 #endif
     if (m_numPasses > 128)
         return false;
     m_passes = new Pass[m_numPasses];
-    m_sPass = *p++;
+    m_sPass = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrSubPass, m_sPass);
 #endif
-    m_pPass = *p++;
+    m_pPass = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrPosPass, m_pPass);
 #endif
@@ -63,7 +63,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         releaseBuffers();
         return false;
     }
-    m_jPass = *p++;
+    m_jPass = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrJustPass, m_jPass);
 #endif
@@ -71,7 +71,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         releaseBuffers();
         return false;
     }
-    m_bPass = *p++;     // when do we reorder?
+    m_bPass = uint8(*p++);     // when do we reorder?
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrBidiPass, m_bPass);
 #endif
@@ -79,10 +79,10 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         releaseBuffers();
         return false;
     }
-    m_flags = *p++;
+    m_flags = uint8(*p++);
     p += 2;     // ignore line end contextuals for now
     p++;        // not sure what to do with attrPseudo
-    m_aBreak = *p++;
+    m_aBreak = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrBreakWeight, m_aBreak);
     XmlTraceLog::get().addAttribute(AttrDirectionality, *p);
@@ -92,7 +92,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumJustLevels, *p);
 #endif
-    p += *p * 8 + 1;     // ignore justification for now
+    p += uint8(*p) * 8 + 1;     // ignore justification for now
     m_aLig = read16(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrLigComp, *p);
@@ -101,11 +101,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         releaseBuffers();
         return false;
     }
-    m_aUser = *p++;
+    m_aUser = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrUserDefn, m_aUser);
 #endif
-    m_iMaxComp = *p++;
+    m_iMaxComp = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumLigComp, m_iMaxComp);
 #endif
@@ -113,18 +113,18 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumCritFeatures, *p);
 #endif
-    p += *p * 2 + 1;        // don't need critical features yet
+    p += uint8(*p) * 2 + 1;        // don't need critical features yet
     p++;        // reserved
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
         releaseBuffers();
         return false;
     }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumScripts, *p);
 #endif
-    p += *p * 4 + 1;        // skip scripts
+    p += uint8(*p) * 4 + 1;        // skip scripts
     p += 2;     // skip lbGID
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
         releaseBuffers();
         return false;
     }
@@ -148,12 +148,12 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         XmlTraceLog::get().closeElement(ElementPseudo);
 #endif
     }
-    if (p - (char *)pSilf >= static_cast<int32>(lSilf)) {
+    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
         releaseBuffers();
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (char *)pSilf), numGlyphs);
+    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs);
     if (clen < 0) {
         releaseBuffers();
         return false;

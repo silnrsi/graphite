@@ -92,18 +92,19 @@ LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time w
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
-    if (res->readGlyphs() && res->readGraphite() && res->readFeatures())
-    {
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementFace);
-#endif
-        return res;
-    }
+    bool valid = true;
+    valid &= res->readGlyphs();
+    valid &= res->readGraphite();
+    valid &= res->readFeatures();
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFace);
 #endif
-    delete res;
-    return NULL;
+    
+    if (!valid) {
+        delete res;
+        return 0;
+    }
+    return res;
 }
 
 

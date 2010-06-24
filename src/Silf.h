@@ -36,7 +36,7 @@ protected:
     uint16        * m_classOffsets, 
                   * m_classData;
     size_t          m_numPasses;
-    unsigned int    m_sPass, m_pPass, m_jPass, m_bPass,
+    uint8           m_sPass, m_pPass, m_jPass, m_bPass,
                     m_flags;
 
     uint8   m_aBreak, m_aUser, 
