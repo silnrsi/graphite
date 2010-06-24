@@ -132,7 +132,7 @@ bool FeatureMap::readSill(const IFace *face)
     if (read32(pSill) != 0x00010000) return false;
     num = read16(pSill);
     pSill += 6;     // skip the fast search
-    if (lSill < num * 8 + 12) return false;
+    if (lSill < num * 8U + 12) return false;
 
     for (int i = 0; i < num; i++)
     {
@@ -140,7 +140,7 @@ bool FeatureMap::readSill(const IFace *face)
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
-        IFeatures *feats = newFeatures(0);
+        Features *feats = newFeatures(0);
         char *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
