@@ -98,6 +98,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
     unsigned int        gid;
+    unsigned int	fid = seg->addFeatures(face->newFeatures(0));
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
@@ -105,7 +106,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
             for (size_t i = 0; i < numchars; ++i) {
                 cid = consume_utf8(p);
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
             }
             break;
         }
@@ -114,7 +115,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
             for (size_t i = 0; i < numchars; ++i) {
                 cid = consume_utf16(p);
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
             }
             break;
         }
@@ -123,7 +124,7 @@ void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t nu
             for (size_t i = 0; i < numchars; ++i) {
                 cid = *p++;
                 gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid));
+                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
             }
             break;
         }

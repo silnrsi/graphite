@@ -22,6 +22,8 @@ public:
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
     void origin(Position &pos) { m_position = pos + m_shift; }
+    void originate(int index) { m_original = index; }
+    int original() { return m_original; }
     void before(int index) { m_before = index; }
     void after(int index) { m_after = index; }
     bool isBase() { return (m_parent == -1); }
@@ -32,6 +34,7 @@ public:
 
 protected:
     unsigned short m_glyphid;        // glyph id
+    int m_original;	    // charinfo that originated this slot (e.g. for feature values)
     int m_before;           // charinfo index of before association
     int m_after;            // charinfo index of after association
     int m_parent;           // index to parent we are attached to

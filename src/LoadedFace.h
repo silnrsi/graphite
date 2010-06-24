@@ -9,6 +9,7 @@
 #include "FeatureMap.h"
 
 class Segment;
+class Features;
 
 #define ktiCmap MAKE_TAG('c','m','a','p')
 #define ktiHead MAKE_TAG('h','e','a','d')
@@ -49,6 +50,8 @@ public:
     bool readGraphite();
     bool readFeatures() { return m_features.readFont(m_face); }
     const Silf *chooseSilf(uint32 script) const;
+    Features *newFeatures(uint32 lang) { return m_features.newFeatures(lang); }
+    FeatureRef *feature(uint8 index) { return m_features.feature(index); }
 
 private:
 

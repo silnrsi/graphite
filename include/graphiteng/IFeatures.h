@@ -4,13 +4,17 @@
 #include "graphiteng/Types.h"
 
 class FeatureRef;
+class Features;
 
 class IFeatures
 {
 public:
-    virtual void addFeature(FeatureRef *ref, uint16 value) = 0;
-    virtual uint16 getFeature(FeatureRef &ref) = 0;
-    virtual IFeatures *newCopy() = 0;
+    void addFeature(FeatureRef *ref, uint16 value) = 0;
+    uint16 getFeature(FeatureRef *ref) = 0;
+    IFeatures *newCopy() = 0;
+
+private:
+    Features *m_feats;
 };
 
 #endif

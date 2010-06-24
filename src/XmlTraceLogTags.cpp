@@ -119,9 +119,10 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "y",
     "before",
     "after",
-    "encoding"
+    "encoding",
     "name",
     "result",
+    "default"
 };
 
 #endif

@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-class Features : public IFeatures
+class Features
 {
 public:
     virtual void addFeature(FeatureRef *ref, uint16 value) { if (ref) ref->set(&m_vec, value, m_length); } 
-    virtual uint16 getFeature(FeatureRef &ref) { return ref.get(&m_vec, m_length); }
+    virtual uint16 getFeature(FeatureRef *ref) { return ref->get(&m_vec, m_length); }
     virtual void addFeatureMask(FeatureRef &ref) { ref.setMask(&m_vec, m_length); }
     virtual Features *newCopy() { Features *res = new(m_length) Features(m_length); memcpy(&(res->m_vec), &m_vec, m_length * sizeof(uint32)); return res; }
     virtual void maskedOr(Features &other, Features &mask) {

@@ -122,6 +122,7 @@ typedef enum {
     AttrEncoding,
     AttrName,
     AttrResult,
+    AttrDefault,
 
     NumAttributes // Last
 } XmlTraceLogAttribute;

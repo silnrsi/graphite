@@ -68,7 +68,7 @@ bool FeatureMap::readFeats(const IFace *face)
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementFeature);
         XmlTraceLog::get().addAttribute(AttrIndex, i);
-        XmlTraceLog::get().addAttribute(AttrNum, numSet);
+        XmlTraceLog::get().addAttribute(AttrNum, name);
         XmlTraceLog::get().addAttribute(AttrFlags, flags);
         XmlTraceLog::get().addAttribute(AttrLabel, uiName);
 #endif
@@ -84,12 +84,13 @@ bool FeatureMap::readFeats(const IFace *face)
             XmlTraceLog::get().addAttribute(AttrIndex, j);
             XmlTraceLog::get().addAttribute(AttrValue, val);
             XmlTraceLog::get().addAttribute(AttrLabel, label);
+            if (j == 0) XmlTraceLog::get().addAttribute(AttrDefault, defVals[i]);
             XmlTraceLog::get().closeElement(ElementFeatureSetting);
 #endif
         }
         uint32 mask = 1;
         byte bits = 0;
-        for (bits = 0; bits < 32; bits++)
+        for (bits = 0; bits < 32; bits++, mask <<= 1)
         {
             if (mask > maxVal)
             {
@@ -97,8 +98,9 @@ bool FeatureMap::readFeats(const IFace *face)
                 {
                     currIndex++;
                     currBits = 0;
+		    mask = 1;
                 }
-                currBits += bits - 1;
+                currBits += bits;
                 m_feats[i].init(currBits, currIndex, (mask - 1) << currBits);
                 break;
             }
@@ -138,7 +140,7 @@ bool FeatureMap::readSill(const IFace *face)
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8 * numSettings > lSill && numSettings > 0) return false;
-        IFeatures *feats = newFeatures(0);
+        Features *feats = newFeatures(0);
         char *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
@@ -148,7 +150,7 @@ bool FeatureMap::readSill(const IFace *face)
             pLSet += 2;
             feats->addFeature(featureRef(name), val);
         }
-        std::pair<uint32, IFeatures *>kvalue = std::pair<uint32, IFeatures *>(langid, feats);
+        std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         m_langMap.insert(kvalue);
     }
     return true;
@@ -160,11 +162,11 @@ FeatureRef *FeatureMap::featureRef(uint32 name)
     return res == m_map.end() ? NULL : m_feats + res->second;
 }
 
-IFeatures *FeatureMap::newFeatures(uint32 name)
+Features *FeatureMap::newFeatures(uint32 name)
 {
     if (name)
     {
-        std::map<uint32, IFeatures *>::iterator res = m_langMap.find(name);
+        std::map<uint32, Features *>::iterator res = m_langMap.find(name);
         if (res != m_langMap.end()) return res->second->newCopy();
     }
     return m_defaultFeatures->newCopy();

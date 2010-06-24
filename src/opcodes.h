@@ -335,16 +335,18 @@ STARTOP(push_feat)
     declare_params(2);
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
+    uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
     // TODO; Implement body
-    push(0);
+    push(seg.getFeature(fid, feat));
 ENDOP
 
 STARTOP(push_feat_constrained)
     declare_params(2);
     const unsigned int  feat        = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]) + is + 1;
+    const int           slot_ref    = int8(param[1]);
+    uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
     // TODO; Implement body
-    push(0);
+    push(seg.getFeature(fid, feat));
 ENDOP
 
 STARTOP(push_att_to_gattr_obs)
