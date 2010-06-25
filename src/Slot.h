@@ -29,7 +29,7 @@ public:
     void after(int index) { m_after = index; }
     bool isBase() { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    void finalise(Segment *seg, LoadedFont *font, Position &base, float *cMin, float *cMax);
+    void finalise(Segment *seg, const LoadedFont *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }

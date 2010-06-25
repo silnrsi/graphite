@@ -82,19 +82,19 @@ static void read_text(const LoadedFace *face, const ITextSource *txt, Segment *s
     }
 }
 
-static void prepare_pos(LoadedFont *font, Segment *seg)
+static void prepare_pos(const LoadedFont *font, Segment *seg)
 {
     // reorder for bidi
     // copy key changeable metrics into slot (if any);
 }
 
-static void finalise(LoadedFont *font, Segment *seg)
+static void finalise(const LoadedFont *font, Segment *seg)
 {
     seg->positionSlots(font);
 }
 
 
-SegmentHandle::SegmentHandle(LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
 {
     int numchars = txt->getLength();
     m_pSegment = new Segment(numchars, face);

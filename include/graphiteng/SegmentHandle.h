@@ -12,7 +12,7 @@ class LoadedFont;
 class SegmentHandle 
 {
 public:
-    SegmentHandle(LoadedFont *font, const LoadedFace *face, const ITextSource *txt);
+    SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt);
     ~SegmentHandle();
   
     int length() const;
