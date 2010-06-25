@@ -60,6 +60,7 @@ public:
     int8 dir() { return m_dir; }
     void dir(int8 val) { m_dir = val; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
+    uint16 getGlyphMetric(uint16 gid, uint8 metric) { return const_cast<LoadedFace *>(m_face)->getGlyphMetric(gid, metric); }
 
 private:
     std::vector<Slot> m_slots;

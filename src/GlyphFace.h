@@ -2,6 +2,14 @@
 #define GLYPHFACE_INCLUDE
 #include "Main.h"
 
+enum metrics {
+    kgmetLsb = 0, kgmetRsb,
+    kgmetBbTop, kgmetBbBottom, kgmetBbLeft, kgmetBbRight,
+    kgmetBbHeight, kgmetBbWidth,
+    kgmetAdvWidth, kgmetAdvHeight,
+    kgmetAscent, kgmetDescent
+};
+        
 class GlyphFace
 {
 public:
@@ -13,6 +21,7 @@ public:
     void    bbox(Rect a);
     void    readAttrs(const void *pGlat, int start, int end, size_t num);
     uint16  getAttr(uint8 index) { return m_attrs[index]; }
+    uint16  getMetric(uint8 metric);
 
 protected:
     Rect     m_bbox;        // bounding box metrics in design units

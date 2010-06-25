@@ -326,8 +326,8 @@ STARTOP(push_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
@@ -335,8 +335,8 @@ STARTOP(push_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]) + is + 1;
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_feat)

@@ -23,3 +23,20 @@ void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num)
     }
 }
 
+uint16 GlyphFace::getMetric(uint8 metric)
+{
+    switch ((enum metrics)metric)
+    {
+        case kgmetLsb : return m_bbox.bl.x;
+        case kgmetRsb : return (m_advance.x - m_bbox.tr.x);
+        case kgmetBbTop : return m_bbox.tr.y;
+        case kgmetBbBottom : return m_bbox.bl.y;
+        case kgmetBbLeft : return m_bbox.bl.x;
+        case kgmetBbRight : return m_bbox.tr.x;
+        case kgmetBbHeight: return (m_bbox.tr.y - m_bbox.bl.y);
+        case kgmetBbWidth : return (m_bbox.tr.x - m_bbox.bl.x);
+        case kgmetAdvWidth : return m_advance.x;
+        case kgmetAdvHeight : return m_advance.y;
+        default : return 0;
+    }
+}

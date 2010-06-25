@@ -53,11 +53,14 @@ public:
     Features *newFeatures(uint32 lang) { return m_features.newFeatures(lang); }
     FeatureRef *feature(uint8 index) { return m_features.feature(index); }
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return (gattr < m_numAttrs && gid < m_numGlyphs) ? m_glyphs[gid].getAttr(gattr) : 0; }
-
+    uint16 getGlyphMetric(uint16 gid, uint8 metric);
+    
 private:
 
     const IFace *m_face;                  // Where to get tables
     unsigned short m_numGlyphs;     // number of glyphs in the font
+    uint16 m_ascent;
+    uint16 m_descent;
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs

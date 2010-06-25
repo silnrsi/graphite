@@ -171,3 +171,13 @@ const Silf *LoadedFace::chooseSilf(uint32 script) const
     else // do more work here
         return m_silfs;
 }
+
+uint16 LoadedFace::getGlyphMetric(uint16 gid, uint8 metric)
+{
+    switch ((enum metrics)metric)
+    {
+        case kgmetAscent : return m_ascent;
+        case kgmetDescent : return m_descent;
+        default: return m_glyphs[gid].getMetric(metric);
+    }
+}
