@@ -118,7 +118,7 @@ STARTOP(max)
 ENDOP
 
 STARTOP(neg)
-    *sp = -*sp;
+    *sp = -*sp; // FIXME won't work correctly on an unsigned type
 ENDOP
 
 STARTOP(trunc8)
@@ -248,7 +248,7 @@ STARTOP(cntxt_item)
     const size_t    count  = uint8(param[1]);
 
     if (is_arg != is) {
-        ip += count;
+        //ip += count; // TODO jump in bytes, not instructions
         push(true);
     }
 ENDOP

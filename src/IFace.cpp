@@ -49,7 +49,11 @@ FileFont::~FileFont()
 {
     delete[] m_pTableDir;
     delete[] m_pHeader;
-    fclose(m_pfile);
+    if (m_pfile)
+        fclose(m_pfile);
+    m_pTableDir = NULL;
+    m_pfile = NULL;
+    m_pHeader = NULL;
 }
 
 const void *FileFont::getTable(unsigned int name, size_t *len) const

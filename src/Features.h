@@ -4,8 +4,9 @@
 #include "FeatureMap.h"
 #include <algorithm>
 
-struct Features
+class Features
 {
+public:
     virtual void addFeature(FeatureRef *ref, uint16 value) { if (ref) ref->set(m_vec, value, m_length); } 
     virtual uint16 getFeature(FeatureRef *ref) { return ref->get(m_vec, m_length); }
     virtual void addFeatureMask(FeatureRef &ref) { ref.setMask(m_vec, m_length); }

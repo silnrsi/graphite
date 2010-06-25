@@ -1,6 +1,7 @@
 #ifndef SEGMENT_INCLUDE
 #define SEGMENT_INCLUDE
 
+#include <cassert>
 #include <vector>
 
 #include "graphiteng/ISegment.h"
@@ -8,6 +9,7 @@
 #include "Slot.h"
 #include "CharInfo.h"
 #include "Features.h"
+#include "XmlTraceLog.h"
 
 class Silf;
 class LoadedFace;
@@ -17,7 +19,27 @@ class Segment : public ISegment
 public:
     virtual int length() const { return m_numGlyphs; }
     virtual Position advance() const { return m_advance; }
-    virtual Slot & operator[] (int index) { return m_slots[index]; }
+    virtual Slot & operator[] (int index) {
+        assert(index >= 0);
+#ifdef ENABLE_DEEP_TRACING
+        if (static_cast<size_t>(index) >= m_slots.size())
+        {
+            XmlTraceLog::get().warning("Unexpectedly extending Segment size from %d to %d",
+                m_slots.size(), index + 1);
+            // temp hack
+            m_slots.reserve(index+1);
+            while (m_slots.size() <= static_cast<size_t>(index))
+            {
+                Slot s;
+                s.glyph(0);
+                s.before(-1);
+                s.after(-1);
+                m_slots.push_back(s);
+            }
+        }
+#endif
+        return m_slots[index];
+    }
     virtual const Slot & operator[] (int index) const { return m_slots[index]; }
     virtual void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     virtual void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }

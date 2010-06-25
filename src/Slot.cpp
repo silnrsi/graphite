@@ -100,7 +100,7 @@ void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value)
 	case kslatBreak : seg->charinfo(m_original)->breakWeight(value); break;
 	case kslatCompRef : break;		// not sure what to do here
 	case kslatDir : break;	// read only
-	case kslatInsert : markInsertBefore(value); break;
+	case kslatInsert : markInsertBefore(value? true : false); break;
 	case kslatPosX : break; // can't set these here
 	case kslatPosY : break;
 	case kslatShiftX : m_shift = Position(value, m_shift.y); break;

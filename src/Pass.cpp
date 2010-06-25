@@ -222,12 +222,12 @@ void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
         int advance = 0;
         int loopCount = m_iMaxLoop;
         while (!advance && loopCount--)
-            advance = findNDoRule(seg, i, vms);
+            advance = findNDoRule(seg, i, face, vms);
         if (advance > 0) i += advance - 1;
     }
 }
 
-int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const
+int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const
 {
     int state;
     int startSlot = iSlot;
@@ -247,6 +247,24 @@ int Pass::findNDoRule(Segment *seg, int iSlot, VMScratch *vms) const
     while (true)
     {
         if (iSlot >= seg->length()) break;
+#ifdef ENABLE_DEEP_TRACING
+        if (state >= m_sTransition)
+        {
+            XmlTraceLog::get().error("Invalid state %d", state);
+            return -1;
+        }
+        if ((*seg)[iSlot].gid() >= face->numGlyphs())
+        {
+            XmlTraceLog::get().error("Invalid glyph ID %d for slot %d", (*seg)[iSlot].gid(), iSlot);
+            return -1;
+        }
+        if (m_cols[(*seg)[iSlot].gid()] >= m_sColumns)
+        {
+            XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
+                m_cols[(*seg)[iSlot].gid()], (*seg)[iSlot].gid(), iSlot);
+            return -1;
+        }
+#endif
         state = m_sTable[state * m_sColumns + m_cols[(*seg)[iSlot].gid()]];
         if (state > m_sSuccess)
             for (int i = m_ruleidx[state - m_sSuccess]; i < m_ruleidx[state - m_sSuccess + 1]; ++i) {

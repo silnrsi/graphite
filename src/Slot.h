@@ -33,7 +33,7 @@ public:
     void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED); }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
-    bool isInsertBefore() { return (m_flags & SLOT_INSERT); }
+    bool isInsertBefore() { return (m_flags & SLOT_INSERT)? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
     int getAttr(Segment *seg, uint8 index, uint8 subindex);
     void setAttr(Segment *seg, uint8 index, uint8 subindex, int value);
