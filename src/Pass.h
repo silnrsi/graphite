@@ -5,7 +5,6 @@
 #include "code.h"
 
 class Segment;
-class FontImpl;
 class LoadedFace;
 class Silf;
 

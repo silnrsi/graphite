@@ -4,7 +4,7 @@
 #include "graphiteng/ISegment.h"
 #include "graphiteng/ISlot.h"
 #include "graphiteng/Types.h"
-#include "FontImpl.h"
+#include "LoadedFont.h"
 
 #define SLOT_DELETED    1
 #define SLOT_INSERT	2
@@ -17,7 +17,7 @@ class Slot : public ISlot
 public:
     virtual unsigned short gid() const { return m_glyphid; }
     virtual Position origin() const { return m_position; }
-    virtual float advance(FontImpl *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
+    virtual float advance(LoadedFont *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
     virtual int before() const { return m_before; }
     virtual int after() const { return m_after; }
 
@@ -30,7 +30,7 @@ public:
     void after(int index) { m_after = index; }
     bool isBase() { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
+    void finalise(Segment *seg, LoadedFont *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }

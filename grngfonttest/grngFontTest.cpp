@@ -486,7 +486,6 @@ int Parameters::testFileFont() const
 {
     int returnCode = 0;
     IFace *fileface;
-    FontImpl *sizeFont;
     try
     {
         FILE * logFile = fopen("graphitengTrace.xml", "wb");
@@ -526,7 +525,7 @@ int Parameters::testFileFont() const
             return 3;
         }
 
-        sizeFont = create_font(NULL, face, pointSize * dpi / 72);
+        LoadedFont *sizedFont = IFont::makeLoadedFont(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -581,7 +580,7 @@ int Parameters::testFileFont() const
                        pSegment->rightToLeft());
           }
 #endif
-        ISegment *seg = create_rangesegment(sizeFont, face, &textSrc);
+        ISegment *seg = create_rangesegment(sizedFont, face, &textSrc);
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
@@ -628,7 +627,7 @@ int Parameters::testFileFont() const
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         
         destroy_segment(seg);
-        destroy_font(sizeFont);
+        IFont::destroyLoadedFont(sizedFont);
 	IFace::destroyLoadedFace(face);
         delete fileface;
 //            delete featureParser;

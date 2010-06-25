@@ -6,27 +6,15 @@
 #include "XmlTraceLog.h"
 #include "LoadedFace.h"
 #include "TtfUtil.h"
-#include "FontImpl.h"
+#include "LoadedFont.h"
 
 void read_text(const LoadedFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
-void prepare_pos(FontImpl *font, Segment *seg);
-void finalise(FontImpl *font, Segment *seg);
+void prepare_pos(LoadedFont *font, Segment *seg);
+void finalise(LoadedFont *font, Segment *seg);
 
 
-// font my be NULL, but needs ppm in that case
-FontImpl *create_font(IFont *font, const LoadedFace *face, float ppm)
-{
-    FontImpl *res = new FontImpl(font, face, ppm);
-    return res;
-}
 
-void destroy_font(FontImpl *font)
-{
-    delete font;
-}
-
-
-ISegment *create_rangesegment(FontImpl *font, const LoadedFace *face, const ITextSource *txt)
+ISegment *create_rangesegment(LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
 {
     int numchars = txt->getLength();
     Segment *seg = new Segment(numchars, face);
@@ -131,13 +119,13 @@ void read_text(const LoadedFace *face, const ITextSource *txt, Segment *seg, siz
     }
 }
 
-void prepare_pos(FontImpl *font, Segment *seg)
+void prepare_pos(LoadedFont *font, Segment *seg)
 {
     // reorder for bidi
     // copy key changeable metrics into slot (if any);
 }
 
-void finalise(FontImpl *font, Segment *seg)
+void finalise(LoadedFont *font, Segment *seg)
 {
     seg->positionSlots(font);
 }

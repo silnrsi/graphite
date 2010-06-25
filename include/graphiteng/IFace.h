@@ -29,7 +29,7 @@ public:
 #endif 		//!DISABLE_FILE_FONT
 
 
-    LoadedFace* makeLoadedFace() const;		//this must stay alive all the time when the LoadedFace is alive. When finished with the LoadeFace, call IFace::destroyLoadedFace
+    LoadedFace* makeLoadedFace() const;		//this must stay alive all the time when the LoadedFace is alive. When finished with the LoadedFace, call IFace::destroyLoadedFace
     static void destroyLoadedFace(LoadedFace *face);
 
 private :

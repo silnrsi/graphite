@@ -19,18 +19,11 @@ public:
 
 //PR the following functions are still to be encapsulated properly
 
-class LoadedFace;
-class IFont;
-class FontImpl;
-
-extern GRNG_EXPORT FontImpl *create_font(IFont *font, const LoadedFace *face, float ppm);
-extern GRNG_EXPORT void destroy_font(FontImpl *font);
-
-
-
 class ITextSource;
+class LoadedFace;
+class LoadedFont;
 
-extern GRNG_EXPORT ISegment *create_rangesegment(FontImpl *font, const LoadedFace *face, const ITextSource *txt);
+extern GRNG_EXPORT ISegment *create_rangesegment(LoadedFont *font, const LoadedFace *face, const ITextSource *txt);
 extern GRNG_EXPORT void destroy_segment(ISegment *seg);
 
 #endif // SEGMENT_INCLUDE

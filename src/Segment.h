@@ -49,7 +49,7 @@ public:
     Segment(const Segment &other);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid);
-    void positionSlots(FontImpl *font);
+    void positionSlots(LoadedFont *font);
     void append(const Segment &other);
     void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
     void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }

@@ -1,16 +1,20 @@
-#ifndef FONT_INCLUDE
-#define FONT_INCLUDE
+#ifndef LOADED_FONT_INCLUDE
+#define LOADED_FONT_INCLUDE
 
-//#include <limits>
-//#include <cmath>
 #include "graphiteng/IFont.h"
 #include "LoadedFace.h"
 
-class FontImpl
+const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
+
+class LoadedFont
 {
 public:
-    FontImpl(const IFont *font, const LoadedFace *face, float ppm);
-    ~FontImpl();
+    LoadedFont(const IFont *font/*not NULL*/, const LoadedFace *face);
+    LoadedFont(float ppm, const LoadedFace *face);
+private:
+    void initialize();
+public:
+    ~LoadedFont();
     float advance(unsigned short glyphid) const {
         if (m_advances[glyphid] == INVALID_ADVANCE)
             m_advances[glyphid] = m_font ? m_font->advance(glyphid) : m_face->getAdvance(glyphid, m_scale);
@@ -20,16 +24,14 @@ public:
     float scale(float p) const { return m_scale * p; }
 
 private:
-    const IFont *m_font;      // Application interface
+    const IFont *m_font;      // Application interface. May be NULL
     float m_scale;      // scales from design units to ppm
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
     const LoadedFace *m_face;   // LoadedFace to get the rest of the info from
-
-    const static float INVALID_ADVANCE;
     
 private:			//defensive on m_advances
-    FontImpl(const FontImpl&);
-    FontImpl& operator=(const FontImpl&);
+    LoadedFont(const LoadedFont&);
+    LoadedFont& operator=(const LoadedFont&);
 };
 
-#endif // FONT_INCLUDE
+#endif // !LOADED_FONT_INCLUDE

@@ -15,7 +15,7 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 };
 
-void Slot::finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax)
+void Slot::finalise(Segment *seg, LoadedFont *font, Position &base, float *cMin, float *cMax)
 {
     Position shift = font->scale(m_shift);
     m_position = base + shift;

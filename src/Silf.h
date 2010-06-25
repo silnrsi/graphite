@@ -5,7 +5,6 @@
 #include "Pass.h"
 class ISegment;
 class LoadedFace;
-class FontImpl;
 class VMScratch;
 class Segment;
 

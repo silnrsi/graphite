@@ -21,7 +21,6 @@ typedef int     int32;
 
 
 
-class FontImpl;
 
 class GRNG_EXPORT Position
 {

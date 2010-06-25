@@ -58,7 +58,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats)
     m_slots[id].after(id);
 }
 
-void Segment::positionSlots(FontImpl *font)
+void Segment::positionSlots(LoadedFont *font)
 {
     Position currpos;
     Slot *s;
