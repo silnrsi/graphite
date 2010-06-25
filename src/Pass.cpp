@@ -312,6 +312,8 @@ int Pass::testConstraint(const code *codeptr, int iSlot, Segment *seg, VMScratch
 {
     if (!*codeptr)
         return 1;
+ 
+    assert(codeptr->constraint());
     
     machine::status_t status;
     const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
@@ -323,6 +325,8 @@ int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
 {
     if (!*codeptr)
         return 1;
+    
+    assert(!codeptr->constraint());
     
     machine::status_t status;
     int iStart = iSlot;

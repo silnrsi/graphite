@@ -29,6 +29,7 @@ private:
     size_t      _data_size,
                 _instr_count;
     status_t    _status;
+    bool        _constrained;
     mutable bool _own;
 
     void release_buffers() throw ();
@@ -45,6 +46,7 @@ public:
     code & operator=(const code &rhs) throw();
     operator bool () const throw();
     status_t    status() const throw();
+    bool        constraint() const throw();
     size_t      data_size() const throw();
     size_t      instruction_count() const throw();
     
@@ -59,17 +61,28 @@ inline code::code() throw()
 }
 
 inline code::code(const code &obj) throw ()
-:_code(obj._code), _data(obj._data), 
- _data_size(obj._data_size), _instr_count(obj._instr_count), 
- _status(obj._status), _own(obj._own) {
+ :  _code(obj._code), 
+    _data(obj._data), 
+    _data_size(obj._data_size), 
+    _instr_count(obj._instr_count), 
+    _status(obj._status), 
+    _constrained(obj._constrained), 
+    _own(obj._own) 
+{
     obj._own = false;
 }
 
 inline code & code::operator=(const code &rhs) throw() {
-    if (_status != empty)   release_buffers();
-    _code = rhs._code; _data = rhs._data;
-    _data_size = rhs._data_size; _instr_count = rhs._instr_count;
-    _status = rhs._status; _own = rhs._own; rhs._own = false;
+    if (_status != empty)
+        release_buffers();
+    _code        = rhs._code; 
+    _data        = rhs._data;
+    _data_size   = rhs._data_size; 
+    _instr_count = rhs._instr_count;
+    _status      = rhs._status; 
+    _constrained = rhs._constrained;
+    _own         = rhs._own; 
+    rhs._own = false;
     return *this;
 }
 
@@ -79,6 +92,10 @@ inline code::operator bool () const throw () {
 
 inline code::status_t code::status() const throw() {
     return _status;
+}
+
+inline bool code::constraint() const throw() {
+    return _constrained;
 }
 
 inline size_t code::data_size() const throw() {

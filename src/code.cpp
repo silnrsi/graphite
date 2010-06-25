@@ -26,7 +26,8 @@ void fixup_cntxt_item_target(const byte*, byte * &);
 
 
 code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
-: _code(0), _data_size(0), _instr_count(0), _status(loaded), _own(true)
+ :  _code(0), _data_size(0), _instr_count(0), _status(loaded), 
+    _constrained(constrained), _own(true)
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
