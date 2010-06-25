@@ -20,6 +20,7 @@ inline bool is_return(const machine::opcode opc) {
 }
 
 void emit_trace_message(machine::opcode, const byte *const, const opcode_t &);
+void fixup_cntxt_item_target(const byte*, byte * &);
 
 } // end namespace
 
@@ -81,8 +82,12 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             dp     += param_sz;
         }
         
-//        fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
-//                                    iSlot, cContexts);
+        // Fixups to any argument data that needs it.
+        if (opc == machine::CNTXT_ITEM)
+            fixup_cntxt_item_target(cd_ptr, dp);
+//        if (!constrained)
+//            fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
+//                                      iSlot, cContexts);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
@@ -162,6 +167,28 @@ inline void emit_trace_message(machine::opcode opc, const byte *const params,
 }
 
 
+void fixup_cntxt_item_target(const byte* cdp, 
+                       byte * & dp) {
+    using namespace machine;
+    
+    const opcode_t    * oplut = machine::get_opcode_table();
+    size_t              data_skip = 0;
+    uint8               count = uint8(dp[-1]); 
+    
+    while (count > 0) {
+        const opcode    opc      = opcode(*cdp++);
+        size_t          param_sz = oplut[opc].param_sz;
+        
+        if (param_sz == VARARGS)    param_sz = *cdp+1;
+        cdp       += param_sz;
+        data_skip += param_sz +(opc == CNTXT_ITEM);
+        count     -= 1 + param_sz;
+    }
+    assert(count == 0);
+    dp[-1] -= data_skip;
+    *dp++   = data_skip;
+}
+
 #define ctxtins(n)  cContexts[(n)*2]
 #define ctxtdel(n)  cContexts[(n)*2+1]
 inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
@@ -207,26 +234,21 @@ void code::fixup_instruction_offsets(const machine::opcode opc,
         case PUSH_ATT_TO_GLYPH_ATTR :
             fixup_slotref(dp-1,iSlot,cContexts);
             break;
-        case CNTXT_ITEM :
         case PUSH_GLYPH_METRIC :
         case PUSH_ATT_TO_GLYPH_METRIC :
         case PUSH_ISLOT_ATTR :
             fixup_slotref(dp-2,iSlot,cContexts);
-	    break;
+            break;
+        case CNTXT_ITEM :
         case PUT_SUBS_8BIT_OBS:
             fixup_slotref(dp-3,iSlot,cContexts);
-	    break;
+	        break;
         case PUT_SUBS :
             fixup_slotref(dp-5,iSlot,cContexts);
             break;
         case ASSOC :
-            printf("param_sz = %d\tiSlot = %d\n", unsigned(param_sz), iSlot);
-            for (size_t i = 1; i < param_sz; ++i) {
-                printf("\t-i = %d\t(iSlot + dp[-i]) = %d\n", int(-i), iSlot + dp[-i]);
+            for (size_t i = 1; i < param_sz; ++i)
                 fixup_slotref(dp-i,iSlot,cContexts);
-            }
-            break;
-        default :
             break;
     }
 }

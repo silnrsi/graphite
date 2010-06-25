@@ -243,12 +243,14 @@ ENDOP
 STARTOP(cntxt_item)
     // It turns out this is a cunningly disguised condition forward jump.
     // TODO: Put checks for this one to avoid jumping off the end of the program.
-    declare_params(2);    
+    declare_params(3);    
     const int       is_arg = int8(param[0]);
-    const size_t    count  = uint8(param[1]);
+    const size_t    iskip  = uint8(param[1]),
+                    dskip  = uint8(param[2]);
 
-    if (is_arg != is) {
-        //ip += count; // TODO jump in bytes, not instructions
+    if (ib + is_arg != is) {
+        ip += iskip;
+        dp += dskip;
         push(true);
     }
 ENDOP
