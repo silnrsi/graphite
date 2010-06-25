@@ -118,7 +118,7 @@ STARTOP(max)
 ENDOP
 
 STARTOP(neg)
-    *sp = -*sp; // FIXME won't work correctly on an unsigned type
+    *sp = uint32(-int32(*sp));
 ENDOP
 
 STARTOP(trunc8)
