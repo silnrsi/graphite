@@ -193,7 +193,6 @@ void fixup_cntxt_item_target(const byte* cdp,
 #define ctxtins(n)  cContexts[(n)*2]
 #define ctxtdel(n)  cContexts[(n)*2+1]
 inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
-    printf("slotref = %d \tislot = %d\n", *arg, is); fflush(stdout);
     if (*arg < 0)
         *arg -= ctxtins(is + *arg);
     else
