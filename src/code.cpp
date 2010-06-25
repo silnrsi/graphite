@@ -64,7 +64,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
             return;
         }
         
-        const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr++ : op.param_sz;
+        const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr + 1 : op.param_sz;
         if (cd_ptr + param_sz > bytecode_end) { // Is the requested size possible
             failure(arguments_exhausted);
             return;

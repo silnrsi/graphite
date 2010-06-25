@@ -225,7 +225,7 @@ STARTOP(assoc)
     declare_params(1);
     unsigned int  count = uint8(*param);
     const int8 *        assocs = reinterpret_cast<const int8 *>(param+1);
-    use_params(count + 1);
+    use_params(count);
     int max = -1;
     int min = -1;
     
