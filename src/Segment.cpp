@@ -79,14 +79,14 @@ void Segment::positionSlots(const LoadedFont *font)
 }
 
 #ifndef DISABLE_TRACING
-void logSegment(const ITextSource & textSrc, const Segment& seg)
+void Segment::logSegment(const ITextSource & textSrc) const
 {
     if (XmlTraceLog::get().active())
     {
         XmlTraceLog::get().openElement(ElementSegment);
-        XmlTraceLog::get().addAttribute(AttrLength, seg.length());
-        XmlTraceLog::get().addAttribute(AttrAdvanceX, seg.advance().x);
-        XmlTraceLog::get().addAttribute(AttrAdvanceY, seg.advance().y);
+        XmlTraceLog::get().addAttribute(AttrLength, length());
+        XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
+        XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
         XmlTraceLog::get().openElement(ElementText);
         XmlTraceLog::get().addAttribute(AttrEncoding, textSrc.utfEncodingForm());
         XmlTraceLog::get().addAttribute(AttrLength, textSrc.getLength());
@@ -122,14 +122,14 @@ void logSegment(const ITextSource & textSrc, const Segment& seg)
             break;
         }
         XmlTraceLog::get().closeElement(ElementText);
-        for (int i = 0; i < seg.length(); i++)
+        for (int i = 0; i < length(); i++)
         {
             XmlTraceLog::get().openElement(ElementSlot);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, seg[i].gid());
-            XmlTraceLog::get().addAttribute(AttrX, seg[i].origin().x);
-            XmlTraceLog::get().addAttribute(AttrY, seg[i].origin().y);
-            XmlTraceLog::get().addAttribute(AttrBefore, seg[i].before());
-            XmlTraceLog::get().addAttribute(AttrAfter, seg[i].after());
+            XmlTraceLog::get().addAttribute(AttrGlyphId, (*this)[i].gid());
+            XmlTraceLog::get().addAttribute(AttrX, (*this)[i].origin().x);
+            XmlTraceLog::get().addAttribute(AttrY, (*this)[i].origin().y);
+            XmlTraceLog::get().addAttribute(AttrBefore, (*this)[i].before());
+            XmlTraceLog::get().addAttribute(AttrAfter, (*this)[i].after());
             XmlTraceLog::get().closeElement(ElementSlot);
         }
         XmlTraceLog::get().closeElement(ElementSegment);
@@ -137,3 +137,97 @@ void logSegment(const ITextSource & textSrc, const Segment& seg)
 }
 
 #endif
+
+typedef unsigned int uchar_t;
+namespace {
+const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
+                                          0,0,0,0,  // trailing byte
+                                          2,2,            // 2 bytes
+                                          3,                 // 3 bytes
+                                          4};                // 4 bytes
+const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
+
+inline uchar_t consume_utf8(const uint8 *&p) {
+    const size_t    seq_sz = utf8_sz_lut[*p >> 4];
+    uchar_t         uc = *p ^ utf8_mask_lut[seq_sz];
+    
+    switch(seq_sz) {
+        case 4:     uc <<= 6; uc |= *++p & 0x7F;
+        case 3:     uc <<= 6; uc |= *++p & 0x7F;
+        case 2:     uc <<= 6; uc |= *++p & 0x7F; break;
+        case 1:     break;
+        case 0:     uc = 0xFFFD; break;
+    }
+    ++p; return uc;
+}
+
+const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+inline uchar_t consume_utf16(const uint16 *&p) {
+    const uchar_t   uh = *p, ul = *++p;
+    
+    if (0xD800 > uh || uh > 0xDBFF)
+        return uh;
+    ++p;
+    if (0xDC00 > ul || ul > 0xDFFF) {
+        return 0xFFFD;
+    }
+    return (uh<<10) + ul - SURROGATE_OFFSET;
+}
+
+} // end of private namespace
+
+
+
+void Segment::read_text(const LoadedFace *face, const ITextSource *txt, size_t numchars)
+{
+    const void *const   cmap = face->getTable(ktiCmap, NULL);
+    const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
+    const void *        pChar = txt->get_utf_buffer_begin();
+    uchar_t             cid;
+    unsigned int        gid;
+    unsigned int	fid = addFeatures(face->newFeatures(0));
+    
+    switch (txt->utfEncodingForm()) {
+        case ITextSource::kutf8 : {
+            const uint8 * p = static_cast<const uint8 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = consume_utf8(p);
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+            }
+            break;
+        }
+        case ITextSource::kutf16: {
+            const uint16 * p = static_cast<const uint16 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = consume_utf16(p);
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+            }
+            break;
+        }
+        case ITextSource::kutf32 : default: {
+            const uint32 * p = static_cast<const uint32 *>(pChar);
+            for (size_t i = 0; i < numchars; ++i) {
+                cid = *p++;
+                gid = TtfUtil::Cmap31Lookup(ctable, cid);
+                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+            }
+            break;
+        }
+    }
+}
+
+void Segment::prepare_pos(const LoadedFont *font)
+{
+    // reorder for bidi
+    // copy key changeable metrics into slot (if any);
+}
+
+void Segment::finalise(const LoadedFont *font)
+{
+    positionSlots(font);
+}
+
+
+

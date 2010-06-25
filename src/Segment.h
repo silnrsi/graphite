@@ -12,6 +12,7 @@
 
 class Silf;
 class LoadedFace;
+class ITextSource;
 
 class Segment
 {
@@ -61,6 +62,16 @@ public:
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) { return const_cast<LoadedFace *>(m_face)->getGlyphMetric(gid, metric); }
 
+#ifndef DISABLE_TRACING
+    void logSegment(const ITextSource & textSrc) const;
+#endif
+
+private:
+    friend class SegmentHandle ;
+    void read_text(const LoadedFace *face, const ITextSource *txt, size_t numchars);
+    void prepare_pos(const LoadedFont *font);
+    void finalise(const LoadedFont *font);
+  
 private:
     std::vector<Slot> m_slots;
     std::vector<uint16> m_user;
@@ -76,10 +87,5 @@ private:
     std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
 };
 
-class ITextSource;
-class SegmentHandle;
-#ifndef DISABLE_TRACING
-extern void logSegment(const ITextSource & textSrc, const Segment & seg);
-#endif
 
 #endif // SEGMENT_INCLUDE

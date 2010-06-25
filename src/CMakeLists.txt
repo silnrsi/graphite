@@ -41,9 +41,10 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/IFont.h
     ../include/graphiteng/IFace.h
     ../include/graphiteng/IFeatures.h
-    ../include/graphiteng/SegmentHandle.h
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
+    ../include/graphiteng/RefCountHandle.h
+    ../include/graphiteng/SegmentHandle.h
     ../include/graphiteng/Types.h
     ${TRACE_HEADERS}
     )
