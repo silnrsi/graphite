@@ -31,12 +31,14 @@ public:
     bool isBase() { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     void finalise(Segment *seg, FontImpl *font, Position &base, float *cMin, float *cMax);
-    bool isDeleted() { return (m_flags & SLOT_DELETED); }
+    bool isDeleted() { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
-    bool isInsertBefore() { return (m_flags & SLOT_INSERT)? true : false; }
+    bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
     int getAttr(Segment *seg, uint8 index, uint8 subindex);
     void setAttr(Segment *seg, uint8 index, uint8 subindex, int value);
+    void attachTo(int ap) { m_attachto = ap; }
+    int attachTo() { return m_attachto; }
 
     enum attrCode {
 	kslatAdvX = 0, kslatAdvY,
@@ -70,6 +72,7 @@ protected:
     int m_parent;           // index to parent we are attached to
     int m_child;            // index to first child slot that attaches to us
     int m_sibling;          // index to next child that attaches to our parent
+    int m_attachto;        // temporary action code, attach.to
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute

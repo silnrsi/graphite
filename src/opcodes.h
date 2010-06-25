@@ -326,8 +326,8 @@ STARTOP(push_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
@@ -335,8 +335,8 @@ STARTOP(push_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]) + is + 1;
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_feat)
@@ -359,16 +359,18 @@ STARTOP(push_att_to_gattr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_gattr_obs_constrained)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]) + is + 1;
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_metric)
@@ -376,8 +378,10 @@ STARTOP(push_att_to_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.getGlyphMetric(seg[slot].gid(), glyph_attr));
+    // ignoring cluster metric
 ENDOP
 
 STARTOP(push_att_to_glyph_metric_constrained)
@@ -385,8 +389,10 @@ STARTOP(push_att_to_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]) + is + 1;
     const signed int    attr_level  = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.getGlyphMetric(seg[slot].gid(), glyph_attr));
+    // ignoring cluster metric
 ENDOP
 
 STARTOP(push_islot_attr)
@@ -394,8 +400,7 @@ STARTOP(push_islot_attr)
     const unsigned int  slat     = uint8(param[0]);
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx));
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -403,8 +408,7 @@ STARTOP(push_islot_attr_constrained)
     const unsigned int  slat     = uint8(param[0]);
     const int           slot_ref = int8(param[1]) + is + 1,
                         idx      = uint8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx));
 ENDOP
 
 STARTOP(push_iglyph_attr) // not implemented
@@ -429,8 +433,7 @@ STARTOP(iattr_set)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    seg[is].setAttr(&seg, slat, idx, val);
 ENDOP
 
 STARTOP(iattr_add)
@@ -438,8 +441,8 @@ STARTOP(iattr_add)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    int res = seg[is].getAttr(&seg, slat, idx);
+    seg[is].setAttr(&seg, slat, idx, val + res);
 ENDOP
 
 STARTOP(iattr_sub)
@@ -447,8 +450,8 @@ STARTOP(iattr_sub)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-
-    // TODO; Implement body
+    int res = seg[is].getAttr(&seg, slat, idx);
+    seg[is].setAttr(&seg, slat, idx, val - res);
 ENDOP
 
 STARTOP(push_proc_state)
@@ -469,7 +472,8 @@ STARTOP(put_subs)
                                      | uint8(param[2]);
     const unsigned int  output_class = uint8(param[3]) << 8
                                      | uint8(param[4]);
-    // TODO; Implement body
+    int index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
+    seg[is].glyph(seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_subs2) // not implemented
@@ -484,7 +488,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    // TODO: Implement body
+    seg[is].glyph(seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)
@@ -492,8 +496,7 @@ STARTOP(push_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    // TODO; Implement body
-    push(0);
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_attr_constrained)
@@ -501,8 +504,7 @@ STARTOP(push_glyph_attr_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]) + is + 1;
-    // TODO; Implement body
-    push(0);
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_attr)
@@ -510,8 +512,9 @@ STARTOP(push_att_to_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_attr_constrained)
@@ -519,7 +522,8 @@ STARTOP(push_att_to_glyph_attr_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]) + is + 1;
-    // TODO; Implement body
-    push(0);
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 

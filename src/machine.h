@@ -42,18 +42,18 @@ namespace machine
     };
     
     extern const opcode_t *    get_opcode_table() throw();
-    extern uint32              run(const instr * program, const byte * data,
-                                   uint32 * stack_base, const size_t length,
+    extern int32              run(const instr * program, const byte * data,
+                                   int32 * stack_base, const size_t length,
                                    Segment & seg, int & islot_idx,
                                    status_t &status) HOT;
 
-    bool check_stack(const uint32 * const sp, 
-                     const uint32 * const base,
-                     const uint32 * const limit) REGPARM(3);
+    bool check_stack(const int32 * const sp, 
+                     const int32 * const base,
+                     const int32 * const limit) REGPARM(3);
 
-    bool check_final_stack(const uint32 * const sp, 
-                           const uint32 * const base,
-                           const uint32 * const limit,
+    bool check_final_stack(const int32 * const sp, 
+                           const int32 * const base,
+                           const int32 * const limit,
                            status_t &status);
     
     enum opcode {
@@ -97,15 +97,15 @@ namespace machine
     };
 }
 
-inline bool machine::check_stack(const uint32 * const sp, 
-                                 const uint32 * const base,
-                                 const uint32 * const limit) {
+inline bool machine::check_stack(const int32 * const sp, 
+                                 const int32 * const base,
+                                 const int32 * const limit) {
     return (sp <= base && sp > limit);
 }
 
-inline bool machine::check_final_stack(const uint32 * const sp, 
-                                       const uint32 * const base,
-                                       const uint32 * const limit,
+inline bool machine::check_final_stack(const int32 * const sp, 
+                                       const int32 * const base,
+                                       const int32 * const limit,
                                        status_t & status) {
     if (sp != base) {
         if (sp > base)

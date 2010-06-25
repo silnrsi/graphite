@@ -56,8 +56,6 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         uint16 last = read16(p);
         if (last >= numGlyphs) last = numGlyphs - 1;
         uint16 col = read16(p);
-        while (first <= last)
-            m_cols[first++] = col;
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementRange);
         XmlTraceLog::get().addAttribute(AttrFirstId, first);
@@ -65,6 +63,8 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().addAttribute(AttrColId, col);
         XmlTraceLog::get().closeElement(ElementRange);
 #endif
+        while (first <= last)
+            m_cols[first++] = col;
     }
     if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_ruleidx = new uint16[m_sSuccess + 1];
@@ -266,8 +266,8 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
         }
 #endif
         state = m_sTable[state * m_sColumns + m_cols[(*seg)[iSlot].gid()]];
-        if (state > m_sSuccess)
-            for (int i = m_ruleidx[state - m_sSuccess]; i < m_ruleidx[state - m_sSuccess + 1]; ++i) {
+        if (state > m_sRows - m_sSuccess)
+            for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];
                 vms->addRule(rule, m_ruleSorts[rule]);
             }            
@@ -330,7 +330,7 @@ int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     
     machine::status_t status;
     int iStart = iSlot;
-    const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    const int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
     for (int i = iStart; i <= iSlot; )
     {

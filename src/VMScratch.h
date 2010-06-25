@@ -11,7 +11,7 @@ class VMScratch
 public:
     void resetRules() { m_numRules = 0; }
     void resetStack() { m_stackptr = 0; }
-    uint32 *stack() { return m_stack; }
+    int32 *stack() { return m_stack; }
     uint16 rule(int i) { return m_rules[i]; }
     uint16 ruleLength() { return m_numRules; }
     void addRule(uint16 ruleid, uint16 sortkey) {
@@ -21,8 +21,8 @@ public:
             if (m_rules[i] == ruleid) return;
             if (m_sortKeys[i] < sortkey) break;
         }
-        memcpy(m_rules + i, m_rules + i + 1, (m_numRules - i) * sizeof(uint16));
-        memcpy(m_sortKeys + i, m_sortKeys + i + 1, (m_numRules - i) * sizeof(uint16));
+        memcpy(m_rules + i + 1, m_rules + i, (m_numRules - i) * sizeof(uint16));
+        memcpy(m_sortKeys + i + 1, m_sortKeys + i, (m_numRules - i) * sizeof(uint16));
         m_rules[i] = ruleid;
         m_sortKeys[i] = sortkey;
         if (m_numRules < MAX_RULES_PER_SEQUENCE) m_numRules++;
@@ -35,7 +35,7 @@ protected:
     uint16 m_rules[MAX_RULES_PER_SEQUENCE];
     uint16 m_sortKeys[MAX_RULES_PER_SEQUENCE];
     byte m_stackptr;
-    uint32 m_stack[MAX_STACK];
+    int32 m_stack[MAX_STACK];
 };
 
 #endif

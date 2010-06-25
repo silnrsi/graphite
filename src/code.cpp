@@ -86,9 +86,9 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         // Fixups to any argument data that needs it.
         if (opc == machine::CNTXT_ITEM)
             fixup_cntxt_item_target(cd_ptr, dp);
-//        if (!constrained)
-//            fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
-//                                      iSlot, cContexts);
+        if (!constrained)
+            fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
+                                      iSlot, cContexts);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
@@ -195,8 +195,8 @@ void fixup_cntxt_item_target(const byte* cdp,
 inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
     if (*arg < 0)
         *arg -= ctxtins(is + *arg);
-    else
-        *arg  = ctxtins(is);
+//    else
+//        *arg += ctxtins(is);
 }
 
 } // end of namespace
@@ -270,7 +270,7 @@ void code::release_buffers() throw()
 }
 
 
-uint32 code::run(uint32 * stack_base, const size_t length,
+int32 code::run(int32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx, 
                     machine::status_t & status_out) const
 {

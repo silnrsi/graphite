@@ -11,7 +11,7 @@
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
-#define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
+#define registers           const byte * & dp, int32 * & sp, Segment & seg, \
                             int & is, const int ib, const instr * & ip
 typedef ptrdiff_t        (* ip_t)(registers);
 
@@ -31,9 +31,9 @@ namespace {
 #include "opcodes.h"
 }
 
-uint32  machine::run(const instr  * program,
+int32  machine::run(const instr  * program,
                      const byte   * data,
-                     uint32       * stack_base, 
+                     int32       * stack_base, 
                      const size_t   length,
                      Segment &      seg, 
                      int &          is,
@@ -50,8 +50,8 @@ uint32  machine::run(const instr  * program,
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    uint32        * sp        = stack_base + length - 2;
-    uint32 * const  stack_top = stack_base + 2;
+    int32        * sp        = stack_base + length - 2;
+    int32 * const  stack_top = stack_base + 2;
     stack_base = sp;
 
     // Run the program        

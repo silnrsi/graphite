@@ -42,13 +42,13 @@ class GRNG_EXPORT Rect
 public :
 
     Rect() {}
-    Rect(Position origin, Position extent) { org = origin; ext = extent; }
-    Rect(const Rect &other) {org = other.org; ext = other.ext;}
-    Rect widen(Rect other) { return Rect(Position(org.x > other.org.x ? other.org.x : org.x, org.y > other.org.y ? other.org.y : org.y), Position(ext.x > other.ext.x ? ext.x : other.ext.x, ext.y > other.ext.y ? ext.y : other.ext.y)); }
-    Rect operator + (const Position &a) const { return Rect(Position(org.x + a.x, org.y + a.y), Position(ext.x + a.x, ext.y + a.y)); }
+    Rect(Position origin, Position extent) { bl = origin; tr = extent; }
+    Rect(const Rect &other) {bl = other.bl; tr = other.tr;}
+    Rect widen(Rect other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
+    Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
 
-    Position org;
-    Position ext;
+    Position bl;
+    Position tr;
 };
 
 #endif // GRTYPES_INCLUDE

@@ -306,11 +306,11 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
     else
     {
         uint16 num = m_classData[loc];
-        uint16 search = m_classData[loc + 1] / 2;
+        uint16 search = m_classData[loc + 1];
         uint16 selector = m_classData[loc + 2];
-        uint16 range = m_classData[loc + 3] / 2;
+        uint16 range = m_classData[loc + 3];
 
-        uint16 curr = loc + 4 + range;
+        uint16 curr = loc + 4 + 2 * selector;
 
         while (search > 1)
         {
