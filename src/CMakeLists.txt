@@ -41,7 +41,7 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/IFont.h
     ../include/graphiteng/IFace.h
     ../include/graphiteng/IFeatures.h
-    ../include/graphiteng/ISegment.h
+    ../include/graphiteng/SegmentHandle.h
     ../include/graphiteng/ISlot.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/Types.h
@@ -61,6 +61,7 @@ add_library(graphiteng SHARED
     IFace.cpp
     IFont.cpp
     Segment.cpp
+    SegmentHandle.cpp
     Slot.cpp
     Silf.cpp
     Pass.cpp

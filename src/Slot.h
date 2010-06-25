@@ -1,7 +1,6 @@
 #ifndef SLOT_INCLUDE
 #define SLOT_INCLUDE
 
-#include "graphiteng/ISegment.h"
 #include "graphiteng/ISlot.h"
 #include "graphiteng/Types.h"
 #include "LoadedFont.h"
@@ -17,7 +16,7 @@ class Slot : public ISlot
 public:
     virtual unsigned short gid() const { return m_glyphid; }
     virtual Position origin() const { return m_position; }
-    virtual float advance(LoadedFont *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
+    virtual float advance(const LoadedFont *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
     virtual int before() const { return m_before; }
     virtual int after() const { return m_after; }
 

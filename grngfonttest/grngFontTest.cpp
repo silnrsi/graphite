@@ -26,7 +26,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "graphiteng/Types.h"
-#include "graphiteng/ISegment.h"
+#include "graphiteng/SegmentHandle.h"
 #include "graphiteng/ITextSource.h"
 #include "graphiteng/ISlot.h"
 #include "graphiteng/IFont.h"
@@ -580,14 +580,15 @@ int Parameters::testFileFont() const
                        pSegment->rightToLeft());
           }
 #endif
-        ISegment *seg = create_rangesegment(sizedFont, face, &textSrc);
+       {
+        SegmentHandle seg(sizedFont, face, &textSrc);
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
-        for (i = 0; i < seg->length(); i++)
+        for (i = 0; i < seg.length(); i++)
         {
-            ISlot *slot = &((*seg)[i]);
+            ISlot *slot = &(seg[i]);
             Position org = slot->origin();
             fprintf(log, "%02d  %4d %3d@%2.1f,%2.1f\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot->gid(), 0 /*attachedTo*/, 0., 0. /*attachedAt*/, org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
@@ -623,10 +624,10 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = seg->advance().x;
+        float advanceWidth = seg.advance().x;
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
+       }	//to get seg destroyed before its parameters
         
-        destroy_segment(seg);
         IFont::destroyLoadedFont(sizedFont);
 	IFace::destroyLoadedFace(face);
         delete fileface;

@@ -4,7 +4,6 @@
 #include <cassert>
 #include <vector>
 
-#include "graphiteng/ISegment.h"
 #include "graphiteng/ISlot.h"
 #include "Slot.h"
 #include "CharInfo.h"
@@ -14,12 +13,12 @@
 class Silf;
 class LoadedFace;
 
-class Segment : public ISegment
+class Segment
 {
 public:
-    virtual int length() const { return m_numGlyphs; }
-    virtual Position advance() const { return m_advance; }
-    virtual Slot & operator[] (int index) {
+    int length() const { return m_numGlyphs; }
+    Position advance() const { return m_advance; }
+    Slot & operator[] (int index) {
         assert(index >= 0);
 #ifdef ENABLE_DEEP_TRACING
         if (static_cast<size_t>(index) >= m_slots.size())
@@ -40,10 +39,10 @@ public:
 #endif
         return m_slots[index];
     }
-    virtual const Slot & operator[] (int index) const { return m_slots[index]; }
-    virtual void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
-    virtual void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
-    virtual CharInfo *charinfo(int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    const Slot & operator[] (int index) const { return m_slots[index]; }
+    void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
+    void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
+    CharInfo *charinfo(int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
 
     Segment(int numSlots, const LoadedFace *face);
     Segment(const Segment &other);
@@ -77,8 +76,10 @@ private:
     std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
 };
 
+class ITextSource;
+class SegmentHandle;
 #ifndef DISABLE_TRACING
-extern void logSegment(const ITextSource & textSrc, const ISegment & seg);
+extern void logSegment(const ITextSource & textSrc, const Segment & seg);
 #endif
 
 #endif // SEGMENT_INCLUDE

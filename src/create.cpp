@@ -8,35 +8,8 @@
 #include "TtfUtil.h"
 #include "LoadedFont.h"
 
-void read_text(const LoadedFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
-void prepare_pos(LoadedFont *font, Segment *seg);
-void finalise(LoadedFont *font, Segment *seg);
 
 
-
-ISegment *create_rangesegment(LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
-{
-    int numchars = txt->getLength();
-    Segment *seg = new Segment(numchars, face);
-
-    seg->chooseSilf(0);
-    read_text(face, txt, seg, numchars);
-    seg->runGraphite();
-    // run the line break passes
-    // run the substitution passes
-    prepare_pos(font, seg);
-    // run the positioning passes
-    finalise(font, seg);
-#ifndef DISABLE_TRACING
-    logSegment(*txt, *seg);
-#endif
-    return seg;
-}
-
-void destroy_segment(ISegment *seg)
-{
-    delete seg;
-}
 
 /* Now we go private */
 typedef unsigned int uchar_t;
@@ -79,53 +52,4 @@ inline uchar_t consume_utf16(const uint16 *&p) {
 } // end of private namespace
 
 
-void read_text(const LoadedFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
-{
-    const void *const   cmap = face->getTable(ktiCmap, NULL);
-    const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
-    const void *        pChar = txt->get_utf_buffer_begin();
-    uchar_t             cid;
-    unsigned int        gid;
-    unsigned int	fid = seg->addFeatures(face->newFeatures(0));
-    
-    switch (txt->utfEncodingForm()) {
-        case ITextSource::kutf8 : {
-            const uint8 * p = static_cast<const uint8 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
-                cid = consume_utf8(p);
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
-            }
-            break;
-        }
-        case ITextSource::kutf16: {
-            const uint16 * p = static_cast<const uint16 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
-                cid = consume_utf16(p);
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
-            }
-            break;
-        }
-        case ITextSource::kutf32 : default: {
-            const uint32 * p = static_cast<const uint32 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
-                cid = *p++;
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                seg->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
-            }
-            break;
-        }
-    }
-}
 
-void prepare_pos(LoadedFont *font, Segment *seg)
-{
-    // reorder for bidi
-    // copy key changeable metrics into slot (if any);
-}
-
-void finalise(LoadedFont *font, Segment *seg)
-{
-    seg->positionSlots(font);
-}

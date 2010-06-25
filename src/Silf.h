@@ -3,7 +3,6 @@
 #include "Main.h"
 
 #include "Pass.h"
-class ISegment;
 class LoadedFace;
 class VMScratch;
 class Segment;

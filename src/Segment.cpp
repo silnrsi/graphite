@@ -8,6 +8,7 @@
 #include "Slot.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
+#include "graphiteng/SegmentHandle.h"
 
 Segment::Segment(int numchars, const LoadedFace *face) :
         m_numGlyphs(numchars),
@@ -78,7 +79,7 @@ void Segment::positionSlots(LoadedFont *font)
 }
 
 #ifndef DISABLE_TRACING
-void logSegment(const ITextSource & textSrc, const ISegment & seg)
+void logSegment(const ITextSource & textSrc, const Segment& seg)
 {
     if (XmlTraceLog::get().active())
     {
