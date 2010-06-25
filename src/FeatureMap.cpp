@@ -162,11 +162,11 @@ FeatureRef *FeatureMap::featureRef(uint32 name)
     return res == m_map.end() ? NULL : m_feats + res->second;
 }
 
-Features *FeatureMap::newFeatures(uint32 name)
+Features *FeatureMap::newFeatures(uint32 name) const
 {
     if (name)
     {
-        std::map<uint32, Features *>::iterator res = m_langMap.find(name);
+        std::map<uint32, Features *>::const_iterator res = m_langMap.find(name);
         if (res != m_langMap.end()) 
             return new Features(*res->second);
     }

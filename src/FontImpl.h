@@ -9,7 +9,7 @@
 class FontImpl
 {
 public:
-    FontImpl(const IFont *font, LoadedFace *face, float ppm);
+    FontImpl(const IFont *font, const LoadedFace *face, float ppm);
     ~FontImpl();
     float advance(unsigned short glyphid) const {
         if (m_advances[glyphid] == INVALID_ADVANCE)
@@ -23,7 +23,7 @@ private:
     const IFont *m_font;      // Application interface
     float m_scale;      // scales from design units to ppm
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
-    LoadedFace *m_face;   // LoadedFace to get the rest of the info from
+    const LoadedFace *m_face;   // LoadedFace to get the rest of the info from
 
     const static float INVALID_ADVANCE;
     

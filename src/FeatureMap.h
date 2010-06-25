@@ -38,7 +38,7 @@ public:
     FeatureRef *featureRef(uint32 name);
     FeatureRef *feature(uint8 index) { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
-    Features *newFeatures(uint32 name);
+    Features *newFeatures(uint32 name) const;
 
 protected:
     byte m_numFeats;

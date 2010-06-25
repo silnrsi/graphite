@@ -8,13 +8,13 @@
 #include "TtfUtil.h"
 #include "FontImpl.h"
 
-void read_text(LoadedFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
+void read_text(const LoadedFace *font, const ITextSource *txt, Segment *seg, size_t numchars);
 void prepare_pos(FontImpl *font, Segment *seg);
 void finalise(FontImpl *font, Segment *seg);
 
 
 // font my be NULL, but needs ppm in that case
-FontImpl *create_font(IFont *font, LoadedFace *face, float ppm)
+FontImpl *create_font(IFont *font, const LoadedFace *face, float ppm)
 {
     FontImpl *res = new FontImpl(font, face, ppm);
     return res;
@@ -26,7 +26,7 @@ void destroy_font(FontImpl *font)
 }
 
 
-ISegment *create_rangesegment(FontImpl *font, LoadedFace *face, const ITextSource *txt)
+ISegment *create_rangesegment(FontImpl *font, const LoadedFace *face, const ITextSource *txt)
 {
     int numchars = txt->getLength();
     Segment *seg = new Segment(numchars, face);
@@ -91,7 +91,7 @@ inline uchar_t consume_utf16(const uint16 *&p) {
 } // end of private namespace
 
 
-void read_text(LoadedFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
+void read_text(const LoadedFace *face, const ITextSource *txt, Segment *seg, size_t numchars)
 {
     const void *const   cmap = face->getTable(ktiCmap, NULL);
     const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
