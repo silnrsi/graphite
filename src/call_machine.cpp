@@ -12,7 +12,7 @@
 #include "XmlTraceLog.h"
 
 #define registers           const byte * & dp, uint32 * & sp, Segment & seg, \
-                            int & is, const instr * & ip
+                            int & is, const int ib, const instr * & ip
 typedef ptrdiff_t        (* ip_t)(registers);
 
 // These are required by opcodes.h and should not be changed
@@ -46,6 +46,7 @@ uint32  machine::run(const instr  * program,
     // Declare virtual machine registers
     const instr   * ip = program-1;
     const byte    * dp = data;
+    const int       ib = is;
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
@@ -54,7 +55,7 @@ uint32  machine::run(const instr  * program,
     stack_base = sp;
 
     // Run the program        
-    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ip)
+    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ib, ip)
 #if defined(CHECK_STACK)
            && machine::check_stack(sp, stack_base, stack_top)
 #endif

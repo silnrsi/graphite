@@ -22,12 +22,12 @@
 //                      instead.
 //
 //    You have access to the following named 'registers':
-//        ip    = The current virtual instruction pointer. This always points to the 
-//                instruction currently executing.
+//        ip    = The current virtual instruction pointer. This always points 
+//                to the instruction currently executing.
 //        sp    = The pointer to the current top of stack.
 //        seg   = A reference to the Segment this code is running over.
-//        is    = The input slot index
-//        os    = The output slot index
+//        is    = The current slot index
+//        ib    = The original base slot index at the start of this rule
 //        param = pointer to the instructions parameter block.
 //                (Only if you use declare_params first).
      

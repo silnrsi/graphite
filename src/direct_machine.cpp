@@ -47,6 +47,7 @@ const void * direct_machine(const bool get_table_mode,
     // Declare virtual machine registers
     const instr   * ip = program;
     const byte    * dp = data;
+    const int       ib = is;
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
