@@ -12,38 +12,6 @@
 
 #include <cstdio>
 
-#ifndef DISABLE_TRACING
-static const char * sCodeNames[machine::MAX_OPCODE] = {
-	    "NOP",
-	    "PUSH_BYTE",		"PUSH_BYTEU",		"PUSH_SHORT",	"PUSH_SHORTU",	"PUSH_LONG",
-	    "ADD",				"SUB",				"MUL",			"DIV",
-	    "MIN",				"MAX",
-	    "NEG",
-	    "TRUNC8",			"TRUNC16",
-	    "COND",
-	    "AND",				"OR",				"NOT",
-	    "EQUAL",			"NOT_EQ",
-	    "LESS",			"GTR",				"LESS_EQ",		"GTR_EQ",
-	    "NEXT",			"NEXTN",			"COPY_NEXT",
-	    "PUT_GLYPH8BIT_OBS",	"PUT_SUBS8BIT_OBS",	"PUT_COPY",
-	    "INSERT",			"DELETE",
-	    "ASSOC",
-	    "CNTXT_ITEM",
-	    "ATTR_SET",			"ATTR_ADD",			"ATTR_SUB",
-	    "ATTR_SET_SLOT",
-	    "IATTR_SET_SLOT",
-	    "PUSH_SLOT_ATTR",	"PUSH_GLYPH_ATTR_OBS","PUSH_GLYPH_METRIC",		"PUSH_FEAT",
-	    "PUSH_ATT_TOG_ATTR_OBS",	"PUSH_ATT_TOGLYPH_METRIC",
-	    "PUSH_ISLOT_ATTR",
-	    "PUSH_IGLYPH_ATTR",	// not implemented
-	    "POP_RET",			"RET_ZERO",			"RET_TRUE",
-	    "IATTR_SET",		"IATTR_ADD",		"IATTR_SUB",
-	    "PUSH_PROC_STATE",	"PUSH_VERSION",
-	    "PUT_SUBS",			"PUT_SUBS2",		"PUT_SUBS3",
-	    "PUT_GLYPH",		"PUSH_GLYPH_ATTR",	"PUSH_ATT_TOGLYPH_ATTR"
-    };
-#endif
-
 namespace {
 
 inline bool is_return(const machine::opcode opc) {
@@ -51,7 +19,9 @@ inline bool is_return(const machine::opcode opc) {
     return opc == POP_RET || opc == RET_ZERO || opc == RET_TRUE;
 }
 
-}
+void emit_trace_message(machine::opcode, const byte *const, const opcode_t &);
+
+} // end namespace
 
 
 code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
@@ -59,7 +29,6 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
-    
     const opcode_t *    op_to_fn = machine::get_opcode_table();
     const byte *        cd_ptr = bytecode_begin;
     byte                iSlot = 0;
@@ -88,7 +57,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         if (!check_opcode(opc, cd_ptr, bytecode_end))
             return;
 
-        const opcode_t op = op_to_fn[opc];
+        const opcode_t & op = op_to_fn[opc];
         if (op.impl[constrained] == 0) {      // Is it implemented?
             failure(unimplemented_opcode_used);
             return;
@@ -103,21 +72,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         // Add this instruction
         *ip++ = op.impl[constrained]; 
         ++_instr_count;
-        
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementAction);
-            XmlTraceLog::get().addAttribute(AttrActionCode, opc);
-            XmlTraceLog::get().addAttribute(AttrAction, sCodeNames[opc]);
-            for (size_t param = 0; param < param_sz && param < 4; param++)
-            {
-                XmlTraceLog::get().addAttribute(
-                    static_cast<XmlTraceLogAttribute>(Attr0 + param), *(cd_ptr + param));
-            }
-            XmlTraceLog::get().closeElement(ElementAction);
-        }
-#endif
+        emit_trace_message(opc, cd_ptr, op);
 
         // Grab the parameters
         if (param_sz) {
@@ -184,14 +139,40 @@ bool code::check_opcode(const machine::opcode opc,
     return true;
 }
 
+namespace {
+
+inline void emit_trace_message(machine::opcode opc, const byte *const params, 
+                        const opcode_t &op)
+{
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementAction);
+        XmlTraceLog::get().addAttribute(AttrActionCode, opc);
+        XmlTraceLog::get().addAttribute(AttrAction, op.name);
+        for (size_t p = 0; p < 8 && p < op.param_sz; ++p)
+        {
+            XmlTraceLog::get().addAttribute(
+                                XmlTraceLogAttribute(Attr0 + p),
+                                params[p]);
+        }
+        XmlTraceLog::get().closeElement(ElementAction);
+    }
+#endif
+}
+
+
 #define ctxtins(n)  cContexts[(n)*2]
 #define ctxtdel(n)  cContexts[(n)*2+1]
-
 inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
-    *arg = *arg < 0 
-        ? *arg - ctxtins(is + *arg) 
-        : ctxtins(is);
+    printf("slotref = %d \tislot = %d\n", *arg, is); fflush(stdout);
+    if (*arg < 0)
+        *arg -= ctxtins(is + *arg);
+    else
+        *arg  = ctxtins(is);
 }
+
+} // end of namespace
 
 void code::fixup_instruction_offsets(const machine::opcode opc, 
                                      int8  * dp, size_t param_sz,
@@ -274,7 +255,7 @@ uint32 code::run(uint32 * stack_base, const size_t length,
     assert(stack_base != 0);
     assert(length >= 32);
     assert(*this);          // Check we are actually runnable
-    
+
     return machine::run(_code, _data, stack_base, length, seg, islot_idx, status_out);
 }
 

@@ -22,13 +22,14 @@ class Segment;
 
 typedef void *  instr;
 
-enum {VARARGS = size_t(-1)};
+enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
 struct opcode_t 
 { 
-    instr   impl[2];
-    size_t  param_sz;
-    int     stack_delta;
+    instr           impl[2];
+    size_t          param_sz;
+    int             stack_delta;
+    char            name[MAX_NAME_LEN];
 };
 
 namespace machine
