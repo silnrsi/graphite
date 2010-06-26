@@ -44,6 +44,7 @@ public:
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     CharInfo *charinfo(int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    virtual int8 dir() { return m_dir; }
 
     Segment(int numSlots, const LoadedFace *face);
     Segment(const Segment &other);
@@ -57,7 +58,6 @@ public:
     uint16 findClassIndex(uint16 cid, uint16 gid) { return const_cast<Silf *>(m_silf)->findClassIndex(cid, gid); }
     int addFeatures(Features *feats) { m_feats.push_back(*feats); return m_feats.size() - 1; }
     uint16 getFeature(int index, uint8 findex) { return m_feats[index].getFeature(const_cast<LoadedFace *>(m_face)->feature(findex)); }
-    int8 dir() { return m_dir; }
     void dir(int8 val) { m_dir = val; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) { return const_cast<LoadedFace *>(m_face)->getGlyphMetric(gid, metric); }

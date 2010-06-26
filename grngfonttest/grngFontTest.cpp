@@ -590,8 +590,8 @@ int Parameters::testFileFont() const
         {
             ISlot *slot = &(seg[i]);
             Position org = slot->origin();
-            fprintf(log, "%02d  %4d %3d@%2.1f,%2.1f\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot->gid(), 0 /*attachedTo*/, 0., 0. /*attachedAt*/, org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
+            fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
+                    i, slot->gid(), slot->getAttr(&seg, (uint8)kslatAttTo, 0), slot->getAttr(&seg, (uint8)kslatAttX, 0), slot->getAttr(&seg, kslatAttY, 0), org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
             
             if (pText32 != NULL)
             {

@@ -19,6 +19,7 @@ public:
     virtual float advance(const LoadedFont *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
     virtual int before() const { return m_before; }
     virtual int after() const { return m_after; }
+    virtual int getAttr(SegmentHandle *seg, uint8 index, uint8 subindex) { return getAttr((Segment *)&(*seg), index, subindex); }
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
@@ -34,35 +35,11 @@ public:
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    int getAttr(Segment *seg, uint8 index, uint8 subindex);
     void setAttr(Segment *seg, uint8 index, uint8 subindex, int value);
+    int getAttr(Segment *seg, uint8 index, uint8 subindex);
     void attachTo(int ap) { m_attachto = ap; }
     int attachTo() { return m_attachto; }
 
-    enum attrCode {
-	kslatAdvX = 0, kslatAdvY,
-	kslatAttTo,
-	kslatAttX, kslatAttY,
-	kslatAttXOff, kslatAttYOff,
-	kslatAttWithX, kslatAttWithY,
-	kslatAttWithXOff, kslatAttWithYOff,
-	kslatAttLevel,
-	kslatBreak,
-	kslatCompRef,
-	kslatDir,
-	kslatInsert,
-	kslatPosX, kslatPosY,
-	kslatShiftX, kslatShiftY,
-	kslatUserDefnV1,
-	kslatMeasureSol, kslatMeasureEol,
-	kslatJStretch, kslatJShrink, kslatJStep, kslatJWeight, kslatJWidth,
-	
-	kslatUserDefn = kslatJStretch + 30,
-	
-	kslatMax,
-	kslatNoEffect = kslatMax + 1
-    };
-    
 protected:
     unsigned short m_glyphid;        // glyph id
     int m_original;	    // charinfo that originated this slot (e.g. for feature values)
