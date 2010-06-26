@@ -2,7 +2,7 @@
 #define PASS_INCLUDE
 
 #include "VMScratch.h"
-#include "code.h"
+#include "Code.h"
 
 class Segment;
 class LoadedFace;
@@ -10,12 +10,13 @@ class Silf;
 
 class Pass
 {
+    
 public:
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     int findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const;
-    int testConstraint(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const;
-    int doAction(const code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;
+    int testConstraint(const vm::Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const;
+    int doAction(const vm::Code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;
     void init(Silf *silf) { m_silf = silf; }
 
 protected:
@@ -34,9 +35,9 @@ protected:
     byte m_maxPreCtxt;
     uint16 *m_startStates;
     byte *m_rulePreCtxt;
-    code m_cPConstraint;
-    code *m_cConstraint;
-    code *m_cActions;
+    vm::Code m_cPConstraint;
+    vm::Code *m_cConstraint;
+    vm::Code *m_cActions;
     int16 *m_sTable;
 };
 

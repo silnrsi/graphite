@@ -53,7 +53,7 @@ file(GLOB PRIVATE_HEADERS *.h)
 
 add_library(graphiteng SHARED
     call_machine.cpp
-    code.cpp
+    Code.cpp
     FeatureMap.cpp
     GlyphFace.cpp
     LoadedFace.cpp

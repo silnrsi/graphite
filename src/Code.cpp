@@ -6,32 +6,33 @@
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
-#include "code.h"
-#include "machine.h"
+#include "Code.h"
+#include "Machine.h"
 #include "XmlTraceLog.h"
 
 #include <cstdio>
 
+using namespace vm;
+
 namespace {
 
-inline bool is_return(const machine::opcode opc) {
-    using namespace machine;
+inline bool is_return(const opcode opc) {
     return opc == POP_RET || opc == RET_ZERO || opc == RET_TRUE;
 }
 
-void emit_trace_message(machine::opcode, const byte *const, const opcode_t &);
+void emit_trace_message(opcode, const byte *const, const opcode_t &);
 void fixup_cntxt_item_target(const byte*, byte * &);
 
 } // end namespace
 
 
-code::code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
+Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
  :  _code(0), _data_size(0), _instr_count(0), _status(loaded), 
     _constrained(constrained), _own(true)
 {
     assert(bytecode_begin != 0);
     assert(bytecode_end > bytecode_begin);
-    const opcode_t *    op_to_fn = machine::get_opcode_table();
+    const opcode_t *    op_to_fn = Machine::getOpcodeTable();
     const byte *        cd_ptr = bytecode_begin;
     byte                iSlot = 0;
     
@@ -47,13 +48,13 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    instr *         ip = _code;
-    byte  *         dp = _data;
-    machine::opcode opc;
+    instr * ip = _code;
+    byte  * dp = _data;
+    opcode  opc;
     cContexts[0] = 0;
     cContexts[1] = 0;
     do {
-        opc = machine::opcode(*cd_ptr++);
+        opc = opcode(*cd_ptr++);
         
         // Do some basic sanity checks based on what we know about the opcodes.
         if (!check_opcode(opc, cd_ptr, bytecode_end))
@@ -84,7 +85,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
         }
         
         // Fixups to any argument data that needs it.
-        if (opc == machine::CNTXT_ITEM)
+        if (opc == CNTXT_ITEM)
             fixup_cntxt_item_target(cd_ptr, dp);
         if (!constrained)
             fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
@@ -114,7 +115,7 @@ code::code(bool constrained, const byte * bytecode_begin, const byte * const byt
     }    
 }
 
-code::~code() throw ()
+Code::~Code() throw ()
 {
     if (_own)
         release_buffers();
@@ -123,12 +124,10 @@ code::~code() throw ()
 
 // Validation check and fixups.
 //
-bool code::check_opcode(const machine::opcode opc, 
+bool Code::check_opcode(const opcode opc, 
                         const byte *cd_ptr, 
                         const byte *const cd_end) 
 {
-    using namespace machine;
-    
     if (opc >= MAX_OPCODE) {   // Is this even a valid opcode?
         failure(invalid_opcode);
         return false;
@@ -147,7 +146,7 @@ bool code::check_opcode(const machine::opcode opc,
 
 namespace {
 
-inline void emit_trace_message(machine::opcode opc, const byte *const params, 
+inline void emit_trace_message(opcode opc, const byte *const params, 
                         const opcode_t &op)
 {
 #ifndef DISABLE_TRACING
@@ -170,9 +169,8 @@ inline void emit_trace_message(machine::opcode opc, const byte *const params,
 
 void fixup_cntxt_item_target(const byte* cdp, 
                        byte * & dp) {
-    using namespace machine;
     
-    const opcode_t    * oplut = machine::get_opcode_table();
+    const opcode_t    * oplut = Machine::getOpcodeTable();
     size_t              data_skip = 0;
     uint8               count = uint8(dp[-1]); 
     
@@ -201,12 +199,11 @@ inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContext
 
 } // end of namespace
 
-void code::fixup_instruction_offsets(const machine::opcode opc, 
+void Code::fixup_instruction_offsets(const opcode opc, 
                                      int8  * dp, size_t param_sz,
                                      byte & iSlot, byte * cContexts)
 {
     
-    using namespace machine;
     uint8 *contexts = static_cast<uint8 *>(cContexts);
     
     switch (opc)
@@ -255,12 +252,12 @@ void code::fixup_instruction_offsets(const machine::opcode opc,
 
 
 inline 
-void code::failure(const status_t s) throw() {
+void Code::failure(const status_t s) throw() {
     release_buffers();
     _status = s;
 }
 
-void code::release_buffers() throw() 
+void Code::release_buffers() throw() 
 {
     std::free(_code);
     std::free(_data);
@@ -270,14 +267,15 @@ void code::release_buffers() throw()
 }
 
 
-int32 code::run(int32 * stack_base, const size_t length,
+int32 Code::run(int32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx, 
-                    machine::status_t & status_out) const
+                    Machine::status_t & status_out) const
 {
+    assert(_own);
     assert(stack_base != 0);
     assert(length >= 32);
     assert(*this);          // Check we are actually runnable
 
-    return machine::run(_code, _data, stack_base, length, seg, islot_idx, status_out);
+    return Machine::run(_code, _data, stack_base, length, seg, islot_idx, status_out);
 }
 

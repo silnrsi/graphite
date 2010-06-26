@@ -6,9 +6,13 @@
 #pragma once
 
 #include <graphiteng/Types.h>
-#include "machine.h"
+#include "Machine.h"
 
-class code 
+namespace vm
+{
+
+
+class Code 
 {
 public:
     enum status_t 
@@ -34,33 +38,33 @@ private:
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
-    bool check_opcode(const machine::opcode, const byte *, const byte *const);
-    void fixup_instruction_offsets(const machine::opcode, int8  *, size_t, 
+    bool check_opcode(const opcode, const byte *, const byte *const);
+    void fixup_instruction_offsets(const opcode, int8  *, size_t, 
                                    byte &, byte *);
 public:
-    code() throw();
-    code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cConstraints);
-    code(const code &) throw();
-    ~code() throw();
+    Code() throw();
+    Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cConstraints);
+    Code(const Code &) throw();
+    ~Code() throw();
     
-    code & operator=(const code &rhs) throw();
+    Code & operator=(const Code &rhs) throw();
     operator bool () const throw();
     status_t    status() const throw();
     bool        constraint() const throw();
-    size_t      data_size() const throw();
-    size_t      instruction_count() const throw();
+    size_t      dataSize() const throw();
+    size_t      instructionCount() const throw();
     
     int32 run(int32 * stack_base, const size_t length,
                     Segment & seg, int & islot_idx,
-                    machine::status_t & status) const;
+                    Machine::status_t & status) const;
 };
 
-inline code::code() throw()
+inline Code::Code() throw()
 : _code(0), _data(0), _data_size(0), _instr_count(0), 
   _status(empty), _own(false) {
 }
 
-inline code::code(const code &obj) throw ()
+inline Code::Code(const Code &obj) throw ()
  :  _code(obj._code), 
     _data(obj._data), 
     _data_size(obj._data_size), 
@@ -72,7 +76,7 @@ inline code::code(const code &obj) throw ()
     obj._own = false;
 }
 
-inline code & code::operator=(const code &rhs) throw() {
+inline Code & Code::operator=(const Code &rhs) throw() {
     if (_status != empty)
         release_buffers();
     _code        = rhs._code; 
@@ -86,23 +90,27 @@ inline code & code::operator=(const code &rhs) throw() {
     return *this;
 }
 
-inline code::operator bool () const throw () {
+inline Code::operator bool () const throw () {
     return _code && status() == loaded;
 }
 
-inline code::status_t code::status() const throw() {
+inline Code::status_t Code::status() const throw() {
     return _status;
 }
 
-inline bool code::constraint() const throw() {
+inline bool Code::constraint() const throw() {
     return _constrained;
 }
 
-inline size_t code::data_size() const throw() {
+inline size_t Code::dataSize() const throw() {
     return _data_size;
 }
 
-inline size_t code::instruction_count() const throw() {
+inline size_t Code::instructionCount() const throw() {
     return _instr_count;
 }
+
+
+
+} // end of namespace vm
 

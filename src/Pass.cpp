@@ -3,8 +3,11 @@
 #include <string.h>
 #include <assert.h>
 #include "Segment.h"
-#include "code.h"
+#include "Code.h"
 #include "XmlTraceLog.h"
+
+using vm::Code;
+using vm::Machine;
 
 bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 {
@@ -151,16 +154,16 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 #ifndef DISABLE_TRACING    
         XmlTraceLog::get().openElement(ElementConstraint);
 #endif
-        m_cPConstraint = code(true, p, p + nPConstraint, cContexts);
+        m_cPConstraint = Code(true, p, p + nPConstraint, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraint);
 #endif
         p += nPConstraint;
     }
     else
-        m_cPConstraint = code();
+        m_cPConstraint = Code();
 
-    m_cConstraint = new code[m_numRules];
+    m_cConstraint = new Code[m_numRules];
     uint16 loffset = read16(pConstraint);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementConstraints);
@@ -172,7 +175,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().openElement(ElementConstraint);
         XmlTraceLog::get().addAttribute(AttrIndex, i);
 #endif
-        if (noffset > loffset) m_cConstraint[i] = code(true, p + loffset, p + noffset, cContexts);
+        if (noffset > loffset) m_cConstraint[i] = Code(true, p + loffset, p + noffset, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraint);
 #endif
@@ -182,7 +185,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().closeElement(ElementConstraints);
 #endif
     p += loffset;
-    m_cActions = new code[m_numRules];
+    m_cActions = new Code[m_numRules];
     loffset = read16(pActions);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementActions);
@@ -196,7 +199,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
 #endif
         uint16 noffset = read16(pActions);
-        if (noffset > loffset) m_cActions[i] = code(false, p + loffset, p + noffset, cContexts);
+        if (noffset > loffset) m_cActions[i] = Code(false, p + loffset, p + noffset, cContexts);
         loffset = noffset;
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementRule);
@@ -308,27 +311,27 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     return -1;
 }
 
-int Pass::testConstraint(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
+int Pass::testConstraint(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
 {
     if (!*codeptr)
         return 1;
  
     assert(codeptr->constraint());
     
-    machine::status_t status;
+    Machine::status_t status;
     const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
-    return status == machine::finished ? ret : 1;
+    return status == Machine::finished ? ret : 1;
 }
 
-int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
+int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
 {
     if (!*codeptr)
         return 1;
     
     assert(!codeptr->constraint());
     
-    machine::status_t status;
+    Machine::status_t status;
     int iStart = iSlot;
     const int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
@@ -342,6 +345,6 @@ int Pass::doAction(const code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
         else
             i++;
     }
-    return (status == machine::finished ? iSlot + ret : iSlot) - iStart;
+    return (status == Machine::finished ? iSlot + ret : iSlot) - iStart;
 }
 

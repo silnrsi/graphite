@@ -7,13 +7,14 @@
 // opcodes) but is slower that the direct threaded interpreter by a factor of 2
 
 #include <cassert>
-#include "machine.h"
+#include "Machine.h"
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
+
 #define registers           const byte * & dp, int32 * & sp, Segment & seg, \
                             int & is, const int ib, const instr * & ip
-typedef ptrdiff_t        (* ip_t)(registers);
+
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(6);\
@@ -24,6 +25,11 @@ typedef ptrdiff_t        (* ip_t)(registers);
 // This is required by opcode_table.h
 #define do_(name)           instr(name)
 
+
+using namespace vm;
+
+typedef ptrdiff_t        (* ip_t)(registers);
+
 // Pull in the opcode definitions
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
@@ -31,7 +37,7 @@ namespace {
 #include "opcodes.h"
 }
 
-int32  machine::run(const instr  * program,
+int32  Machine::run(const instr  * program,
                      const byte   * data,
                      int32       * stack_base, 
                      const size_t   length,
@@ -57,11 +63,11 @@ int32  machine::run(const instr  * program,
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ib, ip)
 #if defined(CHECK_STACK)
-           && machine::check_stack(sp, stack_base, stack_top)
+           && check_stack(sp, stack_base, stack_top)
 #endif
            ) {}
 
-    machine::check_final_stack(sp, stack_base-1, stack_top, status);
+    check_final_stack(sp, stack_base-1, stack_top, status);
     return *sp;
 }
 
@@ -70,7 +76,7 @@ namespace {
 #include "opcode_table.h"
 }
 
-const opcode_t * machine::get_opcode_table() throw()
+const opcode_t * Machine::getOpcodeTable() throw()
 {
     return opcode_table;
 }
