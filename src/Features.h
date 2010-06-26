@@ -7,10 +7,10 @@
 class Features
 {
 public:
-    virtual void addFeature(FeatureRef *ref, uint16 value) { if (ref) ref->set(m_vec, value, m_length); } 
-    virtual uint16 getFeature(FeatureRef *ref) { return ref->get(m_vec, m_length); }
-    virtual void addFeatureMask(FeatureRef &ref) { ref.setMask(m_vec, m_length); }
-    virtual void maskedOr(Features &other, Features &mask) {
+    void addFeature(const FeatureRef *ref, uint16 value) { if (ref) ref->applyTo(m_vec, value, m_length); } 
+    uint16 getFeature(const FeatureRef *ref) const { return ref->get(m_vec, m_length); }
+    void addFeatureMask(const FeatureRef &ref) { ref.applyMaskTo(m_vec, m_length); }
+    void maskedOr(const Features &other, const Features &mask) {
         for (uint32 i = 0; i < m_length; i++)
             if ((&mask.m_vec)[i]) m_vec[i] = (m_vec[i] & ~mask.m_vec[i]) | (other.m_vec[i] & mask.m_vec[i]);
     }
@@ -44,6 +44,14 @@ public:
 private:
     uint32 m_length;
     uint32 * m_vec;
+
+private :
+#ifdef FIND_BROKEN_VIRTUALS
+    virtual double addFeature(FeatureRef *ref, uint16 value) { return 0.0; } 
+    virtual double getFeature(FeatureRef *ref) { return 0.0; }
+    virtual double addFeatureMask(FeatureRef &ref) { return 0.0; }
+    virtual double maskedOr(Features &other, Features &mask) { return 0.0; }
+#endif		//FIND_BROKEN_VIRTUALS
 };
 
 #endif

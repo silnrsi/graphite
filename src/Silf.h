@@ -22,11 +22,11 @@ public:
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
-    uint16 findClassIndex(uint16 cid, uint16 gid);
-    uint16 getClassGlyph(uint16 cid, uint16 index);
-    uint16 findPseudo(uint32 uid);
+    uint16 findClassIndex(uint16 cid, uint16 gid) const;
+    uint16 getClassGlyph(uint16 cid, uint16 index) const;
+    uint16 findPseudo(uint32 uid) const;
 
-protected:
+private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
 
     Pass          * m_passes;

@@ -172,7 +172,7 @@ const Silf *LoadedFace::chooseSilf(uint32 script) const
         return m_silfs;
 }
 
-uint16 LoadedFace::getGlyphMetric(uint16 gid, uint8 metric)
+uint16 LoadedFace::getGlyphMetric(uint16 gid, uint8 metric) const
 {
     switch ((enum metrics)metric)
     {

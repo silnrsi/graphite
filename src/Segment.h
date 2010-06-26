@@ -55,13 +55,13 @@ public:
     void append(const Segment &other);
     void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
     void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
-    uint16 getClassGlyph(uint16 cid, uint16 offset) { return const_cast<Silf *>(m_silf)->getClassGlyph(cid, offset); }
-    uint16 findClassIndex(uint16 cid, uint16 gid) { return const_cast<Silf *>(m_silf)->findClassIndex(cid, gid); }
+    uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
+    uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
-    uint16 getFeature(int index, uint8 findex) { return m_feats[index].getFeature(const_cast<LoadedFace *>(m_face)->feature(findex)); }
+    uint16 getFeature(int index, uint8 findex) const { return m_feats[index].getFeature(m_face->feature(findex)); }
     void dir(int8 val) { m_dir = val; }
-    uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
-    uint16 getGlyphMetric(uint16 gid, uint8 metric) { return const_cast<LoadedFace *>(m_face)->getGlyphMetric(gid, metric); }
+    uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_face->glyphAttr(gid, gattr); }
+    uint16 getGlyphMetric(uint16 gid, uint8 metric) const { return m_face->getGlyphMetric(gid, metric); }
 
 #ifndef DISABLE_TRACING
     void logSegment(const ITextSource & textSrc) const;

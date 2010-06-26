@@ -112,8 +112,9 @@ bool FeatureMap::readFeats(const IFace *face)
 #endif
     }
     m_defaultFeatures = new Features(currIndex + 1);
+    const FeatureRef* pcFeats = m_feats;
     for (int i = 0; i < m_numFeats; i++)
-        m_defaultFeatures->addFeature(m_feats + i, defVals[i]);
+        m_defaultFeatures->addFeature(pcFeats + i, defVals[i]);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -162,7 +163,7 @@ bool FeatureMap::readSill(const IFace *face)
     return true;
 }
 
-FeatureRef *FeatureMap::featureRef(uint32 name)
+const FeatureRef *FeatureMap::featureRef(uint32 name)
 {
     // TODO reimplement without MAP (nothing is currently put int the map anyway!)
 //    std::map<uint32, byte>::iterator res = m_map.find(name);

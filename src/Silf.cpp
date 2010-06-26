@@ -286,14 +286,14 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
     return (p - (char *)pClass);
 }
 
-uint16 Silf::findPseudo(uint32 uid)
+uint16 Silf::findPseudo(uint32 uid) const
 {
     for (int i = 0; i < m_numPseudo; i++)
         if (m_pseudos[i].uid == uid) return m_pseudos[i].gid;
     return 0;
 }
 
-uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
+uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
 {
     if (cid > m_nClass) return -1;
 
@@ -332,7 +332,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid)
     return -1;
 }
 
-uint16 Silf::getClassGlyph(uint16 cid, uint16 index)
+uint16 Silf::getClassGlyph(uint16 cid, uint16 index) const
 {
     if (cid > m_nClass) return 0;
 
