@@ -19,6 +19,7 @@ public:
 
 private:
     friend class Segment;
+    friend class FeatureMap;
     Features* Ptr() const { return AutoHandle<Features, &DeleteFeatures>::Ptr(); }
 };
 

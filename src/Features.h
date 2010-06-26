@@ -1,18 +1,20 @@
 #ifndef FEATURES_INCLUDE
 #define FEATURES_INCLUDE
 
-#include "FeatureMap.h"
 #include <algorithm>
+
+class FeatureRef;
 
 class Features
 {
 public:
-    void addFeature(const FeatureRef *ref, uint16 value) { if (ref) ref->applyTo(m_vec, value, m_length); } 
-    uint16 getFeature(const FeatureRef *ref) const { return ref->get(m_vec, m_length); }
-    void addFeatureMask(const FeatureRef &ref) { ref.applyMaskTo(m_vec, m_length); }
-    void maskedOr(const Features &other, const Features &mask) {
-        for (uint32 i = 0; i < m_length; i++)
-            if ((&mask.m_vec)[i]) m_vec[i] = (m_vec[i] & ~mask.m_vec[i]) | (other.m_vec[i] & mask.m_vec[i]);
+    uint32 maskedOr(const Features &other, const Features &mask) {
+	uint32 len = m_length ;
+	if (other.m_length<len) len = other.m_length;		//defensive
+	if (mask.m_length<len) len = mask.m_length;		//defensive
+        for (uint32 i = 0; i < len; i++)
+            if ((mask.m_vec)[i]) m_vec[i] = (m_vec[i] & ~mask.m_vec[i]) | (other.m_vec[i] & mask.m_vec[i]);
+	return len;
     }
 
     explicit Features(int num)
@@ -42,16 +44,19 @@ public:
 //    }
 
 private:
+friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
 
 private :
+  /*
 #ifdef FIND_BROKEN_VIRTUALS
     virtual double addFeature(FeatureRef *ref, uint16 value) { return 0.0; } 
     virtual double getFeature(FeatureRef *ref) { return 0.0; }
     virtual double addFeatureMask(FeatureRef &ref) { return 0.0; }
     virtual double maskedOr(Features &other, Features &mask) { return 0.0; }
 #endif		//FIND_BROKEN_VIRTUALS
+*/
 };
 
 #endif

@@ -112,9 +112,8 @@ bool FeatureMap::readFeats(const IFace *face)
 #endif
     }
     m_defaultFeatures = new Features(currIndex + 1);
-    const FeatureRef* pcFeats = m_feats;
     for (int i = 0; i < m_numFeats; i++)
-        m_defaultFeatures->addFeature(pcFeats + i, defVals[i]);
+	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures.Ptr());
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -153,8 +152,10 @@ bool FeatureMap::readSill(const IFace *face)
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-            feats->addFeature(featureRef(name), val);
-        }
+	    const FeatureRef* pRef = featureRef(name);
+	    if (pRef)
+		pRef->applyValToFeature(val, feats.Ptr());
+	}
         //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         //m_langMap.insert(kvalue);
         m_langFeats[i].m_lang = langid;

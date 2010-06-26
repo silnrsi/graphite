@@ -3,25 +3,34 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
+#include "Features.h"
 //#include <map> // avoid libstdc++
 
 class IFace;
-class Features;
 
 class FeatureRef
 {
 public:
     FeatureRef(byte bits=0, byte i=0, uint32 mask=0) throw() 
       : m_mask(mask), m_bits(bits), m_index(i), m_max(mask >> bits) {}
-    void applyTo(uint32 *vec, uint16 val, byte length) const { 
-        if (m_index < length && val <= m_max)
+    void applyValToFeature(uint16 val, Features* pDest) const { 
+        if (m_index < pDest->m_length && val <= m_max)
         {
-            vec[m_index] &= ~m_mask;
-            vec[m_index] |= (val << m_bits);
+            pDest->m_vec[m_index] &= ~m_mask;
+            pDest->m_vec[m_index] |= (val << m_bits);
         }
     }
-    uint16 get(const uint32 *vec, byte length) const { if (m_index < length) return (vec[m_index] & m_mask) >> m_bits; else return 0; }
-    void applyMaskTo(uint32 *vec, byte length) const { vec[m_index] |= m_mask; }
+    void maskFeature(Features* pDest) const { 
+	if (m_index < pDest->m_length) 				//defensive
+	    pDest->m_vec[m_index] |= m_mask; 
+    }
+
+    uint16 getFeatureVal(const Features& feats) const { 
+	if (m_index < feats.m_length) 
+	    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
+	else 
+	    return 0; 
+    }
 
 private:
     uint32 m_mask;
