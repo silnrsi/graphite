@@ -11,8 +11,8 @@ class IFace;
 class FeatureRef
 {
 public:
-    FeatureRef(byte bits=0, byte i=0, uint32 mask=0) throw() 
-      : m_mask(mask), m_bits(bits), m_index(i), m_max(mask >> bits) {}
+    FeatureRef(byte bits=0, byte index=0, uint32 mask=0) throw() 
+      : m_mask(mask), m_bits(bits), m_index(index), m_max(mask >> bits) {}
     void applyValToFeature(uint16 val, Features* pDest) const { 
         if (m_index < pDest->m_length && val <= m_max)
         {

@@ -3,7 +3,6 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/AutoHandle.h"
-#include "graphiteng/SlotHandle.h"
 
 class Features;
 
@@ -15,12 +14,13 @@ public:
     FeaturesHandle() {}
     FeaturesHandle(Features* p/*takes ownership*/) : AutoHandle<Features, &DeleteFeatures>(p) {}
     
-    FeaturesHandle clone() const;		//clones the Features which are then owned separately
+    FeaturesHandle clone() const;		//clones the Features which is then owned separately
     bool maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const;	//returns false iff any of the FeaturesHandles are IsNull
 
 private:
     friend class Segment;
     friend class FeatureMap;
+    friend class FeatureRefHandle;
     Features* Ptr() const { return AutoHandle<Features, &DeleteFeatures>::Ptr(); }
 };
 
