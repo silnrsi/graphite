@@ -1,10 +1,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <time.h>
-#include "code.h"
+#include "Code.h"
 
-using namespace machine;
+using namespace vm;
 
 const byte simple_prog[] = 
 {
@@ -62,7 +61,7 @@ int main(int argc, char *argv[])
     
     // Load the code.
     byte context[256];
-    code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(),context);
+    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(),context);
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.
         std::cerr << "program failed to load due to: " 
@@ -70,30 +69,30 @@ int main(int argc, char *argv[])
         return 1;
     }
     std::cout << "loaded program size:    " 
-              << prog.data_size() + prog.instruction_count()*sizeof(instr) 
+              << prog.dataSize() + prog.instructionCount()*sizeof(instr) 
               << " bytes" << std::endl
               << "                        " 
-              << prog.instruction_count() << " instructions" << std::endl;
+              << prog.instructionCount() << " instructions" << std::endl;
     
     // run the program
-    uint32 * stack = new uint32 [64];
+    int32 * stack = new int32 [64];
     Segment seg;
     int is=0;
     uint32 ret;
-    machine::status_t status;
+    Machine::status_t status;
     for(size_t n = repeats; n; --n) {
         ret = prog.run(stack, 64, seg, is, status);
         switch (status) {
-            case stack_underflow:
-            case stack_overflow:
+            case Machine::stack_underflow:
+            case Machine::stack_overflow:
                 std::cerr << "program terminated early: " 
                           << run_error_msg[status] << std::endl;
                 std::cout << "--------" << std::endl
-                          << "between " << prog.instruction_count()*(repeats-n) 
-                          << " and "    << prog.instruction_count()*(repeats-std::min(n-1,repeats))
+                          << "between " << prog.instructionCount()*(repeats-n) 
+                          << " and "    << prog.instructionCount()*(repeats-std::min(n-1,repeats))
                           << " instructions executed" << std::endl;
                 return 2;
-            case stack_not_empty:
+            case Machine::stack_not_empty:
                 std::cerr << "program completed but stack not empty." << std::endl;
                 repeats -= n-1;
                 n=1;
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
     
     std::cout << "result of program: " << ret << std::endl
               << "--------" << std::endl
-              << "equivalent of " << prog.instruction_count()*repeats 
+              << "equivalent of " << prog.instructionCount()*repeats 
               << " instructions executed" << std::endl;
     
     delete [] stack;
