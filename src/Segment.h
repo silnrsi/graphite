@@ -48,7 +48,6 @@ public:
     virtual int8 dir() const { return m_dir; }
 
     Segment(int numSlots, const LoadedFace *face);
-    Segment(const Segment &other);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid);
     void positionSlots(const LoadedFont *font);
@@ -86,9 +85,15 @@ private:
     Rect m_bbox;           // ink box of the segment
     int8 m_dir;
     std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
+
+
 #ifdef FIND_BROKEN_VIRTUALS
     virtual int8 dir() { return m_dir; }
 #endif		//FIND_BROKEN_VIRTUALS
+
+private:		//defensive on m_charinfo
+    Segment(const Segment&);
+    Segment& operator=(const Segment&);
 };
 
 

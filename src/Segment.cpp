@@ -23,22 +23,24 @@ Segment::Segment(int numchars, const LoadedFace *face) :
 Segment::~Segment()
 {
 //    delete[] m_slots;
-//    delete[] m_charinfo;
+    delete[] m_charinfo;
 }
 
+#if 0		//unsafe - memcpying vectors will lead to problems when the destructors are run
 Segment::Segment(const Segment &other)
 {
     memcpy(this, &other, sizeof(Segment));
     m_charinfo = (CharInfo *)(operator new(m_numCharinfo * sizeof(CharInfo)));
     memcpy(m_charinfo, other.m_charinfo, m_numCharinfo * sizeof(CharInfo));
 }
+#endif
 
 void Segment::append(const Segment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
 
     m_slots.insert(m_slots.end(), other.m_slots.begin(), other.m_slots.end());
-    m_charinfo = (CharInfo *)realloc(m_charinfo, other.m_numCharinfo * sizeof(CharInfo));
+    m_charinfo = (CharInfo *)realloc(m_charinfo, (m_numCharinfo+other.m_numCharinfo) * sizeof(CharInfo));
     memcpy(m_charinfo + m_numCharinfo, other.m_charinfo, other.m_numCharinfo * sizeof(CharInfo));
     for (int i = 0; i < other.m_numCharinfo; i++)
     { m_charinfo[m_numCharinfo + i].update(m_numCharinfo); }
