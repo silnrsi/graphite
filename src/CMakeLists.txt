@@ -43,7 +43,6 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/FeaturesHandle.h
     ../include/graphiteng/IFont.h
     ../include/graphiteng/IFace.h
-    ../include/graphiteng/IFeatures.h
     ../include/graphiteng/ITextSource.h
     ../include/graphiteng/RefCountHandle.h
     ../include/graphiteng/SegmentHandle.h
