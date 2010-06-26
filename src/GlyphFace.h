@@ -11,6 +11,20 @@ enum metrics {
     kgmetAscent, kgmetDescent
 };
 
+class Rect
+{
+public :
+    Rect() {}
+    Rect(const Position& botLeft, const Position& topRight): bl(botLeft), tr(topRight) {}
+    Rect widen(const Rect& other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
+    Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
+
+    Position bl;
+    Position tr;
+};
+
+
+
 class GlyphFace
 {
 public:
