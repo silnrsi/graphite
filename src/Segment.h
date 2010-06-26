@@ -21,7 +21,6 @@ public:
     unsigned int length() const { return m_numGlyphs; }
     Position advance() const { return m_advance; }
     Slot & operator[] (unsigned int index) {
-        assert(index >= 0);
 #ifdef ENABLE_DEEP_TRACING
         if (static_cast<size_t>(index) >= m_slots.size())
         {

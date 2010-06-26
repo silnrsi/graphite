@@ -9,9 +9,10 @@ class LoadedFace;
 class Silf;
 
 class Pass
-{
-    
+{   
 public:
+    Pass() {}
+    
     bool readPass(void *pPass, size_t lPass, int numGlyphs);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     int findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const;
@@ -19,7 +20,7 @@ public:
     int doAction(const vm::Code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;
     void init(Silf *silf) { m_silf = silf; }
 
-protected:
+private:
     Silf *m_silf;
     byte m_iMaxLoop;
     uint16 m_numRules;
@@ -39,6 +40,10 @@ protected:
     vm::Code *m_cConstraint;
     vm::Code *m_cActions;
     int16 *m_sTable;
+    
+private:		//defensive
+    Pass(const Pass&);
+    Pass& operator=(const Pass&);
 };
 
 #endif

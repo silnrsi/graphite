@@ -45,6 +45,10 @@ private:
             m_nLinear;
     
     void releaseBuffers() throw();
+    
+private:			//defensive
+    Silf(const Silf&);
+    Silf& operator=(const Silf&);
 };
 
 #endif

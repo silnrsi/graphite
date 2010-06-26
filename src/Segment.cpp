@@ -75,7 +75,7 @@ void Segment::positionSlots(const LoadedFont *font)
     Position currpos;
     Slot *s;
 
-    for (int i = 0; i < m_numGlyphs; i++)
+    for (unsigned int i = 0; i < m_numGlyphs; i++)
     {
         s = &(m_slots[i]);
         if (s->isBase())
@@ -133,7 +133,7 @@ void Segment::logSegment(const ITextSource & textSrc) const
             break;
         }
         XmlTraceLog::get().closeElement(ElementText);
-        for (int i = 0; i < length(); i++)
+        for (unsigned int i = 0; i < length(); i++)
         {
             XmlTraceLog::get().openElement(ElementSlot);
             XmlTraceLog::get().addAttribute(AttrGlyphId, (*this)[i].gid());
