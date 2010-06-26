@@ -31,7 +31,6 @@ class GRNG_EXPORT Position
 public:
 
     Position() : x(0), y(0) { }
-    Position(const Position &other) {x = other.x, y = other.y;}
     Position(float inx, float iny) { x = inx; y = iny; }
     Position operator + (const Position& a) { return Position(x + a.x, y + a.y); }
     Position &operator += (const Position &a) { x += a.x; y += a.y; return *this; }
@@ -43,10 +42,8 @@ public:
 class GRNG_EXPORT Rect
 {
 public :
-
     Rect() {}
-    Rect(const Position& origin, const Position& extent) { bl = origin; tr = extent; }
-    Rect(const Rect &other) {bl = other.bl; tr = other.tr;}
+    Rect(const Position& botLeft, const Position& topRight): bl(botLeft), tr(topRight) {}
     Rect widen(const Rect& other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
     Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
 
