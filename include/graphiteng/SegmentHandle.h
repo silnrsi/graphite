@@ -24,8 +24,7 @@ public:
     void chooseSilf(uint32 script);
     
     Segment* operator->() const { return m_pSegment; }		//cannot be used by client code - only available witin graphite code!
-    const Segment & operator*() const { return *m_pSegment; };
-    Segment & operator*() {return *m_pSegment; };
+    Segment & operator*() const {return *m_pSegment; };
     
 private:
     RefCountHandle m_RefCountHandle;
