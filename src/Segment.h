@@ -45,8 +45,8 @@ public:
     const Slot & operator[] (int index) const { return m_slots[index]; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
-    CharInfo *charinfo(int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
-    virtual int8 dir() { return m_dir; }
+    CharInfo *charinfo(int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    virtual int8 dir() const { return m_dir; }
 
     Segment(int numSlots, const LoadedFace *face);
     Segment(const Segment &other);
@@ -87,6 +87,9 @@ private:
     Rect m_bbox;           // ink box of the segment
     int8 m_dir;
     std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
+#ifdef FIND_BROKEN_VIRTUALS
+    virtual int8 dir() { return m_dir; }
+#endif		//FIND_BROKEN_VIRTUALS
 };
 
 

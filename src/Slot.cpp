@@ -37,14 +37,14 @@ void Slot::finalise(Segment *seg, const LoadedFont *font, Position &base, float 
         (*seg)[m_sibling].finalise(seg, font, base, cMin, cMax);
 }
 
-int Slot::getAttr(Segment *seg, uint8 index, uint8 subindex)
+int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex) const
 {
-    if ((enum attrCode)index == kslatUserDefnV1)
+    if (index == kslatUserDefnV1)
     {
 	index = kslatUserDefn;
 	subindex = 0;
     }
-    switch ((enum attrCode)index)
+    switch (index)
     {
 	case kslatAdvX : return m_advance.x;
 	case kslatAdvY : return m_advance.y;
@@ -77,14 +77,14 @@ int Slot::getAttr(Segment *seg, uint8 index, uint8 subindex)
     }
 }
 
-void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value, int is)
+void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int is)
 {
-    if ((enum attrCode)index == kslatUserDefnV1)
+    if (index == kslatUserDefnV1)
     {
 	index = kslatUserDefn;
 	subindex = 0;
     }
-    switch ((enum attrCode)index)
+    switch (index)
     {
 	case kslatAdvX : m_advance = Position(value, m_advance.y); break;
 	case kslatAdvY : m_advance = Position(m_advance.x, value); break;

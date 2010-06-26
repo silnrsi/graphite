@@ -11,7 +11,8 @@ public:
     ~RefCountHandle() { Release();}
 
     OBJCLASS* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
-    OBJCLASS& operator*() const {return *m_p; };
+//    OBJCLASS& operator*() const {return *m_p; };
+    OBJCLASS* Ptr() const { return m_p; }
 
 protected:
     OBJCLASS* Ptr() const { return m_p; }

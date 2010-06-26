@@ -1,9 +1,9 @@
 // This file will be pulled into and integrated into a machine implmentation
 // DO NOT build directly
 //
-// Implementers notes
+// Implementers' notes
 // ==================
-// You have at you displsoal access to a few primatives and the full C++ code:
+// You have access to a few primitives and the full C++ code:
 //    declare_params(n) Tells the interpreter how many bytes of parameter
 //                      space to claim for this instruction uses and 
 //                      initialises the param pointer.  You *must* before the 
@@ -30,7 +30,8 @@
 //        ib    = The original base slot index at the start of this rule
 //        param = pointer to the instructions parameter block.
 //                (Only if you use declare_params first).
-     
+
+#include "graphiteng/ISlot.h"
      
 #define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
 
@@ -257,14 +258,14 @@ ENDOP
 
 STARTOP(attr_set)
     declare_params(1);
-    const unsigned int  slat = uint8(*param);
+    const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
     seg[is].setAttr(&seg, slat, 0, val, is);
 ENDOP
 
 STARTOP(attr_add)
     declare_params(1);
-    const unsigned int  slat = uint8(*param);
+    const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, 0);
     seg[is].setAttr(&seg, slat, 0, val + res, is);
@@ -272,7 +273,7 @@ ENDOP
 
 STARTOP(attr_sub)
     declare_params(1);
-    const unsigned int  slat = uint8(*param);
+    const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, 0);
     seg[is].setAttr(&seg, slat, 0, res - val, is);
@@ -280,14 +281,14 @@ ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
-    const unsigned int  slat = uint8(*param);
+    const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
     seg[is].setAttr(&seg, slat, 0, val + is, is);
 ENDOP
 
 STARTOP(iattr_set_slot)
     declare_params(2);
-    const unsigned int  slat = uint8(param[0]);
+    const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     seg[is].setAttr(&seg, slat, idx, val + is, is);
@@ -295,14 +296,14 @@ ENDOP
 
 STARTOP(push_slot_attr)
     declare_params(2);
-    const unsigned int  slat     = uint8(param[0]);
+    const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
     push(seg[is + slot_ref].getAttr(&seg, slat, 0));
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
-    const unsigned int  slat     = uint8(param[0]);
+    const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]) + is + 1;
     push(seg[is + slot_ref].getAttr(&seg, slat, 0));
 ENDOP
@@ -397,7 +398,7 @@ ENDOP
 
 STARTOP(push_islot_attr)
     declare_params(3);
-    const unsigned int  slat     = uint8(param[0]);
+    const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
     push(seg[is + slot_ref].getAttr(&seg, slat, idx));
@@ -405,7 +406,7 @@ ENDOP
 
 STARTOP(push_islot_attr_constrained)
     declare_params(3);
-    const unsigned int  slat     = uint8(param[0]);
+    const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]) + is + 1,
                         idx      = uint8(param[2]);
     push(seg[is + slot_ref].getAttr(&seg, slat, idx));
@@ -430,7 +431,7 @@ ENDOP
 
 STARTOP(iattr_set)
     declare_params(2);
-    const unsigned int  slat = uint8(param[0]);
+    const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     seg[is].setAttr(&seg, slat, idx, val, is);
@@ -438,7 +439,7 @@ ENDOP
 
 STARTOP(iattr_add)
     declare_params(2);
-    const unsigned int  slat = uint8(param[0]);
+    const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, idx);
@@ -447,7 +448,7 @@ ENDOP
 
 STARTOP(iattr_sub)
     declare_params(2);
-    const unsigned int  slat = uint8(param[0]);
+    const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, idx);

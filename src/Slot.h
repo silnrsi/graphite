@@ -3,6 +3,7 @@
 
 #include "graphiteng/ISlot.h"
 #include "graphiteng/Types.h"
+#include "graphiteng/SegmentHandle.h"
 #include "LoadedFont.h"
 
 #define SLOT_DELETED    1
@@ -15,10 +16,10 @@ class Slot : public ISlot
 public:
     virtual unsigned short gid() const { return m_glyphid; }
     virtual Position origin() const { return m_position; }
-    virtual float advance(const LoadedFont *font) { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
+    virtual float advance(const LoadedFont *font) const { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
     virtual int before() const { return m_before; }
     virtual int after() const { return m_after; }
-    virtual int getAttr(SegmentHandle *seg, uint8 index, uint8 subindex) { return getAttr((Segment *)&(*seg), index, subindex); }
+    virtual int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const { return getAttr(hSeg.Ptr(), index, subindex); }
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
@@ -32,10 +33,10 @@ public:
     void finalise(Segment *seg, const LoadedFont *font, Position &base, float *cMin, float *cMax);
     bool isDeleted() { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
-    bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }
+    bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(Segment *seg, uint8 index, uint8 subindex, int value, int is);
-    int getAttr(Segment *seg, uint8 index, uint8 subindex);
+    void setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int is);
+    int getAttr(const Segment *seg, attrCode index, uint8 subindex) const;
     void attachTo(int ap) { m_parent = ap; }
     void child(Segment *seg, int ap);
     int attachTo() { return m_parent; }
@@ -54,6 +55,7 @@ protected:
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
     byte m_flags;           // holds bit flags
+
 };
 
 #endif // SLOT_INCLUDE
