@@ -19,7 +19,6 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <cstdlib>
 #include <cassert>
 #include <climits>
-#include <iostream>
 #include <iomanip>
 #include <string>
 #include <cstring>
@@ -32,6 +31,34 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
 #include "graphiteng/XmlLog.h"
+
+// define a few basic functions to save using libstdc++
+#ifdef __GNUC__
+extern "C" void __cxa_pure_virtual() { assert(false); }
+void * operator new[](unsigned long size)
+{
+    return malloc(size);
+}
+void operator delete[] (void * p)
+{
+    if (p) free(p);
+}
+void * operator new(unsigned long size)
+{
+    return malloc(size);
+}
+void operator delete (void * p)
+{
+    if (p) free(p);
+}
+// declaration in c++/x.y/bits/functexcept.h
+namespace std
+{
+    void __throw_bad_alloc(void) { assert(false); };
+    void __throw_length_error(const char* c)
+    { fprintf(stderr, "Length error %s\n", c); assert(false);}
+}
+#endif
 
 class GrngTextSrc : public ITextSource
 {
@@ -88,6 +115,8 @@ public:
     size_t charLength;
     size_t offset;
     FILE * log;
+    FILE * trace;
+    int mask;
     
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
@@ -103,6 +132,8 @@ Parameters::Parameters()
 
 Parameters::~Parameters()
 {
+  delete pText32;
+  pText32 = NULL;
   closeLog();
 }
 
@@ -125,6 +156,8 @@ void Parameters::clear()
     charLength = 0;
     offset = 0;
     log = stdout;
+    trace = NULL;
+    mask = GRLOG_ALL;
 }
 
 
@@ -162,7 +195,8 @@ convertUtf(const char * inType, const char * outType, A* pIn, B * & pOut)
     // allow 2 extra for null + bom
     size_t outBytesLeft = (length*outFactor + 2) * sizeof(B);
     size_t outBufferSize = outBytesLeft;
-    B * textOut = new B[length*outFactor + 2];
+    //B * textOut = new B[length*outFactor + 2];
+    B * textOut = reinterpret_cast<B*>(malloc(sizeof(B) * length*outFactor + 2));// new operator not defined
     iconv_t utfInOut = iconv_open(outType,inType);
     assert(utfInOut != (iconv_t)(-1));
     char * pTextOut = reinterpret_cast<char*>(&textOut[0]);
@@ -206,7 +240,9 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         LINE_FILL,
         CODES,
         FEAT,
-        LOG
+        LOG,
+        TRACE,
+        TRACE_MASK
     } TestOptions;
     TestOptions option = NONE;
     char * pIntEnd = NULL;
@@ -274,6 +310,19 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             }
             option = NONE;
             break;
+        case TRACE:
+            if (trace) fclose(trace);
+            trace = fopen(argv[a], "wb");
+            if (trace == NULL)
+            {
+                fprintf(stderr,"Failed to open %s\n", argv[a]);
+            }
+            option = NONE;
+            break;
+        case TRACE_MASK:
+            mask = atoi(argv[a]);
+            option = NONE;
+            break;
         default:
             option = NONE;
             if (argv[a][0] == '-')
@@ -336,6 +385,14 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 else if (strcmp(argv[a], "-log") == 0)
                 {
                     option = LOG;
+                }
+                else if (strcmp(argv[a], "-trace") == 0)
+                {
+                    option = TRACE;
+                }
+                else if (strcmp(argv[a], "-mask") == 0)
+                {
+                    option = TRACE_MASK;
                 }
                 else
                 {
@@ -486,11 +543,12 @@ int Parameters::testFileFont() const
 {
     int returnCode = 0;
     IFace *fileface;
-    try
+//    try
     {
-        FILE * logFile = fopen("graphitengTrace.xml", "wb");
+        // use the -trace option to specify a file
+        //FILE * logFile = fopen("graphitengTrace.xml", "wb");
 #ifndef DISABLE_TRACING
-        startGraphiteLogging(logFile, GRLOG_ALL);
+        startGraphiteLogging(trace, static_cast<GrLogMask>(mask));
 #endif
         //fileFont = new FileFont(fileName);
         //if (!fileFont)
@@ -636,13 +694,13 @@ int Parameters::testFileFont() const
 //        delete [] parameters.pText32;
 //        logStream.close();
     }
-    catch (...)
-    {
-        printf("Exception occurred\n");
-        returnCode = 5;
-    }
+//    catch (...)
+//    {
+//        printf("Exception occurred\n");
+//        returnCode = 5;
+//    }
 #ifndef DISABLE_TRACING
-    stopGraphiteLogging();
+    if (trace) stopGraphiteLogging();
 #endif
     return returnCode;
 }
@@ -669,6 +727,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
+        fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
         fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
         return 1;
     }

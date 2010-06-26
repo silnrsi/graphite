@@ -40,8 +40,16 @@ find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk 
 find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	add_test(NAME nostdc++ COMMAND /bin/sh ../tests/libstdc++_usage ../common/*.cpp ../src/*.cpp)
-	set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "^.+:.+$")
+    # -lgcc LINKER_LANGUAGE C
+    add_definitions(-fno-rtti -fno-exceptions)
+    set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc  -lm" )
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+    # This script just fails
+    add_test(NAME nostdc++ COMMAND /bin/sh ${PROJECT_SOURCE_DIR}/../tests/libstdc++_usage ../common/*.cpp ../src/*.cpp)
+    set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "\\^.+:.+$")
+    add_test(NAME ldd_nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
+    set_tests_properties(ldd_nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
+
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
@@ -58,11 +66,11 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 add_dependencies(copy_dll graphiteng iconv)
 
 # TODO need to set ENVIRONMENT property for Windows?
-add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -codes 1000 1031 102C)
+add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.xml -codes 1000 1031 102C)
 # TODO Add expected results to compare with
 #add_test(NAME grngfonttestPadauk1Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log ${PROJECT_SOURCE_DIR}/expected/grngfonttestPadauk1.log)
 #set_tests_properties(grngfonttestPadauk1Output PROPERTIES DEPENDS grngfonttestPadauk1)
 
-add_test(NAME grngfonttestCharis1 COMMAND $<TARGET_FILE:grngfonttest> ${CHARIS_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -codes 0069 02e6 02e8 02e5)
+add_test(NAME grngfonttestCharis1 COMMAND $<TARGET_FILE:grngfonttest> ${CHARIS_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestCharis1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestCharis1.xml -codes 0069 02e6 02e8 02e5)
 
 set_tests_properties(grngfonttestPadauk1 grngfonttestCharis1 PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})

@@ -19,8 +19,10 @@ Description:
 #define TTFUTIL_H
 
 #include <cstddef>
-#include <stdexcept>
+//#include <stdexcept>
 
+namespace TtfUtil
+{
 // Enumeration used to specify a table in a TTF file
 enum TableId
 {
@@ -38,8 +40,6 @@ typedef unsigned short gid16;
 	Callling application handles all file input and memory allocation.
 	Assumes minimal knowledge of TTF file format.
 ----------------------------------------------------------------------------------------------*/
-namespace TtfUtil
-{
 	////////////////////////////////// tools to find & check TTF tables
 	bool GetHeaderInfo(size_t & lOffset, size_t & lSize);
 	bool CheckHeader(const void * pHdr);

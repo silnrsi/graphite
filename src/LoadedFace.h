@@ -11,24 +11,25 @@
 class Segment;
 class Features;
 
-#define ktiCmap MAKE_TAG('c','m','a','p')
-#define ktiHead MAKE_TAG('h','e','a','d')
-#define ktiGlyf MAKE_TAG('g','l','y','f')
-#define ktiHdmx MAKE_TAG('h','d','m','x')
-#define ktiHhea MAKE_TAG('h','h','e','a')
-#define ktiHmtx MAKE_TAG('h','m','t','x')
-#define ktiLoca MAKE_TAG('l','o','c','a')
-#define ktiKern MAKE_TAG('k','e','r','n')
-#define ktiMaxp MAKE_TAG('m','a','x','p')
-#define ktiName MAKE_TAG('n','a','m','e')
-#define ktiOs2  MAKE_TAG('O','S','/','2')
-#define ktiPost MAKE_TAG('p','o','s','t')
-#define ktiFeat MAKE_TAG('F','e','a','t')
-#define ktiGlat MAKE_TAG('G','l','a','t')
-#define ktiGloc MAKE_TAG('G','l','o','c')
-#define ktiSilf MAKE_TAG('S','i','l','f')
-#define ktiSile MAKE_TAG('S','i','l','e')
-#define ktiSill MAKE_TAG('S','i','l','l')
+// These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
+#define tagCmap MAKE_TAG('c','m','a','p')
+#define tagHead MAKE_TAG('h','e','a','d')
+#define tagGlyf MAKE_TAG('g','l','y','f')
+#define tagHdmx MAKE_TAG('h','d','m','x')
+#define tagHhea MAKE_TAG('h','h','e','a')
+#define tagHmtx MAKE_TAG('h','m','t','x')
+#define tagLoca MAKE_TAG('l','o','c','a')
+#define tagKern MAKE_TAG('k','e','r','n')
+#define tagMaxp MAKE_TAG('m','a','x','p')
+#define tagName MAKE_TAG('n','a','m','e')
+#define tagOs2  MAKE_TAG('O','S','/','2')
+#define tagPost MAKE_TAG('p','o','s','t')
+#define tagFeat MAKE_TAG('F','e','a','t')
+#define tagGlat MAKE_TAG('G','l','a','t')
+#define tagGloc MAKE_TAG('G','l','o','c')
+#define tagSilf MAKE_TAG('S','i','l','f')
+#define tagSile MAKE_TAG('S','i','l','e')
+#define tagSill MAKE_TAG('S','i','l','l')
 
 class LoadedFace 	// an IFace loaded into an object
 {

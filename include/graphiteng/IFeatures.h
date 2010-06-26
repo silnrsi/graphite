@@ -6,7 +6,7 @@
 class FeatureRef;
 class Features;
 
-class IFeatures
+class GRNG_EXPORT IFeatures
 {
 public:
     void addFeature(FeatureRef *ref, uint16 value) = 0;

@@ -82,7 +82,7 @@ namespace
 	}
 
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
-	const fontTableId32 mapIdToTag[] = {
+	const TtfUtil::fontTableId32 mapIdToTag[] = {
 		MAKE_TAG('c','m','a','p'),
 		MAKE_TAG('c','v','t',' '),
 		MAKE_TAG('c','r','y','p'),

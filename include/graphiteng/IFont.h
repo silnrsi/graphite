@@ -6,7 +6,7 @@
 class LoadedFace;
 class LoadedFont;
 
-class IFont
+class GRNG_EXPORT IFont
 {
 public:
     virtual float advance(uint16 glyphid) const = 0;		//amount to advance. positive is in the writing direction

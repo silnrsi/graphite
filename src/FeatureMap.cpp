@@ -1,9 +1,9 @@
 #include <string.h>
 
+#include "Main.h"
 #include "FeatureMap.h"
 #include "Features.h"
 #include "graphiteng/IFace.h"
-#include "Main.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
 
@@ -124,17 +124,19 @@ bool FeatureMap::readSill(const IFace *face)
 {
     size_t lSill;
     char *pSill = (char *)(face->getTable(ktiSill, &lSill));
-    uint16 num;
     char *pBase = pSill;
 
     if (!pSill) return true;
     if (lSill < 12) return false;
     if (read32(pSill) != 0x00010000) return false;
-    num = read16(pSill);
-    pSill += 6;     // skip the fast search
-    if (lSill < num * 8U + 12) return false;
+    m_numLanguages = read16(pSill);
+    m_langFeats = new LangFeaturePair[m_numLanguages];
+    if (!m_langFeats) return NULL;
 
-    for (int i = 0; i < num; i++)
+    pSill += 6;     // skip the fast search
+    if (lSill < m_numLanguages * 8U + 12) return false;
+
+    for (int i = 0; i < m_numLanguages; i++)
     {
         uint32 langid = read32(pSill);
         uint16 numSettings = read16(pSill);
@@ -150,25 +152,36 @@ bool FeatureMap::readSill(const IFace *face)
             pLSet += 2;
             feats->addFeature(featureRef(name), val);
         }
-        std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
-        m_langMap.insert(kvalue);
+        //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
+        //m_langMap.insert(kvalue);
+        m_langFeats[i].m_lang = langid;
+        m_langFeats[i].m_pFeatures = feats;
     }
     return true;
 }
 
 FeatureRef *FeatureMap::featureRef(uint32 name)
 {
-    std::map<uint32, byte>::iterator res = m_map.find(name);
-    return res == m_map.end() ? NULL : m_feats + res->second;
+    // TODO reimplement without MAP (nothing is currently put int the map anyway!)
+//    std::map<uint32, byte>::iterator res = m_map.find(name);
+//    return res == m_map.end() ? NULL : m_feats + res->second;
+    return NULL;
 }
 
 Features *FeatureMap::newFeatures(uint32 name) const
 {
     if (name)
     {
-        std::map<uint32, Features *>::const_iterator res = m_langMap.find(name);
-        if (res != m_langMap.end()) 
-            return new Features(*res->second);
+        // the number of languages in a font is usually small e.g. 8 in Doulos
+        // so this loop is not very expensive
+        for (uint16 i = 0; i < m_numLanguages; i++)
+        {
+            if (m_langFeats[i].m_lang == name)
+                return new Features(*(m_langFeats[i].m_pFeatures));
+        }
+//        std::map<uint32, Features *>::const_iterator res = m_langMap.find(name);
+//        if (res != m_langMap.end()) 
+//            return new Features(*res->second);
     }
     return new Features(*m_defaultFeatures);
 }

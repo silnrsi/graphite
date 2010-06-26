@@ -30,7 +30,7 @@ enum attrCode {
     kslatNoEffect = kslatMax + 1
 };
     
-class ISlot
+class GRNG_EXPORT ISlot
 {
 public:
     virtual unsigned short gid() const = 0;

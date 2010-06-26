@@ -1,6 +1,8 @@
 #ifndef SEGMENT_INCLUDE
 #define SEGMENT_INCLUDE
 
+#include "Main.h"
+
 #include <cassert>
 #include <vector>
 

@@ -17,14 +17,14 @@ bool LoadedFace::readGlyphs()
 {
     size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
     const void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
-    if ((pHead = getTable(ktiHead, &lHead)) == NULL) return false;
-    if ((pHHea = getTable(ktiHhea, &lHHea)) == NULL) return false;
-    if ((pLoca = getTable(ktiLoca, &lLoca)) == NULL) return false;
-    if ((pGlyf = getTable(ktiGlyf, &lGlyf)) == NULL) return false;
-    if ((pHmtx = getTable(ktiHmtx, &lHmtx)) == NULL) return false;
-    if ((pGloc = getTable(ktiGloc, &lGloc)) == NULL) return false;
-    if ((pGlat = getTable(ktiGlat, &lGlat)) == NULL) return false;
-    if ((pMaxp = getTable(ktiMaxp, &lMaxp)) == NULL) return false;
+    if ((pHead = getTable(tagHead, &lHead)) == NULL) return false;
+    if ((pHHea = getTable(tagHhea, &lHHea)) == NULL) return false;
+    if ((pLoca = getTable(tagLoca, &lLoca)) == NULL) return false;
+    if ((pGlyf = getTable(tagGlyf, &lGlyf)) == NULL) return false;
+    if ((pHmtx = getTable(tagHmtx, &lHmtx)) == NULL) return false;
+    if ((pGloc = getTable(tagGloc, &lGloc)) == NULL) return false;
+    if ((pGlat = getTable(tagGlat, &lGlat)) == NULL) return false;
+    if ((pMaxp = getTable(tagMaxp, &lMaxp)) == NULL) return false;
     m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
     m_upem = TtfUtil::DesignUnits(pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
@@ -95,7 +95,7 @@ bool LoadedFace::readGraphite()
 {
     char *pSilf;
     size_t lSilf;
-    if ((pSilf = (char *)getTable(ktiSilf, &lSilf)) == NULL) return false;
+    if ((pSilf = (char *)getTable(tagSilf, &lSilf)) == NULL) return false;
     uint32 version;
     uint32 compilerVersion = 0; // wasn't set before GTF version 3
     uint32 offset32Pos = 2;

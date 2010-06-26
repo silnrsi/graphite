@@ -21,7 +21,7 @@ void startGraphiteLogging(FILE * logFile, GrLogMask mask)
 
 void stopGraphiteLogging()
 {
-    if (XmlTraceLog::sLog)
+    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &s_NullLog)
     {
         delete XmlTraceLog::sLog;
         XmlTraceLog::sLog = &s_NullLog;
@@ -34,8 +34,12 @@ XmlTraceLog::XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask)
                          : m_file(file), m_depth(0), m_mask(logMask)
 {
     if (!m_file) return;
-    fprintf(m_file, "<?xml version='1.0' encoding='UTF-8'?>\n<%s xmlns='%s'>",
-            xmlTraceLogElements[ElementTopLevel].mName, ns);
+    int deep = 0;
+#ifdef ENABLE_DEEP_TRACING
+    deep = 1;
+#endif
+    fprintf(m_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<%s xmlns=\"%s\" mask=\"%x\" deep=\"%d\">",
+            xmlTraceLogElements[ElementTopLevel].mName, ns, logMask, deep);
     m_elementStack[m_depth++] = ElementTopLevel;
     m_elementEmpty = true;
     m_inElement = false;

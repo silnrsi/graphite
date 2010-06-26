@@ -2,7 +2,7 @@
 #define REF_COUNT_HANDLE_INCLUDE
 
 template <class OBJCLASS, void (*pDELETEFN)(OBJCLASS *p)>
-class RefCountHandle
+class GRNG_EXPORT RefCountHandle
 {
 public:
     RefCountHandle(OBJCLASS* p/*takes ownership*/=NULL) : m_pCount(new unsigned int(1)), m_p(p) {}

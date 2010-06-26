@@ -181,7 +181,7 @@ inline uchar_t consume_utf16(const uint16 *&p) {
 
 void Segment::read_text(const LoadedFace *face, const ITextSource *txt, size_t numchars)
 {
-    const void *const   cmap = face->getTable(ktiCmap, NULL);
+    const void *const   cmap = face->getTable(tagCmap, NULL);
     const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;

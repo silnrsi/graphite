@@ -5,7 +5,7 @@
 
 #include "graphiteng/Types.h"		//for FIND_BROKEN_VIRTUALS
 
-class ITextSource
+class GRNG_EXPORT ITextSource
 {
 public :
     enum encform {

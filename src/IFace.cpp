@@ -5,7 +5,26 @@
 #ifndef DISABLE_FILE_FONT
 #include "TtfUtil.h"
 #include <cstdio>
-#include <map>
+#include <cassert>
+//#include <map> // Please don't use map, it forces libstdc++
+
+class TableCacheItem
+{
+public:
+    TableCacheItem(char * theData, size_t theSize) : m_data(theData), m_size(theSize) {}
+    TableCacheItem() : m_data(0), m_size(0) {}
+    ~TableCacheItem()
+    {
+        if (m_size) delete m_data;
+    }
+    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; }
+    const void * data() const { return m_data; }
+    size_t size() const { return m_size; }
+private:
+    char * m_data;
+    size_t m_size;
+};
+
 
 class FileFont /*really a FileFace!*/: public IFace
 {
@@ -18,7 +37,8 @@ public:
 
 private:
     FILE* m_pfile;
-    mutable std::map<unsigned int, std::pair<const void *, size_t> > m_tables;
+//    mutable std::map<unsigned int, std::pair<const void *, size_t> > m_tables;
+    mutable TableCacheItem m_tables[TtfUtil::ktiLast];
     char *m_pHeader;
     char *m_pTableDir;
     
@@ -58,24 +78,108 @@ FileFont::~FileFont()
 
 const void *FileFont::getTable(unsigned int name, size_t *len) const
 {
-    std::map<unsigned int, std::pair<const void *, size_t> >::const_iterator res;
-    if ((res = m_tables.find(name)) == m_tables.end())
+//    std::map<unsigned int, std::pair<const void *, size_t> >::const_iterator res;
+//    if ((res = m_tables.find(name)) == m_tables.end())
+    TableCacheItem * res;
+    switch (name)
     {
-        void *tptr;
+        case tagCmap:
+            res = &m_tables[TtfUtil::ktiCmap];
+            break;
+//        case tagCvt:
+//            res = &m_tables[TtfUtil::ktiCvt];
+//            break;
+//        case tagCryp:
+//            res = &m_tables[TtfUtil::ktiCryp];
+//            break;
+        case tagHead:
+            res = &m_tables[TtfUtil::ktiHead];
+            break;
+//        case tagFpgm:
+//            res = &m_tables[TtfUtil::ktiFpgm];
+//            break;
+//        case tagGdir:
+//            res = &m_tables[TtfUtil::ktiGdir];
+//            break;
+        case tagGlyf:
+            res = &m_tables[TtfUtil::ktiGlyf];
+            break;
+        case tagHdmx:
+            res = &m_tables[TtfUtil::ktiHdmx];
+            break;
+        case tagHhea:
+            res = &m_tables[TtfUtil::ktiHhea];
+            break;
+        case tagHmtx:
+            res = &m_tables[TtfUtil::ktiHmtx];
+            break;
+        case tagLoca:
+            res = &m_tables[TtfUtil::ktiLoca];
+            break;
+        case tagKern:
+            res = &m_tables[TtfUtil::ktiKern];
+            break;
+//        case tagLtsh:
+//            res = &m_tables[TtfUtil::ktiLtsh];
+//            break;
+        case tagMaxp:
+            res = &m_tables[TtfUtil::ktiMaxp];
+            break;
+        case tagName:
+            res = &m_tables[TtfUtil::ktiName];
+            break;
+        case tagOs2:
+            res = &m_tables[TtfUtil::ktiOs2];
+            break;
+        case tagPost:
+            res = &m_tables[TtfUtil::ktiPost];
+            break;
+//        case tagPrep:
+//            res = &m_tables[TtfUtil::ktiPrep];
+//            break;
+        case tagFeat:
+            res = &m_tables[TtfUtil::ktiFeat];
+            break;
+        case tagGlat:
+            res = &m_tables[TtfUtil::ktiGlat];
+            break;
+        case tagGloc:
+            res = &m_tables[TtfUtil::ktiGloc];
+            break;
+        case tagSilf:
+            res = &m_tables[TtfUtil::ktiSilf];
+            break;
+        case tagSile:
+            res = &m_tables[TtfUtil::ktiSile];
+            break;
+        case tagSill:
+            res = &m_tables[TtfUtil::ktiSill];
+            break;
+        default:
+            res = NULL;
+    }
+    assert(res); // don't expect any other table types
+    if (!res) return NULL;
+    if (res->data() == NULL)
+    {
+        char *tptr;
         size_t tlen, lOffset;
         if (!TtfUtil::GetTableInfo(name, m_pHeader, m_pTableDir, lOffset, tlen)) return NULL;
         if (fseek(m_pfile, lOffset, SEEK_SET)) return NULL;
         tptr = new char[tlen];
         if (fread(tptr, 1, tlen, m_pfile) != tlen) return NULL;
 //        if (!TtfUtil::CheckTable(name, tptr, tlen)) return NULL;
-
-        std::pair<unsigned int, std::pair<const void *, size_t> > kvalue = std::pair<unsigned int, std::pair<const void *, size_t> >(name, std::pair<void *, size_t>(tptr, tlen));
-        std::pair<std::map<unsigned int, std::pair<const void *, size_t> >::iterator, bool> result = m_tables.insert(kvalue);
-        if (result.second)
-            res = result.first;
+        res->set(tptr, tlen);
+        
+        //std::pair<unsigned int, std::pair<const void *, size_t> > kvalue = std::pair<unsigned int, std::pair<const void *, size_t> >(name, std::pair<void *, size_t>(tptr, tlen));
+        //std::pair<std::map<unsigned int, std::pair<const void *, size_t> >::iterator, bool> result = m_tables.insert(kvalue);
+        //if (result.second)
+        //    res = result.first;
     }
-    if (len) *len = res->second.second;
-    return res->second.first;
+    //if (len) *len = res->second.second;
+    //return res->second.first;
+    if (len) *len = res->size();
+    return res->data();
 }
 
 /*static*/ IFace* IFace::loadTTFFile(const char *name)		//when no longer needed, call delete

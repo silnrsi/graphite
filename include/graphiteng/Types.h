@@ -14,7 +14,11 @@ typedef int     int32;
 #ifdef _MSC_VER
 #define GRNG_EXPORT __declspec(dllexport)
 #else
+#ifdef __GNUC__
+#define GRNG_EXPORT __attribute__ ((visibility("default")))
+#else
 #define GRNG_EXPORT
+#endif
 #endif
 
 #define FIND_BROKEN_VIRTUALS
