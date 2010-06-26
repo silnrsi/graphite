@@ -15,7 +15,6 @@ public:
     OBJCLASS* Ptr() const { return m_p; }
 
 protected:
-    OBJCLASS* Ptr() const { return m_p; }
     void SetPtr(OBJCLASS* p/*takes ownership*/=NULL) { Release(); m_pCount=new unsigned int(1); m_p=p; }
 
 private:
