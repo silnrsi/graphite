@@ -1,6 +1,7 @@
 #ifndef GLYPHFACE_INCLUDE
 #define GLYPHFACE_INCLUDE
 #include "Main.h"
+#include "XmlTraceLog.h"
 
 enum metrics {
     kgmetLsb = 0, kgmetRsb,
@@ -9,7 +10,7 @@ enum metrics {
     kgmetAdvWidth, kgmetAdvHeight,
     kgmetAscent, kgmetDescent
 };
-        
+
 class GlyphFace
 {
 public:
@@ -20,7 +21,14 @@ public:
     void                advance(Position a);
     void    bbox(Rect a);
     void    readAttrs(const void *pGlat, int start, int end, size_t num);
-    uint16  getAttr(uint8 index) { return m_attrs[index]; }
+    uint16  getAttr(uint8 index) { 
+        if (m_attrs)
+            return m_attrs[index];
+#ifdef ENABLE_DEEP_TRACING
+        XmlTraceLog::get().warning("No attributes for glyph attr %d", index);
+#endif
+        return 0;
+    }
     uint16  getMetric(uint8 metric);
 
 protected:
