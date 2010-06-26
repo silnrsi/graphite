@@ -10,20 +10,13 @@ GRNG_EXPORT void DeleteSegment(Segment *p)
 
 SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
 {
-    int numchars = txt->getLength();
-    SetPtr(new Segment(numchars, face));
+    initialize(font, face, face->theFeatures().cloneFeatures(0/*0 means default*/), txt);
+}
 
-    Ptr()->chooseSilf(0);
-    Ptr()->read_text(face, txt, numchars);
-    Ptr()->runGraphite();
-    // run the line break passes
-    // run the substitution passes
-    Ptr()->prepare_pos(font);
-    // run the positioning passes
-    Ptr()->finalise(font);
-#ifndef DISABLE_TRACING
-    Ptr()->logSegment(*txt);
-#endif
+
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
+{
+    initialize(font, face, pFeats, txt);
 }
 
 
@@ -54,6 +47,25 @@ void SegmentHandle::runGraphite() const
 void SegmentHandle::chooseSilf(uint32 script) const
 {
     return Ptr()->chooseSilf(script);
+}
+
+
+void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
+{
+    int numchars = txt->getLength();
+    SetPtr(new Segment(numchars, face));
+
+    Ptr()->chooseSilf(0);
+    Ptr()->read_text(face, pFeats, txt, numchars);
+    Ptr()->runGraphite();
+    // run the line break passes
+    // run the substitution passes
+    Ptr()->prepare_pos(font);
+    // run the positioning passes
+    Ptr()->finalise(font);
+#ifndef DISABLE_TRACING
+    Ptr()->logSegment(*txt);
+#endif
 }
 
 

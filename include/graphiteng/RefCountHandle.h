@@ -19,7 +19,7 @@ protected:
 
 private:
     void AddRef() const { ++*m_pCount; }
-    void Release() const { if (--*m_pCount==0) { delete m_pCount; (*pDELETEFN)(m_p); } }
+    void Release() { if (--*m_pCount==0) { delete m_pCount; (*pDELETEFN)(m_p); } }
 
 private:
     mutable unsigned int* m_pCount;	//counts how many times shared. Never 0

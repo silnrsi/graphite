@@ -57,7 +57,7 @@ public:
     void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
     uint16 getClassGlyph(uint16 cid, uint16 offset) { return const_cast<Silf *>(m_silf)->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) { return const_cast<Silf *>(m_silf)->findClassIndex(cid, gid); }
-    int addFeatures(Features *feats) { m_feats.push_back(*feats); return m_feats.size() - 1; }
+    int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
     uint16 getFeature(int index, uint8 findex) { return m_feats[index].getFeature(const_cast<LoadedFace *>(m_face)->feature(findex)); }
     void dir(int8 val) { m_dir = val; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return const_cast<LoadedFace *>(m_face)->glyphAttr(gid, gattr); }
@@ -69,7 +69,7 @@ public:
 
 private:
     friend class SegmentHandle ;
-    void read_text(const LoadedFace *face, const ITextSource *txt, size_t numchars);
+    void read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt, size_t numchars);
     void prepare_pos(const LoadedFont *font);
     void finalise(const LoadedFont *font);
   

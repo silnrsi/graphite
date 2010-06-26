@@ -179,14 +179,14 @@ inline uchar_t consume_utf16(const uint16 *&p) {
 
 
 
-void Segment::read_text(const LoadedFace *face, const ITextSource *txt, size_t numchars)
+void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt, size_t numchars)
 {
     const void *const   cmap = face->getTable(tagCmap, NULL);
     const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
     unsigned int        gid;
-    unsigned int	fid = addFeatures(face->newFeatures(0));
+    unsigned int	fid = addFeatures(*pFeats.Ptr());
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {

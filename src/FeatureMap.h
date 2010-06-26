@@ -2,6 +2,7 @@
 #define FEATUREMAP_INCLUDE
 
 #include "graphiteng/Types.h"
+#include "graphiteng/FeaturesHandle.h"
 //#include <map> // avoid libstdc++
 
 class IFace;
@@ -36,18 +37,21 @@ private:
     {
     public:
         uint32 m_lang;
-        Features * m_pFeatures;
+        FeaturesHandle m_pFeatures;
     };
 public:
+    FeatureMap() : m_langFeats(NULL), m_feats(NULL) {}
+    ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; }
+    
     bool readFont(const IFace *face);
     bool readFeats(const IFace *face);
     bool readSill(const IFace *face);
     FeatureRef *featureRef(uint32 name);
     FeatureRef *feature(uint8 index) { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
-    Features *newFeatures(uint32 name) const;
+    FeaturesHandle cloneFeatures(uint32 langname/*0 means default*/) const;
 
-protected:
+private:
     byte m_numFeats;
 //    std::map<uint32, byte> m_map;
 //    std::map<uint32, Features *>m_langMap;
@@ -55,7 +59,11 @@ protected:
     uint16 m_numLanguages;
 
     FeatureRef *m_feats;
-    Features *m_defaultFeatures;
+    FeaturesHandle m_defaultFeatures;
+    
+private:		//defensive on m_langFeats and m_feats
+    FeatureMap(const FeatureMap&);
+    FeatureMap& operator=(const FeatureMap&);
 };
 
 #endif

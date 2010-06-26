@@ -28,7 +28,11 @@ public:
         std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
         return *this;
     }
-    void setSize(uint32 length) { m_length = length; }
+    
+    FeaturesHandle clone() const { return new Features(*this); }
+    
+//    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
+
 //    void *operator new(size_t dummy, int num) {
 //        void *res = malloc(offsetof(Features, m_vec) + num* sizeof(uint32));
 //        return res;

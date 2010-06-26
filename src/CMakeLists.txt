@@ -38,6 +38,8 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
+    ../include/graphiteng/AutoHandle.h
+    ../include/graphiteng/FeaturesHandle.h
     ../include/graphiteng/IFont.h
     ../include/graphiteng/IFace.h
     ../include/graphiteng/IFeatures.h
@@ -55,6 +57,7 @@ add_library(graphiteng SHARED
     call_machine.cpp
     Code.cpp
     FeatureMap.cpp
+    FeaturesHandle.cpp
     GlyphFace.cpp
     LoadedFace.cpp
     LoadedFont.cpp

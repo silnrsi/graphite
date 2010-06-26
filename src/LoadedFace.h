@@ -51,7 +51,7 @@ public:
     bool readGraphite();
     bool readFeatures() { return m_features.readFont(m_face); }
     const Silf *chooseSilf(uint32 script) const;
-    Features *newFeatures(uint32 lang) const { return m_features.newFeatures(lang); }
+    const FeatureMap& theFeatures() const { return m_features; }
     FeatureRef *feature(uint8 index) { return m_features.feature(index); }
     uint16 glyphAttr(uint16 gid, uint8 gattr) { return (gattr < m_numAttrs && gid < m_numGlyphs) ? m_glyphs[gid].getAttr(gattr) : 0; }
     uint16 getGlyphMetric(uint16 gid, uint8 metric);

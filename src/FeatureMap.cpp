@@ -10,6 +10,8 @@
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
+
+
 bool FeatureMap::readFont(const IFace *face)
 {
     if (!readFeats(face)) return false;
@@ -32,7 +34,7 @@ bool FeatureMap::readFeats(const IFace *face)
     m_numFeats = read16(pFeat);
     read16(pFeat);
     read32(pFeat);
-    if (m_numFeats * 16U + 12 > lFeat) return false;
+    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     m_feats = new FeatureRef[m_numFeats];
     defVals = new uint16[m_numFeats];
     byte currIndex = 0;
@@ -131,7 +133,7 @@ bool FeatureMap::readSill(const IFace *face)
     if (read32(pSill) != 0x00010000) return false;
     m_numLanguages = read16(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
-    if (!m_langFeats) return NULL;
+    if (!m_langFeats) { m_numLanguages = 0; return NULL; }		//defensive
 
     pSill += 6;     // skip the fast search
     if (lSill < m_numLanguages * 8U + 12) return false;
@@ -142,7 +144,7 @@ bool FeatureMap::readSill(const IFace *face)
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
-        Features *feats = newFeatures(0);
+        FeaturesHandle feats = cloneFeatures(0/*0 means default*/);
         char *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
@@ -168,21 +170,21 @@ FeatureRef *FeatureMap::featureRef(uint32 name)
     return NULL;
 }
 
-Features *FeatureMap::newFeatures(uint32 name) const
+FeaturesHandle FeatureMap::cloneFeatures(uint32 langname/*0 means default*/) const
 {
-    if (name)
+    if (langname)
     {
         // the number of languages in a font is usually small e.g. 8 in Doulos
         // so this loop is not very expensive
         for (uint16 i = 0; i < m_numLanguages; i++)
         {
-            if (m_langFeats[i].m_lang == name)
-                return new Features(*(m_langFeats[i].m_pFeatures));
+            if (m_langFeats[i].m_lang == langname)
+                return m_langFeats[i].m_pFeatures->clone();
         }
 //        std::map<uint32, Features *>::const_iterator res = m_langMap.find(name);
 //        if (res != m_langMap.end()) 
 //            return new Features(*res->second);
     }
-    return new Features(*m_defaultFeatures);
+    return m_defaultFeatures->clone();
 }
 

@@ -215,6 +215,10 @@ LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time w
     return res;
 }
 
+/*static*/ FeaturesHandle IFace::getFeatures(const LoadedFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+{
+    return pFace->theFeatures().cloneFeatures(langname);
+}
 
 /*static*/ void IFace::destroyLoadedFace(LoadedFace *face)
 {
