@@ -16,6 +16,7 @@ public:
     FeaturesHandle(Features* p/*takes ownership*/) : AutoHandle<Features, &DeleteFeatures>(p) {}
     
     FeaturesHandle clone() const;		//clones the Features which are then owned separately
+    bool maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const;	//returns false iff any of the FeaturesHandles are IsNull
 
 private:
     friend class Segment;

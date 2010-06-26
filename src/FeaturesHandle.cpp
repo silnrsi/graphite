@@ -16,4 +16,16 @@ FeaturesHandle FeaturesHandle::clone() const		//clones the Features which are th
 }
 
 
+bool FeaturesHandle::maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const	//returns false iff any of the FeaturesHandles are IsNull
+{
+    if (IsNull())
+	return false;
+    if (other.IsNull())
+	return false;
+    if (mask.IsNull())
+	return false;
+    
+    Ptr()->maskedOr(*other.Ptr(), *mask.Ptr());
+    return true;
+}
 
