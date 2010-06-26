@@ -3,6 +3,7 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
+#include "graphiteng/FeatureRefHandle.h"
 
 /*
     A client would usually derive from IFace to implement their own way of hetting the table information for a font face.
@@ -31,6 +32,7 @@ public:
 
     LoadedFace* makeLoadedFace() const;		//the 'this' must stay alive all the time when the LoadedFace is alive. When finished with the LoadedFace, call IFace::destroyLoadedFace    
     static FeaturesHandle getFeatures(const LoadedFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
+    static FeatureRefHandle feature(const LoadedFace* pFace, uint8 index);
     static void destroyLoadedFace(LoadedFace *face);
 
 private :

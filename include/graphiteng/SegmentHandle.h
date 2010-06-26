@@ -24,7 +24,9 @@ public:
     SlotHandle operator[] (int index) const;
     void runGraphite() const;
     void chooseSilf(uint32 script) const;
-
+    
+    int addFeatures(const FeaturesHandle& feats) const;
+ 
 private:
     void initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt);
     

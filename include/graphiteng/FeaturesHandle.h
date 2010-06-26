@@ -21,6 +21,7 @@ private:
     friend class Segment;
     friend class FeatureMap;
     friend class FeatureRefHandle;
+    friend class SegmentHandle;
     Features* Ptr() const { return AutoHandle<Features, &DeleteFeatures>::Ptr(); }
 };
 

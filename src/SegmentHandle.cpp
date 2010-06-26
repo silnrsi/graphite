@@ -50,6 +50,15 @@ void SegmentHandle::chooseSilf(uint32 script) const
 }
 
 
+int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
+{
+    if (feats.IsNull())
+	return -2;		//the smallest value that can normally be returned is -1
+    
+    return Ptr()->addFeatures(*feats.Ptr());
+}
+
+
 void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
 {
     int numchars = txt->getLength();

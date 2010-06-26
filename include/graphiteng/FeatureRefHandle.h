@@ -12,7 +12,7 @@ extern GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p);
 class GRNG_EXPORT FeatureRefHandle : public AutoHandle<FeatureRef, &DeleteFeatureRef>
 {
 public:
-    FeatureRefHandle(byte bits=0, byte index=0, uint32 mask=0);
+    FeatureRefHandle(byte bits, byte index, uint32 mask=0);
     FeatureRefHandle(FeatureRef* p/*takes ownership*/) : AutoHandle<FeatureRef, &DeleteFeatureRef>(p) {}
     
     FeatureRefHandle clone() const;		//clones the FeatureRef which is then owned separately

@@ -7,7 +7,7 @@ GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p)
 }
 
 
-FeatureRefHandle::FeatureRefHandle(byte bits/*=0*/, byte index/*=0*/, uint32 mask/*=0*/)
+FeatureRefHandle::FeatureRefHandle(byte bits, byte index, uint32 mask/*=0*/)
 :	AutoHandle<FeatureRef, &DeleteFeatureRef>(new FeatureRef(bits, index, mask))
 {
 }
@@ -18,7 +18,7 @@ FeatureRefHandle FeatureRefHandle::clone() const		//clones the FeatureRef which 
     if (Ptr())
 	return new FeatureRef(*Ptr());
     else
-	return FeatureRefHandle();
+	return NULL;
 }
 
 
@@ -51,6 +51,6 @@ uint16 FeatureRefHandle::getFeatureVal(const FeaturesHandle& feats) const	//retu
     if (feats.IsNull())
 	return 0;
     
-    Ptr()->getFeatureVal(*feats.Ptr());
+    return Ptr()->getFeatureVal(*feats.Ptr());
 }
 

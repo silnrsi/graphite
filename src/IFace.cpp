@@ -220,6 +220,17 @@ LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time w
     return pFace->theFeatures().cloneFeatures(langname);
 }
 
+
+/*static*/ FeatureRefHandle IFace::feature(const LoadedFace* pFace, uint8 index)
+{
+    const FeatureRef* pRef = pFace->feature(index);
+    if (!pRef)
+	return NULL;
+    
+    return new FeatureRef(*pRef);
+}
+
+
 /*static*/ void IFace::destroyLoadedFace(LoadedFace *face)
 {
     delete face;
