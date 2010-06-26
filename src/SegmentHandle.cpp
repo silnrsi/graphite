@@ -32,7 +32,7 @@ Position SegmentHandle::advance() const
 }
 
 
-SlotHandle SegmentHandle::operator[] (int index) const
+SlotHandle SegmentHandle::operator[] (unsigned int index) const
 {
     return &(Ptr()->operator[](index));
 }

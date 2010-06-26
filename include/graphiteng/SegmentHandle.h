@@ -21,7 +21,7 @@ public:
   
     int length() const;
     Position advance() const;
-    SlotHandle operator[] (int index) const;
+    SlotHandle operator[] (unsigned int index) const;
     void runGraphite() const;
     void chooseSilf(uint32 script) const;
     

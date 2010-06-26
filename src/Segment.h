@@ -18,9 +18,9 @@ class ITextSource;
 class Segment
 {
 public:
-    int length() const { return m_numGlyphs; }
+    unsigned int length() const { return m_numGlyphs; }
     Position advance() const { return m_advance; }
-    Slot & operator[] (int index) {
+    Slot & operator[] (unsigned int index) {
         assert(index >= 0);
 #ifdef ENABLE_DEEP_TRACING
         if (static_cast<size_t>(index) >= m_slots.size())
@@ -41,13 +41,13 @@ public:
 #endif
         return m_slots[index];
     }
-    const Slot & operator[] (int index) const { return m_slots[index]; }
+    const Slot & operator[] (unsigned int index) const { return m_slots[index]; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
-    CharInfo *charinfo(int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     virtual int8 dir() const { return m_dir; }
 
-    Segment(int numSlots, const LoadedFace *face);
+    Segment(unsigned int numSlots, const LoadedFace *face);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid);
     void positionSlots(const LoadedFont *font);
@@ -75,9 +75,9 @@ private:
 private:
     std::vector<Slot> m_slots;
     std::vector<uint16> m_user;
-    int m_numGlyphs;
+    unsigned int m_numGlyphs;
     CharInfo *m_charinfo;  // character info, one per input character
-    int m_numCharinfo;      // size of the array and number of input characters
+    unsigned int m_numCharinfo;      // size of the array and number of input characters
 
     const LoadedFace *m_face;      // LoadedFace
     const Silf *m_silf;

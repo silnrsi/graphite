@@ -10,7 +10,7 @@
 #include "XmlTraceLog.h"
 #include "graphiteng/SegmentHandle.h"
 
-Segment::Segment(int numchars, const LoadedFace *face) :
+Segment::Segment(unsigned int numchars, const LoadedFace *face) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
@@ -40,10 +40,18 @@ void Segment::append(const Segment &other)
     Rect bbox = other.m_bbox + m_advance;
 
     m_slots.insert(m_slots.end(), other.m_slots.begin(), other.m_slots.end());
-    m_charinfo = (CharInfo *)realloc(m_charinfo, (m_numCharinfo+other.m_numCharinfo) * sizeof(CharInfo));
-    memcpy(m_charinfo + m_numCharinfo, other.m_charinfo, other.m_numCharinfo * sizeof(CharInfo));
-    for (int i = 0; i < other.m_numCharinfo; i++)
-    { m_charinfo[m_numCharinfo + i].update(m_numCharinfo); }
+    CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
+    for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
+	pNewCharInfo[i] = m_charinfo[i];
+    
+    m_charinfo = pNewCharInfo;
+    pNewCharInfo += m_numCharinfo ;
+    for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
+    {
+	pNewCharInfo[i] = other.m_charinfo[i];
+	pNewCharInfo[i].update(m_numCharinfo);
+    }
+ 
     m_numCharinfo += other.m_numCharinfo;
     m_numGlyphs += other.m_numGlyphs;
     m_advance = m_advance + other.m_advance;
