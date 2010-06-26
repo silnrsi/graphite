@@ -1,6 +1,6 @@
+#include "Segment.h"
 #include "Slot.h"
 #include "CharInfo.h"
-#include "Segment.h"
 
 Slot::Slot() :
     m_glyphid(0), m_before(0), m_after(0), m_parent(-1), m_child(-1), m_sibling(-1),
@@ -77,7 +77,7 @@ int Slot::getAttr(Segment *seg, uint8 index, uint8 subindex)
     }
 }
 
-void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value)
+void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value, int is)
 {
     if ((enum attrCode)index == kslatUserDefnV1)
     {
@@ -88,7 +88,7 @@ void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value)
     {
 	case kslatAdvX : m_advance = Position(value, m_advance.y); break;
 	case kslatAdvY : m_advance = Position(m_advance.x, value); break;
-	case kslatAttTo : m_parent = value; break;
+	case kslatAttTo : m_parent = value; (*seg)[value].child(seg, is); break;
 	case kslatAttX : m_attach = Position(value, m_attach.y); break;
 	case kslatAttY : m_attach = Position(m_attach.x, value); break;
 	case kslatAttXOff : break;
@@ -115,4 +115,13 @@ void Slot::setAttr(Segment *seg, uint8 index, uint8 subindex, int value)
 	case kslatUserDefn : break;	// talk to the seg
 	default : break;
     }
+}
+
+void Slot::child(Segment *seg, int ap)
+{
+    if (ap == m_child) {}
+    else if (ap == -1 || m_child == -1)
+        m_child = ap;
+    else
+        (*seg)[m_child].child(seg, ap);
 }

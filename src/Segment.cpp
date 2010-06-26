@@ -53,6 +53,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats)
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
     
+    m_slots[id].child(this, -1);
     m_slots[id].glyph(gid);
     m_slots[id].originate(id);
     m_slots[id].before(id);

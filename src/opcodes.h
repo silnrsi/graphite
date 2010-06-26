@@ -259,7 +259,7 @@ STARTOP(attr_set)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-    seg[is].setAttr(&seg, slat, 0, val);
+    seg[is].setAttr(&seg, slat, 0, val, is);
 ENDOP
 
 STARTOP(attr_add)
@@ -267,7 +267,7 @@ STARTOP(attr_add)
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, 0);
-    seg[is].setAttr(&seg, slat, 0, val + res);
+    seg[is].setAttr(&seg, slat, 0, val + res, is);
 ENDOP
 
 STARTOP(attr_sub)
@@ -275,14 +275,14 @@ STARTOP(attr_sub)
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, 0);
-    seg[is].setAttr(&seg, slat, 0, res - val);
+    seg[is].setAttr(&seg, slat, 0, res - val, is);
 ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
     const unsigned int  slat = uint8(*param);
     const          int  val  = int(pop());
-    seg[is].setAttr(&seg, slat, 0, val + is);
+    seg[is].setAttr(&seg, slat, 0, val + is, is);
 ENDOP
 
 STARTOP(iattr_set_slot)
@@ -290,7 +290,7 @@ STARTOP(iattr_set_slot)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    seg[is].setAttr(&seg, slat, idx, val + is);
+    seg[is].setAttr(&seg, slat, idx, val + is, is);
 ENDOP
 
 STARTOP(push_slot_attr)
@@ -433,7 +433,7 @@ STARTOP(iattr_set)
     const unsigned int  slat = uint8(param[0]);
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    seg[is].setAttr(&seg, slat, idx, val);
+    seg[is].setAttr(&seg, slat, idx, val, is);
 ENDOP
 
 STARTOP(iattr_add)
@@ -442,7 +442,7 @@ STARTOP(iattr_add)
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, idx);
-    seg[is].setAttr(&seg, slat, idx, val + res);
+    seg[is].setAttr(&seg, slat, idx, val + res, is);
 ENDOP
 
 STARTOP(iattr_sub)
@@ -451,7 +451,7 @@ STARTOP(iattr_sub)
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
     int res = seg[is].getAttr(&seg, slat, idx);
-    seg[is].setAttr(&seg, slat, idx, val - res);
+    seg[is].setAttr(&seg, slat, idx, val - res, is);
 ENDOP
 
 STARTOP(push_proc_state)

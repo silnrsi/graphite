@@ -10,7 +10,6 @@
 
 class Segment;
 
-
 class Slot : public ISlot
 {
 public:
@@ -35,10 +34,11 @@ public:
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(Segment *seg, uint8 index, uint8 subindex, int value);
+    void setAttr(Segment *seg, uint8 index, uint8 subindex, int value, int is);
     int getAttr(Segment *seg, uint8 index, uint8 subindex);
-    void attachTo(int ap) { m_attachto = ap; }
-    int attachTo() { return m_attachto; }
+    void attachTo(int ap) { m_parent = ap; }
+    void child(Segment *seg, int ap);
+    int attachTo() { return m_parent; }
 
 protected:
     unsigned short m_glyphid;        // glyph id
@@ -48,7 +48,6 @@ protected:
     int m_parent;           // index to parent we are attached to
     int m_child;            // index to first child slot that attaches to us
     int m_sibling;          // index to next child that attaches to our parent
-    int m_attachto;        // temporary action code, attach.to
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
