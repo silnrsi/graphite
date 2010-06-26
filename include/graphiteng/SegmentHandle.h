@@ -10,26 +10,18 @@ class ITextSource;
 class LoadedFace;
 class LoadedFont;
 
-class SegmentHandle 
+extern GRNG_EXPORT void DeleteSegment(Segment *p);
+
+class GRNG_EXPORT SegmentHandle : public RefCountHandle<Segment, &DeleteSegment>
 {
 public:
     SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt);
-    SegmentHandle& operator=(const SegmentHandle& src);
-    ~SegmentHandle();
   
     int length() const;
     Position advance() const;
     ISlot & operator[] (int index) const;
     void runGraphite();
     void chooseSilf(uint32 script);
-    
-    Segment* operator->() const { return m_pSegment; }		//cannot be used by client code - only available witin graphite code!
-    Segment & operator*() const {return *m_pSegment; };
-    
-private:
-    RefCountHandle m_RefCountHandle;
-    Segment* m_pSegment;		//not NULL
-    
 };
 
 
