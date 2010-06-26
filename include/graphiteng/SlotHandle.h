@@ -44,10 +44,11 @@ public:
     int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const;
 
     const Slot* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
+
+protected:
 //    const Slot& operator*() const {return *m_p; };
     const Slot* Ptr() const { return m_p; }
 
-protected:
     void SetPtr(const Slot* p/*no ownership, caller must keep it alive*/=NULL) { m_p=p; }
   
 
