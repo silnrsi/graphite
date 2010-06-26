@@ -39,19 +39,19 @@ Position SegmentHandle::advance() const
 }
 
 
-ISlot & SegmentHandle::operator[] (int index) const
+SlotHandle SegmentHandle::operator[] (int index) const
 {
-    return Ptr()->operator[](index);
+    return &(Ptr()->operator[](index));
 }
 
 
-void SegmentHandle::runGraphite()
+void SegmentHandle::runGraphite() const
 {
     return Ptr()->runGraphite();
 }
 
 
-void SegmentHandle::chooseSilf(uint32 script)
+void SegmentHandle::chooseSilf(uint32 script) const
 {
     return Ptr()->chooseSilf(script);
 }

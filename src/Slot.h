@@ -1,7 +1,6 @@
 #ifndef SLOT_INCLUDE
 #define SLOT_INCLUDE
 
-#include "graphiteng/ISlot.h"
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
 #include "LoadedFont.h"
@@ -11,15 +10,14 @@
 
 class Segment;
 
-class Slot : public ISlot
+class Slot
 {
 public:
-    virtual unsigned short gid() const { return m_glyphid; }
-    virtual Position origin() const { return m_position; }
-    virtual float advance(const LoadedFont *font) const { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
-    virtual int before() const { return m_before; }
-    virtual int after() const { return m_after; }
-    virtual int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const { return getAttr(hSeg.Ptr(), index, subindex); }
+    unsigned short gid() const { return m_glyphid; }
+    Position origin() const { return m_position; }
+    float advance(const LoadedFont *font) const { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
+    int before() const { return m_before; }
+    int after() const { return m_after; }
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
@@ -55,7 +53,6 @@ protected:
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
     byte m_flags;           // holds bit flags
-
 };
 
 #endif // SLOT_INCLUDE

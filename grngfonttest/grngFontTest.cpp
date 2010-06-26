@@ -27,7 +27,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
 #include "graphiteng/ITextSource.h"
-#include "graphiteng/ISlot.h"
+#include "graphiteng/SlotHandle.h"
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
 #include "graphiteng/XmlLog.h"
@@ -646,18 +646,18 @@ int Parameters::testFileFont() const
         fprintf(log, "\n");
         for (i = 0; i < seg.length(); i++)
         {
-            const ISlot *slot = &(seg[i]);
-            Position org = slot->origin();
+            SlotHandle slot = seg[i];
+            Position org = slot.origin();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot->gid(), slot->getAttr(seg, kslatAttTo, 0), 
-		    slot->getAttr(seg, kslatAttX, 0), 
-		    slot->getAttr(seg, kslatAttY, 0), org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot->before(), slot->after());
+                    i, slot.gid(), slot.getAttr(seg, kslatAttTo, 0), 
+		    slot.getAttr(seg, kslatAttX, 0), 
+		    slot.getAttr(seg, kslatAttY, 0), org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot.before(), slot.after());
             
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[slot->before() + offset],
-                    pText32[slot->after() + offset]);
+                    pText32[slot.before() + offset],
+                    pText32[slot.after() + offset]);
             }
 #if 0
             if (parameters.justification)

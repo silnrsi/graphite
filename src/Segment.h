@@ -6,7 +6,6 @@
 #include <cassert>
 #include <vector>
 
-#include "graphiteng/ISlot.h"
 #include "Slot.h"
 #include "CharInfo.h"
 #include "Features.h"

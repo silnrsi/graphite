@@ -12,9 +12,9 @@ public:
 
     OBJCLASS* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
 //    OBJCLASS& operator*() const {return *m_p; };
-    OBJCLASS* Ptr() const { return m_p; }
 
 protected:
+    OBJCLASS* Ptr() const { return m_p; }
     void SetPtr(OBJCLASS* p/*takes ownership*/=NULL) { Release(); m_pCount=new unsigned int(1); m_p=p; }
 
 private:

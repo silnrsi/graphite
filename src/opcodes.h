@@ -31,7 +31,7 @@
 //        param = pointer to the instructions parameter block.
 //                (Only if you use declare_params first).
 
-#include "graphiteng/ISlot.h"
+#include "graphiteng/SlotHandle.h"
      
 #define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
 

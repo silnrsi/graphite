@@ -3,8 +3,8 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/RefCountHandle.h"
+#include "graphiteng/SlotHandle.h"
 
-class ISlot;
 class Segment;
 class ITextSource;
 class LoadedFace;
@@ -19,9 +19,13 @@ public:
   
     int length() const;
     Position advance() const;
-    ISlot & operator[] (int index) const;
-    void runGraphite();
-    void chooseSilf(uint32 script);
+    SlotHandle operator[] (int index) const;
+    void runGraphite() const;
+    void chooseSilf(uint32 script) const;
+
+private:
+    friend class SlotHandle;
+    Segment* Ptr() const { return RefCountHandle<Segment, &DeleteSegment>::Ptr(); }
 };
 
 
