@@ -151,40 +151,95 @@ void Segment::logSegment(const ITextSource & textSrc) const
 #endif
 
 typedef unsigned int uchar_t;
-namespace {
-const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
+
+
+class NoLimit
+{
+public:
+    static bool inRange(const void* p) { return true; }
+};
+
+class Utf8Consumer
+{
+private:
+      static const int utf8_sz_lut[16];
+      static const byte utf8_mask_lut[5];
+
+public:
+      Utf8Consumer(const uint8* pCharStart) : m_pCharStart(pCharStart) {}
+  
+      template <class LIMIT>
+      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inRange(m_pCharStart) is true. return value is iff character contents does not go past limit
+      {
+	const size_t    seq_sz = utf8_sz_lut[*m_pCharStart >> 4];
+	if (seq_sz==0) {
+	    *pRes = 0xFFFD;
+	    return true;			//this is an error. But carry on anyway?
+	}
+	
+	if (!limit.inRange(m_pCharStart+(seq_sz-1))) {
+	    return false;
+	}
+	
+	*pRes = *m_pCharStart ^ utf8_mask_lut[seq_sz];
+	
+	switch(seq_sz) {      
+	    case 4:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x7F;
+	    case 3:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x7F;
+	    case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x7F; break;
+	    case 1: default:    break;
+	}
+	++m_pCharStart; 
+	return true;
+      }	
+  
+private:
+      const uint8 *m_pCharStart;
+};
+
+/*static*/ const int Utf8Consumer::utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
                                           0,0,0,0,  // trailing byte
                                           2,2,            // 2 bytes
                                           3,                 // 3 bytes
                                           4};                // 4 bytes
-const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
 
-inline uchar_t consume_utf8(const uint8 **pp) {
-    const size_t    seq_sz = utf8_sz_lut[*(*pp) >> 4];
-    uchar_t         uc = *(*pp) ^ utf8_mask_lut[seq_sz];
-    
-    switch(seq_sz) {
-        case 4:     uc <<= 6; uc |= *++(*pp) & 0x7F;
-        case 3:     uc <<= 6; uc |= *++(*pp) & 0x7F;
-        case 2:     uc <<= 6; uc |= *++(*pp) & 0x7F; break;
-        case 1:     break;
-        case 0:     uc = 0xFFFD; break;
-    }
-    ++(*pp); return uc;
-}
+/*static*/ const byte Utf8Consumer::utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
 
-const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
-inline uchar_t consume_utf16(const uint16 **pp) {
-    const uchar_t   uh = *(*pp), ul = *++(*pp);
-    
-    if (0xD800 > uh || uh > 0xDBFF)
-        return uh;
-    ++(*pp);
-    if (0xDC00 > ul || ul > 0xDFFF) {
-        return 0xFFFD;
-    }
-    return (uh<<10) + ul - SURROGATE_OFFSET;
-}
+
+class Utf16Consumer
+{
+private:
+    static const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+
+public:
+      Utf16Consumer(const uint16* pCharStart) : m_pCharStart(pCharStart) {}
+  
+      template <class LIMIT>
+      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inRange(m_pCharStart) is true. return value is iff character contents does not go past limit
+      {
+	  *pRes = *m_pCharStart;
+	  if (*pRes > 0xDBFF || 0xD800 > *pRes)
+	      return true;
+
+	  if (!limit.inRange(m_pCharStart+1)) {
+	      return false;
+	  }
+
+	  uchar_t ul = *++m_pCharStart;
+	  if (0xDC00 > ul || ul > 0xDFFF) {
+	      *pRes = 0xFFFD;
+	      return true; 			//this is an error. But carry on anyway?
+	  }
+	  *pRes =  (*pRes<<10) + ul - SURROGATE_OFFSET;
+	  return true;
+      }
+
+private:
+      const uint16 *m_pCharStart;
+};
+
+
+namespace {
 
 inline uchar_t consume_utf32(const uint32 **pp) {
     return *((*pp)++);
@@ -228,21 +283,24 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     SlotBuilder slotBuilder(face, pFeats, this);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
+    NoLimit limit;
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
-            const uint8 * p = static_cast<const uint8 *>(pChar);
+	    Utf8Consumer consumer(static_cast<const uint8 *>(pChar));
             for (; slotBuilder.i < numchars; ++slotBuilder.i) {
-                cid = consume_utf8(&p);
+		if (!consumer.consumeChar(limit, &cid))
+		    break;
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
             break;
         }
         case ITextSource::kutf16: {
-            const uint16 * p = static_cast<const uint16 *>(pChar);
+            Utf16Consumer consumer(static_cast<const uint16 *>(pChar));
             for (; slotBuilder.i < numchars; ++slotBuilder.i) {
-                cid = consume_utf16(&p);
+		if (!consumer.consumeChar(limit, &cid))
+		    break;
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
