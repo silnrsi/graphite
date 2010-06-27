@@ -256,14 +256,14 @@ public:
 	  pDest(pDest2), 
 	  ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
 	  fid(pDest2->addFeatures(*pFeats.ptr())),
-	  i(0) 
+	  m_nCharsProcessed(0) 
       {
       }	  
 
       bool processChar(uchar_t cid/*unicode character*/)		//return value indicates if should stop processing
       {
 	  unsigned int gid = TtfUtil::Cmap31Lookup(ctable, cid);
-          pDest->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+          pDest->appendSlot(m_nCharsProcessed, cid, gid ? gid : face->findPseudo(cid), fid);
 	  return true;
       }
 
@@ -274,7 +274,7 @@ private:
       const void *const   ctable;
       const unsigned int fid;
 public:
-    size_t i ; //character number
+    size_t m_nCharsProcessed ;
 };
 
 
@@ -288,7 +288,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(pChar));
-            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
+            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -298,7 +298,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         }
         case ITextSource::kutf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(pChar));
-            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
+            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -308,7 +308,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         }
         case ITextSource::kutf32 : default: {
             const uint32 * p = static_cast<const uint32 *>(pChar);
-            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
+            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
                 cid = consume_utf32(&p);
 		if (!slotBuilder.processChar(cid))
 		    break;
