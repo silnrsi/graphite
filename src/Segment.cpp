@@ -189,41 +189,67 @@ inline uchar_t consume_utf16(const uint16 *&p) {
 } // end of private namespace
 
 
+class SlotBuilder
+{
+public:
+      SlotBuilder(const LoadedFace *face2, const FeaturesHandle& pFeats/*must not be IsNull*/, Segment* pDest2)
+      :	  face(face2), 
+	  pDest(pDest2), 
+	  ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
+	  fid(pDest2->addFeatures(*pFeats.ptr())),
+	  i(0) 
+      {
+      }	  
+
+      bool processChar(uchar_t cid/*unicode character*/)		//return value indicates if should stop processing
+      {
+	  unsigned int gid = TtfUtil::Cmap31Lookup(ctable, cid);
+          pDest->appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+	  return true;
+      }
+
+
+private:
+      const LoadedFace *face;
+      Segment *pDest;
+      const void *const   ctable;
+      const unsigned int fid;
+public:
+    size_t i ; //character number
+};
+
 
 void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt, size_t numchars)
 {
-    const void *const   cmap = face->getTable(tagCmap, NULL);
-    const void *const   ctable = TtfUtil::FindCmapSubtable(cmap, 3, -1);
+    SlotBuilder slotBuilder(face, pFeats, this);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
-    unsigned int        gid;
-    unsigned int	fid = addFeatures(*pFeats.ptr());
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
             const uint8 * p = static_cast<const uint8 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
+            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
                 cid = consume_utf8(p);
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+		if (!slotBuilder.processChar(cid))
+		    break;
             }
             break;
         }
         case ITextSource::kutf16: {
             const uint16 * p = static_cast<const uint16 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
+            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
                 cid = consume_utf16(p);
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+		if (!slotBuilder.processChar(cid))
+		    break;
             }
             break;
         }
         case ITextSource::kutf32 : default: {
             const uint32 * p = static_cast<const uint32 *>(pChar);
-            for (size_t i = 0; i < numchars; ++i) {
+            for (; slotBuilder.i < numchars; ++slotBuilder.i) {
                 cid = *p++;
-                gid = TtfUtil::Cmap31Lookup(ctable, cid);
-                appendSlot(i, cid, gid ? gid : face->findPseudo(cid), fid);
+		if (!slotBuilder.processChar(cid))
+		    break;
             }
             break;
         }

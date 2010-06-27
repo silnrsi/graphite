@@ -18,7 +18,7 @@ public:
     bool maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const;	//returns false iff any of the FeaturesHandles are IsNull
 
 private:
-    friend class Segment;
+    friend class SlotBuilder;
     friend class FeatureMap;
     friend class FeatureRefHandle;
     friend class SegmentHandle;
