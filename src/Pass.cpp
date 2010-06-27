@@ -220,7 +220,7 @@ void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
     if (!testConstraint(&m_cPConstraint, 0, seg, vms))
         return;
 
-    for (int i = 0; i < seg->length(); i++)
+    for (unsigned int i = 0; i < seg->length(); i++)
     {
         int advance = 0;
         int loopCount = m_iMaxLoop;
@@ -249,7 +249,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     vms->resetRules();
     while (true)
     {
-        if (iSlot >= seg->length()) break;
+        if (iSlot >= (int)seg->length()) break;
 #ifdef ENABLE_DEEP_TRACING
         if (state >= m_sTransition)
         {
