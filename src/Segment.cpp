@@ -152,18 +152,58 @@ void Segment::logSegment(const ITextSource & textSrc) const
 
 typedef unsigned int uchar_t;
 
-
-class NoLimit
+class NoLimit		//relies on the processor.processChar() failing, such as because of a terminating nul character
 {
 public:
-    NoLimit(size_t numchars) : m_numchars(numchars) {}
+    static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
+    static bool needMoreChars(const void* pCharStart, size_t nProcessed) { return true; }
+};
+
+
+class CharacterCountLimit
+{
+public:
+    CharacterCountLimit(size_t numchars) : m_numchars(numchars) {}
   
-    static bool inBuffer(const void* pCharStart) { return true; }
+    static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
     bool needMoreChars(const void* pCharStart, size_t nProcessed) const { return nProcessed<m_numchars; }
     
 private:
     size_t m_numchars;
 };
+
+
+class BufferLimit
+{
+public:
+    BufferLimit(const void* pEnd/*as in stl i.e. don't use end*/) : m_pEnd(pEnd) {}
+  
+    bool inBuffer(const uint8* pCharLastSurrogatePart) { return pCharLastSurrogatePart<m_pEnd; }
+    bool inBuffer(const uint16* pCharLastSurrogatePart) { return pCharLastSurrogatePart<static_cast<const void*>(static_cast<const char*>(m_pEnd)-1/*to allow for the second byte of pCharLastSurrogatePart*/); }
+    bool inBuffer(const uint32* pCharLastSurrogatePart) { return pCharLastSurrogatePart<static_cast<const void*>(static_cast<const char*>(m_pEnd)-3/*to allow for the fourth byte of pCharLastSurrogatePart*/); }
+
+    template <class UINT>
+    bool needMoreChars(const UINT* pCharStart, size_t nProcessed) const { return inBuffer(pCharStart); }
+     
+private:
+    const void* m_pEnd;
+};
+
+
+class BufferAndCharacterCountLimit : public BufferLimit
+{
+public:
+    BufferAndCharacterCountLimit(const void* pEnd/*as in stl i.e. don't use end*/, size_t numchars) : BufferLimit(pEnd), m_numchars(numchars) {}
+  
+    //inBuffer is conveniently inherited
+    template <class UINT>
+    bool needMoreChars(const UINT* pCharStart, size_t nProcessed) const { return nProcessed<m_numchars && inBuffer(pCharStart); }
+     
+private:
+    size_t m_numchars;
+};
+
+
 
 class Utf8Consumer
 {
@@ -172,7 +212,7 @@ private:
       static const byte utf8_mask_lut[5];
 
 public:
-      Utf8Consumer(const uint8* pCharStart) : m_pCharStart(pCharStart) {}
+      Utf8Consumer(const uint8* pCharStart2) : m_pCharStart(pCharStart2) {}
       
       const uint8* pCharStart() const { return m_pCharStart; }
   
@@ -220,7 +260,7 @@ private:
     static const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
 
 public:
-      Utf16Consumer(const uint16* pCharStart) : m_pCharStart(pCharStart) {}
+      Utf16Consumer(const uint16* pCharStart2) : m_pCharStart(pCharStart2) {}
       
       const uint16* pCharStart() const { return m_pCharStart; }
   
@@ -252,7 +292,7 @@ private:
 class Utf32Consumer
 {
 public:
-      Utf32Consumer(const uint32* pCharStart) : m_pCharStart(pCharStart) {}
+      Utf32Consumer(const uint32* pCharStart2) : m_pCharStart(pCharStart2) {}
       
       const uint32* pCharStart() const { return m_pCharStart; }
   
@@ -304,7 +344,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     SlotBuilder slotBuilder(face, pFeats, this);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
-    NoLimit limit(numchars);
+    CharacterCountLimit limit(numchars);
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
