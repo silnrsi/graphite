@@ -26,9 +26,15 @@ int SegmentHandle::length() const
 }
 
 
-Position SegmentHandle::advance() const
+float SegmentHandle::advanceX() const
 {
-    return Ptr()->advance();
+    return Ptr()->advance().x;
+}
+
+
+float SegmentHandle::advanceY() const
+{
+    return Ptr()->advance().y;
 }
 
 

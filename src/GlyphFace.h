@@ -2,6 +2,7 @@
 #define GLYPHFACE_INCLUDE
 #include "Main.h"
 #include "XmlTraceLog.h"
+#include "Position.h"
 
 enum metrics {
     kgmetLsb = 0, kgmetRsb,

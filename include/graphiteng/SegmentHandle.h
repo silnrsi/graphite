@@ -20,7 +20,8 @@ public:
     SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt);
   
     int length() const;
-    Position advance() const;
+    float advanceX() const;
+    float advanceY() const;
     SlotHandle operator[] (unsigned int index) const;
     void runGraphite() const;
     void chooseSilf(uint32 script) const;

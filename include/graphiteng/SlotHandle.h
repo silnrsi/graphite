@@ -37,7 +37,8 @@ public:
     SlotHandle(const Slot* p/*no ownership, caller must keep it alive*/=NULL) : m_p(p) {}
  
     unsigned short gid() const;
-    Position origin() const;
+    float originX() const;
+    float originY() const;
     float advance(const LoadedFont *font) const;
     int before() const;
     int after() const;

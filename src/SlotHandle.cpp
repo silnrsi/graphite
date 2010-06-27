@@ -8,9 +8,15 @@ unsigned short SlotHandle::gid() const
 }
 
 
-Position SlotHandle::origin() const
+float SlotHandle::originX() const
 {
-    return m_p->origin();
+    return m_p->origin().x;
+}
+
+
+float SlotHandle::originY() const
+{
+    return m_p->origin().y;
 }
 
 

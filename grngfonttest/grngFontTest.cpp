@@ -647,11 +647,12 @@ int Parameters::testFileFont() const
         for (i = 0; i < seg.length(); i++)
         {
             SlotHandle slot = seg[i];
-            Position org = slot.origin();
+            float orgX = slot.originX();
+            float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot.gid(), slot.getAttr(seg, kslatAttTo, 0), 
 		    slot.getAttr(seg, kslatAttX, 0), 
-		    slot.getAttr(seg, kslatAttY, 0), org.x, org.y,0 /*insert*/,0 /*breakWeight*/, slot.before(), slot.after());
+		    slot.getAttr(seg, kslatAttY, 0), orgX, orgY,0 /*insert*/,0 /*breakWeight*/, slot.before(), slot.after());
             
             if (pText32 != NULL)
             {
@@ -684,7 +685,7 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = seg.advance().x;
+        float advanceWidth = seg.advanceX();
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
        }	//to get seg destroyed before its parameters
         
