@@ -156,7 +156,13 @@ typedef unsigned int uchar_t;
 class NoLimit
 {
 public:
-    static bool inRange(const void* p) { return true; }
+    NoLimit(size_t numchars) : m_numchars(numchars) {}
+  
+    static bool inBuffer(const void* pCharStart) { return true; }
+    bool needMoreChars(const void* pCharStart, size_t nProcessed) const { return nProcessed<m_numchars; }
+    
+private:
+    size_t m_numchars;
 };
 
 class Utf8Consumer
@@ -167,9 +173,11 @@ private:
 
 public:
       Utf8Consumer(const uint8* pCharStart) : m_pCharStart(pCharStart) {}
+      
+      const uint8* pCharStart() const { return m_pCharStart; }
   
       template <class LIMIT>
-      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inRange(m_pCharStart) is true. return value is iff character contents does not go past limit
+      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	const size_t    seq_sz = utf8_sz_lut[*m_pCharStart >> 4];
 	if (seq_sz==0) {
@@ -177,7 +185,7 @@ public:
 	    return true;			//this is an error. But carry on anyway?
 	}
 	
-	if (!limit.inRange(m_pCharStart+(seq_sz-1))) {
+	if (!limit.inBuffer(m_pCharStart+(seq_sz-1))) {
 	    return false;
 	}
 	
@@ -213,19 +221,21 @@ private:
 
 public:
       Utf16Consumer(const uint16* pCharStart) : m_pCharStart(pCharStart) {}
+      
+      const uint16* pCharStart() const { return m_pCharStart; }
   
       template <class LIMIT>
-      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inRange(m_pCharStart) is true. return value is iff character contents does not go past limit
+      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
-	  *pRes = *m_pCharStart;
+	  *pRes = *(m_pCharStart)++;
 	  if (*pRes > 0xDBFF || 0xD800 > *pRes)
 	      return true;
 
-	  if (!limit.inRange(m_pCharStart+1)) {
+	  if (!limit.inBuffer(m_pCharStart+1)) {
 	      return false;
 	  }
 
-	  uchar_t ul = *++m_pCharStart;
+	  uchar_t ul = *(m_pCharStart++);
 	  if (0xDC00 > ul || ul > 0xDFFF) {
 	      *pRes = 0xFFFD;
 	      return true; 			//this is an error. But carry on anyway?
@@ -239,19 +249,29 @@ private:
 };
 
 
-namespace {
+class Utf32Consumer
+{
+public:
+      Utf32Consumer(const uint32* pCharStart) : m_pCharStart(pCharStart) {}
+      
+      const uint32* pCharStart() const { return m_pCharStart; }
+  
+      template <class LIMIT>
+      inline bool consumeChar(const LIMIT& limit, uchar_t* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+      {
+	  *pRes = *(m_pCharStart++);
+	  return true;
+      }
 
-inline uchar_t consume_utf32(const uint32 **pp) {
-    return *((*pp)++);
-}
-
-} // end of private namespace
+private:
+      const uint32 *m_pCharStart;
+};
 
 
 class SlotBuilder
 {
 public:
-      SlotBuilder(const LoadedFace *face2, const FeaturesHandle& pFeats/*must not be IsNull*/, Segment* pDest2)
+      SlotBuilder(const LoadedFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, Segment* pDest2)
       :	  face(face2), 
 	  pDest(pDest2), 
 	  ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
@@ -268,14 +288,14 @@ public:
 	  return true;
       }
 
+      size_t charsProcessed() const { return m_nCharsProcessed; }
 
 private:
       const LoadedFace *face;
       Segment *pDest;
       const void *const   ctable;
       const unsigned int fid;
-public:
-    size_t m_nCharsProcessed ;
+      size_t m_nCharsProcessed ;
 };
 
 
@@ -284,12 +304,12 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     SlotBuilder slotBuilder(face, pFeats, this);
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
-    NoLimit limit;
+    NoLimit limit(numchars);
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(pChar));
-            for (; slotBuilder.m_nCharsProcessed < numchars;) {
+            for (;limit.needMoreChars(consumer.pCharStart(), slotBuilder.charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -299,7 +319,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         }
         case ITextSource::kutf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(pChar));
-            for (; slotBuilder.m_nCharsProcessed < numchars;) {
+             for (;limit.needMoreChars(consumer.pCharStart(), slotBuilder.charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -308,9 +328,10 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
             break;
         }
         case ITextSource::kutf32 : default: {
-            const uint32 * p = static_cast<const uint32 *>(pChar);
-            for (; slotBuilder.m_nCharsProcessed < numchars;) {
-                cid = consume_utf32(&p);
+	    Utf32Consumer consumer(static_cast<const uint32 *>(pChar));
+            for (;limit.needMoreChars(consumer.pCharStart(), slotBuilder.charsProcessed());) {
+		if (!consumer.consumeChar(limit, &cid))
+		    break;
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
