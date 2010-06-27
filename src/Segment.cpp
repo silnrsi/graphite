@@ -159,31 +159,35 @@ const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
                                           4};                // 4 bytes
 const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
 
-inline uchar_t consume_utf8(const uint8 *&p) {
-    const size_t    seq_sz = utf8_sz_lut[*p >> 4];
-    uchar_t         uc = *p ^ utf8_mask_lut[seq_sz];
+inline uchar_t consume_utf8(const uint8 **pp) {
+    const size_t    seq_sz = utf8_sz_lut[*(*pp) >> 4];
+    uchar_t         uc = *(*pp) ^ utf8_mask_lut[seq_sz];
     
     switch(seq_sz) {
-        case 4:     uc <<= 6; uc |= *++p & 0x7F;
-        case 3:     uc <<= 6; uc |= *++p & 0x7F;
-        case 2:     uc <<= 6; uc |= *++p & 0x7F; break;
+        case 4:     uc <<= 6; uc |= *++(*pp) & 0x7F;
+        case 3:     uc <<= 6; uc |= *++(*pp) & 0x7F;
+        case 2:     uc <<= 6; uc |= *++(*pp) & 0x7F; break;
         case 1:     break;
         case 0:     uc = 0xFFFD; break;
     }
-    ++p; return uc;
+    ++(*pp); return uc;
 }
 
 const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
-inline uchar_t consume_utf16(const uint16 *&p) {
-    const uchar_t   uh = *p, ul = *++p;
+inline uchar_t consume_utf16(const uint16 **pp) {
+    const uchar_t   uh = *(*pp), ul = *++(*pp);
     
     if (0xD800 > uh || uh > 0xDBFF)
         return uh;
-    ++p;
+    ++(*pp);
     if (0xDC00 > ul || ul > 0xDFFF) {
         return 0xFFFD;
     }
     return (uh<<10) + ul - SURROGATE_OFFSET;
+}
+
+inline uchar_t consume_utf32(const uint32 **pp) {
+    return *((*pp)++);
 }
 
 } // end of private namespace
@@ -229,7 +233,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         case ITextSource::kutf8 : {
             const uint8 * p = static_cast<const uint8 *>(pChar);
             for (; slotBuilder.i < numchars; ++slotBuilder.i) {
-                cid = consume_utf8(p);
+                cid = consume_utf8(&p);
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
@@ -238,7 +242,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         case ITextSource::kutf16: {
             const uint16 * p = static_cast<const uint16 *>(pChar);
             for (; slotBuilder.i < numchars; ++slotBuilder.i) {
-                cid = consume_utf16(p);
+                cid = consume_utf16(&p);
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
@@ -247,7 +251,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         case ITextSource::kutf32 : default: {
             const uint32 * p = static_cast<const uint32 *>(pChar);
             for (; slotBuilder.i < numchars; ++slotBuilder.i) {
-                cid = *p++;
+                cid = consume_utf32(&p);
 		if (!slotBuilder.processChar(cid))
 		    break;
             }
