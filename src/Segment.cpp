@@ -264,6 +264,7 @@ public:
       {
 	  unsigned int gid = TtfUtil::Cmap31Lookup(ctable, cid);
           pDest->appendSlot(m_nCharsProcessed, cid, gid ? gid : face->findPseudo(cid), fid);
+	  ++m_nCharsProcessed;
 	  return true;
       }
 
@@ -288,7 +289,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(pChar));
-            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
+            for (; slotBuilder.m_nCharsProcessed < numchars;) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -298,7 +299,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         }
         case ITextSource::kutf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(pChar));
-            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
+            for (; slotBuilder.m_nCharsProcessed < numchars;) {
 		if (!consumer.consumeChar(limit, &cid))
 		    break;
 		if (!slotBuilder.processChar(cid))
@@ -308,7 +309,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
         }
         case ITextSource::kutf32 : default: {
             const uint32 * p = static_cast<const uint32 *>(pChar);
-            for (; slotBuilder.m_nCharsProcessed < numchars; ++slotBuilder.m_nCharsProcessed) {
+            for (; slotBuilder.m_nCharsProcessed < numchars;) {
                 cid = consume_utf32(&p);
 		if (!slotBuilder.processChar(cid))
 		    break;
