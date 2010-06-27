@@ -44,6 +44,7 @@ void Segment::append(const Segment &other)
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
 	pNewCharInfo[i] = m_charinfo[i];
     
+    delete[] m_charinfo;
     m_charinfo = pNewCharInfo;
     pNewCharInfo += m_numCharinfo ;
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
