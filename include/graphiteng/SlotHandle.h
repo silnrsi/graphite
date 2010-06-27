@@ -31,7 +31,7 @@ enum attrCode {
     kslatNoEffect = kslatMax + 1
 };
     
-class GRNG_EXPORT SlotHandle
+class GRNG_EXPORT SlotHandle		//stays valid so long as its SegmentHandle stays valid
 {
 public:
     SlotHandle(const Slot* p/*no ownership, caller must keep it alive*/=NULL) : m_p(p) {}
@@ -48,9 +48,9 @@ public:
 
 protected:
 //    const Slot& operator*() const {return *m_p; };
-    const Slot* Ptr() const { return m_p; }
+    const Slot* ptr() const { return m_p; }
 
-    void SetPtr(const Slot* p/*no ownership, caller must keep it alive*/=NULL) { m_p=p; }
+    void setPtr(const Slot* p/*no ownership, caller must keep it alive*/=NULL) { m_p=p; }
   
 
 private:

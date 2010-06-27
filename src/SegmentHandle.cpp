@@ -22,64 +22,64 @@ SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, con
 
 int SegmentHandle::length() const
 {
-    return Ptr()->length();
+    return ptr()->length();
 }
 
 
 float SegmentHandle::advanceX() const
 {
-    return Ptr()->advance().x;
+    return ptr()->advance().x;
 }
 
 
 float SegmentHandle::advanceY() const
 {
-    return Ptr()->advance().y;
+    return ptr()->advance().y;
 }
 
 
 SlotHandle SegmentHandle::operator[] (unsigned int index) const
 {
-    return &(Ptr()->operator[](index));
+    return &(ptr()->operator[](index));
 }
 
 
 void SegmentHandle::runGraphite() const
 {
-    return Ptr()->runGraphite();
+    return ptr()->runGraphite();
 }
 
 
 void SegmentHandle::chooseSilf(uint32 script) const
 {
-    return Ptr()->chooseSilf(script);
+    return ptr()->chooseSilf(script);
 }
 
 
 int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
 {
-    if (feats.IsNull())
+    if (feats.isNull())
 	return -2;		//the smallest value that can normally be returned is -1
     
-    return Ptr()->addFeatures(*feats.Ptr());
+    return ptr()->addFeatures(*feats.ptr());
 }
 
 
 void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
 {
     int numchars = txt->getLength();
-    SetPtr(new Segment(numchars, face));
+    setPtr(new Segment(numchars, face));
 
-    Ptr()->chooseSilf(0);
-    Ptr()->read_text(face, pFeats, txt, numchars);
-    Ptr()->runGraphite();
+    ptr()->chooseSilf(0);
+    ptr()->read_text(face, pFeats, txt, numchars);
+    ptr()->runGraphite();
     // run the line break passes
     // run the substitution passes
-    Ptr()->prepare_pos(font);
+    ptr()->prepare_pos(font);
     // run the positioning passes
-    Ptr()->finalise(font);
+    ptr()->finalise(font);
 #ifndef DISABLE_TRACING
-    Ptr()->logSegment(*txt);
+    ptr()->logSegment(*txt);
 #endif
 }
 

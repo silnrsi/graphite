@@ -9,8 +9,8 @@ GRNG_EXPORT void DeleteFeatures(Features *p)
 
 FeaturesHandle FeaturesHandle::clone() const		//clones the Features which are then owned separately
 {
-    if (Ptr())
-	return Ptr()->clone();
+    if (ptr())
+	return ptr()->clone();
     else
 	return FeaturesHandle();
 }
@@ -18,14 +18,14 @@ FeaturesHandle FeaturesHandle::clone() const		//clones the Features which are th
 
 bool FeaturesHandle::maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const	//returns false iff any of the FeaturesHandles are IsNull
 {
-    if (IsNull())
+    if (isNull())
 	return false;
-    if (other.IsNull())
+    if (other.isNull())
 	return false;
-    if (mask.IsNull())
+    if (mask.isNull())
 	return false;
     
-    Ptr()->maskedOr(*other.Ptr(), *mask.Ptr());
+    ptr()->maskedOr(*other.ptr(), *mask.ptr());
     return true;
 }
 

@@ -17,7 +17,7 @@ class GRNG_EXPORT SegmentHandle : public RefCountHandle<Segment, &DeleteSegment>
 {
 public:
     SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt);
-    SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt);
+    SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, const ITextSource *txt);
   
     int length() const;
     float advanceX() const;
@@ -29,11 +29,11 @@ public:
     int addFeatures(const FeaturesHandle& feats) const;
  
 private:
-    void initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt);
+    void initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, const ITextSource *txt);
     
 private:
     friend class SlotHandle;
-    Segment* Ptr() const { return RefCountHandle<Segment, &DeleteSegment>::Ptr(); }
+    Segment* ptr() const { return RefCountHandle<Segment, &DeleteSegment>::ptr(); }
 };
 
 

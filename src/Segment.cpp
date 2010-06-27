@@ -197,7 +197,7 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     const void *        pChar = txt->get_utf_buffer_begin();
     uchar_t             cid;
     unsigned int        gid;
-    unsigned int	fid = addFeatures(*pFeats.Ptr());
+    unsigned int	fid = addFeatures(*pFeats.ptr());
     
     switch (txt->utfEncodingForm()) {
         case ITextSource::kutf8 : {

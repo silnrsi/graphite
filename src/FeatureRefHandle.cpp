@@ -15,8 +15,8 @@ FeatureRefHandle::FeatureRefHandle(byte bits, byte index, uint32 mask/*=0*/)
 
 FeatureRefHandle FeatureRefHandle::clone() const		//clones the FeatureRef which are then owned separately
 {
-    if (Ptr())
-	return new FeatureRef(*Ptr());
+    if (ptr())
+	return new FeatureRef(*ptr());
     else
 	return NULL;
 }
@@ -24,33 +24,33 @@ FeatureRefHandle FeatureRefHandle::clone() const		//clones the FeatureRef which 
 
 void FeatureRefHandle::applyValToFeature(uint16 val, const FeaturesHandle& pDest) const
 {
-    if (IsNull())
+    if (isNull())
 	return;
-    if (pDest.IsNull())
+    if (pDest.isNull())
 	return;
     
-    Ptr()->applyValToFeature(val, pDest.Ptr());
+    ptr()->applyValToFeature(val, pDest.ptr());
 }
 
 
 void FeatureRefHandle::maskFeature(const FeaturesHandle& pDest) const
 {
-    if (IsNull())
+    if (isNull())
 	return;
-    if (pDest.IsNull())
+    if (pDest.isNull())
 	return;
     
-    Ptr()->maskFeature(pDest.Ptr());
+    ptr()->maskFeature(pDest.ptr());
 }
 
 
 uint16 FeatureRefHandle::getFeatureVal(const FeaturesHandle& feats) const	//returns 0 if either handle IsNull
 {
-    if (IsNull())
+    if (isNull())
 	return 0;
-    if (feats.IsNull())
+    if (feats.isNull())
 	return 0;
     
-    return Ptr()->getFeatureVal(*feats.Ptr());
+    return ptr()->getFeatureVal(*feats.ptr());
 }
 

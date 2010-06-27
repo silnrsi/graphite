@@ -19,12 +19,7 @@ public:
 
     void applyValToFeature(uint16 val, const FeaturesHandle& pDest) const;
     void maskFeature(const FeaturesHandle& pDest) const;
-    uint16 getFeatureVal(const FeaturesHandle& feats) const;	//returns 0 if either handle IsNull
-
-private:
-//    friend class Segment;
-//    friend class FeatureMap;
-//    FeatureRef* Ptr() const { return AutoHandle<FeatureRef, &DeleteFeatureRef>::Ptr(); }
+    uint16 getFeatureVal(const FeaturesHandle& feats) const;	//returns 0 if either handle isNull
 };
 
 

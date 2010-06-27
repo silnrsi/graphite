@@ -22,7 +22,7 @@ private:
     friend class FeatureMap;
     friend class FeatureRefHandle;
     friend class SegmentHandle;
-    Features* Ptr() const { return AutoHandle<Features, &DeleteFeatures>::Ptr(); }
+    Features* ptr() const { return AutoHandle<Features, &DeleteFeatures>::ptr(); }
 };
 
 

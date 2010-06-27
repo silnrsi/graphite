@@ -6,20 +6,20 @@ class GRNG_EXPORT RefCountHandle
 {
 public:
     RefCountHandle(OBJCLASS* p/*takes ownership*/=NULL) : m_pCount(new unsigned int(1)), m_p(p) {}
-    RefCountHandle(const RefCountHandle<OBJCLASS, pDELETEFN>& src) : m_pCount(src.m_pCount), m_p(src.m_p) { AddRef(); }
-    RefCountHandle<OBJCLASS, pDELETEFN>& operator=(const RefCountHandle<OBJCLASS, pDELETEFN>& src) { src.AddRef(); Release(); m_pCount=src.m_pCount; m_p=src.m_p; return *this; }
-    ~RefCountHandle() { Release();}
+    RefCountHandle(const RefCountHandle<OBJCLASS, pDELETEFN>& src) : m_pCount(src.m_pCount), m_p(src.m_p) { addRef(); }
+    RefCountHandle<OBJCLASS, pDELETEFN>& operator=(const RefCountHandle<OBJCLASS, pDELETEFN>& src) { src.addRef(); release(); m_pCount=src.m_pCount; m_p=src.m_p; return *this; }
+    ~RefCountHandle() { release();}
 
     OBJCLASS* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
 //    OBJCLASS& operator*() const {return *m_p; };
 
 protected:
-    OBJCLASS* Ptr() const { return m_p; }
-    void SetPtr(OBJCLASS* p/*takes ownership*/=NULL) { Release(); m_pCount=new unsigned int(1); m_p=p; }
+    OBJCLASS* ptr() const { return m_p; }
+    void setPtr(OBJCLASS* p/*takes ownership*/=NULL) { release(); m_pCount=new unsigned int(1); m_p=p; }
 
 private:
-    void AddRef() const { ++*m_pCount; }
-    void Release() { if (--*m_pCount==0) { delete m_pCount; (*pDELETEFN)(m_p); } }
+    void addRef() const { ++*m_pCount; }
+    void release() { if (--*m_pCount==0) { delete m_pCount; (*pDELETEFN)(m_p); } }
 
 private:
     mutable unsigned int* m_pCount;	//counts how many times shared. Never 0

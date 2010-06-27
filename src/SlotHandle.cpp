@@ -40,7 +40,7 @@ int SlotHandle::after() const
 
 int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const
 {
-    return m_p->getAttr(hSeg.Ptr(), index, subindex);
+    return m_p->getAttr(hSeg.ptr(), index, subindex);
 }
 
 
