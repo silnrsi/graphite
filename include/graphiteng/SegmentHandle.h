@@ -22,9 +22,8 @@ public:
     static size_t countUnicodeCharacters(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/);
     static size_t countUnicodeCharacters(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount);
     static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin);	//the nul is not in the count
-    static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/);	//the nul is not in the count
-    static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount);	//the nul is not in the count
-
+    static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/);	//the nul is not in the count
+    static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/, size_t maxCount);	//the nul is not in the count
     
 public:
     SegmentHandle(const LoadedFont *font, const LoadedFace *face, encform enc, const void* pStart, size_t nChars);
