@@ -42,7 +42,7 @@ public:
     float advance(const LoadedFont *font) const;
     int before() const;
     int after() const;
-    int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const;
+    int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex, int is) const;
 
     const Slot* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
 

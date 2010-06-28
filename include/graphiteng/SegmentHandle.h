@@ -26,8 +26,8 @@ public:
     static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/, size_t maxCount);	//the nul is not in the count
     
 public:
-    SegmentHandle(const LoadedFont *font, const LoadedFace *face, encform enc, const void* pStart, size_t nChars);
-    SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void* pStart, size_t nChars);
+    SegmentHandle(const LoadedFont* font, const LoadedFace* face, uint32 script, SegmentHandle::encform enc, const void* pStart, size_t nChars);
+    SegmentHandle(const LoadedFont* font, const LoadedFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars);
   
     int length() const;
     float advanceX() const;
@@ -39,7 +39,7 @@ public:
     int addFeatures(const FeaturesHandle& feats) const;
  
 private:
-    void initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void*pStart, size_t nChars);
+    void initialize(const LoadedFont* font, const LoadedFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars);
     
 private:
     friend class SlotHandle;

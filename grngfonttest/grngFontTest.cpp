@@ -638,7 +638,7 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        SegmentHandle seg(sizedFont, face, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength());
+        SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength());
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
@@ -649,9 +649,9 @@ int Parameters::testFileFont() const
             float orgX = slot.originX();
             float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot.gid(), slot.getAttr(seg, kslatAttTo, 0), 
-		    slot.getAttr(seg, kslatAttX, 0), 
-		    slot.getAttr(seg, kslatAttY, 0), orgX, orgY,0 /*insert*/,0 /*breakWeight*/, slot.before(), slot.after());
+                    i, slot.gid(), slot.getAttr(seg, kslatAttTo, 0, i), 
+		    slot.getAttr(seg, kslatAttX, 0, i), 
+		    slot.getAttr(seg, kslatAttY, 0, i), orgX, orgY,0 /*insert*/,0 /*breakWeight*/, slot.before(), slot.after());
             
             if (pText32 != NULL)
             {

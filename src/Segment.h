@@ -42,15 +42,25 @@ public:
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
-    virtual int8 dir() const { return m_dir; }
+    int8 dir() const { return m_dir; }
+    uint16 user(int sid, uint8 index) { return (m_silf->numUser() > index ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
+    uint16 user(int sid, uint8 index, uint16 value) { if (m_silf->numUser() > index) m_userAttrs[sid * m_silf->numUser() + index] = value; }
 
-    Segment(unsigned int numSlots, const LoadedFace *face);
+    Segment(unsigned int numchars, const LoadedFace* face, uint32 script);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid);
     void positionSlots(const LoadedFont *font);
     void append(const Segment &other);
-    void insertSlot(int index) { m_slots.insert(m_slots.begin() + index, Slot()); m_numGlyphs++; }
-    void deleteSlot(int index) { m_slots.erase(m_slots.begin() + index); m_numGlyphs--; }
+    void insertSlot(int index) {
+        m_slots.insert(m_slots.begin() + index, Slot());
+        m_userAttrs.insert(m_userAttrs.begin() + index * m_silf->numUser(), m_silf->numUser(), 0);
+        m_numGlyphs++;
+    }
+    void deleteSlot(int index) {
+        m_slots.erase(m_slots.begin() + index);
+        m_userAttrs.erase(m_userAttrs.begin() + index * m_silf->numUser(), m_userAttrs.begin() + (index + 1) * m_silf->numUser());
+        m_numGlyphs--;
+    }
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
@@ -71,7 +81,7 @@ private:
   
 private:
     std::vector<Slot> m_slots;
-    std::vector<uint16> m_user;
+    std::vector<uint16> m_userAttrs;
     unsigned int m_numGlyphs;
     CharInfo *m_charinfo;  // character info, one per input character
     unsigned int m_numCharinfo;      // size of the array and number of input characters

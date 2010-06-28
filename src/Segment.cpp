@@ -1,6 +1,7 @@
 #include "processUTF.h"
 #include <string.h>
 #include <stdlib.h>
+#include <vector>
 
 #include "Segment.h"
 #include "graphiteng/IFont.h"
@@ -10,14 +11,16 @@
 #include "XmlTraceLog.h"
 #include "graphiteng/SegmentHandle.h"
 
-Segment::Segment(unsigned int numchars, const LoadedFace *face) :
+Segment::Segment(unsigned int numchars, const LoadedFace *face, uint32 script) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
         m_slots(numchars),
         m_charinfo(new CharInfo[numchars]),
+        m_silf(face->chooseSilf(script)),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
+    m_userAttrs.assign(m_silf->numUser() * numchars, 0);         // initialise to 0
 }
 
 Segment::~Segment()

@@ -25,6 +25,7 @@ public:
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, uint16 index) const;
     uint16 findPseudo(uint32 uid) const;
+    uint8 numUser() const { return m_aUser; }
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);

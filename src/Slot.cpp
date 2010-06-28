@@ -37,7 +37,7 @@ void Slot::finalise(Segment *seg, const LoadedFont *font, Position &base, float 
         (*seg)[m_sibling].finalise(seg, font, base, cMin, cMax);
 }
 
-int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex) const
+int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is) const
 {
     if (index == kslatUserDefnV1)
     {
@@ -72,7 +72,7 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex) const
 	case kslatJStep : return 0;
 	case kslatJWeight : return 0;
 	case kslatJWidth : return 0;
-	case kslatUserDefn : return 0; // get it from the seg
+	case kslatUserDefn : return const_cast<Segment *>(seg)->user(is, subindex);
 	default : return 0;
     }
 }
@@ -112,7 +112,7 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int 
 	case kslatJStep : break;
 	case kslatJWeight : break;
 	case kslatJWidth : break;
-	case kslatUserDefn : break;	// talk to the seg
+	case kslatUserDefn : seg->user(is, subindex, value); break;
 	default : break;
     }
 }

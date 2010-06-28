@@ -103,15 +103,15 @@ private:
 
 
 
-SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, encform enc, const void* pStart, size_t nChars)
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, uint32 script, encform enc, const void* pStart, size_t nChars)
 {
-    initialize(font, face, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars);
+    initialize(font, face, script, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars);
 }
 
 
-SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
 {
-    initialize(font, face, pFeats, enc, pStart, nChars);
+    initialize(font, face, script, pFeats, enc, pStart, nChars);
 }
 
 
@@ -160,11 +160,10 @@ int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
 }
 
 
-void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
+void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
 {
-    setPtr(new Segment(nChars, face));
+    setPtr(new Segment(nChars, face, script));
 
-    ptr()->chooseSilf(0);
     ptr()->read_text(face, pFeats, enc, pStart, nChars);
     ptr()->runGraphite();
     // run the line break passes

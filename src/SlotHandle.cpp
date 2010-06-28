@@ -37,9 +37,9 @@ int SlotHandle::after() const
 }
 
 
-int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const
+int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex, int is) const
 {
-    return m_p->getAttr(hSeg.ptr(), index, subindex);
+    return m_p->getAttr(hSeg.ptr(), index, subindex, is);
 }
 
 

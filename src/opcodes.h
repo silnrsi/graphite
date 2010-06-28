@@ -266,7 +266,7 @@ STARTOP(attr_add)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = seg[is].getAttr(&seg, slat, 0);
+    int res = seg[is].getAttr(&seg, slat, 0, is);
     seg[is].setAttr(&seg, slat, 0, val + res, is);
 ENDOP
 
@@ -274,7 +274,7 @@ STARTOP(attr_sub)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = seg[is].getAttr(&seg, slat, 0);
+    int res = seg[is].getAttr(&seg, slat, 0, is);
     seg[is].setAttr(&seg, slat, 0, res - val, is);
 ENDOP
 
@@ -297,14 +297,14 @@ STARTOP(push_slot_attr)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    push(seg[is + slot_ref].getAttr(&seg, slat, 0));
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref));
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]) + is + 1;
-    push(seg[is + slot_ref].getAttr(&seg, slat, 0));
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref));
 ENDOP
 
 STARTOP(push_glyph_attr_obs)
@@ -400,7 +400,7 @@ STARTOP(push_islot_attr)
     const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    push(seg[is + slot_ref].getAttr(&seg, slat, idx));
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref));
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -408,7 +408,7 @@ STARTOP(push_islot_attr_constrained)
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]) + is + 1,
                         idx      = uint8(param[2]);
-    push(seg[is + slot_ref].getAttr(&seg, slat, idx));
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref));
 ENDOP
 
 STARTOP(push_iglyph_attr) // not implemented
@@ -441,7 +441,7 @@ STARTOP(iattr_add)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = seg[is].getAttr(&seg, slat, idx);
+    int res = seg[is].getAttr(&seg, slat, idx, is);
     seg[is].setAttr(&seg, slat, idx, val + res, is);
 ENDOP
 
@@ -450,7 +450,7 @@ STARTOP(iattr_sub)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = seg[is].getAttr(&seg, slat, idx);
+    int res = seg[is].getAttr(&seg, slat, idx, is);
     seg[is].setAttr(&seg, slat, idx, val - res, is);
 ENDOP
 
