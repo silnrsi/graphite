@@ -20,7 +20,7 @@ Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Re
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;
     Position shift = m_shift * scale;
-    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(m_glyphid)) * scale : m_advance.x;
+    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(m_glyphid)) * scale + advance(font) : m_advance.x;
     Position res;
     
     m_position = *base + shift;
@@ -117,8 +117,9 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is) co
     }
 }
 
-void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int is)
+void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 val, int is)
 {
+    int value = *(int16 *)&val;
     if (index == kslatUserDefnV1)
     {
         index = kslatUserDefn;
@@ -165,4 +166,10 @@ void Slot::child(Segment *seg, int ap)
         m_child = ap;
     else
         (*seg)[m_child].child(seg, ap);
+}
+
+void Slot::setGlyph(Segment *seg, uint16 glyphid)
+{
+    glyph(glyphid);
+    m_advance = Position(seg->glyphAdvance(glyphid), 0.);
 }

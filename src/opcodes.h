@@ -189,7 +189,7 @@ STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
     // TODO: Implement body
-    seg[is].glyph(seg.getClassGlyph(output_class, 0));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -199,7 +199,7 @@ STARTOP(put_subs_8bit_obs)
                         output_class = uint8(param[2]);
     // TODO; Implement body
     uint16 index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
-    seg[is].glyph(seg.getClassGlyph(output_class, index));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_copy)
@@ -471,7 +471,7 @@ STARTOP(put_subs)
     const unsigned int  output_class = uint8(param[3]) << 8
                                      | uint8(param[4]);
     int index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
-    seg[is].glyph(seg.getClassGlyph(output_class, index));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_subs2) // not implemented
@@ -486,7 +486,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    seg[is].glyph(seg.getClassGlyph(output_class, 0));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)

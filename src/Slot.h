@@ -21,6 +21,7 @@ public:
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
+    void setGlyph(Segment *seg, uint16 glyphid);
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }
     int original() const { return m_original; }
@@ -33,7 +34,7 @@ public:
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int is);
+    void setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 value, int is);
     int getAttr(const Segment* seg, attrCode index, uint8 subindex, int is) const;
     void attachTo(int ap) { m_parent = ap; }
     void child(Segment *seg, int ap);
