@@ -54,12 +54,18 @@ public:
     void insertSlot(int index) {
         m_slots.insert(m_slots.begin() + index, Slot());
         m_userAttrs.insert(m_userAttrs.begin() + index * m_silf->numUser(), m_silf->numUser(), 0);
-        m_numGlyphs++;
+        if (index < m_numGlyphs)
+            m_numGlyphs++;
+        else
+            m_numGlyphs = index + 1;
     }
     void deleteSlot(int index) {
-        m_slots.erase(m_slots.begin() + index);
-        m_userAttrs.erase(m_userAttrs.begin() + index * m_silf->numUser(), m_userAttrs.begin() + (index + 1) * m_silf->numUser());
-        m_numGlyphs--;
+        if (index < m_numGlyphs)
+        {
+            m_slots.erase(m_slots.begin() + index);
+            m_userAttrs.erase(m_userAttrs.begin() + index * m_silf->numUser(), m_userAttrs.begin() + (index + 1) * m_silf->numUser());
+            m_numGlyphs--;
+        }
     }
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
@@ -81,8 +87,8 @@ private:
   
 private:
     std::vector<Slot> m_slots;
-    std::vector<uint16> m_userAttrs;
     unsigned int m_numGlyphs;
+    std::vector<uint16> m_userAttrs;
     CharInfo *m_charinfo;  // character info, one per input character
     unsigned int m_numCharinfo;      // size of the array and number of input characters
 

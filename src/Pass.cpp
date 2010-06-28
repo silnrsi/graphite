@@ -335,6 +335,7 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     int iStart = iSlot;
     const int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
     
+    if (iSlot >= seg->length()) iSlot = seg->length() - 1;
     for (int i = iStart; i <= iSlot; )
     {
         if ((*seg)[i].isDeleted())
