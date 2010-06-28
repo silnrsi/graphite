@@ -22,6 +22,7 @@ public:
     }
     Position scale(const Position& p) const { return Position(m_scale * p.x, m_scale * p.y); }
     float scale(float p) const { return m_scale * p; }
+    float scale() const { return m_scale; }
 
 private:
     const IFont *m_font;      // Application interface. May be NULL

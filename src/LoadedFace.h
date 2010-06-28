@@ -45,6 +45,7 @@ public:
     ~LoadedFace();
     const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
+    const Rect &bbox(uint16 gid) const { return m_glyphs[gid].bbox(); }
     unsigned short upem() const { return m_upem; }
     unsigned short numGlyphs() const { return m_numGlyphs; }
     bool readGlyphs();

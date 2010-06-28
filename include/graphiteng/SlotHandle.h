@@ -10,9 +10,9 @@ class Slot;
 enum attrCode {
     kslatAdvX = 0, kslatAdvY,
     kslatAttTo,
-    kslatAttX, kslatAttY,
+    kslatAttX, kslatAttY, kslatAttGpt,
     kslatAttXOff, kslatAttYOff,
-    kslatAttWithX, kslatAttWithY,
+    kslatAttWithX, kslatAttWithY, kslatWithGpt,
     kslatAttWithXOff, kslatAttWithYOff,
     kslatAttLevel,
     kslatBreak,

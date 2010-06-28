@@ -73,7 +73,21 @@ public:
     uint16 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->feature(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void dir(int8 val) { m_dir = val; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_face->glyphAttr(gid, gattr); }
-    uint16 getGlyphMetric(uint16 gid, uint8 metric) const { return m_face->getGlyphMetric(gid, metric); }
+    uint16 getGlyphMetric(int iSlot, uint8 metric, uint8 attrLevel) const {
+        if (attrLevel > 0)
+        {
+            int is = findRoot(iSlot);
+            return m_slots[is].clusterMetric(this, is, metric, attrLevel);
+        }
+        else
+            return m_face->getGlyphMetric(m_slots[iSlot].gid(), metric);
+    }
+    const float glyphAdvance(uint16 gid) { return m_face->getAdvance(gid, 1.0); }
+    const Rect &glyphBbox(uint16 gid) { return m_face->bbox(gid); }
+    Position finalise(int iSlot, LoadedFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel) {
+        return m_slots[iSlot].finalise(this, font, base, bbox, cMin, attrLevel);
+    }
+    int findRoot(int is) const { return (m_slots[is].attachTo() == -1 ? is : findRoot(m_slots[is].attachTo())); }
 
 #ifndef DISABLE_TRACING
     void logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const;

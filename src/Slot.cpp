@@ -15,34 +15,73 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 };
 
-void Slot::finalise(Segment *seg, const LoadedFont *font, Position &base, float *cMin, float *cMax)
+Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
-    Position shift = font->scale(m_shift);
-    m_position = base + shift;
+    if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
+    float scale = font ? font->scale() : 1.0;
+    Position shift = m_shift * scale;
+    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(m_glyphid)) * scale : m_advance.x;
+    Position res;
+    
+    m_position = *base + shift;
     if (m_parent == -1)
-        *cMax = m_position.x + advance(font) - shift.x;
+        res = *base + Position(tAdvance, m_advance.y);
     else
     {
         float tAdv;
-        m_position += font->scale(m_attach);
-        tAdv = m_position.x + (m_advance.x > 0 ? font->scale(m_advance.x) : advance(font)) - shift.x;
-        if (tAdv > *cMax) *cMax = tAdv;
-        if (m_position.x - base.x - shift.x < *cMin) *cMin = m_position.x - base.x - shift.x;
+        m_position += (m_attach - m_with) * scale;
+        tAdv = m_position.x + tAdvance - shift.x;
+        res = Position(tAdv, 0);
     }
 
+    Rect ourBbox = seg->glyphBbox(m_glyphid) * scale + m_position;
+    bbox->widen(ourBbox);
+    
+    if (m_parent != -1 && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x;
+    
     if (m_child != -1)
-        (*seg)[m_child].finalise(seg, font, m_position, cMin, cMax);
-
+    {
+        Position tRes = (*seg)[m_child].finalise(seg, font, &m_position, bbox, cMin, attrLevel);
+        if (tRes.x > res.x) res = tRes;
+    }
+        
     if (m_sibling != -1)
-        (*seg)[m_sibling].finalise(seg, font, base, cMin, cMax);
+    {
+        Position tRes = (*seg)[m_sibling].finalise(seg, font, base, bbox, cMin, attrLevel);
+        if (tRes.x > res.x) res = tRes;
+    }
+    return res;
 }
 
+uint32 Slot::clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const
+{
+    Position base;
+    Rect bbox;
+    float cMin = 0.;
+    Position res = const_cast<Segment *>(seg)->finalise(is, NULL, &base, &bbox, &cMin, attrLevel);
+    
+    switch ((enum metrics)metric)
+    {
+        case kgmetLsb : return bbox.bl.x;
+        case kgmetRsb : return res.x - bbox.tr.x;
+        case kgmetBbTop : return bbox.tr.y;
+        case kgmetBbBottom : return bbox.bl.y;
+        case kgmetBbLeft : return bbox.bl.x;
+        case kgmetBbRight : return bbox.tr.x;
+        case kgmetBbWidth : return bbox.tr.x - bbox.bl.x;
+        case kgmetBbHeight : return bbox.tr.y - bbox.bl.y;
+        case kgmetAdvWidth : return res.x;
+        case kgmetAdvHeight : return res.y;
+        default : return 0;
+    }
+}
+    
 int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is) const
 {
     if (index == kslatUserDefnV1)
     {
-	index = kslatUserDefn;
-	subindex = 0;
+        index = kslatUserDefn;
+        subindex = 0;
     }
     switch (index)
     {
@@ -57,6 +96,7 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is) co
 	case kslatAttWithY : return m_with.y;
 	case kslatAttWithXOff : return 0;
 	case kslatAttWithYOff : return 0;
+    case kslatAttLevel : return m_attLevel;
 	case kslatBreak : seg->charinfo(m_original)->breakWeight();
 	case kslatCompRef : return 0;
 	case kslatDir : return seg->dir();
@@ -81,8 +121,8 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int 
 {
     if (index == kslatUserDefnV1)
     {
-	index = kslatUserDefn;
-	subindex = 0;
+        index = kslatUserDefn;
+        subindex = 0;
     }
     switch (index)
     {
@@ -97,6 +137,7 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int value, int 
 	case kslatAttWithY : m_with = Position(m_with.x, value); break;
 	case kslatAttWithXOff : break;
 	case kslatAttWithYOff : break;
+    case kslatAttLevel : m_attLevel = value; break;
 	case kslatBreak : seg->charinfo(m_original)->breakWeight(value); break;
 	case kslatCompRef : break;		// not sure what to do here
 	case kslatDir : break;	// read only

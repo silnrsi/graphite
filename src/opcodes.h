@@ -326,7 +326,7 @@ STARTOP(push_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    push(seg.getGlyphMetric(is + slot_ref, glyph_attr, attr_level));
     // Ignore cluster metrics at the moment
 ENDOP
 
@@ -335,7 +335,7 @@ STARTOP(push_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]) + is + 1;
     const signed int    attr_level  = uint8(param[2]);
-    push(seg.getGlyphMetric(seg[is + slot_ref].gid(), glyph_attr));
+    push(seg.getGlyphMetric(is + slot_ref, glyph_attr, attr_level));
     // Ignore cluster metrics at the moment
 ENDOP
 
@@ -380,8 +380,7 @@ STARTOP(push_att_to_glyph_metric)
     const signed int    attr_level  = uint8(param[2]);
     int slot = seg[is + slot_ref].attachTo();
     if (slot < 0) slot = is + slot_ref;
-    push(seg.getGlyphMetric(seg[slot].gid(), glyph_attr));
-    // ignoring cluster metric
+    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_att_to_glyph_metric_constrained)
@@ -391,8 +390,7 @@ STARTOP(push_att_to_glyph_metric_constrained)
     const signed int    attr_level  = uint8(param[2]);
     int slot = seg[is + slot_ref].attachTo();
     if (slot < 0) slot = is + slot_ref;
-    push(seg.getGlyphMetric(seg[slot].gid(), glyph_attr));
-    // ignoring cluster metric
+    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_islot_attr)

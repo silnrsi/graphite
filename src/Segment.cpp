@@ -78,16 +78,15 @@ void Segment::positionSlots(const LoadedFont *font)
 {
     Position currpos;
     Slot *s;
+    float cMin = 0.;
 
     for (unsigned int i = 0; i < m_numGlyphs; i++)
     {
         s = &(m_slots[i]);
         if (s->isBase())
         {
-            float cMin = currpos.x;
-            float cMax = currpos.x;
-            s->finalise(this, font, currpos, &cMin, &cMax);
-            currpos = Position(cMax, 0);
+            Rect bbox = Rect(currpos, currpos);
+            currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
         }
     }
     m_advance = currpos;

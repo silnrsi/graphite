@@ -15,7 +15,7 @@ class Slot
 public:
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
-    float advance(const LoadedFont *font) const { return m_advance.x < 0 ? font->advance(m_glyphid) : font->scale(m_advance.x); }
+    float advance(const LoadedFont *font) const { return m_advance.x < 0 ? font->advance(m_glyphid) : (font ? font->scale(m_advance.x) : m_advance.x); }
     int before() const { return m_before; }
     int after() const { return m_after; }
 
@@ -28,7 +28,7 @@ public:
     void after(int index) { m_after = index; }
     bool isBase() const { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    void finalise(Segment *seg, const LoadedFont *font, Position &base, float *cMin, float *cMax);
+    Position finalise(Segment* seg, const LoadedFont* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel);
     bool isDeleted() const { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
@@ -38,6 +38,7 @@ public:
     void attachTo(int ap) { m_parent = ap; }
     void child(Segment *seg, int ap);
     int attachTo() const { return m_parent; }
+    uint32 clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const;
 
 private:
     unsigned short m_glyphid;        // glyph id
@@ -53,6 +54,7 @@ private:
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
     byte m_flags;           // holds bit flags
+    byte m_attLevel;        // attachment level
 };
 
 #endif // SLOT_INCLUDE
