@@ -1,5 +1,6 @@
 // This file will be pulled into and integrated into a machine implmentation
-// DO NOT build directly
+// DO NOT build directly and under no circumstances every #include headers in 
+// here or you will break the direct_machine.
 //
 // Implementers' notes
 // ==================
@@ -30,8 +31,6 @@
 //        ib    = The original base slot index at the start of this rule
 //        param = pointer to the instructions parameter block.
 //                (Only if you use declare_params first).
-
-#include "graphiteng/SlotHandle.h"
      
 #define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
 

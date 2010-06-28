@@ -7,6 +7,7 @@
 // opcodes) but is slower that the direct threaded interpreter by a factor of 2
 
 #include <cassert>
+#include <graphiteng/SlotHandle.h>
 #include "Machine.h"
 #include "Segment.h"
 #include "XmlTraceLog.h"

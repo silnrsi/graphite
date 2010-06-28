@@ -12,6 +12,7 @@
 
 
 #include <cassert>
+#include <graphiteng/SlotHandle.h>
 #include "Machine.h"
 #include "Segment.h"
 
