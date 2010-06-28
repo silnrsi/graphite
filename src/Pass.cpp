@@ -226,7 +226,8 @@ void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
         int loopCount = m_iMaxLoop;
         while (!advance && loopCount--)
             advance = findNDoRule(seg, i, face, vms);
-        if (advance > 0) i += advance - 1;
+        if (!advance) advance = 1;
+        i += advance - 1;
     }
 }
 
@@ -308,7 +309,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
 	    XmlTraceLog::get().closeElement(ElementTestRule);
 #endif
     }
-    return -1;
+    return 0;
 }
 
 int Pass::testConstraint(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
@@ -333,7 +334,8 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     
     Machine::status_t status;
     int iStart = iSlot;
-    const int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    ret += iSlot;
     
     if (iSlot >= seg->length()) iSlot = seg->length() - 1;
     for (int i = iStart; i <= iSlot; )
@@ -346,6 +348,6 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
         else
             i++;
     }
-    return (status == Machine::finished ? iSlot + ret : iSlot) - iStart;
+    return (status == Machine::finished ? ret : iSlot) - iStart;
 }
 

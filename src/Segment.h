@@ -43,8 +43,8 @@ public:
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     int8 dir() const { return m_dir; }
-    uint16 user(int sid, uint8 index) { return (m_silf->numUser() > index ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
-    uint16 user(int sid, uint8 index, uint16 value) { if (m_silf->numUser() > index) m_userAttrs[sid * m_silf->numUser() + index] = value; }
+    uint16 user(uint32 sid, uint8 index) { return (sid < m_numGlyphs && index < m_silf->numUser() ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
+    uint16 user(uint32 sid, uint8 index, uint16 value) { if (sid < m_numGlyphs && index < m_silf->numUser()) m_userAttrs[sid * m_silf->numUser() + index] = value; }
 
     Segment(unsigned int numchars, const LoadedFace* face, uint32 script);
     ~Segment();

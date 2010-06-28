@@ -19,7 +19,7 @@ public:
         for (i = 0; i < m_numRules; i++)
         {
             if (m_rules[i] == ruleid) return;
-            if (m_sortKeys[i] < sortkey) break;
+            if (m_sortKeys[i] <= sortkey) break;
         }
         memcpy(m_rules + i + 1, m_rules + i, (m_numRules - i) * sizeof(uint16));
         memcpy(m_sortKeys + i + 1, m_sortKeys + i, (m_numRules - i) * sizeof(uint16));
