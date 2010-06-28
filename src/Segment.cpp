@@ -4,7 +4,6 @@
 
 #include "Segment.h"
 #include "graphiteng/IFont.h"
-#include "graphiteng/ITextSource.h"
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
@@ -92,7 +91,7 @@ void Segment::positionSlots(const LoadedFont *font)
 }
 
 #ifndef DISABLE_TRACING
-void Segment::logSegment(const ITextSource & textSrc) const
+void Segment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
 {
     if (XmlTraceLog::get().active())
     {
@@ -101,23 +100,23 @@ void Segment::logSegment(const ITextSource & textSrc) const
         XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
         XmlTraceLog::get().openElement(ElementText);
-        XmlTraceLog::get().addAttribute(AttrEncoding, textSrc.utfEncodingForm());
-        XmlTraceLog::get().addAttribute(AttrLength, textSrc.getLength());
-        switch (textSrc.utfEncodingForm())
+        XmlTraceLog::get().addAttribute(AttrEncoding, enc);
+        XmlTraceLog::get().addAttribute(AttrLength, nChars);
+        switch (enc)
         {
-        case ITextSource::kutf8:
+        case SegmentHandle::kutf8:
             XmlTraceLog::get().writeText(
-                reinterpret_cast<const char *>(textSrc.get_utf_buffer_begin()));
+                reinterpret_cast<const char *>(pStart));
             break;
-        case ITextSource::kutf16:
-            for (size_t j = 0; j < textSrc.getLength(); ++j)
+        case SegmentHandle::kutf16:
+            for (size_t j = 0; j < nChars; ++j)
             {
-                uint32 code = reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
+                uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
                 if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
                 {
                     j++;
                     // append low surrogate
-                    code = (code << 16) + reinterpret_cast<const uint16 *>(textSrc.get_utf_buffer_begin())[j];
+                    code = (code << 16) + reinterpret_cast<const uint16 *>(pStart)[j];
                 }
                 else if (code >= 0xDC00 && code <= 0xDFFF)
                 {
@@ -126,11 +125,11 @@ void Segment::logSegment(const ITextSource & textSrc) const
                 XmlTraceLog::get().writeUnicode(code);
             }
             break;
-        case ITextSource::kutf32:
-            for (size_t j = 0; j < textSrc.getLength(); ++j)
+        case SegmentHandle::kutf32:
+            for (size_t j = 0; j < nChars; ++j)
             {
                 XmlTraceLog::get().writeUnicode(
-                    reinterpret_cast<const uint32 *>(textSrc.get_utf_buffer_begin())[j]);
+                    reinterpret_cast<const uint32 *>(pStart)[j]);
             }
             break;
         }
@@ -185,13 +184,12 @@ private:
 };
 
 
-void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt, size_t numchars)
+void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
-    const void *        pChar = txt->get_utf_buffer_begin();
-    CharacterCountLimit limit(numchars);
+    CharacterCountLimit limit(nChars);
 
-    processUTF(txt->utfEncodingForm(), pChar, limit/*when to stop processing*/, &slotBuilder);
+    processUTF(enc, pStart, limit/*when to stop processing*/, &slotBuilder);
 }
 
 void Segment::prepare_pos(const LoadedFont *font)

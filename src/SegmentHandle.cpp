@@ -1,6 +1,6 @@
 #include "graphiteng/SegmentHandle.h"
 #include "Segment.h"
-#include "graphiteng/ITextSource.h"
+#include "processUTF.h"
 
 GRNG_EXPORT void DeleteSegment(Segment *p)
 {
@@ -8,15 +8,110 @@ GRNG_EXPORT void DeleteSegment(Segment *p)
 }
 
 
-SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const ITextSource *txt)
+class CharCounter
 {
-    initialize(font, face, face->theFeatures().cloneFeatures(0/*0 means default*/), txt);
+public:
+      CharCounter()
+      :	  m_nCharsProcessed(0) 
+      {
+      }	  
+
+      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
+      {
+	  ++m_nCharsProcessed;
+	  return true;
+      }
+
+      size_t charsProcessed() const { return m_nCharsProcessed; }
+
+private:
+      size_t m_nCharsProcessed ;
+};
+
+
+/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/)
+{
+    BufferLimit limit(buffer_end);
+    CharCounter counter;
+    
+    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    return counter.charsProcessed();
 }
 
 
-SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
+/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount)
 {
-    initialize(font, face, pFeats, txt);
+    BufferAndCharacterCountLimit limit(buffer_end, maxCount);
+    CharCounter counter;
+    
+    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    return counter.charsProcessed();
+}
+
+
+class CharCounterToNul
+{
+public:
+      CharCounterToNul()
+      :	  m_nCharsProcessed(0) 
+      {
+      }	  
+
+      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
+      {
+	  if (cid==0)
+	      return false;
+	  ++m_nCharsProcessed;
+	  return true;
+      }
+
+      size_t charsProcessed() const { return m_nCharsProcessed; }
+
+private:
+      size_t m_nCharsProcessed ;
+};
+
+
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin)	//the nul is not in the count
+{
+    NoLimit limit;
+    CharCounterToNul counter;
+    
+    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    return counter.charsProcessed();
+}
+
+
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/)	//the nul is not in the count
+{
+    BufferLimit limit(buffer_end);
+    CharCounterToNul counter;
+    
+    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    return counter.charsProcessed();
+}
+
+
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount)	//the nul is not in the count
+{
+    BufferAndCharacterCountLimit limit(buffer_end, maxCount);
+    CharCounterToNul counter;
+    
+    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    return counter.charsProcessed();
+}
+
+
+
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, encform enc, const void* pStart, size_t nChars)
+{
+    initialize(font, face, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars);
+}
+
+
+SegmentHandle::SegmentHandle(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
+{
+    initialize(font, face, pFeats, enc, pStart, nChars);
 }
 
 
@@ -65,13 +160,12 @@ int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
 }
 
 
-void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt)
+void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars)
 {
-    int numchars = txt->getLength();
-    setPtr(new Segment(numchars, face));
+    setPtr(new Segment(nChars, face));
 
     ptr()->chooseSilf(0);
-    ptr()->read_text(face, pFeats, txt, numchars);
+    ptr()->read_text(face, pFeats, enc, pStart, nChars);
     ptr()->runGraphite();
     // run the line break passes
     // run the substitution passes
@@ -79,7 +173,7 @@ void SegmentHandle::initialize(const LoadedFont *font, const LoadedFace *face, c
     // run the positioning passes
     ptr()->finalise(font);
 #ifndef DISABLE_TRACING
-    ptr()->logSegment(*txt);
+    ptr()->logSegment(enc, pStart, nChars);
 #endif
 }
 

@@ -13,8 +13,6 @@
 
 class Silf;
 class LoadedFace;
-class ITextSource;
-
 class Segment
 {
 public:
@@ -62,12 +60,12 @@ public:
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const { return m_face->getGlyphMetric(gid, metric); }
 
 #ifndef DISABLE_TRACING
-    void logSegment(const ITextSource & textSrc) const;
+    void logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const;
 #endif
 
 private:
     friend class SegmentHandle ;
-    void read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be IsNull*/, const ITextSource *txt, size_t numchars);
+    void read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const LoadedFont *font);
     void finalise(const LoadedFont *font);
   

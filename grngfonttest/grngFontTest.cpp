@@ -26,7 +26,6 @@ diagnostic log of the segment creation in grSegmentLog.txt
 
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
-#include "graphiteng/ITextSource.h"
 #include "graphiteng/SlotHandle.h"
 #include "graphiteng/IFont.h"
 #include "graphiteng/IFace.h"
@@ -60,14 +59,14 @@ namespace std
 }
 #endif
 
-class GrngTextSrc : public ITextSource
+class GrngTextSrc
 {
 
 public:
     GrngTextSrc(const uint32* base, size_t len) : m_buff(base), m_len(len) { }
-    virtual encform utfEncodingForm() const { return kutf32; }
-    virtual size_t getLength() const { return m_len; }
-    virtual const void* get_utf_buffer_begin() const { return m_buff; }
+    SegmentHandle::encform utfEncodingForm() const { return SegmentHandle::kutf32; }
+    size_t getLength() const { return m_len; }
+    const void* get_utf_buffer_begin() const { return m_buff; }
 
 private:
     const uint32* m_buff;
@@ -639,7 +638,7 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        SegmentHandle seg(sizedFont, face, &textSrc);
+        SegmentHandle seg(sizedFont, face, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength());
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");

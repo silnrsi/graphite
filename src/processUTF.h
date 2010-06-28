@@ -2,7 +2,7 @@
 #define PROCESS_UTF_INCLUDE
 
 #include "graphiteng/Types.h"
-#include "graphiteng/ITextSource.h"
+#include "graphiteng/SegmentHandle.h"
 
 
 
@@ -58,13 +58,16 @@ private:
 };
 
 
+const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
+                                          0,0,0,0,  // trailing byte
+                                          2,2,            // 2 bytes
+                                          3,                 // 3 bytes
+                                          4};                // 4 bytes
+
+const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
 
 class Utf8Consumer
 {
-private:
-      static const int utf8_sz_lut[16];
-      static const byte utf8_mask_lut[5];
-
 public:
       Utf8Consumer(const uint8* pCharStart2) : m_pCharStart(pCharStart2) {}
       
@@ -99,13 +102,6 @@ private:
       const uint8 *m_pCharStart;
 };
 
-/*static*/ const int Utf8Consumer::utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
-                                          0,0,0,0,  // trailing byte
-                                          2,2,            // 2 bytes
-                                          3,                 // 3 bytes
-                                          4};                // 4 bytes
-
-/*static*/ const byte Utf8Consumer::utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
 
 
 class Utf16Consumer
@@ -192,11 +188,11 @@ BufferAndCharacterCountLimit //processes a maximum number of characters there ar
 */
 
 template <class LIMIT, class CHARPROCESSOR>
-void processUTF(ITextSource::encform enc, const void* pStart, const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pProcessor)
+void processUTF(SegmentHandle::encform enc, const void* pStart, const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pProcessor)
 {
      uint32             cid;
      switch (enc) {
-        case ITextSource::kutf8 : {
+       case SegmentHandle::kutf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(pStart));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid))
@@ -206,7 +202,7 @@ void processUTF(ITextSource::encform enc, const void* pStart, const LIMIT& limit
             }
             break;
         }
-        case ITextSource::kutf16: {
+       case SegmentHandle::kutf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(pStart));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid))
@@ -216,7 +212,7 @@ void processUTF(ITextSource::encform enc, const void* pStart, const LIMIT& limit
             }
 	    break;
         }
-        case ITextSource::kutf32 : default: {
+       case SegmentHandle::kutf32 : default: {
 	    Utf32Consumer consumer(static_cast<const uint32 *>(pStart));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid))

@@ -1,6 +1,5 @@
 #include "graphiteng/SlotHandle.h"
 #include "Slot.h"
-#include "graphiteng/ITextSource.h"
 
 unsigned short SlotHandle::gid() const
 {
