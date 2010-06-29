@@ -54,8 +54,7 @@ public:
     size_t      dataSize() const throw();
     size_t      instructionCount() const throw();
     
-    int32 run(int32 * stack_base, const size_t length,
-                    Segment & seg, int & islot_idx,
+    int32 run(Machine &m, Segment & seg, int & islot_idx,
                     Machine::status_t & status) const;
 };
 

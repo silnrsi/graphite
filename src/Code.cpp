@@ -272,15 +272,13 @@ void Code::release_buffers() throw()
 }
 
 
-int32 Code::run(int32 * stack_base, const size_t length,
-                    Segment & seg, int & islot_idx, 
+int32 Code::run(Machine & m, Segment & seg, int & islot_idx,
                     Machine::status_t & status_out) const
 {
     assert(_own);
-    assert(stack_base != 0);
-    assert(length >= 32);
+//    assert(stack_base != 0);
+//    assert(length >= 32);
     assert(*this);          // Check we are actually runnable
-
-    return Machine::run(_code, _data, stack_base, length, seg, islot_idx, status_out);
+    return m.run(_code, _data, seg, islot_idx, status_out);
 }
 

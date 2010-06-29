@@ -75,68 +75,56 @@ enum opcode {
     MAX_OPCODE
 };
 
+
+
 class Machine
 {
 public:
+    typedef int32       stack_t;
+    static size_t const STACK_ORDER  = 10,
+                        STACK_MAX    = 1 << STACK_ORDER,
+                        STACK_GUARD  = 1;
+
     enum status_t {
         finished,
         stack_underflow,
         stack_not_empty,
         stack_overflow
     };
-    
+   
     static const opcode_t *   getOpcodeTable() throw();
-    static int32              run(const instr * program, const byte * data,
-                                   int32 * stack_base, const size_t length,
-                                   Segment & seg, int & islot_idx,
-                                   status_t &status) HOT;
+    stack_t                   run(const instr * program, const byte * data,
+                                  Segment & seg, int & islot_idx,
+                                  status_t &status) HOT;
 
-protected:
-    static bool check_stack(const int32 * const sp, 
-                     const int32 * const base,
-                     const int32 * const limit) REGPARM(3);
+private:
+    void check_final_stack(const stack_t * const sp, status_t &status);
 
-    static bool check_final_stack(const int32 * const sp, 
-                           const int32 * const base,
-                           const int32 * const limit,
-                           status_t &status);
-    
+    stack_t _stack[STACK_MAX + 2*STACK_GUARD];
 };
 
-inline bool Machine::check_stack(const int32 * const sp, 
-                                 const int32 * const base,
-                                 const int32 * const limit) {
-    return (sp <= base && sp > limit);
-}
 
-inline bool Machine::check_final_stack(const int32 * const sp, 
-                                       const int32 * const base,
-                                       const int32 * const limit,
+inline void Machine::check_final_stack(const int32 * const sp,
                                        status_t & status) {
-    if (sp != base) {
-        if (sp > base)
-            status = stack_underflow;
-        else if (sp <= limit)
-            status = stack_overflow;
-        else 
-            status = stack_not_empty;
-        return false;
-    }
-    status = finished;
-    return true;
+    stack_t const * const base  = _stack + STACK_GUARD,
+                  * const limit = _stack + sizeof(_stack) - STACK_GUARD;
+    if      (sp <  base)    status = stack_underflow;       // This should be impossible now.
+    else if (sp >= limit)   status = stack_overflow;        // So should this.
+    else if (sp != base)    status = stack_not_empty;
+    else                    status = finished;
 }
 
 
 } // end of namespace vm
 
 #ifdef ENABLE_DEEP_TRACING
-#define STARTTRACE(name,is)     if (XmlTraceLog::get().active()) { \
-				                    XmlTraceLog::get().openElement(ElementOpCode); \
-				                    XmlTraceLog::get().addAttribute(AttrName, # name); \
-				                    XmlTraceLog::get().addAttribute(AttrIndex, is); \
-			                    }
+#define STARTTRACE(name,is) if (XmlTraceLog::get().active()) { \
+                                XmlTraceLog::get().openElement(ElementOpCode); \
+                                XmlTraceLog::get().addAttribute(AttrName, # name); \
+                                XmlTraceLog::get().addAttribute(AttrIndex, is); \
+                            }
 
-#define ENDTRACE                XmlTraceLog::get().closeElement(ElementOpCode);
+#define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode);
 #else
 #define STARTTRACE(name,is)
 #define ENDTRACE

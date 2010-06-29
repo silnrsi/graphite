@@ -13,8 +13,9 @@
 #include "XmlTraceLog.h"
 
 
-#define registers           const byte * & dp, int32 * & sp, Segment & seg, \
-                            int & is, const int ib, const instr * & ip
+#define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
+                            Segment & seg, int & is, const int ib, \
+                            const instr * & ip
 
 
 // These are required by opcodes.h and should not be changed
@@ -38,17 +39,13 @@ namespace {
 #include "opcodes.h"
 }
 
-int32  Machine::run(const instr  * program,
-                     const byte   * data,
-                     int32       * stack_base, 
-                     const size_t   length,
-                     Segment &      seg, 
-                     int &          is,
-                     status_t &     status)
+int32  Machine::run(const instr   * program,
+                    const byte    * data,
+                    Segment &       seg,
+                    int &           is,
+                    status_t &      status)
 {
     assert(program != 0);
-    assert(stack_base !=0);
-    assert(length > 8);
 
     // Declare virtual machine registers
     const instr   * ip = program-1;
@@ -57,18 +54,14 @@ int32  Machine::run(const instr  * program,
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    int32        * sp        = stack_base + length - 2;
-    int32 * const  stack_top = stack_base + 2;
-    stack_base = sp;
+    stack_t *       sp      = _stack + Machine::STACK_GUARD,
+            * const sb = sp;
 
     // Run the program        
-    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, seg, is, ib, ip)
-#if defined(CHECK_STACK)
-           && check_stack(sp, stack_base, stack_top)
-#endif
-           ) {}
+    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, seg, is, ib, ip)) {}
 
-    check_final_stack(sp, stack_base-1, stack_top, status);
+    check_final_stack(sp-1, status);
+
     return *sp;
 }
 

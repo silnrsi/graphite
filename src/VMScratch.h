@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-#define MAX_RULES_PER_SEQUENCE 64
-#define MAX_STACK 64
+#define VMS_MAX_RULES_PER_SEQUENCE 64
+#define VMS_MAX_STACK 64
 
 class VMScratch
 {
@@ -25,17 +25,17 @@ public:
         memcpy(m_sortKeys + i + 1, m_sortKeys + i, (m_numRules - i) * sizeof(uint16));
         m_rules[i] = ruleid;
         m_sortKeys[i] = sortkey;
-        if (m_numRules < MAX_RULES_PER_SEQUENCE) m_numRules++;
+        if (m_numRules < VMS_MAX_RULES_PER_SEQUENCE) m_numRules++;
     }
-    void push(uint32 val) { if (m_stackptr < MAX_STACK) m_stack[m_stackptr++] = val; }
+    void push(uint32 val) { if (m_stackptr < VMS_MAX_STACK) m_stack[m_stackptr++] = val; }
     uint16 pop() { return m_stackptr > 0 ? m_stack[m_stackptr--] : 0; }
 
 protected:
     byte m_numRules;
-    uint16 m_rules[MAX_RULES_PER_SEQUENCE];
-    uint16 m_sortKeys[MAX_RULES_PER_SEQUENCE];
+    uint16 m_rules[VMS_MAX_RULES_PER_SEQUENCE];
+    uint16 m_sortKeys[VMS_MAX_RULES_PER_SEQUENCE];
     byte m_stackptr;
-    int32 m_stack[MAX_STACK];
+    int32 m_stack[VMS_MAX_STACK];
 };
 
 #endif

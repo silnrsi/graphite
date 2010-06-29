@@ -320,7 +320,8 @@ int Pass::testConstraint(const Code *codeptr, int iSlot, Segment *seg, VMScratch
     assert(codeptr->constraint());
     
     Machine::status_t status;
-    const uint32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
+    Machine m;
+    const uint32 ret = codeptr->run(m, *seg, iSlot, status);
     
     return status == Machine::finished ? ret : 1;
 }
@@ -333,9 +334,10 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     assert(!codeptr->constraint());
     
     Machine::status_t status;
+    Machine m;
     int iStart = iSlot;
-    int32 ret = codeptr->run(vms->stack(), size_t(64), *seg, iSlot, status);
-    ret += iSlot;
+    int32 ret = codeptr->run(m, *seg, iSlot, status);
+	ret += iSlot;
     
     if (iSlot >= seg->length()) iSlot = seg->length() - 1;
     for (int i = iStart; i <= iSlot; )

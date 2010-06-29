@@ -75,13 +75,13 @@ int main(int argc, char *argv[])
               << prog.instructionCount() << " instructions" << std::endl;
     
     // run the program
-    int32 * stack = new int32 [64];
     Segment seg;
     int is=0;
     uint32 ret;
     Machine::status_t status;
+    Machine m;
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(stack, 64, seg, is, status);
+        ret = prog.run(m, seg, is, status);
         switch (status) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:
@@ -104,9 +104,7 @@ int main(int argc, char *argv[])
               << "--------" << std::endl
               << "equivalent of " << prog.instructionCount()*repeats 
               << " instructions executed" << std::endl;
-    
-    delete [] stack;
-    
+        
     return 0;
 }
 

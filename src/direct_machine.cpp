@@ -32,25 +32,12 @@ using namespace vm;
 
 namespace {
 
-struct Direct : public Machine {
-    static const void * run(const bool get_table_mode,
-                            const instr   * program,
-                            const byte    * data,
-                            int32        * stack_base, 
-                            const size_t    length,
-                            Segment * const seg_ptr,
-                            int  &          is,
-                            Machine::status_t &     status);
-};
-
-const void * Direct::run(const bool get_table_mode,
-                            const instr   * program,
-                            const byte    * data,
-                            int32        * stack_base, 
-                            const size_t    length,
-                            Segment * const seg_ptr,
-                            int  &          is,
-                            Machine::status_t &     status)
+const void * direct_run(const bool          get_table_mode,
+                        const instr       * program,
+                        const byte        * data,
+                        Machine::stack_t  * stack_base,
+                        Segment     * const seg_ptr,
+                        int  &              is)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -65,10 +52,9 @@ const void * Direct::run(const bool get_table_mode,
     // We give enough guard space so that one instruction can over/under flow 
     // the stack and cause no damage this condition will then be caught by
     // check_stack.
-    int32        * sp        = stack_base + length - 2;
-    int32 * const  stack_top = stack_base + 2;
-    Segment &       seg = *seg_ptr;
-    stack_base = sp;
+    int32        * sp = stack_base + Machine::STACK_GUARD;
+    int32 * const  sb = sb;
+    Segment &      seg = *seg_ptr;
     
     // start the program
     goto **ip;
@@ -77,35 +63,29 @@ const void * Direct::run(const bool get_table_mode,
     #include "opcodes.h"
     
     end:
-    Machine::check_final_stack(sp, stack_base-1, stack_top, status);
-    return reinterpret_cast<const void *>(*sp);
+    return sp;
 }
 
 }
 
 const opcode_t * Machine::getOpcodeTable() throw()
 {
-    status_t dummy;
     int is_dummy;
-    return static_cast<const opcode_t *>(Direct::run(true, 0, 0, 0, 0, 0, is_dummy, dummy));
+    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, 0, is_dummy));
 }
 
 
-int32  Machine::run(const instr  * program,
-                     const byte   * data,
-                     int32       * stack_base, 
-                     const size_t   length,
-                     Segment & seg, 
-                     int &          islot_idx,
-                     status_t &     status)
+Machine::stack_t  Machine::run(const instr  * program,
+                               const byte   * data,
+                               Segment      & seg,
+                               int          & islot_idx,
+                               status_t     & status)
 {
     assert(program != 0);
-    assert(stack_base !=0);
-    assert(length > 8);
     
-    const void * ret = Direct::run(false, program, data,
-                                      stack_base, length, &seg, 
-                                      islot_idx, status);
-    return reinterpret_cast<ptrdiff_t>(ret);
+    const stack_t *sp = static_cast<const stack_t *>(
+                direct_run(false, program, data, _stack, &seg, islot_idx));
+    check_final_stack(sp-1, status);
+    return *sp;
 }
 
