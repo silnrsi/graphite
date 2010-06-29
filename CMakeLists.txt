@@ -23,6 +23,7 @@ endif (ENABLE_DEEP_TRACING)
 
 add_subdirectory(src)
 add_subdirectory(grngfonttest)
+add_subdirectory(tests)
 set(version 3.0.0)
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
