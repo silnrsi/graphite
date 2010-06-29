@@ -17,13 +17,7 @@
 #include "Segment.h"
 
 #define STARTOP(name)           name: {
-#if defined(CHECK_STACK)
-#define ENDOP                   }; if (!check_stack(sp, stack_base, stack_top)) \
-                                        goto end; \
-                                goto **++ip;
-#else
 #define ENDOP                   }; goto **++ip;
-#endif
 #define EXIT(status)            push(status); goto end
 
 #define do_(name)               &&name

@@ -20,8 +20,13 @@
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(6);\
-			                bool name(registers) { STARTTRACE(name,is)
-#define ENDOP		        ENDTRACE return true; }
+			                bool name(registers) { \
+                                STARTTRACE(name,is);
+#define ENDOP		            ENDTRACE; \
+                                guard_sp; \
+                                return true; \
+                            }
+
 #define EXIT(status)        push(status); ENDTRACE return false
 
 // This is required by opcode_table.h

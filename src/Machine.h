@@ -7,7 +7,6 @@
 #pragma once
 #include <graphiteng/Types.h>
 
-//#define CHECK_STACK   TRUE
 #if defined(__GNUC__)
 #define     HOT             __attribute__((hot))
 #define     REGPARM(n)      __attribute__((hot, regparm(n)))

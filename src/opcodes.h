@@ -49,10 +49,9 @@
 #define declare_params(n)   const byte * param = dp; \
                             use_params(n);
 
-#define push(n)             *--sp = n; TRACEPUSH(n)
-
-#define pop()               *sp++
-#define drop(n)             sp += n
+#define guard_sp            sp = sb + ((sp - sb) % Machine::STACK_MAX)
+#define push(n)             *++sp = n; TRACEPUSH(n)
+#define pop()               (*sp--)
 
 STARTOP(nop)
     do {} while (0);

@@ -25,13 +25,6 @@ add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
-option(CHECK_STACK "Enable stack checking in FSM")
-
-if (CHECK_STACK)
-    add_definitions(-DCHECK_STACK)
-    message(STATUS "Stack checking enabled")
-endif (CHECK_STACK)
-
 if (NOT DISABLE_TRACING)
     message(STATUS "Tracing enabled")
     set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)
