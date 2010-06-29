@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <graphiteng/Types.h>
 
-#ifndef DISABLE_TRACING
 
 typedef enum {
     GRLOG_NONE = 0x0,
@@ -16,6 +15,7 @@ typedef enum {
     GRLOG_ALL = 0xFF
 } GrLogMask;
 
+#ifndef DISABLE_TRACING
 extern GRNG_EXPORT void startGraphiteLogging(FILE * logFile, GrLogMask mask);
 extern GRNG_EXPORT void stopGraphiteLogging();
 
