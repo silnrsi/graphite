@@ -50,7 +50,7 @@ public:
     void appendSlot(int i, int cid, int gid, int fid);
     void positionSlots(const LoadedFont *font);
     void append(const Segment &other);
-    void insertSlot(int index) {
+    void insertSlot(size_t index) {
         m_slots.insert(m_slots.begin() + index, Slot());
         m_userAttrs.insert(m_userAttrs.begin() + index * m_silf->numUser(), m_silf->numUser(), 0);
         if (index < m_numGlyphs)
@@ -58,7 +58,7 @@ public:
         else
             m_numGlyphs = index + 1;
     }
-    void deleteSlot(int index) {
+    void deleteSlot(size_t index) {
         if (index < m_numGlyphs)
         {
             m_slots.erase(m_slots.begin() + index);
@@ -81,7 +81,7 @@ public:
         else
             return m_face->getGlyphMetric(m_slots[iSlot].gid(), metric);
     }
-    const float glyphAdvance(uint16 gid) { return m_face->getAdvance(gid, 1.0); }
+    float glyphAdvance(uint16 gid) { return m_face->getAdvance(gid, 1.0); }
     const Rect &glyphBbox(uint16 gid) { return m_face->bbox(gid); }
     Position finalise(int iSlot, LoadedFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel) {
         return m_slots[iSlot].finalise(this, font, base, bbox, cMin, attrLevel);
