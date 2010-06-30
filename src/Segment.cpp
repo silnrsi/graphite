@@ -189,9 +189,9 @@ private:
 void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
-    CharacterCountLimit limit(nChars);
+    CharacterCountLimit limit(enc, pStart, nChars);
 
-    processUTF(enc, pStart, limit/*when to stop processing*/, &slotBuilder);
+    processUTF(limit/*when to stop processing*/, &slotBuilder);
 }
 
 void Segment::prepare_pos(const LoadedFont *font)

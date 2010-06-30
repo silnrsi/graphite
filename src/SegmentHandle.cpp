@@ -31,20 +31,20 @@ private:
 
 /*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/)
 {
-    BufferLimit limit(buffer_end);
+    BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounter counter;
     
-    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter);
     return counter.charsProcessed();
 }
 
 
 /*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount)
 {
-    BufferAndCharacterCountLimit limit(buffer_end, maxCount);
+    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounter counter;
     
-    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter);
     return counter.charsProcessed();
 }
 
@@ -74,30 +74,30 @@ private:
 
 /*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin)	//the nul is not in the count
 {
-    NoLimit limit;
+    NoLimit limit(enc, buffer_begin);
     CharCounterToNul counter;
     
-    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter);
     return counter.charsProcessed();
 }
 
 
 /*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/)	//the nul is not in the count
 {
-    BufferLimit limit(buffer_end);
+    BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounterToNul counter;
     
-    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter);
     return counter.charsProcessed();
 }
 
 
 /*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount)	//the nul is not in the count
 {
-    BufferAndCharacterCountLimit limit(buffer_end, maxCount);
+    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounterToNul counter;
     
-    processUTF(enc, buffer_begin, limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter);
     return counter.charsProcessed();
 }
 
