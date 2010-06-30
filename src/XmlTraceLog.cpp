@@ -10,24 +10,6 @@
 static NullTraceLog s_NullLog;
 XmlTraceLog * XmlTraceLog::sLog = &s_NullLog;
 
-void startGraphiteLogging(FILE * logFile, GrLogMask mask)
-{
-    if (XmlTraceLog::sLog != &s_NullLog)
-    {
-        delete XmlTraceLog::sLog;
-    }
-    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphiteng", mask);
-}
-
-void stopGraphiteLogging()
-{
-    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &s_NullLog)
-    {
-        delete XmlTraceLog::sLog;
-        XmlTraceLog::sLog = &s_NullLog;
-    }
-}
-
 
 
 XmlTraceLog::XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask)
@@ -344,4 +326,31 @@ void XmlTraceLog::warning(const char * msg, ...)
     closeElement(ElementWarning);
 }
 
-#endif
+#endif		//!DISABLE_TRACING
+
+
+void startGraphiteLogging(FILE * logFile, GrLogMask mask)
+{
+#ifdef DISABLE_TRACING
+    logFile;			//pointless uses to avoid warnings re implementation not using parameters
+    mask;
+#else	//!DISABLE_TRACING
+    if (XmlTraceLog::sLog != &s_NullLog)
+    {
+        delete XmlTraceLog::sLog;
+    }
+    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphiteng", mask);
+#endif		//!DISABLE_TRACING
+}
+
+void stopGraphiteLogging()
+{
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &s_NullLog)
+    {
+        delete XmlTraceLog::sLog;
+        XmlTraceLog::sLog = &s_NullLog;
+    }
+#endif		//!DISABLE_TRACING
+}
+

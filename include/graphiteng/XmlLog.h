@@ -14,7 +14,5 @@ typedef enum {
     GRLOG_ALL = 0xFF
 } GrLogMask;
 
-#ifndef DISABLE_TRACING
-extern GRNG_EXPORT void startGraphiteLogging(FILE * logFile, GrLogMask mask);
+extern GRNG_EXPORT void startGraphiteLogging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
 extern GRNG_EXPORT void stopGraphiteLogging();
-#endif		//!DISABLE_TRACING

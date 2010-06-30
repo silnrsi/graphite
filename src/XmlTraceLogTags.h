@@ -3,6 +3,10 @@
 #include <graphiteng/Types.h>
 #include <graphiteng/XmlLog.h>
 
+#ifdef ENABLE_DEEP_TRACING
+#undef DISABLE_TRACING
+#endif
+
 #ifndef DISABLE_TRACING
 
 // start this at same line number as in XmlTraceLogTags.cpp
