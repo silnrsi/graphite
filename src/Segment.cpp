@@ -190,8 +190,9 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
 {
     SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);
+    IgnoreErrors ignoreErrors;
 
-    processUTF(limit/*when to stop processing*/, &slotBuilder);
+    processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
 }
 
 void Segment::prepare_pos(const LoadedFont *font)

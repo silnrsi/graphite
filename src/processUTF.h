@@ -73,6 +73,28 @@ private:
 };
 
 
+class IgnoreErrors
+{
+public:
+    static bool handleError(const void* pPositionOfError) { return true;}
+};
+
+
+class BreakOnError
+{
+public:
+    BreakOnError() : m_pErrorPos(NULL) {}
+    
+    bool handleError(const void* pPositionOfError) { m_pErrorPos=pPositionOfError; return false;}
+
+public:
+    const void* m_pErrorPos;
+};
+
+
+
+
+
 /*
   const int utf8_extrabytes_lut[16] = {0,0,0,0,0,0,0,0,        // 1 byte
                                           3,3,3,3,  // errors since trailing byte, catch later
@@ -93,8 +115,8 @@ public:
     
     const uint8* pCharStart() const { return m_pCharStart; }
 
-    template <class LIMIT>
-    inline bool consumeChar(const LIMIT& limit, uint32* pRes) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+    template <class LIMIT, class ERRORHANDLER>
+    inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
         const unsigned int seq_extra = utf8_extrabytes(*m_pCharStart >> 4);        //length of sequence including *m_pCharStart is 1+seq_extra
         if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
             return false;
@@ -110,8 +132,11 @@ public:
                     }
                     else {
                         *pRes = 0xFFFD;
+                        if (!pErrHandler->handleError(m_pCharStart)) {
+                          return false;
+                        }                          
                         ++m_pCharStart; 
-                        return true;			//this is an error. But carry on anyway?
+                        return true;
                     }		    
                 }
                 case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
@@ -138,8 +163,8 @@ public:
       
       const uint16* pCharStart() const { return m_pCharStart; }
   
-      template <class LIMIT>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+      template <class LIMIT, class ERRORHANDLER>
+      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *(m_pCharStart)++;
 	  if (*pRes > 0xDBFF || 0xD800 > *pRes)
@@ -149,11 +174,16 @@ public:
 	      return false;
 	  }
 
-	  uint32 ul = *(m_pCharStart++);
+	  uint32 ul = *(m_pCharStart);
 	  if (0xDC00 > ul || ul > 0xDFFF) {
 	      *pRes = 0xFFFD;
+          if (!pErrHandler->handleError(m_pCharStart)) {
+            return false;
+          }
+          ++m_pCharStart;
 	      return true; 			//this is an error. But carry on anyway?
 	  }
+	  ++m_pCharStart;
 	  *pRes =  (*pRes<<10) + ul - SURROGATE_OFFSET;
 	  return true;
       }
@@ -170,8 +200,8 @@ public:
       
       const uint32* pCharStart() const { return m_pCharStart; }
   
-      template <class LIMIT>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+      template <class LIMIT, class ERRORHANDLER>
+      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *(m_pCharStart++);
 	  return true;
@@ -200,6 +230,12 @@ public:
     bool needMoreChars(const uint32* pCharStart, size_t nProcessed) const; //whether or not the input is considered to be in the range of the buffer, and sufficient characters have been processed.
 };
 
+class ERRORHANDLER
+{
+public:
+    bool handleError(const void* pPositionOfError);     //returns true iff error handled and should continue
+};
+
 class CHARPROCESSOR
 {
 public:
@@ -212,17 +248,19 @@ NoLimit		//relies on the CHARPROCESSOR.processChar() failing, such as because of
 CharacterCountLimit //doesn't care about where the input buffer may end, but limits the number of unicode characters processed.
 BufferLimit	//processes how ever many characters there are until the buffer end. characters straggling the end are not processed.
 BufferAndCharacterCountLimit //processes a maximum number of characters there are until the buffer end. characters straggling the end are not processed.
+
+Useful examples of ERRORHANDLER are IgnoreErrors, BreakOnError.
 */
 
-template <class LIMIT, class CHARPROCESSOR>
-void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pProcessor)
+template <class LIMIT, class CHARPROCESSOR, class ERRORHANDLER>
+void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pProcessor, ERRORHANDLER* pErrHandler)
 {
      uint32             cid;
      switch (limit.enc()) {
        case SegmentHandle::kutf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid))
+		if (!consumer.consumeChar(limit, &cid, pErrHandler))
 		    break;
 		if (!pProcessor->processChar(cid))
 		    break;
@@ -232,7 +270,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
        case SegmentHandle::kutf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid))
+		if (!consumer.consumeChar(limit, &cid, pErrHandler))
 		    break;
 		if (!pProcessor->processChar(cid))
 		    break;
@@ -242,7 +280,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
        case SegmentHandle::kutf32 : default: {
 	    Utf32Consumer consumer(static_cast<const uint32 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid))
+		if (!consumer.consumeChar(limit, &cid, pErrHandler))
 		    break;
 		if (!pProcessor->processChar(cid))
 		    break;

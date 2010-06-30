@@ -33,8 +33,9 @@ private:
 {
     BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounter counter;
+    BreakOnError breakOnError;
     
-    processUTF(limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
     return counter.charsProcessed();
 }
 
@@ -43,8 +44,9 @@ private:
 {
     BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounter counter;
+    BreakOnError breakOnError;
     
-    processUTF(limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
     return counter.charsProcessed();
 }
 
@@ -76,8 +78,9 @@ private:
 {
     NoLimit limit(enc, buffer_begin);
     CharCounterToNul counter;
+    BreakOnError breakOnError;
     
-    processUTF(limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
     return counter.charsProcessed();
 }
 
@@ -86,8 +89,9 @@ private:
 {
     BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounterToNul counter;
+    BreakOnError breakOnError;
     
-    processUTF(limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
     return counter.charsProcessed();
 }
 
@@ -96,8 +100,9 @@ private:
 {
     BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounterToNul counter;
+    BreakOnError breakOnError;
     
-    processUTF(limit/*when to stop processing*/, &counter);
+    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
     return counter.charsProcessed();
 }
 
