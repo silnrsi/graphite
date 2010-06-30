@@ -1,3 +1,4 @@
+#pragma once
 /*--------------------------------------------------------------------*//*:Ignore this sentence.
 Copyright (C) 2007 SIL International. All rights reserved.
 

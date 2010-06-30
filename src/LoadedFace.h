@@ -1,5 +1,4 @@
-#ifndef LOADEDFACE_INCLUDE
-#define LOADEDFACE_INCLUDE
+#pragma once
 
 #include "GlyphFace.h"
 #include "Silf.h"
@@ -78,4 +77,3 @@ private:
     LoadedFace& operator=(const LoadedFace&);
 };
 
-#endif // LOADEDFACE_INCLUDE

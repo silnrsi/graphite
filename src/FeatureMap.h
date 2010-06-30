@@ -1,5 +1,4 @@
-#ifndef FEATUREMAP_INCLUDE
-#define FEATUREMAP_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
@@ -75,4 +74,3 @@ private:		//defensive on m_langFeats and m_feats
     FeatureMap& operator=(const FeatureMap&);
 };
 
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*--------------------------------------------------------------------*//*:Ignore this sentence.
 Copyright (C) 2000, 2001 SIL International. All rights reserved.
 
@@ -12,11 +13,6 @@ Description:
     Utility class for handling TrueType font files.
 ----------------------------------------------------------------------------------------------*/
 
-#ifdef _MSC_VER
-#pragma once
-#endif
-#ifndef TTFUTIL_H
-#define TTFUTIL_H
 
 #include <cstddef>
 //#include <stdexcept>
@@ -145,4 +141,3 @@ typedef unsigned short gid16;
 
 } // end of namespace TtfUtil
 
-#endif

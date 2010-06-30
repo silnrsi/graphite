@@ -1,5 +1,4 @@
-#ifndef PROCESS_UTF_INCLUDE
-#define PROCESS_UTF_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
@@ -227,5 +226,4 @@ void processUTF(SegmentHandle::encform enc, const void* pStart, const LIMIT& lim
 
 
 
-#endif			//!PROCESS_UTF_INCLUDE
 

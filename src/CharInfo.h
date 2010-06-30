@@ -1,5 +1,4 @@
-#ifndef CHARINFO_INCLUDE
-#define CHARINFO_INCLUDE
+#pragma once
 
 class CharInfo // : ICharInfo
 {
@@ -20,5 +19,4 @@ protected:
     int8 m_break;	// breakweight coming from lb table
 };
 
-#endif // CHARINFO_INCLUDE
 

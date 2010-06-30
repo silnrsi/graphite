@@ -1,3 +1,4 @@
+#pragma once
 // This file will be pulled into and integrated into a machine implmentation
 // DO NOT build directly and under no circumstances every #include headers in 
 // here or you will break the direct_machine.

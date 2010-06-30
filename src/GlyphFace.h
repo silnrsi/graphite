@@ -1,5 +1,5 @@
-#ifndef GLYPHFACE_INCLUDE
-#define GLYPHFACE_INCLUDE
+#pragma once
+
 #include "Main.h"
 #include "XmlTraceLog.h"
 #include "Position.h"
@@ -80,4 +80,3 @@ inline void GlyphFace::bbox(Rect a) {
 }
 
 
-#endif // GLYPHFACE_INCLUDE

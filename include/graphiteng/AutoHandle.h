@@ -1,5 +1,4 @@
-#ifndef AUTO_HANDLE_INCLUDE
-#define AUTO_HANDLE_INCLUDE
+#pragma once
 
 /* In contrast to AutoHandle which has multiple owners of the same object via a count. AutoHandle has a single owner for each object.
    When one AutoHandle is copied from another, the original AutoHandle loses ownership.
@@ -31,4 +30,3 @@ private:
     mutable OBJCLASS* m_p;
 };
 
-#endif // !AUTO_HANDLE_INCLUDE

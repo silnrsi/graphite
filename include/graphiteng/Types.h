@@ -1,5 +1,4 @@
-#ifndef GRTYPES_INCLUDE
-#define GRTYPES_INCLUDE
+#pragma once
 
 #include <cstddef>
 
@@ -25,4 +24,3 @@ typedef int     int32;
 
 
 
-#endif // GRTYPES_INCLUDE

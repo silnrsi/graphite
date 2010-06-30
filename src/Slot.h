@@ -1,5 +1,4 @@
-#ifndef SLOT_INCLUDE
-#define SLOT_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
@@ -58,5 +57,4 @@ private:
     byte m_attLevel;        // attachment level
 };
 
-#endif // SLOT_INCLUDE
 

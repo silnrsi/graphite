@@ -1,5 +1,4 @@
-#ifndef SEGMENT_INCLUDE
-#define SEGMENT_INCLUDE
+#pragma once
 
 #include "Main.h"
 
@@ -124,4 +123,3 @@ private:		//defensive on m_charinfo
 };
 
 
-#endif // SEGMENT_INCLUDE

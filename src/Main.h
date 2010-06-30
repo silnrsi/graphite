@@ -1,3 +1,5 @@
+#pragma once
+
 #include "graphiteng/Types.h"
 
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))

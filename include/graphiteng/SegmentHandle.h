@@ -1,5 +1,4 @@
-#ifndef SEGMENT_HANDLE_INCLUDE
-#define SEGMENT_HANDLE_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/RefCountHandle.h"
@@ -48,4 +47,3 @@ private:
 
 
 
-#endif // !SEGMENT_HANDLE_INCLUDE

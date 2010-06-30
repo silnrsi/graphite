@@ -1,5 +1,4 @@
-#ifndef SLOT_HANDLE_INCLUDE
-#define SLOT_HANDLE_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 
@@ -57,5 +56,4 @@ private:
     const Slot* m_p;		//not owned
 };
 
-#endif // !SLOT_HANDLE_INCLUDE
 

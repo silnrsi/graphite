@@ -1,5 +1,4 @@
-#ifndef XmlTraceLogTags_h
-#define XmlTraceLogTags_h
+#pragma once
 
 #include <graphiteng/Types.h>
 #include <graphiteng/XmlLog.h>
@@ -142,5 +141,4 @@ public:
 extern const XmlTraceLogTag xmlTraceLogElements[NumElements];
 extern const char * xmlTraceLogAttributes[NumAttributes];
 
-#endif
 #endif

@@ -1,5 +1,4 @@
-#ifndef IFONT_INCLUDE
-#define IFONT_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 
@@ -27,4 +26,3 @@ private :
 
 
 
-#endif // FONT_INCLUDE

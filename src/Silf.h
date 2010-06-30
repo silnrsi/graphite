@@ -1,5 +1,5 @@
-#ifndef SILF_INCLUDE
-#define SILF_INCLUDE
+#pragma once
+
 #include "Main.h"
 
 #include "Pass.h"
@@ -52,4 +52,3 @@ private:			//defensive
     Silf& operator=(const Silf&);
 };
 
-#endif

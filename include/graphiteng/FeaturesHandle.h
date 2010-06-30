@@ -1,5 +1,4 @@
-#ifndef FEATURES_HANDLE_INCLUDE
-#define FEATURES_HANDLE_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/AutoHandle.h"
@@ -26,4 +25,3 @@ private:
 };
 
 
-#endif // !FEATURES_HANDLE_INCLUDE

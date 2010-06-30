@@ -1,5 +1,4 @@
-#ifndef XmlLog_h
-#define XmlLog_h
+#pragma once
 
 #include <cstdio>
 #include <graphiteng/Types.h>
@@ -18,6 +17,4 @@ typedef enum {
 #ifndef DISABLE_TRACING
 extern GRNG_EXPORT void startGraphiteLogging(FILE * logFile, GrLogMask mask);
 extern GRNG_EXPORT void stopGraphiteLogging();
-
-#endif
-#endif
+#endif		//!DISABLE_TRACING

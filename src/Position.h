@@ -1,6 +1,4 @@
-#ifndef POSITION_INCLUDE
-#define POSITION_INCLUDE
-
+#pragma once
 
 class Position
 {
@@ -17,4 +15,3 @@ public:
     float y;
 };
 
-#endif

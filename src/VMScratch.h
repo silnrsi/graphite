@@ -1,5 +1,4 @@
-#ifndef VMSCRATCH_INCLUDE
-#define VMSCRATCH_INCLUDE
+#pragma once
 
 #include <string.h>
 
@@ -38,5 +37,4 @@ protected:
     int32 m_stack[VMS_MAX_STACK];
 };
 
-#endif
 

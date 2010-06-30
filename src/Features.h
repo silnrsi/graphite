@@ -1,5 +1,4 @@
-#ifndef FEATURES_INCLUDE
-#define FEATURES_INCLUDE
+#pragma once
 
 #include <algorithm>
 
@@ -59,4 +58,3 @@ private :
 */
 };
 
-#endif

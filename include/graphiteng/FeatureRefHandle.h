@@ -1,5 +1,4 @@
-#ifndef FEATURE_REF_HANDLE_INCLUDE
-#define FEATURE_REF_HANDLE_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/AutoHandle.h"
@@ -23,4 +22,3 @@ public:
 };
 
 
-#endif // !FEATURE_REF_HANDLE_INCLUDE

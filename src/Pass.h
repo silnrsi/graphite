@@ -1,5 +1,4 @@
-#ifndef PASS_INCLUDE
-#define PASS_INCLUDE
+#pragma once
 
 #include "VMScratch.h"
 #include "Code.h"
@@ -46,4 +45,3 @@ private:		//defensive
     Pass& operator=(const Pass&);
 };
 
-#endif

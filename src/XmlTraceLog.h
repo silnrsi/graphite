@@ -1,6 +1,5 @@
+#pragma once
 // XmlTraceLog - produces a log in XML format
-#ifndef XmlTraceLog_h
-#define XmlTraceLog_h
 
 #include <cstdio>
 #include <graphiteng/Types.h>
@@ -80,5 +79,4 @@ public:
     void warning(const char * msg, ...) {};
 };
 
-#endif
 #endif

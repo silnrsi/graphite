@@ -1,5 +1,4 @@
-#ifndef LOADED_FONT_INCLUDE
-#define LOADED_FONT_INCLUDE
+#pragma once
 
 #include "graphiteng/IFont.h"
 #include "LoadedFace.h"
@@ -35,4 +34,3 @@ private:			//defensive on m_advances
     LoadedFont& operator=(const LoadedFont&);
 };
 
-#endif // !LOADED_FONT_INCLUDE

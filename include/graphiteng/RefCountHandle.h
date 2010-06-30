@@ -1,5 +1,4 @@
-#ifndef REF_COUNT_HANDLE_INCLUDE
-#define REF_COUNT_HANDLE_INCLUDE
+#pragma once
 
 template <class OBJCLASS, void (*pDELETEFN)(OBJCLASS *p)>
 class GRNG_EXPORT RefCountHandle
@@ -26,4 +25,3 @@ private:
     OBJCLASS* m_p;
 };
 
-#endif // !REF_COUNT_HANDLE_INCLUDE

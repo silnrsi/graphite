@@ -1,5 +1,4 @@
-#ifndef IFACE_INCLUDE
-#define IFACE_INCLUDE
+#pragma once
 
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
@@ -41,5 +40,4 @@ private :
 #endif		//FIND_BROKEN_VIRTUALS
 };
 
-#endif
 
