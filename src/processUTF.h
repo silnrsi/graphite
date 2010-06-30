@@ -84,43 +84,41 @@ const byte utf8_mask_lut[4] = {0x00,0xC0,0xE0,0xF0};
 class Utf8Consumer
 {
 public:
-      Utf8Consumer(const uint8* pCharStart2) : m_pCharStart(pCharStart2) {}
-      
-      const uint8* pCharStart() const { return m_pCharStart; }
-  
-      template <class LIMIT>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
-      {
-	const size_t    seq_extra = utf8_extrabytes_lut[*m_pCharStart >> 4];        //length of sequence including *m_pCharStart is 1+seq_extra
-	if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
-	    return false;
-	}
-	
-	*pRes = *m_pCharStart ^ utf8_mask_lut[seq_extra];
-	
-    if (seq_extra) {
-	switch(seq_extra) {    //hopefully the optimzer will implement this as a jump table     
-	    case 3:    
-	    {	
-		if ((*m_pCharStart>>3)==0x1E) {		//the good case
-		    *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;		//drop through
+    Utf8Consumer(const uint8* pCharStart2) : m_pCharStart(pCharStart2) {}
+    
+    const uint8* pCharStart() const { return m_pCharStart; }
+
+    template <class LIMIT>
+    inline bool consumeChar(const LIMIT& limit, uint32* pRes) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+        const size_t    seq_extra = utf8_extrabytes_lut[*m_pCharStart >> 4];        //length of sequence including *m_pCharStart is 1+seq_extra
+        if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
+            return false;
         }
-		else {
-		    *pRes = 0xFFFD;
-		    ++m_pCharStart; 
-		    return true;			//this is an error. But carry on anyway?
-		}		    
-	    }
-	    case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
-	    case 1:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F; break;
-	}
-    }
-	++m_pCharStart; 
-	return true;
-      }	
+    
+        *pRes = *m_pCharStart ^ utf8_mask_lut[seq_extra];
+        
+        if (seq_extra) {
+            switch(seq_extra) {    //hopefully the optimzer will implement this as a jump table     
+                case 3: {	
+                    if ((*m_pCharStart>>3)==0x1E) {		//the good case
+                        *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;		//drop through
+                    }
+                    else {
+                        *pRes = 0xFFFD;
+                        ++m_pCharStart; 
+                        return true;			//this is an error. But carry on anyway?
+                    }		    
+                }
+                case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
+                case 1:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F; break;
+            }
+        }
+        ++m_pCharStart; 
+        return true;
+    }	
   
 private:
-      const uint8 *m_pCharStart;
+    const uint8 *m_pCharStart;
 };
 
 
