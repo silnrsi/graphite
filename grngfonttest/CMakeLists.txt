@@ -45,10 +45,8 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc  -lm" )
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
-    add_test(NAME nostdc++ COMMAND /bin/sh ${PROJECT_SOURCE_DIR}/../tests/libstdc++_usage ../common/*.cpp ../src/*.cpp)
-    set_tests_properties(nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "\\^.+:.+$")
-    add_test(NAME ldd_nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
-    set_tests_properties(ldd_nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
+    add_test(NAME grngfonttest-nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
+    set_tests_properties(grngfonttest-nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
 
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 

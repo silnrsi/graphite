@@ -1,0 +1,6 @@
+#!/bin/sh
+g++ -x c++ - -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -lc -lgcc -lm -L$2 -l$1 -o test << EOF
+int main() { return 1; }
+EOF
+
+return $?
