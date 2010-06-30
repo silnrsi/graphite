@@ -29,25 +29,31 @@ private:
 };
 
 
-/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/)
+template <class LIMIT, class CHARPROCESSOR>
+size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
+{
+    BreakOnError breakOnError;
+    
+    processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
+    if (pError) {
+        *pError = breakOnError.m_pErrorPos;
+    }        
+    return pProcessor->charsProcessed();
+}    
+
+/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, const void** pError)
 {
     BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounter counter;
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
-    return counter.charsProcessed();
+    return doCountUnicodeCharacters(limit, &counter, pError);
 }
 
 
-/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount)
+/*static*/ size_t SegmentHandle::countUnicodeCharacters(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount, const void** pError)
 {
     BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounter counter;
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
-    return counter.charsProcessed();
+    return doCountUnicodeCharacters(limit, &counter, pError);
 }
 
 
@@ -74,36 +80,27 @@ private:
 };
 
 
-/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin)	//the nul is not in the count
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void** pError)	//the nul is not in the count
 {
     NoLimit limit(enc, buffer_begin);
     CharCounterToNul counter;
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
-    return counter.charsProcessed();
+    return doCountUnicodeCharacters(limit, &counter, pError);
 }
 
 
-/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/)	//the nul is not in the count
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, const void** pError)	//the nul is not in the count
 {
     BufferLimit limit(enc, buffer_begin, buffer_end);
     CharCounterToNul counter;
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
-    return counter.charsProcessed();
+    return doCountUnicodeCharacters(limit, &counter, pError);
 }
 
 
-/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount)	//the nul is not in the count
+/*static*/ size_t SegmentHandle::countUnicodeCharactersToNul(SegmentHandle::encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount, const void** pError)	//the nul is not in the count
 {
     BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
     CharCounterToNul counter;
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, &counter, &breakOnError);
-    return counter.charsProcessed();
+    return doCountUnicodeCharacters(limit, &counter, pError);
 }
 
 

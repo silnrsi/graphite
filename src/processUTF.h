@@ -128,7 +128,17 @@ public:
             switch(seq_extra) {    //hopefully the optimizer will implement this as a jump table. If not the above if should cover the majority case.    
                 case 3: {	
                     if ((*m_pCharStart>>3)==0x1E) {		//the good case
-                        *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;		//drop through
+                        ++m_pCharStart;
+                        if ((*m_pCharStart&0xC0)!=0x80) {
+                            *pRes = 0xFFFD;
+                            if (!pErrHandler->handleError(m_pCharStart)) {
+                                return false;
+                            }                          
+                            ++m_pCharStart; 
+                            return true;
+                        }           
+                          
+                        *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;		//drop through
                     }
                     else {
                         *pRes = 0xFFFD;
@@ -139,9 +149,31 @@ public:
                         return true;
                     }		    
                 }
-                case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
-                case 1:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F; break;
-            }
+                case 2: {
+                        ++m_pCharStart;
+                        if ((*m_pCharStart&0xC0)!=0x80) {
+                            *pRes = 0xFFFD;
+                            if (!pErrHandler->handleError(m_pCharStart)) {
+                                return false;
+                            }                          
+                            ++m_pCharStart; 
+                            return true;
+                        }
+                }           
+                *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;       //drop through
+                case 1: {
+                        ++m_pCharStart;
+                        if ((*m_pCharStart&0xC0)!=0x80) {
+                            *pRes = 0xFFFD;
+                            if (!pErrHandler->handleError(m_pCharStart)) {
+                                return false;
+                            }                          
+                            ++m_pCharStart; 
+                            return true;
+                        }
+               }           
+                *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;
+             }
         }
         ++m_pCharStart; 
         return true;
@@ -156,7 +188,7 @@ private:
 class Utf16Consumer
 {
 private:
-    static const unsigned int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+    static const unsigned int SURROGATE_OFFSET = 0x10000 - 0xDC00;
 
 public:
       Utf16Consumer(const uint16* pCharStart2) : m_pCharStart(pCharStart2) {}
@@ -166,11 +198,23 @@ public:
       template <class LIMIT, class ERRORHANDLER>
       inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
-	  *pRes = *(m_pCharStart)++;
-	  if (*pRes > 0xDBFF || 0xD800 > *pRes)
-	      return true;
+	  *pRes = *m_pCharStart;
+      if (0xD800 > *pRes || *pRes >= 0xE000) {
+          ++m_pCharStart;
+          return true;
+      }
+      
+      if (*pRes >= 0xDC00) {        //second surrogate is incorrectly coming first
+          *pRes = 0xFFFD;
+          if (!pErrHandler->handleError(m_pCharStart)) {
+            return false;
+          }
+          ++m_pCharStart;
+          return true;
+      }
 
-	  if (!limit.inBuffer(m_pCharStart+1)) {
+      ++m_pCharStart;
+	  if (!limit.inBuffer(m_pCharStart)) {
 	      return false;
 	  }
 
@@ -181,10 +225,10 @@ public:
             return false;
           }
           ++m_pCharStart;
-	      return true; 			//this is an error. But carry on anyway?
+	      return true;
 	  }
 	  ++m_pCharStart;
-	  *pRes =  (*pRes<<10) + ul - SURROGATE_OFFSET;
+	  *pRes =  (*pRes<<10) + ul + SURROGATE_OFFSET;
 	  return true;
       }
 
@@ -203,7 +247,22 @@ public:
       template <class LIMIT, class ERRORHANDLER>
       inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
-	  *pRes = *(m_pCharStart++);
+	  *pRes = *m_pCharStart;
+      if (*pRes<0xD800) {
+          ++m_pCharStart;
+          return true;
+      }
+      
+      if (*pRes>=0xE000 && *pRes<0x110000) {
+          ++m_pCharStart;
+          return true;
+      }
+        
+      *pRes = 0xFFFD;
+      if (!pErrHandler->handleError(m_pCharStart)) {
+        return false;
+      }
+      ++m_pCharStart;
 	  return true;
       }
 
