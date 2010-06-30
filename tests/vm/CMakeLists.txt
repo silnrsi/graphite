@@ -23,7 +23,7 @@ target_link_libraries(vm-test-call vm-test-common)
 add_executable(vm-test-direct   ${SRC}/direct_machine.cpp)
 target_link_libraries(vm-test-direct vm-test-common)
 
-add_definitions("-fno-rtti -fno-exceptions -DNDEBUG -DDISABLE_TRACING")
+add_definitions("-fno-rtti -fno-exceptions -DNDEBUG -DDISABLE_TRACING -UENABLE_DEEP_TRACING")
 
 
 add_test(vm-test-call-threading vm-test-call 1)

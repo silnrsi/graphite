@@ -25,6 +25,7 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
+    void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);

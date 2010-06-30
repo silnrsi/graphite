@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Main.h"
 #include "XmlTraceLog.h"
+#include "Main.h"
 #include "Position.h"
 
 enum metrics {
@@ -25,7 +25,7 @@ public :
     Position tr;
 };
 
-
+class XmlTraceLog;
 
 class GlyphFace
 {

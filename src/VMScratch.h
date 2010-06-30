@@ -8,6 +8,7 @@
 class VMScratch
 {
 public:
+    VMScratch() : m_firstPositioned(-1), m_lastPositioned(-1), m_numRules(0), m_stackptr(0) {}
     void resetRules() { m_numRules = 0; }
     void resetStack() { m_stackptr = 0; }
     int32 *stack() { return m_stack; }
@@ -31,9 +32,11 @@ public:
 
 protected:
     byte m_numRules;
+    byte m_stackptr;
+    uint32 m_firstPositioned;
+    uint32 m_lastPositioned;
     uint16 m_rules[VMS_MAX_RULES_PER_SEQUENCE];
     uint16 m_sortKeys[VMS_MAX_RULES_PER_SEQUENCE];
-    byte m_stackptr;
     int32 m_stack[VMS_MAX_STACK];
 };
 
