@@ -14,10 +14,13 @@ option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 if (DISABLE_TRACING)
     add_definitions(-DDISABLE_TRACING)
     message(STATUS "Tracing disabled")
+	if (ENABLE_DEEP_TRACING)
+		message(STATUS "Deep tracing request ignored!")
+	endif (ENABLE_DEEP_TRACING)
 else(DISABLE_TRACING)
 	if (ENABLE_DEEP_TRACING)
-
 		message(STATUS "Deep tracing enabled")
+		# The actual define is now set only in the projects which want it
 	endif (ENABLE_DEEP_TRACING)
 endif (DISABLE_TRACING)
 
