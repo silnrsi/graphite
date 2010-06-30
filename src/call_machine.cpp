@@ -17,15 +17,15 @@
                             regbank & reg
 
 // These are required by opcodes.h and should not be changed
-#define STARTOP(name)	    bool name(registers) REGPARM(4);\
-			                bool name(registers) { \
+#define STARTOP(name)	    ptrdiff_t name(registers) REGPARM(4);\
+			                ptrdiff_t name(registers) { \
                                 STARTTRACE(name,reg.is);
 #define ENDOP		            ENDTRACE; \
                                 guard_sp; \
-                                return true; \
+                                return 1; \
                             }
 
-#define EXIT(status)        push(status); ENDTRACE return false
+#define EXIT(status)        push(status); ENDTRACE return NULL
 
 // This is required by opcode_table.h
 #define do_(name)           instr(name)

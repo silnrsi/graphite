@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <time.h>
 #include "Code.h"
 
 using namespace vm;

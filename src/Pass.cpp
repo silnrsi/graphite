@@ -226,7 +226,7 @@ void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
         int loopCount = m_iMaxLoop;
         while (!advance && loopCount--)
             advance = findNDoRule(seg, i, face, vms);
-        if (!advance) advance = 1;
+        if (advance <= 0) advance = 1;
         i += advance - 1;
     }
 }
