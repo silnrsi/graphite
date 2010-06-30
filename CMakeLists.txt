@@ -11,6 +11,7 @@ option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
 
 if (DISABLE_TRACING)
     add_definitions(-DDISABLE_TRACING)
+    add_definitions(-UENABLE_DEEP_TRACING)
     message(STATUS "Tracing disabled")
 endif (DISABLE_TRACING)
 
@@ -18,6 +19,7 @@ option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 
 if (ENABLE_DEEP_TRACING)
     add_definitions(-DENABLE_DEEP_TRACING)
+    add_definitions(-UDISABLE_TRACING)
     message(STATUS "Deep tracing enabled")
 endif (ENABLE_DEEP_TRACING)
 
