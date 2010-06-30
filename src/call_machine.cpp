@@ -19,7 +19,7 @@
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\
 			                bool name(registers) { \
-                                STARTTRACE(name,is);
+                                STARTTRACE(name,reg.is);
 #define ENDOP		            ENDTRACE; \
                                 guard_sp; \
                                 return true; \
@@ -38,6 +38,7 @@ struct regbank  {
     slotref         is, isf, isl;
     const slotref   isb;
     const instr * & ip;
+    Position        endPos;
 };
 
 typedef ptrdiff_t        (* ip_t)(registers);
@@ -55,6 +56,7 @@ int32  Machine::run(const instr   * program,
                     const byte    * data,
                     Segment &       seg,
                     slotref &       islot_idx,
+                    slotref         iStart,
                     status_t &      status)
 {
     assert(program != 0);
@@ -64,7 +66,7 @@ int32  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, -1, -1, islot_idx, ip};
+    regbank         reg = {seg, islot_idx, -1, -1, iStart, ip, Position()};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}

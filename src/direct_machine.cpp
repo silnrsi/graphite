@@ -29,6 +29,7 @@ struct regbank  {
     slotref         is, isf, isl;
     const slotref   isb;
     const instr * & ip;
+    Position        endPos;
 };
 
 namespace {
@@ -38,7 +39,8 @@ const void * direct_run(const bool          get_table_mode,
                         const byte        * data,
                         Machine::stack_t  * stack_base,
                         Segment     * const seg_ptr,
-                        slotref           & islot_idx)
+                        slotref           & islot_idx,
+                        slotref             iStart)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -51,7 +53,7 @@ const void * direct_run(const bool          get_table_mode,
     const byte    * dp = data;
     int32         * sp = stack_base + Machine::STACK_GUARD;
     int32   * const sb = sb;
-    regbank         reg = {*seg_ptr, islot_idx, -1, -1, islot_idx, ip};
+    regbank         reg = {*seg_ptr, islot_idx, -1, -1, iStart, ip, Position()};
     
     // start the program
     goto **ip;
@@ -69,7 +71,7 @@ const void * direct_run(const bool          get_table_mode,
 const opcode_t * Machine::getOpcodeTable() throw()
 {
     int is_dummy;
-    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, 0, is_dummy));
+    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, 0, is_dummy, 0));
 }
 
 
@@ -77,12 +79,13 @@ Machine::stack_t  Machine::run(const instr  * program,
                                const byte   * data,
                                Segment      & seg,
                                slotref      & islot_idx,
+                               slotref        iStart,
                                status_t     & status)
 {
     assert(program != 0);
     
     const stack_t *sp = static_cast<const stack_t *>(
-                direct_run(false, program, data, _stack, &seg, islot_idx));
+                direct_run(false, program, data, _stack, &seg, islot_idx, iStart));
     check_final_stack(sp-1, status);
     return *sp;
 }

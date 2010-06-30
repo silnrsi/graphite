@@ -23,6 +23,7 @@ add_library(vm-test-common  STATIC
                 ${SRC}/Silf.cpp
                 ${SRC}/Slot.cpp
                 ${SRC}/TtfUtil.cpp
+                ${SRC}/Segment.cpp
                 ${TRACESUPPORT})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")

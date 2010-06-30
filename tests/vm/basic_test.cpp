@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     Machine::status_t status;
     Machine m;
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, seg, is, status);
+        ret = prog.run(m, seg, is, is, status);
         switch (status) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:

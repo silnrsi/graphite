@@ -49,6 +49,7 @@ public:
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid);
     void positionSlots(const LoadedFont *font);
+    void positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos);
     void append(const Segment &other);
     void insertSlot(size_t index) {
         m_slots.insert(m_slots.begin() + index, Slot());

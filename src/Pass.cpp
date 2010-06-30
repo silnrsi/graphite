@@ -217,7 +217,7 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 
 void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const
 {
-    if (!testConstraint(&m_cPConstraint, 0, seg, vms))
+    if (!testConstraint(&m_cPConstraint, 0, 1, seg, vms))
         return;
 
     for (unsigned int i = 0; i < seg->length(); i++)
@@ -273,7 +273,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
         if (state > m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];
-                vms->addRule(rule, m_ruleSorts[rule]);
+                vms->addRule(rule, m_ruleSorts[rule], iSlot - startSlot);
             }            
         if (!state || state >= m_sTransition) break;
         iSlot++;
@@ -286,7 +286,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
 	XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
 	XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
 #endif
-        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, seg, vms))
+        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, vms->length(i), seg, vms))
         {
 #ifdef ENABLE_DEEP_TRACING
 	  XmlTraceLog::get().closeElement(ElementTestRule);
@@ -312,8 +312,10 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     return 0;
 }
 
-int Pass::testConstraint(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
+int Pass::testConstraint(const Code *codeptr, int iSlot, int num, Segment *seg, VMScratch *vms) const
 {
+    uint32 ret;
+    
     if (!*codeptr)
         return 1;
  
@@ -321,7 +323,13 @@ int Pass::testConstraint(const Code *codeptr, int iSlot, Segment *seg, VMScratch
     
     Machine::status_t status;
     Machine m;
-    const uint32 ret = codeptr->run(m, *seg, iSlot, status);
+    for (int i = 0; i <= num; i++)
+    {
+        int is = iSlot + i;
+        ret = codeptr->run(m, *seg, is, iSlot, status);
+        if (!ret) return 0;
+        if (status != Machine::finished) return 1;
+    }
     
     return status == Machine::finished ? ret : 1;
 }
@@ -336,7 +344,7 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     Machine::status_t status;
     Machine m;
     int iStart = iSlot;
-    int32 ret = codeptr->run(m, *seg, iSlot, status);
+    int32 ret = codeptr->run(m, *seg, iSlot, iSlot, status);
 	ret += iSlot;
     
     if (iSlot >= int(seg->length())) iSlot = seg->length() - 1;

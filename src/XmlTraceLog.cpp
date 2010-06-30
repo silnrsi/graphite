@@ -180,7 +180,7 @@ void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int value)
     assert(m_inElement);
     if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
     {
-        fprintf(m_file, " %s=\"%u\" (\"%d\")", xmlTraceLogAttributes[aId], value, value);
+        fprintf(m_file, " %s=\"%d\"", xmlTraceLogAttributes[aId], value);
     }
 }
 
@@ -190,7 +190,7 @@ void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int value)
     assert(m_inElement);
     if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
     {
-        fprintf(m_file, " %s=\"%u\" (\"%d\")", xmlTraceLogAttributes[aId], value, value);
+        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], value);
     }
 }
 

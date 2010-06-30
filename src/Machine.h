@@ -94,7 +94,7 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const byte * data,
-                                  Segment & seg, slotref & islot_idx,
+                                  Segment & seg, slotref & islot_idx, slotref iStart,
                                   status_t &status) HOT;
 
 private:

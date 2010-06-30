@@ -34,6 +34,7 @@
 //        reg.isf   = The first positioned slot
 //        reg.isl   = The last positioned slot
 //        reg.ip    = The current instruction pointer
+//        reg.endPos    = Position of advance of last cluster
      
 
 #define NOT_IMPLEMENTED     assert(false)
@@ -190,7 +191,6 @@ ENDOP
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
-    // TODO: Implement body
     reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, 0));
 ENDOP
 
@@ -199,7 +199,6 @@ STARTOP(put_subs_8bit_obs)
     const int           slot_ref     = int8(param[0]);
     const unsigned int  input_class  = uint8(param[1]),
                         output_class = uint8(param[2]);
-    // TODO; Implement body
     uint16 index = reg.seg.findClassIndex(input_class, reg.seg[reg.is + slot_ref].gid());
     reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, index));
 ENDOP
@@ -207,7 +206,6 @@ ENDOP
 STARTOP(put_copy)
     declare_params(1);
     const unsigned int  slot_ref = uint8(*param);
-    // TODO; Implement body
     if (slot_ref)
 	memcpy(&(reg.seg[reg.is]), &(reg.seg[reg.is + slot_ref]), sizeof(Slot));
 ENDOP
@@ -215,12 +213,10 @@ ENDOP
 STARTOP(insert)
     reg.seg.insertSlot(reg.is);
     reg.seg[reg.is].originate(reg.seg[reg.is + 1].original());
-    // TODO; Implement body;
 ENDOP
 
 STARTOP(delete_)
     reg.seg[reg.is].markDeleted(true);
-    // TODO; Implement body;
 ENDOP
 
 STARTOP(assoc)
@@ -233,13 +229,12 @@ STARTOP(assoc)
     
     while (count-- > 0)
     {
-	int ts = reg.is + *assocs++;
-	if (min == -1 || reg.seg[ts].before() < min) min = reg.seg[ts].before();
-	if (reg.seg[ts].after() > max) max = reg.seg[ts].after();
+        int ts = reg.is + *assocs++;
+        if (min == -1 || reg.seg[ts].before() < min) min = reg.seg[ts].before();
+        if (reg.seg[ts].after() > max) max = reg.seg[ts].after();
     }
     reg.seg[reg.is].before(min);
     reg.seg[reg.is].after(max);
-    // TODO; Implement body;   
 ENDOP
 
 STARTOP(cntxt_item)
@@ -268,7 +263,7 @@ STARTOP(attr_add)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is);
+    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is, &reg.isf, &reg.isl, &reg.endPos);
     reg.seg[reg.is].setAttr(&reg.seg, slat, 0, val + res, reg.is);
 ENDOP
 
@@ -276,7 +271,7 @@ STARTOP(attr_sub)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is);
+    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is, &reg.isf, &reg.isl, &reg.endPos);
     reg.seg[reg.is].setAttr(&reg.seg, slat, 0, res - val, reg.is);
 ENDOP
 
@@ -299,14 +294,14 @@ STARTOP(push_slot_attr)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref));
+    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref));
+    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
 ENDOP
 
 STARTOP(push_glyph_attr_obs)
@@ -329,7 +324,6 @@ STARTOP(push_glyph_metric)
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
     push(reg.seg.getGlyphMetric(reg.is + slot_ref, glyph_attr, attr_level));
-    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
@@ -338,7 +332,6 @@ STARTOP(push_glyph_metric_constrained)
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
     push(reg.seg.getGlyphMetric(reg.is + slot_ref, glyph_attr, attr_level));
-    // Ignore cluster metrics at the moment
 ENDOP
 
 STARTOP(push_feat)
@@ -400,7 +393,7 @@ STARTOP(push_islot_attr)
     const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref));
+    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -408,7 +401,7 @@ STARTOP(push_islot_attr_constrained)
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref));
+    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
 ENDOP
 
 STARTOP(push_iglyph_attr) // not implemented
@@ -441,7 +434,7 @@ STARTOP(iattr_add)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is);
+    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is, &reg.isf, &reg.isl, &reg.endPos);
     reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val + res, reg.is);
 ENDOP
 
@@ -450,7 +443,7 @@ STARTOP(iattr_sub)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is);
+    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is, &reg.isf, &reg.isl, &reg.endPos);
     reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val - res, reg.is);
 ENDOP
 

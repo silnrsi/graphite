@@ -79,19 +79,69 @@ void Segment::positionSlots(const LoadedFont *font)
     Position currpos;
     Slot *s;
     float cMin = 0.;
+    Rect bbox;
 
     for (unsigned int i = 0; i < m_numGlyphs; i++)
     {
         s = &(m_slots[i]);
         if (s->isBase())
-        {
-            Rect bbox = Rect(currpos, currpos);
             currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
-        }
     }
     m_advance = currpos;
 }
 
+void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos)
+{
+    Position currpos;
+    float cMin = 0.;
+    Rect bbox;
+    int start;
+    int end;    // NB last slot we process not one past
+    
+    if (*iFinish > -1 && iSlot > *iFinish)
+    {
+        currpos = *endPos;
+        start = *iFinish + 1;
+        end = iSlot;
+    }
+    else if (iSlot < *iStart)
+    {
+        start = iSlot;
+        end = *iStart - 1;
+    }
+    else if (*iStart == -1)
+    {
+        *iStart = start = iSlot;
+        *iFinish = end = iSlot;
+    }
+    else
+        return;
+    
+    start = findRoot(start);
+    for ( ; end + 1 < m_numGlyphs && m_slots[end + 1].attachTo() != -1; end++ ) {}
+    
+    for (unsigned int i = start; i <= end; i++)
+    {
+        Slot *s = &(m_slots[i]);
+        if (s->isBase())
+            currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
+    }
+    
+    if (start < *iStart)
+    {
+        Position lShift = Position() - currpos;
+        for (unsigned int i = start; i < *iStart; i++)
+            m_slots[i].positionShift(lShift);
+        *iStart = start;
+    }
+    
+    if (end >= *iFinish)
+    {
+        *endPos = currpos;
+        *iFinish = end;
+    }
+}
+    
 #ifndef DISABLE_TRACING
 void Segment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
 {
