@@ -14,12 +14,10 @@
 
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
-                            Segment & seg, int & is, const int ib, \
-                            const instr * & ip
-
+                            regbank & reg
 
 // These are required by opcodes.h and should not be changed
-#define STARTOP(name)	    bool name(registers) REGPARM(6);\
+#define STARTOP(name)	    bool name(registers) REGPARM(4);\
 			                bool name(registers) { \
                                 STARTTRACE(name,is);
 #define ENDOP		            ENDTRACE; \
@@ -35,19 +33,28 @@
 
 using namespace vm;
 
+struct regbank  {
+    Segment       & seg;
+    slotref         is, isf, isl;
+    const slotref   isb;
+    const instr * & ip;
+};
+
 typedef ptrdiff_t        (* ip_t)(registers);
 
 // Pull in the opcode definitions
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
 namespace {
+
 #include "opcodes.h"
+
 }
 
 int32  Machine::run(const instr   * program,
                     const byte    * data,
                     Segment &       seg,
-                    int &           is,
+                    slotref &       islot_idx,
                     status_t &      status)
 {
     assert(program != 0);
@@ -55,18 +62,15 @@ int32  Machine::run(const instr   * program,
     // Declare virtual machine registers
     const instr   * ip = program-1;
     const byte    * dp = data;
-    const int       ib = is;
-    // We give enough guard space so that one instruction can over/under flow 
-    // the stack and cause no damage this condition will then be caught by
-    // check_stack.
-    stack_t *       sp      = _stack + Machine::STACK_GUARD,
+    stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
+    regbank         reg = {seg, islot_idx, -1, -1, islot_idx, ip};
 
     // Run the program        
-    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, seg, is, ib, ip)) {}
+    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
 
     check_final_stack(sp-1, status);
-
+    islot_idx = reg.is;
     return *sp;
 }
 

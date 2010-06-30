@@ -22,7 +22,8 @@ namespace vm
 {
 
 
-typedef void *  instr;
+typedef void *     instr;
+typedef signed int slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
@@ -93,7 +94,7 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const byte * data,
-                                  Segment & seg, int & islot_idx,
+                                  Segment & seg, slotref & islot_idx,
                                   status_t &status) HOT;
 
 private:

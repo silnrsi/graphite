@@ -24,6 +24,13 @@
 
 using namespace vm;
 
+struct regbank  {
+    Segment       & seg;
+    slotref         is, isf, isl;
+    const slotref   isb;
+    const instr * & ip;
+};
+
 namespace {
 
 const void * direct_run(const bool          get_table_mode,
@@ -31,7 +38,7 @@ const void * direct_run(const bool          get_table_mode,
                         const byte        * data,
                         Machine::stack_t  * stack_base,
                         Segment     * const seg_ptr,
-                        int  &              is)
+                        slotref           & islot_idx)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -42,13 +49,9 @@ const void * direct_run(const bool          get_table_mode,
     // Declare virtual machine registers
     const instr   * ip = program;
     const byte    * dp = data;
-    const int       ib = is;
-    // We give enough guard space so that one instruction can over/under flow 
-    // the stack and cause no damage this condition will then be caught by
-    // check_stack.
-    int32        * sp = stack_base + Machine::STACK_GUARD;
-    int32 * const  sb = sb;
-    Segment &      seg = *seg_ptr;
+    int32         * sp = stack_base + Machine::STACK_GUARD;
+    int32   * const sb = sb;
+    regbank         reg = {*seg_ptr, islot_idx, -1, -1, islot_idx, ip};
     
     // start the program
     goto **ip;
@@ -57,6 +60,7 @@ const void * direct_run(const bool          get_table_mode,
     #include "opcodes.h"
     
     end:
+    islot_idx = reg.is;
     return sp;
 }
 
@@ -72,7 +76,7 @@ const opcode_t * Machine::getOpcodeTable() throw()
 Machine::stack_t  Machine::run(const instr  * program,
                                const byte   * data,
                                Segment      & seg,
-                               int          & islot_idx,
+                               slotref      & islot_idx,
                                status_t     & status)
 {
     assert(program != 0);
