@@ -73,13 +73,13 @@ private:
 };
 
 
-const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,1,        // 1 byte
-                                          4,4,4,4,  // errors since trailing byte, catch later
-                                          2,2,            // 2 bytes
-                                          3,                 // 3 bytes
-                                          4};                // 4 bytes
+const int utf8_extrabytes_lut[16] = {0,0,0,0,0,0,0,0,        // 1 byte
+                                          3,3,3,3,  // errors since trailing byte, catch later
+                                          1,1,            // 2 bytes
+                                          2,                 // 3 bytes
+                                          3};                // 4 bytes
 
-const byte utf8_mask_lut[5] = {0x00,0x00,0xC0,0xE0,0xF0};
+const byte utf8_mask_lut[4] = {0x00,0xC0,0xE0,0xF0};
 
 class Utf8Consumer
 {
@@ -91,28 +91,30 @@ public:
       template <class LIMIT>
       inline bool consumeChar(const LIMIT& limit, uint32* pRes)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
-	const size_t    seq_sz = utf8_sz_lut[*m_pCharStart >> 4];
-	if (!limit.inBuffer(m_pCharStart+(seq_sz-1))) {
+	const size_t    seq_extra = utf8_extrabytes_lut[*m_pCharStart >> 4];        //length of sequence including *m_pCharStart is 1+seq_extra
+	if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
 	    return false;
 	}
 	
-	*pRes = *m_pCharStart ^ utf8_mask_lut[seq_sz];
+	*pRes = *m_pCharStart ^ utf8_mask_lut[seq_extra];
 	
-	switch(seq_sz) {      
-	    case 4:    
+    if (seq_extra) {
+	switch(seq_extra) {    //hopefully the optimzer will implement this as a jump table     
+	    case 3:    
 	    {	
 		if ((*m_pCharStart>>3)==0x1E) {		//the good case
 		    *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;		//drop through
+        }
 		else {
 		    *pRes = 0xFFFD;
 		    ++m_pCharStart; 
 		    return true;			//this is an error. But carry on anyway?
 		}		    
 	    }
-	    case 3:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
-	    case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F; break;
-	    case 1: default:    break;
+	    case 2:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;
+	    case 1:     *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F; break;
 	}
+    }
 	++m_pCharStart; 
 	return true;
       }	
