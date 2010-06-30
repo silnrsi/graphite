@@ -25,7 +25,6 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
-    void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);
@@ -67,9 +66,6 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value) {};
     void addAttribute(XmlTraceLogAttribute aId, int32 value) {};
     void addAttribute(XmlTraceLogAttribute aId, uint32 value) {};
-#if SIZEOF_SIZE_T == 8
-    void addAttribute(XmlTraceLogAttribute aId, size_t value) {};
-#endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value) {};
     void addAttribute(XmlTraceLogAttribute aId, int16 value) {};
     void addAttribute(XmlTraceLogAttribute aId, uint16 value) {};
