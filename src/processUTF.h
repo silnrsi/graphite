@@ -82,9 +82,9 @@ private:
    quicker to implement directly:
 */
 
-inline unsigned int utf8_extrabytes(const unsigned int topNibble) { return ((0xE5FF0000>>topNibble)>>topNibble); }
+inline unsigned int utf8_extrabytes(const unsigned int topNibble) { return (0xE5FF0000>>(2*topNibble))&0x3; }
 
-inline unsigned int utf8_mask(const unsigned int seq_extra) { return ((((0xFEC0>>seq_extra)>>seq_extra)>>seq_extra)>>seq_extra); }
+inline unsigned int utf8_mask(const unsigned int seq_extra) { return ((0xFEC0>>(4*seq_extra))&0xF)<<4; }
 
 class Utf8Consumer
 {
