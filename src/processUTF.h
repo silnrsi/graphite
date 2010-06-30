@@ -73,7 +73,7 @@ private:
 };
 
 
-const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,        // 1 byte
+const int utf8_sz_lut[16] = {1,1,1,1,1,1,1,1,        // 1 byte
                                           0,0,0,0,  // trailing byte
                                           2,2,            // 2 bytes
                                           3,                 // 3 bytes
@@ -122,7 +122,7 @@ private:
 class Utf16Consumer
 {
 private:
-    static const int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+    static const unsigned int SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
 
 public:
       Utf16Consumer(const uint16* pCharStart2) : m_pCharStart(pCharStart2) {}
