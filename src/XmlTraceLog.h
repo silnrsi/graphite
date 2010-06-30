@@ -23,16 +23,10 @@ public:
     void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
     void addSingleElement(XmlTraceLogElement eId, const int value);
     void addAttribute(XmlTraceLogAttribute aId, const char * value);
-    void addAttribute(XmlTraceLogAttribute aId, byte value);
     void addAttribute(XmlTraceLogAttribute aId, float value);
-    void addAttribute(XmlTraceLogAttribute aId, int32 value);
-    void addAttribute(XmlTraceLogAttribute aId, uint32 value);
-#if SIZEOF_SIZE_T == 8
-    void addAttribute(XmlTraceLogAttribute aId, size_t value);
-#endif
+    void addAttribute(XmlTraceLogAttribute aId, int value);
+    void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
-    void addAttribute(XmlTraceLogAttribute aId, int16 value);
-    void addAttribute(XmlTraceLogAttribute aId, uint16 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);
     void writeElementArray(XmlTraceLogElement eId, XmlTraceLogAttribute aId, int16 * values, size_t length);

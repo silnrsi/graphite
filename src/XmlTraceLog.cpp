@@ -192,47 +192,26 @@ void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, float value)
     }
 }
 
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, byte value)
+void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int value)
 {
     if (!m_file) return;
     assert(m_inElement);
     if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
     {
-        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], (uint32)value);
+        fprintf(m_file, " %s=\"%u\" (\"%d\")", xmlTraceLogAttributes[aId], value, value);
     }
 }
 
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int32 value)
+void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int value)
 {
     if (!m_file) return;
     assert(m_inElement);
     if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
     {
-        fprintf(m_file, " %s=\"%d\"", xmlTraceLogAttributes[aId], value);
+        fprintf(m_file, " %s=\"%u\" (\"%d\")", xmlTraceLogAttributes[aId], value, value);
     }
 }
 
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, uint32 value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], value);
-    }
-}
-
-#if SIZEOF_SIZE_T == 8
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, size_t value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%lu\"", xmlTraceLogAttributes[aId], value);
-    }
-}
-#endif
 
 void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
 {
@@ -244,26 +223,6 @@ void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
         float fraction = static_cast<float>(value & 0xFFFF) / static_cast<float>(0x1FFFE);
         float fixed = whole + fraction;
         fprintf(m_file, " %s=\"%f\"", xmlTraceLogAttributes[aId], fixed);
-    }
-}
-
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int16 value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%d\"", xmlTraceLogAttributes[aId], (int)value);
-    }
-}
-
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, uint16 value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], (unsigned int)value);
     }
 }
 
