@@ -73,13 +73,18 @@ private:
 };
 
 
-const int utf8_extrabytes_lut[16] = {0,0,0,0,0,0,0,0,        // 1 byte
+/*
+  const int utf8_extrabytes_lut[16] = {0,0,0,0,0,0,0,0,        // 1 byte
                                           3,3,3,3,  // errors since trailing byte, catch later
                                           1,1,            // 2 bytes
                                           2,                 // 3 bytes
                                           3};                // 4 bytes
+   quicker to implement directly:
+*/
 
-const byte utf8_mask_lut[4] = {0x00,0xC0,0xE0,0xF0};
+inline unsigned int utf8_extrabytes(const unsigned int topNibble) { return ((0xE5FF0000>>topNibble)>>topNibble); }
+
+inline unsigned int utf8_mask(const unsigned int seq_extra) { return ((((0xFEC0>>seq_extra)>>seq_extra)>>seq_extra)>>seq_extra); }
 
 class Utf8Consumer
 {
@@ -90,15 +95,15 @@ public:
 
     template <class LIMIT>
     inline bool consumeChar(const LIMIT& limit, uint32* pRes) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
-        const size_t    seq_extra = utf8_extrabytes_lut[*m_pCharStart >> 4];        //length of sequence including *m_pCharStart is 1+seq_extra
+        const unsigned int seq_extra = utf8_extrabytes(*m_pCharStart >> 4);        //length of sequence including *m_pCharStart is 1+seq_extra
         if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
             return false;
         }
     
-        *pRes = *m_pCharStart ^ utf8_mask_lut[seq_extra];
+        *pRes = *m_pCharStart ^ utf8_mask(seq_extra);
         
         if (seq_extra) {
-            switch(seq_extra) {    //hopefully the optimzer will implement this as a jump table     
+            switch(seq_extra) {    //hopefully the optimizer will implement this as a jump table. If not the above if should cover the majority case.    
                 case 3: {	
                     if ((*m_pCharStart>>3)==0x1E) {		//the good case
                         *pRes <<= 6; *pRes |= *++m_pCharStart & 0x3F;		//drop through
