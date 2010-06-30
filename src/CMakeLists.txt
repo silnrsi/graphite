@@ -28,6 +28,9 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 if (NOT DISABLE_TRACING)
     message(STATUS "Tracing enabled")
     set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)
+	if (ENABLE_DEEP_TRACING)
+		add_definitions(-DENABLE_DEEP_TRACING)
+	endif (ENABLE_DEEP_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
