@@ -37,8 +37,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     if (version >= 0x00030000)
     {
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().addAttribute(AttrMajor, swap16(((uint16*) p)[0]));
-        XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().addAttribute(AttrMajor, swap16(((uint16*) p)[0]));
+            XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
+        }
 #endif
         p += 8;
     }
@@ -164,8 +167,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     {
         m_passes[i].init(this);
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementPass);
-        XmlTraceLog::get().addAttribute(AttrPassId, i);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementPass);
+            XmlTraceLog::get().addAttribute(AttrPassId, i);
+        }
 #endif
         if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + m_numPseudo))
         {
@@ -194,9 +200,12 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
     m_nLinear = read16(p);
     m_classOffsets = new uint16[m_nClass + 1];
 #ifndef DISABLE_TRACING
-    XmlTraceLog::get().openElement(ElementClassMap);
-    XmlTraceLog::get().addAttribute(AttrNumClasses, m_nClass);
-    XmlTraceLog::get().addAttribute(AttrNumLinear, m_nLinear);
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementClassMap);
+        XmlTraceLog::get().addAttribute(AttrNumClasses, m_nClass);
+        XmlTraceLog::get().addAttribute(AttrNumLinear, m_nLinear);
+    }
 #endif
 
     for (int i = 0; i <= m_nClass; i++)
@@ -207,18 +216,24 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
     if (m_classOffsets[0] != 0)
     {
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().error("Invalid first Class Offset %d expected %d",
-            m_classOffsets[0], m_nLinear);
-        XmlTraceLog::get().closeElement(ElementClassMap);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().error("Invalid first Class Offset %d expected %d",
+                m_classOffsets[0], m_nLinear);
+            XmlTraceLog::get().closeElement(ElementClassMap);
+        }
 #endif
         return -1;
     }
     if (m_classOffsets[m_nClass] + (2u + m_nClass + 1u) * 2 > lClass)
     {
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().error("Invalid Class Offset %d max size %d",
-            m_classOffsets[m_nClass], lClass);
-        XmlTraceLog::get().closeElement(ElementClassMap);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().error("Invalid Class Offset %d max size %d",
+                m_classOffsets[m_nClass], lClass);
+            XmlTraceLog::get().closeElement(ElementClassMap);
+        }
 #endif
         return -1;
     }
@@ -355,8 +370,11 @@ void Silf::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
-	    XmlTraceLog::get().openElement(ElementRunPass);
-	    XmlTraceLog::get().addAttribute(AttrNum, i);
+        if (XmlTraceLog::get().active())
+        {
+	        XmlTraceLog::get().openElement(ElementRunPass);
+	        XmlTraceLog::get().addAttribute(AttrNum, i);
+        }
 #endif
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(seg, face, vms);

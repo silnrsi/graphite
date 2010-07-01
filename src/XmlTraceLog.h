@@ -25,7 +25,8 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
-    void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (unsigned int)value); }
+// This won't compile on Windows 32 bit, since it has the same signature as the above method
+//    void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);
@@ -57,24 +58,6 @@ class NullTraceLog : public XmlTraceLog
 {
 public:
     NullTraceLog() : XmlTraceLog(NULL, NULL, GRLOG_NONE){};
-    bool active() { return false; };
-    void openElement(XmlTraceLogElement eId) {};
-    void closeElement(XmlTraceLogElement eId) {};
-    void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
-    void addSingleElement(XmlTraceLogElement eId, const int value);
-    void addAttribute(XmlTraceLogAttribute aId, const char * value) {};
-    void addAttribute(XmlTraceLogAttribute aId, byte value) {};
-    void addAttribute(XmlTraceLogAttribute aId, float value) {};
-    void addAttribute(XmlTraceLogAttribute aId, int32 value) {};
-    void addAttribute(XmlTraceLogAttribute aId, uint32 value) {};
-    void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value) {};
-    void addAttribute(XmlTraceLogAttribute aId, int16 value) {};
-    void addAttribute(XmlTraceLogAttribute aId, uint16 value) {};
-    void writeElementArray(XmlTraceLogElement eId, XmlTraceLogAttribute aId, int16 * values, size_t length) {};
-    void writeText(const char * utf8) {};
-    void writeUnicode(const uint32 code) {};
-    void error(const char * msg, ...) {};
-    void warning(const char * msg, ...) {};
 };
 
 #endif

@@ -41,10 +41,13 @@ bool FeatureMap::readFeats(const IFace *face)
     byte currBits = 0;
 
 #ifndef DISABLE_TRACING
-    XmlTraceLog::get().openElement(ElementFeatures);
-    XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
-    XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
-    XmlTraceLog::get().addAttribute(AttrNum, m_numFeats);
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementFeatures);
+        XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
+        XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
+        XmlTraceLog::get().addAttribute(AttrNum, m_numFeats);
+    }
 #endif
     for (int i = 0; i < m_numFeats; i++)
     {
@@ -68,11 +71,14 @@ bool FeatureMap::readFeats(const IFace *face)
         uint16 maxVal = 0;
 
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementFeature);
-        XmlTraceLog::get().addAttribute(AttrIndex, i);
-        XmlTraceLog::get().addAttribute(AttrNum, name);
-        XmlTraceLog::get().addAttribute(AttrFlags, flags);
-        XmlTraceLog::get().addAttribute(AttrLabel, uiName);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementFeature);
+            XmlTraceLog::get().addAttribute(AttrIndex, i);
+            XmlTraceLog::get().addAttribute(AttrNum, name);
+            XmlTraceLog::get().addAttribute(AttrFlags, flags);
+            XmlTraceLog::get().addAttribute(AttrLabel, uiName);
+        }
 #endif
         if (offset + numSet * 4 > lFeat) return false;
         for (int j = 0; j < numSet; j++)
@@ -82,12 +88,15 @@ bool FeatureMap::readFeats(const IFace *face)
             if (j == 0) defVals[i] = val;
             uint16 label = read16(pSet);
 #ifndef DISABLE_TRACING
-            XmlTraceLog::get().openElement(ElementFeatureSetting);
-            XmlTraceLog::get().addAttribute(AttrIndex, j);
-            XmlTraceLog::get().addAttribute(AttrValue, val);
-            XmlTraceLog::get().addAttribute(AttrLabel, label);
-            if (j == 0) XmlTraceLog::get().addAttribute(AttrDefault, defVals[i]);
-            XmlTraceLog::get().closeElement(ElementFeatureSetting);
+            if (XmlTraceLog::get().active())
+            {
+                XmlTraceLog::get().openElement(ElementFeatureSetting);
+                XmlTraceLog::get().addAttribute(AttrIndex, j);
+                XmlTraceLog::get().addAttribute(AttrValue, val);
+                XmlTraceLog::get().addAttribute(AttrLabel, label);
+                if (j == 0) XmlTraceLog::get().addAttribute(AttrDefault, defVals[i]);
+                XmlTraceLog::get().closeElement(ElementFeatureSetting);
+            }
 #endif
         }
         uint32 mask = 1;

@@ -60,11 +60,14 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
         if (last >= numGlyphs) last = numGlyphs - 1;
         uint16 col = read16(p);
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementRange);
-        XmlTraceLog::get().addAttribute(AttrFirstId, first);
-        XmlTraceLog::get().addAttribute(AttrLastId, last);
-        XmlTraceLog::get().addAttribute(AttrColId, col);
-        XmlTraceLog::get().closeElement(ElementRange);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRange);
+            XmlTraceLog::get().addAttribute(AttrFirstId, first);
+            XmlTraceLog::get().addAttribute(AttrLastId, last);
+            XmlTraceLog::get().addAttribute(AttrColId, col);
+            XmlTraceLog::get().closeElement(ElementRange);
+        }
 #endif
         while (first <= last)
             m_cols[first++] = col;
@@ -107,10 +110,13 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     {
         m_startStates[i] = read16(p);
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementStartState);
-        XmlTraceLog::get().addAttribute(AttrContextLen, i + m_minPreCtxt);
-        XmlTraceLog::get().addAttribute(AttrState, m_startStates[i]);
-        XmlTraceLog::get().closeElement(ElementStartState);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementStartState);
+            XmlTraceLog::get().addAttribute(AttrContextLen, i + m_minPreCtxt);
+            XmlTraceLog::get().addAttribute(AttrState, m_startStates[i]);
+            XmlTraceLog::get().closeElement(ElementStartState);
+        }
 #endif
         if (m_startStates[i] >= lPass) return false;
     }
@@ -193,10 +199,13 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     for (int i = 0; i < m_numRules; i++)
     {
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementRule);
-        XmlTraceLog::get().addAttribute(AttrIndex, i);
-        XmlTraceLog::get().addAttribute(AttrSortKey, m_ruleSorts[i]);
-        XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRule);
+            XmlTraceLog::get().addAttribute(AttrIndex, i);
+            XmlTraceLog::get().addAttribute(AttrSortKey, m_ruleSorts[i]);
+            XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
+        }
 #endif
         uint16 noffset = read16(pActions);
         if (noffset > loffset) m_cActions[i] = Code(false, p + loffset, p + noffset, cContexts);
@@ -282,22 +291,31 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     for (int i = 0; i < vms->ruleLength(); i++)
     {
 #ifdef ENABLE_DEEP_TRACING
-	XmlTraceLog::get().openElement(ElementTestRule);
-	XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
-	XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+        if (XmlTraceLog::get().active())
+        {
+	        XmlTraceLog::get().openElement(ElementTestRule);
+	        XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
+	        XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+        }
 #endif
         if (testConstraint(m_cConstraint + vms->rule(i), startSlot, vms->length(i), seg, vms))
         {
 #ifdef ENABLE_DEEP_TRACING
-	  XmlTraceLog::get().closeElement(ElementTestRule);
-	  XmlTraceLog::get().openElement(ElementDoRule);
-	  XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
-	  XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+            if (XmlTraceLog::get().active())
+            {
+	          XmlTraceLog::get().closeElement(ElementTestRule);
+	          XmlTraceLog::get().openElement(ElementDoRule);
+	          XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
+	          XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+            }
 #endif
 	  int res = doAction(m_cActions + vms->rule(i), startSlot, seg, vms);
 #ifdef ENABLE_DEEP_TRACING
-//	  XmlTraceLog::get().addAttribute(AttrResult, res);
-	  XmlTraceLog::get().closeElement(ElementDoRule);
+        if (XmlTraceLog::get().active())
+        {
+//	      XmlTraceLog::get().addAttribute(AttrResult, res);
+    	  XmlTraceLog::get().closeElement(ElementDoRule);
+        }
 #endif
             if (res == -1)
                 return m_ruleSorts[vms->rule(i)];
