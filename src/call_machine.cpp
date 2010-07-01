@@ -21,8 +21,7 @@
 			                bool name(registers) { \
                                 STARTTRACE(name,reg.is);
 #define ENDOP		            ENDTRACE; \
-                                guard_sp; \
-                                return true; \
+                                return (sp - sb)/Machine::STACK_MAX==0; \
                             }
 
 #define EXIT(status)        push(status); ENDTRACE return false
@@ -52,12 +51,12 @@ namespace {
 
 }
 
-int32  Machine::run(const instr   * program,
-                    const byte    * data,
-                    Segment &       seg,
-                    slotref &       islot_idx,
-                    slotref         iStart,
-                    status_t &      status)
+Machine::stack_t  Machine::run(const instr   * program,
+                               const byte    * data,
+                               Segment &       seg,
+                               slotref &       islot_idx,
+                               slotref         iStart,
+                               status_t &      status)
 {
     assert(program != 0);
 
@@ -70,10 +69,11 @@ int32  Machine::run(const instr   * program,
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
+    const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
 
-    check_final_stack(sp-1, status);
+    check_final_stack(sp, status);
     islot_idx = reg.is;
-    return *sp;
+    return ret;
 }
 
 // Pull in the opcode table

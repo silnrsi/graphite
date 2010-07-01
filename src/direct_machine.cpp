@@ -17,7 +17,7 @@
 #include "Segment.h"
 
 #define STARTOP(name)           name: {
-#define ENDOP                   }; goto **++ip;
+#define ENDOP                   }; goto *((sp - sb)/Machine::STACK_MAX ? &&end : *++ip);
 #define EXIT(status)            push(status); goto end
 
 #define do_(name)               &&name
@@ -86,7 +86,8 @@ Machine::stack_t  Machine::run(const instr  * program,
     
     const stack_t *sp = static_cast<const stack_t *>(
                 direct_run(false, program, data, _stack, &seg, islot_idx, iStart));
-    check_final_stack(sp-1, status);
+    const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
+    check_final_stack(sp, status);
     return *sp;
 }
 

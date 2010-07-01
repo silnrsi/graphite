@@ -83,7 +83,7 @@ public:
     typedef int32       stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
-                        STACK_GUARD  = 1;
+                        STACK_GUARD  = 2;
 
     enum status_t {
         finished,
@@ -107,7 +107,7 @@ private:
 inline void Machine::check_final_stack(const int32 * const sp,
                                        status_t & status) {
     stack_t const * const base  = _stack + STACK_GUARD,
-                  * const limit = _stack + sizeof(_stack) - STACK_GUARD;
+                  * const limit = base + STACK_MAX;
     if      (sp <  base)    status = stack_underflow;       // This should be impossible now.
     else if (sp >= limit)   status = stack_overflow;        // So should this.
     else if (sp != base)    status = stack_not_empty;

@@ -53,7 +53,6 @@
 #define declare_params(n)   const byte * param = dp; \
                             use_params(n);
 
-#define guard_sp            sp = sb + ((sp - sb) % Machine::STACK_MAX)
 #define push(n)             *++sp = n; TRACEPUSH(n)
 #define pop()               (*sp--)
 
@@ -87,10 +86,10 @@ ENDOP
 
 STARTOP(push_long)
     declare_params(4);
-    const uint32 r  = uint8(param[0]) << 24 
+    const  int32 r  = uint8(param[0]) << 24
                     | uint8(param[1]) << 16
                     | uint8(param[2]) << 8
-                    | uint8(param[4]);
+                    | uint8(param[3]);
     push(r);
 ENDOP
 

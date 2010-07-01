@@ -10,9 +10,11 @@ const byte simple_prog[] =
 {
         PUSH_BYTE, 43, 
         PUSH_BYTE, 42,
+//        PUSH_LONG, 1,2,3,4,                   // Uncomment to cause an overflow
             PUSH_BYTE, 11, PUSH_BYTE, 13, ADD,
             PUSH_BYTE, 4, SUB,
         COND,
+//        COND,                                 // Uncomment to cause an underflow
 //    POP_RET
 };
 
