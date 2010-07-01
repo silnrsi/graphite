@@ -17,15 +17,15 @@
                             regbank & reg
 
 // These are required by opcodes.h and should not be changed
-#define STARTOP(name)	    ptrdiff_t name(registers) REGPARM(4);\
-			                ptrdiff_t name(registers) { \
+#define STARTOP(name)	    bool name(registers) REGPARM(4);\
+			                bool name(registers) { \
                                 STARTTRACE(name,reg.is);
 #define ENDOP		            ENDTRACE; \
                                 guard_sp; \
-                                return 1; \
+                                return true; \
                             }
 
-#define EXIT(status)        push(status); ENDTRACE return NULL
+#define EXIT(status)        push(status); ENDTRACE return false
 
 // This is required by opcode_table.h
 #define do_(name)           instr(name)
@@ -41,7 +41,7 @@ struct regbank  {
     Position        endPos;
 };
 
-typedef ptrdiff_t        (* ip_t)(registers);
+typedef bool        (* ip_t)(registers);
 
 // Pull in the opcode definitions
 // We pull these into a private namespace so these otherwise common names dont
