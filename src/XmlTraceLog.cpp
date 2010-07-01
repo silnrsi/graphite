@@ -329,17 +329,19 @@ void XmlTraceLog::warning(const char * msg, ...)
 #endif		//!DISABLE_TRACING
 
 
-void startGraphiteLogging(FILE * logFile, GrLogMask mask)
+bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
     logFile;			//pointless uses to avoid warnings re implementation not using parameters
     mask;
+    return false;
 #else	//!DISABLE_TRACING
     if (XmlTraceLog::sLog != &s_NullLog)
     {
         delete XmlTraceLog::sLog;
     }
     XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphiteng", mask);
+    return (XmlTraceLog::sLog != NULL);
 #endif		//!DISABLE_TRACING
 }
 

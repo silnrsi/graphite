@@ -12,7 +12,7 @@ class NullTraceLog;
 
 class XmlTraceLog
 {
-    friend void startGraphiteLogging(FILE * logFile, GrLogMask mask);
+    friend bool startGraphiteLogging(FILE * logFile, GrLogMask mask);
     friend void stopGraphiteLogging();
 public:
     ~XmlTraceLog();
