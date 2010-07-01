@@ -15,7 +15,7 @@ public:
     uint16 rule(int i) { return m_rules[i]; }
     uint16 ruleLength() { return m_numRules; }
     uint16 length(int i) { return m_lengths[i]; }
-    void addRule(uint16 ruleid, uint16 sortkey, uint16 length) {
+    void addRule(uint16 ruleid, uint16 sortkey, uint16 len) {
         int i;
         for (i = 0; i < m_numRules; i++)
         {
@@ -27,7 +27,7 @@ public:
         memcpy(m_lengths + i + 1, m_lengths + i, (m_numRules - i) * sizeof(uint16));
         m_rules[i] = ruleid;
         m_sortKeys[i] = sortkey;
-        m_lengths[i] = length;
+        m_lengths[i] = len;
         if (m_numRules < VMS_MAX_RULES_PER_SEQUENCE) m_numRules++;
     }
     void push(uint32 val) { if (m_stackptr < VMS_MAX_STACK) m_stack[m_stackptr++] = val; }

@@ -19,7 +19,7 @@
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\
 			                bool name(registers) { \
-                                STARTTRACE(name,reg.is);
+                                STARTTRACE(name,is);
 #define ENDOP		            ENDTRACE; \
                                 return (sp - sb)/Machine::STACK_MAX==0; \
                             }
