@@ -24,20 +24,12 @@
 
 using namespace vm;
 
-struct regbank  {
-    Segment       & seg;
-    slotref         is, isf, isl;
-    const slotref   isb;
-    const instr * & ip;
-    Position        endPos;
-};
-
 namespace {
 
 const void * direct_run(const bool          get_table_mode,
                         const instr       * program,
                         const byte        * data,
-                        Machine::stack_t  * stack_base,
+                        Machine::stack_t  * stack,
                         Segment     * const seg_ptr,
                         slotref           & islot_idx,
                         slotref             iStart)
@@ -49,11 +41,14 @@ const void * direct_run(const bool          get_table_mode,
         return opcode_table;
 
     // Declare virtual machine registers
-    const instr   * ip = program;
-    const byte    * dp = data;
-    int32         * sp = stack_base + Machine::STACK_GUARD;
-    int32   * const sb = sb;
-    regbank         reg = {*seg_ptr, islot_idx, -1, -1, iStart, ip, Position()};
+    const instr       * ip = program;
+    const byte        * dp = data;
+    Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
+                * const sb = sp;
+    Segment       & seg = *seg_ptr;
+    slotref         is=islot_idx, isf=-1, isl=-1;
+    const slotref   isb=iStart;
+    Position        endPos=Position();
     
     // start the program
     goto **ip;
@@ -62,7 +57,7 @@ const void * direct_run(const bool          get_table_mode,
     #include "opcodes.h"
     
     end:
-    islot_idx = reg.is;
+    islot_idx = is;
     return sp;
 }
 

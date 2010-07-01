@@ -46,9 +46,23 @@ typedef bool        (* ip_t)(registers);
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
 namespace {
+#define seg     reg.seg
+#define is      reg.is
+#define isf     reg.isf
+#define isl     reg.isl
+#define isb     reg.isb
+#define ip      reg.ip
+#define endPos  reg.endPos
 
 #include "opcodes.h"
 
+#undef seg
+#undef is
+#undef isf
+#undef isl
+#undef isb
+#undef ip
+#undef endPos
 }
 
 Machine::stack_t  Machine::run(const instr   * program,

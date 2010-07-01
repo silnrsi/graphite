@@ -28,13 +28,13 @@
 //    You have access to the following named fast 'registers':
 //        sp        = The pointer to the current top of stack, the last value
 //                    pushed.
-//        reg.seg   = A reference to the Segment this code is running over.
-//        reg.is    = The current slot index
-//        reg.isb   = The original base slot index at the start of this rule
-//        reg.isf   = The first positioned slot
-//        reg.isl   = The last positioned slot
-//        reg.ip    = The current instruction pointer
-//        reg.endPos    = Position of advance of last cluster
+//        seg       = A reference to the Segment this code is running over.
+//        is        = The current slot index
+//        isb       = The original base slot index at the start of this rule
+//        isf       = The first positioned slot
+//        isl       = The last positioned slot
+//        ip        = The current instruction pointer
+//        endPos    = Position of advance of last cluster
      
 
 #define NOT_IMPLEMENTED     assert(false)
@@ -173,7 +173,7 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-    ++reg.is;
+    ++is;
 ENDOP
 
 STARTOP(next_n)
@@ -184,13 +184,13 @@ STARTOP(next_n)
 ENDOP
 
 STARTOP(copy_next)
-    reg.is++;
+    is++;
 ENDOP
 
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
-    reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, 0));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -198,24 +198,24 @@ STARTOP(put_subs_8bit_obs)
     const int           slot_ref     = int8(param[0]);
     const unsigned int  input_class  = uint8(param[1]),
                         output_class = uint8(param[2]);
-    uint16 index = reg.seg.findClassIndex(input_class, reg.seg[reg.is + slot_ref].gid());
-    reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, index));
+    uint16 index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_copy)
     declare_params(1);
     const unsigned int  slot_ref = uint8(*param);
     if (slot_ref)
-	memcpy(&(reg.seg[reg.is]), &(reg.seg[reg.is + slot_ref]), sizeof(Slot));
+	memcpy(&(seg[is]), &(seg[is + slot_ref]), sizeof(Slot));
 ENDOP
 
 STARTOP(insert)
-    reg.seg.insertSlot(reg.is);
-    reg.seg[reg.is].originate(reg.seg[reg.is + 1].original());
+    seg.insertSlot(is);
+    seg[is].originate(seg[is + 1].original());
 ENDOP
 
 STARTOP(delete_)
-    reg.seg[reg.is].markDeleted(true);
+    seg[is].markDeleted(true);
 ENDOP
 
 STARTOP(assoc)
@@ -228,12 +228,12 @@ STARTOP(assoc)
     
     while (count-- > 0)
     {
-        int ts = reg.is + *assocs++;
-        if (min == -1 || reg.seg[ts].before() < min) min = reg.seg[ts].before();
-        if (reg.seg[ts].after() > max) max = reg.seg[ts].after();
+        int ts = is + *assocs++;
+        if (min == -1 || seg[ts].before() < min) min = seg[ts].before();
+        if (seg[ts].after() > max) max = seg[ts].after();
     }
-    reg.seg[reg.is].before(min);
-    reg.seg[reg.is].after(max);
+    seg[is].before(min);
+    seg[is].after(max);
 ENDOP
 
 STARTOP(cntxt_item)
@@ -244,8 +244,8 @@ STARTOP(cntxt_item)
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
-    if (reg.isb + is_arg != reg.is) {
-        reg.ip += iskip;
+    if (isb + is_arg != is) {
+        ip += iskip;
         dp += dskip;
         push(true);
     }
@@ -255,30 +255,30 @@ STARTOP(attr_set)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    reg.seg[reg.is].setAttr(&reg.seg, slat, 0, val, reg.is);
+    seg[is].setAttr(&seg, slat, 0, val, is);
 ENDOP
 
 STARTOP(attr_add)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is, &reg.isf, &reg.isl, &reg.endPos);
-    reg.seg[reg.is].setAttr(&reg.seg, slat, 0, val + res, reg.is);
+    int res = seg[is].getAttr(&seg, slat, 0, is, &isf, &isl, &endPos);
+    seg[is].setAttr(&seg, slat, 0, val + res, is);
 ENDOP
 
 STARTOP(attr_sub)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, 0, reg.is, &reg.isf, &reg.isl, &reg.endPos);
-    reg.seg[reg.is].setAttr(&reg.seg, slat, 0, res - val, reg.is);
+    int res = seg[is].getAttr(&seg, slat, 0, is, &isf, &isl, &endPos);
+    seg[is].setAttr(&seg, slat, 0, res - val, is);
 ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    reg.seg[reg.is].setAttr(&reg.seg, slat, 0, val + reg.is, reg.is);
+    seg[is].setAttr(&seg, slat, 0, val + is, is);
 ENDOP
 
 STARTOP(iattr_set_slot)
@@ -286,35 +286,35 @@ STARTOP(iattr_set_slot)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val + reg.is, reg.is);
+    seg[is].setAttr(&seg, slat, idx, val + is, is);
 ENDOP
 
 STARTOP(push_slot_attr)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos));
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, 0, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
+    push(seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos));
 ENDOP
 
 STARTOP(push_glyph_attr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    push(reg.seg.glyphAttr(reg.seg[reg.is + slot_ref].gid(), glyph_attr));
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_attr_obs_constrained)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    push(reg.seg.glyphAttr(reg.seg[reg.is + slot_ref].gid(), glyph_attr));
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_metric)
@@ -322,7 +322,7 @@ STARTOP(push_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    push(reg.seg.getGlyphMetric(reg.is + slot_ref, glyph_attr, attr_level));
+    push(seg.getGlyphMetric(is + slot_ref, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_glyph_metric_constrained)
@@ -330,41 +330,41 @@ STARTOP(push_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    push(reg.seg.getGlyphMetric(reg.is + slot_ref, glyph_attr, attr_level));
+    push(seg.getGlyphMetric(is + slot_ref, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_feat)
     declare_params(2);
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    uint8 fid = reg.seg.charinfo(reg.seg[reg.is + slot_ref].original())->fid();
-    push(reg.seg.getFeature(fid, feat));
+    uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
+    push(seg.getFeature(fid, feat));
 ENDOP
 
 STARTOP(push_feat_constrained)
     declare_params(2);
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    uint8 fid = reg.seg.charinfo(reg.seg[reg.is + slot_ref].original())->fid();
-    push(reg.seg.getFeature(fid, feat));
+    uint8 fid = seg.charinfo(seg[is + slot_ref].original())->fid();
+    push(seg.getFeature(fid, feat));
 ENDOP
 
 STARTOP(push_att_to_gattr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.glyphAttr(reg.seg[slot].gid(), glyph_attr));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_gattr_obs_constrained)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.glyphAttr(reg.seg[slot].gid(), glyph_attr));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_metric)
@@ -372,9 +372,9 @@ STARTOP(push_att_to_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.getGlyphMetric(slot, glyph_attr, attr_level));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_att_to_glyph_metric_constrained)
@@ -382,9 +382,9 @@ STARTOP(push_att_to_glyph_metric_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.getGlyphMetric(slot, glyph_attr, attr_level));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_islot_attr)
@@ -392,7 +392,7 @@ STARTOP(push_islot_attr)
     const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref, &isf, &isl, &endPos));
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -400,7 +400,7 @@ STARTOP(push_islot_attr_constrained)
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    push(reg.seg[reg.is + slot_ref].getAttr(&reg.seg, slat, idx, reg.is + slot_ref, &reg.isf, &reg.isl, &reg.endPos));
+    push(seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref, &isf, &isl, &endPos));
 ENDOP
 
 STARTOP(push_iglyph_attr) // not implemented
@@ -425,7 +425,7 @@ STARTOP(iattr_set)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val, reg.is);
+    seg[is].setAttr(&seg, slat, idx, val, is);
 ENDOP
 
 STARTOP(iattr_add)
@@ -433,8 +433,8 @@ STARTOP(iattr_add)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is, &reg.isf, &reg.isl, &reg.endPos);
-    reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val + res, reg.is);
+    int res = seg[is].getAttr(&seg, slat, idx, is, &isf, &isl, &endPos);
+    seg[is].setAttr(&seg, slat, idx, val + res, is);
 ENDOP
 
 STARTOP(iattr_sub)
@@ -442,8 +442,8 @@ STARTOP(iattr_sub)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    int res = reg.seg[reg.is].getAttr(&reg.seg, slat, idx, reg.is, &reg.isf, &reg.isl, &reg.endPos);
-    reg.seg[reg.is].setAttr(&reg.seg, slat, idx, val - res, reg.is);
+    int res = seg[is].getAttr(&seg, slat, idx, is, &isf, &isl, &endPos);
+    seg[is].setAttr(&seg, slat, idx, val - res, is);
 ENDOP
 
 STARTOP(push_proc_state)
@@ -464,8 +464,8 @@ STARTOP(put_subs)
                                      | uint8(param[2]);
     const unsigned int  output_class = uint8(param[3]) << 8
                                      | uint8(param[4]);
-    int index = reg.seg.findClassIndex(input_class, reg.seg[reg.is + slot_ref].gid());
-    reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, index));
+    int index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_subs2) // not implemented
@@ -480,7 +480,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    reg.seg[reg.is].setGlyph(&reg.seg, reg.seg.getClassGlyph(output_class, 0));
+    seg[is].setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)
@@ -488,7 +488,7 @@ STARTOP(push_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    push(reg.seg.glyphAttr(reg.seg[reg.is + slot_ref].gid(), glyph_attr));
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_attr_constrained)
@@ -496,7 +496,7 @@ STARTOP(push_glyph_attr_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    push(reg.seg.glyphAttr(reg.seg[reg.is + slot_ref].gid(), glyph_attr));
+    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_attr)
@@ -504,9 +504,9 @@ STARTOP(push_att_to_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.glyphAttr(reg.seg[slot].gid(), glyph_attr));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_attr_constrained)
@@ -514,8 +514,8 @@ STARTOP(push_att_to_glyph_attr_constrained)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    int slot = reg.seg[reg.is + slot_ref].attachTo();
-    if (slot < 0) slot = reg.is + slot_ref;
-    push(reg.seg.glyphAttr(reg.seg[slot].gid(), glyph_attr));
+    int slot = seg[is + slot_ref].attachTo();
+    if (slot < 0) slot = is + slot_ref;
+    push(seg.glyphAttr(seg[slot].gid(), glyph_attr));
 ENDOP
 
