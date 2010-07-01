@@ -115,7 +115,7 @@ std::vector<byte> random_sequence(size_t n)
     std::vector<bool> done(n);
     std::vector<byte> seq(n);
     
-    srand(time(NULL));
+    srand(static_cast<unsigned int>(time(NULL)));
     
     while(n)
     {
