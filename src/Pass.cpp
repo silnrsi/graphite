@@ -290,15 +290,16 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     
     for (int i = 0; i < vms->ruleLength(); i++)
     {
+        int rulenum = vms->rule(i);
 #ifdef ENABLE_DEEP_TRACING
         if (XmlTraceLog::get().active())
         {
 	        XmlTraceLog::get().openElement(ElementTestRule);
-	        XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
+	        XmlTraceLog::get().addAttribute(AttrNum, rulenum);
 	        XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
         }
 #endif
-        if (testConstraint(m_cConstraint + vms->rule(i), startSlot, vms->length(i), seg, vms))
+        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), seg, vms))
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -309,7 +310,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
 	          XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
             }
 #endif
-	  int res = doAction(m_cActions + vms->rule(i), startSlot, seg, vms);
+	  int res = doAction(m_cActions + rulenum, startSlot, seg, vms);
 #ifdef ENABLE_DEEP_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -318,7 +319,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
         }
 #endif
             if (res == -1)
-                return m_ruleSorts[vms->rule(i)];
+                return m_ruleSorts[rulenum];
             else
                 return res;
         }
@@ -364,7 +365,11 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
     int iStart = iSlot;
     int32 ret = codeptr->run(m, *seg, iSlot, iSlot, status);
     
-    if (iSlot >= int(seg->length())) iSlot = seg->length() - 1;
+    if (iSlot >= int(seg->length()))
+    {
+        ret += seg->length() - iSlot + 1;
+        iSlot = seg->length() - 1;
+    }
     for (int i = iStart; i <= iSlot; )
     {
         if ((*seg)[i].isDeleted())
