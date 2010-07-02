@@ -140,6 +140,10 @@ SlotHandle SegmentHandle::operator[] (unsigned int index) const
     return &(ptr()->operator[](index));
 }
 
+CharInfo *SegmentHandle::charInfo(int index) const
+{
+    return ptr()->charinfo(index);
+}
 
 void SegmentHandle::runGraphite() const
 {

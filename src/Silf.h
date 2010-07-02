@@ -26,6 +26,8 @@ public:
     uint16 getClassGlyph(uint16 cid, uint16 index) const;
     uint16 findPseudo(uint32 uid) const;
     uint8 numUser() const { return m_aUser; }
+    uint8 aPseudo() const { return m_aPseudo; }
+    uint8 aBreak() const { return m_aBreak; }
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
@@ -38,7 +40,7 @@ private:
     uint8           m_sPass, m_pPass, m_jPass, m_bPass,
                     m_flags;
 
-    uint8   m_aBreak, m_aUser, 
+    uint8   m_aPseudo, m_aBreak, m_aUser, 
             m_iMaxComp;
     uint16  m_aLig,
             m_numPseudo,

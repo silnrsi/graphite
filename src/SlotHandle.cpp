@@ -42,4 +42,12 @@ int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subinde
     return m_p->getAttr(hSeg.ptr(), index, subindex, is, NULL, NULL, NULL);
 }
 
+bool SlotHandle::isInsertBefore() const
+{
+    return m_p->isInsertBefore();
+}
 
+int SlotHandle::original() const
+{
+    return m_p->original();
+}

@@ -20,7 +20,9 @@ public:
 
     Slot();
     void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
+    uint16 glyph() { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment *seg, uint16 glyphid);
+    void setRealGid(uint16 gid) { m_realglyphid = gid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }
     int original() const { return m_original; }
@@ -43,6 +45,7 @@ public:
 
 private:
     unsigned short m_glyphid;        // glyph id
+    uint16 m_realglyphid;
     int m_original;	    // charinfo that originated this slot (e.g. for feature values)
     int m_before;           // charinfo index of before association
     int m_after;            // charinfo index of after association

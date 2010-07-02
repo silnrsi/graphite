@@ -3,6 +3,7 @@
 #include "graphiteng/Types.h"
 #include "graphiteng/RefCountHandle.h"
 #include "graphiteng/SlotHandle.h"
+#include "CharInfo.h"           // hmm we need a public layer of one of these
 
 class Segment;
 class LoadedFace;
@@ -33,6 +34,7 @@ public:
     float advanceX() const;
     float advanceY() const;
     SlotHandle operator[] (unsigned int index) const;
+    CharInfo *charInfo(int index) const;
     void runGraphite() const;
     void chooseSilf(uint32 script) const;
     

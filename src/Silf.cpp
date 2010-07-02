@@ -84,7 +84,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     }
     m_flags = uint8(*p++);
     p += 2;     // ignore line end contextuals for now
-    p++;        // not sure what to do with attrPseudo
+    m_aPseudo = uint8(*p++);
     m_aBreak = uint8(*p++);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrBreakWeight, m_aBreak);

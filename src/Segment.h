@@ -40,6 +40,7 @@ public:
     const Slot & operator[] (unsigned int index) const { return m_slots[index]; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
+    const Silf *silf() const { return m_silf; }
     CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     int8 dir() const { return m_dir; }
     uint16 user(uint32 sid, uint8 index) { return (sid < m_numGlyphs && index < m_silf->numUser() ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
@@ -47,7 +48,7 @@ public:
 
     Segment(unsigned int numchars, const LoadedFace* face, uint32 script);
     ~Segment();
-    void appendSlot(int i, int cid, int gid, int fid);
+    void appendSlot(int i, int cid, int gid, int realgid, int fid, int bw);
     void positionSlots(const LoadedFont *font);
     void positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos);
     void append(const Segment &other);

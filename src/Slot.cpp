@@ -3,7 +3,7 @@
 #include "CharInfo.h"
 
 Slot::Slot() :
-        m_glyphid(0), m_before(0), m_after(0), m_parent(-1), m_child(-1), m_sibling(-1),
+        m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(-1), m_child(-1), m_sibling(-1),
         m_position(0, 0), m_advance(-1, -1), m_shift(0, 0)
 {
 }
@@ -20,7 +20,7 @@ Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Re
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;
     Position shift = m_shift * scale;
-    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(m_glyphid)) * scale + advance(font) : m_advance.x;
+    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + advance(font) : m_advance.x;
 //    float tAdvance = font ? m_advance.x * scale + advance(font) : m_advance.x + seg->glyphAdvance(m_glyphid);
     Position res;
 
@@ -35,7 +35,7 @@ Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Re
         res = Position(tAdv, 0);
     }
 
-    Rect ourBbox = seg->glyphBbox(m_glyphid) * scale + m_position;
+    Rect ourBbox = seg->glyphBbox(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
     if (m_parent != -1 && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x;
@@ -122,7 +122,7 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, in
     case kslatAttLevel :
         return m_attLevel;
     case kslatBreak :
-        seg->charinfo(m_original)->breakWeight();
+        return seg->charinfo(m_original)->breakWeight();
     case kslatCompRef :
         return 0;
     case kslatDir :

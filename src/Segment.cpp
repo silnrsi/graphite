@@ -62,13 +62,15 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void Segment::appendSlot(int id, int cid, int gid, int iFeats)
+void Segment::appendSlot(int id, int cid, int gid, int realgid, int iFeats, int bw)
 {
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
+    m_charinfo[id].breakWeight(bw);
     
     m_slots[id].child(this, -1);
     m_slots[id].setGlyph(this, gid);
+    m_slots[id].setRealGid(realgid);
     m_slots[id].originate(id);
     m_slots[id].before(id);
     m_slots[id].after(id);
@@ -209,18 +211,25 @@ class SlotBuilder
 {
 public:
       SlotBuilder(const LoadedFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, Segment* pDest2)
-      :	  face(face2), 
-	  pDest(pDest2), 
-	  ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
-	  fid(pDest2->addFeatures(*pFeats.ptr())),
+      :	  m_face(face2), 
+	  m_pDest(pDest2), 
+	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
+	  m_fid(pDest2->addFeatures(*pFeats.ptr())),
 	  m_nCharsProcessed(0) 
       {
       }	  
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
-	  unsigned int gid = TtfUtil::Cmap31Lookup(ctable, cid);
-          pDest->appendSlot(m_nCharsProcessed, cid, gid ? gid : face->findPseudo(cid), fid);
+          uint16 realgid = 0;
+	  uint16 gid = TtfUtil::Cmap31Lookup(m_ctable, cid);
+          if (!gid)
+          {
+              gid = m_face->findPseudo(cid);
+              realgid = m_face->glyphAttr(gid, m_pDest->silf()->aPseudo());
+          }
+          int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
+          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, realgid, m_fid, bw);
 	  ++m_nCharsProcessed;
 	  return true;
       }
@@ -228,10 +237,10 @@ public:
       size_t charsProcessed() const { return m_nCharsProcessed; }
 
 private:
-      const LoadedFace *face;
-      Segment *pDest;
-      const void *const   ctable;
-      const unsigned int fid;
+      const LoadedFace *m_face;
+      Segment *m_pDest;
+      const void *const   m_ctable;
+      const unsigned int m_fid;
       size_t m_nCharsProcessed ;
 };
 
