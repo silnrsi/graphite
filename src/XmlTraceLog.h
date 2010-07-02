@@ -25,9 +25,12 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
+#if 0
 // This won't compile on Windows 32 bit, since it has the same signature as the above method
 // And it won't compile in linux without it. So add something conditional here
+//PR does compile in Linux without it!
     void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
+#endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);
