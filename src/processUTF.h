@@ -76,6 +76,10 @@ private:
 class IgnoreErrors
 {
 public:
+    //for all of the ignore* methods is the parameter is false, the return result must be true
+    static bool ignoreUnicodeOutOfRangeErrors(bool isBad) { return true; }
+    static bool ignoreBadSurrogatesErrors(bool isBad) { return true; }
+
     static bool handleError(const void* pPositionOfError) { return true;}
 };
 
@@ -85,6 +89,10 @@ class BreakOnError
 public:
     BreakOnError() : m_pErrorPos(NULL) {}
     
+    //for all of the ignore* methods is the parameter is false, the return result must be true
+    static bool ignoreUnicodeOutOfRangeErrors(bool isBad) { return !isBad; }
+    static bool ignoreBadSurrogatesErrors(bool isBad) { return !isBad; }
+
     bool handleError(const void* pPositionOfError) { m_pErrorPos=pPositionOfError; return false;}
 
 public:
@@ -115,6 +123,18 @@ public:
     
     const uint8* pCharStart() const { return m_pCharStart; }
 
+private:
+    template <class ERRORHANDLER>
+    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
+        *pRes = 0xFFFD;
+        if (!pErrHandler->handleError(m_pCharStart)) {
+            return false;
+        }                          
+        ++m_pCharStart; 
+        return true;
+    }
+    
+public:
     template <class LIMIT, class ERRORHANDLER>
     inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
         const unsigned int seq_extra = utf8_extrabytes(*m_pCharStart >> 4);        //length of sequence including *m_pCharStart is 1+seq_extra
@@ -127,51 +147,31 @@ public:
         if (seq_extra) {
             switch(seq_extra) {    //hopefully the optimizer will implement this as a jump table. If not the above if should cover the majority case.    
                 case 3: {	
-                    if ((*m_pCharStart>>3)==0x1E) {		//the good case
+                    if (pErrHandler->ignoreUnicodeOutOfRangeErrors(*m_pCharStart>=0xF8)) {		//the good case
                         ++m_pCharStart;
-                        if ((*m_pCharStart&0xC0)!=0x80) {
-                            *pRes = 0xFFFD;
-                            if (!pErrHandler->handleError(m_pCharStart)) {
-                                return false;
-                            }                          
-                            ++m_pCharStart; 
-                            return true;
+                        if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
+                            return respondToError(pRes, pErrHandler);
                         }           
-                          
+                        
                         *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;		//drop through
                     }
                     else {
-                        *pRes = 0xFFFD;
-                        if (!pErrHandler->handleError(m_pCharStart)) {
-                          return false;
-                        }                          
-                        ++m_pCharStart; 
-                        return true;
+                        return respondToError(pRes, pErrHandler);
                     }		    
                 }
                 case 2: {
-                        ++m_pCharStart;
-                        if ((*m_pCharStart&0xC0)!=0x80) {
-                            *pRes = 0xFFFD;
-                            if (!pErrHandler->handleError(m_pCharStart)) {
-                                return false;
-                            }                          
-                            ++m_pCharStart; 
-                            return true;
-                        }
+                    ++m_pCharStart;
+                    if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
+                        return respondToError(pRes, pErrHandler);
+                    }
                 }           
                 *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;       //drop through
                 case 1: {
-                        ++m_pCharStart;
-                        if ((*m_pCharStart&0xC0)!=0x80) {
-                            *pRes = 0xFFFD;
-                            if (!pErrHandler->handleError(m_pCharStart)) {
-                                return false;
-                            }                          
-                            ++m_pCharStart; 
-                            return true;
-                        }
-               }           
+                    ++m_pCharStart;
+                    if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
+                        return respondToError(pRes, pErrHandler);
+                    }
+                }           
                 *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;
              }
         }
@@ -195,22 +195,29 @@ public:
       
       const uint16* pCharStart() const { return m_pCharStart; }
   
+private:
+    template <class ERRORHANDLER>
+    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
+        *pRes = 0xFFFD;
+        if (!pErrHandler->handleError(m_pCharStart)) {
+            return false;
+        }                          
+        ++m_pCharStart; 
+        return true;
+    }
+    
+public:
       template <class LIMIT, class ERRORHANDLER>
       inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *m_pCharStart;
-      if (0xD800 > *pRes || *pRes >= 0xE000) {
+      if (0xD800 > *pRes || pErrHandler->ignoreUnicodeOutOfRangeErrors(*pRes >= 0xE000)) {
           ++m_pCharStart;
           return true;
       }
       
-      if (*pRes >= 0xDC00) {        //second surrogate is incorrectly coming first
-          *pRes = 0xFFFD;
-          if (!pErrHandler->handleError(m_pCharStart)) {
-            return false;
-          }
-          ++m_pCharStart;
-          return true;
+      if (!pErrHandler->ignoreBadSurrogatesErrors(*pRes >= 0xDC00)) {        //second surrogate is incorrectly coming first
+          return respondToError(pRes, pErrHandler);
       }
 
       ++m_pCharStart;
@@ -219,13 +226,8 @@ public:
 	  }
 
 	  uint32 ul = *(m_pCharStart);
-	  if (0xDC00 > ul || ul > 0xDFFF) {
-	      *pRes = 0xFFFD;
-          if (!pErrHandler->handleError(m_pCharStart)) {
-            return false;
-          }
-          ++m_pCharStart;
-	      return true;
+	  if (!pErrHandler->ignoreBadSurrogatesErrors(0xDC00 > ul || ul > 0xDFFF)) {
+          return respondToError(pRes, pErrHandler);
 	  }
 	  ++m_pCharStart;
 	  *pRes =  (*pRes<<10) + ul + SURROGATE_OFFSET;
@@ -244,26 +246,28 @@ public:
       
       const uint32* pCharStart() const { return m_pCharStart; }
   
+private:
+    template <class ERRORHANDLER>
+    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
+        *pRes = 0xFFFD;
+        if (!pErrHandler->handleError(m_pCharStart)) {
+            return false;
+        }                          
+        ++m_pCharStart; 
+        return true;
+    }
+
+public:
       template <class LIMIT, class ERRORHANDLER>
       inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *m_pCharStart;
-      if (*pRes<0xD800) {
+      if (pErrHandler->ignoreUnicodeOutOfRangeErrors(!(*pRes<0xD800 || (*pRes>=0xE000 && *pRes<0x110000)))) {
           ++m_pCharStart;
           return true;
       }
       
-      if (*pRes>=0xE000 && *pRes<0x110000) {
-          ++m_pCharStart;
-          return true;
-      }
-        
-      *pRes = 0xFFFD;
-      if (!pErrHandler->handleError(m_pCharStart)) {
-        return false;
-      }
-      ++m_pCharStart;
-	  return true;
+      return respondToError(pRes, pErrHandler);
       }
 
 private:
@@ -292,6 +296,10 @@ public:
 class ERRORHANDLER
 {
 public:
+    //for all of the ignore* methods is the parameter is false, the return result must be true
+    bool ignoreUnicodeOutOfRangeErrors(bool isBad) const;
+    bool ignoreBadSurrogatesErrors(bool isBad) const;
+
     bool handleError(const void* pPositionOfError);     //returns true iff error handled and should continue
 };
 
