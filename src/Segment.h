@@ -28,7 +28,7 @@ public:
             while (m_slots.size() <= static_cast<size_t>(index))
             {
                 Slot s;
-                s.glyph(0);
+                s.setGlyph(this, 0);
                 s.before(-1);
                 s.after(-1);
                 m_slots.push_back(s);
@@ -48,7 +48,7 @@ public:
 
     Segment(unsigned int numchars, const LoadedFace* face, uint32 script);
     ~Segment();
-    void appendSlot(int i, int cid, int gid, int realgid, int fid, int bw);
+    void appendSlot(int i, int cid, int gid, int fid, int bw);
     void positionSlots(const LoadedFont *font);
     void positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos);
     void append(const Segment &other);

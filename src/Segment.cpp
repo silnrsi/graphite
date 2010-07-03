@@ -62,7 +62,7 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void Segment::appendSlot(int id, int cid, int gid, int realgid, int iFeats, int bw)
+void Segment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
 {
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
@@ -70,7 +70,6 @@ void Segment::appendSlot(int id, int cid, int gid, int realgid, int iFeats, int 
     
     m_slots[id].child(this, -1);
     m_slots[id].setGlyph(this, gid);
-    m_slots[id].setRealGid(realgid);
     m_slots[id].originate(id);
     m_slots[id].before(id);
     m_slots[id].after(id);
@@ -224,12 +223,9 @@ public:
           uint16 realgid = 0;
 	  uint16 gid = TtfUtil::Cmap31Lookup(m_ctable, cid);
           if (!gid)
-          {
               gid = m_face->findPseudo(cid);
-              realgid = m_face->glyphAttr(gid, m_pDest->silf()->aPseudo());
-          }
           int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
-          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, realgid, m_fid, bw);
+          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, bw);
 	  ++m_nCharsProcessed;
 	  return true;
       }

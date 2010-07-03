@@ -256,6 +256,7 @@ void Slot::child(Segment *seg, int ap)
 
 void Slot::setGlyph(Segment *seg, uint16 glyphid)
 {
-    glyph(glyphid);
+    m_glyphid = glyphid;
+    m_realglyphid = seg->glyphAttr(glyphid, seg->silf()->aPseudo());
     m_advance = Position(seg->glyphAdvance(glyphid), 0.);
 }
