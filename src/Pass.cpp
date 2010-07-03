@@ -53,6 +53,8 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
 #endif
     p += 6;
     m_cols = new uint16[numGlyphs];
+    for (int i = 0; i < numGlyphs; i++)
+        m_cols[i] = -1;
     for (int i = 0; i < numRanges; i++)
     {
         uint16 first = read16(p);
@@ -260,25 +262,23 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     while (true)
     {
         if (iSlot >= (int)seg->length()) break;
+        uint16 iCol = m_cols[(*seg)[iSlot].gid()];
 #ifdef ENABLE_DEEP_TRACING
         if (state >= m_sTransition)
         {
             XmlTraceLog::get().error("Invalid state %d", state);
-            return -1;
         }
         if ((*seg)[iSlot].gid() >= face->numGlyphs())
         {
             XmlTraceLog::get().error("Invalid glyph ID %d for slot %d", (*seg)[iSlot].gid(), iSlot);
-            return -1;
         }
-        if (m_cols[(*seg)[iSlot].gid()] >= m_sColumns)
+        if (iCol >= m_sColumns && iCol != 65535)
         {
             XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
                 m_cols[(*seg)[iSlot].gid()], (*seg)[iSlot].gid(), iSlot);
-            return -1;
         }
 #endif
-        state = m_sTable[state * m_sColumns + m_cols[(*seg)[iSlot].gid()]];
+        state = iCol != 65535 ? m_sTable[state * m_sColumns + iCol] : 0;
         if (state > m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];

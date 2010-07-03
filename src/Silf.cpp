@@ -347,14 +347,14 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     return -1;
 }
 
-uint16 Silf::getClassGlyph(uint16 cid, uint16 index) const
+uint16 Silf::getClassGlyph(uint16 cid, int index) const
 {
     if (cid > m_nClass) return 0;
 
     uint16 loc = m_classOffsets[cid];
     if (cid < m_nLinear)
     {
-        if (index < m_classOffsets[cid + 1] - index)
+        if (index >= 0 && index < m_classOffsets[cid + 1] - index)
             return m_classData[index + loc];
     }
     else        // input class being used for output. Shouldn't happen

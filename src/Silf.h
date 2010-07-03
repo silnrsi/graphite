@@ -23,7 +23,7 @@ public:
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
-    uint16 getClassGlyph(uint16 cid, uint16 index) const;
+    uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
