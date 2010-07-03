@@ -173,7 +173,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
             XmlTraceLog::get().addAttribute(AttrPassId, i);
         }
 #endif
-        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), numGlyphs + m_numPseudo))
+        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i])))
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);

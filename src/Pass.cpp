@@ -9,7 +9,7 @@
 using vm::Code;
 using vm::Machine;
 
-bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
+bool Pass::readPass(void *pPass, size_t lPass)
 {
     byte *p = (byte *)pPass;
     uint16 numRanges, numEntries;
@@ -52,14 +52,14 @@ bool Pass::readPass(void *pPass, size_t lPass, int numGlyphs)
     XmlTraceLog::get().addAttribute(AttrNumRanges, numRanges);
 #endif
     p += 6;
-    m_cols = new uint16[numGlyphs];
-    for (int i = 0; i < numGlyphs; i++)
+    m_numGlyphs = swap16(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
+    m_cols = new uint16[m_numGlyphs];
+    for (int i = 0; i < m_numGlyphs; i++)
         m_cols[i] = -1;
     for (int i = 0; i < numRanges; i++)
     {
         uint16 first = read16(p);
         uint16 last = read16(p);
-        if (last >= numGlyphs) last = numGlyphs - 1;
         uint16 col = read16(p);
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
@@ -262,15 +262,13 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
     while (true)
     {
         if (iSlot >= (int)seg->length()) break;
-        uint16 iCol = m_cols[(*seg)[iSlot].gid()];
+        uint16 gid = (*seg)[iSlot].gid();
+        if (gid >= m_numGlyphs) break;
+        uint16 iCol = m_cols[gid];
 #ifdef ENABLE_DEEP_TRACING
         if (state >= m_sTransition)
         {
             XmlTraceLog::get().error("Invalid state %d", state);
-        }
-        if ((*seg)[iSlot].gid() >= face->numGlyphs())
-        {
-            XmlTraceLog::get().error("Invalid glyph ID %d for slot %d", (*seg)[iSlot].gid(), iSlot);
         }
         if (iCol >= m_sColumns && iCol != 65535)
         {
@@ -278,7 +276,8 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch
                 m_cols[(*seg)[iSlot].gid()], (*seg)[iSlot].gid(), iSlot);
         }
 #endif
-        state = iCol != 65535 ? m_sTable[state * m_sColumns + iCol] : 0;
+        if (iCol == 65535) break;
+        state = m_sTable[state * m_sColumns + iCol];
         if (state > m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];

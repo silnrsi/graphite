@@ -12,7 +12,7 @@ class Pass
 public:
     Pass() {}
     
-    bool readPass(void *pPass, size_t lPass, int numGlyphs);
+    bool readPass(void *pPass, size_t lPass);
     void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
     int findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const;
     int testConstraint(const vm::Code *codeptr, int iSlot, int num, Segment *seg, VMScratch *vms) const;
@@ -22,6 +22,7 @@ public:
 private:
     Silf *m_silf;
     byte m_iMaxLoop;
+    uint16 m_numGlyphs;
     uint16 m_numRules;
     uint16 m_sRows;
     uint16 m_sTransition;
