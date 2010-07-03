@@ -638,7 +638,7 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength());
+        SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");

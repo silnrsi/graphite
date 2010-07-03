@@ -46,7 +46,7 @@ public:
     uint16 user(uint32 sid, uint8 index) { return (sid < m_numGlyphs && index < m_silf->numUser() ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
     void user(uint32 sid, uint8 index, uint16 value) { if (sid < m_numGlyphs && index < m_silf->numUser()) m_userAttrs[sid * m_silf->numUser() + index] = value; }
 
-    Segment(unsigned int numchars, const LoadedFace* face, uint32 script);
+    Segment(unsigned int numchars, const LoadedFace* face, uint32 script, int dir);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid, int bw);
     void positionSlots(const LoadedFont *font);

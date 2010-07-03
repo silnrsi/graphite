@@ -11,13 +11,14 @@
 #include "XmlTraceLog.h"
 #include "graphiteng/SegmentHandle.h"
 
-Segment::Segment(unsigned int numchars, const LoadedFace *face, uint32 script) :
+Segment::Segment(unsigned int numchars, const LoadedFace* face, uint32 script, int dir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
         m_slots(numchars),
         m_charinfo(new CharInfo[numchars]),
         m_silf(face->chooseSilf(script)),
+        m_dir(dir),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
     m_userAttrs.assign(m_silf->numUser() * numchars, 0);         // initialise to 0
@@ -82,11 +83,23 @@ void Segment::positionSlots(const LoadedFont *font)
     float cMin = 0.;
     Rect bbox;
 
-    for (unsigned int i = 0; i < m_numGlyphs; i++)
+    if (m_dir & 1)
     {
-        s = &(m_slots[i]);
-        if (s->isBase())
-            currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
+        for (int i = m_numGlyphs - 1; i >= 0; i--)
+        {
+            s = &(m_slots[i]);
+            if (s->isBase())
+                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
+        }
+    }
+    else
+    {
+        for (unsigned int i = 0; i < m_numGlyphs; i++)
+        {
+            s = &(m_slots[i]);
+            if (s->isBase())
+                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
+        }
     }
     m_advance = currpos;
 }
@@ -120,12 +133,23 @@ void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endP
     
     start = findRoot(start);
     for ( ; end + 1 < m_numGlyphs && m_slots[end + 1].attachTo() != -1; end++ ) {}
-    
-    for (unsigned int i = start; i <= end; i++)
+    if (m_dir)
     {
-        Slot *s = &(m_slots[i]);
-        if (s->isBase())
-            currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
+        for (unsigned int i = end; i >= start; i--)
+        {
+            Slot *s = &(m_slots[i]);
+            if (s->isBase())
+                currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
+        }
+    }
+    else
+    {
+        for (unsigned int i = start; i <= end; i++)
+        {
+            Slot *s = &(m_slots[i]);
+            if (s->isBase())
+                currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
+        }
     }
     
     if (start < *iStart)
@@ -252,7 +276,6 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
 
 void Segment::prepare_pos(const LoadedFont *font)
 {
-    // reorder for bidi
     // copy key changeable metrics into slot (if any);
 }
 

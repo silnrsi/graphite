@@ -19,7 +19,6 @@ public:
     int after() const { return m_after; }
 
     Slot();
-//    void glyph(unsigned short glyphid) { m_glyphid = glyphid; }
     uint16 glyph() { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment *seg, uint16 glyphid);
     void setRealGid(uint16 gid) { m_realglyphid = gid; }
