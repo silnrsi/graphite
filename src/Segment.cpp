@@ -172,45 +172,56 @@ void Segment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t 
 {
     if (XmlTraceLog::get().active())
     {
+        if (pStart)
+        {
+            XmlTraceLog::get().openElement(ElementText);
+            XmlTraceLog::get().addAttribute(AttrEncoding, enc);
+            XmlTraceLog::get().addAttribute(AttrLength, nChars);
+            switch (enc)
+            {
+            case SegmentHandle::kutf8:
+                XmlTraceLog::get().writeText(
+                    reinterpret_cast<const char *>(pStart));
+                break;
+            case SegmentHandle::kutf16:
+                for (size_t j = 0; j < nChars; ++j)
+                {
+                    uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
+                    if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
+                    {
+                        j++;
+                        // append low surrogate
+                        code = (code << 16) + reinterpret_cast<const uint16 *>(pStart)[j];
+                    }
+                    else if (code >= 0xDC00 && code <= 0xDFFF)
+                    {
+                        XmlTraceLog::get().warning("Unexpected low surrogate %x at %d", code, j);
+                    }
+                    XmlTraceLog::get().writeUnicode(code);
+                }
+                break;
+            case SegmentHandle::kutf32:
+                for (size_t j = 0; j < nChars; ++j)
+                {
+                    XmlTraceLog::get().writeUnicode(
+                        reinterpret_cast<const uint32 *>(pStart)[j]);
+                }
+                break;
+            }
+            XmlTraceLog::get().closeElement(ElementText);
+        }
+        logSegment();
+    }
+}
+
+void Segment::logSegment() const
+{
+    if (XmlTraceLog::get().active())
+    {
         XmlTraceLog::get().openElement(ElementSegment);
         XmlTraceLog::get().addAttribute(AttrLength, length());
         XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
-        XmlTraceLog::get().openElement(ElementText);
-        XmlTraceLog::get().addAttribute(AttrEncoding, enc);
-        XmlTraceLog::get().addAttribute(AttrLength, nChars);
-        switch (enc)
-        {
-        case SegmentHandle::kutf8:
-            XmlTraceLog::get().writeText(
-                reinterpret_cast<const char *>(pStart));
-            break;
-        case SegmentHandle::kutf16:
-            for (size_t j = 0; j < nChars; ++j)
-            {
-                uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
-                if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
-                {
-                    j++;
-                    // append low surrogate
-                    code = (code << 16) + reinterpret_cast<const uint16 *>(pStart)[j];
-                }
-                else if (code >= 0xDC00 && code <= 0xDFFF)
-                {
-                    XmlTraceLog::get().warning("Unexpected low surrogate %x at %d", code, j);
-                }
-                XmlTraceLog::get().writeUnicode(code);
-            }
-            break;
-        case SegmentHandle::kutf32:
-            for (size_t j = 0; j < nChars; ++j)
-            {
-                XmlTraceLog::get().writeUnicode(
-                    reinterpret_cast<const uint32 *>(pStart)[j]);
-            }
-            break;
-        }
-        XmlTraceLog::get().closeElement(ElementText);
         for (unsigned int i = 0; i < length(); i++)
         {
             XmlTraceLog::get().openElement(ElementSlot);

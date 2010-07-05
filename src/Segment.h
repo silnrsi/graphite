@@ -92,6 +92,7 @@ public:
 
 #ifndef DISABLE_TRACING
     void logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const;
+    void logSegment() const;
 #endif
 
 private:

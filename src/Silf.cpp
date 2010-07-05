@@ -1,5 +1,6 @@
 #include "Silf.h"
 #include "XmlTraceLog.h"
+#include "Segment.h"
 
 Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
@@ -312,6 +313,15 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
 {
     if (cid > m_nClass) return -1;
 
+#ifdef ENABLE_DEEP_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementLookupClass);
+        XmlTraceLog::get().addAttribute(AttrNum, cid);
+        XmlTraceLog::get().addAttribute(AttrGlyphId, gid);
+    }
+#endif
+
     uint16 loc = m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
     {
@@ -325,7 +335,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
         uint16 selector = m_classData[loc + 2];
         uint16 range = m_classData[loc + 3];
 
-        uint16 curr = loc + 4 + 2 * selector;
+        uint16 curr = loc + 4 + range * 2;
 
         while (search > 1)
         {
@@ -335,8 +345,16 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
             else
                 test = m_classData[curr] - gid;
 
-            if (test == 0) return m_classData[curr + 1];
-
+            if (test == 0)
+            {
+                uint16 res = m_classData[curr + 1];
+#ifdef ENABLE_DEEP_TRACING
+                XmlTraceLog::get().addAttribute(AttrIndex, res);
+                XmlTraceLog::get().closeElement(ElementLookupClass);
+#endif
+                return res;
+            }
+            
             search >>= 1;
             if (test < 0)
                 curr += search;
@@ -344,6 +362,10 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
                 curr -= search;
         }
     }
+#ifdef ENABLE_DEEP_TRACING
+    XmlTraceLog::get().addAttribute(AttrIndex, -1);
+    XmlTraceLog::get().closeElement(ElementLookupClass);
+#endif
     return -1;
 }
 
@@ -354,7 +376,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     uint16 loc = m_classOffsets[cid];
     if (cid < m_nLinear)
     {
-        if (index >= 0 && index < m_classOffsets[cid + 1] - index)
+        if (index >= 0 && index < m_classOffsets[cid + 1] - loc)
             return m_classData[index + loc];
     }
     else        // input class being used for output. Shouldn't happen
@@ -379,6 +401,7 @@ void Silf::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(seg, face, vms);
 #ifndef DISABLE_TRACING
+            seg->logSegment();
 	    XmlTraceLog::get().closeElement(ElementRunPass);
 #endif
     }
