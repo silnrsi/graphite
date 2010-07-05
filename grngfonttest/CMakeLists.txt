@@ -42,8 +42,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     endif (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
-find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
+# find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
+# find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # -lgcc LINKER_LANGUAGE C
@@ -70,11 +70,11 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 add_dependencies(copy_dll graphiteng iconv)
 
 # TODO need to set ENVIRONMENT property for Windows?
-add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.xml -codes 1000 1031 102C)
+# add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.xml -codes 1000 1031 102C)
 # TODO Add expected results to compare with
 #add_test(NAME grngfonttestPadauk1Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log ${PROJECT_SOURCE_DIR}/expected/grngfonttestPadauk1.log)
 #set_tests_properties(grngfonttestPadauk1Output PROPERTIES DEPENDS grngfonttestPadauk1)
 
-add_test(NAME grngfonttestCharis1 COMMAND $<TARGET_FILE:grngfonttest> ${CHARIS_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestCharis1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestCharis1.xml -codes 0069 02e6 02e8 02e5)
+# add_test(NAME grngfonttestCharis1 COMMAND $<TARGET_FILE:grngfonttest> ${CHARIS_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestCharis1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestCharis1.xml -codes 0069 02e6 02e8 02e5)
 
-set_tests_properties(grngfonttestPadauk1 grngfonttestCharis1 PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+# set_tests_properties(grngfonttestPadauk1 grngfonttestCharis1 PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})

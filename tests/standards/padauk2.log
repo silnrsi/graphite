@@ -1,0 +1,6 @@
+Text codes
+1000	103c	102d	102f	
+pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
+00    99  -1@0,0	   0.0	   0.0	 0 -15	  0   0	   1000	   1000
+01   209   0@714,495	  11.1	   0.0	 1 -50	  2   2	   102d	   102d
+Advance width =   11.7
