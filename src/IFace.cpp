@@ -26,13 +26,13 @@ private:
 };
 
 
-class FileFont /*really a FileFace!*/: public IFace
+class FileFace : public IFace
 {
 friend class IFace;
 
 public:
-    FileFont(const char *name);
-    ~FileFont();
+    FileFace(const char *name);
+    ~FileFace();
     virtual const void *getTable(unsigned int name, size_t *len) const;
 
 private:
@@ -43,12 +43,12 @@ private:
     char *m_pTableDir;
     
 private:		//defensive
-    FileFont(const FileFont&);
-    FileFont& operator=(const FileFont&);
+    FileFace(const FileFace&);
+    FileFace& operator=(const FileFace&);
 };
 
 
-FileFont::FileFont(const char *fname) :
+FileFace::FileFace(const char *fname) :
     m_pHeader(NULL),
     m_pTableDir(NULL)
 {
@@ -65,7 +65,7 @@ FileFont::FileFont(const char *fname) :
     if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
 
-FileFont::~FileFont()
+FileFace::~FileFace()
 {
     delete[] m_pTableDir;
     delete[] m_pHeader;
@@ -76,7 +76,7 @@ FileFont::~FileFont()
     m_pHeader = NULL;
 }
 
-const void *FileFont::getTable(unsigned int name, size_t *len) const
+const void *FileFace::getTable(unsigned int name, size_t *len) const
 {
 //    std::map<unsigned int, std::pair<const void *, size_t> >::const_iterator res;
 //    if ((res = m_tables.find(name)) == m_tables.end())
@@ -184,11 +184,12 @@ const void *FileFont::getTable(unsigned int name, size_t *len) const
 
 /*static*/ IFace* IFace::loadTTFFile(const char *name)		//when no longer needed, call delete
 {
-    FileFont* res = new FileFont(name);
+    FileFace* res = new FileFace(name);
     if (res->m_pTableDir)
 	return res;
     
     //error when loading
+
     delete res;
     return NULL;
 }
