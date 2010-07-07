@@ -13,6 +13,7 @@ endmacro(fonttest)
 
 fonttest(padauk1 Padauk.ttf 1000 103C 1031 102C)
 fonttest(padauk2 Padauk.ttf 1000 103C 102D 102F)
+fonttest(padauk3 Padauk.ttf 101e 1004 103a 1039 1001 103b 102d 102f 1004 103a 1038)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 
