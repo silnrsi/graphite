@@ -49,7 +49,7 @@ public:
     Segment(unsigned int numchars, const LoadedFace* face, uint32 script, int dir);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid, int bw);
-    void positionSlots(const LoadedFont *font);
+    void positionSlots(const GrFont *font);
     void positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos);
     void append(const Segment &other);
     void insertSlot(size_t index) {
@@ -85,7 +85,7 @@ public:
     }
     float glyphAdvance(uint16 gid) { return m_face->getAdvance(gid, 1.0); }
     const Rect &glyphBbox(uint16 gid) { return m_face->bbox(gid); }
-    Position finalise(int iSlot, LoadedFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel) {
+    Position finalise(int iSlot, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel) {
         return m_slots[iSlot].finalise(this, font, base, bbox, cMin, attrLevel);
     }
     int findRoot(int is) const { return (m_slots[is].attachTo() == -1 ? is : findRoot(m_slots[is].attachTo())); }
@@ -98,8 +98,8 @@ public:
 private:
     friend class SegmentHandle ;
     void read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void*pStart, size_t nChars);
-    void prepare_pos(const LoadedFont *font);
-    void finalise(const LoadedFont *font);
+    void prepare_pos(const GrFont *font);
+    void finalise(const GrFont *font);
   
 private:
     std::vector<Slot> m_slots;

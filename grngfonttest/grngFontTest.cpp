@@ -582,7 +582,7 @@ int Parameters::testFileFont() const
             return 3;
         }
 
-        LoadedFont *sizedFont = IFont::makeLoadedFont(pointSize * dpi / 72, face);
+        GrFont *sizedFont = IFont::makeGrFont(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -689,7 +689,7 @@ int Parameters::testFileFont() const
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
        }	//to get seg destroyed before its parameters
         
-        IFont::destroyLoadedFont(sizedFont);
+        IFont::destroyGrFont(sizedFont);
         IFace::destroyLoadedFace(face);
         delete fileface;
 //            delete featureParser;

@@ -76,7 +76,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
     m_slots[id].after(id);
 }
 
-void Segment::positionSlots(const LoadedFont *font)
+void Segment::positionSlots(const GrFont *font)
 {
     Position currpos;
     Slot *s;
@@ -285,12 +285,12 @@ void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*mu
     processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
 }
 
-void Segment::prepare_pos(const LoadedFont *font)
+void Segment::prepare_pos(const GrFont *font)
 {
     // copy key changeable metrics into slot (if any);
 }
 
-void Segment::finalise(const LoadedFont *font)
+void Segment::finalise(const GrFont *font)
 {
     positionSlots(font);
 }

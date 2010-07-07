@@ -1,20 +1,20 @@
 #include "graphiteng/IFont.h"
-#include "LoadedFont.h"
+#include "GrFont.h"
 
 
-LoadedFont* IFont::makeLoadedFont(const LoadedFace *face) const			//this must stay alive all the time when the LoadedFont is alive. When finished with the LoadedFont, call IFont::destroyLoadedFace
+GrFont* IFont::makeGrFont(const LoadedFace *face) const			//this must stay alive all the time when the GrFont is alive. When finished with the GrFont, call IFont::destroyLoadedFace
 {
-    return new LoadedHintedFont(this, face);
+    return new GrHintedFont(this, face);
 }
 
 
-/*static*/ LoadedFont* IFont::makeLoadedFont(float ppm, const LoadedFace *face)		//When finished with the LoadedFont, call IFont::destroyLoadedFace
+/*static*/ GrFont* IFont::makeGrFont(float ppm, const LoadedFace *face)		//When finished with the GrFont, call IFont::destroyLoadedFace
 {
-    return new LoadedFont(ppm, face);
+    return new GrFont(ppm, face);
 }
 
 
-/*static*/ void IFont::destroyLoadedFont(LoadedFont *font)
+/*static*/ void IFont::destroyGrFont(GrFont *font)
 {
     delete font;
 }

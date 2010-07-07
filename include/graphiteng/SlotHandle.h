@@ -2,7 +2,7 @@
 
 #include "graphiteng/Types.h"
 
-class LoadedFont;
+class GrFont;
 class SegmentHandle;
 class Slot;
 
@@ -38,7 +38,7 @@ public:
     unsigned short gid() const;
     float originX() const;
     float originY() const;
-    float advance(const LoadedFont *font) const;
+    float advance(const GrFont *font) const;
     int before() const;
     int after() const;
     int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex, int is) const;

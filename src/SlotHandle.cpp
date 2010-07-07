@@ -19,7 +19,7 @@ float SlotHandle::originY() const
 }
 
 
-float SlotHandle::advance(const LoadedFont *font) const
+float SlotHandle::advance(const GrFont *font) const
 {
     return font->advance(m_p->m_glyphid);
 }

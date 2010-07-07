@@ -5,14 +5,14 @@
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
-class LoadedFont
+class GrFont
 {
 public:
-     LoadedFont(float ppm, const LoadedFace *face);
+     GrFont(float ppm, const LoadedFace *face);
 private:
     void initialize();
 public:
-    virtual ~LoadedFont();
+    virtual ~GrFont();
     float advance(unsigned short glyphid) const {
         if (m_advances[glyphid] == INVALID_ADVANCE)
             m_advances[glyphid] = computeAdvance(glyphid);
@@ -32,14 +32,14 @@ protected:
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
     
 private:			//defensive on m_advances
-    LoadedFont(const LoadedFont&);
-    LoadedFont& operator=(const LoadedFont&);
+    GrFont(const GrFont&);
+    GrFont& operator=(const GrFont&);
 };
 
-class LoadedHintedFont : public LoadedFont
+class GrHintedFont : public GrFont
 {
 public:
-   LoadedHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face);
+   GrHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face);
    
 private:
     virtual float computeAdvance(unsigned short glyphid) const;

@@ -15,7 +15,7 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 };
 
-Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
+Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;

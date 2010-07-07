@@ -56,7 +56,7 @@ add_library(graphiteng SHARED
     FeaturesHandle.cpp
     GlyphFace.cpp
     LoadedFace.cpp
-    LoadedFont.cpp
+    GrFont.cpp
     IFace.cpp
     IFont.cpp
     Segment.cpp
