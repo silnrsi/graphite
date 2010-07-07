@@ -15,3 +15,8 @@
 #define read16(x) (x+=sizeof(uint16), swap16(*(uint16 *)(x-sizeof(uint16))))
 #define read32(x) (x+=sizeof(uint32), swap32(*(uint32 *)(x-sizeof(uint32))))
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
+    
+
+}}}} // namespace

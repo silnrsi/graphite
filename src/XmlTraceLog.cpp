@@ -4,11 +4,12 @@
 
 #include "XmlTraceLog.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 #ifndef DISABLE_TRACING
 
 /*static*/ XmlTraceLog XmlTraceLog::sm_NullLog(NULL, NULL, GRLOG_NONE);
 XmlTraceLog * XmlTraceLog::sLog = &sm_NullLog;
-
 
 XmlTraceLog::XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask)
                          : m_file(file), m_depth(0), m_mask(logMask)
@@ -243,3 +244,4 @@ void stopGraphiteLogging()
 #endif		//!DISABLE_TRACING
 }
 
+}}}} // namespace

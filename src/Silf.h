@@ -3,6 +3,9 @@
 #include "Main.h"
 
 #include "Pass.h"
+
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class GrFace;
 class VMScratch;
 class Segment;
@@ -54,3 +57,4 @@ private:			//defensive
     Silf& operator=(const Silf&);
 };
 
+}}}} // namespace

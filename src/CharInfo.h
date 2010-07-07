@@ -1,5 +1,7 @@
 #pragma once
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class CharInfo // : ICharInfo
 {
 
@@ -19,4 +21,4 @@ protected:
     int8 m_break;	// breakweight coming from lb table
 };
 
-
+}}}} // namespace

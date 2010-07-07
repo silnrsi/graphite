@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <graphiteng/Types.h>
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
 typedef enum {
     GRLOG_NONE = 0x0,
@@ -18,3 +19,5 @@ typedef enum {
 // will be closed by graphite when stopGraphiteLogging is called.
 extern GRNG_EXPORT bool startGraphiteLogging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
 extern GRNG_EXPORT void stopGraphiteLogging();
+
+}}}} // namespace

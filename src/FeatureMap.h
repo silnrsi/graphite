@@ -5,6 +5,8 @@
 #include "Features.h"
 //#include <map> // avoid libstdc++
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class IFace;
 
 class FeatureRef
@@ -74,3 +76,4 @@ private:		//defensive on m_langFeats and m_feats
     FeatureMap& operator=(const FeatureMap&);
 };
 
+}}}} // namespace

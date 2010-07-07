@@ -4,6 +4,8 @@
 #include "Main.h"
 #include "Position.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 enum metrics {
     kgmetLsb = 0, kgmetRsb,
     kgmetBbTop, kgmetBbBottom, kgmetBbLeft, kgmetBbRight,
@@ -79,4 +81,4 @@ inline void GlyphFace::bbox(Rect a) {
     m_bbox = a;
 }
 
-
+}}}} // namespace

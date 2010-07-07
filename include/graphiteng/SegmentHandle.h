@@ -5,6 +5,8 @@
 #include "graphiteng/SlotHandle.h"
 //#include "CharInfo.h"           // hmm we need a public layer of one of these
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class CharInfo;
 class Segment;
 class GrFace;
@@ -49,5 +51,4 @@ private:
     Segment* ptr() const { return RefCountHandle<Segment, &DeleteSegment>::ptr(); }
 };
 
-
-
+}}}} // namespace

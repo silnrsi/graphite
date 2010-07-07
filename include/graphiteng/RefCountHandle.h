@@ -1,5 +1,7 @@
 #pragma once
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 template <class OBJCLASS, void (*pDELETEFN)(OBJCLASS *p)>
 class GRNG_EXPORT RefCountHandle
 {
@@ -25,3 +27,4 @@ private:
     OBJCLASS* m_p;
 };
 
+}}}}

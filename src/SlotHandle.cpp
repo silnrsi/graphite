@@ -1,6 +1,8 @@
 #include "graphiteng/SlotHandle.h"
 #include "Slot.h"
 
+using namespace org::sil::graphite::v2;
+
 unsigned short SlotHandle::gid() const
 {
     return m_p->gid();

@@ -2,6 +2,8 @@
 
 #include "graphiteng/Types.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class GrFont;
 class SegmentHandle;
 class Slot;
@@ -58,4 +60,4 @@ private:
     const Slot* m_p;		//not owned
 };
 
-
+}}}} // namespace

@@ -1,6 +1,7 @@
 #include "GlyphFace.h"
 #include "XmlTraceLog.h"
 
+using namespace org::sil::graphite::v2;
 
 void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num) 
 {

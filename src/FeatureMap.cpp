@@ -10,7 +10,7 @@
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-
+using namespace org::sil::graphite::v2;
 
 bool FeatureMap::readFont(const IFace *face)
 {

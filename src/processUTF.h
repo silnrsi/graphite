@@ -4,7 +4,7 @@
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
 
-
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class NoLimit		//relies on the processor.processChar() failing, such as because of a terminating nul character
 {
@@ -357,7 +357,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
     }
 }
 
-
+}}}} // namespace
 
 #endif			//!PROCESS_UTF_INCLUDE
 

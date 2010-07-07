@@ -3,6 +3,8 @@
 #include "VMScratch.h"
 #include "Code.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class Segment;
 class GrFace;
 class Silf;
@@ -46,3 +48,4 @@ private:		//defensive
     Pass& operator=(const Pass&);
 };
 
+}}}} // namespace

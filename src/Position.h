@@ -1,5 +1,7 @@
 #pragma once
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class Position
 {
 public:
@@ -15,3 +17,4 @@ public:
     float y;
 };
 
+}}}} // namespace

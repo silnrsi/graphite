@@ -3,7 +3,11 @@
 #include "graphiteng/Types.h"
 #include "graphiteng/AutoHandle.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class Features;
+class SlotBuilder;
+class SegmentHandle;
 
 extern GRNG_EXPORT void DeleteFeatures(Features *p);
 
@@ -24,4 +28,4 @@ private:
     Features* ptr() const { return AutoHandle<Features, &DeleteFeatures>::ptr(); }
 };
 
-
+}}}}

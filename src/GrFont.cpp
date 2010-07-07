@@ -1,5 +1,7 @@
 #include "GrFont.h"
 
+using namespace org::sil::graphite::v2;
+
 GrFont::GrFont(float ppm, const GrFace *face) :
     m_face(face),
     m_scale(ppm / face->upem())

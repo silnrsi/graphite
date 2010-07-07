@@ -1,6 +1,8 @@
 #include "graphiteng/FeatureRefHandle.h"
 #include "FeatureMap.h"
 
+using namespace org::sil::graphite::v2;
+
 GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p)
 {
     delete p;

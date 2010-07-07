@@ -9,6 +9,8 @@
 
 #ifndef DISABLE_TRACING
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
     ElementTopLevel,
@@ -51,6 +53,8 @@ typedef enum {
     ElementWarning,
     NumElements // Last
 } XmlTraceLogElement;
+
+
 
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
@@ -144,5 +148,7 @@ public:
 
 extern const XmlTraceLogTag xmlTraceLogElements[NumElements];
 extern const char * xmlTraceLogAttributes[NumAttributes];
+
+}}}} // namespace
 
 #endif

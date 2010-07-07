@@ -23,6 +23,7 @@
 #define do_(name)               &&name
 
 using namespace vm;
+using namespace org::sil::graphite::v2;
 
 namespace {
 

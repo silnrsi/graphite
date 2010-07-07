@@ -2,6 +2,8 @@
 
 #include "graphiteng/Types.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class GrFace;
 class GrFont;
 
@@ -22,7 +24,4 @@ private :
 #endif		//FIND_BROKEN_VIRTUALS
 };
 
-
-
-
-
+}}}} // namespace

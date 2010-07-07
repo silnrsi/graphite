@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 #define VMS_MAX_RULES_PER_SEQUENCE 64
 #define VMS_MAX_STACK 64
 
@@ -44,4 +46,4 @@ protected:
     int32 m_stack[VMS_MAX_STACK];
 };
 
-
+}}}} // namespace

@@ -1,6 +1,8 @@
 #include "graphiteng/FeaturesHandle.h"
 #include "Features.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 GRNG_EXPORT void DeleteFeatures(Features *p)
 {
     delete p;
@@ -29,3 +31,4 @@ bool FeaturesHandle::maskedOr(const FeaturesHandle& other, const FeaturesHandle&
     return true;
 }
 
+}}}} // namespace

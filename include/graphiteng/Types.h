@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 typedef unsigned char uint8;
 typedef uint8    byte;
 typedef signed char int8;
@@ -22,5 +24,5 @@ typedef int     int32;
 
 #define FIND_BROKEN_VIRTUALS
 
-
+}}}} // namespace
 

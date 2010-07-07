@@ -15,8 +15,11 @@
 #define     REGPARM(n)
 #endif
 
+namespace gr2 = org::sil::graphite::v2;
 // Forward declarations
-class Segment;
+namespace org { namespace sil { namespace graphite { namespace v2 {
+    class Segment;
+}}}}
 
 namespace vm 
 {
@@ -80,7 +83,7 @@ enum opcode {
 class Machine
 {
 public:
-    typedef int32       stack_t;
+    typedef gr2::int32  stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
                         STACK_GUARD  = 2;
@@ -93,8 +96,8 @@ public:
     };
    
     static const opcode_t *   getOpcodeTable() throw();
-    stack_t                   run(const instr * program, const byte * data,
-                                  Segment & seg, slotref & islot_idx, slotref iStart,
+    stack_t                   run(const instr * program, const gr2::byte * data,
+                                  gr2::Segment & seg, slotref & islot_idx, slotref iStart,
                                   status_t &status) HOT;
 
 private:
@@ -104,7 +107,7 @@ private:
 };
 
 
-inline void Machine::check_final_stack(const int32 * const sp,
+inline void Machine::check_final_stack(const gr2::int32 * const sp,
                                        status_t & status) {
     stack_t const * const base  = _stack + STACK_GUARD,
                   * const limit = base + STACK_MAX;

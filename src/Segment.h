@@ -10,6 +10,8 @@
 #include "Features.h"
 #include "XmlTraceLog.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class Silf;
 class GrFace;
 class Segment
@@ -125,4 +127,4 @@ private:		//defensive on m_charinfo
     Segment& operator=(const Segment&);
 };
 
-
+}}}} // namespace

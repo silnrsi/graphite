@@ -14,6 +14,7 @@
     GrFace is lazy and so the IFace must stay alive in case Graphite needs to get more data loaded into it.
     When the GrFace* is no longer needed, IFace::destroyGrFace() should be called.
 */
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrFace;
 
@@ -41,4 +42,4 @@ private :
 #endif		//FIND_BROKEN_VIRTUALS
 };
 
-
+}}}} // namespace

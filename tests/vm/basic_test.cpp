@@ -5,6 +5,7 @@
 #include "Code.h"
 
 using namespace vm;
+using namespace org::sil::graphite::v2;
 
 const byte simple_prog[] = 
 {
@@ -18,10 +19,12 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
 class Segment 
 {
     byte x;
 };
+}}}} // namespace
 
 #define _msg(m) #m
 

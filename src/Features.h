@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class FeatureRef;
 
 class Features
@@ -58,3 +60,4 @@ private :
 */
 };
 
+}}}} // namespace

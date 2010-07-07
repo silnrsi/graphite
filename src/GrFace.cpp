@@ -4,6 +4,8 @@
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
+using namespace org::sil::graphite::v2;
+
 GrFace::~GrFace()
 {
     delete[] m_glyphs;

@@ -36,6 +36,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 // define a few basic functions to save using libstdc++
 #ifdef __GNUC__
 extern "C" void __cxa_pure_virtual() { assert(false); }
+
 void * operator new[](size_t size)
 {
     return malloc(size);
@@ -52,6 +53,7 @@ void operator delete (void * p)
 {
     if (p) free(p);
 }
+
 // declaration in c++/x.y/bits/functexcept.h
 namespace std
 {
@@ -61,17 +63,19 @@ namespace std
 }
 #endif
 
+namespace gr2 = org::sil::graphite::v2;
+
 class GrngTextSrc
 {
 
 public:
-    GrngTextSrc(const uint32* base, size_t len) : m_buff(base), m_len(len) { }
-    SegmentHandle::encform utfEncodingForm() const { return SegmentHandle::kutf32; }
+    GrngTextSrc(const gr2::uint32* base, size_t len) : m_buff(base), m_len(len) { }
+    gr2::SegmentHandle::encform utfEncodingForm() const { return gr2::SegmentHandle::kutf32; }
     size_t getLength() const { return m_len; }
     const void* get_utf_buffer_begin() const { return m_buff; }
 
 private:
-    const uint32* m_buff;
+    const gr2::uint32* m_buff;
     size_t m_len;
 };
 
@@ -133,7 +137,7 @@ Parameters::Parameters()
 
 Parameters::~Parameters()
 {
-  delete pText32;
+  free(pText32);
   pText32 = NULL;
   closeLog();
 }
@@ -158,7 +162,7 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
-    mask = GRLOG_ALL;
+    mask = gr2::GRLOG_ALL;
 }
 
 
@@ -370,7 +374,8 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                     option = NONE;
                     useCodes = true;
                     // must be less than argc
-                    pText32 = new unsigned int[argc];
+                    //pText32 = new unsigned int[argc];
+                    pText32 = (unsigned int *)malloc(sizeof(unsigned int) * argc);
                     fprintf(log, "Text codes\n");
                 }
                 else if (strcmp(argv[a], "-linefill") == 0)
@@ -543,13 +548,13 @@ void listFeatures(gr::Font & font)
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
-    IFace *fileface;
+    gr2::IFace *fileface;
 //    try
     {
         // use the -trace option to specify a file
         //FILE * logFile = fopen("graphitengTrace.xml", "wb");
 #ifndef DISABLE_TRACING
-        startGraphiteLogging(trace, static_cast<GrLogMask>(mask));
+        startGraphiteLogging(trace, static_cast<gr2::GrLogMask>(mask));
 #endif
         //fileFont = new FileFont(fileName);
         //if (!fileFont)
@@ -571,13 +576,13 @@ int Parameters::testFileFont() const
         }
 #endif
         GrngTextSrc textSrc(pText32, charLength);
-        if (!(fileface = IFace::loadTTFFile(fileName)))
+        if (!(fileface = gr2::IFace::loadTTFFile(fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables\n");
             return 2;
         }
         
-        GrFace *face = fileface->makeGrFace();
+        gr2::GrFace *face = fileface->makeGrFace();
         if (!face)
         {
             fprintf(stderr, "Invalid font, failed to parse tables\n");
@@ -640,20 +645,20 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+        gr2::SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
 
         int i = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         for (i = 0; i < seg.length(); i++)
         {
-            SlotHandle slot = seg[i];
+            gr2::SlotHandle slot = seg[i];
             float orgX = slot.originX();
             float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot.gid(), slot.getAttr(seg, kslatAttTo, 0, i), 
-		    slot.getAttr(seg, kslatAttX, 0, i), 
-		    slot.getAttr(seg, kslatAttY, 0, i), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
+                    i, slot.gid(), slot.getAttr(seg, gr2::kslatAttTo, 0, i), 
+		    slot.getAttr(seg, gr2::kslatAttX, 0, i), 
+		    slot.getAttr(seg, gr2::kslatAttY, 0, i), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
                     seg.charInfo(slot.original())->breakWeight(), slot.before(), slot.after());
             
             if (pText32 != NULL)
@@ -691,8 +696,8 @@ int Parameters::testFileFont() const
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
        }	//to get seg destroyed before its parameters
         
-        IFont::destroyGrFont(sizedFont);
-        IFace::destroyGrFace(face);
+        gr2::IFont::destroyGrFont(sizedFont);
+        gr2::IFace::destroyGrFace(face);
         delete fileface;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
@@ -705,7 +710,7 @@ int Parameters::testFileFont() const
 //        returnCode = 5;
 //    }
 #ifndef DISABLE_TRACING
-    if (trace) stopGraphiteLogging();
+    if (trace) gr2::stopGraphiteLogging();
 #endif
     return returnCode;
 }

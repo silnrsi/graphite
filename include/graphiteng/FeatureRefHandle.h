@@ -3,6 +3,8 @@
 #include "graphiteng/Types.h"
 #include "graphiteng/AutoHandle.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class FeatureRef;
 class FeaturesHandle;
 
@@ -21,4 +23,4 @@ public:
     uint16 getFeatureVal(const FeaturesHandle& feats) const;	//returns 0 if either handle isNull
 };
 
-
+}}}}

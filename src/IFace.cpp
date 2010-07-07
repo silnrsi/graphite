@@ -8,6 +8,8 @@
 #include <cassert>
 //#include <map> // Please don't use map, it forces libstdc++
 
+using namespace org::sil::graphite::v2;
+
 class TableCacheItem
 {
 public:

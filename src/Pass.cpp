@@ -8,6 +8,7 @@
 
 using vm::Code;
 using vm::Machine;
+using namespace org::sil::graphite::v2;
 
 bool Pass::readPass(void *pPass, size_t lPass)
 {

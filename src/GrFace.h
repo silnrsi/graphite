@@ -7,6 +7,8 @@
 #include "graphiteng/IFace.h"
 #include "FeatureMap.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class Segment;
 class Features;
 
@@ -77,3 +79,4 @@ private:
     GrFace& operator=(const GrFace&);
 };
 
+}}}} // namespace

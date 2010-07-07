@@ -9,6 +9,8 @@
 
 #ifndef DISABLE_TRACING
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 class XmlTraceLog
 {
     friend bool startGraphiteLogging(FILE * logFile, GrLogMask mask);
@@ -174,5 +176,6 @@ inline void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 valu
 
 
 
+}}}} // namespace
 
 #endif

@@ -11,6 +11,8 @@
 #include "XmlTraceLog.h"
 #include "graphiteng/SegmentHandle.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
@@ -240,7 +242,6 @@ void Segment::logSegment() const
 
 
 
-
 class SlotBuilder
 {
 public:
@@ -295,5 +296,4 @@ void Segment::finalise(const GrFont *font)
     positionSlots(font);
 }
 
-
-
+}}}} // namespace

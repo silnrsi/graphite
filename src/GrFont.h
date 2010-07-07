@@ -3,6 +3,8 @@
 #include "graphiteng/IFont.h"
 #include "GrFace.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
 class GrFont
@@ -47,3 +49,5 @@ private:
 private:
     const IFont *m_font;      // Application interface.
 };
+
+}}}} // namespace

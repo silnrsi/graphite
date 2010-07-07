@@ -2,6 +2,8 @@
 #include "Segment.h"
 #include "processUTF.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 GRNG_EXPORT void DeleteSegment(Segment *p)
 {
     delete p;
@@ -182,4 +184,4 @@ void SegmentHandle::initialize(const GrFont *font, const GrFace *face, uint32 sc
 #endif
 }
 
-
+}}}} // namespace

@@ -4,6 +4,8 @@
 #include "graphiteng/SegmentHandle.h"
 #include "GrFont.h"
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 #define SLOT_DELETED    1
 #define SLOT_INSERT	2
 
@@ -21,7 +23,7 @@ public:
     Slot();
     uint16 glyph() { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment *seg, uint16 glyphid);
-    void setRealGid(uint16 gid) { m_realglyphid = gid; }
+    void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }
     int original() const { return m_original; }
@@ -61,4 +63,4 @@ friend class SlotHandle;
     byte m_attLevel;        // attachment level
 };
 
-
+}}}} // namespace

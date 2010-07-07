@@ -2,6 +2,8 @@
 #include "Slot.h"
 #include "CharInfo.h"
 
+using namespace org::sil::graphite::v2;
+
 Slot::Slot() :
         m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(-1), m_child(-1), m_sibling(-1),
         m_position(0, 0), m_advance(-1, -1), m_shift(0, 0), m_flags(0)

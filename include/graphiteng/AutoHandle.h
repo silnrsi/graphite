@@ -3,6 +3,7 @@
 /* In contrast to AutoHandle which has multiple owners of the same object via a count. AutoHandle has a single owner for each object.
    When one AutoHandle is copied from another, the original AutoHandle loses ownership.
 */
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
 template <class OBJCLASS, void (*pDELETEFN)(OBJCLASS *p)>
 class GRNG_EXPORT AutoHandle
@@ -30,3 +31,4 @@ private:
     mutable OBJCLASS* m_p;
 };
 
+}}}}

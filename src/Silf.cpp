@@ -2,6 +2,8 @@
 #include "XmlTraceLog.h"
 #include "Segment.h"
 
+using namespace org::sil::graphite::v2;
+
 Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
