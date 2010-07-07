@@ -4,7 +4,7 @@
 
 LoadedFont* IFont::makeLoadedFont(const LoadedFace *face) const			//this must stay alive all the time when the LoadedFont is alive. When finished with the LoadedFont, call IFont::destroyLoadedFace
 {
-    return new LoadedFontWithHints(this, face);
+    return new LoadedHintedFont(this, face);
 }
 
 

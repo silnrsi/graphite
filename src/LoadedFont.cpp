@@ -25,14 +25,14 @@ LoadedFont::LoadedFont(float ppm, const LoadedFace *face) :
 
 
 
-LoadedFontWithHints::LoadedFontWithHints(const IFont *font/*not NULL*/, const LoadedFace *face) :
+LoadedHintedFont::LoadedHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face) :
     LoadedFont(font->ppm(), face), 
     m_font(font)
 {
 }
 
 
-/*virtual*/ float LoadedFontWithHints::computeAdvance(unsigned short glyphid) const
+/*virtual*/ float LoadedHintedFont::computeAdvance(unsigned short glyphid) const
 {
     return m_font->advance(glyphid);
 }

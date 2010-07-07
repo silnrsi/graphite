@@ -36,10 +36,10 @@ private:			//defensive on m_advances
     LoadedFont& operator=(const LoadedFont&);
 };
 
-class LoadedFontWithHints : public LoadedFont
+class LoadedHintedFont : public LoadedFont
 {
 public:
-   LoadedFontWithHints(const IFont *font/*not NULL*/, const LoadedFace *face);
+   LoadedHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face);
    
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
