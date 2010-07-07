@@ -3,8 +3,9 @@
 #include "graphiteng/Types.h"
 #include "graphiteng/RefCountHandle.h"
 #include "graphiteng/SlotHandle.h"
-#include "CharInfo.h"           // hmm we need a public layer of one of these
+//#include "CharInfo.h"           // hmm we need a public layer of one of these
 
+class CharInfo;
 class Segment;
 class GrFace;
 class GrFont;

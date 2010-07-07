@@ -31,6 +31,8 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/IFace.h"
 #include "graphiteng/XmlLog.h"
 
+#include "CharInfo.h" // temp
+
 // define a few basic functions to save using libstdc++
 #ifdef __GNUC__
 extern "C" void __cxa_pure_virtual() { assert(false); }
