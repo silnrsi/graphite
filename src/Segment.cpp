@@ -11,7 +11,7 @@
 #include "XmlTraceLog.h"
 #include "graphiteng/SegmentHandle.h"
 
-Segment::Segment(unsigned int numchars, const LoadedFace* face, uint32 script, int dir) :
+Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
@@ -244,7 +244,7 @@ void Segment::logSegment() const
 class SlotBuilder
 {
 public:
-      SlotBuilder(const LoadedFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, Segment* pDest2)
+      SlotBuilder(const GrFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, Segment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
 	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
@@ -268,7 +268,7 @@ public:
       size_t charsProcessed() const { return m_nCharsProcessed; }
 
 private:
-      const LoadedFace *m_face;
+      const GrFace *m_face;
       Segment *m_pDest;
       const void *const   m_ctable;
       const unsigned int m_fid;
@@ -276,7 +276,7 @@ private:
 };
 
 
-void Segment::read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
+void Segment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);

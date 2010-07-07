@@ -1,14 +1,14 @@
 #pragma once
 
 #include "graphiteng/IFont.h"
-#include "LoadedFace.h"
+#include "GrFace.h"
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
 class GrFont
 {
 public:
-     GrFont(float ppm, const LoadedFace *face);
+     GrFont(float ppm, const GrFace *face);
 private:
     void initialize();
 public:
@@ -27,7 +27,7 @@ private:
     
 private:
     float m_scale;      // scales from design units to ppm
-    const LoadedFace *m_face;   // LoadedFace to get the rest of the info from
+    const GrFace *m_face;   // GrFace to get the rest of the info from
 protected:
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
     
@@ -39,7 +39,7 @@ private:			//defensive on m_advances
 class GrHintedFont : public GrFont
 {
 public:
-   GrHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face);
+   GrHintedFont(const IFont *font/*not NULL*/, const GrFace *face);
    
 private:
     virtual float computeAdvance(unsigned short glyphid) const;

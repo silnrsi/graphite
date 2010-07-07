@@ -1,6 +1,6 @@
 #include "GrFont.h"
 
-GrFont::GrFont(float ppm, const LoadedFace *face) :
+GrFont::GrFont(float ppm, const GrFace *face) :
     m_face(face),
     m_scale(ppm / face->upem())
 {
@@ -25,7 +25,7 @@ GrFont::GrFont(float ppm, const LoadedFace *face) :
 
 
 
-GrHintedFont::GrHintedFont(const IFont *font/*not NULL*/, const LoadedFace *face) :
+GrHintedFont::GrHintedFont(const IFont *font/*not NULL*/, const GrFace *face) :
     GrFont(font->ppm(), face), 
     m_font(font)
 {

@@ -387,7 +387,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const
+void Silf::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
 {
     for (size_t i = 0; i < m_numPasses; ++i)
     {

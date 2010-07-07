@@ -1,10 +1,10 @@
-#include "LoadedFace.h"
+#include "GrFace.h"
 #include "VMScratch.h"
 #include <string.h>
 #include "Segment.h"
 #include "XmlTraceLog.h"
 
-LoadedFace::~LoadedFace()
+GrFace::~GrFace()
 {
     delete[] m_glyphs;
     delete[] m_silfs;
@@ -13,7 +13,7 @@ LoadedFace::~LoadedFace()
 }
 
 
-bool LoadedFace::readGlyphs()
+bool GrFace::readGlyphs()
 {
     size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
     const void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
@@ -97,7 +97,7 @@ bool LoadedFace::readGlyphs()
     return true;
 }
 
-bool LoadedFace::readGraphite()
+bool GrFace::readGraphite()
 {
     char *pSilf;
     size_t lSilf;
@@ -167,14 +167,14 @@ bool LoadedFace::readGraphite()
     return true;
 }
 
-void LoadedFace::runGraphite(Segment *seg, const Silf *aSilf) const
+void GrFace::runGraphite(Segment *seg, const Silf *aSilf) const
 {
     VMScratch vms;
 
     aSilf->runGraphite(seg, this, &vms);
 }
 
-const Silf *LoadedFace::chooseSilf(uint32 script) const
+const Silf *GrFace::chooseSilf(uint32 script) const
 {
     if (m_numSilf == 0)
         return NULL;
@@ -184,7 +184,7 @@ const Silf *LoadedFace::chooseSilf(uint32 script) const
         return m_silfs;
 }
 
-uint16 LoadedFace::getGlyphMetric(uint16 gid, uint8 metric) const
+uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
 {
     switch ((enum metrics)metric)
     {

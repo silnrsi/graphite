@@ -4,7 +4,7 @@
 #include "Code.h"
 
 class Segment;
-class LoadedFace;
+class GrFace;
 class Silf;
 
 class Pass
@@ -13,8 +13,8 @@ public:
     Pass() {}
     
     bool readPass(void *pPass, size_t lPass);
-    void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
-    int findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const;
+    void runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const;
+    int findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vms) const;
     int testConstraint(const vm::Code *codeptr, int iSlot, int num, Segment *seg, VMScratch *vms) const;
     int doAction(const vm::Code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;
     void init(Silf *silf) { m_silf = silf; }

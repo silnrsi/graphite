@@ -1,6 +1,6 @@
 #include "graphiteng/IFace.h"
 #include "XmlTraceLog.h"
-#include "LoadedFace.h"
+#include "GrFace.h"
 
 #ifndef DISABLE_FILE_FONT
 #include "TtfUtil.h"
@@ -196,13 +196,13 @@ const void *FileFont::getTable(unsigned int name, size_t *len) const
 
 void IFace::operator delete(void* p, size_t)
 {
-    ::delete(p);
+    ::delete((char*)p);
 }
 
 
-LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time when the LoadedFace is alive. When finished with the LoadeFace, call IFace::destroyLoadedFace
+GrFace* IFace::makeGrFace() const		//this must stay alive all the time when the GrFace is alive. When finished with the LoadeFace, call IFace::destroyGrFace
 {
-    LoadedFace *res = new LoadedFace(this);
+    GrFace *res = new GrFace(this);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
@@ -221,13 +221,13 @@ LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time w
     return res;
 }
 
-/*static*/ FeaturesHandle IFace::getFeatures(const LoadedFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+/*static*/ FeaturesHandle IFace::getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
 {
     return pFace->theFeatures().cloneFeatures(langname);
 }
 
 
-/*static*/ FeatureRefHandle IFace::feature(const LoadedFace* pFace, uint8 index)
+/*static*/ FeatureRefHandle IFace::feature(const GrFace* pFace, uint8 index)
 {
     const FeatureRef* pRef = pFace->feature(index);
     if (!pRef)
@@ -237,7 +237,7 @@ LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time w
 }
 
 
-/*static*/ void IFace::destroyLoadedFace(LoadedFace *face)
+/*static*/ void IFace::destroyGrFace(GrFace *face)
 {
     delete face;
 }

@@ -9,13 +9,13 @@
     But if they are happy to load directly from a true type font from a file, they can use IFace::loadTTFFile instead, remebering to 
     delete the pointer when it is no longer required.
 
-    Then the client should call the member function makeLoadedFace to load the IFace, and the LoadedFace pointer will then
+    Then the client should call the member function makeGrFace to load the IFace, and the GrFace pointer will then
     be passed into Graphite for further processing.
-    LoadedFace is lazy and so the IFace must stay alive in case Graphite needs to get more data loaded into it.
-    When the LoadedFace* is no longer needed, IFace::destroyLoadedFace() should be called.
+    GrFace is lazy and so the IFace must stay alive in case Graphite needs to get more data loaded into it.
+    When the GrFace* is no longer needed, IFace::destroyGrFace() should be called.
 */
 
-class LoadedFace;
+class GrFace;
 
 
 class GRNG_EXPORT IFace
@@ -30,10 +30,10 @@ public:
 #endif 		//!DISABLE_FILE_FONT
     void operator delete(void* p, size_t);
 
-    LoadedFace* makeLoadedFace() const;		//the 'this' must stay alive all the time when the LoadedFace is alive. When finished with the LoadedFace, call IFace::destroyLoadedFace    
-    static FeaturesHandle getFeatures(const LoadedFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
-    static FeatureRefHandle feature(const LoadedFace* pFace, uint8 index);
-    static void destroyLoadedFace(LoadedFace *face);
+    GrFace* makeGrFace() const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
+    static FeaturesHandle getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
+    static FeatureRefHandle feature(const GrFace* pFace, uint8 index);
+    static void destroyGrFace(GrFace *face);
 
 private :
 #ifdef FIND_BROKEN_VIRTUALS

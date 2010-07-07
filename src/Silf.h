@@ -3,7 +3,7 @@
 #include "Main.h"
 
 #include "Pass.h"
-class LoadedFace;
+class GrFace;
 class VMScratch;
 class Segment;
 
@@ -21,7 +21,7 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const;
+    void runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;

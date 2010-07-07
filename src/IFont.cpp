@@ -2,13 +2,13 @@
 #include "GrFont.h"
 
 
-GrFont* IFont::makeGrFont(const LoadedFace *face) const			//this must stay alive all the time when the GrFont is alive. When finished with the GrFont, call IFont::destroyLoadedFace
+GrFont* IFont::makeGrFont(const GrFace *face) const			//this must stay alive all the time when the GrFont is alive. When finished with the GrFont, call IFont::destroyGrFace
 {
     return new GrHintedFont(this, face);
 }
 
 
-/*static*/ GrFont* IFont::makeGrFont(float ppm, const LoadedFace *face)		//When finished with the GrFont, call IFont::destroyLoadedFace
+/*static*/ GrFont* IFont::makeGrFont(float ppm, const GrFace *face)		//When finished with the GrFont, call IFont::destroyGrFace
 {
     return new GrFont(ppm, face);
 }

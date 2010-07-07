@@ -30,7 +30,7 @@ class Features;
 #define tagSile MAKE_TAG('S','i','l','e')
 #define tagSill MAKE_TAG('S','i','l','l')
 
-class LoadedFace 	// an IFace loaded into an object
+class GrFace 	// an IFace loaded into an object
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
@@ -40,8 +40,8 @@ public:
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    LoadedFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
-    ~LoadedFace();
+    GrFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
+    ~GrFace();
     const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
     const Rect &bbox(uint16 gid) const { return m_glyphs[gid].bbox(); }
@@ -73,7 +73,7 @@ private:
     FeatureMap m_features;
     
   private:		//defensive on m_glyphs and m_silfs
-    LoadedFace(const LoadedFace&);
-    LoadedFace& operator=(const LoadedFace&);
+    GrFace(const GrFace&);
+    GrFace& operator=(const GrFace&);
 };
 

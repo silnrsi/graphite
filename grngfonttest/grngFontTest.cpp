@@ -575,7 +575,7 @@ int Parameters::testFileFont() const
             return 2;
         }
         
-        LoadedFace *face = fileface->makeLoadedFace();
+        GrFace *face = fileface->makeGrFace();
         if (!face)
         {
             fprintf(stderr, "Invalid font, failed to parse tables\n");
@@ -690,7 +690,7 @@ int Parameters::testFileFont() const
        }	//to get seg destroyed before its parameters
         
         IFont::destroyGrFont(sizedFont);
-        IFace::destroyLoadedFace(face);
+        IFace::destroyGrFace(face);
         delete fileface;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed

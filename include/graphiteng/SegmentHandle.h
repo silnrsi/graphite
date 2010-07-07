@@ -6,7 +6,7 @@
 #include "CharInfo.h"           // hmm we need a public layer of one of these
 
 class Segment;
-class LoadedFace;
+class GrFace;
 class GrFont;
 class FeaturesHandle;
 
@@ -27,8 +27,8 @@ public:
     static size_t countUnicodeCharactersToNul(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/, size_t maxCount, const void** pError);	//the nul is not in the count
     
 public:
-    SegmentHandle(const GrFont* font, const LoadedFace* face, uint32 script, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
-    SegmentHandle(const GrFont* font, const LoadedFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
+    SegmentHandle(const GrFont* font, const GrFace* face, uint32 script, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
+    SegmentHandle(const GrFont* font, const GrFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
   
     int length() const;
     float advanceX() const;
@@ -41,7 +41,7 @@ public:
     int addFeatures(const FeaturesHandle& feats) const;
  
 private:
-    void initialize(const GrFont* font, const LoadedFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
+    void initialize(const GrFont* font, const GrFace* face, uint32 script, const FeaturesHandle& pFeats, SegmentHandle::encform enc, const void* pStart, size_t nChars, int dir);
     
 private:
     friend class SlotHandle;

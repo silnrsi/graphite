@@ -226,7 +226,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     return true;
 }
 
-void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) const
+void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, 1, seg, vms))
         return;
@@ -242,7 +242,7 @@ void Pass::runGraphite(Segment *seg, const LoadedFace *face, VMScratch *vms) con
     }
 }
 
-int Pass::findNDoRule(Segment *seg, int iSlot, const LoadedFace *face, VMScratch *vms) const
+int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vms) const
 {
     int state;
     int startSlot = iSlot;

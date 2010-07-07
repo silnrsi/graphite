@@ -11,7 +11,7 @@
 #include "XmlTraceLog.h"
 
 class Silf;
-class LoadedFace;
+class GrFace;
 class Segment
 {
 public:
@@ -46,7 +46,7 @@ public:
     uint16 user(uint32 sid, uint8 index) { return (sid < m_numGlyphs && index < m_silf->numUser() ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
     void user(uint32 sid, uint8 index, uint16 value) { if (sid < m_numGlyphs && index < m_silf->numUser()) m_userAttrs[sid * m_silf->numUser() + index] = value; }
 
-    Segment(unsigned int numchars, const LoadedFace* face, uint32 script, int dir);
+    Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
     ~Segment();
     void appendSlot(int i, int cid, int gid, int fid, int bw);
     void positionSlots(const GrFont *font);
@@ -97,7 +97,7 @@ public:
 
 private:
     friend class SegmentHandle ;
-    void read_text(const LoadedFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void*pStart, size_t nChars);
+    void read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const GrFont *font);
     void finalise(const GrFont *font);
   
@@ -108,7 +108,7 @@ private:
     CharInfo *m_charinfo;  // character info, one per input character
     unsigned int m_numCharinfo;      // size of the array and number of input characters
 
-    const LoadedFace *m_face;      // LoadedFace
+    const GrFace *m_face;      // GrFace
     const Silf *m_silf;
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
