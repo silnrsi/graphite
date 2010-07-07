@@ -690,7 +690,7 @@ int Parameters::testFileFont() const
        }	//to get seg destroyed before its parameters
         
         IFont::destroyLoadedFont(sizedFont);
-	IFace::destroyLoadedFace(face);
+        IFace::destroyLoadedFace(face);
         delete fileface;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed

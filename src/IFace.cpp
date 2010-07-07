@@ -194,6 +194,12 @@ const void *FileFont::getTable(unsigned int name, size_t *len) const
 }
 #endif			//!DISABLE_FILE_FONT
 
+void IFace::operator delete(void* p, size_t)
+{
+    ::delete(p);
+}
+
+
 LoadedFace* IFace::makeLoadedFace() const		//this must stay alive all the time when the LoadedFace is alive. When finished with the LoadeFace, call IFace::destroyLoadedFace
 {
     LoadedFace *res = new LoadedFace(this);

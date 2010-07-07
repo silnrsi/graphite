@@ -28,6 +28,7 @@ public:
     static IFace* loadTTFFile(const char *name);		//when no longer needed, call delete
 								//TBD better error handling
 #endif 		//!DISABLE_FILE_FONT
+    void operator delete(void* p, size_t);
 
     LoadedFace* makeLoadedFace() const;		//the 'this' must stay alive all the time when the LoadedFace is alive. When finished with the LoadedFace, call IFace::destroyLoadedFace    
     static FeaturesHandle getFeatures(const LoadedFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
