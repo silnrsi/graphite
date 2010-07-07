@@ -1,15 +1,13 @@
 
 #include <cstring>
-#include <cassert>
 #include <stdarg.h>
 
 #include "XmlTraceLog.h"
 
 #ifndef DISABLE_TRACING
 
-static NullTraceLog s_NullLog;
-XmlTraceLog * XmlTraceLog::sLog = &s_NullLog;
-
+/*static*/ XmlTraceLog XmlTraceLog::sm_NullLog(NULL, NULL, GRLOG_NONE);
+XmlTraceLog * XmlTraceLog::sLog = &sm_NullLog;
 
 
 XmlTraceLog::XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask)
@@ -40,61 +38,6 @@ XmlTraceLog::~XmlTraceLog()
         fclose(m_file);
         m_file = NULL;
     }
-}
-
-void XmlTraceLog::openElement(XmlTraceLogElement eId)
-{
-    if (!m_file) return;
-    if (m_inElement)
-    {
-        if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-            fprintf(m_file, ">");
-    }
-    if (xmlTraceLogElements[eId].mFlags & m_mask)
-    {
-        if (!m_lastNodeText)
-        {
-            fprintf(m_file, "\n");
-            for (size_t i = 0; i < m_depth; i++)
-            {
-                fprintf(m_file, " ");
-            }
-        }
-        fprintf(m_file, "<%s", xmlTraceLogElements[eId].mName);
-    }
-    m_elementStack[m_depth++] = eId;
-    m_inElement = true;
-    m_lastNodeText = false;
-}
-
-void XmlTraceLog::closeElement(XmlTraceLogElement eId)
-{
-    if (!m_file) return;
-    assert(m_depth > 0);
-    assert(eId == m_elementStack[m_depth-1]);
-    --m_depth;
-    if (xmlTraceLogElements[eId].mFlags & m_mask)
-    {
-        if (m_inElement)
-        {
-            fprintf(m_file, "/>");
-        }
-        else
-        {
-            if (!m_lastNodeText)
-            {
-                fprintf(m_file, "\n");
-                for (size_t i = 0; i < m_depth; i++)
-                    fprintf(m_file, " ");
-            }
-            fprintf(m_file, "</%s>", xmlTraceLogElements[eId].mName);
-        }
-    }
-    m_inElement = false;
-    m_lastNodeText = false;
-#ifdef ENABLE_DEEP_TRACING
-    fflush(m_file);
-#endif
 }
 
 void XmlTraceLog::addArrayElement(XmlTraceLogElement eId, const byte *start, int num)
@@ -152,62 +95,6 @@ void XmlTraceLog::addSingleElement(XmlTraceLogElement eId, const int value)
     }
 }
     
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, const char * value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"", xmlTraceLogAttributes[aId]);
-        escapeIfNeeded(value);
-        fprintf(m_file, "\"");
-    }
-}
-
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, float value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%f\"", xmlTraceLogAttributes[aId], value);
-    }
-}
-
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%d\"", xmlTraceLogAttributes[aId], value);
-    }
-}
-
-void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], value);
-    }
-}
-
-
-void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
-{
-    if (!m_file) return;
-    assert(m_inElement);
-    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-    {
-        uint32 whole = (value >> 16);
-        float fraction = static_cast<float>(value & 0xFFFF) / static_cast<float>(0x1FFFE);
-        float fixed = whole + fraction;
-        fprintf(m_file, " %s=\"%f\"", xmlTraceLogAttributes[aId], fixed);
-    }
-}
-
 void XmlTraceLog::writeElementArray(XmlTraceLogElement eId, XmlTraceLogAttribute aId, int16 values [], size_t length)
 {
     if (!m_file) return;
@@ -336,7 +223,7 @@ bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
     mask;
     return false;
 #else	//!DISABLE_TRACING
-    if (XmlTraceLog::sLog != &s_NullLog)
+    if (XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
     {
         delete XmlTraceLog::sLog;
     }
@@ -348,10 +235,10 @@ bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
 void stopGraphiteLogging()
 {
 #ifndef DISABLE_TRACING
-    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &s_NullLog)
+    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
     {
         delete XmlTraceLog::sLog;
-        XmlTraceLog::sLog = &s_NullLog;
+        XmlTraceLog::sLog = &XmlTraceLog::sm_NullLog;
     }
 #endif		//!DISABLE_TRACING
 }

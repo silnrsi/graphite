@@ -5,10 +5,9 @@
 #include <graphiteng/Types.h>
 #include "XmlTraceLogTags.h"
 #include <graphiteng/XmlLog.h>
+#include <cassert>
 
 #ifndef DISABLE_TRACING
-
-class NullTraceLog;
 
 class XmlTraceLog
 {
@@ -38,7 +37,8 @@ public:
     {
         return *sLog;
     }
-protected:
+private:
+    static XmlTraceLog sm_NullLog;
     static XmlTraceLog * sLog;
     XmlTraceLog(FILE * file, const char * ns, GrLogMask logMask);
 private:
@@ -55,10 +55,124 @@ private:
     XmlTraceLogElement m_elementStack[MAX_ELEMENT_DEPTH];
 };
 
-class NullTraceLog : public XmlTraceLog
+
+inline void XmlTraceLog::openElement(XmlTraceLogElement eId)
 {
-public:
-    NullTraceLog() : XmlTraceLog(NULL, NULL, GRLOG_NONE){};
-};
+    if (!m_file) return;
+    if (m_inElement)
+    {
+        if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+            fprintf(m_file, ">");
+    }
+    if (xmlTraceLogElements[eId].mFlags & m_mask)
+    {
+        if (!m_lastNodeText)
+        {
+            fprintf(m_file, "\n");
+            for (size_t i = 0; i < m_depth; i++)
+            {
+                fprintf(m_file, " ");
+            }
+        }
+        fprintf(m_file, "<%s", xmlTraceLogElements[eId].mName);
+    }
+    m_elementStack[m_depth++] = eId;
+    m_inElement = true;
+    m_lastNodeText = false;
+}
+
+
+inline void XmlTraceLog::closeElement(XmlTraceLogElement eId)
+{
+    if (!m_file) return;
+    assert(m_depth > 0);
+    assert(eId == m_elementStack[m_depth-1]);
+    --m_depth;
+    if (xmlTraceLogElements[eId].mFlags & m_mask)
+    {
+        if (m_inElement)
+        {
+            fprintf(m_file, "/>");
+        }
+        else
+        {
+            if (!m_lastNodeText)
+            {
+                fprintf(m_file, "\n");
+                for (size_t i = 0; i < m_depth; i++)
+                    fprintf(m_file, " ");
+            }
+            fprintf(m_file, "</%s>", xmlTraceLogElements[eId].mName);
+        }
+    }
+    m_inElement = false;
+    m_lastNodeText = false;
+#ifdef ENABLE_DEEP_TRACING
+    fflush(m_file);
+#endif
+}
+
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, const char * value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"", xmlTraceLogAttributes[aId]);
+        escapeIfNeeded(value);
+        fprintf(m_file, "\"");
+    }
+}
+
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, float value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%f\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, int value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%d\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+
+
+inline void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        uint32 whole = (value >> 16);
+        float fraction = static_cast<float>(value & 0xFFFF) / static_cast<float>(0x1FFFE);
+        float fixed = whole + fraction;
+        fprintf(m_file, " %s=\"%f\"", xmlTraceLogAttributes[aId], fixed);
+    }
+}
+
+
+
 
 #endif
