@@ -14,7 +14,7 @@ class Slot
 public:
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
-    float advance(const LoadedFont *font) const { return font->advance(m_glyphid); }
+//    float advance(const LoadedFont *font) const { return font->advance(m_glyphid); }
     int before() const { return m_before; }
     int after() const { return m_after; }
 
@@ -43,6 +43,7 @@ public:
     void positionShift(Position a) { m_position += a; }
 
 private:
+friend class SlotHandle;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     int m_original;	    // charinfo that originated this slot (e.g. for feature values)

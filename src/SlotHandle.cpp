@@ -21,7 +21,7 @@ float SlotHandle::originY() const
 
 float SlotHandle::advance(const LoadedFont *font) const
 {
-    return m_p->advance(font);
+    return font->advance(m_p->m_glyphid);
 }
 
 

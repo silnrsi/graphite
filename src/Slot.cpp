@@ -20,7 +20,7 @@ Position Slot::finalise(Segment *seg, const LoadedFont *font, Position *base, Re
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;
     Position shift = m_shift * scale;
-    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + advance(font) : m_advance.x;
+    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
 //    float tAdvance = font ? m_advance.x * scale + advance(font) : m_advance.x + seg->glyphAdvance(m_glyphid);
     Position res;
 
