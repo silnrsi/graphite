@@ -13,14 +13,14 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir) :
+Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
         m_slots(numchars),
         m_charinfo(new CharInfo[numchars]),
         m_silf(face->chooseSilf(script)),
-        m_dir(dir),
+        m_dir(textDir),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
     m_userAttrs.assign(m_silf->numUser() * numchars, 0);         // initialise to 0

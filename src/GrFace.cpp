@@ -60,15 +60,15 @@ bool GrFace::readGlyphs()
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
         unsigned int nAdvWid;
         Position pos(0, 0);
-        Rect bbox(pos, pos);
+        Rect boundingBox(pos, pos);
         GlyphFace *g;
         size_t locidx = TtfUtil::LocaLookup(i, pLoca, lLoca, pHead);
         void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
         if (TtfUtil::HorMetrics(i, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
             pos = Position(nAdvWid, 0);
         if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-            bbox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
-        g = new(m_glyphs + i) GlyphFace(pos, bbox);
+            boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+        g = new(m_glyphs + i) GlyphFace(pos, boundingBox);
         if (locFlags & 1)
         {
             glocs = swap32(((uint32 *)pGloc)[2+i]);
