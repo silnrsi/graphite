@@ -33,36 +33,6 @@ diagnostic log of the segment creation in grSegmentLog.txt
 
 #include "CharInfo.h" // temp
 
-// define a few basic functions to save using libstdc++
-#ifdef __GNUC__
-extern "C" void __cxa_pure_virtual() { assert(false); }
-
-void * operator new[](size_t size)
-{
-    return malloc(size);
-}
-void operator delete[] (void * p)
-{
-    if (p) free(p);
-}
-void * operator new(size_t size)
-{
-    return malloc(size);
-}
-void operator delete (void * p)
-{
-    if (p) free(p);
-}
-
-// declaration in c++/x.y/bits/functexcept.h
-namespace std
-{
-    void __throw_bad_alloc(void) { assert(false); };
-    void __throw_length_error(const char* c)
-    { fprintf(stderr, "Length error %s\n", c); assert(false);}
-}
-#endif
-
 namespace gr2 = org::sil::graphite::v2;
 
 class GrngTextSrc
