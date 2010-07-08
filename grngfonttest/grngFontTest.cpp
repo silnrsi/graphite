@@ -559,7 +559,7 @@ int Parameters::testFileFont() const
             return 3;
         }
 
-        GrFont *sizedFont = IFont::makeGrFont(pointSize * dpi / 72, face);
+        gr2::GrFont *sizedFont = gr2::IFont::makeGrFont(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
