@@ -28,9 +28,9 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 if (NOT DISABLE_TRACING)
     message(STATUS "Tracing enabled")
     set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)
-	if (ENABLE_DEEP_TRACING)
-		add_definitions(-DENABLE_DEEP_TRACING)
-	endif (ENABLE_DEEP_TRACING)
+    if (ENABLE_DEEP_TRACING)
+        add_definitions(-DENABLE_DEEP_TRACING)
+    endif (ENABLE_DEEP_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
@@ -57,6 +57,7 @@ add_library(graphiteng SHARED
     GlyphFace.cpp
     GrFace.cpp
     GrFont.cpp
+    Main.cpp
     IFace.cpp
     IFont.cpp
     Segment.cpp
@@ -68,8 +69,8 @@ add_library(graphiteng SHARED
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
-	${GRAPHITE_HEADERS}
-	${PRIVATE_HEADERS}
+    ${GRAPHITE_HEADERS}
+    ${PRIVATE_HEADERS}
     )
 
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
@@ -78,7 +79,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden)
-     set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc -lm" LINKER_LANGUAGE C)
+    set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc" LINKER_LANGUAGE C)
      set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
      add_test(libgraphiteng-nostdc++ ${PROJECT_SOURCE_DIR}/../tests/nolibstdc++ graphiteng .)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -93,5 +94,4 @@ set_target_properties(graphiteng PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
 set_target_properties(graphiteng PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
 install(TARGETS graphiteng EXPORT graphiteng LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphiteng)
 install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE gr_)
-
 
