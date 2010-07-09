@@ -40,7 +40,7 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
     Rect ourBbox = seg->glyphBbox(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
-    if (m_parent != -1 && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x;
+    if (m_parent != -1 && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x >= m_position.x ? ourBbox.bl.x : m_position.x;
 
     if (m_child != -1)
     {
@@ -181,6 +181,7 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 val, int
     case kslatAttTo :
         m_parent = value;
         (*seg)[value].child(seg, is);
+        m_attach = Position(seg->glyphAdvance((*seg)[value].gid()), 0);
         break;
     case kslatAttX :
         m_attach = Position(value, m_attach.y);
@@ -253,7 +254,16 @@ void Slot::child(Segment *seg, int ap)
     else if (ap == -1 || m_child == -1)
         m_child = ap;
     else
-        (*seg)[m_child].child(seg, ap);
+        (*seg)[m_child].sibling(seg, ap);
+}
+
+void Slot::sibling(Segment *seg, int ap)
+{
+    if (ap == m_sibling) {}
+    else if (ap == -1 || m_sibling == -1)
+        m_sibling = ap;
+    else
+        (*seg)[m_sibling].sibling(seg, ap);
 }
 
 void Slot::setGlyph(Segment *seg, uint16 glyphid)

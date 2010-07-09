@@ -60,6 +60,7 @@ public:
     int8 dir() const { return m_dir; }
     uint16 user(uint32 sid, uint8 index) { return (sid < m_numGlyphs && index < m_silf->numUser() ? m_userAttrs[sid * m_silf->numUser() + index] : 0); }
     void user(uint32 sid, uint8 index, uint16 value) { if (sid < m_numGlyphs && index < m_silf->numUser()) m_userAttrs[sid * m_silf->numUser() + index] = value; }
+    void copyUserAttrs(uint32 osid, uint32 isid) { int n = m_silf->numUser(); for (int i = 0; i < n; i++) m_userAttrs[osid * n + i] = m_userAttrs[isid * n + i]; }
 
     Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
     ~Segment();

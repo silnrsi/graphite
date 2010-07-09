@@ -41,6 +41,7 @@ public:
     int getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos) const;
     void attachTo(int ap) { m_parent = ap; }
     void child(Segment *seg, int ap);
+    void sibling(Segment *seg, int ap);
     int attachTo() const { return m_parent; }
     uint32 clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const;
     void positionShift(Position a) { m_position += a; }

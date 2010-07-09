@@ -210,54 +210,22 @@ bool Pass::readPass(void *pPass, size_t lPass)
         m_cPConstraint = Code();
 
     m_cConstraint = new Code[m_numRules];
-    uint16 loffset = read16(pConstraint);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementConstraints);
 #endif
-    for (uint16 i = 0; i < m_numRules; i++)
-    {
-        uint16 noffset = read16(pConstraint);
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementConstraint);
-        XmlTraceLog::get().addAttribute(AttrIndex, i);
-#endif
-        if (noffset > loffset) m_cConstraint[i] = Code(true, p + loffset, p + noffset, cContexts);
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementConstraint);
-#endif
-        loffset = noffset;
-    }
+    p += readCodePointers(p, pConstraint, m_cConstraint, m_numRules, true, cContexts); 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraints);
 #endif
-    p += loffset;
+
     m_cActions = new Code[m_numRules];
-    loffset = read16(pActions);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementActions);
 #endif
-    for (int i = 0; i < m_numRules; i++)
-    {
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementRule);
-            XmlTraceLog::get().addAttribute(AttrIndex, i);
-            XmlTraceLog::get().addAttribute(AttrSortKey, m_ruleSorts[i]);
-            XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[i]);
-        }
-#endif
-        uint16 noffset = read16(pActions);
-        if (noffset > loffset) m_cActions[i] = Code(false, p + loffset, p + noffset, cContexts);
-        loffset = noffset;
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementRule);
-#endif
-    }
+    p += readCodePointers(p, pActions, m_cActions, m_numRules, false, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementActions);
 #endif
-    p += loffset;
 
     assert(size_t(p - (byte *)pPass) <= lPass);
     free(cContexts);
@@ -265,9 +233,52 @@ bool Pass::readPass(void *pPass, size_t lPass)
     return true;
 }
 
+int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, byte *cContexts)
+{
+    uint16 loffset = read16(pPointers);
+    int lid = (loffset || !isConstraint) ? 0 : -1;
+    for (int i = 1; i <= num; i++)
+    {
+        uint16 noffset = read16(pPointers);
+        if (noffset > 0)
+        {
+            if (lid >= 0)
+            {
+#ifndef DISABLE_TRACING
+                if (XmlTraceLog::get().active())
+                {
+                    if (isConstraint)
+                    {
+                        XmlTraceLog::get().openElement(ElementConstraint);
+                        XmlTraceLog::get().addAttribute(AttrIndex, lid);
+                    }
+                    else
+                    {
+                        XmlTraceLog::get().openElement(ElementRule);
+                        XmlTraceLog::get().addAttribute(AttrIndex, lid);
+                        XmlTraceLog::get().addAttribute(AttrSortKey, m_ruleSorts[lid]);
+                        XmlTraceLog::get().addAttribute(AttrPrecontext, m_rulePreCtxt[lid]);
+                    }
+                }
+#endif
+                pRes[lid] = Code(isConstraint, pCode + loffset, pCode + noffset, cContexts);
+#ifndef DISABLE_TRACING
+                if (isConstraint)
+                    XmlTraceLog::get().closeElement(ElementConstraint);
+                else
+                    XmlTraceLog::get().closeElement(ElementRule);
+#endif
+            }
+            lid = i;
+            loffset = noffset;
+        }
+    }
+    return loffset;
+}
+
 void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
 {
-    if (!testConstraint(&m_cPConstraint, 0, 1, seg, vms))
+    if (!testConstraint(&m_cPConstraint, 0, 1, 0, seg, vms))
         return;
 
     for (unsigned int i = 0; i < seg->length(); i++)
@@ -317,7 +328,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
 #endif
         if (iCol == 65535) break;
         state = m_sTable[state * m_sColumns + iCol];
-        if (state > m_sRows - m_sSuccess)
+        if (state >= m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];
                 vms->addRule(rule, m_ruleSorts[rule], iSlot - startSlot);
@@ -337,7 +348,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
 	        XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
         }
 #endif
-        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), seg, vms))
+        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), m_rulePreCtxt[rulenum], seg, vms))
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -369,7 +380,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
     return 1;
 }
 
-int Pass::testConstraint(const Code *codeptr, int iSlot, int num, Segment *seg, VMScratch *vms) const
+int Pass::testConstraint(const Code *codeptr, int iSlot, int num, int nPre, Segment *seg, VMScratch *vms) const
 {
     uint32 ret;
     
@@ -380,7 +391,8 @@ int Pass::testConstraint(const Code *codeptr, int iSlot, int num, Segment *seg, 
     
     Machine::status_t status;
     Machine m;
-    for (int i = 0; i <= num; i++)
+    if (nPre > iSlot) nPre = iSlot;
+    for (int i = -nPre; i <= num; i++)
     {
         int is = iSlot + i;
         ret = codeptr->run(m, *seg, is, iSlot, status);

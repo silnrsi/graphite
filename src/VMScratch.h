@@ -16,13 +16,13 @@ public:
     int32 *stack() { return m_stack; }
     uint16 rule(int i) { return m_rules[i]; }
     uint16 ruleLength() { return m_numRules; }
-    uint16 length(int i) { return m_lengths[i]; }
-    void addRule(uint16 ruleid, uint16 sortkey, uint16 len) {
+    int16 length(int i) { return m_lengths[i]; }
+    void addRule(uint16 ruleid, uint16 sortkey, int16 len) {
         int i;
         for (i = 0; i < m_numRules; i++)
         {
             if (m_rules[i] == ruleid) return;
-            if (m_sortKeys[i] <= sortkey) break;
+            if (m_sortKeys[i] < sortkey || (m_sortKeys[i] == sortkey && ruleid <= m_rules[i])) break;
         }
         memcpy(m_rules + i + 1, m_rules + i, (m_numRules - i) * sizeof(uint16));
         memcpy(m_sortKeys + i + 1, m_sortKeys + i, (m_numRules - i) * sizeof(uint16));
@@ -42,7 +42,7 @@ protected:
     uint32 m_lastPositioned;
     uint16 m_rules[VMS_MAX_RULES_PER_SEQUENCE];
     uint16 m_sortKeys[VMS_MAX_RULES_PER_SEQUENCE];
-    uint16 m_lengths[VMS_MAX_RULES_PER_SEQUENCE];
+    int16 m_lengths[VMS_MAX_RULES_PER_SEQUENCE];
     int32 m_stack[VMS_MAX_STACK];
 };
 

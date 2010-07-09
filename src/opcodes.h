@@ -206,7 +206,10 @@ STARTOP(put_copy)
     declare_params(1);
     const unsigned int  slot_ref = uint8(*param);
     if (slot_ref)
+    {
 	memcpy(&(seg[is]), &(seg[is + slot_ref]), sizeof(Slot));
+        seg.copyUserAttrs(is, is + slot_ref);
+    }
 ENDOP
 
 STARTOP(insert)
