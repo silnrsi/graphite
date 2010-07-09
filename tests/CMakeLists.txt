@@ -1,6 +1,7 @@
 project(testing)
 
 add_subdirectory(vm)
+add_subdirectory(comparerenderer)
 enable_testing()
 
 macro(fonttest TESTNAME FONTFILE)

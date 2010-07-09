@@ -1,0 +1,99 @@
+#pragma once
+
+#include <cassert>
+
+class RenderedLine;
+
+typedef enum {
+    IDENTICAL = 0,
+    MORE_GLYPHS,
+    LESS_GLYPHS,
+    DIFFERENT_ADVANCE,
+    DIFFERENT_GLYPHS,
+    DIFFERENT_POSITIONS
+} LineDifference;
+
+const char * DIFFERENCE_DESC[] = {
+    "same",
+    "more glyphs",
+    "less glyphs",
+    "different advance",
+    "different glyphs",
+    "different positions"
+};
+
+class GlyphInfo
+{
+    public:
+        GlyphInfo()
+        : m_gid(0), m_x(0), m_y(0), m_firstChar(0), m_lastChar(0)
+        {}
+        GlyphInfo(size_t theGid, float xPos, float yPos, size_t first, size_t last)
+            : m_gid(theGid), m_x(xPos), m_y(yPos), m_firstChar(first), m_lastChar(last)
+        {}
+        void set(size_t theGid, float xPos, float yPos, size_t first, size_t last)
+        {
+            m_gid = theGid;
+            m_x = xPos;
+            m_y = yPos;
+            m_firstChar = first;
+            m_lastChar = last;
+        }
+        float x() const { return m_x; }
+        float y() const { return m_y; }
+        size_t glyph() const { return m_gid; }
+        LineDifference compare(GlyphInfo & cf)
+        {
+            if (m_gid != cf.m_gid) return DIFFERENT_GLYPHS;
+            // do we need a tolerance here?
+            if (m_x != cf.m_x || m_y != cf.m_y)
+            {
+                return DIFFERENT_POSITIONS;
+            }
+            return IDENTICAL;
+        }
+    private:
+        size_t m_gid;
+        float m_x;
+        float m_y;
+        size_t m_firstChar;
+        size_t m_lastChar;
+};
+
+
+class RenderedLine
+{
+    public:
+        RenderedLine()
+        : m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
+        {}
+        RenderedLine(size_t numGlyphs, float adv)
+        : m_numGlyphs(numGlyphs), m_advance(adv), m_glyphs(new GlyphInfo[numGlyphs])
+        {
+            
+        }
+        ~RenderedLine()
+        {
+            delete [] m_glyphs;
+            m_glyphs = NULL;
+        }
+        LineDifference compare(RenderedLine & cf)
+        {
+            if (m_numGlyphs > cf.m_numGlyphs) return MORE_GLYPHS;
+            if (m_numGlyphs < cf.m_numGlyphs) return LESS_GLYPHS;
+            if (m_advance != cf.m_advance) return DIFFERENT_ADVANCE;
+            for (size_t i = 0; i < m_numGlyphs; i++)
+            {
+                LineDifference ld = (*this)[i].compare(cf[i]);
+                if (ld) return ld;
+            }
+            return IDENTICAL;
+        }
+        GlyphInfo & operator [] (size_t i) { assert(i < m_numGlyphs); return m_glyphs[i]; }
+        const GlyphInfo & operator [] (size_t i) const { assert(i < m_numGlyphs); return m_glyphs[i]; }
+    private:
+        size_t m_numGlyphs;
+        float m_advance;
+        GlyphInfo * m_glyphs;
+};
+
