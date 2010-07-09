@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "Segment.h"
@@ -21,8 +22,8 @@ void Silf::releaseBuffers() throw()
 {
     delete [] m_passes;
     delete [] m_pseudos;
-    delete [] m_classOffsets;
-    delete [] m_classData;
+    free(m_classOffsets);
+    free(m_classData);
     m_passes= 0;
     m_pseudos = 0;
     m_classOffsets = 0;
@@ -201,7 +202,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
     char *p = (char *)pClass;
     m_nClass = read16(p);
     m_nLinear = read16(p);
-    m_classOffsets = new uint16[m_nClass + 1];
+    m_classOffsets = gralloc<uint16>(m_nClass + 1);
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
     {
@@ -240,7 +241,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
 #endif
         return -1;
     }
-    m_classData = new uint16[m_classOffsets[m_nClass]];
+    m_classData = gralloc<uint16>(m_classOffsets[m_nClass]);
     for (int i = 0; i < m_classOffsets[m_nClass]; i++)
         m_classData[i] = read16(p);
 #ifndef DISABLE_TRACING

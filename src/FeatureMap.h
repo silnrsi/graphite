@@ -2,6 +2,7 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
+#include "Main.h"
 #include "Features.h"
 //#include <map> // avoid libstdc++
 
@@ -32,7 +33,12 @@ public:
 	else 
 	    return 0; 
     }
+    void * operator new (size_t s, FeatureRef * p)
+    {
+        return p;
+    }
 
+    CLASS_NEW_DELETE
 private:
     uint32 m_mask;
     uint16 m_max;
@@ -48,6 +54,7 @@ private:
     public:
         uint32 m_lang;
         FeaturesHandle m_pFeatures;
+        CLASS_NEW_DELETE
     };
 public:
     FeatureMap() : m_langFeats(NULL), m_feats(NULL) {}
@@ -60,7 +67,7 @@ public:
     FeatureRef *feature(uint8 index) const { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
     FeaturesHandle cloneFeatures(uint32 langname/*0 means default*/) const;
-
+    CLASS_NEW_DELETE
 private:
     byte m_numFeats;
 //    std::map<uint32, byte> m_map;

@@ -1,7 +1,6 @@
 #include "processUTF.h"
 #include <string.h>
 #include <stdlib.h>
-#include <vector>
 
 #include "Segment.h"
 #include "graphiteng/IFont.h"
@@ -28,7 +27,6 @@ Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int t
 
 Segment::~Segment()
 {
-//    delete[] m_slots;
     delete[] m_charinfo;
 }
 

@@ -17,7 +17,7 @@ public:
     TableCacheItem() : m_data(0), m_size(0) {}
     ~TableCacheItem()
     {
-        if (m_size) delete m_data;
+        if (m_size) free(m_data);
     }
     void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; }
     const void * data() const { return m_data; }
@@ -28,18 +28,18 @@ private:
 };
 
 
-class FileFace : public IFace
+class FileFace : public TtfFileFace
 {
-friend class IFace;
+friend class TtfFileFace;
 
 public:
     FileFace(const char *name);
     ~FileFace();
     virtual const void *getTable(unsigned int name, size_t *len) const;
 
+    CLASS_NEW_DELETE
 private:
     FILE* m_pfile;
-//    mutable std::map<unsigned int, std::pair<const void *, size_t> > m_tables;
     mutable TableCacheItem m_tables[TtfUtil::ktiLast];
     char *m_pHeader;
     char *m_pTableDir;
@@ -57,20 +57,20 @@ FileFace::FileFace(const char *fname) :
     if (!(m_pfile = fopen(fname, "rb"))) return;
     size_t lOffset, lSize;
     if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
-    m_pHeader = new char[lSize];
+    m_pHeader = gralloc<char>(lSize);
     if (fseek(m_pfile, lOffset, SEEK_SET)) return;
     if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
     if (!TtfUtil::CheckHeader(m_pHeader)) return;
     if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
-    m_pTableDir = new char[lSize];
+    m_pTableDir = gralloc<char>(lSize);
     if (fseek(m_pfile, lOffset, SEEK_SET)) return;
     if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
 
 FileFace::~FileFace()
 {
-    delete[] m_pTableDir;
-    delete[] m_pHeader;
+    free(m_pTableDir);
+    free(m_pHeader);
     if (m_pfile)
         fclose(m_pfile);
     m_pTableDir = NULL;
@@ -80,8 +80,6 @@ FileFace::~FileFace()
 
 const void *FileFace::getTable(unsigned int name, size_t *len) const
 {
-//    std::map<unsigned int, std::pair<const void *, size_t> >::const_iterator res;
-//    if ((res = m_tables.find(name)) == m_tables.end())
     TableCacheItem * res;
     switch (name)
     {
@@ -168,23 +166,21 @@ const void *FileFace::getTable(unsigned int name, size_t *len) const
         size_t tlen, lOffset;
         if (!TtfUtil::GetTableInfo(name, m_pHeader, m_pTableDir, lOffset, tlen)) return NULL;
         if (fseek(m_pfile, lOffset, SEEK_SET)) return NULL;
-        tptr = new char[tlen];
+        tptr = gralloc<char>(tlen);
         if (fread(tptr, 1, tlen, m_pfile) != tlen) return NULL;
-//        if (!TtfUtil::CheckTable(name, tptr, tlen)) return NULL;
         res->set(tptr, tlen);
-        
-        //std::pair<unsigned int, std::pair<const void *, size_t> > kvalue = std::pair<unsigned int, std::pair<const void *, size_t> >(name, std::pair<void *, size_t>(tptr, tlen));
-        //std::pair<std::map<unsigned int, std::pair<const void *, size_t> >::iterator, bool> result = m_tables.insert(kvalue);
-        //if (result.second)
-        //    res = result.first;
     }
-    //if (len) *len = res->second.second;
-    //return res->second.first;
     if (len) *len = res->size();
     return res->data();
 }
 
-/*static*/ IFace* IFace::loadTTFFile(const char *name)		//when no longer needed, call delete
+void TtfFileFace::operator delete(void * p)
+{
+    FileFace * pFileFace = reinterpret_cast<FileFace *>(p);
+    delete pFileFace;
+}
+
+/*static*/ TtfFileFace* TtfFileFace::loadTTFFile(const char *name)		//when no longer needed, call delete
 {
     FileFace* res = new FileFace(name);
     if (res->m_pTableDir)
@@ -196,12 +192,6 @@ const void *FileFace::getTable(unsigned int name, size_t *len) const
     return NULL;
 }
 #endif			//!DISABLE_FILE_FONT
-
-void IFace::operator delete(void* p, size_t)
-{
-    ::delete((char*)p);
-}
-
 
 GrFace* IFace::makeGrFace() const		//this must stay alive all the time when the GrFace is alive. When finished with the LoadeFace, call IFace::destroyGrFace
 {

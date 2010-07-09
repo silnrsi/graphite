@@ -6,6 +6,7 @@
 #pragma once
 
 #include <graphiteng/Types.h>
+#include "Main.h"
 #include "Machine.h"
 
 using namespace org::sil::graphite::v2;
@@ -58,6 +59,7 @@ public:
     
     int32 run(Machine &m, Segment & seg, slotref & islot_idx, slotref iStart,
                     Machine::status_t & status) const;
+    CLASS_NEW_DELETE
 };
 
 inline Code::Code() throw()

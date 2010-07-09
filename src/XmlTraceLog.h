@@ -6,6 +6,7 @@
 #include "XmlTraceLogTags.h"
 #include <graphiteng/XmlLog.h>
 #include <cassert>
+#include "Main.h"
 
 #ifndef DISABLE_TRACING
 
@@ -39,6 +40,7 @@ public:
     {
         return *sLog;
     }
+    CLASS_NEW_DELETE
 private:
     static XmlTraceLog sm_NullLog;
     static XmlTraceLog * sLog;

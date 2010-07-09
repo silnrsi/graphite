@@ -79,7 +79,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden)
-    set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -lgcc" LINKER_LANGUAGE C)
+    set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc" LINKER_LANGUAGE C)
      set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
      add_test(libgraphiteng-nostdc++ ${PROJECT_SOURCE_DIR}/../tests/nolibstdc++ graphiteng .)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

@@ -2,6 +2,7 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
+#include "Main.h"
 #include "GrFont.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -43,6 +44,8 @@ public:
     int attachTo() const { return m_parent; }
     uint32 clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const;
     void positionShift(Position a) { m_position += a; }
+
+    CLASS_NEW_DELETE
 
 private:
 friend class SlotHandle;

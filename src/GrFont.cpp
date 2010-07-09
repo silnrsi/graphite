@@ -7,7 +7,7 @@ GrFont::GrFont(float ppm, const GrFace *face) :
     m_scale(ppm / face->upem())
 {
     size_t nGlyphs=m_face->numGlyphs();
-    m_advances = new float[nGlyphs];
+    m_advances = gralloc<float>(nGlyphs);
     float *advp = m_advances;
     for (size_t i = 0; i < nGlyphs; i++)
     { *advp++ = INVALID_ADVANCE; }
@@ -16,7 +16,7 @@ GrFont::GrFont(float ppm, const GrFace *face) :
 
 /*virtual*/ GrFont::~GrFont()
 {
-    delete[] m_advances;
+    free(m_advances);
 }
 
 

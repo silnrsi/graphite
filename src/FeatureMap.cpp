@@ -36,7 +36,7 @@ bool FeatureMap::readFeats(const IFace *face)
     read32(pFeat);
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     m_feats = new FeatureRef[m_numFeats];
-    defVals = new uint16[m_numFeats];
+    defVals = gralloc<uint16>(m_numFeats);
     byte currIndex = 0;
     byte currBits = 0;
 

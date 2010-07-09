@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Main.h"
+
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class CharInfo // : ICharInfo
@@ -13,6 +15,7 @@ public:
     int breakWeight() { return m_break; }
     void breakWeight(int val) { m_break = val; }
 
+    CLASS_NEW_DELETE
 protected:
     int m_char;     // Unicode character in character stream
     int m_before;   // slot id of glyph that cursor before this char is before

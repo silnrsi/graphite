@@ -10,6 +10,43 @@ using vm::Code;
 using vm::Machine;
 using namespace org::sil::graphite::v2;
 
+Pass::Pass()
+ :
+    m_silf(NULL),
+    m_cols(NULL),
+    m_ruleidx(NULL),
+    m_ruleMap(NULL),
+    m_ruleSorts(NULL),
+    m_startStates(NULL),
+    m_rulePreCtxt(NULL),
+    m_cConstraint(NULL),
+    m_cActions(NULL),
+    m_sTable(NULL)
+{
+}
+
+Pass::~Pass()
+{
+    if (m_cols) free(m_cols);
+    if (m_ruleidx) free(m_ruleidx);
+    if (m_ruleMap) free(m_ruleMap);
+    if (m_startStates) free(m_startStates);
+    if (m_ruleSorts) free(m_ruleSorts);
+    if (m_rulePreCtxt) free(m_rulePreCtxt);
+    if (m_sTable) free(m_sTable);
+    delete [] m_cConstraint;
+    delete [] m_cActions;
+    m_cols = NULL;
+    m_ruleidx = NULL;
+    m_ruleMap = NULL;
+    m_startStates = NULL;
+    m_ruleSorts = NULL;
+    m_rulePreCtxt = NULL;
+    m_sTable = NULL;
+    m_cConstraint = NULL;
+    m_cActions = NULL;
+}
+
 bool Pass::readPass(void *pPass, size_t lPass)
 {
     byte *p = (byte *)pPass;
@@ -54,7 +91,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
 #endif
     p += 6;
     m_numGlyphs = swap16(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
-    m_cols = new uint16[m_numGlyphs];
+    m_cols = gralloc<uint16>(m_numGlyphs);
     for (int i = 0; i < m_numGlyphs; i++)
         m_cols[i] = -1;
     for (int i = 0; i < numRanges; i++)
@@ -76,14 +113,14 @@ bool Pass::readPass(void *pPass, size_t lPass)
             m_cols[first++] = col;
     }
     if (size_t(p - (byte *)pPass) >= lPass) return false;
-    m_ruleidx = new uint16[m_sSuccess + 1];
+    m_ruleidx =gralloc<uint16>(m_sSuccess+1);
     for (int i = 0; i <= m_sSuccess; i++)
     {
         m_ruleidx[i] = read16(p);
         if (m_ruleidx[i] > lPass) return false;
     }
     numEntries = m_ruleidx[m_sSuccess];
-    m_ruleMap = new uint16[numEntries];
+    m_ruleMap = gralloc<uint16>(numEntries);
     for (int i = 0; i < numEntries; i++)
     {
         m_ruleMap[i] = read16(p);
@@ -108,7 +145,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_minPreCtxt = *p++;
     m_maxPreCtxt = *p++;
-    m_startStates = new uint16[m_maxPreCtxt - m_minPreCtxt + 1];
+    m_startStates = gralloc<uint16>(m_maxPreCtxt - m_minPreCtxt + 1);
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
     {
         m_startStates[i] = read16(p);
@@ -124,10 +161,10 @@ bool Pass::readPass(void *pPass, size_t lPass)
         if (m_startStates[i] >= lPass) return false;
     }
 
-    m_ruleSorts = new uint16[m_numRules];
+    m_ruleSorts = gralloc<uint16>(m_numRules);
     for (int i = 0; i < m_numRules; i++)
         m_ruleSorts[i] = read16(p);
-    m_rulePreCtxt = new byte[m_numRules];
+    m_rulePreCtxt = gralloc<byte>(m_numRules);
     memcpy(m_rulePreCtxt, p, m_numRules);
     p += m_numRules;
     p++;
@@ -135,7 +172,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     byte *pConstraint = p;
     byte *pActions = p + (m_numRules + 1) * 2;
     p += (m_numRules + 1) * 4;
-    m_sTable = new int16[m_sTransition * m_sColumns];
+    m_sTable = gralloc<int16>(m_sTransition * m_sColumns);
     for (int i = 0; i < m_sTransition * m_sColumns; i++)
     {
         m_sTable[i] = read16(p);
@@ -157,7 +194,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     }
 #endif
     p++;
-    byte *cContexts = new byte[2 * nMaxContext];
+    byte *cContexts = gralloc< byte>(2 * nMaxContext);
     if (nPConstraint)
     {
 #ifndef DISABLE_TRACING    
@@ -223,6 +260,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     p += loffset;
 
     assert(size_t(p - (byte *)pPass) <= lPass);
+    free(cContexts);
     // no debug
     return true;
 }

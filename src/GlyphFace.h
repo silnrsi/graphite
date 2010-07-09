@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Main.h"
 #include "XmlTraceLog.h"
 #include "Main.h"
 #include "Position.h"
@@ -50,6 +51,12 @@ public:
     }
     uint16  getMetric(uint8 metric);
 
+    CLASS_NEW_DELETE
+    void * operator new (size_t s, GlyphFace * p)
+    {
+        return p;
+    }
+
 protected:
     Rect     m_bbox;        // bounding box metrics in design units
     Position m_advance;     // Advance width and height in design units
@@ -65,8 +72,8 @@ inline GlyphFace::GlyphFace(Position pos, Rect box) throw()
     m_attribs(0), m_columns(0), m_attrs(0) {
 }
 
-inline GlyphFace::~GlyphFace() throw() { 
-    delete [] m_attrs;
+inline GlyphFace::~GlyphFace() throw() {
+    free(m_attrs);
 }
 
 inline const Position & GlyphFace::advance() const { 

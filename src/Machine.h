@@ -6,6 +6,7 @@
 
 #pragma once
 #include <graphiteng/Types.h>
+#include "Main.h"
 
 #if defined(__GNUC__)
 #define     HOT             __attribute__((hot))
@@ -99,6 +100,7 @@ public:
     stack_t                   run(const instr * program, const gr2::byte * data,
                                   gr2::Segment & seg, slotref & islot_idx, slotref iStart,
                                   status_t &status) HOT;
+    CLASS_NEW_DELETE
 
 private:
     void check_final_stack(const stack_t * const sp, status_t &status);

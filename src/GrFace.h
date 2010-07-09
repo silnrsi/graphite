@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Main.h"
 #include "GlyphFace.h"
 #include "Silf.h"
 #include "TtfUtil.h"
@@ -57,7 +58,8 @@ public:
     const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return (gattr < m_numAttrs && gid < m_numGlyphs) ? m_glyphs[gid].getAttr(gattr) : 0; }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
-    
+
+    CLASS_NEW_DELETE
 private:
 
     const IFace *m_face;                  // Where to get tables

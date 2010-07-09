@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include "VMScratch.h"
 #include "Code.h"
 
@@ -12,7 +13,8 @@ class Silf;
 class Pass
 {   
 public:
-    Pass() {}
+    Pass();
+    ~Pass();
     
     bool readPass(void *pPass, size_t lPass);
     void runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const;
@@ -21,6 +23,7 @@ public:
     int doAction(const vm::Code *m_cAction, int startSlot, Segment *seg, VMScratch *vms) const;
     void init(Silf *silf) { m_silf = silf; }
 
+    CLASS_NEW_DELETE
 private:
     Silf *m_silf;
     byte m_iMaxLoop;

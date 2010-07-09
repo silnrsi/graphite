@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphiteng/IFont.h"
+#include "Main.h"
 #include "GrFace.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -23,7 +24,8 @@ public:
 //    Position scale(const Position& p) const { return Position(m_scale * p.x, m_scale * p.y); }
 //    float scale(float p) const { return m_scale * p; }
     float scale() const { return m_scale; }
-    
+
+    CLASS_NEW_DELETE
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
     
@@ -42,10 +44,10 @@ class GrHintedFont : public GrFont
 {
 public:
    GrHintedFont(const IFont *font/*not NULL*/, const GrFace *face);
-   
+
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
-    
+
 private:
     const IFont *m_font;      // Application interface.
 };

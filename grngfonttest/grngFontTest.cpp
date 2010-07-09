@@ -20,7 +20,6 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <cassert>
 #include <climits>
 #include <iomanip>
-#include <string>
 #include <cstring>
 #include <iconv.h>
 
@@ -518,7 +517,7 @@ void listFeatures(gr::Font & font)
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
-    gr2::IFace *fileface;
+    gr2::TtfFileFace *fileface;
 //    try
     {
         // use the -trace option to specify a file
@@ -546,7 +545,7 @@ int Parameters::testFileFont() const
         }
 #endif
         GrngTextSrc textSrc(pText32, charLength);
-        if (!(fileface = gr2::IFace::loadTTFFile(fileName)))
+        if (!(fileface = gr2::TtfFileFace::loadTTFFile(fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables\n");
             return 2;
@@ -627,8 +626,8 @@ int Parameters::testFileFont() const
             float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot.gid(), slot.getAttr(seg, gr2::kslatAttTo, 0, i), 
-		    slot.getAttr(seg, gr2::kslatAttX, 0, i), 
-		    slot.getAttr(seg, gr2::kslatAttY, 0, i), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
+                    slot.getAttr(seg, gr2::kslatAttX, 0, i),
+                    slot.getAttr(seg, gr2::kslatAttY, 0, i), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
                     seg.charInfo(slot.original())->breakWeight(), slot.before(), slot.after());
             
             if (pText32 != NULL)

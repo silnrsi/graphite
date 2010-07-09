@@ -15,6 +15,7 @@ class Pseudo
 public:
     uint32 uid;
     uint32 gid;
+    CLASS_NEW_DELETE
 };
 
 class Silf
@@ -31,6 +32,8 @@ public:
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
     uint8 aBreak() const { return m_aBreak; }
+
+    CLASS_NEW_DELETE
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);

@@ -12,6 +12,19 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
+#ifdef __GNUC__
+// use the GNU CXX extension malloc_allocator to avoid new/delete
+#include <ext/malloc_allocator.h>
+typedef std::vector<Features, __gnu_cxx::malloc_allocator<Features> > FeatureList;
+typedef std::vector<Slot, __gnu_cxx::malloc_allocator<Slot> > SlotList;
+typedef std::vector<uint16, __gnu_cxx::malloc_allocator<uint16> > AttributeList;
+#else
+// standard allocator for other platforms
+typedef std::vector<Features> FeatureList;
+typedef std::vector<Slot> SlotList;
+typedef std::vector<uint16> AttributeList;
+#endif
+
 class Silf;
 class GrFace;
 class Segment
@@ -92,6 +105,8 @@ public:
     }
     int findRoot(int is) const { return (m_slots[is].attachTo() == -1 ? is : findRoot(m_slots[is].attachTo())); }
 
+    CLASS_NEW_DELETE
+
 #ifndef DISABLE_TRACING
     void logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const;
     void logSegment() const;
@@ -104,9 +119,9 @@ private:
     void finalise(const GrFont *font);
   
 private:
-    std::vector<Slot> m_slots;
+    SlotList m_slots;
     unsigned int m_numGlyphs;
-    std::vector<uint16> m_userAttrs;
+    AttributeList m_userAttrs;
     CharInfo *m_charinfo;  // character info, one per input character
     unsigned int m_numCharinfo;      // size of the array and number of input characters
 
@@ -115,7 +130,7 @@ private:
     Position m_advance;       // whole segment advance
     Rect m_bbox;           // ink box of the segment
     int8 m_dir;
-    std::vector<Features> m_feats;	// feature settings referenced by charinfos in this segment
+    FeatureList m_feats;	// feature settings referenced by charinfos in this segment
 
 
 #ifdef FIND_BROKEN_VIRTUALS

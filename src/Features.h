@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include "Main.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -19,13 +20,13 @@ public:
     }
 
     explicit Features(int num)
-      : m_length(num), m_vec(new uint32 [num]) {}
+      : m_length(num), m_vec(gralloc<uint32>(num)) {}
     Features(const Features & o) : m_length(0), m_vec(0) { *this = o; }
-    ~Features() { delete [] m_vec; }
+    ~Features() { free(m_vec); }
     Features & operator=(const Features & rhs) {
         if (m_length != rhs.m_length) {
-            delete [] m_vec;
-            m_vec = new uint32 [rhs.m_length];
+            if (m_vec) free(m_vec);
+            m_vec = gralloc<uint32>(m_length);
             m_length = m_vec ? rhs.m_length : 0;
         }
         std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
@@ -43,7 +44,7 @@ public:
 //    void operator delete(void * res, int num) {
 //        free(res);
 //    }
-
+    CLASS_NEW_DELETE
 private:
 friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;

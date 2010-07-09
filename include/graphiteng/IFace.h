@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cassert>
 #include "graphiteng/Types.h"
 #include "graphiteng/FeaturesHandle.h"
 #include "graphiteng/FeatureRefHandle.h"
@@ -18,18 +18,11 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrFace;
 
-
 class GRNG_EXPORT IFace
 {
 public:
-    virtual ~IFace() {}
+    //virtual ~IFace() {}
     virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format
-    
-#ifndef DISABLE_FILE_FONT
-    static IFace* loadTTFFile(const char *name);		//when no longer needed, call delete
-								//TBD better error handling
-#endif 		//!DISABLE_FILE_FONT
-    void operator delete(void* p, size_t);
 
     GrFace* makeGrFace() const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
     static FeaturesHandle getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
@@ -41,5 +34,15 @@ private :
     virtual double getTable(unsigned int name, size_t *len) { return 0.0; }
 #endif		//FIND_BROKEN_VIRTUALS
 };
+
+#ifndef DISABLE_FILE_FONT
+class GRNG_EXPORT TtfFileFace : public IFace
+{
+public:
+    void operator delete(void *);
+    static TtfFileFace* loadTTFFile(const char *name);        //when no longer needed, call delete
+                                //TBD better error handling
+};
+#endif      //!DISABLE_FILE_FONT
 
 }}}} // namespace
