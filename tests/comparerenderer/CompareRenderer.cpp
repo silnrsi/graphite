@@ -227,12 +227,16 @@ int main(int argc, char ** argv)
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
 
+#ifdef HAVE_GRAPHITE
     if (rendererOptions[OptGraphite].exists())
         renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+#endif
     if (rendererOptions[OptGraphiteNg].exists())
         renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
+#ifdef HAVE_HARFBUZZNG
     if (rendererOptions[OptHarfbuzzNg].exists())
         renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+#endif
 
     if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL)
     {
