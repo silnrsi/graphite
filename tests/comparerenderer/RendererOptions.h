@@ -47,6 +47,7 @@ typedef enum {
     OptRtl,
     OptRepeat,
     OptTolerance,
+    OptCompare,
     OptFeatures,
     OptAlternativeFont
 } OptionId;
@@ -60,7 +61,8 @@ static Option rendererOptions[] = {
     Option("-h", "--harfbuzzng", "Use Harfbuzz NG renderer", Option::OPTION_BOOL),
     Option("-r", "--rtl", "Right to left", Option::OPTION_BOOL),
     Option("", "--repeat", "Number of times to rerun rendering", Option::OPTION_INT),
-    Option("", "--tolerance", "Ignore differences in position smaller than this", Option::OPTION_FLOAT)
+    Option("", "--tolerance", "Ignore differences in position smaller than this", Option::OPTION_FLOAT),
+    Option("-c", "--compare", "Compare glyph output", Option::OPTION_BOOL)
     //Option("", "--features", "Font size", Option::OPTION_STRING),
     //Option("-a", "--alt-font", "Alternative font file", OPTION_STRING),
     

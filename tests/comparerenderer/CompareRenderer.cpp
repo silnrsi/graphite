@@ -218,6 +218,8 @@ int main(int argc, char ** argv)
         compareRenderers.runTests(rendererOptions[OptRepeat].getInt(argv));
     else
         compareRenderers.runTests();
-    int status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv));
+    int status = 0;
+    if (rendererOptions[OptCompare].exists())
+        status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv));
     return status;
 }
