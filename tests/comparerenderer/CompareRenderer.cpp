@@ -9,10 +9,18 @@
 
 #include "RendererOptions.h"
 #include "Renderer.h"
-#include "GrRenderer.h"
-#include "GrNgRenderer.h"
-#include "HbNgRenderer.h"
 #include "RenderedLine.h"
+
+#ifdef HAVE_GRAPHITE
+#include "GrRenderer.h"
+#endif
+
+#include "GrNgRenderer.h"
+
+#ifdef HAVE_HARFBUZZNG
+#include "HbNgRenderer.h"
+#endif
+
 
 const size_t NUM_RENDERERS = 3;
 
@@ -20,7 +28,7 @@ class CompareRenderer
 {
 public:
     CompareRenderer(const char * testFile, Renderer** renderers)
-        : m_fileBuffer(NULL), m_numLines(0), m_renderers(renderers)
+        : m_fileBuffer(NULL), m_numLines(0), m_lineOffsets(NULL), m_renderers(renderers)
     {
         // read the file into memory for fast access
         struct stat fileStat;
@@ -35,6 +43,7 @@ public:
                     m_fileLength = fread(m_fileBuffer, 1, fileStat.st_size, file);
                     assert(m_fileLength == fileStat.st_size);
                     countLines();
+                    findLines();
                     for (size_t r = 0; r < NUM_RENDERERS; r++)
                     {
                         if (m_renderers[r])
@@ -75,9 +84,11 @@ public:
             if (m_lineResults[i]) delete [] m_lineResults[i];
             m_lineResults[i] = NULL;
         }
+        if (m_lineOffsets) delete m_lineOffsets;
+        m_lineOffsets = NULL;
     }
 
-    void runTests(int repeat = 1)
+    void runTests(FILE * log, int repeat = 1)
     {
         for (size_t r = 0; r < NUM_RENDERERS; r++)
         {
@@ -85,11 +96,11 @@ public:
             {
                 for (int i = 0; i < repeat; i++)
                     m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r]);
-                fprintf(stdout, "Ran %s in %fs\n", m_renderers[r]->name(), m_elapsedTime[r]);
+                fprintf(log, "Ran %s in %fs\n", m_renderers[r]->name(), m_elapsedTime[r]);
             }
         }
     }
-    int compare(float tolerance)
+    int compare(float tolerance, FILE * log)
     {
         int status = IDENTICAL;
         for (size_t i = 0; i < NUM_RENDERERS; i++)
@@ -98,17 +109,21 @@ public:
             {
                 if (m_renderers[i] == NULL || m_renderers[j] == NULL) continue;
                 if (m_lineResults[i] == NULL || m_lineResults[j] == NULL) continue;
-                fprintf(stdout, "Comparing %s with %s\n", m_renderers[i]->name(), m_renderers[j]->name());
+                fprintf(log, "Comparing %s with %s\n", m_renderers[i]->name(), m_renderers[j]->name());
                 for (size_t line = 0; line < m_numLines; line++)
                 {
                     LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line], tolerance);
                     if (ld)
                     {
-                        fprintf(stdout, "Line %u %s\n", (unsigned int)line, DIFFERENCE_DESC[ld]);
-                        m_lineResults[i][line].dump(stdout);
-                        fprintf(stdout, "%s\n", m_renderers[i]->name());
-                        m_lineResults[j][line].dump(stdout);
-                        fprintf(stdout, "%s\n", m_renderers[j]->name());
+                        fprintf(log, "Line %u %s\n", (unsigned int)line, DIFFERENCE_DESC[ld]);
+                        for (size_t c = m_lineOffsets[line]; c < m_lineOffsets[line+1]; c++)
+                        {
+                            fprintf(log, "%c", m_fileBuffer[c]);
+                        }
+                        m_lineResults[i][line].dump(log);
+                        fprintf(log, "%s\n", m_renderers[i]->name());
+                        m_lineResults[j][line].dump(log);
+                        fprintf(log, "%s\n", m_renderers[j]->name());
                         status |= ld;
                     }
                 }
@@ -121,27 +136,14 @@ protected:
     {
         size_t i = 0;
         const char * pLine = m_fileBuffer;
-        const char * pLineBreak = m_fileBuffer;
         struct timespec startTime;
         struct timespec endTime;
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
         while (i < m_numLines)
         {
-            size_t lineLength;
-            if (i + 1 == m_numLines)
-            {
-                lineLength = m_fileLength - (pLine - m_fileBuffer);
-                if (lineLength > 0 && pLine[lineLength-1] == '\n')
-                    --lineLength;
-            }
-            else
-            {
-                while (*pLineBreak != '\n') ++pLineBreak;
-                lineLength = pLineBreak - pLine;
-            }
+            size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
+            pLine = m_fileBuffer + m_lineOffsets[i];
             renderer.renderText(pLine, lineLength, pLineResult + i);
-            ++pLineBreak;
-            pLine = pLineBreak;
             ++i;
         }
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
@@ -167,10 +169,25 @@ protected:
         }
         return m_numLines;
     }
+    void findLines()
+    {
+        m_lineOffsets = new size_t[m_numLines+1];
+        m_lineOffsets[0] = 0;
+        int line = 0;
+        for (size_t i = 0; i < m_fileLength; i++)
+        {
+            if (m_fileBuffer[i] == '\n')
+            {
+                m_lineOffsets[++line] = i + 1;
+            }
+        }
+        m_lineOffsets[m_numLines] = m_fileLength;
+    }
 private:
     char * m_fileBuffer;
     size_t m_fileLength;
     size_t m_numLines;
+    size_t * m_lineOffsets;
     Renderer** m_renderers;
     RenderedLine * m_lineResults[NUM_RENDERERS];
     float m_elapsedTime[NUM_RENDERERS];
@@ -193,6 +210,17 @@ int main(int argc, char ** argv)
     const char * textFile = rendererOptions[OptTextFile].get(argv);
     const char * fontFile = rendererOptions[OptFontFile].get(argv);
     int fontSize = rendererOptions[OptSize].getInt(argv);
+    FILE * log = stdout;
+    if (rendererOptions[OptLogFile].exists())
+    {
+        log = fopen(rendererOptions[OptLogFile].get(argv), "wb");
+        if (!log)
+        {
+            fprintf(stderr, "Failed to open log file %s\n",
+                    rendererOptions[OptLogFile].get(argv));
+            return -2;
+        }
+    }
 
     // TODO features
 
@@ -210,16 +238,27 @@ int main(int argc, char ** argv)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
-        return -2;
+        return -3;
     }   
 
     CompareRenderer compareRenderers(textFile, renderers);
     if (rendererOptions[OptRepeat].exists())
-        compareRenderers.runTests(rendererOptions[OptRepeat].getInt(argv));
+        compareRenderers.runTests(log, rendererOptions[OptRepeat].getInt(argv));
     else
-        compareRenderers.runTests();
+        compareRenderers.runTests(log);
     int status = 0;
     if (rendererOptions[OptCompare].exists())
-        status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv));
+        status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv), log);
+
+    for (size_t i = 0; i < NUM_RENDERERS; i++)
+    {
+        if (renderers[i])
+        {
+            delete renderers[i];
+            renderers[i] = NULL;
+        }
+    }
+    if (rendererOptions[OptLogFile].exists()) fclose(log);
+
     return status;
 }

@@ -48,6 +48,7 @@ typedef enum {
     OptRepeat,
     OptTolerance,
     OptCompare,
+    OptLogFile,
     OptFeatures,
     OptAlternativeFont
 } OptionId;
@@ -62,7 +63,8 @@ static Option rendererOptions[] = {
     Option("-r", "--rtl", "Right to left", Option::OPTION_BOOL),
     Option("", "--repeat", "Number of times to rerun rendering", Option::OPTION_INT),
     Option("", "--tolerance", "Ignore differences in position smaller than this", Option::OPTION_FLOAT),
-    Option("-c", "--compare", "Compare glyph output", Option::OPTION_BOOL)
+    Option("-c", "--compare", "Compare glyph output", Option::OPTION_BOOL),
+    Option("-l", "--log", "Log file for results instead of stdout", Option::OPTION_STRING)
     //Option("", "--features", "Font size", Option::OPTION_STRING),
     //Option("-a", "--alt-font", "Alternative font file", OPTION_STRING),
     
