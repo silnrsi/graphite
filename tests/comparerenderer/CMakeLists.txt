@@ -28,3 +28,13 @@ add_executable(comparerenderer
 
 # rt is for timing
 target_link_libraries(comparerenderer graphiteng ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} rt)
+
+if (${GR_FOUND})
+    # comparision tests between old and new graphite
+    # this file is fine as a test for Latin, but beware tabs in the file may cause discrepancies
+    add_test(NAME charis_comparison COMMAND $<TARGET_FILE:comparerenderer>
+        -t ${PROJECT_SOURCE_DIR}/CMakeLists.txt -f ${PROJECT_SOURCE_DIR}/../fonts/charis_r_gr.ttf -s 12 -l ${PROJECT_BINARY_DIR}/charis_comparision.log -c -g -n)
+    add_test(NAME padauk_comparison COMMAND $<TARGET_FILE:comparerenderer>
+        -t ${PROJECT_SOURCE_DIR}/../texts/my_HeadwordSyllables.txt -f ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf -s 12 -l ${PROJECT_BINARY_DIR}/padauk_comparision.log -c -g -n)
+
+endif (${GR_FOUND})
