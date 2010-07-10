@@ -105,7 +105,7 @@ void Segment::positionSlots(const GrFont *font)
     if (cMin != 0)
     {
         Position adj = Position(-cMin, 0);
-        for (int i = 0; i < m_numGlyphs; i++)
+        for (unsigned int i = 0; i < m_numGlyphs; i++)
             m_slots[i].positionShift(adj);
         m_advance += adj;
     }
@@ -139,10 +139,10 @@ void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endP
         return;
     
     start = findRoot(start);
-    for ( ; end + 1 < m_numGlyphs && m_slots[end + 1].attachTo() != -1; end++ ) {}
+    for ( ; end + 1 < static_cast<int>(m_numGlyphs) && m_slots[end + 1].attachTo() != -1; end++ ) {}
     if (m_dir)
     {
-        for (unsigned int i = end; i >= start; i--)
+        for (int i = end; i >= start; i--)
         {
             Slot *s = &(m_slots[i]);
             if (s->isBase())
@@ -151,7 +151,7 @@ void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endP
     }
     else
     {
-        for (unsigned int i = start; i <= end; i++)
+        for (int i = start; i <= end; i++)
         {
             Slot *s = &(m_slots[i]);
             if (s->isBase())
@@ -162,7 +162,7 @@ void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endP
     if (start < *iStart)
     {
         Position lShift = Position() - currpos;
-        for (unsigned int i = start; i < *iStart; i++)
+        for (int i = start; i < *iStart; i++)
             m_slots[i].positionShift(lShift);
         *iStart = start;
     }
