@@ -14,8 +14,8 @@ public:
         : m_fileFont(fontFile, fontSize, 72, 72)
         
     {  
-        m_layout.setStartOfLine(true);
-        m_layout.setEndOfLine(true);
+        m_layout.setStartOfLine(false);
+        m_layout.setEndOfLine(false);
         m_layout.setDumbFallback(true);
         m_layout.setJustifier(NULL);
         m_layout.setRightToLeft(direction);
@@ -38,6 +38,7 @@ public:
             ++i;
         }
     }
+    virtual const char * name() const { return "graphite"; }
 private:
     gr::FileFont m_fileFont;
     gr::LayoutEnvironment m_layout;

@@ -42,15 +42,21 @@ class GlyphInfo
         float x() const { return m_x; }
         float y() const { return m_y; }
         size_t glyph() const { return m_gid; }
-        LineDifference compare(GlyphInfo & cf)
+        LineDifference compare(GlyphInfo & cf, float tolerance)
         {
             if (m_gid != cf.m_gid) return DIFFERENT_GLYPHS;
             // do we need a tolerance here?
-            if (m_x != cf.m_x || m_y != cf.m_y)
+            if (m_x > cf.m_x + tolerance || m_x < cf.m_x - tolerance ||
+                m_y > cf.m_y + tolerance || m_y < cf.m_y - tolerance)
             {
                 return DIFFERENT_POSITIONS;
             }
             return IDENTICAL;
+        }
+        void dump(FILE * f)
+        {
+            fprintf(f, "[%3u,%6.2f,%5.2f,%2u,%2u]", (unsigned int)m_gid,
+                    m_x, m_y, (unsigned int)m_firstChar, (unsigned int)m_lastChar);
         }
     private:
         size_t m_gid;
@@ -67,7 +73,7 @@ class RenderedLine
         RenderedLine()
         : m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
         {}
-        RenderedLine(size_t numGlyphs, float adv)
+        RenderedLine(size_t numGlyphs, float adv = 0.0f)
         : m_numGlyphs(numGlyphs), m_advance(adv), m_glyphs(new GlyphInfo[numGlyphs])
         {
             
@@ -77,14 +83,27 @@ class RenderedLine
             delete [] m_glyphs;
             m_glyphs = NULL;
         }
-        LineDifference compare(RenderedLine & cf)
+        void setAdvance(float newAdv) { m_advance = newAdv; }
+        void dump(FILE * f)
+        {
+            for (size_t i = 0; i < m_numGlyphs; i++)
+            {
+                fprintf(f, "%2u", (unsigned int)i);
+                (*this)[i].dump(f);
+                // only 3 glyphs fit on 80 char line
+                if ((i + 1) % 3 == 0) fprintf(f, "\n");
+            }
+            fprintf(f, "(%2u,%4.3f)", (unsigned int)m_numGlyphs, m_advance);
+        }
+        LineDifference compare(RenderedLine & cf, float tolerance)
         {
             if (m_numGlyphs > cf.m_numGlyphs) return MORE_GLYPHS;
             if (m_numGlyphs < cf.m_numGlyphs) return LESS_GLYPHS;
-            if (m_advance != cf.m_advance) return DIFFERENT_ADVANCE;
+            if (m_advance > cf.m_advance + tolerance ||
+                m_advance < cf.m_advance - tolerance) return DIFFERENT_ADVANCE;
             for (size_t i = 0; i < m_numGlyphs; i++)
             {
-                LineDifference ld = (*this)[i].compare(cf[i]);
+                LineDifference ld = (*this)[i].compare(cf[i], tolerance);
                 if (ld) return ld;
             }
             return IDENTICAL;

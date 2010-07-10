@@ -7,12 +7,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "RendererOptions.h"
 #include "Renderer.h"
 #include "GrRenderer.h"
+#include "GrNgRenderer.h"
+#include "HbNgRenderer.h"
 #include "RenderedLine.h"
 
 const size_t NUM_RENDERERS = 3;
-const char * RENDER_NAMES[3] = { "gr", "grng", "hbng" };
 
 class CompareRenderer
 {
@@ -22,7 +24,7 @@ public:
     {
         // read the file into memory for fast access
         struct stat fileStat;
-        if (stat(testFile, &fileStat))
+        if (stat(testFile, &fileStat) == 0)
         {
             FILE * file = fopen(testFile, "r");
             if (file)
@@ -30,7 +32,7 @@ public:
                 m_fileBuffer = new char[fileStat.st_size];
                 if (m_fileBuffer)
                 {
-                    size_t m_fileLength = fread(m_fileBuffer, 1, fileStat.st_size, file);
+                    m_fileLength = fread(m_fileBuffer, 1, fileStat.st_size, file);
                     assert(m_fileLength == fileStat.st_size);
                     countLines();
                     for (size_t r = 0; r < NUM_RENDERERS; r++)
@@ -38,8 +40,12 @@ public:
                         if (m_renderers[r])
                         {
                             m_lineResults[r] = new RenderedLine[m_numLines];
-                            m_elapsedTime[r] = 0.0f;
                         }
+                        else
+                        {
+                            m_lineResults[r] = NULL;
+                        }
+                        m_elapsedTime[r] = 0.0f;
                     }
                 }
                 fclose(file);
@@ -52,6 +58,11 @@ public:
         else
         {
             fprintf(stderr, "Error stating file %s\n", testFile);
+            for (size_t r = 0; r < NUM_RENDERERS; r++)
+            {
+                m_lineResults[r] = NULL;
+                m_elapsedTime[r] = 0.0f;
+            }
         }
     }
     
@@ -61,40 +72,49 @@ public:
         m_fileBuffer = NULL;
         for (size_t i = 0; i < NUM_RENDERERS; i++)
         {
-            delete m_lineResults[i];
+            if (m_lineResults[i]) delete [] m_lineResults[i];
             m_lineResults[i] = NULL;
         }
     }
 
-    void runTests()
+    void runTests(int repeat = 1)
     {
         for (size_t r = 0; r < NUM_RENDERERS; r++)
         {
             if (m_renderers[r])
             {
-                m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r]);
+                for (int i = 0; i < repeat; i++)
+                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r]);
+                fprintf(stdout, "Ran %s in %fs\n", m_renderers[r]->name(), m_elapsedTime[r]);
             }
-            fprintf(stdout, "Ran %s in %fs\n", RENDER_NAMES[r], m_elapsedTime[r]);
         }
     }
-    void compare()
+    int compare(float tolerance)
     {
+        int status = IDENTICAL;
         for (size_t i = 0; i < NUM_RENDERERS; i++)
         {
             for (size_t j = i + 1; j < NUM_RENDERERS; j++)
             {
+                if (m_renderers[i] == NULL || m_renderers[j] == NULL) continue;
                 if (m_lineResults[i] == NULL || m_lineResults[j] == NULL) continue;
-                fprintf(stdout, "Comparing %s with %s\n", RENDER_NAMES[i], RENDER_NAMES[j]);
+                fprintf(stdout, "Comparing %s with %s\n", m_renderers[i]->name(), m_renderers[j]->name());
                 for (size_t line = 0; line < m_numLines; line++)
                 {
-                    LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line]);
+                    LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line], tolerance);
                     if (ld)
                     {
-                        fprintf(stdout, "Line %d %s\n", DIFFERENCE_DESC[ld]);
+                        fprintf(stdout, "Line %u %s\n", (unsigned int)line, DIFFERENCE_DESC[ld]);
+                        m_lineResults[i][line].dump(stdout);
+                        fprintf(stdout, "%s\n", m_renderers[i]->name());
+                        m_lineResults[j][line].dump(stdout);
+                        fprintf(stdout, "%s\n", m_renderers[j]->name());
+                        status |= ld;
                     }
                 }
             }
         }
+        return status;
     }
 protected:
     float runRenderer(Renderer & renderer, RenderedLine * pLineResult)
@@ -109,7 +129,11 @@ protected:
         {
             size_t lineLength;
             if (i + 1 == m_numLines)
+            {
                 lineLength = m_fileLength - (pLine - m_fileBuffer);
+                if (lineLength > 0 && pLine[lineLength-1] == '\n')
+                    --lineLength;
+            }
             else
             {
                 while (*pLineBreak != '\n') ++pLineBreak;
@@ -117,7 +141,8 @@ protected:
             }
             renderer.renderText(pLine, lineLength, pLineResult + i);
             ++pLineBreak;
-            pLine = pLineBreak + 1;
+            pLine = pLineBreak;
+            ++i;
         }
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
         long deltaSeconds = endTime.tv_sec - startTime.tv_sec;
@@ -128,6 +153,7 @@ protected:
             deltaNs += 1000000000;
         }
         float elapsed = deltaSeconds + deltaNs / 1000000000.0f;
+        return elapsed;
     }
 
     size_t countLines()
@@ -151,35 +177,47 @@ private:
 };
 
 
-void help(const char * app)
-{
-    fprintf(stderr, "Usage: %s textfile font size [gr] [grng] [hb]\n", app); 
-}
-
 int main(int argc, char ** argv)
 {
-    if (argc < 4)
+    if (!parseOptions(argc, argv) ||
+        !rendererOptions[OptFontFile].exists() ||
+        !rendererOptions[OptTextFile].exists() ||
+        !rendererOptions[OptSize].exists())
     {
-        help(argv[0]);
+        fprintf(stderr, "Usage:\n%s [options] -t utf8.txt -f font.ttf -s 12\n", argv[0]);
+        fprintf(stderr, "Options:\n");
+        showOptions();
         return -1;
     }
-    const char * textFile = argv[1];
-    const char * fontFile = argv[2];
-    int fontSize = atoi(argv[3]);
+
+    const char * textFile = rendererOptions[OptTextFile].get(argv);
+    const char * fontFile = rendererOptions[OptFontFile].get(argv);
+    int fontSize = rendererOptions[OptSize].getInt(argv);
+
+    // TODO features
 
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
-    int direction = 0; // ltr
-    for (int i = 4; i < argc; i++)
+    int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
+
+    if (rendererOptions[OptGraphite].exists())
+        renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+    if (rendererOptions[OptGraphiteNg].exists())
+        renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
+    if (rendererOptions[OptHarfbuzzNg].exists())
+        renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+
+    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL)
     {
-//        if (strcmp(argv[i], "gr") == 0)
-//            renderers.push_back(new GrRenderer(fontFile, fontSize, direction));
-//        else if (strcmp(argv[i], "grng") == 0)
-//            renderers.push_back(new GrNgRenderer(fontFile, fontSize, direction));
-//        else if (strcmp(argv[i], "hb") == 0)
-//            renderers.push_back(new HbNgRenderer(fontFile, fontSize, direction));
-    }
+        fprintf(stderr, "Please specify at least 1 renderer\n");
+        showOptions();
+        return -2;
+    }   
+
     CompareRenderer compareRenderers(textFile, renderers);
-    compareRenderers.runTests();
-    compareRenderers.compare();
-    return 0;
+    if (rendererOptions[OptRepeat].exists())
+        compareRenderers.runTests(rendererOptions[OptRepeat].getInt(argv));
+    else
+        compareRenderers.runTests();
+    int status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv));
+    return status;
 }
