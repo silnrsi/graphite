@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
+#include <string.h>
 #include "Code.h"
 #include "Machine.h"
 #include "XmlTraceLog.h"
@@ -27,7 +28,7 @@ void fixup_cntxt_item_target(const byte*, byte * &);
 } // end namespace
 
 
-Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cContexts)
+Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, CodeContext *cContexts)
  :  _code(0), _data_size(0), _instr_count(0), _status(loaded), 
     _constrained(constrained), _own(true)
 {
@@ -52,8 +53,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
-    cContexts[0] = 0;
-    cContexts[1] = 0;
+    cContexts[0] = {0, 0, 0};
     do {
         opc = opcode(*cd_ptr++);
         
@@ -89,7 +89,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         if (opc == CNTXT_ITEM)
             fixup_cntxt_item_target(cd_ptr, dp);
         if (!constrained)
-            fixup_instruction_offsets(opc, reinterpret_cast<int8 *>(dp), param_sz, 
+            fixup_instruction_offsets(opc, _instr_count, reinterpret_cast<int8 *>(dp), param_sz, 
                                       iSlot, cContexts);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
@@ -99,7 +99,17 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    assert(ip - _code == ptrdiff_t(_instr_count));
+    // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
+    if (!constrained)
+        for (int i = iSlot - 1; i >= 0; i--)
+            if (cContexts[i].copySlot == 3)
+            {
+                memmove(_code + cContexts[i].codeRef + 1, _code + cContexts[i].codeRef, (_instr_count - cContexts[i].codeRef) * sizeof(instr));
+                _code[cContexts[i].codeRef] = op_to_fn[TEMP_COPY].impl[constrained];
+                _instr_count++;
+            }
+
+//    assert(ip - _code == ptrdiff_t(_instr_count));
     _data_size = sizeof(byte)*(dp - _data);
     
     // Now we know exactly how much code and data the program really needs
@@ -193,42 +203,40 @@ void fixup_cntxt_item_target(const byte* cdp,
     *dp++   = data_skip;
 }
 
-#define ctxtins(n)  cContexts[(n)*2]
-#define ctxtdel(n)  cContexts[(n)*2+1]
-inline void fixup_slotref(int8 * const arg, uint8 is, const byte *const cContexts) {
-    if (*arg < 0)
-        *arg -= ctxtins(is + *arg);
+inline void fixup_slotref(int8 * const arg, uint8 is, const CodeContext *const cContexts) {
+    if (*arg < 0 && -*arg <= is)
+        *arg -= cContexts[is + *arg].nInserts;
 //    else
 //        *arg += ctxtins(is);
 }
 
 } // end of namespace
 
-void Code::fixup_instruction_offsets(const opcode opc, 
+void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
                                      int8  * dp, size_t param_sz,
-                                     byte & iSlot, byte * cContexts)
+                                     byte & iSlot, CodeContext* cContexts)
 {
-    
-    uint8 *contexts = static_cast<uint8 *>(cContexts);
     
     switch (opc)
     {
         case NEXT :
         case COPY_NEXT :
             iSlot++;
-            ctxtins(iSlot) = 0;
-            ctxtdel(iSlot) = 0;
+            cContexts[iSlot] = {0, 0, cp + 1};
             break;
         case INSERT :
             for (int i = iSlot; i >= 0; --i)
-                ++ctxtins(i);
+                ++cContexts[i].nInserts;
             break;
         case DELETE :
-            for (int i = iSlot; i >= 0; --i)
-                ++ctxtdel(i);
             break;
         case PUT_COPY :
         case PUSH_SLOT_ATTR :
+            cContexts[iSlot].copySlot = 1;
+            fixup_slotref(dp-1,iSlot,cContexts);
+            if (dp[-1] < 0 && -dp[-1] <= iSlot)
+                cContexts[iSlot + dp[-1]].copySlot |= 2;
+            break;
         case PUSH_GLYPH_ATTR_OBS :
         case PUSH_FEAT :
         case PUSH_ATT_TO_GATTR_OBS :
@@ -236,17 +244,30 @@ void Code::fixup_instruction_offsets(const opcode opc,
         case PUSH_ATT_TO_GLYPH_ATTR :
             fixup_slotref(dp-1,iSlot,cContexts);
             break;
+        case PUSH_ISLOT_ATTR :
+            cContexts[iSlot].copySlot = 1;
+            fixup_slotref(dp-2,iSlot,cContexts);
+            if (dp[-2] < 0 && -dp[-2] <= iSlot)
+                cContexts[iSlot + dp[-2]].copySlot |= 2;
+            break;
         case PUSH_GLYPH_METRIC :
         case PUSH_ATT_TO_GLYPH_METRIC :
-        case PUSH_ISLOT_ATTR :
             fixup_slotref(dp-2,iSlot,cContexts);
             break;
-        case CNTXT_ITEM :
         case PUT_SUBS_8BIT_OBS:
+            cContexts[iSlot].copySlot = 1;
+            fixup_slotref(dp-3,iSlot,cContexts);
+            if (dp[-3] < 0 && -dp[-3] <= iSlot)
+                cContexts[iSlot + dp[-3]].copySlot |= 2;
+            break;
+        case CNTXT_ITEM :
             fixup_slotref(dp-3,iSlot,cContexts);
 	        break;
         case PUT_SUBS :
+            cContexts[iSlot].copySlot = 1;
             fixup_slotref(dp-5,iSlot,cContexts);
+            if (dp[-5] < 0 && -dp[-5] <= iSlot)
+                cContexts[iSlot + dp[-5]].copySlot |= 2;
             break;
         case ASSOC :
             for (size_t i = 1; i < param_sz; ++i)

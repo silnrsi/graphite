@@ -105,6 +105,13 @@ public:
         return m_slots[iSlot].finalise(this, font, base, bbox, cMin, attrLevel);
     }
     int findRoot(int is) const { return (m_slots[is].attachTo() == -1 ? is : findRoot(m_slots[is].attachTo())); }
+    int copyTempSlot(int is) {
+        m_tempSlots.push_back(m_slots[is]);
+        for (int i = is * m_silf->numUser(); i < (is + 1) * m_silf->numUser(); i++)
+            m_tempUserAttrs.push_back(m_userAttrs[i]);
+        return m_tempSlots.size() - 1;
+    }
+    const Slot & getCopy(int is) { return m_tempSlots[is]; }
 
     CLASS_NEW_DELETE
 
@@ -132,6 +139,8 @@ private:
     Rect m_bbox;           // ink box of the segment
     int8 m_dir;
     FeatureList m_feats;	// feature settings referenced by charinfos in this segment
+    SlotList m_tempSlots;
+    AttributeList m_tempUserAttrs;
 
 
 #ifdef FIND_BROKEN_VIRTUALS

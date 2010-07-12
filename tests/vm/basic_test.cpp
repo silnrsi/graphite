@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     std::cout << "amplified program size: " << big_prog.size() << " bytes" << std::endl;
     
     // Load the code.
-    byte context[256];
+    CodeContext context[256];
     Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(),context);
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.

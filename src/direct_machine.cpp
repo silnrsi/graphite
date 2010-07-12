@@ -50,6 +50,7 @@ const void * direct_run(const bool          get_table_mode,
     slotref         is=islot_idx, isf=-1, isl=-1;
     const slotref   isb=iStart;
     Position        endPos=Position();
+    int8           copies[64] = {-1};
     
     // start the program
     goto **ip;

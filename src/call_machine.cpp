@@ -39,6 +39,7 @@ struct regbank  {
     const slotref   isb;
     const instr * & ip;
     Position        endPos;
+    int8            copies[64];
 };
 
 typedef bool        (* ip_t)(registers);
@@ -54,6 +55,7 @@ namespace {
 #define isb     reg.isb
 #define ip      reg.ip
 #define endPos  reg.endPos
+#define copies  reg.copies
 
 #include "opcodes.h"
 
@@ -64,6 +66,7 @@ namespace {
 #undef isb
 #undef ip
 #undef endPos
+#undef copies
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
@@ -80,7 +83,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, -1, -1, iStart, ip, Position()};
+    regbank         reg = {seg, islot_idx, -1, -1, iStart, ip, Position(), {-1}};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}

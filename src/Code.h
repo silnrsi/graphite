@@ -14,6 +14,12 @@ using namespace org::sil::graphite::v2;
 namespace vm
 {
 
+struct CodeContext
+{
+    uint8       nInserts;
+    uint8       copySlot;
+    uint8       codeRef;
+};
 
 class Code 
 {
@@ -42,11 +48,10 @@ private:
     void release_buffers() throw ();
     void failure(const status_t) throw();
     bool check_opcode(const opcode, const byte *, const byte *const);
-    void fixup_instruction_offsets(const opcode, int8  *, size_t, 
-                                   byte &, byte *);
+    void fixup_instruction_offsets(const opcode, size_t, int8  *, size_t, byte &, CodeContext *);
 public:
     Code() throw();
-    Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, byte *cConstraints);
+    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end, CodeContext* cContexts);
     Code(const Code &) throw();
     ~Code() throw();
     

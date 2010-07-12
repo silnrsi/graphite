@@ -194,7 +194,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     }
 #endif
     p++;
-    byte *cContexts = gralloc< byte>(2 * nMaxContext);
+    vm::CodeContext *cContexts = gralloc<vm::CodeContext>(nMaxContext + 2);
     if (nPConstraint)
     {
 #ifndef DISABLE_TRACING    
@@ -233,7 +233,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     return true;
 }
 
-int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, byte *cContexts)
+int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts)
 {
     uint16 loffset = read16(pPointers);
     int lid = (loffset || !isConstraint) ? 0 : -1;
