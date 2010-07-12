@@ -112,6 +112,8 @@ public:
         return m_tempSlots.size() - 1;
     }
     const Slot & getCopy(int is) { return m_tempSlots[is]; }
+    int getTempUser(int is, int index) { return index < m_silf->numUser() ? m_tempUserAttrs[is * m_silf->numUser() + index] : 0; }
+    void clearCopies() { m_tempSlots.clear(); m_tempUserAttrs.clear(); }
 
     CLASS_NEW_DELETE
 

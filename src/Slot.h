@@ -38,7 +38,7 @@ public:
     bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
     void setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 value, int is);
-    int getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos) const;
+    int getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const;
     void attachTo(int ap) { m_parent = ap; }
     void child(Segment *seg, int ap);
     void sibling(Segment *seg, int ap);

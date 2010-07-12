@@ -431,6 +431,7 @@ int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms)
             i++;
     }
     ret += iSlot;
+    seg->clearCopies();
     return (status == Machine::finished ? ret : iSlot) - iStart;
 }
 

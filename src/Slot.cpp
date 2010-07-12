@@ -101,7 +101,7 @@ uint32 Slot::clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrL
     }
 }
 
-int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos) const
+int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const
 {
     if (index == kslatUserDefnV1)
     {
@@ -167,7 +167,7 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, in
     case kslatJWidth :
         return 0;
     case kslatUserDefn :
-        return const_cast<Segment *>(seg)->user(is, subindex);
+        return useTemp ? const_cast<Segment *>(seg)->getTempUser(is, subindex) : const_cast<Segment *>(seg)->user(is, subindex);
     default :
         return 0;
     }
