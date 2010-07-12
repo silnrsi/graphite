@@ -28,19 +28,22 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
 
     m_position = *base + shift;
     if (m_parent == -1)
+    {
         res = *base + Position(tAdvance, m_advance.y);
+        *cMin = 0.;
+    }
     else
     {
         float tAdv;
         m_position += (m_attach - m_with) * scale;
-        tAdv = m_position.x + tAdvance - shift.x;
+        tAdv = tAdvance > 0. ? m_position.x + tAdvance - shift.x : 0.;
         res = Position(tAdv, 0);
     }
 
     Rect ourBbox = seg->glyphBbox(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
-    if (m_parent != -1 && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x >= m_position.x ? ourBbox.bl.x : m_position.x;
+    if (m_parent != -1 && ourBbox.bl.x >= m_position.x && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x;
 
     if (m_child != -1)
     {
@@ -52,6 +55,14 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
     {
         Position tRes = (*seg)[m_sibling].finalise(seg, font, base, bbox, cMin, attrLevel);
         if (tRes.x > res.x) res = tRes;
+    }
+    
+    if (m_parent == -1 && *cMin < 0)
+    {
+        Position adj = Position(-*cMin, 0.);
+        res += adj;
+        m_position += adj;
+        if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);
     }
     return res;
 }
@@ -271,4 +282,11 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid)
     m_glyphid = glyphid;
     m_realglyphid = seg->glyphAttr(glyphid, seg->silf()->aPseudo());
     m_advance = Position(seg->glyphAdvance(glyphid), 0.);
+}
+
+void Slot::floodShift(Position adj, Segment *seg)
+{
+    m_position += adj;
+    if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);
+    if (m_sibling != -1) (*seg)[m_child].floodShift(adj, seg);
 }

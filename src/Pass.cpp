@@ -281,7 +281,7 @@ void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
     if (!testConstraint(&m_cPConstraint, 0, 1, 0, seg, vms))
         return;
 
-    for (unsigned int i = 0; i < seg->length(); i++)
+    for (unsigned int i = 0; i < seg->length() && i >= 0; i++)
     {
         int advance = 0;
         int loopCount = m_iMaxLoop;
@@ -367,9 +367,9 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
     	  XmlTraceLog::get().closeElement(ElementDoRule);
         }
 #endif
-            if (res == -1)
-                return m_ruleSorts[rulenum];
-            else
+//            if (res == -1)
+//                return m_ruleSorts[rulenum];
+//            else
                 return res;
         }
 #ifdef ENABLE_DEEP_TRACING

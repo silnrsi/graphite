@@ -12,11 +12,12 @@ macro(fonttest TESTNAME FONTFILE)
     add_custom_target(${TESTNAME} DEPENDS ${TESTNAME}.xml)
 endmacro(fonttest)
 
-fonttest(padauk1 Padauk.ttf 1000 103C 1031 102C)
+fonttest(padauk1 Padauk.ttf 1015 102F 100F 1039 100F 1031 1038)
 fonttest(padauk2 Padauk.ttf 1000 103C 102D 102F)
 fonttest(padauk3 Padauk.ttf 101e 1004 103a 1039 1001 103b 102d 102f 1004 103a 1038)
 fonttest(padauk4 Padauk.ttf 1005 1000 1039 1000 1030)
 fonttest(padauk5 Padauk.ttf 1000 103c 1031 102c 1004 1037 103a)
+fonttest(padauk6 Padauk.ttf 1000 102D 1005 1039 1006 102C)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 

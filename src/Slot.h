@@ -45,6 +45,7 @@ public:
     int attachTo() const { return m_parent; }
     uint32 clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const;
     void positionShift(Position a) { m_position += a; }
+    void floodShift(Position adj, Segment *seg);
 
     CLASS_NEW_DELETE
 

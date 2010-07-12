@@ -102,13 +102,6 @@ void Segment::positionSlots(const GrFont *font)
         }
     }
     m_advance = currpos;
-    if (cMin != 0)
-    {
-        Position adj = Position(-cMin, 0);
-        for (unsigned int i = 0; i < m_numGlyphs; i++)
-            m_slots[i].positionShift(adj);
-        m_advance += adj;
-    }
 }
 
 void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos)
