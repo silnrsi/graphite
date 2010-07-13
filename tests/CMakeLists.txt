@@ -5,10 +5,10 @@ add_subdirectory(comparerenderer)
 enable_testing()
 
 macro(fonttest TESTNAME FONTFILE)
-    add_test(NAME ${TESTNAME} COMMAND ${PROJECT_BINARY_DIR}/../grngfonttest/grngfonttest ${OPTS} -log ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
+    add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:grngfonttest> ${OPTS} -log ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
     add_test(NAME ${TESTNAME}Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}.log)
     set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
-    add_custom_target(${TESTNAME} COMMAND ${PROJECT_BINARY_DIR}/../grngfonttest/grngfonttest -trace ${TESTNAME}.xml ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
+    add_custom_command(OUTPUT ${TESTNAME} COMMAND $<TARGET_FILE:grngfonttest> -trace ${TESTNAME}.xml ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
 #    add_custom_target(${TESTNAME} DEPENDS ${TESTNAME}.xml)
 endmacro(fonttest)
 
