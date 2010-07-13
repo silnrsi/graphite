@@ -31,4 +31,9 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
         return reinterpret_cast<T*>(malloc(sizeof(T) * n));
     }
 
+    template <typename T> T * grzeroalloc(size_t n)
+    {
+        return reinterpret_cast<T*>(calloc(n, sizeof(T)));
+    }
+
 }}}} // namespace

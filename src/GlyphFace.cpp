@@ -5,7 +5,7 @@ using namespace org::sil::graphite::v2;
 
 void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num) 
 {
-    m_attrs = gralloc<uint16>(num);
+    m_attrs = grzeroalloc<uint16>(num);
     while (start < end)
     {
         int attr = ((char *)pGlat)[start];

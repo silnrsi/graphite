@@ -26,7 +26,7 @@ public:
     Features & operator=(const Features & rhs) {
         if (m_length != rhs.m_length) {
             if (m_vec) free(m_vec);
-            m_vec = gralloc<uint32>(m_length);
+            m_vec = gralloc<uint32>(rhs.m_length);
             m_length = m_vec ? rhs.m_length : 0;
         }
         std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
