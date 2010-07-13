@@ -43,7 +43,7 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
     Rect ourBbox = seg->glyphBbox(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
-    if (m_parent != -1 && ourBbox.bl.x >= m_position.x && ourBbox.bl.x < *cMin) *cMin = ourBbox.bl.x;
+    if (m_parent != -1 && m_position.x < *cMin) *cMin = m_position.x;
 
     if (m_child != -1)
     {
@@ -288,5 +288,5 @@ void Slot::floodShift(Position adj, Segment *seg)
 {
     m_position += adj;
     if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);
-    if (m_sibling != -1) (*seg)[m_child].floodShift(adj, seg);
+    if (m_sibling != -1) (*seg)[m_sibling].floodShift(adj, seg);
 }
