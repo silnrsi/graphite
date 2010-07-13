@@ -435,7 +435,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             }
             fprintf(log, "\n");
 #else
-            fprintf(stderr,"Only the -codes option is supported on Win32\r\n");
+            fprintf(stderr,"Only the -codes option is supported on Win32\n");
             argError = true;
 #endif
         }
@@ -701,7 +701,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-ls\tStart of line = true (false)\n");
         fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
-        fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\r\n");
+        fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
         fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
