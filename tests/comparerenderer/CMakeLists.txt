@@ -15,19 +15,28 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
     if (${GR_FOUND})
         add_definitions(-DHAVE_GRAPHITE)
+        set(GR_EXTRA_SOURCE GrUtfTextSrc.cpp)
     endif (${GR_FOUND})
+    set(RT_LDFLAGS "rd")
 
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_custom_target(cr_copy_dll ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+	add_dependencies(cr_copy_dll graphiteng iconv)
+endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 include_directories(../common icule ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
 
 add_executable(comparerenderer
     CompareRenderer.cpp
-    GrUtfTextSrc.cpp
+    ${GR_EXTRA_SOURCE}
     )
 
 # rt is for timing
-target_link_libraries(comparerenderer graphiteng ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} rt)
+target_link_libraries(comparerenderer graphiteng ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} ${RT_LDFLAGS})
 
 if (${GR_FOUND})
     # comparision tests between old and new graphite

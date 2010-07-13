@@ -110,6 +110,9 @@ class RenderedLine
         }
         GlyphInfo & operator [] (size_t i) { assert(i < m_numGlyphs); return m_glyphs[i]; }
         const GlyphInfo & operator [] (size_t i) const { assert(i < m_numGlyphs); return m_glyphs[i]; }
+        // define placement new for windows
+        void * operator new (size_t size, RenderedLine * p) { return p; }
+        void operator delete (void *, RenderedLine * p) { }
     private:
         size_t m_numGlyphs;
         float m_advance;

@@ -3,11 +3,14 @@
 
 using namespace org::sil::graphite::v2;
 
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
 GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p)
 {
     delete p;
 }
 
+}}}} // namespace
 
 FeatureRefHandle::FeatureRefHandle(byte bits, byte index, uint32 mask/*=0*/)
 :	AutoHandle<FeatureRef, &DeleteFeatureRef>(new FeatureRef(bits, index, mask))

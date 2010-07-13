@@ -40,6 +40,10 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	target_link_libraries(vm-test-direct vm-test-common)
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+
 add_definitions(-DDISABLE_TRACING)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

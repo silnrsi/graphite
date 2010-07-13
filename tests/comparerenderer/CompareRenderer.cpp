@@ -5,7 +5,13 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef __GNUC__
 #include <unistd.h>
+#endif
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 #include "RendererOptions.h"
 #include "Renderer.h"
@@ -136,9 +142,19 @@ protected:
     {
         size_t i = 0;
         const char * pLine = m_fileBuffer;
+#ifdef __GNUC__
         struct timespec startTime;
         struct timespec endTime;
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
+#endif
+#ifdef WIN32
+        LARGE_INTEGER counterFreq;
+        LARGE_INTEGER startCounter;
+        LARGE_INTEGER endCounter;
+        if (!QueryPerformanceFrequency(&counterFreq))
+            fprintf(stderr, "Warning no high performance counter available\n");
+        QueryPerformanceCounter(&startCounter);
+#endif
         while (i < m_numLines)
         {
             size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
@@ -146,6 +162,7 @@ protected:
             renderer.renderText(pLine, lineLength, pLineResult + i);
             ++i;
         }
+#ifdef __GNUC__
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
         long deltaSeconds = endTime.tv_sec - startTime.tv_sec;
         long deltaNs = endTime.tv_nsec - startTime.tv_nsec;
@@ -155,6 +172,11 @@ protected:
             deltaNs += 1000000000;
         }
         float elapsed = deltaSeconds + deltaNs / 1000000000.0f;
+#endif
+#ifdef WIN32
+        QueryPerformanceCounter(&endCounter);
+        float elapsed = (endCounter.QuadPart - startCounter.QuadPart) / static_cast<float>(counterFreq.QuadPart);
+#endif
         return elapsed;
     }
 

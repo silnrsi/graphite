@@ -1,5 +1,6 @@
 #pragma once
 
+#include <new>
 #include "Renderer.h"
 #include <graphiteng/Types.h>
 #include <graphiteng/IFace.h>
@@ -14,7 +15,7 @@ public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir)
         : m_ttfFace(gr2::TtfFileFace::loadTTFFile(fontFile)),
         m_grFace(m_ttfFace->makeGrFace()),
-        m_grFont(gr2::IFont::makeGrFont(fontSize, m_grFace))
+        m_grFont(gr2::IFont::makeGrFont(static_cast<float>(fontSize), m_grFace))
     {
 
     }
@@ -36,7 +37,7 @@ public:
             fprintf(stderr, "Invalid Unicode pos %ld\n", reinterpret_cast<const char*>(pError) - utf8);
         gr2::SegmentHandle seg(m_grFont, m_grFace, 0u, gr2::SegmentHandle::kutf8, utf8, numCodePoints, m_rtl);
         RenderedLine * renderedLine = new(result) RenderedLine(seg.length(), seg.advanceX());
-        for (size_t i = 0; i < seg.length(); i++)
+        for (int i = 0; i < seg.length(); i++)
         {
             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
         }
