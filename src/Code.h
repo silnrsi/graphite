@@ -16,6 +16,9 @@ namespace vm
 
 struct CodeContext
 {
+    CodeContext(uint8 ins, uint8 copy, uint8 ref)
+        : nInserts(ins), copySlot(copy), codeRef(ref) {}
+    CodeContext() : nInserts(0), copySlot(0), codeRef(0) {}
     uint8       nInserts;
     uint8       copySlot;
     uint8       codeRef;

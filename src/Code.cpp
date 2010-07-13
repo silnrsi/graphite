@@ -53,9 +53,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
-    cContexts[0].codeRef = 0;
-    cContexts[0].copySlot = 0;
-    cContexts[0].nInserts = 0;
+    cContexts[0] = CodeContext(0, 0, 0);
     do {
         opc = opcode(*cd_ptr++);
         
@@ -224,9 +222,7 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case NEXT :
         case COPY_NEXT :
             iSlot++;
-            cContexts[iSlot].codeRef = 0;
-            cContexts[iSlot].copySlot = 0;
-            cContexts[iSlot].nInserts = cp + 1;
+            cContexts[iSlot] = CodeContext(0, 0, cp + 1);
             break;
         case INSERT :
             for (int i = iSlot; i >= 0; --i)
