@@ -14,6 +14,7 @@ class GrNgRenderer : public Renderer
 public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir)
         : m_ttfFace(gr2::TtfFileFace::loadTTFFile(fontFile)),
+        m_rtl(textDir),
         m_grFace(m_ttfFace->makeGrFace()),
         m_grFont(gr2::IFont::makeGrFont(static_cast<float>(fontSize), m_grFace))
     {
