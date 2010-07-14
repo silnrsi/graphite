@@ -27,7 +27,8 @@ bool GrFace::readGlyphs()
     if ((pGloc = getTable(tagGloc, &lGloc)) == NULL) return false;
     if ((pGlat = getTable(tagGlat, &lGlat)) == NULL) return false;
     if ((pMaxp = getTable(tagMaxp, &lMaxp)) == NULL) return false;
-    m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
+    int fGlyphs = TtfUtil::GlyphCount(pMaxp);
+    m_numGlyphs = fGlyphs;
     m_upem = TtfUtil::DesignUnits(pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
 
@@ -53,17 +54,21 @@ bool GrFace::readGlyphs()
 #endif
     for (int i = 0; i < m_numGlyphs; i++)
     {
-        int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
-        unsigned int nAdvWid;
         Position pos(0, 0);
         Rect boundingBox(pos, pos);
         GlyphFace *g;
-        size_t locidx = TtfUtil::LocaLookup(i, pLoca, lLoca, pHead);
-        void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
-        if (TtfUtil::HorMetrics(i, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
-            pos = Position(nAdvWid, 0);
-        if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-            boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+        int glocs, gloce;
+        if (i < fGlyphs)
+        {
+            int nLsb, xMin, yMin, xMax, yMax;
+            unsigned int nAdvWid;
+            size_t locidx = TtfUtil::LocaLookup(i, pLoca, lLoca, pHead);
+            void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
+            if (TtfUtil::HorMetrics(i, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
+                pos = Position(nAdvWid, 0);
+            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+                boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+        }
         g = new(m_glyphs2 + i) GlyphFace(pos, boundingBox);
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
