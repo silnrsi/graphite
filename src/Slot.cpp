@@ -40,7 +40,7 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
         res = Position(tAdv, 0);
     }
 
-    Rect ourBbox = seg->glyphBbox(glyph()) * scale + m_position;
+    Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
     if (m_parent != -1 && m_position.x < *cMin) *cMin = m_position.x;

@@ -37,7 +37,7 @@ class GrFace 	// an IFace loaded into an object
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
-    float advance(unsigned short id) const { return glyph(id)->advance().x; }
+    float advance(unsigned short id) const { return glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
     void runGraphite(Segment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
@@ -49,7 +49,7 @@ private:
     const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs2 + glyphid; } // m_glyphidx[glyphid]; }
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
-    const Rect &bbox(uint16 gid) const { return glyph(gid)->bbox(); }
+    const Rect &theBBoxTemporary(uint16 gid) const { return glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     unsigned short upem() const { return m_upem; }
     unsigned short numGlyphs() const { return m_numGlyphs; }
     bool readGlyphs();

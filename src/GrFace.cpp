@@ -84,8 +84,8 @@ bool GrFace::readGlyphs()
         {
             XmlTraceLog::get().openElement(ElementGlyphFace);
             XmlTraceLog::get().addAttribute(AttrGlyphId, i);
-            XmlTraceLog::get().addAttribute(AttrAdvanceX, g->advance().x);
-            XmlTraceLog::get().addAttribute(AttrAdvanceY, g->advance().y);
+            XmlTraceLog::get().addAttribute(AttrAdvanceX, g->theAdvance().x);
+            XmlTraceLog::get().addAttribute(AttrAdvanceY, g->theAdvance().y);
         }
 #endif
         g->readAttrs(pGlat, glocs, gloce, m_numAttrs);

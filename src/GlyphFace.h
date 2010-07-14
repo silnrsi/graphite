@@ -36,10 +36,10 @@ public:
     GlyphFace(Position pos=Position(), Rect box=Rect()) throw();
     ~GlyphFace() throw();
 
-    const Position    & advance() const;
-    void                advance(Position a);
-    void    bbox(Rect a);
-    const Rect &bbox() const { return m_bbox; }
+    const Position    & theAdvance() const;
+    void                setAdvance(const Position& a);
+    void    setBBox(const Rect& a);
+    const Rect &theBBox() const { return m_bbox; }
     void    readAttrs(const void *pGlat, int start, int end, size_t num);
     uint16  getAttr(uint8 index) const { 
         if (m_attrs)
@@ -76,15 +76,15 @@ inline GlyphFace::~GlyphFace() throw() {
     free(m_attrs);
 }
 
-inline const Position & GlyphFace::advance() const { 
+inline const Position & GlyphFace::theAdvance() const { 
     return m_advance;
 }
 
-inline void GlyphFace::advance(Position a) { 
+inline void GlyphFace::setAdvance(const Position& a) { 
     m_advance = a;
 }
 
-inline void GlyphFace::bbox(Rect a) {
+inline void GlyphFace::setBBox(const Rect& a) {
     m_bbox = a;
 }
 

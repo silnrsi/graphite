@@ -100,7 +100,7 @@ public:
             return m_face->getGlyphMetric(m_slots[iSlot].gid(), metric);
     }
     float glyphAdvance(uint16 gid) { return m_face->getAdvance(gid, 1.0); }
-    const Rect &glyphBbox(uint16 gid) { return m_face->bbox(gid); }
+    const Rect &theGlyphBBoxTemporary(uint16 gid) { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Position finalise(int iSlot, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel) {
         return m_slots[iSlot].finalise(this, font, base, bbox, cMin, attrLevel);
     }
