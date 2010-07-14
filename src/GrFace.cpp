@@ -30,24 +30,20 @@ bool GrFace::readGlyphs()
     m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
     m_upem = TtfUtil::DesignUnits(pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
-    m_glyphs2 = new GlyphFace [m_numGlyphs];
 
     int version = swap32(*((uint32 *)pGloc));
     if (version != 0x00010000) return false;
     if (lGloc < 6) return false;
     unsigned short locFlags = swap16(((uint16 *)pGloc)[2]);
     m_numAttrs = swap16(((uint16 *)pGloc)[3]);
-    int nGlyphs = m_numGlyphs;
+    int nGlyphs;
     if (locFlags)
-    {
-        if (lGloc < 4u * m_numGlyphs + 10u)
-            nGlyphs = (lGloc - 10) / 4;
-    }
+        nGlyphs = (lGloc - 10) / 4;
     else
-    {
-        if (lGloc < 2u * m_numGlyphs + 8u)
-            nGlyphs = (lGloc - 8) / 4;
-    }
+        nGlyphs = (lGloc - 8) / 2;
+    if (nGlyphs > m_numGlyphs) m_numGlyphs = nGlyphs;
+    
+    m_glyphs2 = new GlyphFace [m_numGlyphs];
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
     {
@@ -55,7 +51,7 @@ bool GrFace::readGlyphs()
         XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
     }
 #endif
-    for (int i = 0; i < nGlyphs; i++)
+    for (int i = 0; i < m_numGlyphs; i++)
     {
         int nLsb, xMin, yMin, xMax, yMax, glocs, gloce;
         unsigned int nAdvWid;
@@ -69,16 +65,6 @@ bool GrFace::readGlyphs()
         if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
             boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
         g = new(m_glyphs2 + i) GlyphFace(pos, boundingBox);
-        if (locFlags & 1)
-        {
-            glocs = swap32(((uint32 *)pGloc)[2+i]);
-            gloce = swap32(((uint32 *)pGloc)[3+i]);
-        }
-        else
-        {
-            glocs = swap16(((uint16 *)pGloc)[4+i]);
-            gloce = swap16(((uint16 *)pGloc)[5+i]);
-        }
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -88,7 +74,20 @@ bool GrFace::readGlyphs()
             XmlTraceLog::get().addAttribute(AttrAdvanceY, g->theAdvance().y);
         }
 #endif
-        g->readAttrs(pGlat, glocs, gloce, m_numAttrs);
+        if (i < nGlyphs)
+        {
+            if (locFlags & 1)
+            {
+                glocs = swap32(((uint32 *)pGloc)[2+i]);
+                gloce = swap32(((uint32 *)pGloc)[3+i]);
+            }
+            else
+            {
+                glocs = swap16(((uint16 *)pGloc)[4+i]);
+                gloce = swap16(((uint16 *)pGloc)[5+i]);
+            }
+            g->readAttrs(pGlat, glocs, gloce, m_numAttrs);
+        }
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementGlyphFace);
 #endif
