@@ -10,9 +10,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # pkg_check_modules(GRNG graphite)
 
     if (${HB_FOUND})
-		if (${FREETYPE_FOUND})
-			add_definitions(-DHAVE_HARFBUZZNG)
-		endif (${FREETYPE_FOUND})
+        if (${FREETYPE_FOUND})
+            add_definitions(-DHAVE_HARFBUZZNG)
+        endif (${FREETYPE_FOUND})
     endif (${HB_FOUND})
 
     if (${GR_FOUND})
@@ -24,10 +24,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_custom_target(cr_copy_dll ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-	add_dependencies(cr_copy_dll graphiteng iconv)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_custom_target(cr_copy_dll ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    add_dependencies(cr_copy_dll graphiteng iconv)
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 include_directories(../common icule ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
