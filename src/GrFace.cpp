@@ -17,8 +17,11 @@ GrFace::~GrFace()
 
 bool GrFace::readGlyphs()
 {
-    m_pGlyphFaceCache = new GlyphFaceCachePreloaded();
-    if (!m_pGlyphFaceCache->initialize(m_face)) return false;
+    GlyphFaceCacheHeader hdr;
+    if (!hdr.initialize(m_face)) return false;
+    
+    m_pGlyphFaceCache = new(hdr) GlyphFaceCachePreloaded(hdr);
+    if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
     

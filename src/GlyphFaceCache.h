@@ -37,6 +37,7 @@ friend class GlyphFace;
 class GlyphFaceCache : public GlyphFaceCacheHeader
 {
 public:
+    GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr) {}
     virtual ~GlyphFaceCache() {}
     
     virtual const GlyphFace *glyph(unsigned short glyphid) const = 0 ;      //result may be changed by subsequent call with a different glyphid
@@ -50,15 +51,20 @@ public:
 class GlyphFaceCachePreloaded : public GlyphFaceCache
 {
 public:
-    GlyphFaceCachePreloaded();
+    void * operator new (size_t s, const GlyphFaceCacheHeader& hdr)
+    {
+        return malloc(s + sizeof(GlyphFace)*hdr.numGlyphs());
+    }
+
+    GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
     virtual ~GlyphFaceCachePreloaded();
-    
-    virtual bool initialize(const IFace* iFace/*not NULL*/);    //return result indicates success. Do not use if failed.
+
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
     
 private:
-    GlyphFace *m_glyphs;                       // list of actual glyphs indexed by glyphid.
-    
+    const GlyphFace *glyphDirect(unsigned short glyphid) const { return (const GlyphFace *)((const char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}
+    GlyphFace *glyphDirect(unsigned short glyphid) { return (GlyphFace *)((char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}
+
 private:      //defensive
     GlyphFaceCachePreloaded(const GlyphFaceCachePreloaded&);
     GlyphFaceCachePreloaded& operator=(const GlyphFaceCachePreloaded&);

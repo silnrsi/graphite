@@ -53,32 +53,10 @@ using namespace org::sil::graphite::v2;
 }
 
 
-GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
-:   m_glyphs(NULL)
+GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr)
+:   GlyphFaceCache(hdr)
 {
-}
-
-/*virtual*/ GlyphFaceCachePreloaded::~GlyphFaceCachePreloaded()
-{
-//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
-    if (!m_glyphs)
-        return ;
-    
     unsigned int nGlyphs = numGlyphs();
-    for (unsigned int i=0 ; i<nGlyphs; ++i)
-        m_glyphs[i].~GlyphFace();
-}
-
-
-/*virtual*/ bool GlyphFaceCachePreloaded::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
-{
-    if (!GlyphFaceCache::initialize(iFace))
-        return false;
-
-    unsigned int nGlyphs = numGlyphs();
-    m_glyphs = (GlyphFace*)malloc(sizeof(GlyphFace)*nGlyphs);
-    if (!m_glyphs)
-        return false;
     
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
@@ -89,18 +67,24 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
 #endif
     for (unsigned int i = 0; i < nGlyphs; i++)
     {
-        new(m_glyphs + i) GlyphFace(*this, i);
+        new(glyphDirect(i)) GlyphFace(*this, i);
     }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementGlyphs);
 #endif
-    return true;
 }
-    
+
+/*virtual*/ GlyphFaceCachePreloaded::~GlyphFaceCachePreloaded()
+{
+//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
+    unsigned int nGlyphs = numGlyphs();
+    for (unsigned int i=0 ; i<nGlyphs; ++i)
+        glyphDirect(i)->~GlyphFace();
+}
 
 
 /*virtual*/ const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
-    return m_glyphs + glyphid; 
+    return glyphDirect(glyphid); 
 }
 
