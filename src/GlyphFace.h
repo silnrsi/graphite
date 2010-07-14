@@ -36,7 +36,7 @@ class GlyphFace
 {
 public:
     GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid);
-    GlyphFace(Position pos=Position(), Rect box=Rect()) throw();
+//    GlyphFace(Position pos=Position(), Rect box=Rect()) throw();
     ~GlyphFace() throw();
 
     const Position    & theAdvance() const;
@@ -72,11 +72,13 @@ private:
 };
 
 
+#if 0
 inline GlyphFace::GlyphFace(Position pos, Rect box) throw()
   : m_bbox(box), m_advance(pos), m_gloc(0),
 //    m_attribs(0), m_columns(0), 
     m_attrs(0) {
 }
+#endif
 
 inline GlyphFace::~GlyphFace() throw() {
     if (m_attrs) free(m_attrs);
