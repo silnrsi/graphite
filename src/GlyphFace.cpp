@@ -1,7 +1,67 @@
 #include "GlyphFace.h"
 #include "XmlTraceLog.h"
+#include "GlyphFaceCache.h"
+#include "TtfUtil.h"
 
 using namespace org::sil::graphite::v2;
+
+GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
+:   m_bbox(DoNotInitialize()), m_advance(DoNotInitialize())
+{
+        if (glyphid < hdr.m_nGlyphsWithGraphics)
+        {
+            int nLsb, xMin, yMin, xMax, yMax;
+            unsigned int nAdvWid;
+            size_t locidx = TtfUtil::LocaLookup(glyphid, hdr.m_pLoca, hdr.m_lLoca, hdr.m_pHead);
+            void *pGlyph = TtfUtil::GlyfLookup(hdr.m_pGlyf, locidx);
+            if (TtfUtil::HorMetrics(glyphid, hdr.m_pHmtx, hdr.m_lHmtx, hdr.m_pHHea, nLsb, nAdvWid))
+                m_advance = Position(nAdvWid, 0);
+            else
+                m_advance = Position();
+            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+                m_bbox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+            else
+                m_bbox = Rect();
+        }
+        else
+        {
+            m_advance = Position();
+            m_bbox = Rect();
+        }
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementGlyphFace);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, glyphid);
+            XmlTraceLog::get().addAttribute(AttrAdvanceX, m_advance.x);
+            XmlTraceLog::get().addAttribute(AttrAdvanceY, m_advance.y);
+        }
+#endif
+        if (glyphid < hdr.m_nGlyphsWithAttributes)
+        {
+            int glocs, gloce;
+            if (hdr.m_locFlagsUse32Bit)
+            {
+                glocs = swap32(((uint32 *)hdr.m_pGloc)[2+glyphid]);
+                gloce = swap32(((uint32 *)hdr.m_pGloc)[3+glyphid]);
+            }
+            else
+            {
+                glocs = swap16(((uint16 *)hdr.m_pGloc)[4+glyphid]);
+                gloce = swap16(((uint16 *)hdr.m_pGloc)[5+glyphid]);
+            }
+            readAttrs(hdr.m_pGlat, glocs, gloce, hdr.m_numAttrs);
+        }
+        else
+            m_attrs = NULL;
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementGlyphFace);
+#endif
+}
+ 
+
+
+
 
 void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num) 
 {

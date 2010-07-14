@@ -1,13 +1,12 @@
 #include "GlyphFaceCache.h"
 #include "graphiteng/IFace.h"
-#include "TtfUtil.h"
 #include "GrFace.h"     //for the tags
 
 using namespace org::sil::graphite::v2;
 
 
 
-/*virtual*/ bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
+/*virtual*/ bool GlyphFaceCacheHeader::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
 {
     if ((m_pLoca = iFace->getTable(tagLoca, &m_lLoca)) == NULL) return false;
     size_t lHead;
@@ -54,53 +53,6 @@ using namespace org::sil::graphite::v2;
 }
 
 
-void GlyphFaceCache::setupGlyph(unsigned short glyphid, GlyphFace* pPosToSetup)
-{
-        Position pos(0, 0);
-        Rect boundingBox(pos, pos);
-        GlyphFace *g;
-        int glocs, gloce;
-        if (glyphid < m_nGlyphsWithGraphics)
-        {
-            int nLsb, xMin, yMin, xMax, yMax;
-            unsigned int nAdvWid;
-            size_t locidx = TtfUtil::LocaLookup(glyphid, m_pLoca, m_lLoca, m_pHead);
-            void *pGlyph = TtfUtil::GlyfLookup(m_pGlyf, locidx);
-            if (TtfUtil::HorMetrics(glyphid, m_pHmtx, m_lHmtx, m_pHHea, nLsb, nAdvWid))
-                pos = Position(nAdvWid, 0);
-            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-                boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
-        }
-        g = new(pPosToSetup) GlyphFace(pos, boundingBox);
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementGlyphFace);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, glyphid);
-            XmlTraceLog::get().addAttribute(AttrAdvanceX, g->theAdvance().x);
-            XmlTraceLog::get().addAttribute(AttrAdvanceY, g->theAdvance().y);
-        }
-#endif
-        if (glyphid < m_nGlyphsWithAttributes)
-        {
-            if (m_locFlagsUse32Bit)
-            {
-                glocs = swap32(((uint32 *)m_pGloc)[2+glyphid]);
-                gloce = swap32(((uint32 *)m_pGloc)[3+glyphid]);
-            }
-            else
-            {
-                glocs = swap16(((uint16 *)m_pGloc)[4+glyphid]);
-                gloce = swap16(((uint16 *)m_pGloc)[5+glyphid]);
-            }
-            g->readAttrs(m_pGlat, glocs, gloce, m_numAttrs);
-        }
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementGlyphFace);
-#endif
-}
-
-
 GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
 :   m_glyphs(NULL)
 {
@@ -108,7 +60,13 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
 
 /*virtual*/ GlyphFaceCachePreloaded::~GlyphFaceCachePreloaded()
 {
-    delete[] m_glyphs;
+//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
+    if (!m_glyphs)
+        return ;
+    
+    unsigned int nGlyphs = numGlyphs();
+    for (unsigned int i=0 ; i<nGlyphs; ++i)
+        m_glyphs[i].~GlyphFace();
 }
 
 
@@ -118,7 +76,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
         return false;
 
     unsigned int nGlyphs = numGlyphs();
-    m_glyphs = new GlyphFace [nGlyphs];
+    m_glyphs = (GlyphFace*)malloc(sizeof(GlyphFace)*nGlyphs);
     if (!m_glyphs)
         return false;
     
@@ -131,7 +89,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
 #endif
     for (unsigned int i = 0; i < nGlyphs; i++)
     {
-        setupGlyph(i, m_glyphs + i);
+        new(m_glyphs + i) GlyphFace(*this, i);
     }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementGlyphs);
