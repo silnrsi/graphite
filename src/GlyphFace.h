@@ -41,7 +41,7 @@ public:
     void    bbox(Rect a);
     const Rect &bbox() const { return m_bbox; }
     void    readAttrs(const void *pGlat, int start, int end, size_t num);
-    uint16  getAttr(uint8 index) { 
+    uint16  getAttr(uint8 index) const { 
         if (m_attrs)
             return m_attrs[index];
 #ifdef ENABLE_DEEP_TRACING
@@ -49,7 +49,7 @@ public:
 #endif
         return 0;
     }
-    uint16  getMetric(uint8 metric);
+    uint16  getMetric(uint8 metric) const;
 
     CLASS_NEW_DELETE
     void * operator new (size_t s, GlyphFace * p)

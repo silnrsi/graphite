@@ -8,9 +8,9 @@ using namespace org::sil::graphite::v2;
 
 GrFace::~GrFace()
 {
-    delete[] m_glyphs;
+    delete[] m_glyphs2;
     delete[] m_silfs;
-    m_glyphs = NULL;
+    m_glyphs2 = NULL;
     m_silfs = NULL;
 }
 
@@ -30,7 +30,7 @@ bool GrFace::readGlyphs()
     m_numGlyphs = TtfUtil::GlyphCount(pMaxp);
     m_upem = TtfUtil::DesignUnits(pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
-    m_glyphs = new GlyphFace [m_numGlyphs];
+    m_glyphs2 = new GlyphFace [m_numGlyphs];
 
     int version = swap32(*((uint32 *)pGloc));
     if (version != 0x00010000) return false;
@@ -68,7 +68,7 @@ bool GrFace::readGlyphs()
             pos = Position(nAdvWid, 0);
         if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
             boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
-        g = new(m_glyphs + i) GlyphFace(pos, boundingBox);
+        g = new(m_glyphs2 + i) GlyphFace(pos, boundingBox);
         if (locFlags & 1)
         {
             glocs = swap32(((uint32 *)pGloc)[2+i]);
@@ -192,6 +192,6 @@ uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
     {
         case kgmetAscent : return m_ascent;
         case kgmetDescent : return m_descent;
-        default: return m_glyphs[gid].getMetric(metric);
+        default: return glyph(gid)->getMetric(metric);
     }
 }

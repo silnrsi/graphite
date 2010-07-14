@@ -37,17 +37,19 @@ class GrFace 	// an IFace loaded into an object
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
-    float advance(unsigned short id) const { return m_glyphs[id].advance().x; }
+    float advance(unsigned short id) const { return glyph(id)->advance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
     void runGraphite(Segment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    GrFace(const IFace *face) : m_face(face), m_glyphs(NULL), m_silfs(NULL)  {}
+    GrFace(const IFace *face) : m_face(face), m_glyphs2(NULL), m_silfs(NULL)  {}
     ~GrFace();
-    const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs + glyphid; } // m_glyphidx[glyphid]; }
+private:
+    const GlyphFace *glyph(unsigned short glyphid) const { return m_glyphs2 + glyphid; } // m_glyphidx[glyphid]; }
+public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
-    const Rect &bbox(uint16 gid) const { return m_glyphs[gid].bbox(); }
+    const Rect &bbox(uint16 gid) const { return glyph(gid)->bbox(); }
     unsigned short upem() const { return m_upem; }
     unsigned short numGlyphs() const { return m_numGlyphs; }
     bool readGlyphs();
@@ -56,7 +58,7 @@ public:
     const Silf *chooseSilf(uint32 script) const;
     const FeatureMap& theFeatures() const { return m_features; }
     const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
-    uint16 glyphAttr(uint16 gid, uint8 gattr) const { return (gattr < m_numAttrs && gid < m_numGlyphs) ? m_glyphs[gid].getAttr(gattr) : 0; }
+    uint16 glyphAttr(uint16 gid, uint8 gattr) const { return (gattr < m_numAttrs && gid < m_numGlyphs) ? glyph(gid)->getAttr(gattr) : 0; }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     CLASS_NEW_DELETE
@@ -69,7 +71,7 @@ private:
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs
-    GlyphFace *m_glyphs;            // list of actual glyphs indexed by glyphidx, 1 base
+    GlyphFace *m_glyphs2;            // list of actual glyphs indexed by glyphidx, 1 base
     unsigned short m_upem;          // design units per em
     unsigned short m_numAttrs;      // number of glyph attributes per glyph
     unsigned short m_numSilf;       // number of silf subtables in the silf table

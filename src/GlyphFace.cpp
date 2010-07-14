@@ -27,7 +27,7 @@ void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num)
     }
 }
 
-uint16 GlyphFace::getMetric(uint8 metric)
+uint16 GlyphFace::getMetric(uint8 metric) const
 {
     switch ((enum metrics)metric)
     {
