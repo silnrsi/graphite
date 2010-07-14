@@ -76,7 +76,7 @@ bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementGlyphs);
 #endif
-
+    return true;
 }
 
 
