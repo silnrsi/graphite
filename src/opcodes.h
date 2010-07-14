@@ -225,7 +225,7 @@ ENDOP
 
 STARTOP(insert)
     seg.insertSlot(is);
-    seg[is].originate(seg[is + 1].original());
+    seg[is].originate(seg[is + (is > isb ? -1 : 1)].original());
 ENDOP
 
 STARTOP(delete_)
