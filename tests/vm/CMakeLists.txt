@@ -18,6 +18,7 @@ add_library(vm-test-common  STATIC
                 ${SRC}/Code.cpp
                 ${SRC}/FeaturesHandle.cpp
                 ${SRC}/GlyphFace.cpp
+                ${SRC}/GlyphFaceCache.cpp
                 ${SRC}/GrFace.cpp
                 ${SRC}/Pass.cpp
                 ${SRC}/Silf.cpp

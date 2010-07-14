@@ -55,6 +55,7 @@ add_library(graphiteng SHARED
     FeatureRefHandle.cpp
     FeaturesHandle.cpp
     GlyphFace.cpp
+    GlyphFaceCache.cpp
     GrFace.cpp
     GrFont.cpp
     Main.cpp
