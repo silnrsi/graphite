@@ -19,7 +19,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         add_definitions(-DHAVE_GRAPHITE)
         set(GR_EXTRA_SOURCE GrUtfTextSrc.cpp)
     endif (${GR_FOUND})
-    set(RT_LDFLAGS "rd")
+    set(RT_LDFLAGS "rt")
 
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
