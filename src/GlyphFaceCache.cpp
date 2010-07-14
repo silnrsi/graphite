@@ -7,7 +7,7 @@ using namespace org::sil::graphite::v2;
 
 
 
-bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)
+/*virtual*/ bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
 {
     if ((m_pLoca = iFace->getTable(tagLoca, &m_lLoca)) == NULL) return false;
     size_t lHead;
@@ -50,29 +50,11 @@ bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)
     else
         m_nGlyphs = m_nGlyphsWithGraphics;
 
-    m_glyphs2 = new GlyphFace [m_nGlyphs];
-    if (!m_glyphs2)
-        return false;
-    
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementGlyphs);
-        XmlTraceLog::get().addAttribute(AttrNum, m_nGlyphs);
-    }
-#endif
-    for (unsigned int i = 0; i < m_nGlyphs; i++)
-    {
-        setupGlyph(i);
-    }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementGlyphs);
-#endif
     return true;
 }
 
 
-void GlyphFaceCache::setupGlyph(unsigned short glyphid)
+void GlyphFaceCache::setupGlyph(unsigned short glyphid, GlyphFace* pPosToSetup)
 {
         Position pos(0, 0);
         Rect boundingBox(pos, pos);
@@ -89,7 +71,7 @@ void GlyphFaceCache::setupGlyph(unsigned short glyphid)
             if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
                 boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
         }
-        g = new(m_glyphs2 + glyphid) GlyphFace(pos, boundingBox);
+        g = new(pPosToSetup) GlyphFace(pos, boundingBox);
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -118,4 +100,49 @@ void GlyphFaceCache::setupGlyph(unsigned short glyphid)
 #endif
 }
 
+
+GlyphFaceCachePreloaded::GlyphFaceCachePreloaded()
+:   m_glyphs(NULL)
+{
+}
+
+/*virtual*/ GlyphFaceCachePreloaded::~GlyphFaceCachePreloaded()
+{
+    delete[] m_glyphs;
+}
+
+
+/*virtual*/ bool GlyphFaceCachePreloaded::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
+{
+    if (!GlyphFaceCache::initialize(iFace))
+        return false;
+
+    unsigned int nGlyphs = numGlyphs();
+    m_glyphs = new GlyphFace [nGlyphs];
+    if (!m_glyphs)
+        return false;
+    
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementGlyphs);
+        XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
+    }
+#endif
+    for (unsigned int i = 0; i < nGlyphs; i++)
+    {
+        setupGlyph(i, m_glyphs + i);
+    }
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementGlyphs);
+#endif
+    return true;
+}
+    
+
+
+/*virtual*/ const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+{ 
+    return m_glyphs + glyphid; 
+}
 
