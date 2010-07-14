@@ -22,7 +22,7 @@ class GRNG_EXPORT IFace
 {
 public:
     //virtual ~IFace() {}
-    virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format
+    virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format. Must check in range. Return NULL if not.
 
     GrFace* makeGrFace() const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
     static FeaturesHandle getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default

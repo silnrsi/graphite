@@ -8,98 +8,132 @@ using namespace org::sil::graphite::v2;
 
 GrFace::~GrFace()
 {
-    delete[] m_glyphs2;
+    delete m_pGlyphFaceCache;
     delete[] m_silfs;
-    m_glyphs2 = NULL;
+    m_pGlyphFaceCache = NULL;
     m_silfs = NULL;
+}
+
+
+bool GlyphFaceCache::initialize(const IFace* iFace/*not NULL*/)
+{
+    if ((m_pLoca = iFace->getTable(tagLoca, &m_lLoca)) == NULL) return false;
+    size_t lHead;
+    if ((m_pHead = iFace->getTable(tagHead, &lHead)) == NULL) return false;
+    size_t lGlyf;
+    if ((m_pGlyf = iFace->getTable(tagGlyf, &lGlyf)) == NULL) return false;
+    if ((m_pHmtx = iFace->getTable(tagHmtx, &m_lHmtx)) == NULL) return false;
+    size_t lHHea;
+    if ((m_pHHea = iFace->getTable(tagHhea, &lHHea)) == NULL) return false;
+    size_t lGlat;
+    if ((m_pGlat = iFace->getTable(tagGlat, &lGlat)) == NULL) return false;
+
+    size_t lMaxp;
+    const void* pMaxp = iFace->getTable(tagMaxp, &lMaxp);
+    if (pMaxp==NULL) return false;
+    m_nGlyphsWithGraphics = (unsigned short)TtfUtil::GlyphCount(pMaxp);
+    
+    size_t lGloc;
+    if ((m_pGloc = iFace->getTable(tagGloc, &lGloc)) == NULL) return false;
+    if (lGloc < 6) return false;
+    int version = swap32(*((uint32 *)m_pGloc));
+    if (version != 0x00010000) return false;
+
+    m_numAttrs = swap16(((uint16 *)m_pGloc)[3]);
+
+    unsigned short locFlags = swap16(((uint16 *)m_pGloc)[2]);
+    if (locFlags&1)
+    {
+        m_locFlagsUse32Bit = true;
+        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 10) / 4);
+    }
+    else
+    {
+        m_locFlagsUse32Bit = false;
+        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 8) / 2);
+    }
+    
+    if (m_nGlyphsWithAttributes>m_nGlyphsWithGraphics) 
+        m_nGlyphs = m_nGlyphsWithAttributes;
+    else
+        m_nGlyphs = m_nGlyphsWithGraphics;
+
+    m_glyphs2 = new GlyphFace [m_nGlyphs];
+    if (!m_glyphs2)
+        return false;
+    
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementGlyphs);
+        XmlTraceLog::get().addAttribute(AttrNum, m_nGlyphs);
+    }
+#endif
+    for (unsigned int i = 0; i < m_nGlyphs; i++)
+    {
+        setupGlyph(i);
+    }
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementGlyphs);
+#endif
+
+}
+
+
+void GlyphFaceCache::setupGlyph(unsigned short glyphid)
+{
+        Position pos(0, 0);
+        Rect boundingBox(pos, pos);
+        GlyphFace *g;
+        int glocs, gloce;
+        if (glyphid < m_nGlyphsWithGraphics)
+        {
+            int nLsb, xMin, yMin, xMax, yMax;
+            unsigned int nAdvWid;
+            size_t locidx = TtfUtil::LocaLookup(glyphid, m_pLoca, m_lLoca, m_pHead);
+            void *pGlyph = TtfUtil::GlyfLookup(m_pGlyf, locidx);
+            if (TtfUtil::HorMetrics(glyphid, m_pHmtx, m_lHmtx, m_pHHea, nLsb, nAdvWid))
+                pos = Position(nAdvWid, 0);
+            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+                boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+        }
+        g = new(m_glyphs2 + glyphid) GlyphFace(pos, boundingBox);
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementGlyphFace);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, glyphid);
+            XmlTraceLog::get().addAttribute(AttrAdvanceX, g->theAdvance().x);
+            XmlTraceLog::get().addAttribute(AttrAdvanceY, g->theAdvance().y);
+        }
+#endif
+        if (glyphid < m_nGlyphsWithAttributes)
+        {
+            if (m_locFlagsUse32Bit)
+            {
+                glocs = swap32(((uint32 *)m_pGloc)[2+glyphid]);
+                gloce = swap32(((uint32 *)m_pGloc)[3+glyphid]);
+            }
+            else
+            {
+                glocs = swap16(((uint16 *)m_pGloc)[4+glyphid]);
+                gloce = swap16(((uint16 *)m_pGloc)[5+glyphid]);
+            }
+            g->readAttrs(m_pGlat, glocs, gloce, m_numAttrs);
+        }
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementGlyphFace);
+#endif
 }
 
 
 bool GrFace::readGlyphs()
 {
-    size_t lHead, lLoca, lGlyf, lHmtx, lHHea, lGloc, lGlat, lMaxp;
-    const void *pHead, *pHHea, *pLoca, *pGlyf, *pHmtx, *pGloc, *pGlat, *pMaxp;
-    if ((pHead = getTable(tagHead, &lHead)) == NULL) return false;
-    if ((pHHea = getTable(tagHhea, &lHHea)) == NULL) return false;
-    if ((pLoca = getTable(tagLoca, &lLoca)) == NULL) return false;
-    if ((pGlyf = getTable(tagGlyf, &lGlyf)) == NULL) return false;
-    if ((pHmtx = getTable(tagHmtx, &lHmtx)) == NULL) return false;
-    if ((pGloc = getTable(tagGloc, &lGloc)) == NULL) return false;
-    if ((pGlat = getTable(tagGlat, &lGlat)) == NULL) return false;
-    if ((pMaxp = getTable(tagMaxp, &lMaxp)) == NULL) return false;
-    int fGlyphs = TtfUtil::GlyphCount(pMaxp);
-    m_numGlyphs = fGlyphs;
-    m_upem = TtfUtil::DesignUnits(pHead);
+    m_pGlyphFaceCache = new GlyphFaceCache();
+    if (!m_pGlyphFaceCache->initialize(m_face)) return false;
+    m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
-
-    int version = swap32(*((uint32 *)pGloc));
-    if (version != 0x00010000) return false;
-    if (lGloc < 6) return false;
-    unsigned short locFlags = swap16(((uint16 *)pGloc)[2]);
-    m_numAttrs = swap16(((uint16 *)pGloc)[3]);
-    int nGlyphs;
-    if (locFlags)
-        nGlyphs = (lGloc - 10) / 4;
-    else
-        nGlyphs = (lGloc - 8) / 2;
-    if (nGlyphs > m_numGlyphs) m_numGlyphs = nGlyphs;
     
-    m_glyphs2 = new GlyphFace [m_numGlyphs];
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementGlyphs);
-        XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
-    }
-#endif
-    for (int i = 0; i < m_numGlyphs; i++)
-    {
-        Position pos(0, 0);
-        Rect boundingBox(pos, pos);
-        GlyphFace *g;
-        int glocs, gloce;
-        if (i < fGlyphs)
-        {
-            int nLsb, xMin, yMin, xMax, yMax;
-            unsigned int nAdvWid;
-            size_t locidx = TtfUtil::LocaLookup(i, pLoca, lLoca, pHead);
-            void *pGlyph = TtfUtil::GlyfLookup(pGlyf, locidx);
-            if (TtfUtil::HorMetrics(i, pHmtx, lHmtx, pHHea, nLsb, nAdvWid))
-                pos = Position(nAdvWid, 0);
-            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-                boundingBox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
-        }
-        g = new(m_glyphs2 + i) GlyphFace(pos, boundingBox);
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementGlyphFace);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, i);
-            XmlTraceLog::get().addAttribute(AttrAdvanceX, g->theAdvance().x);
-            XmlTraceLog::get().addAttribute(AttrAdvanceY, g->theAdvance().y);
-        }
-#endif
-        if (i < nGlyphs)
-        {
-            if (locFlags & 1)
-            {
-                glocs = swap32(((uint32 *)pGloc)[2+i]);
-                gloce = swap32(((uint32 *)pGloc)[3+i]);
-            }
-            else
-            {
-                glocs = swap16(((uint16 *)pGloc)[4+i]);
-                gloce = swap16(((uint16 *)pGloc)[5+i]);
-            }
-            g->readAttrs(pGlat, glocs, gloce, m_numAttrs);
-        }
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementGlyphFace);
-#endif
-    }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementGlyphs);
-#endif
     return true;
 }
 
@@ -153,7 +187,7 @@ bool GrFace::readGraphite()
 #endif
             return false;
         }
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_numGlyphs, version))
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_pGlyphFaceCache->m_nGlyphs, version))
         {
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())
@@ -196,6 +230,6 @@ uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
     {
         case kgmetAscent : return m_ascent;
         case kgmetDescent : return m_descent;
-        default: return glyph(gid)->getMetric(metric);
+        default: return m_pGlyphFaceCache->glyph(gid)->getMetric(metric);
     }
 }
