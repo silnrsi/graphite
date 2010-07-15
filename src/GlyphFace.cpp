@@ -68,8 +68,15 @@ void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num)
     m_attrs = grzeroalloc<uint16>(num);
     while (start < end)
     {
-        int attr = ((char *)pGlat)[start];
-        int count = ((char *)pGlat)[start + 1];
+        int attr = ((uint8 *)pGlat)[start];
+        int count = ((uint8 *)pGlat)[start + 1];
+        if (attr + count > num)
+        {
+#ifndef DISABLE_TRACING
+            XmlTraceLog::get().warning("Invalid glat entry: attr id %d count %d", attr, count);
+#endif
+            return;
+        }
         for (int i = 0; i < count; i++)
         {
             m_attrs[attr + i] = swap16(((uint16 *)((char *)pGlat + start))[1 + i]);

@@ -36,12 +36,12 @@ using namespace org::sil::graphite::v2;
     if (locFlags&1)
     {
         m_locFlagsUse32Bit = true;
-        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 10) / 4);
+        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 12) / 4);
     }
     else
     {
         m_locFlagsUse32Bit = false;
-        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 8) / 2);
+        m_nGlyphsWithAttributes = (unsigned short)((lGloc - 10) / 2);
     }
     
     if (m_nGlyphsWithAttributes>m_nGlyphsWithGraphics) 
