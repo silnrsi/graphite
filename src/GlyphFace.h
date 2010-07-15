@@ -34,14 +34,21 @@ class GlyphFaceCacheHeader;
 
 class GlyphFace
 {
-public:
+private:
+friend class GlyphFaceCachePreloaded;
     GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid);
-//    GlyphFace(Position pos=Position(), Rect box=Rect()) throw();
     ~GlyphFace() throw();
+    void * operator new (size_t s, GlyphFace * p)
+    {
+        return p;
+    }
+    void operator delete (void * p) {}
+
+public:
 
     const Position    & theAdvance() const;
-    void                setAdvance(const Position& a);
-    void    setBBox(const Rect& a);
+//    void                setAdvance(const Position& a);
+//    void    setBBox(const Rect& a);
     const Rect &theBBox() const { return m_bbox; }
     uint16  getAttr(uint8 index) const { 
         if (m_attrs)
@@ -52,12 +59,6 @@ public:
         return 0;
     }
     uint16  getMetric(uint8 metric) const;
-
-    CLASS_NEW_DELETE
-    void * operator new (size_t s, GlyphFace * p)
-    {
-        return p;
-    }
 
 private:
     void    readAttrs(const void *pGlat, int start, int end, size_t num);       //only called from constructor
@@ -88,6 +89,7 @@ inline const Position & GlyphFace::theAdvance() const {
     return m_advance;
 }
 
+#if 0
 inline void GlyphFace::setAdvance(const Position& a) { 
     m_advance = a;
 }
@@ -95,5 +97,6 @@ inline void GlyphFace::setAdvance(const Position& a) {
 inline void GlyphFace::setBBox(const Rect& a) {
     m_bbox = a;
 }
+#endif
 
 }}}} // namespace

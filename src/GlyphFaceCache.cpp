@@ -79,7 +79,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
 //    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
     unsigned int nGlyphs = numGlyphs();
     for (unsigned int i=0 ; i<nGlyphs; ++i)
-        glyphDirect(i)->~GlyphFace();
+        delete glyphDirect(i);      //invokes d'tor. Does not release the memory.
 }
 
 
