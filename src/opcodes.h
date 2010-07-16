@@ -132,8 +132,15 @@ STARTOP(trunc16)
 ENDOP
 
 STARTOP(cond)
-    const uint32 c = pop(), t = pop();
-    if (c) *sp = t;
+    const uint32 f = pop(), t = pop(), c = pop();
+    if (c)
+    {
+        push(t);
+    }
+    else
+    {
+        push(f);
+    }
 ENDOP
 
 STARTOP(and_)
@@ -201,7 +208,7 @@ STARTOP(put_subs_8bit_obs)
     const unsigned int  input_class  = uint8(param[1]),
                         output_class = uint8(param[2]);
     uint16 index;
-    if (slot_ref < 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
         index = seg.findClassIndex(input_class, seg.getCopy(copies[is + slot_ref - isb]).gid());
     else
         index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
@@ -307,13 +314,13 @@ STARTOP(push_slot_attr)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    if (slot_ref < 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
-    {
-        int res =seg.getCopy(copies[is + slot_ref - isb]).getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos, true);
-        push(res);
-    }
+    int res;
+    
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+        res =seg.getCopy(copies[is + slot_ref - isb]).getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos, true);
     else
-        push(seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos, false));
+        res = seg[is + slot_ref].getAttr(&seg, slat, 0, is + slot_ref, &isf, &isl, &endPos, false);
+    push(res);
 ENDOP
 
 STARTOP(push_slot_attr_constrained)
@@ -327,7 +334,13 @@ STARTOP(push_glyph_attr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
+    int res;
+    
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+        res = seg.glyphAttr(seg.getCopy(copies[is + slot_ref - isb]).gid(), glyph_attr);
+    else
+        res = seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr);
+    push (res);
 ENDOP
 
 STARTOP(push_glyph_attr_obs_constrained)
@@ -412,13 +425,12 @@ STARTOP(push_islot_attr)
     const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    if (slot_ref < 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
-    {
-        int res = seg.getCopy(copies[is + slot_ref - isb]).getAttr(&seg, slat, idx, is + slot_ref, &isf, &isl, &endPos, true);
-        push(res);
-    }
+    int res;
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+        res = seg.getCopy(copies[is + slot_ref - isb]).getAttr(&seg, slat, idx, copies[is + slot_ref - isb], &isf, &isl, &endPos, true);
     else
-        push(seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref, &isf, &isl, &endPos, false));
+        res = seg[is + slot_ref].getAttr(&seg, slat, idx, is + slot_ref, &isf, &isl, &endPos, false);
+    push(res);
 ENDOP
 
 STARTOP(push_islot_attr_constrained)
@@ -491,7 +503,7 @@ STARTOP(put_subs)
     const unsigned int  output_class = uint8(param[3]) << 8
                                      | uint8(param[4]);
     int index;
-    if (slot_ref < 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
         index = seg.findClassIndex(input_class, seg.getCopy(copies[is + slot_ref - isb]).gid());
     else
         index = seg.findClassIndex(input_class, seg[is + slot_ref].gid());
@@ -518,7 +530,12 @@ STARTOP(push_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    push(seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr));
+    int res;
+    if (slot_ref <= 0 && is + slot_ref >= isb && copies[is + slot_ref - isb] >= 0)
+        res = seg.glyphAttr(seg.getCopy(copies[is + slot_ref - isb]).gid(), glyph_attr);
+    else
+        res = seg.glyphAttr(seg[is + slot_ref].gid(), glyph_attr);
+    push(res);
 ENDOP
 
 STARTOP(push_glyph_attr_constrained)

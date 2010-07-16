@@ -222,7 +222,7 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case NEXT :
         case COPY_NEXT :
             iSlot++;
-            cContexts[iSlot] = CodeContext(0, 0, cp + 1);
+            cContexts[iSlot] = CodeContext(0, 0, cp);
             break;
         case INSERT :
             for (int i = iSlot; i >= 0; --i)
@@ -231,23 +231,23 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case DELETE :
             break;
         case PUT_COPY :
-        case PUSH_SLOT_ATTR :
             cContexts[iSlot].copySlot = 1;
+        case PUSH_SLOT_ATTR :
+        case PUSH_GLYPH_ATTR_OBS :
+        case PUSH_GLYPH_ATTR :
             fixup_slotref(dp-1,iSlot,cContexts);
-            if (dp[-1] < 0 && -dp[-1] <= iSlot)
+            if (dp[-1] <= 0 && -dp[-1] <= iSlot)
                 cContexts[iSlot + dp[-1]].copySlot |= 2;
             break;
-        case PUSH_GLYPH_ATTR_OBS :
         case PUSH_FEAT :
         case PUSH_ATT_TO_GATTR_OBS :
-        case PUSH_GLYPH_ATTR :
         case PUSH_ATT_TO_GLYPH_ATTR :
             fixup_slotref(dp-1,iSlot,cContexts);
             break;
         case PUSH_ISLOT_ATTR :
-            cContexts[iSlot].copySlot = 1;
+//            cContexts[iSlot].copySlot = 1;
             fixup_slotref(dp-2,iSlot,cContexts);
-            if (dp[-2] < 0 && -dp[-2] <= iSlot)
+            if (dp[-2] <= 0 && -dp[-2] <= iSlot)
                 cContexts[iSlot + dp[-2]].copySlot |= 2;
             break;
         case PUSH_GLYPH_METRIC :
@@ -257,7 +257,7 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case PUT_SUBS_8BIT_OBS:
             cContexts[iSlot].copySlot = 1;
             fixup_slotref(dp-3,iSlot,cContexts);
-            if (dp[-3] < 0 && -dp[-3] <= iSlot)
+            if (dp[-3] <= 0 && -dp[-3] <= iSlot)
                 cContexts[iSlot + dp[-3]].copySlot |= 2;
             break;
         case CNTXT_ITEM :
@@ -266,7 +266,7 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case PUT_SUBS :
             cContexts[iSlot].copySlot = 1;
             fixup_slotref(dp-5,iSlot,cContexts);
-            if (dp[-5] < 0 && -dp[-5] <= iSlot)
+            if (dp[-5] <= 0 && -dp[-5] <= iSlot)
                 cContexts[iSlot + dp[-5]].copySlot |= 2;
             break;
         case ASSOC :
