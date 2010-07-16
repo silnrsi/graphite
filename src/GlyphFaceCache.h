@@ -45,6 +45,14 @@ public:
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
     CLASS_NEW_DELETE
+    
+protected:
+    void incAccesses() const { ++m_Accesses; }      //don't count an access as a change
+    void incLoads() { ++m_Loads; }
+    
+private:
+    mutable unsigned long m_Accesses;
+    unsigned long m_Loads;
 };
 
 

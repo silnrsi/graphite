@@ -67,6 +67,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
 #endif
     for (unsigned int i = 0; i < nGlyphs; i++)
     {
+        incLoads();
         new(glyphDirect(i)) GlyphFace(*this, i);
     }
 #ifndef DISABLE_TRACING
@@ -85,6 +86,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
 
 /*virtual*/ const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
+    incAccesses();
     return glyphDirect(glyphid); 
 }
 
