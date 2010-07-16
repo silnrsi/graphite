@@ -86,6 +86,29 @@ private:
 };
 
 
+class GlyphFaceCacheLoadedOnDemand : public GlyphFaceCache
+{
+public:
+    void * operator new (size_t s, const GlyphFaceCacheHeader& hdr)
+    {
+        return malloc(s + sizeof(GlyphFace*)*hdr.numGlyphs());
+    }
+
+    GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
+    virtual ~GlyphFaceCacheLoadedOnDemand();
+
+    virtual EGlyphCacheStrategy getEnum() const;
+    virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    
+private:
+    GlyphFace **glyphPtrDirect(unsigned short glyphid) const { return (GlyphFace **)((const char*)(this)+sizeof(GlyphFaceCacheLoadedOnDemand)+sizeof(GlyphFace*)*glyphid);}
+
+private:      //defensive
+    GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheLoadedOnDemand&);
+    GlyphFaceCacheLoadedOnDemand& operator=(const GlyphFaceCacheLoadedOnDemand&);
+};
+
+
 class GlyphFaceCachePreloaded : public GlyphFaceCache
 {
 public:

@@ -56,6 +56,7 @@ using namespace org::sil::graphite::v2;
 /*static*/ EGlyphCacheStrategy GlyphFaceCache::nearestSupportedStrategy(EGlyphCacheStrategy requested)
 {
     if (requested>=ePreload) return ePreload;
+    if (requested>=eLoadOnDemand) return eLoadOnDemand;
     
     return eOneCache;
 }
@@ -68,7 +69,8 @@ using namespace org::sil::graphite::v2;
     {
       case ePreload:
             return new(hdr) GlyphFaceCachePreloaded(hdr);
-            
+      case eLoadOnDemand:
+            return new(hdr) GlyphFaceCacheLoadedOnDemand(hdr);           
       default:      //eOneCache
             return new(hdr) GlyphFaceCacheOneItem(hdr);
     }
@@ -113,6 +115,54 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
     new(glyphDirect()) GlyphFace(*this, glyphid);
     
     return glyphDirect();
+}
+
+
+
+GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr)
+:   GlyphFaceCache(hdr)
+{
+    unsigned int nGlyphs = numGlyphs();
+    
+    for (unsigned int i = 0; i < nGlyphs; i++)
+    {
+         *glyphPtrDirect(i) = NULL;
+    }
+}
+
+/*virtual*/ GlyphFaceCacheLoadedOnDemand::~GlyphFaceCacheLoadedOnDemand()
+{
+//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
+    unsigned int nGlyphs = numGlyphs();
+    for (unsigned int i=0 ; i<nGlyphs; ++i)
+    {
+        GlyphFace *p = *glyphPtrDirect(i);
+        if (p)
+        {
+            delete p;      //invokes d'tor. Does not release the memory.
+            free(p);
+        }
+    }
+}
+
+
+/*virtual*/ EGlyphCacheStrategy GlyphFaceCacheLoadedOnDemand::getEnum() const
+{
+    return eLoadOnDemand;
+}
+
+
+/*virtual*/ const GlyphFace *GlyphFaceCacheLoadedOnDemand::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+{ 
+    incAccesses();
+    GlyphFace **p = glyphPtrDirect(glyphid);
+    if (*p)
+        return *p;
+
+    incLoads();
+    *p = (GlyphFace*)malloc(sizeof(GlyphFace));
+    new(*p) GlyphFace(*this, glyphid);
+    return *p;
 }
 
 
