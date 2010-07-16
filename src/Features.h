@@ -49,16 +49,6 @@ private:
 friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
-
-private :
-  /*
-#ifdef FIND_BROKEN_VIRTUALS
-    virtual double addFeature(FeatureRef *ref, uint16 value) { return 0.0; } 
-    virtual double getFeature(FeatureRef *ref) { return 0.0; }
-    virtual double addFeatureMask(FeatureRef &ref) { return 0.0; }
-    virtual double maskedOr(Features &other, Features &mask) { return 0.0; }
-#endif		//FIND_BROKEN_VIRTUALS
-*/
 };
 
 }}}} // namespace

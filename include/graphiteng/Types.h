@@ -22,7 +22,6 @@ typedef int     int32;
 #endif
 #endif
 
-#define FIND_BROKEN_VIRTUALS
 
 }}}} // namespace
 

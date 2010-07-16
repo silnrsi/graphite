@@ -144,11 +144,6 @@ private:
     SlotList m_tempSlots;
     AttributeList m_tempUserAttrs;
 
-
-#ifdef FIND_BROKEN_VIRTUALS
-    virtual int8 dir() { return m_dir; }
-#endif		//FIND_BROKEN_VIRTUALS
-
 private:		//defensive on m_charinfo
     Segment(const Segment&);
     Segment& operator=(const Segment&);

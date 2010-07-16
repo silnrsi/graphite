@@ -37,11 +37,6 @@ public:
     static unsigned short numGlyphs(const GrFace* pFace);
     static unsigned long numGlyphAccesses(const GrFace* pFace);
     static unsigned long numGlyphLoads(const GrFace* pFace);
-
-private :
-#ifdef FIND_BROKEN_VIRTUALS
-    virtual double getTable(unsigned int name, size_t *len) { return 0.0; }
-#endif		//FIND_BROKEN_VIRTUALS
 };
 
 #ifndef DISABLE_FILE_FONT
