@@ -48,11 +48,33 @@ public:
     
 protected:
     void incAccesses() const { ++m_Accesses; }      //don't count an access as a change
-    void incLoads() { ++m_Loads; }
+    void incLoads() const { ++m_Loads; }            //const to allow lazy loading
     
 private:
     mutable unsigned long m_Accesses;
-    unsigned long m_Loads;
+    mutable unsigned long m_Loads;
+};
+
+
+class GlyphFaceCacheOneItem : public GlyphFaceCache
+{
+public:
+    void * operator new (size_t s, const GlyphFaceCacheHeader& /*hdr*/)
+    {
+        return malloc(s);
+    }
+
+    GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
+    virtual ~GlyphFaceCacheOneItem();
+
+    virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    
+private:
+    GlyphFace *glyphDirect() const { return &m_Buffer;}
+
+private:
+    mutable unsigned int m_LoadedGlyphNo;   //-1 means none loaded
+    mutable GlyphFace m_Buffer;
 };
 
 

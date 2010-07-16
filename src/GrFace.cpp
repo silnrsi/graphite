@@ -20,7 +20,11 @@ bool GrFace::readGlyphs()
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_face)) return false;
     
+#if 1
     m_pGlyphFaceCache = new(hdr) GlyphFaceCachePreloaded(hdr);
+#else
+    m_pGlyphFaceCache = new(hdr) GlyphFaceCacheOneItem(hdr);
+#endif
     if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
