@@ -70,11 +70,13 @@ public:
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
     
 private:
-    GlyphFace *glyphDirect() const { return &m_Buffer;}
+    GlyphFace *glyphDirect() const { return (GlyphFace *)&m_Buffer[0];}
 
 private:
     mutable unsigned int m_LoadedGlyphNo;   //-1 means none loaded
-    mutable GlyphFace m_Buffer;
+//    mutable GlyphFace m_Buffer;           //Not good - d'tor invoked twice
+//    mutable char m_Buffer[sizeof(GlyphFace)];     //Not good possibly bad alignment on Solaris and similar
+    mutable int m_Buffer[(sizeof(GlyphFace)+sizeof(int)-1)/sizeof(int)];
 };
 
 

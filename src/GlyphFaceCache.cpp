@@ -55,8 +55,7 @@ using namespace org::sil::graphite::v2;
 
 GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   //always use with the above new, passing in the same GlyphFaceCacheHeader
 :   GlyphFaceCache(hdr),
-    m_LoadedGlyphNo(-1),   //-1 means none loaded
-    m_Buffer(DoNotInitialize())
+    m_LoadedGlyphNo(-1)   //-1 means none loaded
 {
 }
 
@@ -66,7 +65,7 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
     if (m_LoadedGlyphNo==-1)   //-1 means none loaded
         return;
     
-    delete &m_Buffer;       //invoke destructor
+    delete glyphDirect();       //invoke destructor
 }
 
 
@@ -79,7 +78,7 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
     incLoads();
     
     if (m_LoadedGlyphNo!=-1)   //-1 means none loaded
-        delete &m_Buffer;       //invoke destructor
+        delete glyphDirect();       //invoke destructor
         
     m_LoadedGlyphNo = glyphid;
     new(glyphDirect()) GlyphFace(*this, glyphid);
