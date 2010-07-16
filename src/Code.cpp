@@ -231,7 +231,7 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case DELETE :
             break;
         case PUT_COPY :
-            cContexts[iSlot].copySlot = 1;
+            if (dp[-1] != 0) cContexts[iSlot].copySlot = 1;
         case PUSH_SLOT_ATTR :
         case PUSH_GLYPH_ATTR_OBS :
         case PUSH_GLYPH_ATTR :
