@@ -15,16 +15,25 @@ GrFace::~GrFace()
 }
 
 
-bool GrFace::readGlyphs()
+bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const      //glyphs already loaded are unloaded
+{
+    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache, requestedStrategy);
+    if (!pNewCache)
+        return false;
+    
+    delete m_pGlyphFaceCache;
+    m_pGlyphFaceCache = pNewCache;
+    return true;
+}
+
+
+bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
 {
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_face)) return false;
-    
-#if 1
-    m_pGlyphFaceCache = new(hdr) GlyphFaceCachePreloaded(hdr);
-#else
-    m_pGlyphFaceCache = new(hdr) GlyphFaceCacheOneItem(hdr);
-#endif
+
+    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr, requestedStrategy);
+
     if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads

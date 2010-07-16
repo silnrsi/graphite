@@ -53,6 +53,29 @@ using namespace org::sil::graphite::v2;
 }
 
 
+/*static*/ EGlyphCacheStrategy GlyphFaceCache::nearestSupportedStrategy(EGlyphCacheStrategy requested)
+{
+    if (requested>=ePreload) return ePreload;
+    
+    return eOneCache;
+}
+
+
+
+/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr, EGlyphCacheStrategy requested)
+{
+    switch (nearestSupportedStrategy(requested))
+    {
+      case ePreload:
+            return new(hdr) GlyphFaceCachePreloaded(hdr);
+            
+      default:      //eOneCache
+            return new(hdr) GlyphFaceCacheOneItem(hdr);
+    }
+}
+
+
+
 GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   //always use with the above new, passing in the same GlyphFaceCacheHeader
 :   GlyphFaceCache(hdr),
     m_LoadedGlyphNo(-1)   //-1 means none loaded
@@ -66,6 +89,12 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
         return;
     
     delete glyphDirect();       //invoke destructor
+}
+
+
+/*virtual*/ EGlyphCacheStrategy GlyphFaceCacheOneItem::getEnum() const
+{
+    return eOneCache;
 }
 
 
@@ -116,6 +145,12 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
     unsigned int nGlyphs = numGlyphs();
     for (unsigned int i=0 ; i<nGlyphs; ++i)
         delete glyphDirect(i);      //invokes d'tor. Does not release the memory.
+}
+
+
+/*virtual*/ EGlyphCacheStrategy GlyphFaceCachePreloaded::getEnum() const
+{
+    return ePreload;
 }
 
 

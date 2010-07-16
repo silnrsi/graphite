@@ -193,14 +193,14 @@ void TtfFileFace::operator delete(void * p)
 }
 #endif			//!DISABLE_FILE_FONT
 
-GrFace* IFace::makeGrFace() const		//this must stay alive all the time when the GrFace is alive. When finished with the LoadeFace, call IFace::destroyGrFace
+GrFace* IFace::makeGrFace(EGlyphCacheStrategy requestedStrategy) const		//this must stay alive all the time when the GrFace is alive. When finished with the LoadeFace, call IFace::destroyGrFace
 {
     GrFace *res = new GrFace(this);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
     bool valid = true;
-    valid &= res->readGlyphs();
+    valid &= res->readGlyphs(requestedStrategy);
     valid &= res->readGraphite();
     valid &= res->readFeatures();
 #ifndef DISABLE_TRACING
@@ -235,6 +235,42 @@ GrFace* IFace::makeGrFace() const		//this must stay alive all the time when the 
     delete face;
 }
 
+
+/*static*/ EGlyphCacheStrategy nearestSupportedStrategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
+{
+    return GlyphFaceCache::nearestSupportedStrategy(requested);
+}
+
+
+/*static*/ bool IFace::setGlyphCacheStrategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+{
+    return pFace->setGlyphCacheStrategy(requestedStrategy);
+}
+
+
+/*static*/ EGlyphCacheStrategy IFace::getGlyphStrategy(const GrFace* pFace)
+{
+    return pFace->m_pGlyphFaceCache->getEnum();
+}
+
+
+/*static*/ unsigned short IFace::numGlyphs(const GrFace* pFace)
+{
+    return pFace->m_pGlyphFaceCache->numGlyphs();
+}
+
+
+/*static*/ unsigned long IFace::numGlyphAccesses(const GrFace* pFace)
+{
+    return pFace->m_pGlyphFaceCache->m_nAccesses;
+}
+
+
+
+/*static*/ unsigned long IFace::numGlyphLoads(const GrFace* pFace)
+{
+    return pFace->m_pGlyphFaceCache->m_nLoads;
+}
 
 
 

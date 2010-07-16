@@ -60,7 +60,8 @@ private:
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:
-    bool readGlyphs();
+    bool setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const;      //glyphs already loaded are unloaded
+    bool readGlyphs(EGlyphCacheStrategy requestedStrategy);
     bool readGraphite();
     bool readFeatures() { return m_features.readFont(m_face); }
     const Silf *chooseSilf(uint32 script) const;
@@ -70,6 +71,7 @@ public:
 
     CLASS_NEW_DELETE
 private:
+    friend class IFace;
 
     const IFace *m_face;                  // Where to get tables
     uint16 m_ascent;
@@ -77,7 +79,7 @@ private:
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs
-    GlyphFaceCache* m_pGlyphFaceCache;
+    mutable GlyphFaceCache* m_pGlyphFaceCache;      //owned - never NULL
     unsigned short m_upem;          // design units per em
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.

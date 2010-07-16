@@ -1,12 +1,12 @@
 #pragma once
 
 #include "GlyphFace.h"
+#include "graphiteng/IFace.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class Segment;
 class Features;
-class IFace;
 
 
 class GlyphFaceCacheHeader
@@ -37,9 +37,13 @@ friend class GlyphFace;
 class GlyphFaceCache : public GlyphFaceCacheHeader
 {
 public:
-    GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr) {}
+    static EGlyphCacheStrategy nearestSupportedStrategy(EGlyphCacheStrategy requested);
+    static GlyphFaceCache* makeCache(const GlyphFaceCacheHeader& hdr, EGlyphCacheStrategy requested);
+
+    GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr), m_nAccesses(0), m_nLoads(0) {}
     virtual ~GlyphFaceCache() {}
     
+    virtual EGlyphCacheStrategy getEnum() const = 0 ;
     virtual const GlyphFace *glyph(unsigned short glyphid) const = 0 ;      //result may be changed by subsequent call with a different glyphid
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
@@ -47,12 +51,13 @@ public:
     CLASS_NEW_DELETE
     
 protected:
-    void incAccesses() const { ++m_Accesses; }      //don't count an access as a change
-    void incLoads() const { ++m_Loads; }            //const to allow lazy loading
+    void incAccesses() const { ++m_nAccesses; }      //don't count an access as a change
+    void incLoads() const { ++m_nLoads; }            //const to allow lazy loading
     
 private:
-    mutable unsigned long m_Accesses;
-    mutable unsigned long m_Loads;
+friend class IFace;
+    mutable unsigned long m_nAccesses;
+    mutable unsigned long m_nLoads;
 };
 
 
@@ -67,6 +72,7 @@ public:
     GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
     virtual ~GlyphFaceCacheOneItem();
 
+    virtual EGlyphCacheStrategy getEnum() const;
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
     
 private:
@@ -91,6 +97,7 @@ public:
     GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
     virtual ~GlyphFaceCachePreloaded();
 
+    virtual EGlyphCacheStrategy getEnum() const;
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
     
 private:
