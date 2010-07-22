@@ -23,7 +23,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-include_directories(../common icule ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
+include_directories(../common ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
 
 add_executable(comparerenderer
     CompareRenderer.cpp

@@ -33,8 +33,9 @@ const size_t NUM_RENDERERS = 3;
 class CompareRenderer
 {
 public:
-    CompareRenderer(const char * testFile, Renderer** renderers)
-        : m_fileBuffer(NULL), m_numLines(0), m_lineOffsets(NULL), m_renderers(renderers)
+    CompareRenderer(const char * testFile, Renderer** renderers, bool verbose)
+        : m_fileBuffer(NULL), m_numLines(0), m_lineOffsets(NULL),
+        m_renderers(renderers), m_verbose(verbose)
     {
         // read the file into memory for fast access
         struct stat fileStat;
@@ -140,7 +141,7 @@ public:
 protected:
     float runRenderer(Renderer & renderer, RenderedLine * pLineResult)
     {
-        size_t i = 0;
+        unsigned int i = 0;
         const char * pLine = m_fileBuffer;
 #ifdef __GNUC__
         struct timespec startTime;
@@ -155,12 +156,27 @@ protected:
             fprintf(stderr, "Warning no high performance counter available\n");
         QueryPerformanceCounter(&startCounter);
 #endif
-        while (i < m_numLines)
+        if (m_verbose)
         {
-            size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
-            pLine = m_fileBuffer + m_lineOffsets[i];
-            renderer.renderText(pLine, lineLength, pLineResult + i);
-            ++i;
+            while (i < m_numLines)
+            {
+                fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
+                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
+                pLine = m_fileBuffer + m_lineOffsets[i];
+                renderer.renderText(pLine, lineLength, pLineResult + i);
+                pLineResult[i].dump(stdout);
+                ++i;
+            }
+        }
+        else
+        {
+            while (i < m_numLines)
+            {
+                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
+                pLine = m_fileBuffer + m_lineOffsets[i];
+                renderer.renderText(pLine, lineLength, pLineResult + i);
+                ++i;
+            }
         }
 #ifdef __GNUC__
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
@@ -213,6 +229,7 @@ private:
     Renderer** m_renderers;
     RenderedLine * m_lineResults[NUM_RENDERERS];
     float m_elapsedTime[NUM_RENDERERS];
+    bool m_verbose;
 };
 
 
@@ -267,7 +284,7 @@ int main(int argc, char ** argv)
         return -3;
     }   
 
-    CompareRenderer compareRenderers(textFile, renderers);
+    CompareRenderer compareRenderers(textFile, renderers, rendererOptions[OptVerbose].exists());
     if (rendererOptions[OptRepeat].exists())
         compareRenderers.runTests(log, rendererOptions[OptRepeat].getInt(argv));
     else
