@@ -1,4 +1,4 @@
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 #include "XmlTraceLog.h"
 #include "GrFace.h"
 
@@ -214,13 +214,13 @@ GrFace* IFace::makeGrFace(EGlyphCacheStrategy requestedStrategy) const		//this m
     return res;
 }
 
-/*static*/ FeaturesHandle IFace::getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+FeaturesHandle get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
 {
     return pFace->theFeatures().cloneFeatures(langname);
 }
 
 
-/*static*/ FeatureRefHandle IFace::feature(const GrFace* pFace, uint8 index)
+FeatureRefHandle feature(const GrFace* pFace, uint8 index)
 {
     const FeatureRef* pRef = pFace->feature(index);
     if (!pRef)
@@ -230,46 +230,46 @@ GrFace* IFace::makeGrFace(EGlyphCacheStrategy requestedStrategy) const		//this m
 }
 
 
-/*static*/ void IFace::destroyGrFace(GrFace *face)
+void IFace::destroy_GrFace(GrFace *face)
 {
     delete face;
 }
 
 
-/*static*/ EGlyphCacheStrategy nearestSupportedStrategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
+EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
 {
     return GlyphFaceCache::nearestSupportedStrategy(requested);
 }
 
 
-/*static*/ bool IFace::setGlyphCacheStrategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+bool set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
 {
     return pFace->setGlyphCacheStrategy(requestedStrategy);
 }
 
 
-/*static*/ EGlyphCacheStrategy IFace::getGlyphStrategy(const GrFace* pFace)
+EGlyphCacheStrategy get_glyph_strategy(const GrFace* pFace)
 {
-    return pFace->m_pGlyphFaceCache->getEnum();
+    return pFace->getGlyphFaceCache()->getEnum();
 }
 
 
-/*static*/ unsigned short IFace::numGlyphs(const GrFace* pFace)
+unsigned short num_glyphs(const GrFace* pFace)
 {
-    return pFace->m_pGlyphFaceCache->numGlyphs();
+    return pFace->getGlyphFaceCache()->numGlyphs();
 }
 
 
-/*static*/ unsigned long IFace::numGlyphAccesses(const GrFace* pFace)
+unsigned long num_glyph_accesses(const GrFace* pFace)
 {
-    return pFace->m_pGlyphFaceCache->m_nAccesses;
+    return pFace->getGlyphFaceCache()->numAccesses();
 }
 
 
 
-/*static*/ unsigned long IFace::numGlyphLoads(const GrFace* pFace)
+unsigned long num_glyph_loads(const GrFace* pFace)
 {
-    return pFace->m_pGlyphFaceCache->m_nLoads;
+    return pFace->getGlyphFaceCache()->numLoads();
 }
 
 

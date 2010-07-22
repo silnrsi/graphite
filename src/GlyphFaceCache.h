@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GlyphFace.h"
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -48,6 +48,10 @@ public:
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
+    unsigned long numAccesses() const { return m_nAccesses; }
+    unsigned long numLoads() const { return m_nLoads; }
+
+
     CLASS_NEW_DELETE
     
 protected:
@@ -55,7 +59,6 @@ protected:
     void incLoads() const { ++m_nLoads; }            //const to allow lazy loading
     
 private:
-friend class IFace;
     mutable unsigned long m_nAccesses;
     mutable unsigned long m_nLoads;
 };

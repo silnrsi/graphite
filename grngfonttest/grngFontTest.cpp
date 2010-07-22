@@ -27,7 +27,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/SegmentHandle.h"
 #include "graphiteng/SlotHandle.h"
 #include "graphiteng/IFont.h"
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 #include "graphiteng/XmlLog.h"
 
 #include "CharInfo.h" // temp
@@ -666,7 +666,7 @@ int Parameters::testFileFont() const
        }	//to get seg destroyed before its parameters
         
         gr2::IFont::destroyGrFont(sizedFont);
-        gr2::IFace::destroyGrFace(face);
+        gr2::IFace::destroy_GrFace(face);
         delete fileface;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed

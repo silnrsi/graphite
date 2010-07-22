@@ -27,16 +27,21 @@ public:
     virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format. Must check in range. Return NULL if not.
 
     GrFace* makeGrFace(EGlyphCacheStrategy requestedStrategy=ePreload) const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
-    static FeaturesHandle getFeatures(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
-    static FeatureRefHandle feature(const GrFace* pFace, uint8 index);
-    static void destroyGrFace(GrFace *face);
+    static void destroy_GrFace(GrFace *face);
+};
+
+extern "C"
+{
+    GRNG_EXPORT FeaturesHandle get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
+    GRNG_EXPORT FeatureRefHandle feature(const GrFace* pFace, uint8 index);
+//    GRNG_EXPORT void destroy_GrFace(GrFace *face);
     
-    static EGlyphCacheStrategy nearestSupportedStrategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 
-    static bool setGlyphCacheStrategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
-    static EGlyphCacheStrategy getGlyphStrategy(const GrFace* pFace);
-    static unsigned short numGlyphs(const GrFace* pFace);
-    static unsigned long numGlyphAccesses(const GrFace* pFace);
-    static unsigned long numGlyphLoads(const GrFace* pFace);
+    GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 
+    GRNG_EXPORT bool set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
+    GRNG_EXPORT EGlyphCacheStrategy get_glyph_strategy(const GrFace* pFace);
+    GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace);
+    GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace);
+    GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace);
 };
 
 #ifndef DISABLE_FILE_FONT

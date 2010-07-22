@@ -38,11 +38,11 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/FeatureRefHandle.h
     ../include/graphiteng/FeaturesHandle.h
     ../include/graphiteng/IFont.h
-    ../include/graphiteng/IFace.h
     ../include/graphiteng/RefCountHandle.h
     ../include/graphiteng/SegmentHandle.h
     ../include/graphiteng/SlotHandle.h
     ../include/graphiteng/Types.h
+    ../include/graphiteng/face.h
     ${TRACE_HEADERS}
     )
 
@@ -50,6 +50,7 @@ file(GLOB PRIVATE_HEADERS *.h)
 
 add_library(graphiteng SHARED
     call_machine.cpp
+    face.cpp
     Code.cpp
     FeatureMap.cpp
     FeatureRefHandle.cpp
@@ -59,7 +60,6 @@ add_library(graphiteng SHARED
     GrFace.cpp
     GrFont.cpp
     Main.cpp
-    IFace.cpp
     IFont.cpp
     Segment.cpp
     SegmentHandle.cpp

@@ -5,7 +5,7 @@
 #include "Silf.h"
 #include "TtfUtil.h"
 #include "Main.h"
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 #include "FeatureMap.h"
 #include "GlyphFaceCache.h"
 
@@ -69,6 +69,9 @@ public:
     const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
+    const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
+
+    
     CLASS_NEW_DELETE
 private:
     friend class IFace;

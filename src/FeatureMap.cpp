@@ -3,7 +3,7 @@
 #include "Main.h"
 #include "FeatureMap.h"
 #include "Features.h"
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
 

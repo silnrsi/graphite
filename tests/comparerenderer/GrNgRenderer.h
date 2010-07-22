@@ -3,7 +3,7 @@
 #include <new>
 #include "Renderer.h"
 #include <graphiteng/Types.h>
-#include <graphiteng/IFace.h>
+#include <graphiteng/face.h>
 #include <graphiteng/IFont.h>
 #include <graphiteng/SegmentHandle.h>
 
@@ -23,7 +23,7 @@ public:
     virtual ~GrNgRenderer()
     {
         gr2::IFont::destroyGrFont(m_grFont);
-        gr2::IFace::destroyGrFace(m_grFace);
+        gr2::IFace::destroy_GrFace(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
         delete m_ttfFace;

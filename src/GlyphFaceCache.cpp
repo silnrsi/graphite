@@ -1,5 +1,5 @@
 #include "GlyphFaceCache.h"
-#include "graphiteng/IFace.h"
+#include "graphiteng/face.h"
 #include "GrFace.h"     //for the tags
 
 using namespace org::sil::graphite::v2;
