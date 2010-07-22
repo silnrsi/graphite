@@ -280,22 +280,24 @@ void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, 1, 0, seg, vms))
         return;
-    int outerLoopCount = static_cast<int>(seg->length()) * m_iMaxLoop;
     // advance may be negative, so it is dangerous to use unsigned for i
+    int loopCount = m_iMaxLoop;
+    int maxIndex = 0;
     for (int i = 0; i < static_cast<int>(seg->length()) && i >= 0; i++)
     {
-        int advance = 0;
-        int loopCount = m_iMaxLoop;
-        while (!advance && loopCount--)
-            advance = findNDoRule(seg, i, face, vms);
-        if (advance == 0) advance = 1;
-        i += advance - 1;
-        if (--outerLoopCount == 0)
+        i += findNDoRule(seg, i, face, vms) - 1;
+        if (i < maxIndex)
         {
-#ifndef DISABLE_TRACING
-            XmlTraceLog::get().warning("Pass::runGraphite exceeded max outer loop count");
-#endif
-            break;
+            if (--loopCount < 0)
+            {
+                i = maxIndex;
+                loopCount = m_iMaxLoop;
+            }
+        }
+        else
+        {
+            loopCount = m_iMaxLoop;
+            maxIndex = i + 1;
         }
     }
 }
