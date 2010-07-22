@@ -224,8 +224,8 @@ FeatureRefHandle feature(const GrFace* pFace, uint8 index)
 {
     const FeatureRef* pRef = pFace->feature(index);
     if (!pRef)
-	return NULL;
-    
+        return NULL;
+
     return new FeatureRef(*pRef);
 }
 
@@ -235,6 +235,14 @@ void IFace::destroy_GrFace(GrFace *face)
     delete face;
 }
 
+extern "C" {
+
+    GRNG_EXPORT void destroy_GrFace(GrFace *face)
+    {
+        delete face;
+    }
+
+}
 
 EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
 {

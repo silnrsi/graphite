@@ -666,7 +666,7 @@ int Parameters::testFileFont() const
        }	//to get seg destroyed before its parameters
         
         gr2::IFont::destroyGrFont(sizedFont);
-        gr2::IFace::destroy_GrFace(face);
+        gr2::destroy_GrFace(face);
         delete fileface;
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
