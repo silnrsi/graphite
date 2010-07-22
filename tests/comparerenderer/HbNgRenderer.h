@@ -9,6 +9,7 @@
 #include <hb-glib.h>
 #include <hb-ot.h>
 #include <hb-ot-layout.h>
+#include <glib/gunicode.h>
 
 
 #include "Renderer.h"
@@ -66,13 +67,11 @@ public:
         }
         hb_buffer_clear(m_buffer);
         hb_buffer_add_utf8(m_buffer, utf8, length, 0, length);
-        /*
         hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
-        hb_script_t script = hb_unicode_get_script(unicodeFuncs, utf8[0]);
+        hb_script_t script = hb_unicode_get_script(unicodeFuncs, g_utf8_get_char(utf8));
         hb_buffer_set_script(m_buffer, script);
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
-        */
         hb_shape(m_font, m_face, m_buffer, NULL, 0);
         hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer);
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer);
