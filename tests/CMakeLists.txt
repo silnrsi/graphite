@@ -2,6 +2,11 @@ project(testing)
 
 add_subdirectory(vm)
 add_subdirectory(comparerenderer)
+
+if (EXISTS ${PROJECT_SOURCE_DIR}/grlist)
+add_subdirectory(grlist)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/grlist)
+
 enable_testing()
 
 macro(fonttest TESTNAME FONTFILE)
@@ -22,6 +27,8 @@ fonttest(padauk3 Padauk.ttf 101e 1004 103a 1039 1001 103b 102d 102f 1004 103a 10
 fonttest(padauk4 Padauk.ttf 1005 1000 1039 1000 1030)
 fonttest(padauk5 Padauk.ttf 1000 103c 1031 102c 1004 1037 103a)
 fonttest(padauk6 Padauk.ttf 1000 102D 1005 1039 1006 102C)
+# padauk7 can cause an infinite loop, though the text is miss-spelt
+fonttest(padauk7 Padauk.ttf 1017 1014 103c 103d 102f)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 

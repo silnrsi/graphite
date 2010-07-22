@@ -280,8 +280,9 @@ void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, 1, 0, seg, vms))
         return;
-
-    for (unsigned int i = 0; i < seg->length() && i >= 0; i++)
+    int outerLoopCount = static_cast<int>(seg->length()) * m_iMaxLoop;
+    // advance may be negative, so it is dangerous to use unsigned for i
+    for (int i = 0; i < static_cast<int>(seg->length()) && i >= 0; i++)
     {
         int advance = 0;
         int loopCount = m_iMaxLoop;
@@ -289,6 +290,13 @@ void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
             advance = findNDoRule(seg, i, face, vms);
         if (advance == 0) advance = 1;
         i += advance - 1;
+        if (--outerLoopCount == 0)
+        {
+#ifndef DISABLE_TRACING
+            XmlTraceLog::get().warning("Pass::runGraphite exceeded max outer loop count");
+#endif
+            break;
+        }
     }
 }
 
@@ -382,14 +390,14 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
 
 int Pass::testConstraint(const Code *codeptr, int iSlot, int num, int nPre, Segment *seg, VMScratch *vms) const
 {
-    uint32 ret;
+    uint32 ret = 1;
     
     if (!*codeptr)
         return 1;
  
     assert(codeptr->constraint());
     
-    Machine::status_t status;
+    Machine::status_t status = Machine::finished;
     Machine m;
     if (nPre > iSlot) nPre = iSlot;
     for (int i = -nPre; i <= num; i++)

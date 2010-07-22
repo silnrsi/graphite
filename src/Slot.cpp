@@ -191,8 +191,17 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 val, int
         break;
     case kslatAttTo :
         m_parent = value;
-        (*seg)[value].child(seg, is);
-        m_attach = Position(seg->glyphAdvance((*seg)[value].gid()), 0);
+        if (value >= 0)
+        {
+            (*seg)[value].child(seg, is);
+            m_attach = Position(seg->glyphAdvance((*seg)[value].gid()), 0);
+        }
+        else
+        {
+#ifndef DISABLE_TRACING
+            XmlTraceLog::get().warning("invalid slatAttTo %d", value);
+#endif
+        }
         break;
     case kslatAttX :
         m_attach = Position(value, m_attach.y);
