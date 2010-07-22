@@ -3,7 +3,13 @@
 #include "Main.h"
 
 #include <cassert>
+
+//#define USE_GRLIST
+#ifdef USE_GRLIST
+#include "GrList.h"
+#else
 #include <vector>
+#endif
 
 #include "Slot.h"
 #include "CharInfo.h"
@@ -12,6 +18,11 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
+#ifdef USE_GRLIST
+typedef GrList<Features> FeatureList;
+typedef GrList<Slot> SlotList;
+typedef GrList<uint16> AttributeList;
+#else
 #ifdef __GNUC__
 // use the GNU CXX extension malloc_allocator to avoid new/delete
 #include <ext/malloc_allocator.h>
@@ -23,6 +34,7 @@ typedef std::vector<uint16, __gnu_cxx::malloc_allocator<uint16> > AttributeList;
 typedef std::vector<Features> FeatureList;
 typedef std::vector<Slot> SlotList;
 typedef std::vector<uint16> AttributeList;
+#endif
 #endif
 
 class Silf;

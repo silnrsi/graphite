@@ -21,6 +21,7 @@ public:
 
     explicit Features(int num)
       : m_length(num), m_vec(gralloc<uint32>(num)) {}
+    Features() : m_length(0), m_vec(NULL) { }
     Features(const Features & o) : m_length(0), m_vec(0) { *this = o; }
     ~Features() { free(m_vec); }
     Features & operator=(const Features & rhs) {
