@@ -27,7 +27,6 @@ public:
     virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format. Must check in range. Return NULL if not.
 
     GrFace* makeGrFace(EGlyphCacheStrategy requestedStrategy=ePreload) const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
-    static void destroy_GrFace(GrFace *face);
 };
 
 extern "C"
@@ -42,7 +41,7 @@ extern "C"
     GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace);
-};
+}
 
 #ifndef DISABLE_FILE_FONT
 class GRNG_EXPORT TtfFileFace : public IFace

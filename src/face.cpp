@@ -230,54 +230,50 @@ FeatureRefHandle feature(const GrFace* pFace, uint8 index)
 }
 
 
-void IFace::destroy_GrFace(GrFace *face)
+extern "C" 
 {
-    delete face;
-}
-
-extern "C" {
 
     GRNG_EXPORT void destroy_GrFace(GrFace *face)
     {
         delete face;
     }
 
-}
 
-EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
-{
-    return GlyphFaceCache::nearestSupportedStrategy(requested);
-}
-
-
-bool set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
-{
-    return pFace->setGlyphCacheStrategy(requestedStrategy);
-}
+    GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
+    {
+        return GlyphFaceCache::nearestSupportedStrategy(requested);
+    }
 
 
-EGlyphCacheStrategy get_glyph_strategy(const GrFace* pFace)
-{
-    return pFace->getGlyphFaceCache()->getEnum();
-}
+    GRNG_EXPORT bool set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+    {
+        return pFace->setGlyphCacheStrategy(requestedStrategy);
+    }
 
 
-unsigned short num_glyphs(const GrFace* pFace)
-{
-    return pFace->getGlyphFaceCache()->numGlyphs();
-}
+    GRNG_EXPORT EGlyphCacheStrategy get_glyph_strategy(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->getEnum();
+    }
 
 
-unsigned long num_glyph_accesses(const GrFace* pFace)
-{
-    return pFace->getGlyphFaceCache()->numAccesses();
-}
+    GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numGlyphs();
+    }
 
 
+    GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numAccesses();
+    }
 
-unsigned long num_glyph_loads(const GrFace* pFace)
-{
-    return pFace->getGlyphFaceCache()->numLoads();
+
+    GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numLoads();
+    }
+
 }
 
 

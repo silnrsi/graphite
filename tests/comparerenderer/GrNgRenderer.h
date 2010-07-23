@@ -23,7 +23,7 @@ public:
     virtual ~GrNgRenderer()
     {
         gr2::IFont::destroyGrFont(m_grFont);
-        gr2::IFace::destroy_GrFace(m_grFace);
+        gr2::destroy_GrFace(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
         delete m_ttfFace;
