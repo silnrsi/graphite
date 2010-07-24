@@ -1,4 +1,4 @@
-#include "graphiteng/IFont.h"
+#include "graphiteng/font.h"
 #include "GrFont.h"
 
 using namespace org::sil::graphite::v2;

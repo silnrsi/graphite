@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphiteng/IFont.h"
+#include "graphiteng/font.h"
 #include "Main.h"
 #include "GrFace.h"
 

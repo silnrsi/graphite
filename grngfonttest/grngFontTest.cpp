@@ -26,7 +26,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/Types.h"
 #include "graphiteng/SegmentHandle.h"
 #include "graphiteng/SlotHandle.h"
-#include "graphiteng/IFont.h"
+#include "graphiteng/font.h"
 #include "graphiteng/face.h"
 #include "graphiteng/XmlLog.h"
 

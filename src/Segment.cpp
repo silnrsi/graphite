@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "Segment.h"
-#include "graphiteng/IFont.h"
+#include "graphiteng/font.h"
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
