@@ -59,7 +59,7 @@ public:
     FeatureMap() : m_langFeats(NULL), m_feats(NULL) {}
     ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; }
     
-    bool readFont(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     const FeatureRef *featureRef(uint32 name);

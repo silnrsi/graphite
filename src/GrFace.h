@@ -63,7 +63,7 @@ public:
     bool setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const;      //glyphs already loaded are unloaded
     bool readGlyphs(EGlyphCacheStrategy requestedStrategy);
     bool readGraphite();
-    bool readFeatures() { return m_features.readFont(m_appFaceHandle/*non-NULL*/, m_getTable); }
+    bool readFeatures() { return m_features.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
     const FeatureMap& theFeatures() const { return m_features; }
     const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }

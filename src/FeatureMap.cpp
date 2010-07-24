@@ -12,7 +12,7 @@
 
 using namespace org::sil::graphite::v2;
 
-bool FeatureMap::readFont(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
+bool FeatureMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     if (!readFeats(appFaceHandle, getTable)) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
