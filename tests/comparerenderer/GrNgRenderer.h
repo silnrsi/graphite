@@ -13,9 +13,9 @@ class GrNgRenderer : public Renderer
 {
 public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir)
-        : m_ttfFace(gr2::make_TTF_face_handle(fontFile)),
+        : m_fileFace(gr2::make_file_face_handle(fontFile)),
         m_rtl(textDir),
-        m_grFace(make_GrFace_from_TTF_face_handle(m_ttfFace, gr2::ePreload)),
+        m_grFace(make_GrFace_from_file_face_handle(m_fileFace, gr2::ePreload)),
         m_grFont(gr2::IFont::makeGrFont(static_cast<float>(fontSize), m_grFace))
     {
 
@@ -26,8 +26,8 @@ public:
         gr2::destroy_GrFace(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
-        gr2::destroy_TTF_face_handle(m_ttfFace);
-        m_ttfFace = NULL;
+        gr2::destroy_file_face_handle(m_fileFace);
+        m_fileFace = NULL;
     }
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
@@ -46,7 +46,7 @@ public:
     virtual const char * name() const { return "graphiteng"; }
 private:
     int m_rtl;
-    gr2::TTFFaceHandle * m_ttfFace;
+    gr2::FileFaceHandle * m_fileFace;
     gr2::GrFace * m_grFace;
     gr2::GrFont * m_grFont;
 };

@@ -2,7 +2,7 @@
 #include "XmlTraceLog.h"
 #include "GrFace.h"
 
-#ifndef DISABLE_TTF_FACE_HANDLE
+#ifndef DISABLE_FILE_FACE_HANDLE
 #include "TtfUtil.h"
 #include <cstdio>
 #include <cassert>
@@ -28,11 +28,11 @@ private:
 };
 
 
-class org::sil::graphite::v2::TTFFaceHandle
+class org::sil::graphite::v2::FileFaceHandle
 {
 public:
-    TTFFaceHandle(const char *name);
-    ~TTFFaceHandle();
+    FileFaceHandle(const char *filename);
+    ~FileFaceHandle();
 //    virtual const void *getTable(unsigned int name, size_t *len) const;
 
     CLASS_NEW_DELETE
@@ -43,16 +43,16 @@ public:     //for local convenience
     char *m_pTableDir;
     
 private:		//defensive
-    TTFFaceHandle(const TTFFaceHandle&);
-    TTFFaceHandle& operator=(const TTFFaceHandle&);
+    FileFaceHandle(const FileFaceHandle&);
+    FileFaceHandle& operator=(const FileFaceHandle&);
 };
 
 
-TTFFaceHandle::TTFFaceHandle(const char *fname) :
+FileFaceHandle::FileFaceHandle(const char *filename) :
     m_pHeader(NULL),
     m_pTableDir(NULL)
 {
-    if (!(m_pfile = fopen(fname, "rb"))) return;
+    if (!(m_pfile = fopen(filename, "rb"))) return;
     size_t lOffset, lSize;
     if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
     m_pHeader = gralloc<char>(lSize);
@@ -65,7 +65,7 @@ TTFFaceHandle::TTFFaceHandle(const char *fname) :
     if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
 
-TTFFaceHandle::~TTFFaceHandle()
+FileFaceHandle::~FileFaceHandle()
 {
     free(m_pTableDir);
     free(m_pHeader);
@@ -77,9 +77,9 @@ TTFFaceHandle::~TTFFaceHandle()
 }
 
 
-static const void *TTFFaceHandle_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
+static const void *FileFaceHandle_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
 {
-    const TTFFaceHandle* ttfFaceHandle = (const TTFFaceHandle*)appFaceHandle;
+    const FileFaceHandle* ttfFaceHandle = (const FileFaceHandle*)appFaceHandle;
     TableCacheItem * res;
     switch (name)
     {
@@ -173,7 +173,7 @@ static const void *TTFFaceHandle_table_fn(const void* appFaceHandle, unsigned in
     if (len) *len = res->size();
     return res->data();
 }
-#endif			//!DISABLE_TTF_FACE_HANDLE
+#endif			//!DISABLE_FILE_FACE_HANDLE
 
 extern "C" 
 {
@@ -258,11 +258,11 @@ extern "C"
     }
 
 
-#ifndef DISABLE_TTF_FACE_HANDLE
-    GRNG_EXPORT TTFFaceHandle* make_TTF_face_handle(const char *name)   //returns NULL on failure. //TBD better error handling
+#ifndef DISABLE_FILE_FACE_HANDLE
+    GRNG_EXPORT FileFaceHandle* make_file_face_handle(const char *filename)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_TTF_face_handle
     {
-        TTFFaceHandle* res = new TTFFaceHandle(name);
+        FileFaceHandle* res = new FileFaceHandle(filename);
         if (res->m_pTableDir)
             return res;
         
@@ -273,17 +273,17 @@ extern "C"
     }
     
     
-    GRNG_EXPORT void destroy_TTF_face_handle(TTFFaceHandle* appFaceHandle/*non-NULL*/)
+    GRNG_EXPORT void destroy_file_face_handle(FileFaceHandle* appFaceHandle/*non-NULL*/)
     {
         delete appFaceHandle;
     }
     
     
-    GRNG_EXPORT GrFace* make_GrFace_from_TTF_face_handle(const TTFFaceHandle* appFaceHandle/*non-NULL*/, EGlyphCacheStrategy requestedStrategy)
+    GRNG_EXPORT GrFace* make_GrFace_from_file_face_handle(const FileFaceHandle* appFaceHandle/*non-NULL*/, EGlyphCacheStrategy requestedStrategy)
     {                  //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_TTF_face_handle 
-        return make_GrFace(appFaceHandle/*non-NULL*/, &TTFFaceHandle_table_fn, requestedStrategy);
+        return make_GrFace(appFaceHandle/*non-NULL*/, &FileFaceHandle_table_fn, requestedStrategy);
     }
-#endif      //!DISABLE_TTF_FACE_HANDLE
+#endif      //!DISABLE_FILE_FACE_HANDLE
 }
 
 

@@ -517,7 +517,7 @@ void listFeatures(gr::Font & font)
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
-    gr2::TTFFaceHandle *fileface;
+    gr2::FileFaceHandle *fileface;
 //    try
     {
         // use the -trace option to specify a file
@@ -545,13 +545,13 @@ int Parameters::testFileFont() const
         }
 #endif
         GrngTextSrc textSrc(pText32, charLength);
-        if (!(fileface = gr2::make_TTF_face_handle(fileName)))
+        if (!(fileface = gr2::make_file_face_handle(fileName)))
         {
             fprintf(stderr, "Invalid font, failed to read tables\n");
             return 2;
         }
         
-        gr2::GrFace *face = gr2::make_GrFace_from_TTF_face_handle(fileface, gr2::ePreload);
+        gr2::GrFace *face = gr2::make_GrFace_from_file_face_handle(fileface, gr2::ePreload);
         if (!face)
         {
             fprintf(stderr, "Invalid font, failed to parse tables\n");
@@ -667,7 +667,7 @@ int Parameters::testFileFont() const
         
         gr2::IFont::destroyGrFont(sizedFont);
         gr2::destroy_GrFace(face);
-        gr2::destroy_TTF_face_handle(fileface);
+        gr2::destroy_file_face_handle(fileface);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;
