@@ -1,14 +1,13 @@
 #pragma once
 
 #include "graphiteng/Types.h"
+#include "graphiteng/face.h"
 #include "graphiteng/FeaturesHandle.h"
 #include "Main.h"
 #include "Features.h"
 //#include <map> // avoid libstdc++
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
-
-class IFace;
 
 class FeatureRef
 {
@@ -60,9 +59,9 @@ public:
     FeatureMap() : m_langFeats(NULL), m_feats(NULL) {}
     ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; }
     
-    bool readFont(const IFace *face);
-    bool readFeats(const IFace *face);
-    bool readSill(const IFace *face);
+    bool readFont(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     const FeatureRef *featureRef(uint32 name);
     FeatureRef *feature(uint8 index) const { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }

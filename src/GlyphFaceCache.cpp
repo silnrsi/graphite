@@ -6,26 +6,26 @@ using namespace org::sil::graphite::v2;
 
 
 
-/*virtual*/ bool GlyphFaceCacheHeader::initialize(const IFace* iFace/*not NULL*/)    //return result indicates success. Do not use if failed.
+/*virtual*/ bool GlyphFaceCacheHeader::initialize(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)    //return result indicates success. Do not use if failed.
 {
-    if ((m_pLoca = iFace->getTable(tagLoca, &m_lLoca)) == NULL) return false;
+    if ((m_pLoca = (*getTable)(appFaceHandle, tagLoca, &m_lLoca)) == NULL) return false;
     size_t lHead;
-    if ((m_pHead = iFace->getTable(tagHead, &lHead)) == NULL) return false;
+    if ((m_pHead = (*getTable)(appFaceHandle, tagHead, &lHead)) == NULL) return false;
     size_t lGlyf;
-    if ((m_pGlyf = iFace->getTable(tagGlyf, &lGlyf)) == NULL) return false;
-    if ((m_pHmtx = iFace->getTable(tagHmtx, &m_lHmtx)) == NULL) return false;
+    if ((m_pGlyf = (*getTable)(appFaceHandle, tagGlyf, &lGlyf)) == NULL) return false;
+    if ((m_pHmtx = (*getTable)(appFaceHandle, tagHmtx, &m_lHmtx)) == NULL) return false;
     size_t lHHea;
-    if ((m_pHHea = iFace->getTable(tagHhea, &lHHea)) == NULL) return false;
+    if ((m_pHHea = (*getTable)(appFaceHandle, tagHhea, &lHHea)) == NULL) return false;
     size_t lGlat;
-    if ((m_pGlat = iFace->getTable(tagGlat, &lGlat)) == NULL) return false;
+    if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &lGlat)) == NULL) return false;
 
     size_t lMaxp;
-    const void* pMaxp = iFace->getTable(tagMaxp, &lMaxp);
+    const void* pMaxp = (*getTable)(appFaceHandle, tagMaxp, &lMaxp);
     if (pMaxp==NULL) return false;
     m_nGlyphsWithGraphics = (unsigned short)TtfUtil::GlyphCount(pMaxp);
     
     size_t lGloc;
-    if ((m_pGloc = iFace->getTable(tagGloc, &lGloc)) == NULL) return false;
+    if ((m_pGloc = (*getTable)(appFaceHandle, tagGloc, &lGloc)) == NULL) return false;
     if (lGloc < 6) return false;
     int version = swap32(*((uint32 *)m_pGloc));
     if (version != 0x00010000) return false;

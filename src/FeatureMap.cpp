@@ -12,17 +12,17 @@
 
 using namespace org::sil::graphite::v2;
 
-bool FeatureMap::readFont(const IFace *face)
+bool FeatureMap::readFont(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
-    if (!readFeats(face)) return false;
-    if (!readSill(face)) return false;
+    if (!readFeats(appFaceHandle, getTable)) return false;
+    if (!readSill(appFaceHandle, getTable)) return false;
     return true;
 }
 
-bool FeatureMap::readFeats(const IFace *face)
+bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lFeat;
-    char *pFeat = (char *)(face->getTable(ktiFeat, &lFeat));
+    char *pFeat = (char *)((*getTable)(appFaceHandle, ktiFeat, &lFeat));
     char *pOrig = pFeat;
     uint16 *defVals;
     uint32 version;
@@ -131,10 +131,10 @@ bool FeatureMap::readFeats(const IFace *face)
     return true;
 }
 
-bool FeatureMap::readSill(const IFace *face)
+bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lSill;
-    char *pSill = (char *)(face->getTable(ktiSill, &lSill));
+    char *pSill = (char *)((*getTable)(appFaceHandle, ktiSill, &lSill));
     char *pBase = pSill;
 
     if (!pSill) return true;

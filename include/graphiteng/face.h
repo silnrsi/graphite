@@ -4,33 +4,19 @@
 #include "graphiteng/FeaturesHandle.h"
 #include "graphiteng/FeatureRefHandle.h"
 
-/*
-    A client would usually derive from IFace to implement their own way of hetting the table information for a font face.
-    But if they are happy to load directly from a true type font from a file, they can use IFace::loadTTFFile instead, remebering to 
-    delete the pointer when it is no longer required.
-
-    Then the client should call the member function makeGrFace to load the IFace, and the GrFace pointer will then
-    be passed into Graphite for further processing.
-    GrFace is lazy and so the IFace must stay alive in case Graphite needs to get more data loaded into it.
-    When the GrFace* is no longer needed, IFace::destroyGrFace() should be called.
-*/
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrFace;
+class TTFFaceHandle;
 
 enum EGlyphCacheStrategy{ eOneCache=0, eLoadOnDemand=100/*never unloaded*/, ePreload=200 } ;        //don't change numbering
 
-class GRNG_EXPORT IFace
-{
-public:
-    //virtual ~IFace() {}
-    virtual const void *getTable(unsigned int name, size_t *len) const = 0;		//In standard TTF format. Must check in range. Return NULL if not.
-
-    GrFace* makeGrFace(EGlyphCacheStrategy requestedStrategy=ePreload) const;		//the 'this' must stay alive all the time when the GrFace is alive. When finished with the GrFace, call IFace::destroyGrFace    
-};
-
 extern "C"
 {
+    typedef const void *(*get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
+    GRNG_EXPORT GrFace* make_GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy);
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_GrFace    
+  
     GRNG_EXPORT FeaturesHandle get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
     GRNG_EXPORT FeatureRefHandle feature(const GrFace* pFace, uint8 index);
     GRNG_EXPORT void destroy_GrFace(GrFace *face);
@@ -41,16 +27,14 @@ extern "C"
     GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace);
-}
 
 #ifndef DISABLE_FILE_FONT
-class GRNG_EXPORT TtfFileFace : public IFace
-{
-public:
-    void operator delete(void *);
-    static TtfFileFace* loadTTFFile(const char *name);        //when no longer needed, call delete
-                                //TBD better error handling
-};
+    GRNG_EXPORT TTFFaceHandle* make_TTF_face_handle(const char *name);   //returns NULL on failure. //TBD better error handling
+                      //when finished with, call destroy_TTF_face_handle
+    GRNG_EXPORT void destroy_TTF_face_handle(TTFFaceHandle* appFaceHandle/*non-NULL*/);
+    GRNG_EXPORT GrFace* make_GrFace_from_TTF_face_handle(const TTFFaceHandle* appFaceHandle/*non-NULL*/, EGlyphCacheStrategy requestedStrategy);
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_TTF_face_handle    
 #endif      //!DISABLE_FILE_FONT
+}
 
 }}}} // namespace

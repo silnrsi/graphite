@@ -30,7 +30,7 @@ bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const 
 bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
 {
     GlyphFaceCacheHeader hdr;
-    if (!hdr.initialize(m_face)) return false;
+    if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr, requestedStrategy);
 

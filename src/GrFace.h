@@ -40,14 +40,14 @@ class Features;
 class GrFace 	// an IFace loaded into an object
 {
 public:
-    const void *getTable(unsigned int name, size_t *len) const { return m_face->getTable(name, len); }
+    const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
     void runGraphite(Segment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    GrFace(const IFace *face) : m_face(face), m_pGlyphFaceCache(NULL), m_silfs(NULL)  {}
+    GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL)  {}
     ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
@@ -63,7 +63,7 @@ public:
     bool setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const;      //glyphs already loaded are unloaded
     bool readGlyphs(EGlyphCacheStrategy requestedStrategy);
     bool readGraphite();
-    bool readFeatures() { return m_features.readFont(m_face); }
+    bool readFeatures() { return m_features.readFont(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
     const FeatureMap& theFeatures() const { return m_features; }
     const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
@@ -74,9 +74,8 @@ public:
     
     CLASS_NEW_DELETE
 private:
-    friend class IFace;
-
-    const IFace *m_face;                  // Where to get tables
+    const void* m_appFaceHandle/*non-NULL*/;
+    get_table_fn m_getTable;
     uint16 m_ascent;
     uint16 m_descent;
     // unsigned short *m_glyphidx;     // index for each glyph id in the font
