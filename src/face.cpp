@@ -6,6 +6,7 @@
 #include "TtfUtil.h"
 #include <cstdio>
 #include <cassert>
+#include "TtfTypes.h"
 //#include <map> // Please don't use map, it forces libstdc++
 
 using namespace org::sil::graphite::v2;
@@ -39,8 +40,8 @@ public:
 public:     //for local convenience
     FILE* m_pfile;
     mutable TableCacheItem m_tables[TtfUtil::ktiLast];
-    char *m_pHeader;
-    char *m_pTableDir;
+    TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
+    TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
     
 private:		//defensive
     FileFaceHandle(const FileFaceHandle&);
@@ -55,12 +56,12 @@ FileFaceHandle::FileFaceHandle(const char *filename) :
     if (!(m_pfile = fopen(filename, "rb"))) return;
     size_t lOffset, lSize;
     if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
-    m_pHeader = gralloc<char>(lSize);
+    m_pHeader = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(lSize);
     if (fseek(m_pfile, lOffset, SEEK_SET)) return;
     if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
     if (!TtfUtil::CheckHeader(m_pHeader)) return;
     if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
-    m_pTableDir = gralloc<char>(lSize);
+    m_pTableDir = (TtfUtil::Sfnt::OffsetSubTable::Entry*)gralloc<char>(lSize);
     if (fseek(m_pfile, lOffset, SEEK_SET)) return;
     if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
