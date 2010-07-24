@@ -28,13 +28,13 @@ extern "C"
     GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace);
 
-#ifndef DISABLE_FILE_FONT
+#ifndef DISABLE_TTF_FACE_HANDLE
     GRNG_EXPORT TTFFaceHandle* make_TTF_face_handle(const char *name);   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_TTF_face_handle
     GRNG_EXPORT void destroy_TTF_face_handle(TTFFaceHandle* appFaceHandle/*non-NULL*/);
     GRNG_EXPORT GrFace* make_GrFace_from_TTF_face_handle(const TTFFaceHandle* appFaceHandle/*non-NULL*/, EGlyphCacheStrategy requestedStrategy);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_TTF_face_handle    
-#endif      //!DISABLE_FILE_FONT
+#endif      //!DISABLE_TTF_FACE_HANDLE
 }
 
 }}}} // namespace

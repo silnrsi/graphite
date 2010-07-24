@@ -2,7 +2,7 @@
 #include "XmlTraceLog.h"
 #include "GrFace.h"
 
-#ifndef DISABLE_FILE_FONT
+#ifndef DISABLE_TTF_FACE_HANDLE
 #include "TtfUtil.h"
 #include <cstdio>
 #include <cassert>
@@ -173,7 +173,7 @@ static const void *TTFFaceHandle_table_fn(const void* appFaceHandle, unsigned in
     if (len) *len = res->size();
     return res->data();
 }
-#endif			//!DISABLE_FILE_FONT
+#endif			//!DISABLE_TTF_FACE_HANDLE
 
 extern "C" 
 {
@@ -258,7 +258,7 @@ extern "C"
     }
 
 
-#ifndef DISABLE_FILE_FONT
+#ifndef DISABLE_TTF_FACE_HANDLE
     GRNG_EXPORT TTFFaceHandle* make_TTF_face_handle(const char *name)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_TTF_face_handle
     {
@@ -283,7 +283,7 @@ extern "C"
     {                  //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_TTF_face_handle 
         return make_GrFace(appFaceHandle/*non-NULL*/, &TTFFaceHandle_table_fn, requestedStrategy);
     }
-#endif      //!DISABLE_FILE_FONT
+#endif      //!DISABLE_TTF_FACE_HANDLE
 }
 
 
