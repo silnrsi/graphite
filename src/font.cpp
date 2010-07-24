@@ -3,21 +3,24 @@
 
 using namespace org::sil::graphite::v2;
 
-GrFont* IFont::makeGrFont(const GrFace *face) const			//this must stay alive all the time when the GrFont is alive. When finished with the GrFont, call IFont::destroyGrFace
+extern "C" 
 {
-    return new GrHintedFont(this, face);
-}
+    GRNG_EXPORT GrFont* make_GrFont(float ppm/*pixels per em*/, const GrFace *face)
+    {
+        return new GrFont(ppm, face);
+    }
 
 
-/*static*/ GrFont* IFont::makeGrFont(float ppm, const GrFace *face)		//When finished with the GrFont, call IFont::destroyGrFace
-{
-    return new GrFont(ppm, face);
-}
+    GRNG_EXPORT GrFont* make_GrFont_with_hints(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face)
+    {                 //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_GrFont    
+        return new GrHintedFont(ppm, appFontHandle, advance, face);
+    }
 
 
-/*static*/ void IFont::destroyGrFont(GrFont *font)
-{
-    delete font;
+    GRNG_EXPORT void destroy_GrFont(GrFont *font)
+    {
+        delete font;
+    }
 }
 
 

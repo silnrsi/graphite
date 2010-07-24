@@ -558,7 +558,7 @@ int Parameters::testFileFont() const
             return 3;
         }
 
-        gr2::GrFont *sizedFont = gr2::IFont::makeGrFont(pointSize * dpi / 72, face);
+        gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -665,7 +665,7 @@ int Parameters::testFileFont() const
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
        }	//to get seg destroyed before its parameters
         
-        gr2::IFont::destroyGrFont(sizedFont);
+        gr2::destroy_GrFont(sizedFont);
         gr2::destroy_GrFace(face);
         gr2::destroy_file_face_handle(fileface);
 //            delete featureParser;

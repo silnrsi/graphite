@@ -11,7 +11,7 @@ const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be
 class GrFont
 {
 public:
-     GrFont(float ppm, const GrFace *face);
+    GrFont(float ppm, const GrFace *face);
 private:
     void initialize();
 public:
@@ -43,13 +43,14 @@ private:			//defensive on m_advances
 class GrHintedFont : public GrFont
 {
 public:
-   GrHintedFont(const IFont *font/*not NULL*/, const GrFace *face);
+   GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face);
 
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 
 private:
-    const IFont *m_font;      // Application interface.
+    const void* m_appFontHandle/*non-NULL*/;
+    advance_fn m_advance;
 };
 
 }}}} // namespace

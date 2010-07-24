@@ -7,15 +7,14 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrFace;
 class GrFont;
 
-class GRNG_EXPORT IFont
+extern "C"
 {
-public:
-    virtual float advance(uint16 glyphid) const = 0;		//amount to advance. positive is in the writing direction
-    virtual float ppm() const = 0;				//pixels per em
-    
-    GrFont* makeGrFont(const GrFace *face) const;				//the 'this' must stay alive all the time when the GrFont is alive. When finished with the GrFont, call IFont::destroyGrFont
-    static GrFont* makeGrFont(float ppm, const GrFace *face);		//When finished with the GrFont, call IFont::destroyGrFont
-    static void destroyGrFont(GrFont *font);
-};
+    GRNG_EXPORT GrFont* make_GrFont(float ppm/*pixels per em*/, const GrFace *face);
+                      //When finished with the GrFont, call destroy_GrFont    
+    typedef float (*advance_fn)(const void* appFontHandle, uint16 glyphid);     //amount to advance. positive is in the writing direction
+    GRNG_EXPORT GrFont* make_GrFont_with_hints(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face);
+                      //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_GrFont    
+    GRNG_EXPORT void destroy_GrFont(GrFont *font);
+}
 
 }}}} // namespace

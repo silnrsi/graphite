@@ -27,16 +27,17 @@ GrFont::GrFont(float ppm, const GrFace *face) :
 
 
 
-GrHintedFont::GrHintedFont(const IFont *font/*not NULL*/, const GrFace *face) :
-    GrFont(font->ppm(), face), 
-    m_font(font)
+GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance2, const GrFace *face) :
+    GrFont(ppm, face), 
+    m_appFontHandle(appFontHandle),
+    m_advance(advance2)
 {
 }
 
 
 /*virtual*/ float GrHintedFont::computeAdvance(unsigned short glyphid) const
 {
-    return m_font->advance(glyphid);
+    return (*m_advance)(m_appFontHandle, glyphid);
 }
 
 

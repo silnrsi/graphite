@@ -16,13 +16,13 @@ public:
         : m_fileFace(gr2::make_file_face_handle(fontFile)),
         m_rtl(textDir),
         m_grFace(make_GrFace_from_file_face_handle(m_fileFace, gr2::ePreload)),
-        m_grFont(gr2::IFont::makeGrFont(static_cast<float>(fontSize), m_grFace))
+        m_grFont(gr2::make_GrFont(static_cast<float>(fontSize), m_grFace))
     {
 
     }
     virtual ~GrNgRenderer()
     {
-        gr2::IFont::destroyGrFont(m_grFont);
+        gr2::destroy_GrFont(m_grFont);
         gr2::destroy_GrFace(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
