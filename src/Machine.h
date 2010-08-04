@@ -19,7 +19,7 @@
 namespace gr2 = org::sil::graphite::v2;
 // Forward declarations
 namespace org { namespace sil { namespace graphite { namespace v2 {
-    class Segment;
+    class GrSegment;
 }}}}
 
 namespace vm 
@@ -100,7 +100,7 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  gr2::Segment & seg, slotref & islot_idx, slotref iStart,
+                                  gr2::GrSegment & seg, slotref & islot_idx, slotref iStart,
                                   status_t &status) HOT;
     CLASS_NEW_DELETE
 

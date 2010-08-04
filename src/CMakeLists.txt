@@ -60,8 +60,8 @@ add_library(graphiteng SHARED
     GlyphFaceCache.cpp
     GrFace.cpp
     GrFont.cpp
+    GrSegment.cpp
     Main.cpp
-    Segment.cpp
     SegmentHandle.cpp
     Slot.cpp
     SlotHandle.cpp

@@ -39,7 +39,7 @@ typedef std::vector<uint16> AttributeList;
 
 class Silf;
 class GrFace;
-class Segment
+class GrSegment
 {
 public:
     unsigned int length() const { return m_numGlyphs; }
@@ -74,12 +74,12 @@ public:
     void user(uint32 sid, uint8 index, uint16 value) { if (sid < m_numGlyphs && index < m_silf->numUser()) m_userAttrs[sid * m_silf->numUser() + index] = value; }
     void copyUserAttrs(uint32 osid, uint32 isid) { int n = m_silf->numUser(); for (int i = 0; i < n; i++) m_userAttrs[osid * n + i] = m_userAttrs[isid * n + i]; }
 
-    Segment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
-    ~Segment();
+    GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
+    ~GrSegment();
     void appendSlot(int i, int cid, int gid, int fid, int bw);
     void positionSlots(const GrFont *font);
     void positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos);
-    void append(const Segment &other);
+    void append(const GrSegment &other);
     void insertSlot(size_t index) {
         m_slots.insert(m_slots.begin() + index, Slot());
         m_userAttrs.insert(m_userAttrs.begin() + index * m_silf->numUser(), m_silf->numUser(), 0);
@@ -157,8 +157,8 @@ private:
     AttributeList m_tempUserAttrs;
 
 private:		//defensive on m_charinfo
-    Segment(const Segment&);
-    Segment& operator=(const Segment&);
+    GrSegment(const GrSegment&);
+    GrSegment& operator=(const GrSegment&);
 };
 
 }}}} // namespace

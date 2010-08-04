@@ -5,7 +5,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class Segment;
+class GrSegment;
 class Features;
 
 

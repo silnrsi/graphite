@@ -10,7 +10,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 #define SLOT_DELETED    1
 #define SLOT_INSERT	2
 
-class Segment;
+class GrSegment;
 
 class Slot
 {
@@ -23,7 +23,7 @@ public:
 
     Slot();
     uint16 glyph() { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(Segment *seg, uint16 glyphid);
+    void setGlyph(GrSegment *seg, uint16 glyphid);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }
@@ -32,20 +32,20 @@ public:
     void after(int index) { m_after = index; }
     bool isBase() const { return (m_parent == -1); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(Segment* seg, const GrFont* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel);
+    Position finalise(GrSegment* seg, const GrFont* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel);
     bool isDeleted() const { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 value, int is);
-    int getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const;
+    void setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 value, int is);
+    int getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const;
     void attachTo(int ap) { m_parent = ap; }
-    void child(Segment *seg, int ap);
-    void sibling(Segment *seg, int ap);
+    void child(GrSegment *seg, int ap);
+    void sibling(GrSegment *seg, int ap);
     int attachTo() const { return m_parent; }
-    uint32 clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const;
+    uint32 clusterMetric(const GrSegment *seg, int is, uint8 metric, uint8 attrLevel) const;
     void positionShift(Position a) { m_position += a; }
-    void floodShift(Position adj, Segment *seg);
+    void floodShift(Position adj, GrSegment *seg);
 
     CLASS_NEW_DELETE
 

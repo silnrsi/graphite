@@ -1,4 +1,4 @@
-#include "Segment.h"
+#include "GrSegment.h"
 #include "Slot.h"
 #include "CharInfo.h"
 
@@ -17,7 +17,7 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 };
 
-Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
+Position Slot::finalise(GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;
@@ -67,12 +67,12 @@ Position Slot::finalise(Segment *seg, const GrFont *font, Position *base, Rect *
     return res;
 }
 
-uint32 Slot::clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrLevel) const
+uint32 Slot::clusterMetric(const GrSegment *seg, int is, uint8 metric, uint8 attrLevel) const
 {
     Position base;
     Rect bbox;
     float cMin = 0.;
-    Position res = const_cast<Segment *>(seg)->finalise(is, NULL, &base, &bbox, &cMin, attrLevel);
+    Position res = const_cast<GrSegment *>(seg)->finalise(is, NULL, &base, &bbox, &cMin, attrLevel);
 
     switch ((enum metrics)metric)
     {
@@ -101,7 +101,7 @@ uint32 Slot::clusterMetric(const Segment *seg, int is, uint8 metric, uint8 attrL
     }
 }
 
-int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const
+int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const
 {
     if (index == kslatUserDefnV1)
     {
@@ -143,10 +143,10 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, in
     case kslatInsert :
         return isInsertBefore();
     case kslatPosX :
-        const_cast<Segment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
+        const_cast<GrSegment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
         return m_position.x; // but need to calculate it
     case kslatPosY :
-        const_cast<Segment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
+        const_cast<GrSegment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
         return m_position.y;
     case kslatShiftX :
         return m_shift.x;
@@ -167,13 +167,13 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex, int is, in
     case kslatJWidth :
         return 0;
     case kslatUserDefn :
-        return useTemp ? const_cast<Segment *>(seg)->getTempUser(is, subindex) : const_cast<Segment *>(seg)->user(is, subindex);
+        return useTemp ? const_cast<GrSegment *>(seg)->getTempUser(is, subindex) : const_cast<GrSegment *>(seg)->user(is, subindex);
     default :
         return 0;
     }
 }
 
-void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 val, int is)
+void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, int is)
 {
     int value = *(int16 *)&val;
     if (index == kslatUserDefnV1)
@@ -268,7 +268,7 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, uint16 val, int
     }
 }
 
-void Slot::child(Segment *seg, int ap)
+void Slot::child(GrSegment *seg, int ap)
 {
     if (ap == m_child) {}
     else if (ap == -1 || m_child == -1)
@@ -277,7 +277,7 @@ void Slot::child(Segment *seg, int ap)
         (*seg)[m_child].sibling(seg, ap);
 }
 
-void Slot::sibling(Segment *seg, int ap)
+void Slot::sibling(GrSegment *seg, int ap)
 {
     if (ap == m_sibling) {}
     else if (ap == -1 || m_sibling == -1)
@@ -286,14 +286,14 @@ void Slot::sibling(Segment *seg, int ap)
         (*seg)[m_sibling].sibling(seg, ap);
 }
 
-void Slot::setGlyph(Segment *seg, uint16 glyphid)
+void Slot::setGlyph(GrSegment *seg, uint16 glyphid)
 {
     m_glyphid = glyphid;
     m_realglyphid = seg->glyphAttr(glyphid, seg->silf()->aPseudo());
     m_advance = Position(seg->glyphAdvance(glyphid), 0.);
 }
 
-void Slot::floodShift(Position adj, Segment *seg)
+void Slot::floodShift(Position adj, GrSegment *seg)
 {
     m_position += adj;
     if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);

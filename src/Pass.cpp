@@ -2,7 +2,7 @@
 #include "Pass.h"
 #include <string.h>
 #include <assert.h>
-#include "Segment.h"
+#include "GrSegment.h"
 #include "Code.h"
 #include "XmlTraceLog.h"
 
@@ -276,7 +276,7 @@ int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num
     return loffset;
 }
 
-void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
+void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
     if (!testConstraint(&m_cPConstraint, 0, 1, 0, seg, vms))
         return;
@@ -302,7 +302,7 @@ void Pass::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
     }
 }
 
-int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vms) const
+int Pass::findNDoRule(GrSegment *seg, int iSlot, const GrFace *face, VMScratch *vms) const
 {
     int state;
     int startSlot = iSlot;
@@ -390,7 +390,7 @@ int Pass::findNDoRule(Segment *seg, int iSlot, const GrFace *face, VMScratch *vm
     return 1;
 }
 
-int Pass::testConstraint(const Code *codeptr, int iSlot, int num, int nPre, Segment *seg, VMScratch *vms) const
+int Pass::testConstraint(const Code *codeptr, int iSlot, int num, int nPre, GrSegment *seg, VMScratch *vms) const
 {
     uint32 ret = 1;
     
@@ -413,7 +413,7 @@ int Pass::testConstraint(const Code *codeptr, int iSlot, int num, int nPre, Segm
     return status == Machine::finished ? ret : 1;
 }
 
-int Pass::doAction(const Code *codeptr, int iSlot, Segment *seg, VMScratch *vms) const
+int Pass::doAction(const Code *codeptr, int iSlot, GrSegment *seg, VMScratch *vms) const
 {
     if (!*codeptr)
         return 1;

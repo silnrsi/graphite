@@ -20,7 +20,7 @@ const byte simple_prog[] =
 };
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
-class Segment 
+class GrSegment 
 {
     byte x;
 };
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
               << prog.instructionCount() << " instructions" << std::endl;
     
     // run the program
-    Segment seg;
+    GrSegment seg;
     int is=0;
     uint32 ret;
     Machine::status_t status;

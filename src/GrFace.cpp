@@ -1,7 +1,7 @@
 #include "GrFace.h"
 #include "VMScratch.h"
 #include <string.h>
-#include "Segment.h"
+#include "GrSegment.h"
 #include "XmlTraceLog.h"
 
 using namespace org::sil::graphite::v2;
@@ -111,7 +111,7 @@ bool GrFace::readGraphite()
     return true;
 }
 
-void GrFace::runGraphite(Segment *seg, const Silf *aSilf) const
+void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const
 {
     VMScratch vms;
 

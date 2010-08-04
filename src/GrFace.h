@@ -11,7 +11,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class Segment;
+class GrSegment;
 class Features;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
@@ -43,7 +43,7 @@ public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
-    void runGraphite(Segment *seg, const Silf *silf) const;
+    void runGraphite(GrSegment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:

@@ -293,7 +293,7 @@ void Code::release_buffers() throw()
 }
 
 
-int32 Code::run(Machine & m, Segment & seg, slotref & islot_idx, slotref iStart,
+int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, slotref iStart,
                     Machine::status_t & status_out) const
 {
     assert(_own);

@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include "Silf.h"
 #include "XmlTraceLog.h"
-#include "Segment.h"
+#include "GrSegment.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -390,7 +390,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(Segment *seg, const GrFace *face, VMScratch *vms) const
+void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
     for (size_t i = 0; i < m_numPasses; ++i)
     {

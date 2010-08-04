@@ -20,11 +20,11 @@ add_library(vm-test-common  STATIC
                 ${SRC}/GlyphFace.cpp
                 ${SRC}/GlyphFaceCache.cpp
                 ${SRC}/GrFace.cpp
+                ${SRC}/GrSegment.cpp
                 ${SRC}/Pass.cpp
                 ${SRC}/Silf.cpp
                 ${SRC}/Slot.cpp
                 ${SRC}/TtfUtil.cpp
-                ${SRC}/Segment.cpp
                 ${SRC}/FeatureMap.cpp
                 ${SRC}/FeaturesHandle.cpp
                 ${SRC}/FeatureRefHandle.cpp

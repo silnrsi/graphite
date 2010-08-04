@@ -14,7 +14,7 @@
 #include <cassert>
 #include <graphiteng/SlotHandle.h>
 #include "Machine.h"
-#include "Segment.h"
+#include "GrSegment.h"
 
 #define STARTOP(name)           name: {
 #define ENDOP                   }; goto *((sp - sb)/Machine::STACK_MAX ? &&end : *++ip);
@@ -31,7 +31,7 @@ const void * direct_run(const bool          get_table_mode,
                         const instr       * program,
                         const byte        * data,
                         Machine::stack_t  * stack,
-                        Segment     * const seg_ptr,
+                        GrSegment     * const seg_ptr,
                         slotref           & islot_idx,
                         slotref             iStart)
 {
@@ -46,7 +46,7 @@ const void * direct_run(const bool          get_table_mode,
     const byte        * dp = data;
     Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
                 * const sb = sp;
-    Segment       & seg = *seg_ptr;
+    GrSegment       & seg = *seg_ptr;
     slotref         is=islot_idx, isf=-1, isl=-1;
     const slotref   isb=iStart;
     Position        endPos=Position();
@@ -74,7 +74,7 @@ const opcode_t * Machine::getOpcodeTable() throw()
 
 Machine::stack_t  Machine::run(const instr  * program,
                                const byte   * data,
-                               Segment      & seg,
+                               GrSegment      & seg,
                                slotref      & islot_idx,
                                slotref        iStart,
                                status_t     & status)

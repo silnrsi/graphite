@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "Segment.h"
+#include "GrSegment.h"
 #include "graphiteng/font.h"
 #include "CharInfo.h"
 #include "Slot.h"
@@ -12,7 +12,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
+GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
@@ -25,13 +25,13 @@ Segment::Segment(unsigned int numchars, const GrFace* face, uint32 script, int t
     m_userAttrs.assign(m_silf->numUser() * numchars, 0);         // initialise to 0
 }
 
-Segment::~Segment()
+GrSegment::~GrSegment()
 {
     delete[] m_charinfo;
 }
 
 #if 0		//unsafe - memcpying vectors will lead to problems when the destructors are run
-Segment::Segment(const Segment &other)
+GrSegment::Segment(const Segment &other)
 {
     memcpy(this, &other, sizeof(Segment));
     m_charinfo = (CharInfo *)(operator new(m_numCharinfo * sizeof(CharInfo)));
@@ -39,7 +39,7 @@ Segment::Segment(const Segment &other)
 }
 #endif
 
-void Segment::append(const Segment &other)
+void GrSegment::append(const GrSegment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
 
@@ -63,7 +63,7 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void Segment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
+void GrSegment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
 {
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
@@ -76,7 +76,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
     m_slots[id].after(id);
 }
 
-void Segment::positionSlots(const GrFont *font)
+void GrSegment::positionSlots(const GrFont *font)
 {
     Position currpos;
     Slot *s;
@@ -104,7 +104,7 @@ void Segment::positionSlots(const GrFont *font)
     m_advance = currpos;
 }
 
-void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos)
+void GrSegment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos)
 {
     Position currpos;
     float cMin = 0.;
@@ -168,7 +168,7 @@ void Segment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endP
 }
     
 #ifndef DISABLE_TRACING
-void Segment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
+void GrSegment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
 {
     if (XmlTraceLog::get().active())
     {
@@ -214,7 +214,7 @@ void Segment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t 
     }
 }
 
-void Segment::logSegment() const
+void GrSegment::logSegment() const
 {
     if (XmlTraceLog::get().active())
     {
@@ -243,7 +243,7 @@ void Segment::logSegment() const
 class SlotBuilder
 {
 public:
-      SlotBuilder(const GrFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, Segment* pDest2)
+      SlotBuilder(const GrFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, GrSegment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
 	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
@@ -268,14 +268,14 @@ public:
 
 private:
       const GrFace *m_face;
-      Segment *m_pDest;
+      GrSegment *m_pDest;
       const void *const   m_ctable;
       const unsigned int m_fid;
       size_t m_nCharsProcessed ;
 };
 
 
-void Segment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
+void GrSegment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);
@@ -284,12 +284,12 @@ void Segment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must n
     processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
 }
 
-void Segment::prepare_pos(const GrFont *font)
+void GrSegment::prepare_pos(const GrFont *font)
 {
     // copy key changeable metrics into slot (if any);
 }
 
-void Segment::finalise(const GrFont *font)
+void GrSegment::finalise(const GrFont *font)
 {
     positionSlots(font);
 }

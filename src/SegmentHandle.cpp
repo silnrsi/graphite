@@ -1,10 +1,10 @@
 #include "graphiteng/SegmentHandle.h"
-#include "Segment.h"
+#include "GrSegment.h"
 #include "processUTF.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-GRNG_EXPORT void DeleteSegment(Segment *p)
+GRNG_EXPORT void DeleteSegment(GrSegment *p)
 {
     delete p;
 }
@@ -170,7 +170,7 @@ int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
 
 void SegmentHandle::initialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
-    setPtr(new Segment(nChars, face, script, dir));
+    setPtr(new GrSegment(nChars, face, script, dir));
 
     ptr()->read_text(face, pFeats, enc, pStart, nChars);
     ptr()->runGraphite();

@@ -8,14 +8,14 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class CharInfo;
-class Segment;
+class GrSegment;
 class GrFace;
 class GrFont;
 class FeaturesHandle;
 
-extern GRNG_EXPORT void DeleteSegment(Segment *p);
+extern GRNG_EXPORT void DeleteSegment(GrSegment *p);
 
-class GRNG_EXPORT SegmentHandle : public RefCountHandle<Segment, &DeleteSegment>
+class GRNG_EXPORT SegmentHandle : public RefCountHandle<GrSegment, &DeleteSegment>
 {
 public:
     enum encform {
@@ -48,7 +48,7 @@ private:
     
 private:
     friend class SlotHandle;
-    Segment* ptr() const { return RefCountHandle<Segment, &DeleteSegment>::ptr(); }
+    GrSegment* ptr() const { return RefCountHandle<GrSegment, &DeleteSegment>::ptr(); }
 };
 
 }}}} // namespace

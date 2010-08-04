@@ -9,7 +9,7 @@
 #include <cassert>
 #include <graphiteng/SlotHandle.h>
 #include "Machine.h"
-#include "Segment.h"
+#include "GrSegment.h"
 #include "XmlTraceLog.h"
 
 
@@ -34,7 +34,7 @@ using namespace vm;
 using namespace org::sil::graphite::v2;
 
 struct regbank  {
-    Segment       & seg;
+    GrSegment       & seg;
     slotref         is, isf, isl;
     const slotref   isb;
     const instr * & ip;
@@ -71,7 +71,7 @@ namespace {
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               Segment &       seg,
+                               GrSegment &       seg,
                                slotref &       islot_idx,
                                slotref         iStart,
                                status_t &      status)
