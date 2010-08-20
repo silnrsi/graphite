@@ -19,9 +19,9 @@ public:
     bool readPass(void *pPass, size_t lPass);
     int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts);
     void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
-    int findNDoRule(GrSegment *seg, int iSlot, const GrFace *face, VMScratch *vms) const;
-    int testConstraint(const vm::Code *codeptr, int iSlot, int num, int nPre, GrSegment *seg, VMScratch *vms) const;
-    int doAction(const vm::Code *m_cAction, int startSlot, GrSegment *seg, VMScratch *vms) const;
+    Slot *findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, VMScratch* vms) const;
+    int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, GrSegment* seg, int nMap, Slot** map) const;
+    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, GrSegment* seg, Slot** map) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE

@@ -5,8 +5,8 @@
 using namespace org::sil::graphite::v2;
 
 Slot::Slot() :
-        m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(-1), m_child(-1), m_sibling(-1),
-        m_position(0, 0), m_advance(-1, -1), m_shift(0, 0), m_flags(0)
+        m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
+        m_position(0, 0), m_advance(-1, -1), m_shift(0, 0), m_flags(0), m_next(NULL), m_prev(NULL)
 {
 }
 
@@ -17,7 +17,7 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 };
 
-Position Slot::finalise(GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
+Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0;
@@ -27,7 +27,7 @@ Position Slot::finalise(GrSegment *seg, const GrFont *font, Position *base, Rect
     Position res;
 
     m_position = *base + shift;
-    if (m_parent == -1)
+    if (!m_parent)
     {
         res = *base + Position(tAdvance, m_advance.y);
         *cMin = 0.;
@@ -43,36 +43,36 @@ Position Slot::finalise(GrSegment *seg, const GrFont *font, Position *base, Rect
     Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
     bbox->widen(ourBbox);
 
-    if (m_parent != -1 && m_position.x < *cMin) *cMin = m_position.x;
+    if (m_parent && m_position.x < *cMin) *cMin = m_position.x;
 
-    if (m_child != -1)
+    if (m_child)
     {
-        Position tRes = (*seg)[m_child].finalise(seg, font, &m_position, bbox, cMin, attrLevel);
+        Position tRes = m_child->finalise(seg, font, &m_position, bbox, cMin, attrLevel);
         if (tRes.x > res.x) res = tRes;
     }
 
-    if (m_sibling != -1)
+    if (m_sibling)
     {
-        Position tRes = (*seg)[m_sibling].finalise(seg, font, base, bbox, cMin, attrLevel);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, cMin, attrLevel);
         if (tRes.x > res.x) res = tRes;
     }
     
-    if (m_parent == -1 && *cMin < 0)
+    if (!m_parent && *cMin < 0)
     {
         Position adj = Position(-*cMin, 0.);
         res += adj;
         m_position += adj;
-        if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);
+        if (m_child) m_child->floodShift(adj);
     }
     return res;
 }
 
-uint32 Slot::clusterMetric(const GrSegment *seg, int is, uint8 metric, uint8 attrLevel) const
+uint32 Slot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
 {
     Position base;
     Rect bbox;
     float cMin = 0.;
-    Position res = const_cast<GrSegment *>(seg)->finalise(is, NULL, &base, &bbox, &cMin, attrLevel);
+    Position res = finalise(seg, NULL, &base, &bbox, &cMin, attrLevel);
 
     switch ((enum metrics)metric)
     {
@@ -101,7 +101,7 @@ uint32 Slot::clusterMetric(const GrSegment *seg, int is, uint8 metric, uint8 att
     }
 }
 
-int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, int *startSlot, int *endSlot, Position *endPos, bool useTemp) const
+int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
 {
     if (index == kslatUserDefnV1)
     {
@@ -115,7 +115,7 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, 
     case kslatAdvY :
         return m_advance.y;
     case kslatAttTo :
-        return m_parent;
+        return 0;
     case kslatAttX :
         return m_attach.x;
     case kslatAttY :
@@ -143,10 +143,8 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, 
     case kslatInsert :
         return isInsertBefore();
     case kslatPosX :
-        const_cast<GrSegment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
         return m_position.x; // but need to calculate it
     case kslatPosY :
-        const_cast<GrSegment *>(seg)->positionSlots(is, startSlot, endSlot, endPos);
         return m_position.y;
     case kslatShiftX :
         return m_shift.x;
@@ -167,13 +165,13 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex, int is, 
     case kslatJWidth :
         return 0;
     case kslatUserDefn :
-        return useTemp ? const_cast<GrSegment *>(seg)->getTempUser(is, subindex) : const_cast<GrSegment *>(seg)->user(is, subindex);
+        return m_userAttr[subindex];
     default :
         return 0;
     }
 }
 
-void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, int is)
+void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, Slot **map, int maxmap)
 {
     int value = *(int16 *)&val;
     if (index == kslatUserDefnV1)
@@ -190,11 +188,12 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, i
         m_advance = Position(m_advance.x, value);
         break;
     case kslatAttTo :
-        m_parent = value;
-        if (value >= 0)
+        if (value >= 0 && value < maxmap)
         {
-            (*seg)[value].child(seg, is);
-            m_attach = Position(seg->glyphAdvance((*seg)[value].gid()), 0);
+            Slot *other = map[value];
+            m_parent = other;
+            other->child(this);
+            m_attach = Position(seg->glyphAdvance(other->gid()), 0);
         }
         else
         {
@@ -261,29 +260,29 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, i
     case kslatJWidth :
         break;
     case kslatUserDefn :
-        seg->user(is, subindex, value);
+        m_userAttr[subindex] = value;
         break;
     default :
         break;
     }
 }
 
-void Slot::child(GrSegment *seg, int ap)
+void Slot::child(Slot *ap)
 {
     if (ap == m_child) {}
-    else if (ap == -1 || m_child == -1)
+    else if (!m_child)
         m_child = ap;
     else
-        (*seg)[m_child].sibling(seg, ap);
+        m_child->sibling(ap);
 }
 
-void Slot::sibling(GrSegment *seg, int ap)
+void Slot::sibling(Slot *ap)
 {
     if (ap == m_sibling) {}
-    else if (ap == -1 || m_sibling == -1)
+    else if (!m_sibling)
         m_sibling = ap;
     else
-        (*seg)[m_sibling].sibling(seg, ap);
+        m_sibling->sibling(ap);
 }
 
 void Slot::setGlyph(GrSegment *seg, uint16 glyphid)
@@ -293,9 +292,9 @@ void Slot::setGlyph(GrSegment *seg, uint16 glyphid)
     m_advance = Position(seg->glyphAdvance(glyphid), 0.);
 }
 
-void Slot::floodShift(Position adj, GrSegment *seg)
+void Slot::floodShift(Position adj)
 {
     m_position += adj;
-    if (m_child != -1) (*seg)[m_child].floodShift(adj, seg);
-    if (m_sibling != -1) (*seg)[m_sibling].floodShift(adj, seg);
+    if (m_child) m_child->floodShift(adj);
+    if (m_sibling) m_sibling->floodShift(adj);
 }

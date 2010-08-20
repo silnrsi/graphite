@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstdio>
+#include <new>
 #include "Main.h"
 
 #ifdef __GNUC__
@@ -25,3 +26,19 @@ namespace std
 }
 
 #endif
+
+void *operator new (std::size_t size) throw() { return malloc(size); }
+void *operator new (std::size_t size, const std::nothrow_t& nothrow_constant) throw() { return malloc(size); }
+// void *operator new (std::size_t size, void *ptr) throw() { return ptr; }
+
+void operator delete (void* ptr) throw () { free(ptr); }
+void operator delete (void* ptr, const std::nothrow_t& nothrow_constant) throw() { free(ptr); }
+// void operator delete (void* ptr, void* voidptr2) throw() { }
+
+void* operator new[] (std::size_t size) throw () { return malloc(size); }
+void* operator new[] (std::size_t size, const std::nothrow_t& nothrow_constant) throw() { return malloc(size); }
+// void* operator new[] (std::size_t size, void* ptr) throw() { return ptr; }
+
+void operator delete[] (void* ptr) throw () { free(ptr); }
+void operator delete[] (void* ptr, const std::nothrow_t& nothrow_constant) throw() { free(ptr); }
+// void operator delete[] (void* ptr, void* voidptr2) throw() { }

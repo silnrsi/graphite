@@ -18,9 +18,11 @@
 
 #define CLASS_NEW_DELETE \
     void * operator new[](size_t size) {return malloc(size);} \
-    void operator delete[] (void * p){ if (p) free(p); } \
+    void operator delete[] (void * p)throw() { if (p) free(p); } \
     void * operator new(size_t size){ return malloc(size);} \
-    void operator delete (void * p) {if (p) free(p);}
+    void operator delete (void * p) throw() {if (p) free(p);}
+    
+#define CLASS_NEW_DELETE
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -35,5 +37,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
     {
         return reinterpret_cast<T*>(calloc(n, sizeof(T)));
     }
-
+    
 }}}} // namespace
+
+

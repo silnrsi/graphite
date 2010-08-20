@@ -39,9 +39,9 @@ int SlotHandle::after() const
 }
 
 
-int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex, int is) const
+int SlotHandle::getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const
 {
-    return m_p->getAttr(hSeg.ptr(), index, subindex, is, NULL, NULL, NULL, false);
+    return m_p->getAttr(hSeg.ptr(), index, subindex);
 }
 
 bool SlotHandle::isInsertBefore() const
@@ -53,3 +53,24 @@ int SlotHandle::original() const
 {
     return m_p->original();
 }
+
+SlotHandle SlotHandle::next() const
+{
+    return m_p->next();
+}
+
+bool SlotHandle::isNull() const
+{
+    return (!m_p);
+}
+
+size_t SlotHandle::id() const
+{
+    return size_t(m_p);
+}
+
+size_t SlotHandle::attachedTo() const
+{
+    return size_t(m_p->attachedTo());
+}
+

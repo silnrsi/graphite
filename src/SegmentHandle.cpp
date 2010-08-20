@@ -1,4 +1,5 @@
 #include "graphiteng/SegmentHandle.h"
+#include "graphiteng/SlotHandle.h"
 #include "GrSegment.h"
 #include "processUTF.h"
 
@@ -137,11 +138,6 @@ float SegmentHandle::advanceY() const
 }
 
 
-SlotHandle SegmentHandle::operator[] (unsigned int index) const
-{
-    return &(ptr()->operator[](index));
-}
-
 CharInfo *SegmentHandle::charInfo(int index) const
 {
     return ptr()->charinfo(index);
@@ -167,6 +163,10 @@ int SegmentHandle::addFeatures(const FeaturesHandle& feats) const
     return ptr()->addFeatures(*feats.ptr());
 }
 
+SlotHandle SegmentHandle::first()
+{
+    return SlotHandle(ptr()->first());
+}
 
 void SegmentHandle::initialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {

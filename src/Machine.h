@@ -17,17 +17,20 @@
 #endif
 
 namespace gr2 = org::sil::graphite::v2;
+
 // Forward declarations
 namespace org { namespace sil { namespace graphite { namespace v2 {
     class GrSegment;
+    class Slot;
 }}}}
+
 
 namespace vm 
 {
 
 
-typedef void *     instr;
-typedef signed int slotref;
+typedef void * instr;
+typedef org::sil::graphite::v2::Slot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
@@ -100,8 +103,8 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  gr2::GrSegment & seg, slotref & islot_idx, slotref iStart,
-                                  status_t &status) HOT;
+                                  gr2::GrSegment & seg, slotref & islot_idx, int & count,
+                                  status_t &status, int nMap, slotref * map) HOT;
     CLASS_NEW_DELETE
 
 private:

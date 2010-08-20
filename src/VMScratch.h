@@ -4,16 +4,16 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
+class Slot;
+
 #define VMS_MAX_RULES_PER_SEQUENCE 64
-#define VMS_MAX_STACK 64
 
 class VMScratch
 {
 public:
-    VMScratch() : m_firstPositioned(-1), m_lastPositioned(-1), m_numRules(0), m_stackptr(0) {}
+    VMScratch() : m_firstPositioned(-1), m_lastPositioned(-1), m_numRules(0) {}
     void resetRules() { m_numRules = 0; }
     void resetStack() { m_stackptr = 0; }
-    int32 *stack() { return m_stack; }
     uint16 rule(int i) { return m_rules[i]; }
     uint16 ruleLength() { return m_numRules; }
     int16 length(int i) { return m_lengths[i]; }
@@ -32,8 +32,9 @@ public:
         m_lengths[i] = len;
         if (m_numRules < VMS_MAX_RULES_PER_SEQUENCE) m_numRules++;
     }
-    void push(uint32 val) { if (m_stackptr < VMS_MAX_STACK) m_stack[m_stackptr++] = val; }
-    uint16 pop() { return m_stackptr > 0 ? m_stack[m_stackptr--] : 0; }
+    Slot *slotMap(int i) { m_slotMap[i]; }
+    void slotMap(int i, Slot *s) { m_slotMap[i] = s; }
+    Slot **map() { return m_slotMap; }
 
 protected:
     byte m_numRules;
@@ -43,7 +44,7 @@ protected:
     uint16 m_rules[VMS_MAX_RULES_PER_SEQUENCE];
     uint16 m_sortKeys[VMS_MAX_RULES_PER_SEQUENCE];
     int16 m_lengths[VMS_MAX_RULES_PER_SEQUENCE];
-    int32 m_stack[VMS_MAX_STACK];
+    Slot *m_slotMap[VMS_MAX_RULES_PER_SEQUENCE];
 };
 
 }}}} // namespace

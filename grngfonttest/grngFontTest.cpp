@@ -144,6 +144,7 @@ void Parameters::closeLog()
   log = stdout;
 }
 
+int lookup(size_t *map, size_t val);
 
 
 #ifdef HAVE_ICONV
@@ -617,17 +618,22 @@ int Parameters::testFileFont() const
         gr2::SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
 
         int i = 0;
+//        size_t *map = new size_t [seg.length() + 1];
+        size_t *map = (size_t*)malloc((seg.length() + 1) * sizeof(size_t));
+        for (gr2::SlotHandle slot = seg.first(); !slot.isNull(); slot = slot.next(), ++i)
+        { map[i] = slot.id(); }
+        map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
-        for (i = 0; i < seg.length(); i++)
+        i = 0;
+        for (gr2::SlotHandle slot = seg.first(); !slot.isNull(); slot = slot.next(), ++i)
         {
-            gr2::SlotHandle slot = seg[i];
             float orgX = slot.originX();
             float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot.gid(), slot.getAttr(seg, gr2::kslatAttTo, 0, i), 
-                    slot.getAttr(seg, gr2::kslatAttX, 0, i),
-                    slot.getAttr(seg, gr2::kslatAttY, 0, i), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
+                    i, slot.gid(), lookup(map, slot.attachedTo()),
+                    slot.getAttr(seg, gr2::kslatAttX, 0),
+                    slot.getAttr(seg, gr2::kslatAttY, 0), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
                     seg.charInfo(slot.original())->breakWeight(), slot.before(), slot.after());
             
             if (pText32 != NULL)
@@ -663,6 +669,7 @@ int Parameters::testFileFont() const
         // position arrays must be one bigger than what countGlyphs() returned
         float advanceWidth = seg.advanceX();
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
+        free(map);
        }	//to get seg destroyed before its parameters
         
         gr2::destroy_GrFont(sizedFont);
@@ -684,6 +691,12 @@ int Parameters::testFileFont() const
     return returnCode;
 }
 
+int lookup(size_t *map, size_t val)
+{
+    int i = 0;
+    for ( ; map[i] != val && map[i]; i++) {}
+    return i;
+}
 
 int main(int argc, char *argv[])
 {

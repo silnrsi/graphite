@@ -36,10 +36,10 @@ public:
     int length() const;
     float advanceX() const;
     float advanceY() const;
-    SlotHandle operator[] (unsigned int index) const;
     CharInfo *charInfo(int index) const;
     void runGraphite() const;
     void chooseSilf(uint32 script) const;
+    SlotHandle first();
     
     int addFeatures(const FeaturesHandle& feats) const;
  

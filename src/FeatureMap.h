@@ -32,10 +32,10 @@ public:
 	else 
 	    return 0; 
     }
-    void * operator new (size_t s, FeatureRef * p)
-    {
-        return p;
-    }
+//     void * operator new (size_t s, FeatureRef * p)
+//     {
+//         return p;
+//     }
 
     CLASS_NEW_DELETE
 private:

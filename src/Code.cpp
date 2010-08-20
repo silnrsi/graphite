@@ -204,8 +204,8 @@ void fixup_cntxt_item_target(const byte* cdp,
 }
 
 inline void fixup_slotref(int8 * const arg, uint8 is, const CodeContext *const cContexts) {
-    if (*arg < 0 && -*arg <= is)
-        *arg -= cContexts[is + *arg].nInserts;
+//    if (*arg < 0 && -*arg <= is)
+//        *arg -= cContexts[is + *arg].nInserts;
 //    else
 //        *arg += ctxtins(is);
 }
@@ -293,13 +293,13 @@ void Code::release_buffers() throw()
 }
 
 
-int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, slotref iStart,
+int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, int maxmap, Slot **map,
                     Machine::status_t & status_out) const
 {
     assert(_own);
 //    assert(stack_base != 0);
 //    assert(length >= 32);
     assert(*this);          // Check we are actually runnable
-    return m.run(_code, _data, seg, islot_idx, iStart, status_out);
+    return m.run(_code, _data, seg, islot_idx, count, status_out, maxmap, map);
 }
 

@@ -36,6 +36,7 @@ class GRNG_EXPORT SlotHandle		//stays valid so long as its SegmentHandle stays v
 {
 public:
     SlotHandle(const Slot* p/*no ownership, caller must keep it alive*/=NULL) : m_p(p) {}
+    SlotHandle next() const;
  
     unsigned short gid() const;
     float originX() const;
@@ -43,10 +44,13 @@ public:
     float advance(const GrFont *font) const;
     int before() const;
     int after() const;
-    int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex, int is) const;
+    int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const;
     bool isInsertBefore() const;
     int original() const;
-
+    bool isNull() const;
+    size_t id() const;
+    size_t attachedTo() const;
+    
     const Slot* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
 
 protected:

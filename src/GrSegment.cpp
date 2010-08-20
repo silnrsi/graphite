@@ -1,6 +1,7 @@
 #include "processUTF.h"
 #include <string.h>
 #include <stdlib.h>
+#include <new>
 
 #include "GrSegment.h"
 #include "graphiteng/font.h"
@@ -16,28 +17,29 @@ GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, i
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_face(face),
-        m_slots(numchars),
         m_charinfo(new CharInfo[numchars]),
         m_silf(face->chooseSilf(script)),
         m_dir(textDir),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
-    m_userAttrs.assign(m_silf->numUser() * numchars, 0);         // initialise to 0
+    unsigned int i, j;
+    m_bufSize = numchars + 10;
+    freeSlot(newSlot());
+    for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
+    m_bufSize = i;                  // log2(numchars)
 }
 
 GrSegment::~GrSegment()
 {
+    SlotRope::iterator i;
+    AttributeRope::iterator j;
+    
+    for (i = m_slots.begin(); i != m_slots.end(); i++)
+        delete[] *i;
+    for (j = m_userAttrs.begin(); j != m_userAttrs.end(); j++)
+        delete[] *j;
     delete[] m_charinfo;
 }
-
-#if 0		//unsafe - memcpying vectors will lead to problems when the destructors are run
-GrSegment::Segment(const Segment &other)
-{
-    memcpy(this, &other, sizeof(Segment));
-    m_charinfo = (CharInfo *)(operator new(m_numCharinfo * sizeof(CharInfo)));
-    memcpy(m_charinfo, other.m_charinfo, m_numCharinfo * sizeof(CharInfo));
-}
-#endif
 
 void GrSegment::append(const GrSegment &other)
 {
@@ -47,6 +49,9 @@ void GrSegment::append(const GrSegment &other)
     CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
 	pNewCharInfo[i] = m_charinfo[i];
+    m_last->next(other.m_first);
+    other.m_last->prev(m_last);
+    m_userAttrs.insert(m_userAttrs.end(), other.m_userAttrs.begin(), other.m_userAttrs.end());
     
     delete[] m_charinfo;
     m_charinfo = pNewCharInfo;
@@ -65,108 +70,86 @@ void GrSegment::append(const GrSegment &other)
 
 void GrSegment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
 {
+    Slot *aSlot = newSlot();
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
     m_charinfo[id].breakWeight(bw);
     
-    m_slots[id].child(this, -1);
-    m_slots[id].setGlyph(this, gid);
-    m_slots[id].originate(id);
-    m_slots[id].before(id);
-    m_slots[id].after(id);
+    aSlot->child(NULL);
+    aSlot->setGlyph(this, gid);
+    aSlot->originate(id);
+    aSlot->before(id);
+    aSlot->after(id);
+    if (m_last) m_last->next(aSlot);
+    aSlot->prev(m_last);
+    m_last = aSlot;
+    if (!m_first) m_first = aSlot;
 }
 
-void GrSegment::positionSlots(const GrFont *font)
+Slot *GrSegment::newSlot()
+{
+    if (!m_freeSlots)
+    {
+        int numUser = m_silf->numUser();
+        Slot *newSlots = new Slot[m_bufSize];
+        uint16 *newAttrs = new uint16 [numUser * m_bufSize];
+        
+        memset(newAttrs, 0, numUser * m_bufSize * sizeof(uint16));
+        
+        for (size_t i = 0; i < m_bufSize - 1; i++)
+        {
+            newSlots[i].next(newSlots + i + 1);
+            newSlots[i].userAttrs(newAttrs + i * numUser);
+        }
+        newSlots[m_bufSize - 1].userAttrs(newAttrs + (m_bufSize - 1) * numUser);
+        m_slots.push_back(newSlots);
+        m_userAttrs.push_back(newAttrs);
+        m_freeSlots = newSlots;
+    }
+    Slot *res = m_freeSlots;
+    m_freeSlots = m_freeSlots->next();
+    ::new (res) Slot;
+    return res;
+}
+
+void GrSegment::freeSlot(Slot *aSlot)
+{
+    if (!m_freeSlots)
+        aSlot->next(NULL);
+    else
+        aSlot->next(m_freeSlots);
+    m_freeSlots = aSlot;
+}
+        
+void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
 {
     Position currpos;
     Slot *s;
     float cMin = 0.;
     Rect bbox;
 
+    if (!iStart) iStart = m_first;
+    if (!iEnd) iEnd = m_last;
+    
     if (m_dir & 1)
     {
-        for (int i = m_numGlyphs - 1; i >= 0; i--)
+        for (s = iEnd; s != iStart->prev(); s = s->prev())
         {
-            s = &(m_slots[i]);
             if (s->isBase())
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
         }
     }
     else
     {
-        for (unsigned int i = 0; i < m_numGlyphs; i++)
+        for (s = iStart; s != iEnd->next(); s = s->next())
         {
-            s = &(m_slots[i]);
             if (s->isBase())
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
         }
     }
-    m_advance = currpos;
+    if (iStart == m_first && iEnd == m_last) m_advance = currpos;
 }
 
-void GrSegment::positionSlots(int iSlot, int *iStart, int *iFinish, Position *endPos)
-{
-    Position currpos;
-    float cMin = 0.;
-    Rect bbox;
-    int start;
-    int end;    // NB last slot we process not one past
-    
-    if (*iFinish > -1 && iSlot > *iFinish)
-    {
-        currpos = *endPos;
-        start = *iFinish + 1;
-        end = iSlot;
-    }
-    else if (iSlot < *iStart)
-    {
-        start = iSlot;
-        end = *iStart - 1;
-    }
-    else if (*iStart == -1)
-    {
-        *iStart = start = iSlot;
-        *iFinish = end = iSlot;
-    }
-    else
-        return;
-    
-    start = findRoot(start);
-    for ( ; end + 1 < static_cast<int>(m_numGlyphs) && m_slots[end + 1].attachTo() != -1; end++ ) {}
-    if (m_dir)
-    {
-        for (int i = end; i >= start; i--)
-        {
-            Slot *s = &(m_slots[i]);
-            if (s->isBase())
-                currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
-        }
-    }
-    else
-    {
-        for (int i = start; i <= end; i++)
-        {
-            Slot *s = &(m_slots[i]);
-            if (s->isBase())
-                currpos = s->finalise(this, NULL, &currpos, &bbox, &cMin, 0);
-        }
-    }
-    
-    if (start < *iStart)
-    {
-        Position lShift = Position() - currpos;
-        for (int i = start; i < *iStart; i++)
-            m_slots[i].positionShift(lShift);
-        *iStart = start;
-    }
-    
-    if (end >= *iFinish)
-    {
-        *endPos = currpos;
-        *iFinish = end;
-    }
-}
-    
 #ifndef DISABLE_TRACING
 void GrSegment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
 {
@@ -222,14 +205,14 @@ void GrSegment::logSegment() const
         XmlTraceLog::get().addAttribute(AttrLength, length());
         XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
-        for (unsigned int i = 0; i < length(); i++)
+        for (Slot *i = m_first; i; i = i->next())
         {
             XmlTraceLog::get().openElement(ElementSlot);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, (*this)[i].gid());
-            XmlTraceLog::get().addAttribute(AttrX, (*this)[i].origin().x);
-            XmlTraceLog::get().addAttribute(AttrY, (*this)[i].origin().y);
-            XmlTraceLog::get().addAttribute(AttrBefore, (*this)[i].before());
-            XmlTraceLog::get().addAttribute(AttrAfter, (*this)[i].after());
+            XmlTraceLog::get().addAttribute(AttrGlyphId, i->gid());
+            XmlTraceLog::get().addAttribute(AttrX, i->origin().x);
+            XmlTraceLog::get().addAttribute(AttrY, i->origin().y);
+            XmlTraceLog::get().addAttribute(AttrBefore, i->before());
+            XmlTraceLog::get().addAttribute(AttrAfter, i->after());
             XmlTraceLog::get().closeElement(ElementSlot);
         }
         XmlTraceLog::get().closeElement(ElementSegment);

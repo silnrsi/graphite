@@ -11,7 +11,7 @@
 #include "Machine.h"
 #include "GrSegment.h"
 #include "XmlTraceLog.h"
-
+#include "Slot.h"
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
                             regbank & reg
@@ -31,15 +31,17 @@
 
 
 using namespace vm;
-using namespace org::sil::graphite::v2;
+    using namespace org::sil::graphite::v2;
 
 struct regbank  {
     GrSegment       & seg;
-    slotref         is, isf, isl;
-    const slotref   isb;
+    slotref         is;
     const instr * & ip;
-    Position        endPos;
-    int8            copies[64];
+    int           & count;
+    int             isb;
+    int             maxmap;
+    slotref *       map;        // given slot index from start of rule give slot to *read* from
+    int8            flags;
 };
 
 typedef bool        (* ip_t)(registers);
@@ -50,31 +52,33 @@ typedef bool        (* ip_t)(registers);
 namespace {
 #define seg     reg.seg
 #define is      reg.is
-#define isf     reg.isf
-#define isl     reg.isl
-#define isb     reg.isb
 #define ip      reg.ip
-#define endPos  reg.endPos
-#define copies  reg.copies
+#define count   reg.count
+#define isb     reg.isb
+#define maxmap  reg.maxmap
+#define map     reg.map
+#define flags   reg.flags
 
 #include "opcodes.h"
 
 #undef seg
 #undef is
-#undef isf
-#undef isl
-#undef isb
 #undef ip
-#undef endPos
-#undef copies
+#undef count
+#undef isb
+#undef maxmap
+#undef map
+#undef flags
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               GrSegment &       seg,
+                               GrSegment &     seg,
                                slotref &       islot_idx,
-                               slotref         iStart,
-                               status_t &      status)
+                               int &           count,
+                               status_t &      status,
+                               int             nMap,
+                               slotref *       map)
 {
     assert(program != 0);
 
@@ -83,7 +87,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, -1, -1, iStart, ip, Position(), {-1}};
+    regbank         reg = {seg, islot_idx, ip, count, count, nMap, map, 0};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
