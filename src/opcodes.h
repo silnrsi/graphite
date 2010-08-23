@@ -55,7 +55,7 @@
 
 #define push(n)             *++sp = n; TRACEPUSH(n)
 #define pop()               (*sp--)
-#define slotat(x)           (count + x < maxmap && count + x > 0 ? map[count + x] : map[maxmap - 1])
+#define slotat(x)           (count + x < maxmap && count + x >= 0 ? map[count + x] : map[maxmap - 1])
 #define POSITIONED          1
 
 STARTOP(nop)
@@ -182,8 +182,12 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-    is = is->next();
-    count++;
+    if (is == NULL && count == 0)
+        is = seg.first();
+    else
+        is = is->next();
+    if (map[count + 1] == is)
+        count++;
 ENDOP
 
 STARTOP(next_n)
@@ -220,7 +224,11 @@ STARTOP(put_copy)
     if (slot_ref != 0)
     {
         memcpy(is->userAttrs(), slotat(slot_ref)->userAttrs(), seg.numAttrs() * sizeof(uint16));
+        Slot *prev = is->prev();
+        Slot *next = is->next();
         memcpy(is, slotat(slot_ref), sizeof(Slot));
+        is->next(next);
+        is->prev(prev);
     }
 ENDOP
 
@@ -240,20 +248,39 @@ STARTOP(insert)
     is->prev(newSlot);
     newSlot->originate(is->original());
     is = newSlot;
+    memmove(map + count + 1, map + count, sizeof(Slot *) * (maxmap - count));
+    map[count] = is;
+    maxmap++;
 ENDOP
 
 STARTOP(delete_)
     is->markDeleted(true);
-    if (is->prev()) is->prev()->next(is->next());
-    if (is->next()) is->next()->prev(is->prev());
-    if (is->prev()) is = is->prev(); else is = is->next();
+    if (is->prev())
+        is->prev()->next(is->next());
+    else
+        seg.first(is->next());
+    
+    if (is->next())
+        is->next()->prev(is->prev());
+    else
+        seg.last(is->prev());
+    
+    if (is->prev())
+    {
+        is = is->prev();
+//        --count;      // don't do this since following next() will increment to count is->next()
+    }
+    else
+    {
+        is = is->next();
+    }
 ENDOP
 
 STARTOP(assoc)
     declare_params(1);
     unsigned int  num = uint8(*param);
     const int8 *  assocs = reinterpret_cast<const int8 *>(param+1);
-    use_params(count);
+    use_params(num);
     int max = -1;
     int min = -1;
     
@@ -276,6 +303,7 @@ STARTOP(cntxt_item)
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
+//    if (isb + is_arg != count) {
     if (isb + is_arg != count) {
         ip += iskip;
         dp += dskip;
@@ -598,9 +626,7 @@ ENDOP
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
     memcpy(newSlot, is, sizeof(Slot));
-    is->markCopied(true);
-    if (is->prev()) is->prev()->next(newSlot);
-    if (is->next()) is->next()->prev(newSlot);
-    is = newSlot;
+    newSlot->markCopied(true);
+    map[count] = newSlot;
 ENDOP
 

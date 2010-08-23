@@ -49,6 +49,7 @@ public:
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
+    void last(Slot *p) { m_last = p; }
     void appendSlot(int i, int cid, int gid, int fid, int bw);
     Slot *newSlot();
     void freeSlot(Slot *);

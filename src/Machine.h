@@ -103,7 +103,7 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  gr2::GrSegment & seg, slotref & islot_idx, int & count,
+                                  gr2::GrSegment & seg, slotref & islot_idx, int & count, int nPre,
                                   status_t &status, int nMap, slotref * map) HOT;
     CLASS_NEW_DELETE
 

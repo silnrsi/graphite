@@ -279,7 +279,7 @@ int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num
 void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
     Slot *first = seg->first();
-    if (!testConstraint(&m_cPConstraint, first, 1, 0, seg, 1, &first))
+    if (!testConstraint(&m_cPConstraint, first, 1, 0, 0, seg, 1, &first))
         return;
     // advance may be negative, so it is dangerous to use unsigned for i
     int loopCount = m_iMaxLoop;
@@ -290,11 +290,11 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
         int count = 0;
         s = findNDoRule(seg, s, count, face, vms);
         currCount += count;
-        if (currCount < maxIndex)
+        if (currCount <= maxIndex)
         {
             if (--loopCount < 0)
             {
-                s = maxSlot->next();
+                s = maxSlot->next();            // but maxSlot can be freed!, maybe need to walk forward?
                 loopCount = m_iMaxLoop;
                 currCount = maxIndex;
             }
@@ -328,8 +328,8 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         uint16 gid = iSlot->gid();
         if (gid >= m_numGlyphs) break;
         vms->slotMap(count, iSlot);
-        ++count;
         uint16 iCol = m_cols[gid];
+        ++count;
 #ifdef ENABLE_DEEP_TRACING
         if (state >= m_sTransition)
         {
@@ -363,7 +363,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	        XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
         }
 #endif
-        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), m_rulePreCtxt[rulenum], seg, count, vms->map()))
+        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), m_rulePreCtxt[rulenum], iCtxt, seg, count, vms->map()))
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -374,7 +374,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	          XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
             }
 #endif
-	    Slot *res = doAction(m_cActions + rulenum, startSlot, count, seg, vms->map());
+	    Slot *res = doAction(m_cActions + rulenum, startSlot, count, iCtxt, vms->length(i), seg, vms->map());
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
             {
@@ -392,10 +392,11 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	    XmlTraceLog::get().closeElement(ElementTestRule);
 #endif
     }
+    count = 1;
     return startSlot->next();
 }
 
-int Pass::testConstraint(const Code *codeptr, Slot *iSlot, int num, int nPre, GrSegment *seg, int nMap, Slot **map) const
+int Pass::testConstraint(const Code *codeptr, Slot *iSlot, int num, int nPre, int nCtxt, GrSegment *seg, int nMap, Slot **map) const
 {
     uint32 ret = 1;
     int count;
@@ -407,18 +408,19 @@ int Pass::testConstraint(const Code *codeptr, Slot *iSlot, int num, int nPre, Gr
     
     Machine::status_t status = Machine::finished;
     Machine m;
-    while (nPre-- > 0)
+    for (int i = 0; i < nPre; ++i)
     {
         if (!iSlot->prev())
             break;
         else
             iSlot = iSlot->prev();
-        num++;
+//        num++;
     }
-    for (int i = 0; i < num; i++, iSlot = iSlot->next())
+
+    for (int i = -nPre; i < num; i++, iSlot = iSlot->next())
     {
-        int temp = i;
-        ret = codeptr->run(m, *seg, iSlot, temp, nMap, map, status);
+        int temp = i + nCtxt;
+        ret = codeptr->run(m, *seg, iSlot, temp, nCtxt, nMap, map, status);
         if (!ret) return 0;
         if (status != Machine::finished) return 1;
     }
@@ -426,7 +428,7 @@ int Pass::testConstraint(const Code *codeptr, Slot *iSlot, int num, int nPre, Gr
     return status == Machine::finished ? ret : 1;
 }
 
-Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, GrSegment *seg, Slot **map) const
+Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int len, GrSegment *seg, Slot **map) const
 {
     if (!*codeptr)
         return iSlot->next();
@@ -436,22 +438,29 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, GrSegment *se
     Machine::status_t status;
     Machine m;
     int nMap = count;
-    count = 0;
-    int32 ret = codeptr->run(m, *seg, iSlot, count, nMap, map, status);
+    count = nPre;
+    int32 ret = codeptr->run(m, *seg, iSlot, count, nPre, nMap, map, status);
     
-    for (int i = 0; i < nMap; i++)
+    for (int i = 0; i < nMap; ++i)
     {
         if (map[i]->isCopied() || map[i]->isDeleted())
             seg->freeSlot(map[i]);
     }
-    
-    if (ret < 0)
+    if (ret < nPre)
     {
-        while (ret++ < 0 && iSlot) iSlot = iSlot->prev();
+        while (++ret <= 0 && iSlot)
+        {
+            iSlot = iSlot->prev();
+            --count;
+        }
     }
     else
     {
-        while (ret-- > 0 && iSlot) iSlot = iSlot->next();
+        while (--ret >= -nPre && iSlot)
+        {
+            iSlot = iSlot->next();
+            ++count;
+        }
     }
     return iSlot;
 }

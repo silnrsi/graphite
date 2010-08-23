@@ -76,6 +76,7 @@ Machine::stack_t  Machine::run(const instr   * program,
                                GrSegment &     seg,
                                slotref &       islot_idx,
                                int &           count,
+                               int             nPre,
                                status_t &      status,
                                int             nMap,
                                slotref *       map)
@@ -87,7 +88,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, ip, count, count, nMap, map, 0};
+    regbank         reg = {seg, islot_idx, ip, count, nPre, nMap, map, 0};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}

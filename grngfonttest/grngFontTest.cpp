@@ -695,7 +695,7 @@ int lookup(size_t *map, size_t val)
 {
     int i = 0;
     for ( ; map[i] != val && map[i]; i++) {}
-    return i;
+    return map[i] ? i : -1;
 }
 
 int main(int argc, char *argv[])

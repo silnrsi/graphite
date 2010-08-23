@@ -20,8 +20,8 @@ public:
     int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts);
     void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
     Slot *findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, VMScratch* vms) const;
-    int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, GrSegment* seg, int nMap, Slot** map) const;
-    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, GrSegment* seg, Slot** map) const;
+    int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, int nCtxt, GrSegment* seg, int nMap, Slot** map) const;
+    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, int len, GrSegment* seg, Slot** map) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE
