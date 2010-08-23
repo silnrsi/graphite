@@ -1,6 +1,6 @@
 project(testing)
 
-add_subdirectory(vm)
+# add_subdirectory(vm)
 add_subdirectory(comparerenderer)
 
 if (EXISTS ${PROJECT_SOURCE_DIR}/grlist)

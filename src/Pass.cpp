@@ -283,9 +283,8 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
         return;
     // advance may be negative, so it is dangerous to use unsigned for i
     int loopCount = m_iMaxLoop;
-    Slot *maxSlot = seg->first();
     int maxIndex = 0, currCount = 0;
-    for (Slot *s = maxSlot; s; )
+    for (Slot *s = seg->first(); s; )
     {
         int count = 0;
         s = findNDoRule(seg, s, count, face, vms);
@@ -294,16 +293,15 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
         {
             if (--loopCount < 0)
             {
-                s = maxSlot->next();            // but maxSlot can be freed!, maybe need to walk forward?
+                while (++currCount <= maxIndex && s) s = s->next();
                 loopCount = m_iMaxLoop;
-                currCount = maxIndex;
+                maxIndex = currCount + 1;
             }
         }
         else
         {
             loopCount = m_iMaxLoop;
             maxIndex = currCount + 1;
-            maxSlot = s;
         }
     }
 }
@@ -446,7 +444,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
         if (map[i]->isCopied() || map[i]->isDeleted())
             seg->freeSlot(map[i]);
     }
-    if (ret < nPre)
+    if (ret < 0)
     {
         while (++ret <= 0 && iSlot)
         {
@@ -456,12 +454,13 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
     }
     else
     {
-        while (--ret >= -nPre && iSlot)
+        while (--ret >= 0 && iSlot)
         {
             iSlot = iSlot->next();
             ++count;
         }
     }
+    count -= nPre;
     return iSlot;
 }
 

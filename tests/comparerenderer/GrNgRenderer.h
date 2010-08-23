@@ -6,6 +6,7 @@
 #include <graphiteng/face.h>
 #include <graphiteng/font.h>
 #include <graphiteng/SegmentHandle.h>
+#include <graphiteng/SlotHandle.h>
 
 namespace gr2 = org::sil::graphite::v2;
 
@@ -38,10 +39,14 @@ public:
             fprintf(stderr, "Invalid Unicode pos %ld\n", reinterpret_cast<const char*>(pError) - utf8);
         gr2::SegmentHandle seg(m_grFont, m_grFace, 0u, gr2::SegmentHandle::kutf8, utf8, numCodePoints, m_rtl);
         RenderedLine * renderedLine = new(result) RenderedLine(seg.length(), seg.advanceX());
-        for (int i = 0; i < seg.length(); i++)
-        {
-            (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
-        }
+        int i = 0;
+        for (gr2::SlotHandle s = seg.first(); !s.isNull(); s = s.next(), ++i)
+            (*renderedLine)[i].set(s.gid(), s.originX(), s.originY(), s.before(), s.after());
+        
+//         for (int i = 0; i < seg.length(); i++)
+//         {
+//             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
+//         }
     }
     virtual const char * name() const { return "graphiteng"; }
 private:
