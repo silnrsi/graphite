@@ -37,6 +37,7 @@ class GrSegment
 {
 public:
     unsigned int length() const { return m_numGlyphs; }
+    void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }

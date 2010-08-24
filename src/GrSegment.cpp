@@ -20,6 +20,9 @@ GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, i
         m_charinfo(new CharInfo[numchars]),
         m_silf(face->chooseSilf(script)),
         m_dir(textDir),
+        m_freeSlots(NULL),
+        m_last(NULL),
+        m_first(NULL),
         m_bbox(Rect(Position(0, 0), Position(0, 0)))
 {
     unsigned int i, j;
@@ -114,6 +117,8 @@ Slot *GrSegment::newSlot()
 
 void GrSegment::freeSlot(Slot *aSlot)
 {
+    if (m_last == aSlot) m_last = aSlot->prev();
+    if (m_first == aSlot) m_first = aSlot->next();
     if (!m_freeSlots)
         aSlot->next(NULL);
     else
@@ -133,7 +138,7 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
     
     if (m_dir & 1)
     {
-        for (s = iEnd; s != iStart->prev(); s = s->prev())
+        for (s = iEnd; s && s != iStart->prev(); s = s->prev())
         {
             if (s->isBase())
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
@@ -141,7 +146,7 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
     }
     else
     {
-        for (s = iStart; s != iEnd->next(); s = s->next())
+        for (s = iStart; s && s != iEnd->next(); s = s->next())
         {
             if (s->isBase())
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);

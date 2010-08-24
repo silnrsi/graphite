@@ -349,6 +349,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         if (!state || state >= m_sTransition) break;
         iSlot = iSlot->next();
     }
+    vms->slotMap(count, iSlot ? iSlot->next() : iSlot);
     
     for (int i = 0; i < vms->ruleLength(); i++)
     {
@@ -437,7 +438,9 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
     Machine m;
     int nMap = count;
     count = nPre;
+    int oldNumGlyphs = seg->length();
     int32 ret = codeptr->run(m, *seg, iSlot, count, nPre, nMap, map, status);
+    count += seg->length() - oldNumGlyphs;
     
     for (int i = 0; i < nMap; ++i)
     {
@@ -446,15 +449,27 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
     }
     if (ret < 0)
     {
-        while (++ret <= 0 && iSlot)
+        if (!iSlot)
+        {
+            iSlot = seg->last();
+            ++ret;
+            --count;
+        }
+        while (++ret <= 0)
         {
             iSlot = iSlot->prev();
             --count;
         }
     }
-    else
+    else if (ret > 0)
     {
-        while (--ret >= 0 && iSlot)
+        if (!iSlot)
+        {
+            iSlot = seg->first();
+            --ret;
+            ++count;
+        }
+        while (--ret >= 0)
         {
             iSlot = iSlot->next();
             ++count;

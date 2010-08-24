@@ -229,12 +229,20 @@ STARTOP(put_copy)
         memcpy(is, slotat(slot_ref), sizeof(Slot));
         is->next(next);
         is->prev(prev);
+        is->markCopied(false);
+        is->markDeleted(false);
     }
 ENDOP
 
 STARTOP(insert)
     Slot *newSlot = seg.newSlot();
-    if (is->prev())
+    if (!is)
+    {
+        seg.last()->next(newSlot);
+        newSlot->prev(seg.last());
+        seg.last(newSlot);
+    }
+    else if (is->prev())
     {
         is->prev()->next(newSlot);
         newSlot->prev(is->prev());
@@ -245,12 +253,17 @@ STARTOP(insert)
         seg.first(newSlot);
     }
     newSlot->next(is);
-    is->prev(newSlot);
-    newSlot->originate(is->original());
+    if (is)
+    {
+        is->prev(newSlot);
+        newSlot->originate(is->original());
+    }
     is = newSlot;
-    memmove(map + count + 1, map + count, sizeof(Slot *) * (maxmap - count));
-    map[count] = is;
-    maxmap++;
+    seg.extendLength(1);
+//     memmove(map + count + 1, map + count, sizeof(Slot *) * (maxmap - count));
+//     map[count] = is;
+//     maxmap++;
+    count--;
 ENDOP
 
 STARTOP(delete_)
@@ -274,6 +287,7 @@ STARTOP(delete_)
     {
         is = is->next();
     }
+    seg.extendLength(-1);
 ENDOP
 
 STARTOP(assoc)
