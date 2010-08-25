@@ -203,12 +203,12 @@ void fixup_cntxt_item_target(const byte* cdp,
     *dp++   = data_skip;
 }
 
-inline void fixup_slotref(int8 * const arg, uint8 is, const CodeContext *const cContexts) {
+// inline void fixup_slotref(int8 * const arg, uint8 is, const CodeContext *const cContexts) {
 //    if (*arg < 0 && -*arg <= is)
 //        *arg -= cContexts[is + *arg].nInserts;
 //    else
 //        *arg += ctxtins(is);
-}
+// }
 
 } // end of namespace
 
@@ -224,10 +224,10 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
             iSlot++;
             cContexts[iSlot] = CodeContext(0, 0, cp);
             break;
-        case INSERT :
-            for (int i = iSlot; i >= 0; --i)
-                ++cContexts[i].nInserts;
-            break;
+//         case INSERT :
+//             for (int i = iSlot; i >= 0; --i)
+//                 ++cContexts[i].nInserts;
+//             break;
         case DELETE :
             iSlot--;
             break;
@@ -238,44 +238,44 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
         case PUSH_SLOT_ATTR :
         case PUSH_GLYPH_ATTR_OBS :
         case PUSH_GLYPH_ATTR :
-            fixup_slotref(dp-1,iSlot,cContexts);
+//             fixup_slotref(dp-1,iSlot,cContexts);
             if (dp[-1] <= 0 && -dp[-1] <= iSlot)
                 cContexts[iSlot + dp[-1]].copySlot |= 2;
             break;
-        case PUSH_FEAT :
-        case PUSH_ATT_TO_GATTR_OBS :
-        case PUSH_ATT_TO_GLYPH_ATTR :
-            fixup_slotref(dp-1,iSlot,cContexts);
-            break;
+//         case PUSH_FEAT :
+//         case PUSH_ATT_TO_GATTR_OBS :
+//         case PUSH_ATT_TO_GLYPH_ATTR :
+//             fixup_slotref(dp-1,iSlot,cContexts);
+//             break;
         case PUSH_ISLOT_ATTR :
 //            cContexts[iSlot].copySlot = 1;
-            fixup_slotref(dp-2,iSlot,cContexts);
+//             fixup_slotref(dp-2,iSlot,cContexts);
             if (dp[-2] <= 0 && -dp[-2] <= iSlot)
                 cContexts[iSlot + dp[-2]].copySlot |= 2;
             break;
-        case PUSH_GLYPH_METRIC :
-        case PUSH_ATT_TO_GLYPH_METRIC :
-            fixup_slotref(dp-2,iSlot,cContexts);
-            break;
+//         case PUSH_GLYPH_METRIC :
+//         case PUSH_ATT_TO_GLYPH_METRIC :
+//             fixup_slotref(dp-2,iSlot,cContexts);
+//             break;
         case PUT_SUBS_8BIT_OBS:
             cContexts[iSlot].copySlot = 1;
-            fixup_slotref(dp-3,iSlot,cContexts);
+//             fixup_slotref(dp-3,iSlot,cContexts);
             if (dp[-3] <= 0 && -dp[-3] <= iSlot)
                 cContexts[iSlot + dp[-3]].copySlot |= 2;
             break;
-        case CNTXT_ITEM :
-            fixup_slotref(dp-3,iSlot,cContexts);
-	        break;
+//         case CNTXT_ITEM :
+//             fixup_slotref(dp-3,iSlot,cContexts);
+// 	        break;
         case PUT_SUBS :
             cContexts[iSlot].copySlot = 1;
-            fixup_slotref(dp-5,iSlot,cContexts);
+//             fixup_slotref(dp-5,iSlot,cContexts);
             if (dp[-5] <= 0 && -dp[-5] <= iSlot)
                 cContexts[iSlot + dp[-5]].copySlot |= 2;
             break;
-        case ASSOC :
-            for (size_t i = 1; i < param_sz; ++i)
-                fixup_slotref(dp-i,iSlot,cContexts);
-            break;
+//         case ASSOC :
+//             for (size_t i = 1; i < param_sz; ++i)
+//                 fixup_slotref(dp-i,iSlot,cContexts);
+//             break;
     }
 }
 

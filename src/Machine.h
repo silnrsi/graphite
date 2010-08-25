@@ -131,7 +131,7 @@ inline void Machine::check_final_stack(const gr2::int32 * const sp,
 #define STARTTRACE(name,is) if (XmlTraceLog::get().active()) { \
                                 XmlTraceLog::get().openElement(ElementOpCode); \
                                 XmlTraceLog::get().addAttribute(AttrName, # name); \
-                                XmlTraceLog::get().addAttribute(AttrIndex, is); \
+                                XmlTraceLog::get().addAttribute(AttrIndex, count); \
                             }
 
 #define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode);

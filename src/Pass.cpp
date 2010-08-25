@@ -311,8 +311,13 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
     int state;
     Slot *startSlot = iSlot;
     int iCtxt = 0;
+    int lcount = count;
     for (iCtxt = 0; iCtxt < m_maxPreCtxt && iSlot->prev(); iCtxt++, iSlot = iSlot->prev()) {}
-    if (iCtxt < m_minPreCtxt) return startSlot;
+    if (iCtxt < m_minPreCtxt)
+    {
+        count = 1;
+        return startSlot->next();
+    }
     state = m_startStates[m_maxPreCtxt - iCtxt];
     
     vms->resetRules();
@@ -325,9 +330,9 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         }
         uint16 gid = iSlot->gid();
         if (gid >= m_numGlyphs) break;
-        vms->slotMap(count, iSlot);
+        vms->slotMap(lcount, iSlot);
         uint16 iCol = m_cols[gid];
-        ++count;
+        ++lcount;
 #ifdef ENABLE_DEEP_TRACING
         if (state >= m_sTransition)
         {
@@ -336,7 +341,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         if (iCol >= m_sColumns && iCol != 65535)
         {
             XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
-                m_cols[(*seg)[iSlot].gid()], (*seg)[iSlot].gid(), iSlot);
+                iCol, gid, iSlot);
         }
 #endif
         if (iCol == 65535) break;
@@ -351,6 +356,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
     }
     vms->slotMap(count, iSlot ? iSlot->next() : iSlot);
     
+    count = lcount;
     for (int i = 0; i < vms->ruleLength(); i++)
     {
         int rulenum = vms->rule(i);
@@ -359,10 +365,10 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         {
 	        XmlTraceLog::get().openElement(ElementTestRule);
 	        XmlTraceLog::get().addAttribute(AttrNum, rulenum);
-	        XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+	        XmlTraceLog::get().addAttribute(AttrIndex, count);
         }
 #endif
-        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), m_rulePreCtxt[rulenum], iCtxt, seg, count, vms->map()))
+        if (testConstraint(m_cConstraint + rulenum, startSlot, vms->length(i), m_rulePreCtxt[rulenum], iCtxt, seg, lcount, vms->map()))
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -370,7 +376,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	          XmlTraceLog::get().closeElement(ElementTestRule);
 	          XmlTraceLog::get().openElement(ElementDoRule);
 	          XmlTraceLog::get().addAttribute(AttrNum, vms->rule(i));
-	          XmlTraceLog::get().addAttribute(AttrIndex, startSlot);
+	          XmlTraceLog::get().addAttribute(AttrIndex, count);
             }
 #endif
 	    Slot *res = doAction(m_cActions + rulenum, startSlot, count, iCtxt, vms->length(i), seg, vms->map());
