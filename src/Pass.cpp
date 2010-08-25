@@ -349,12 +349,12 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         if (state >= m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {
                 const uint16 rule = m_ruleMap[i];
-                vms->addRule(rule, m_ruleSorts[rule], count - iCtxt);
+                vms->addRule(rule, m_ruleSorts[rule], lcount - iCtxt);
             }            
         if (!state || state >= m_sTransition) break;
         iSlot = iSlot->next();
     }
-    vms->slotMap(count, iSlot ? iSlot->next() : iSlot);
+    vms->slotMap(lcount, iSlot ? iSlot->next() : iSlot);
     
     count = lcount;
     for (int i = 0; i < vms->ruleLength(); i++)
