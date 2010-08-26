@@ -6,20 +6,24 @@ class RenderedLine;
 
 typedef enum {
     IDENTICAL = 0,
-    MORE_GLYPHS,
-    LESS_GLYPHS,
-    DIFFERENT_ADVANCE,
-    DIFFERENT_GLYPHS,
-    DIFFERENT_POSITIONS
+    MORE_GLYPHS = 1,
+    LESS_GLYPHS = 2,
+    DIFFERENT_ADVANCE = 4,
+    DIFFERENT_GLYPHS = 8,
+    DIFFERENT_POSITIONS = 16,
+    ALL_DIFFERENCE_TYPES = MORE_GLYPHS | LESS_GLYPHS | DIFFERENT_ADVANCE | DIFFERENT_GLYPHS | DIFFERENT_POSITIONS
 } LineDifference;
 
 const char * DIFFERENCE_DESC[] = {
-    "same",
-    "more glyphs",
-    "less glyphs",
-    "different advance",
-    "different glyphs",
-    "different positions"
+    "same",//0
+    "more glyphs",//1
+    "less glyphs",//2
+    "",
+    "different advance",//4
+    "","","",
+    "different glyphs",//8
+    "","","","","","","",
+    "different positions"//16
 };
 
 class GlyphInfo
