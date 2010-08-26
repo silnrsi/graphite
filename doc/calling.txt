@@ -1,0 +1,70 @@
+== Calling GraphiteNG ==
+
+=== Introduction ===
+The basic model for running graphite is to pass text, font and face information
+to create a segment. A segment consists of a linked list of slots which each
+correspond to an output glyph. In addition a segment holds charinfo for each
+character in the input text.
+
+----
+#include <graphiteng/face.h>
+#include <graphiteng/font.h>
+#include <graphiteng/SegmentHandle.h>
+#include <graphiteng/SlotHandle.h>
+
+size_t length;
+char *pUtf8;
+bool rtl;
+char *font_filename;
+
+bool pError;
+
+namespace gr2 = org::sil::graphite::v2;
+
+using gr2
+{
+    FileFaceHandle *fileface = make_file_face_handle(font_filename);
+    GrFace *face = make_GrFace_from_file_face_handle(fileface, ePreLoad); <1>
+    GrFont *sizeFont = make_GrFont(pointsize * dpi / 72, face); <2>
+    size_t numCodePoints = SegmentHandle::countUnicodeCharacters(SegmentHandle::kutf8,
+            reinterpret_cast<const void*>pUtf8,
+            reinterpret_cast<const void*>(pUtf8 + length), &pError); <3>
+    SegmentHandle seg(sizedFont, face, 0, SegmentHandle::kutf8, pUtf8,
+            numCodePoints, rtl); <4>
+
+    for (SlotHandle s = seg.first(); s; s = s.next()) <5>
+    {
+        // do something with s.gid(), s.originX(), etc.
+    }
+    destroy_GrFont(sizeFont); <6>
+    destroy_GrFace(face);
+    destroy_file_face_handle(fileface);
+}
+----
+
+<1> The face corresponds to all the size independent information for a font. In
+    this case we access the font via a file interface.
+<2> The font corresponds to a face at a specific resolution in ppm
+<3> Knowing how many codepoints in the string makes segment creation much
+    faster.
+<4> Create the segment. We don't pass features at the moment.
+<5> A segment contains a linked list of Slots, one per glyph.
+<6> Tidy up at the end, C style.
+
+
+=== Details ===
+
+Here we talk about the details of working with key classes
+
+==== Face ====
+
+Different ways of creating faces. Glyph information caching, etc.
+
+==== Font ====
+
+This can even be NULL.
+
+==== Features ====
+
+Language, script and default values along with modifying them.
+

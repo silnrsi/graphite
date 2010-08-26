@@ -1,0 +1,8 @@
+== Hacking ==
+
+In this section we look at coding conventions and some of the design models used in coding graphiteng.
+
+=== Memory Allocation ===
+
+While GraphiteNG is written in C++, it is targetted at environments where libstdc++ is not present. While this can be problematic since functions used in C++ may be arbitrarily placed in libc and libstdc++, there are general approaches that can help. To this end we use a mixed memory allocation model. For graphiteng classes, we declare our own new() methods and friends, allowing the use of C++ new() and all that it gives us in terms of constructors. For types that are not classes we use malloc() or the type safe version gralloc().
+
