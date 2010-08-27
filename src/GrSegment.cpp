@@ -38,9 +38,9 @@ GrSegment::~GrSegment()
     AttributeRope::iterator j;
     
     for (i = m_slots.begin(); i != m_slots.end(); i++)
-        delete[] *i;
+        free(*i);
     for (j = m_userAttrs.begin(); j != m_userAttrs.end(); j++)
-        delete[] *j;
+        free(*j);
     delete[] m_charinfo;
 }
 
@@ -94,8 +94,8 @@ Slot *GrSegment::newSlot()
     if (!m_freeSlots)
     {
         int numUser = m_silf->numUser();
-        Slot *newSlots = new Slot[m_bufSize];
-        uint16 *newAttrs = new uint16 [numUser * m_bufSize];
+        Slot *newSlots = gralloc<Slot>(m_bufSize);
+        uint16 *newAttrs = gralloc<uint16>(numUser * m_bufSize);
         
         memset(newAttrs, 0, numUser * m_bufSize * sizeof(uint16));
         

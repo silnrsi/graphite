@@ -25,19 +25,3 @@ namespace std
 }
 
 #endif
-
-void __attribute__ ((visibility("internal"))) *operator new (std::size_t size) throw() { return malloc(size); }
-// void __attribute__ ((visibility("internal"))) *operator new (std::size_t size, const std::nothrow_t& nothrow_constant) throw() { return malloc(size); }
-void *operator new (std::size_t size, void *ptr) throw() { return ptr; }
-
-void __attribute__ ((visibility("internal"))) operator delete (void* ptr) throw () { free(ptr); }
-// void __attribute__ ((visibility("internal"))) operator delete (void* ptr, const std::nothrow_t& nothrow_constant) throw() { free(ptr); }
-void operator delete (void* ptr, void* voidptr2) throw() { }
-
-void* __attribute__ ((visibility("internal"))) operator new[] (std::size_t size) throw () { return malloc(size); }
-// void* __attribute__ ((visibility("internal"))) operator new[] (std::size_t size, const std::nothrow_t& nothrow_constant) throw() { return malloc(size); }
-void* operator new[] (std::size_t size, void* ptr) throw() { return ptr; }
-
-void __attribute__ ((visibility("internal"))) operator delete[] (void* ptr) throw () { free(ptr); }
-// void __attribute__ ((visibility("internal"))) operator delete[] (void* ptr, const std::nothrow_t& nothrow_constant) throw() { free(ptr); }
-void operator delete[] (void* ptr, void* voidptr2) throw() { }
