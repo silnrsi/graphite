@@ -9,7 +9,7 @@
 #include "TtfTypes.h"
 //#include <map> // Please don't use map, it forces libstdc++
 
-using namespace org::sil::graphite::v2;
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class TableCacheItem
 {
@@ -287,5 +287,5 @@ extern "C"
 #endif      //!DISABLE_FILE_FACE_HANDLE
 }
 
-
+}}}}// end namespace
 

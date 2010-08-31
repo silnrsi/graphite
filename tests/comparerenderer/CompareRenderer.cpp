@@ -272,16 +272,18 @@ int main(int argc, char ** argv)
     if (rendererOptions[OptAlternativeFont].exists())
     {
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
-        if (rendererOptions[OptGraphite].exists())
-        {
-            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction));
-        }
-        else if (rendererOptions[OptGraphiteNg].exists())
+        if (rendererOptions[OptGraphiteNg].exists())
         {
             renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction));
             renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction));
         }
+#ifdef HAVE_GRAPHITE
+        else if (rendererOptions[OptGraphite].exists())
+        {
+            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction));
+        }
+#endif
 #ifdef HAVE_HARFBUZZNG
         else if (rendererOptions[OptHarfbuzzNg].exists())
         {
