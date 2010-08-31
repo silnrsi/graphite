@@ -282,11 +282,13 @@ int main(int argc, char ** argv)
             renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction));
             renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction));
         }
+#ifdef HAVE_HARFBUZZNG
         else if (rendererOptions[OptHarfbuzzNg].exists())
         {
             renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction));
             renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction));
         }
+#endif
     }
     else
     {
