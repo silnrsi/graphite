@@ -35,7 +35,7 @@ class CompareRenderer
 public:
     CompareRenderer(const char * testFile, Renderer** renderers, bool verbose)
         : m_fileBuffer(NULL), m_numLines(0), m_lineOffsets(NULL),
-        m_renderers(renderers), m_verbose(verbose)
+        m_renderers(renderers), m_verbose(verbose), m_cfMask(ALL_DIFFERENCE_TYPES)
     {
         // read the file into memory for fast access
         struct stat fileStat;
@@ -120,6 +120,7 @@ public:
                 for (size_t line = 0; line < m_numLines; line++)
                 {
                     LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line], tolerance);
+                    ld = (LineDifference)(m_cfMask & ld);
                     if (ld)
                     {
                         fprintf(log, "Line %u %s\n", (unsigned int)line, DIFFERENCE_DESC[ld]);
@@ -138,6 +139,7 @@ public:
         }
         return status;
     }
+    void setDifferenceMask(LineDifference m) { m_cfMask = m; }
 protected:
     float runRenderer(Renderer & renderer, RenderedLine * pLineResult)
     {
@@ -230,6 +232,7 @@ private:
     RenderedLine * m_lineResults[NUM_RENDERERS];
     float m_elapsedTime[NUM_RENDERERS];
     bool m_verbose;
+    LineDifference m_cfMask;
 };
 
 
@@ -266,16 +269,42 @@ int main(int argc, char ** argv)
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
 
+    if (rendererOptions[OptAlternativeFont].exists())
+    {
+        const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
+        if (rendererOptions[OptGraphiteNg].exists())
+        {
+            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction));
+        }
 #ifdef HAVE_GRAPHITE
-    if (rendererOptions[OptGraphite].exists())
-        renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+        else if (rendererOptions[OptGraphite].exists())
+        {
+            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction));
+        }
 #endif
-    if (rendererOptions[OptGraphiteNg].exists())
-        renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
 #ifdef HAVE_HARFBUZZNG
-    if (rendererOptions[OptHarfbuzzNg].exists())
-        renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+        else if (rendererOptions[OptHarfbuzzNg].exists())
+        {
+            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction));
+        }
 #endif
+    }
+    else
+    {
+#ifdef HAVE_GRAPHITE
+        if (rendererOptions[OptGraphite].exists())
+            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+#endif
+        if (rendererOptions[OptGraphiteNg].exists())
+            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
+#ifdef HAVE_HARFBUZZNG
+        if (rendererOptions[OptHarfbuzzNg].exists())
+            renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+#endif
+    }
 
     if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL)
     {
@@ -289,6 +318,11 @@ int main(int argc, char ** argv)
         compareRenderers.runTests(log, rendererOptions[OptRepeat].getInt(argv));
     else
         compareRenderers.runTests(log);
+    // set compare options
+    if (rendererOptions[OptIgnoreGlyphIdDifferences].exists())
+    {
+        compareRenderers.setDifferenceMask((LineDifference)(ALL_DIFFERENCE_TYPES ^ DIFFERENT_GLYPHS));
+    }
     int status = 0;
     if (rendererOptions[OptCompare].exists())
         status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv), log);

@@ -50,8 +50,9 @@ typedef enum {
     OptCompare,
     OptLogFile,
     OptVerbose,
-    OptFeatures,
-    OptAlternativeFont
+    OptAlternativeFont,
+    OptIgnoreGlyphIdDifferences,
+    OptFeatures
 } OptionId;
 
 static Option rendererOptions[] = {
@@ -66,9 +67,10 @@ static Option rendererOptions[] = {
     Option("", "--tolerance", "Ignore differences in position smaller than this", Option::OPTION_FLOAT),
     Option("-c", "--compare", "Compare glyph output", Option::OPTION_BOOL),
     Option("-l", "--log", "Log file for results instead of stdout", Option::OPTION_STRING),
-    Option("", "--verbose", "Output lots of info", Option::OPTION_BOOL)
+    Option("", "--verbose", "Output lots of info", Option::OPTION_BOOL),
+    Option("-a", "--alt-font", "Alternative font file", Option::OPTION_STRING),
+    Option("", "--ignore-gid", "Ignore Glyph IDs in comparison (use with -c -a alt.ttf)", Option::OPTION_BOOL)
     //Option("", "--features", "Font size", Option::OPTION_STRING),
-    //Option("-a", "--alt-font", "Alternative font file", OPTION_STRING),
     
 };
 
