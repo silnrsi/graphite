@@ -50,7 +50,7 @@ private:
 };
 
 
-class org::sil::graphite::v2::FileFaceHandle
+class FileFaceHandle
 {
 public:
     FileFaceHandle(const char *filename);

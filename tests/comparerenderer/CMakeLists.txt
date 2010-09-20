@@ -49,3 +49,6 @@ if (${GR_FOUND})
         -t ${PROJECT_SOURCE_DIR}/../texts/my_HeadwordSyllables.txt -f ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf -s 12 -l ${PROJECT_BINARY_DIR}/padauk_comparison.log -c -g -n)
 
 endif (${GR_FOUND})
+
+# comparerenderer can also be used for font testing
+install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
