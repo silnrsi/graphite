@@ -30,7 +30,7 @@
 #include "Slot.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
-#include "graphiteng/SegmentHandle.h"
+#include "graphiteng/segment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -177,7 +177,7 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
 }
 
 #ifndef DISABLE_TRACING
-void GrSegment::logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const
+void GrSegment::logSegment(encform enc, const void* pStart, size_t nChars) const
 {
     if (XmlTraceLog::get().active())
     {
@@ -188,11 +188,11 @@ void GrSegment::logSegment(SegmentHandle::encform enc, const void* pStart, size_
             XmlTraceLog::get().addAttribute(AttrLength, nChars);
             switch (enc)
             {
-            case SegmentHandle::kutf8:
+            case kutf8:
                 XmlTraceLog::get().writeText(
                     reinterpret_cast<const char *>(pStart));
                 break;
-            case SegmentHandle::kutf16:
+            case kutf16:
                 for (size_t j = 0; j < nChars; ++j)
                 {
                     uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
@@ -209,7 +209,7 @@ void GrSegment::logSegment(SegmentHandle::encform enc, const void* pStart, size_
                     XmlTraceLog::get().writeUnicode(code);
                 }
                 break;
-            case SegmentHandle::kutf32:
+            case kutf32:
                 for (size_t j = 0; j < nChars; ++j)
                 {
                     XmlTraceLog::get().writeUnicode(
@@ -284,7 +284,7 @@ private:
 };
 
 
-void GrSegment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void* pStart, size_t nChars)
+void GrSegment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);

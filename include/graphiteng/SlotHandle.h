@@ -5,8 +5,8 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrFont;
-class SegmentHandle;
 class Slot;
+class GrSegment;
 
 enum attrCode {
     kslatAdvX = 0, kslatAdvY,
@@ -44,7 +44,7 @@ public:
     float advance(const GrFont *font) const;
     int before() const;
     int after() const;
-    int getAttr(const SegmentHandle& hSeg, attrCode index, uint8 subindex) const;
+    int getAttr(const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex) const;
     bool isInsertBefore() const;
     int original() const;
     bool isNull() const;

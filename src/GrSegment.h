@@ -100,13 +100,12 @@ public:
     CLASS_NEW_DELETE
 
 #ifndef DISABLE_TRACING
-    void logSegment(SegmentHandle::encform enc, const void* pStart, size_t nChars) const;
+    void logSegment(encform enc, const void* pStart, size_t nChars) const;
     void logSegment() const;
 #endif
 
-private:
-    friend class SegmentHandle ;
-    void read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, SegmentHandle::encform enc, const void*pStart, size_t nChars);
+public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
+    void read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const GrFont *font);
     void finalise(const GrFont *font);
   

@@ -24,7 +24,7 @@ private:
     friend class SlotBuilder;
     friend class FeatureMap;
     friend class FeatureRefHandle;
-    friend class SegmentHandle;
+public:
     Features* ptr() const { return AutoHandle<Features, &DeleteFeatures>::ptr(); }
 };
 

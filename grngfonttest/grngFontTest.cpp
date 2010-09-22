@@ -24,7 +24,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "graphiteng/Types.h"
-#include "graphiteng/SegmentHandle.h"
+#include "graphiteng/segment.h"
 #include "graphiteng/SlotHandle.h"
 #include "graphiteng/font.h"
 #include "graphiteng/face.h"
@@ -39,7 +39,7 @@ class GrngTextSrc
 
 public:
     GrngTextSrc(const gr2::uint32* base, size_t len) : m_buff(base), m_len(len) { }
-    gr2::SegmentHandle::encform utfEncodingForm() const { return gr2::SegmentHandle::kutf32; }
+    gr2::encform utfEncodingForm() const { return gr2::kutf32; }
     size_t getLength() const { return m_len; }
     const void* get_utf_buffer_begin() const { return m_buff; }
 
@@ -615,26 +615,26 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        gr2::SegmentHandle seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+        gr2::GrSegment* pSeg = make_GrSegment(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
 
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((seg.length() + 1) * sizeof(size_t));
-        for (gr2::SlotHandle slot = seg.first(); !slot.isNull(); slot = slot.next(), ++i)
+        size_t *map = (size_t*)malloc((length(pSeg) + 1) * sizeof(size_t));
+        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
         { map[i] = slot.id(); }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (gr2::SlotHandle slot = seg.first(); !slot.isNull(); slot = slot.next(), ++i)
+        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
         {
             float orgX = slot.originX();
             float orgY = slot.originY();
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot.gid(), lookup(map, slot.attachedTo()),
-                    slot.getAttr(seg, gr2::kslatAttX, 0),
-                    slot.getAttr(seg, gr2::kslatAttY, 0), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
-                    seg.charInfo(slot.original())->breakWeight(), slot.before(), slot.after());
+                    slot.getAttr(pSeg, gr2::kslatAttX, 0),
+                    slot.getAttr(pSeg, gr2::kslatAttY, 0), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
+                    charInfo(pSeg, slot.original())->breakWeight(), slot.before(), slot.after());
             
             if (pText32 != NULL)
             {
@@ -667,10 +667,11 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = seg.advanceX();
+        float advanceWidth = advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         free(map);
-       }	//to get seg destroyed before its parameters
+        gr2::destroy_GrSegment(pSeg);
+       }
         
         gr2::destroy_GrFont(sizedFont);
         gr2::destroy_GrFace(face);
