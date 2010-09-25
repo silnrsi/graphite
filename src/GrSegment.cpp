@@ -126,6 +126,7 @@ Slot *GrSegment::newSlot()
             newSlots[i].userAttrs(newAttrs + i * numUser);
         }
         newSlots[m_bufSize - 1].userAttrs(newAttrs + (m_bufSize - 1) * numUser);
+        newSlots[m_bufSize - 1].next(NULL);
         m_slots.push_back(newSlots);
         m_userAttrs.push_back(newAttrs);
         m_freeSlots = newSlots;
