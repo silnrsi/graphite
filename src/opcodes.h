@@ -279,6 +279,10 @@ STARTOP(insert)
         is->prev(newSlot);
         newSlot->originate(is->original());
     }
+    else
+    {
+        newSlot->originate(newSlot->prev()->original());
+    }
     is = newSlot;
     seg.extendLength(1);
 //     memmove(map + count + 1, map + count, sizeof(Slot *) * (maxmap - count));
