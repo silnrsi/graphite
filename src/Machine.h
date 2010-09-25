@@ -116,7 +116,7 @@ public:
                         STACK_GUARD  = 2;
 
     enum status_t {
-        finished,
+        finished = 0,
         stack_underflow,
         stack_not_empty,
         stack_overflow
@@ -125,7 +125,7 @@ public:
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
                                   gr2::GrSegment & seg, slotref & islot_idx, int & count, int nPre,
-                                  status_t &status, int nMap, slotref * map) HOT;
+                                  status_t &status, int nMap, slotref * map, int &flags) HOT;
     CLASS_NEW_DELETE
 
 private:

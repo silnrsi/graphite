@@ -87,7 +87,7 @@ public:
     size_t      instructionCount() const throw();
     
     int32 run(Machine &m, GrSegment & seg, slotref & islot_idx, int &count, int &nPre, int maxmap, Slot **map,
-                    Machine::status_t & status) const;
+                    Machine::status_t & status, int &flags) const;
     CLASS_NEW_DELETE
 };
 

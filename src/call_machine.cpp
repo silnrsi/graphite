@@ -100,7 +100,8 @@ Machine::stack_t  Machine::run(const instr   * program,
                                int             nPre,
                                status_t &      status,
                                int             nMap,
-                               slotref *       map)
+                               slotref *       map,
+                               int &           flags)
 {
     assert(program != 0);
 
@@ -117,6 +118,7 @@ Machine::stack_t  Machine::run(const instr   * program,
 
     check_final_stack(sp, status);
     islot_idx = reg.is;
+    flags = reg.flags;
     return ret;
 }
 
