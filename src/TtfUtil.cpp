@@ -597,11 +597,12 @@ int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
 		int * nameIdList, int cNameIds, short * langIdList)
 {
 	const Sfnt::FontNames * pTable = reinterpret_cast<const Sfnt::FontNames *>(pName);
+        int cLangIds = 0;
 	uint16 cRecord = read(pTable->count);
+        if (cRecord > 127) return cLangIds;
 	//uint16 nRecordOffset = swapw(pTable->stringOffset);
 	const Sfnt::NameRecord * pRecord = reinterpret_cast<const Sfnt::NameRecord *>(pTable + 1);
 
-	int cLangIds = 0;
 	for (int i = 0; i < cRecord; ++i)
 	{
 		if (read(pRecord->platform_id) == nPlatformId && 

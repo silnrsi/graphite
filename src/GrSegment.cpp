@@ -256,7 +256,8 @@ public:
       SlotBuilder(const GrFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, GrSegment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
-	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, -1)), 
+	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 1)),
+	  m_stable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 10)),
 	  m_fid(pDest2->addFeatures(*pFeats.ptr())),
 	  m_nCharsProcessed(0) 
       {
@@ -265,7 +266,7 @@ public:
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
           uint16 realgid = 0;
-	  uint16 gid = TtfUtil::Cmap31Lookup(m_ctable, cid);
+	  uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
           if (!gid)
               gid = m_face->findPseudo(cid);
           int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
@@ -280,6 +281,7 @@ private:
       const GrFace *m_face;
       GrSegment *m_pDest;
       const void *const   m_ctable;
+      const void *const   m_stable;
       const unsigned int m_fid;
       size_t m_nCharsProcessed ;
 };
