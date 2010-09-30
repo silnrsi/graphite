@@ -83,6 +83,7 @@ private:
 
 static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
+    if (!font) return NULL;
     GrSegment* pRes=new GrSegment(nChars, face, script, dir);
 
     pRes->read_text(face, pFeats, enc, pStart, nChars);

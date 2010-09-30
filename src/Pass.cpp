@@ -71,10 +71,12 @@ Pass::~Pass()
 bool Pass::readPass(void *pPass, size_t lPass)
 {
     byte *p = (byte *)pPass;
+    byte *ePass = (byte *)pPass + lPass;
     uint16 numRanges, numEntries;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrFlags, *p);
 #endif
+    if (lPass < 40) return false;
     p++;
     m_iMaxLoop = *p++;
 #ifndef DISABLE_TRACING
@@ -115,6 +117,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     m_cols = gralloc<uint16>(m_numGlyphs);
     for (int i = 0; i < m_numGlyphs; i++)
         m_cols[i] = -1;
+    if (p + numRanges * 6 >= ePass) return false;
     for (int i = 0; i < numRanges; i++)
     {
         uint16 first = read16(p);
@@ -133,14 +136,15 @@ bool Pass::readPass(void *pPass, size_t lPass)
         while (first <= last)
             m_cols[first++] = col;
     }
-    if (size_t(p - (byte *)pPass) >= lPass) return false;
-    m_ruleidx =gralloc<uint16>(m_sSuccess+1);
+    if (p + (m_sSuccess + 1) * sizeof(uint16) >= ePass) return false;
+    m_ruleidx = gralloc<uint16>(m_sSuccess+1);
     for (int i = 0; i <= m_sSuccess; i++)
     {
         m_ruleidx[i] = read16(p);
         if (m_ruleidx[i] > lPass) return false;
     }
     numEntries = m_ruleidx[m_sSuccess];
+    if (p + (numEntries + 2) * sizeof(uint16) >= ePass) return false;
     m_ruleMap = gralloc<uint16>(numEntries);
     for (int i = 0; i < numEntries; i++)
     {
@@ -163,10 +167,10 @@ bool Pass::readPass(void *pPass, size_t lPass)
         }
     }
 #endif
-    if (size_t(p - (byte *)pPass) >= lPass) return false;
     m_minPreCtxt = *p++;
     m_maxPreCtxt = *p++;
     m_startStates = gralloc<uint16>(m_maxPreCtxt - m_minPreCtxt + 1);
+    if (p + (m_maxPreCtxt - m_minPreCtxt + 1) * sizeof(uint16) >= ePass) return false;
     for (int i = 0; i <= m_maxPreCtxt - m_minPreCtxt; i++)
     {
         m_startStates[i] = read16(p);
@@ -182,21 +186,28 @@ bool Pass::readPass(void *pPass, size_t lPass)
         if (m_startStates[i] >= lPass) return false;
     }
 
+    if (p + m_numRules * (sizeof(uint16) + sizeof(byte)) >= ePass) return false;
     m_ruleSorts = gralloc<uint16>(m_numRules);
-    for (int i = 0; i < m_numRules; i++)
+    for (int i = 0; i < m_numRules; ++i)
         m_ruleSorts[i] = read16(p);
     m_rulePreCtxt = gralloc<byte>(m_numRules);
-    memcpy(m_rulePreCtxt, p, m_numRules);
-    p += m_numRules;
+    for (int i = 0; i < m_numRules; ++i)
+    {
+        m_rulePreCtxt[i] = *p++;
+        if (m_rulePreCtxt[i] > m_maxPreCtxt) return false;
+    }
+    if (p + 3 >= ePass) return false;
     p++;
     uint16 nPConstraint = read16(p);
     byte *pConstraint = p;
     byte *pActions = p + (m_numRules + 1) * 2;
     p += (m_numRules + 1) * 4;
+    if (p + (m_sTransition * m_sColumns * sizeof(uint16)) >= ePass) return false;
     m_sTable = gralloc<int16>(m_sTransition * m_sColumns);
     for (int i = 0; i < m_sTransition * m_sColumns; i++)
     {
         m_sTable[i] = read16(p);
+        if (m_sTable[i] > m_sRows || m_sTable[i] < 0) return false;
     }
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
@@ -215,6 +226,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
     }
 #endif
     p++;
+    if (p + nPConstraint >= ePass) return false;
     vm::CodeContext *cContexts = gralloc<vm::CodeContext>(nMaxContext + 2);
     if (nPConstraint)
     {
@@ -234,35 +246,39 @@ bool Pass::readPass(void *pPass, size_t lPass)
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementConstraints);
 #endif
-    p += readCodePointers(p, pConstraint, m_cConstraint, m_numRules, true, cContexts); 
+    p += readCodePointers(p, pConstraint, m_cConstraint, m_numRules, true, cContexts, ePass - p); 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraints);
 #endif
 
+    if (p >= ePass) return false;
     m_cActions = new Code[m_numRules];
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementActions);
 #endif
-    p += readCodePointers(p, pActions, m_cActions, m_numRules, false, cContexts);
+    p += readCodePointers(p, pActions, m_cActions, m_numRules, false, cContexts, ePass - p);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementActions);
 #endif
 
     assert(size_t(p - (byte *)pPass) <= lPass);
+    if (p > ePass) return false;
     free(cContexts);
     // no debug
     return true;
 }
 
-int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts)
+int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts, int size)
 {
     uint16 loffset = read16(pPointers);
     int lid = (loffset || !isConstraint) ? 0 : -1;
+    if (loffset > size) return size;
     for (int i = 1; i <= num; i++)
     {
         uint16 noffset = read16(pPointers);
         if (noffset > 0)
         {
+            if (noffset > size) return size;
             if (lid >= 0)
             {
 #ifndef DISABLE_TRACING
@@ -509,6 +525,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
             ++count;
         }
     }
+    if (status != Machine::finished) return iSlot->next();
     count -= nPre;
     return iSlot;
 }

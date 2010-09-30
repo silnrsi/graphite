@@ -38,7 +38,7 @@ public:
     ~Pass();
     
     bool readPass(void *pPass, size_t lPass);
-    int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts);
+    int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts, int size);
     void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
     Slot *findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, VMScratch* vms) const;
     int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, int nCtxt, GrSegment* seg, int nMap, Slot** map, int &flags) const;

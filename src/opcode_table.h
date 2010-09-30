@@ -47,7 +47,7 @@ static const opcode_t opcode_table[] =
     {{do2(trunc16)},                                0,  0, "TRUNC16"},
 
     {{do2(cond)},                                   0, -2, "COND"},
-    {{do2(and_)},                                   0, -1, "AND"},
+    {{do2(and_)},                                   0, -1, "AND"},      // 0x10
     {{do2(or_)},                                    0, -1, "OR"},
     {{do2(not_)},                                   0,  0, "NOT"},
     {{do2(equal)},                                  0, -1, "EQUAL"},
@@ -55,7 +55,7 @@ static const opcode_t opcode_table[] =
     {{do2(less)},                                   0, -1, "LESS"},
     {{do2(gtr)},                                    0, -1, "GTR"},
     {{do2(less_eq)},                                0, -1, "LESS_EQ"},
-    {{do2(gtr_eq)},                                 0, -1, "GTR_EQ"},
+    {{do2(gtr_eq)},                                 0, -1, "GTR_EQ"},   // 0x18
 
     {{do_(next), NILOP},                            0,  0, "NEXT"},
     {{do_(next_n), NILOP},                          1,  0, "NEXT_N"},
@@ -64,7 +64,7 @@ static const opcode_t opcode_table[] =
     {{do_(put_subs_8bit_obs), NILOP},               3,  0, "PUT_SUBS_8BIT_OBS"},
     {{do_(put_copy), NILOP},                        1,  0, "PUT_COPY"},
     {{do_(insert), NILOP},                          0,  0, "INSERT"},
-    {{do_(delete_), NILOP},                         0,  0, "DELETE"},
+    {{do_(delete_), NILOP},                         0,  0, "DELETE"},   // 0x20
     {{do_(assoc), NILOP},                     VARARGS,  0, "ASSOC"},
     {{NILOP ,do_(cntxt_item)},                      2,  1, "CNTXT_ITEM"},
 
@@ -91,7 +91,7 @@ static const opcode_t opcode_table[] =
 
     {{NILOP,NILOP},                                 3,  1, "PUSH_IGLYPH_ATTR"},
 
-    {{do2(pop_ret)},                                0, -1, "POP_RET"},
+    {{do2(pop_ret)},                                0, -1, "POP_RET"},  // 0x30
     {{do2(ret_zero)},                               0,  0, "RET_ZERO"},
     {{do2(ret_true)},                               0,  0, "RET_TRUE"},
 

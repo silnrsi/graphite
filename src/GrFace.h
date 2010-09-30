@@ -68,7 +68,8 @@ public:
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL)  {}
+    GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
+        m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL), m_numSilf(0)  {}
     ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }

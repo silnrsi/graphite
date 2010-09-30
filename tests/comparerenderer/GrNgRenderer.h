@@ -17,9 +17,10 @@ public:
         : m_fileFace(gr2::make_file_face_handle(fontFile)),
         m_rtl(textDir),
         m_grFace(make_GrFace_from_file_face_handle(m_fileFace, gr2::ePreload)),
-        m_grFont(gr2::make_GrFont(static_cast<float>(fontSize), m_grFace))
+        m_grFont(0)
     {
-
+        if (m_grFace)
+            m_grFont = gr2::make_GrFont(static_cast<float>(fontSize), m_grFace);
     }
     virtual ~GrNgRenderer()
     {
@@ -33,11 +34,13 @@ public:
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
         const void * pError = NULL;
+        if (!m_grFace) return;
         size_t numCodePoints = gr2::count_unicode_characters(gr2::kutf8,
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %ld\n", reinterpret_cast<const char*>(pError) - utf8);
         gr2::GrSegment* pSeg = make_GrSegment(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
+        if (!pSeg) return;
         RenderedLine * renderedLine = new(result) RenderedLine(gr2::length(pSeg), advance_X(pSeg));
         int i = 0;
         for (gr2::SlotHandle s = first(pSeg); !s.isNull(); s = s.next(), ++i)
