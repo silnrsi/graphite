@@ -33,8 +33,13 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class FeatureRef
 {
 public:
-    FeatureRef(byte bits=0, byte index=0, uint32 mask=0) throw() 
-      : m_mask(mask), m_bits(bits), m_index(index), m_max(mask >> bits) {}
+    FeatureRef(byte bits=0, byte index=0, uint32 mask=0, uint16 flags=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL) throw() 
+      : m_mask(mask), m_bits(bits), m_index(index), m_max(mask >> bits),
+      m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
+    ~FeatureRef() {
+        free(m_nameValues);
+        m_nameValues = NULL;
+    }
     void applyValToFeature(uint16 val, Features* pDest) const { 
         if (m_index < pDest->m_length && val <= m_max)
         {
@@ -64,6 +69,10 @@ private:
     uint16 m_max;
     byte m_bits;
     byte m_index;
+    uint16 m_nameid;
+    uint16 *m_nameValues;
+    uint16 m_flags;
+    uint16 m_numSet;
 };
 
 class FeatureMap

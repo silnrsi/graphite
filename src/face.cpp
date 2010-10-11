@@ -242,6 +242,20 @@ extern "C"
         return new FeatureRef(*pRef);
     }
 
+    GRNG_EXPORT uint16 *face_get_name(const GrFace * pFace, uint16 nameid, uint16 lid)
+    {
+        size_t nLen = 0, lOffset = 0, lSize = 0;
+        const void *pName = pFace->getTable(tagName, &nLen);
+        uint16 *res;
+        if (!pName || !TtfUtil::GetNameInfo(pName, 3, 0, lid, nameid, lOffset, lSize))
+            return NULL;
+        lSize >>= 1;
+        res = gralloc<uint16>(lSize + 1);
+        for (int i = 0; i < lSize; ++i)
+            res[i] = swap16(*(uint16 *)((char *)pName + lOffset));
+        res[lSize] = 0;
+        return res;
+    }
 
     GRNG_EXPORT void destroy_GrFace(GrFace *face)
     {

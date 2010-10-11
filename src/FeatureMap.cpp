@@ -102,12 +102,14 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
         }
 #endif
         if (offset + numSet * 4 > lFeat) return false;
+        uint16 *uiSet = gralloc<uint16>(numSet);
         for (int j = 0; j < numSet; j++)
         {
             uint16 val = read16(pSet);
             if (val > maxVal) maxVal = val;
             if (j == 0) defVals[i] = val;
             uint16 label = read16(pSet);
+            uiSet[j] = label;
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())
             {
@@ -130,10 +132,10 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
                 {
                     currIndex++;
                     currBits = 0;
-		    mask = 1;
+		    mask = 2;
                 }
                 currBits += bits;
-                m_feats[i] = FeatureRef(currBits, currIndex, (mask - 1) << currBits);
+                ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, flags, uiName, numSet, uiSet);
                 break;
             }
         }
