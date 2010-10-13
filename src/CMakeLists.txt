@@ -55,7 +55,6 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
-    ../include/graphiteng/AutoHandle.h
     ../include/graphiteng/Features.h
     ../include/graphiteng/FeatureRef.h
     ../include/graphiteng/GrFace.h
