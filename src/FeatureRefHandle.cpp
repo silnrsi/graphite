@@ -26,57 +26,65 @@ using namespace org::sil::graphite::v2;
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p)
+GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask)
+{                      //When finished with the FeatureRef, call destroy_FeatureRef    
+  return new FeatureRef(bits, index, mask);
+}
+
+
+GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
+{                      //When finished with the FeatureRef, call destroy_FeatureRef    
+    if (pfeatureref)
+    return new FeatureRef(*pfeatureref);
+    else
+    return NULL;
+}
+
+
+GRNG_EXPORT void apply_value_to_feature(uint16 val, const FeaturesHandle& pDest, FeatureRef* pRes)
+{
+    if (!pRes)
+    return;
+    if (pDest.isNull())
+    return;
+    
+    pRes->applyValToFeature(val, pDest.ptr());
+}
+
+
+GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, const FeaturesHandle& pDest)
+{
+    if (!pfeatureref)
+    return;
+    if (pDest.isNull())
+    return;
+    
+    pfeatureref->maskFeature(pDest.ptr());
+}
+
+
+GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const FeaturesHandle& feats)    //returns 0 if either pointer is NULL
+{
+    if (!pfeatureref)
+    return 0;
+    if (feats.isNull())
+    return 0;
+    
+    return pfeatureref->getFeatureVal(*feats.ptr());
+}
+
+
+GRNG_EXPORT void destroy_FeatureRef(FeatureRef *p)
 {
     delete p;
 }
 
+
+
+
+
+
+
+
+
 }}}} // namespace
-
-FeatureRefHandle::FeatureRefHandle(byte bits, byte index, uint32 mask/*=0*/)
-:	AutoHandle<FeatureRef, &DeleteFeatureRef>(new FeatureRef(bits, index, mask))
-{
-}
-
-
-FeatureRefHandle FeatureRefHandle::clone() const		//clones the FeatureRef which are then owned separately
-{
-    if (ptr())
-	return new FeatureRef(*ptr());
-    else
-	return NULL;
-}
-
-
-void FeatureRefHandle::applyValToFeature(uint16 val, const FeaturesHandle& pDest) const
-{
-    if (isNull())
-	return;
-    if (pDest.isNull())
-	return;
-    
-    ptr()->applyValToFeature(val, pDest.ptr());
-}
-
-
-void FeatureRefHandle::maskFeature(const FeaturesHandle& pDest) const
-{
-    if (isNull())
-	return;
-    if (pDest.isNull())
-	return;
-    
-    ptr()->maskFeature(pDest.ptr());
-}
-
-
-uint16 FeatureRefHandle::getFeatureVal(const FeaturesHandle& feats) const	//returns 0 if either handle IsNull
-{
-    if (isNull())
-	return 0;
-    if (feats.isNull())
-	return 0;
-    
-    return ptr()->getFeatureVal(*feats.ptr());
-}
-

@@ -8,19 +8,22 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class FeatureRef;
 class FeaturesHandle;
 
-extern GRNG_EXPORT void DeleteFeatureRef(FeatureRef *p);
 
-class GRNG_EXPORT FeatureRefHandle : public AutoHandle<FeatureRef, &DeleteFeatureRef>
+extern "C"
 {
-public:
-    FeatureRefHandle(byte bits, byte index, uint32 mask=0);
-    FeatureRefHandle(FeatureRef* p/*takes ownership*/) : AutoHandle<FeatureRef, &DeleteFeatureRef>(p) {}
-    
-    FeatureRefHandle clone() const;		//clones the FeatureRef which is then owned separately
+    GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask);
+                      //When finished with the FeatureRef, call destroy_FeatureRef    
+    GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref);
+                      //When finished with the FeatureRef, call destroy_FeatureRef    
 
-    void applyValToFeature(uint16 val, const FeaturesHandle& pDest) const;
-    void maskFeature(const FeaturesHandle& pDest) const;
-    uint16 getFeatureVal(const FeaturesHandle& feats) const;	//returns 0 if either handle isNull
-};
+    GRNG_EXPORT void apply_value_to_feature(uint16 val, const FeaturesHandle& pDest, FeatureRef* pRes);
+    GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, const FeaturesHandle& pDest);
+    GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const FeaturesHandle& feats);    //returns 0 if either pointer is NULL
+
+    GRNG_EXPORT void destroy_FeatureRef(FeatureRef *pfeatureref);
+}
+
+
+
 
 }}}}

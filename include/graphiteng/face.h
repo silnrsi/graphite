@@ -18,7 +18,7 @@ extern "C"
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_GrFace    
   
     GRNG_EXPORT FeaturesHandle get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default
-    GRNG_EXPORT FeatureRefHandle feature(const GrFace* pFace, uint8 index);
+    GRNG_EXPORT FeatureRef* feature(const GrFace* pFace, uint8 index);  //When finished with the FeatureRef, call destroy_FeatureRef
     GRNG_EXPORT void destroy_GrFace(GrFace *face);
 
     GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 

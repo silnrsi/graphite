@@ -233,7 +233,7 @@ extern "C"
     }
 
 
-    GRNG_EXPORT FeatureRefHandle feature(const GrFace* pFace, uint8 index)
+    GRNG_EXPORT FeatureRef* feature(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         const FeatureRef* pRef = pFace->feature(index);
         if (!pRef)
