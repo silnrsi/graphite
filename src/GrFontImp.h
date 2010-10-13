@@ -21,9 +21,9 @@
 */
 #pragma once
 
-#include "graphiteng/font.h"
+#include "graphiteng/GrFont.h"
 #include "Main.h"
-#include "GrFace.h"
+#include "GrFaceImp.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

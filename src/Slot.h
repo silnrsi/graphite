@@ -22,9 +22,9 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/segment.h"
+#include "graphiteng/GrSegment.h"
 #include "Main.h"
-#include "GrFont.h"
+#include "GrFontImp.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

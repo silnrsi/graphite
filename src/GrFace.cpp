@@ -19,9 +19,9 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/face.h"
+#include "graphiteng/GrFace.h"
 #include "XmlTraceLog.h"
-#include "GrFace.h"
+#include "GrFaceImp.h"
 
 #ifndef DISABLE_FILE_FACE_HANDLE
 #include "TtfUtil.h"

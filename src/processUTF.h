@@ -23,7 +23,7 @@
 #define PROCESS_UTF_INCLUDE
 
 #include "graphiteng/Types.h"
-#include "graphiteng/segment.h"
+#include "graphiteng/GrSegment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

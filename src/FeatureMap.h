@@ -22,7 +22,7 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/face.h"
+#include "graphiteng/GrFace.h"
 #include "graphiteng/FeaturesHandle.h"
 #include "Main.h"
 #include "Features.h"

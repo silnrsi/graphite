@@ -25,12 +25,12 @@
 #include <new>
 
 #include "GrSegmentImp.h"
-#include "graphiteng/font.h"
+#include "graphiteng/GrFont.h"
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
-#include "graphiteng/segment.h"
+#include "graphiteng/GrSegment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

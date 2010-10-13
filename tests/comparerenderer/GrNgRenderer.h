@@ -3,9 +3,9 @@
 #include <new>
 #include "Renderer.h"
 #include <graphiteng/Types.h>
-#include <graphiteng/face.h>
-#include <graphiteng/font.h>
-#include <graphiteng/segment.h>
+#include <graphiteng/GrFace.h>
+#include <graphiteng/GrFont.h>
+#include <graphiteng/GrSegment.h>
 #include <graphiteng/SlotHandle.h>
 
 namespace gr2 = org::sil::graphite::v2;
