@@ -227,7 +227,7 @@ extern "C"
     }
     
 
-    GRNG_EXPORT FeaturesHandle get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+    GRNG_EXPORT Features* get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
         return pFace->theFeatures().cloneFeatures(langname);
     }

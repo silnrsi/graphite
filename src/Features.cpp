@@ -24,32 +24,40 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-GRNG_EXPORT void DeleteFeatures(Features *p)
+GRNG_EXPORT Features* make_empty_Features()
+{                      //When finished with the Features, call destroy_Features    
+    return new Features;
+}
+
+
+GRNG_EXPORT Features* clone_Features(const Features* pfeatures)
+{                      //When finished with the Features, call destroy_Features    
+    if (pfeatures)
+    return pfeatures->clone();
+    else
+    return new Features;
+}
+
+
+GRNG_EXPORT bool maskedOr(Features* pSrc, const Features* pOther, const Features* pMask)    //returns false iff any of the Features* are NULL
+{
+    if (!pSrc)
+    return false;
+    if (!pOther)
+    return false;
+    if (!pMask)
+    return false;
+    
+    pSrc->maskedOr(*pOther, *pMask);
+    return true;
+}
+ 
+  
+GRNG_EXPORT void destroy_Features(Features *p)
 {
     delete p;
 }
 
 
-FeaturesHandle FeaturesHandle::clone() const		//clones the Features which are then owned separately
-{
-    if (ptr())
-	return ptr()->clone();
-    else
-	return FeaturesHandle();
-}
-
-
-bool FeaturesHandle::maskedOr(const FeaturesHandle& other, const FeaturesHandle& mask) const	//returns false iff any of the FeaturesHandles are IsNull
-{
-    if (isNull())
-	return false;
-    if (other.isNull())
-	return false;
-    if (mask.isNull())
-	return false;
-    
-    ptr()->maskedOr(*other.ptr(), *mask.ptr());
-    return true;
-}
 
 }}}} // namespace

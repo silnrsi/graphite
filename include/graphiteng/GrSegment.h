@@ -7,8 +7,8 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
 class GrFace;
-class FeaturesHandle;
 class CharInfo;
+class Features;
 
 
 enum encform {
@@ -31,7 +31,7 @@ extern "C"
 {
     GRNG_EXPORT GrSegment* make_GrSegment(const GrFont* font, const GrFace* face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir);
                       //When finished with the GrFont, call destroy_GrSegment    
-    GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont* font, const GrFace* face, uint32 script, const FeaturesHandle& pFeats, encform enc, const void* pStart, size_t nChars, int dir);
+    GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont* font, const GrFace* face, uint32 script, const Features* pFeats, encform enc, const void* pStart, size_t nChars, int dir);
                       //When finished with the GrFont, call destroy_GrSegment    
     GRNG_EXPORT void destroy_GrSegment(GrSegment* p);
 
@@ -43,7 +43,7 @@ extern "C"
     GRNG_EXPORT void choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
     GRNG_EXPORT SlotHandle first(GrSegment* pSeg/*not NULL*/);
     
-    GRNG_EXPORT int add_features(GrSegment* pSeg/*not NULL*/, const FeaturesHandle& feats);
+    GRNG_EXPORT int add_features(GrSegment* pSeg/*not NULL*/, const Features* feats);
 }
   
   

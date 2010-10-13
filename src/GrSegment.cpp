@@ -81,7 +81,7 @@ private:
       size_t m_nCharsProcessed ;
 };
 
-static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
+static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
     if (!font) return NULL;
     GrSegment* pRes=new GrSegment(nChars, face, script, dir);
@@ -148,7 +148,7 @@ GRNG_EXPORT GrSegment* make_GrSegment(const GrFont *font, const GrFace *face, ui
 }
 
 
-GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
     return makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
 }
@@ -201,12 +201,12 @@ GRNG_EXPORT SlotHandle first(GrSegment* pSeg/*not NULL*/)
 }
 
 
-GRNG_EXPORT int addFeatures(GrSegment* pSeg/*not NULL*/, const FeaturesHandle& feats)
+GRNG_EXPORT int addFeatures(GrSegment* pSeg/*not NULL*/, const Features* feats)
 {
-    if (feats.isNull())
+    if (!feats)
     return -2;      //the smallest value that can normally be returned is -1
     
-    return pSeg->addFeatures(*feats.ptr());
+    return pSeg->addFeatures(*feats);
 }
 
 }

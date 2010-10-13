@@ -253,12 +253,12 @@ void GrSegment::logSegment() const
 class SlotBuilder
 {
 public:
-      SlotBuilder(const GrFace *face2, const FeaturesHandle& pFeats/*must not be isNull*/, GrSegment* pDest2)
+      SlotBuilder(const GrFace *face2, const Features* pFeats/*must not be NULL*/, GrSegment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
 	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 1)),
 	  m_stable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 10)),
-	  m_fid(pDest2->addFeatures(*pFeats.ptr())),
+	  m_fid(pDest2->addFeatures(*pFeats)),
 	  m_nCharsProcessed(0) 
       {
       }	  
@@ -287,7 +287,7 @@ private:
 };
 
 
-void GrSegment::read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void* pStart, size_t nChars)
+void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars)
 {
     SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);

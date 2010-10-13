@@ -105,7 +105,7 @@ public:
 #endif
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
-    void read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void*pStart, size_t nChars);
+    void read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const GrFont *font);
     void finalise(const GrFont *font);
   

@@ -82,12 +82,12 @@ private:
     {
     public:
         uint32 m_lang;
-        FeaturesHandle m_pFeatures;
+        Features* m_pFeatures;      //owns
         CLASS_NEW_DELETE
     };
 public:
-    FeatureMap() : m_langFeats(NULL), m_feats(NULL) {}
-    ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; }
+    FeatureMap() : m_langFeats(NULL), m_feats(NULL), m_defaultFeatures(NULL) {}
+    ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; delete m_defaultFeatures; }
     
     bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
@@ -95,7 +95,7 @@ public:
     const FeatureRef *featureRef(uint32 name);
     FeatureRef *feature(uint8 index) const { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
-    FeaturesHandle cloneFeatures(uint32 langname/*0 means default*/) const;
+    Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     CLASS_NEW_DELETE
 private:
     byte m_numFeats;
@@ -105,7 +105,7 @@ private:
     uint16 m_numLanguages;
 
     FeatureRef *m_feats;
-    FeaturesHandle m_defaultFeatures;
+    Features* m_defaultFeatures;        //owned
     
 private:		//defensive on m_langFeats and m_feats
     FeatureMap(const FeatureMap&);

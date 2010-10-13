@@ -41,36 +41,36 @@ GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
 }
 
 
-GRNG_EXPORT void apply_value_to_feature(uint16 val, const FeaturesHandle& pDest, FeatureRef* pRes)
+GRNG_EXPORT void apply_value_to_feature(uint16 val, FeatureRef* pRef, Features* pDest)
 {
-    if (!pRes)
+    if (!pRef)
     return;
-    if (pDest.isNull())
+    if (!pDest)
     return;
     
-    pRes->applyValToFeature(val, pDest.ptr());
+    pRef->applyValToFeature(val, pDest);
 }
 
 
-GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, const FeaturesHandle& pDest)
+GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, Features* pDest)
 {
     if (!pfeatureref)
     return;
-    if (pDest.isNull())
+    if (!pDest)
     return;
     
-    pfeatureref->maskFeature(pDest.ptr());
+    pfeatureref->maskFeature(pDest);
 }
 
 
-GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const FeaturesHandle& feats)    //returns 0 if either pointer is NULL
+GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
-    if (feats.isNull())
+    if (!feats)
     return 0;
     
-    return pfeatureref->getFeatureVal(*feats.ptr());
+    return pfeatureref->getFeatureVal(*feats);
 }
 
 
