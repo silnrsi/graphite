@@ -56,7 +56,7 @@ endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
     ../include/graphiteng/AutoHandle.h
-    ../include/graphiteng/FeatureRefHandle.h
+    ../include/graphiteng/FeatureRef.h
     ../include/graphiteng/FeaturesHandle.h
     ../include/graphiteng/SlotHandle.h
     ../include/graphiteng/Types.h
@@ -75,7 +75,7 @@ add_library(graphiteng SHARED
     segment.cpp
     Code.cpp
     FeatureMap.cpp
-    FeatureRefHandle.cpp
+    FeatureRef.cpp
     FeaturesHandle.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
