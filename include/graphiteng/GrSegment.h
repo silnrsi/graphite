@@ -39,7 +39,7 @@ extern "C"
     GRNG_EXPORT int length(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT CharInfo* charInfo(GrSegment* pSeg/*not NULL*/, int index);
+    GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, int index);
     GRNG_EXPORT void run_graphite(GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT void choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
     GRNG_EXPORT const Slot* first(GrSegment* pSeg/*not NULL*/);

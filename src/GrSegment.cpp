@@ -178,7 +178,7 @@ GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/)
 }
 
 
-GRNG_EXPORT CharInfo* charInfo(GrSegment* pSeg/*not NULL*/, int index)
+GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, int index)
 {
     return pSeg->charinfo(index);
 }

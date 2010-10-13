@@ -32,8 +32,8 @@ public:
     void init(int cid, int gindex) { m_char = cid; m_before = m_after = gindex; }
     void update(int offset) { m_before += offset; m_after += offset; }
     void feats(int offset) { m_featureid = offset; }
-    int fid() { return m_featureid; }
-    int breakWeight() { return m_break; }
+    int fid() const { return m_featureid; }
+    int breakWeight() const { return m_break; }
     void breakWeight(int val) { m_break = val; }
 
     CLASS_NEW_DELETE
