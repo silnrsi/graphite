@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "graphiteng/GrSegment.h"
-#include "graphiteng/SlotHandle.h"
+#include "graphiteng/Slot.h"
 #include "GrSegmentImp.h"
 #include "processUTF.h"
 

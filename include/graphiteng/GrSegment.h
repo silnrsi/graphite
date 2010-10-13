@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/SlotHandle.h"
+#include "graphiteng/Slot.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

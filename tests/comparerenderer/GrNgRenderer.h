@@ -6,7 +6,7 @@
 #include <graphiteng/GrFace.h>
 #include <graphiteng/GrFont.h>
 #include <graphiteng/GrSegment.h>
-#include <graphiteng/SlotHandle.h>
+#include <graphiteng/Slot.h>
 
 namespace gr2 = org::sil::graphite::v2;
 

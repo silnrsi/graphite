@@ -60,7 +60,7 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/GrFace.h
     ../include/graphiteng/GrFont.h
     ../include/graphiteng/GrSegment.h
-    ../include/graphiteng/SlotHandle.h
+    ../include/graphiteng/Slot.h
     ../include/graphiteng/Types.h
     ${TRACE_HEADERS}
     )
@@ -83,7 +83,7 @@ add_library(graphiteng SHARED
     GrSegmentImp.cpp
     Main.cpp
     SlotImp.cpp
-    SlotHandle.cpp
+    Slot.cpp
     Silf.cpp
     Pass.cpp
     TtfUtil.cpp
