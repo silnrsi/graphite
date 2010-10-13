@@ -620,27 +620,27 @@ int Parameters::testFileFont() const
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
         size_t *map = (size_t*)malloc((length(pSeg) + 1) * sizeof(size_t));
-        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
-        { map[i] = slot.id(); }
+        for (const gr2::Slot* slot = first(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
+        for (const gr2::Slot* slot = first(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         {
-            float orgX = slot.originX();
-            float orgY = slot.originY();
+            float orgX = origin_X(slot);
+            float orgY = origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot.gid(), lookup(map, slot.attachedTo()),
-                    slot.getAttr(pSeg, gr2::kslatAttX, 0),
-                    slot.getAttr(pSeg, gr2::kslatAttY, 0), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
-                    charInfo(pSeg, slot.original())->breakWeight(), slot.before(), slot.after());
+                    i, gid(slot), lookup(map, attached_to(slot)),
+                    get_attr(slot, pSeg, gr2::kslatAttX, 0),
+                    get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
+                    charInfo(pSeg, original(slot))->breakWeight(), before(slot), after(slot));
             
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[slot.before() + offset],
-                    pText32[slot.after() + offset]);
+                    pText32[before(slot) + offset],
+                    pText32[after(slot) + offset]);
             }
 #if 0
             if (parameters.justification)

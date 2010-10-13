@@ -195,9 +195,9 @@ GRNG_EXPORT void chooseSilf(GrSegment* pSeg/*not NULL*/, uint32 script)
 }
 
 
-GRNG_EXPORT SlotHandle first(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT const Slot* first(GrSegment* pSeg/*not NULL*/)
 {
-    return SlotHandle(pSeg->first());
+    return pSeg->first();
 }
 
 

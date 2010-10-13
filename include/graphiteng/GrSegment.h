@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/Slot.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -9,6 +8,8 @@ class GrSegment;
 class GrFace;
 class CharInfo;
 class Features;
+class Slot;
+class GrFont;
 
 
 enum encform {
@@ -41,7 +42,7 @@ extern "C"
     GRNG_EXPORT CharInfo* charInfo(GrSegment* pSeg/*not NULL*/, int index);
     GRNG_EXPORT void run_graphite(GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT void choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
-    GRNG_EXPORT SlotHandle first(GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT const Slot* first(GrSegment* pSeg/*not NULL*/);
     
     GRNG_EXPORT int add_features(GrSegment* pSeg/*not NULL*/, const Features* feats);
 }

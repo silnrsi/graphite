@@ -24,74 +24,80 @@
 
 using namespace org::sil::graphite::v2;
 
-unsigned short SlotHandle::gid() const
+extern "C" 
 {
-    return m_p->gid();
+GRNG_EXPORT const Slot* next_slot_in_segment(const Slot* p/*not NULL*/)
+{
+    return p->next();
 }
 
 
-float SlotHandle::originX() const
+GRNG_EXPORT unsigned short gid(const Slot* p/*not NULL*/)
 {
-    return m_p->origin().x;
+    return p->gid();
 }
 
 
-float SlotHandle::originY() const
+GRNG_EXPORT float origin_X(const Slot* p/*not NULL*/)
 {
-    return m_p->origin().y;
+    return p->origin().x;
 }
 
 
-float SlotHandle::advance(const GrFont *font) const
+GRNG_EXPORT float origin_Y(const Slot* p/*not NULL*/)
 {
-    return font->advance(m_p->m_glyphid);
+    return p->origin().y;
 }
 
 
-int SlotHandle::before() const
+GRNG_EXPORT float advance(const Slot* p/*not NULL*/, const GrFont *font)
 {
-    return m_p->before();
+    return p->advance(font);
 }
 
 
-int SlotHandle::after() const
+GRNG_EXPORT int before(const Slot* p/*not NULL*/)
 {
-    return m_p->after();
+    return p->before();
 }
 
 
-int SlotHandle::getAttr(const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex) const
+GRNG_EXPORT int after(const Slot* p/*not NULL*/)
 {
-    return m_p->getAttr(pSeg, index, subindex);
+    return p->after();
 }
 
-bool SlotHandle::isInsertBefore() const
+
+GRNG_EXPORT int get_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex)
 {
-    return m_p->isInsertBefore();
+    return p->getAttr(pSeg, index, subindex);
 }
 
-int SlotHandle::original() const
+
+GRNG_EXPORT bool is_insert_before(const Slot* p/*not NULL*/)
 {
-    return m_p->original();
+    return p->isInsertBefore();
 }
 
-SlotHandle SlotHandle::next() const
+
+GRNG_EXPORT int original(const Slot* p/*not NULL*/)
 {
-    return m_p->next();
+    return p->original();
 }
 
-bool SlotHandle::isNull() const
+#if 0       //what should this be
+GRNG_EXPORT size_t id(const Slot* p/*not NULL*/)
 {
-    return (!m_p);
+    return (size_t)p->id();
+}
+#endif
+
+GRNG_EXPORT size_t attached_to(const Slot* p/*not NULL*/)
+{
+    return (size_t)p->attachedTo();
 }
 
-size_t SlotHandle::id() const
-{
-    return size_t(m_p);
+
 }
 
-size_t SlotHandle::attachedTo() const
-{
-    return size_t(m_p->attachedTo());
-}
 

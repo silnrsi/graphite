@@ -31,37 +31,23 @@ enum attrCode {
     kslatMax,
     kslatNoEffect = kslatMax + 1
 };
-    
-class GRNG_EXPORT SlotHandle		//stays valid so long as its SegmentHandle stays valid
+
+
+extern "C"
 {
-public:
-    SlotHandle(const Slot* p/*no ownership, caller must keep it alive*/=NULL) : m_p(p) {}
-    SlotHandle next() const;
- 
-    unsigned short gid() const;
-    float originX() const;
-    float originY() const;
-    float advance(const GrFont *font) const;
-    int before() const;
-    int after() const;
-    int getAttr(const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex) const;
-    bool isInsertBefore() const;
-    int original() const;
-    bool isNull() const;
-    size_t id() const;
-    size_t attachedTo() const;
-    
-    const Slot* operator->() const { return m_p; }		//cannot be used by client code - only available witin graphite code!
-
-protected:
-//    const Slot& operator*() const {return *m_p; };
-    const Slot* ptr() const { return m_p; }
-
-    void setPtr(const Slot* p/*no ownership, caller must keep it alive*/=NULL) { m_p=p; }
-  
-
-private:
-    const Slot* m_p;		//not owned
-};
+    //slots are owned by their segment
+    GRNG_EXPORT const Slot* next_slot_in_segment(const Slot* p/*not NULL*/);
+    GRNG_EXPORT unsigned short gid(const Slot* p/*not NULL*/);
+    GRNG_EXPORT float origin_X(const Slot* p/*not NULL*/);
+    GRNG_EXPORT float origin_Y(const Slot* p/*not NULL*/);
+    GRNG_EXPORT float advance(const Slot* p/*not NULL*/, const GrFont *font);
+    GRNG_EXPORT int before(const Slot* p/*not NULL*/);
+    GRNG_EXPORT int after(const Slot* p/*not NULL*/);
+    GRNG_EXPORT int get_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex);
+    GRNG_EXPORT bool is_insert_before(const Slot* p/*not NULL*/);
+    GRNG_EXPORT int original(const Slot* p/*not NULL*/);
+//  GRNG_EXPORT size_t id(const Slot* p/*not NULL*/);
+    GRNG_EXPORT size_t attached_to(const Slot* p/*not NULL*/);
+}
 
 }}}} // namespace
