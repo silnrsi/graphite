@@ -32,7 +32,7 @@
 #include "Machine.h"
 #include "GrSegmentImp.h"
 #include "XmlTraceLog.h"
-#include "Slot.h"
+#include "SlotImp.h"
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
                             regbank & reg

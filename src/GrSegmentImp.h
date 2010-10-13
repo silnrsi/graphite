@@ -32,7 +32,7 @@
 #include <vector>
 #endif
 
-#include "Slot.h"
+#include "SlotImp.h"
 #include "CharInfo.h"
 #include "FeaturesImp.h"
 #include "XmlTraceLog.h"

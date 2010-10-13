@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "GrSegmentImp.h"
-#include "Slot.h"
+#include "SlotImp.h"
 #include "CharInfo.h"
 
 using namespace org::sil::graphite::v2;
