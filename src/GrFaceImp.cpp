@@ -22,7 +22,7 @@
 #include "GrFace.h"
 #include "VMScratch.h"
 #include <string.h>
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "XmlTraceLog.h"
 
 using namespace org::sil::graphite::v2;

@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include "Silf.h"
 #include "XmlTraceLog.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 
 using namespace org::sil::graphite::v2;
 

@@ -79,9 +79,9 @@ add_library(graphiteng SHARED
     FeaturesHandle.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
-    GrFace.cpp
-    GrFont.cpp
-    GrSegment.cpp
+    GrFaceImp.cpp
+    GrFontImp.cpp
+    GrSegmentImp.cpp
     Main.cpp
     Slot.cpp
     SlotHandle.cpp

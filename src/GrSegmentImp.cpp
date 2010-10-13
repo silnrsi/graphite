@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <new>
 
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "graphiteng/font.h"
 #include "CharInfo.h"
 #include "Slot.h"

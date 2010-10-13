@@ -23,7 +23,7 @@
 #include "Pass.h"
 #include <string.h>
 #include <assert.h>
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "Code.h"
 #include "XmlTraceLog.h"
 

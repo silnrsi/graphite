@@ -21,7 +21,7 @@
 */
 #include "graphiteng/segment.h"
 #include "graphiteng/SlotHandle.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "processUTF.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {

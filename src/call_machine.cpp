@@ -30,7 +30,7 @@
 #include <cassert>
 #include <graphiteng/SlotHandle.h>
 #include "Machine.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "XmlTraceLog.h"
 #include "Slot.h"
 
