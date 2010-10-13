@@ -19,8 +19,8 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/FeaturesHandle.h"
-#include "Features.h"
+#include "graphiteng/Features.h"
+#include "FeaturesImp.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

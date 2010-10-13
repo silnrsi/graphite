@@ -23,9 +23,9 @@
 
 #include "graphiteng/Types.h"
 #include "graphiteng/GrFace.h"
-#include "graphiteng/FeaturesHandle.h"
+#include "graphiteng/Features.h"
 #include "Main.h"
-#include "Features.h"
+#include "FeaturesImp.h"
 //#include <map> // avoid libstdc++
 
 namespace org { namespace sil { namespace graphite { namespace v2 {

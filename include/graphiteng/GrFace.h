@@ -1,7 +1,7 @@
 #pragma once
 #include <cassert>
 #include "graphiteng/Types.h"
-#include "graphiteng/FeaturesHandle.h"
+#include "graphiteng/Features.h"
 #include "graphiteng/FeatureRef.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {

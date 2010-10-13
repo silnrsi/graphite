@@ -34,7 +34,7 @@
 
 #include "Slot.h"
 #include "CharInfo.h"
-#include "Features.h"
+#include "FeaturesImp.h"
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
