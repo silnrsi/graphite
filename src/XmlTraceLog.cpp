@@ -238,6 +238,8 @@ void XmlTraceLog::warning(const char * msg, ...)
 #endif		//!DISABLE_TRACING
 
 
+extern "C"
+{
 bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
@@ -264,5 +266,5 @@ void stopGraphiteLogging()
     }
 #endif		//!DISABLE_TRACING
 }
-
+}
 }}}} // namespace
