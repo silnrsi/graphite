@@ -55,6 +55,7 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
+    ../include/graphiteng/CharInfo.h
     ../include/graphiteng/Features.h
     ../include/graphiteng/FeatureRef.h
     ../include/graphiteng/GrFace.h
@@ -69,6 +70,7 @@ file(GLOB PRIVATE_HEADERS *.h)
 
 add_library(graphiteng SHARED
     call_machine.cpp
+    CharInfo.cpp
     Code.cpp
     FeatureMap.cpp
     Features.cpp

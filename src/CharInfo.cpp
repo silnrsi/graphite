@@ -19,31 +19,25 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#pragma once
+#include "graphiteng/CharInfo.h"
+#include "CharInfoImp.h"
 
-#include "Main.h"
+using namespace org::sil::graphite::v2;
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-class CharInfo // : ICharInfo
+extern "C" 
 {
+GRNG_EXPORT unsigned int unicode_char(const CharInfo* p/*not NULL*/)
+{
+    return p->unicodeChar();
+}
 
-public:
-    void init(int cid, int gindex) { m_char = cid; m_before = m_after = gindex; }
-    void update(int offset) { m_before += offset; m_after += offset; }
-    unsigned int unicodeChar() const { return m_char; }
-    void feats(int offset) { m_featureid = offset; }
-    int fid() const { return m_featureid; }
-    int breakWeight() const { return m_break; }
-    void breakWeight(int val) { m_break = val; }
 
-    CLASS_NEW_DELETE
-private:
-    int m_char;     // Unicode character from character stream
-    int m_before;   // slot id of glyph that cursor before this char is before
-    int m_after;    // slot id of glyph that cursor after this char is after
-    uint8 m_featureid;	// index into features list in the segment
-    int8 m_break;	// breakweight coming from lb table
-};
+GRNG_EXPORT int break_weight(const CharInfo* p/*not NULL*/)
+{
+    return p->breakWeight();
+}
 
-}}}} // namespace
+
+}
+
+

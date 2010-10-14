@@ -30,7 +30,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/GrFace.h"
 #include "graphiteng/XmlLog.h"
 
-#include "CharInfoImp.h" // temp
+#include "graphiteng/CharInfo.h"
 
 namespace gr2 = org::sil::graphite::v2;
 
@@ -634,8 +634,8 @@ int Parameters::testFileFont() const
                     i, gid(slot), lookup(map, attached_to(slot)),
                     get_attr(slot, pSeg, gr2::kslatAttX, 0),
                     get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
-                    charInfo(pSeg, original(slot))->breakWeight(), before(slot), after(slot));
-            
+                    gr2::break_weight(charInfo(pSeg, original(slot))), before(slot), after(slot));
+           
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
