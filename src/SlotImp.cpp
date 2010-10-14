@@ -21,7 +21,7 @@
 */
 #include "GrSegmentImp.h"
 #include "SlotImp.h"
-#include "CharInfo.h"
+#include "CharInfoImp.h"
 
 using namespace org::sil::graphite::v2;
 

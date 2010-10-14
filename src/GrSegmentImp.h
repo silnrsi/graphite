@@ -33,7 +33,7 @@
 #endif
 
 #include "SlotImp.h"
-#include "CharInfo.h"
+#include "CharInfoImp.h"
 #include "FeaturesImp.h"
 #include "XmlTraceLog.h"
 #include "Silf.h"

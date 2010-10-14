@@ -30,7 +30,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include "graphiteng/GrFace.h"
 #include "graphiteng/XmlLog.h"
 
-#include "CharInfo.h" // temp
+#include "CharInfoImp.h" // temp
 
 namespace gr2 = org::sil::graphite::v2;
 

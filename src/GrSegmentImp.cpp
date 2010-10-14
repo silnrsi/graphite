@@ -26,7 +26,7 @@
 
 #include "GrSegmentImp.h"
 #include "graphiteng/GrFont.h"
-#include "CharInfo.h"
+#include "CharInfoImp.h"
 #include "SlotImp.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
