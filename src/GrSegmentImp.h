@@ -57,7 +57,7 @@ class GrFace;
 class GrSegment
 {
 public:
-    unsigned int length() const { return m_numGlyphs; }
+    unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };

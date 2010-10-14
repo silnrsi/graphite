@@ -229,7 +229,7 @@ void GrSegment::logSegment() const
     if (XmlTraceLog::get().active())
     {
         XmlTraceLog::get().openElement(ElementSegment);
-        XmlTraceLog::get().addAttribute(AttrLength, length());
+        XmlTraceLog::get().addAttribute(AttrLength, slotCount());
         XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
         for (Slot *i = m_first; i; i = i->next())

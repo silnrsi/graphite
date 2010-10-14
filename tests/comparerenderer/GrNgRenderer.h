@@ -41,9 +41,9 @@ public:
             fprintf(stderr, "Invalid Unicode pos %ld\n", reinterpret_cast<const char*>(pError) - utf8);
         gr2::GrSegment* pSeg = make_GrSegment(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
         if (!pSeg) return;
-        RenderedLine * renderedLine = new(result) RenderedLine(gr2::length(pSeg), advance_X(pSeg));
+        RenderedLine * renderedLine = new(result) RenderedLine(gr2::number_of_slots_in_segment(pSeg), advance_X(pSeg));
         int i = 0;
-        for (const gr2::Slot* s = first(pSeg); s; s = next_slot_in_segment(s), ++i)
+        for (const gr2::Slot* s = first_slot_in_segment(pSeg); s; s = next_slot_in_segment(s), ++i)
             (*renderedLine)[i].set(gid(s), origin_X(s), origin_Y(s), before(s), after(s));
         
 //         for (int i = 0; i < seg.length(); i++)

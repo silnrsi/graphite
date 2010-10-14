@@ -160,12 +160,6 @@ GRNG_EXPORT void destroy_GrSegment(GrSegment* p)
 }
 
 
-GRNG_EXPORT int length(const GrSegment* pSeg/*not NULL*/)
-{
-    return pSeg->length();
-}
-
-
 GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->advance().x;
@@ -195,7 +189,13 @@ GRNG_EXPORT void chooseSilf(GrSegment* pSeg/*not NULL*/, uint32 script)
 }
 
 
-GRNG_EXPORT const Slot* first(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/)
+{
+    return pSeg->slotCount();
+}
+
+
+GRNG_EXPORT const Slot* first_slot_in_segment(GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->first();
 }

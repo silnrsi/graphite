@@ -488,9 +488,9 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
     Machine m;
     int nMap = count;
     count = nPre;
-    int oldNumGlyphs = seg->length();
+    int oldNumGlyphs = seg->slotCount();
     int32 ret = codeptr->run(m, *seg, iSlot, count, nPre, nMap, map, status, flags);
-    count += seg->length() - oldNumGlyphs;
+    count += seg->slotCount() - oldNumGlyphs;
     
     for (int i = 0; i < nMap; ++i)
     {

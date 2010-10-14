@@ -619,14 +619,14 @@ int Parameters::testFileFont() const
 
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((length(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = first(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        size_t *map = (size_t*)malloc((number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (const gr2::Slot* slot = first(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         {
             float orgX = origin_X(slot);
             float orgY = origin_Y(slot);

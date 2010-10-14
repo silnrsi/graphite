@@ -36,13 +36,13 @@ extern "C"
                       //When finished with the GrFont, call destroy_GrSegment    
     GRNG_EXPORT void destroy_GrSegment(GrSegment* p);
 
-    GRNG_EXPORT int length(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, int index);
     GRNG_EXPORT void run_graphite(GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT void choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
-    GRNG_EXPORT const Slot* first(GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
+    GRNG_EXPORT const Slot* first_slot_in_segment(GrSegment* pSeg/*not NULL*/);
     
     GRNG_EXPORT int add_features(GrSegment* pSeg/*not NULL*/, const Features* feats);
 }
