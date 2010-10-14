@@ -172,7 +172,13 @@ GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/)
 }
 
 
-GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, int index)
+GRNG_EXPORT unsigned int number_of_CharInfo(const GrSegment* pSeg/*not NULL*/)
+{
+    return pSeg->charInfoCount();
+}
+
+
+GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
     return pSeg->charinfo(index);
 }
@@ -189,7 +195,7 @@ GRNG_EXPORT void chooseSilf(GrSegment* pSeg/*not NULL*/, uint32 script)
 }
 
 
-GRNG_EXPORT int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->slotCount();
 }
