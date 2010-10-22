@@ -65,14 +65,14 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    uint32 m_mask;
-    uint16 m_max;
-    byte m_bits;
-    byte m_index;
-    uint16 m_nameid;
-    uint16 *m_nameValues;
-    uint16 m_flags;
-    uint16 m_numSet;
+    uint32 m_mask;              // bit mask to get the value from the vector
+    uint16 m_max;               // max value the value can take
+    byte m_bits;                // how many bits to shift the value into place
+    byte m_index;               // index into the array to find the ulong to mask
+    uint16 m_nameid;            // Name table id for feature name
+    uint16 *m_nameValues;       // array of name table ids for feature values
+    uint16 m_flags;             // feature flags (unused at the moment but read from the font)
+    uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 };
 
 class FeatureMap

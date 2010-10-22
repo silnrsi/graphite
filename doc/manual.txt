@@ -4,4 +4,5 @@ Martin Hosken <martin_hosken@sil.org>
 :numbered:
 
 include::calling.txt[]
+include::features.txt[]
 include::hacking.txt[]
