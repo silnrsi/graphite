@@ -59,6 +59,7 @@ set(GRAPHITE_HEADERS
     ../include/graphiteng/Features.h
     ../include/graphiteng/FeatureRef.h
     ../include/graphiteng/GrFace.h
+    ../include/graphiteng/GrFeatures.h
     ../include/graphiteng/GrFont.h
     ../include/graphiteng/GrSegment.h
     ../include/graphiteng/Slot.h
