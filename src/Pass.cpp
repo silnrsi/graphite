@@ -68,7 +68,7 @@ Pass::~Pass()
     m_cActions = NULL;
 }
 
-bool Pass::readPass(void *pPass, size_t lPass)
+bool Pass::readPass(void *pPass, size_t lPass, size_t lBase)
 {
     byte *p = (byte *)pPass;
     byte *ePass = (byte *)pPass + lPass;
@@ -89,7 +89,10 @@ bool Pass::readPass(void *pPass, size_t lPass)
     XmlTraceLog::get().addAttribute(AttrNumRules, m_numRules);
 #endif
     p += 2;          // not sure why we would want this
-    p += 16;         // ignore offsets for now
+    uint32 lpCode = read32(p) - lBase;
+    uint32 lrCode = read32(p) - lBase;
+    uint32 laCode = read32(p) - lBase;
+    uint32 lDebug = read32(p);
     m_sRows = read16(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumRows, m_sRows);
@@ -133,6 +136,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
             XmlTraceLog::get().closeElement(ElementRange);
         }
 #endif
+        if (last >= m_numGlyphs) last = m_numGlyphs - 1;
         while (first <= last)
             m_cols[first++] = col;
     }
@@ -233,6 +237,7 @@ bool Pass::readPass(void *pPass, size_t lPass)
 #ifndef DISABLE_TRACING    
         XmlTraceLog::get().openElement(ElementConstraint);
 #endif
+        if (p - (byte *)pPass != lpCode) return false;
         m_cPConstraint = Code(true, p, p + nPConstraint, cContexts);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraint);
@@ -246,7 +251,8 @@ bool Pass::readPass(void *pPass, size_t lPass)
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementConstraints);
 #endif
-    p += readCodePointers(p, pConstraint, m_cConstraint, m_numRules, true, cContexts, ePass - p); 
+    if (p - (byte *)pPass != lrCode) return false;
+    p += readCodePointers(p, pConstraint, m_cConstraint, m_numRules, true, cContexts, laCode - lrCode); 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementConstraints);
 #endif
@@ -256,7 +262,8 @@ bool Pass::readPass(void *pPass, size_t lPass)
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementActions);
 #endif
-    p += readCodePointers(p, pActions, m_cActions, m_numRules, false, cContexts, ePass - p);
+    if (p - (byte *)pPass != laCode) return false;
+    p += readCodePointers(p, pActions, m_cActions, m_numRules, false, cContexts, lDebug ? (lDebug - lBase - laCode) : (ePass - p));
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementActions);
 #endif
@@ -278,7 +285,7 @@ int Pass::readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num
         uint16 noffset = read16(pPointers);
         if (noffset > 0)
         {
-            if (noffset > size) return size;
+            if (noffset > size || noffset < loffset) return size;
             if (lid >= 0)
             {
 #ifndef DISABLE_TRACING
@@ -466,7 +473,7 @@ int Pass::testConstraint(const Code *codeptr, Slot *iSlot, int num, int nPre, in
 //        num++;
     }
 
-    for (int i = -nPre; i < num; i++, iSlot = iSlot->next())
+    for (int i = -nPre; i < num && iSlot; i++, iSlot = iSlot->next())
     {
         int temp = i + nCtxt;
         ret = codeptr->run(m, *seg, iSlot, temp, nCtxt, nMap, map, status, flags);
@@ -525,8 +532,8 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
             ++count;
         }
     }
-    if (status != Machine::finished) return iSlot->next();
     count -= nPre;
+    if (status != Machine::finished) return iSlot->next();
     return iSlot;
 }
 

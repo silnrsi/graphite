@@ -3,7 +3,7 @@
 from subprocess import call
 from optparse import OptionParser
 from random import uniform
-import sys, os
+import sys, os, resource
 
 def excluded(loc, *ranges) :
     for r in ranges :
@@ -17,6 +17,8 @@ parser.add_option("-s", "--single", action="store_true", help="Only one iteratio
 parser.add_option("-p", "--position", help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", help="Specifies value to use (dec)")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
+parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
+parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
 (opts, args) = parser.parse_args()
 
 fontlen = os.path.getsize(opts.font)
@@ -24,6 +26,13 @@ if opts.logfile :
     log = open(opts.logfile, "a")
 else :
     log = sys.stdout
+
+def rlimit() :
+    if opts.timeout :
+        resource.setrlimit(resource.RLIMIT_CPU, (opts.timeout, opts.timeout))
+    if opts.memory :
+        mem = opts.memory * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
 
 font = None
 while (1) :
@@ -41,7 +50,7 @@ while (1) :
         print "0x%X,%d" % (loc, val)
     subfile = open("templog.txt", "w")
 #    retval = call(["xetex", "-interaction=batchmode", "-no-pdf", "test.tex"], stdout = subfile, stderr = subfile)
-    retval = call(["comparerenderer/comparerenderer", "-f", opts.font, "-t", "../../tests/texts/my_HeadwordSyllables.txt", "-s", "12", "-n"], stdout=subfile, stderr=subfile)
+    retval = call(["comparerenderer/comparerenderer", "-f", opts.font, "-t", "../../tests/texts/my_HeadwordSyllables.txt", "-s", "12", "-n"], stdout=subfile, stderr=subfile, preexec_fn=rlimit)
     if retval < 0 :
         print >>log, "%d,0x%x,%d" % (retval, loc, val)
     elif opts.verbose :
