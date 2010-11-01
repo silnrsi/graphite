@@ -41,6 +41,7 @@ public:
                 //m_face = hb_ft_face_create(m_ftFace, hbngFtDestroy);
                 m_face = hb_ft_face_create_cached(m_ftFace);
                 m_font = hb_ft_font_create(m_ftFace, hbngFtDestroy);
+                //m_font = hb_ft_font_create_cache_glyphmetrics(m_ftFace, hbngFtDestroy);
             }
             else
             {

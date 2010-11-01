@@ -23,6 +23,7 @@
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"
+#include "SegCache.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -30,7 +31,7 @@ Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0)
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_segCache(0)
 {
 }
 
@@ -409,6 +410,12 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
 
 void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
+    EGlyphCacheStrategy cacheStrategy = get_glyph_strategy(face);
+    if (cacheStrategy & eSegCache)
+    {
+        runGraphiteWithCache(seg, face, vms);
+        return;
+    }
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -427,3 +434,28 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
     }
 }
 
+void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const
+{
+    if (!m_segCache) m_segCache = new SegCache(face);
+
+    // run up to substitution pass, i.e. run the line break passes
+    for (size_t i = 0; i < m_sPass; ++i)
+    {
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRunPass);
+            XmlTraceLog::get().addAttribute(AttrNum, i);
+        }
+#endif
+        // test whether to reorder, prepare for positioning
+        m_passes[i].runGraphite(seg, face, vms);
+#ifndef DISABLE_TRACING
+        seg->logSegment();
+        XmlTraceLog::get().closeElement(ElementRunPass);
+#endif
+    }
+
+    
+
+}

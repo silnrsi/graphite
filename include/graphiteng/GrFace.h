@@ -9,14 +9,14 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrFace;
 class FileFaceHandle;
 
-enum EGlyphCacheStrategy{ eOneCache=0, eLoadOnDemand=100/*never unloaded*/, ePreload=200 } ;        //don't change numbering
+enum EGlyphCacheStrategy{ eOneCache=0, eLoadOnDemand=100/*never unloaded*/, ePreload=200, eSegCache=400 } ;        //don't change numbering
 
 extern "C"
 {
     typedef const void *(*get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
     GRNG_EXPORT GrFace* make_GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, bool canDumb = false);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_GrFace    
-  
+
     GRNG_EXPORT Features* get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
     GRNG_EXPORT FeatureRef* feature(const GrFace* pFace, uint8 index);  //When finished with the FeatureRef, call destroy_FeatureRef
     GRNG_EXPORT void destroy_GrFace(GrFace *face);

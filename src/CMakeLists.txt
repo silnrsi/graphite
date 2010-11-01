@@ -90,6 +90,8 @@ add_library(graphiteng SHARED
     Silf.cpp
     Pass.cpp
     TtfUtil.cpp
+    SegCache.cpp
+    SegCacheEntry.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
     ${GRAPHITE_HEADERS}
