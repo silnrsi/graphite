@@ -33,6 +33,8 @@ GrFace::~GrFace()
     delete[] m_silfs;
     m_pGlyphFaceCache = NULL;
     m_silfs = NULL;
+    delete m_pFileFace;
+    m_pFileFace = NULL;
 }
 
 
@@ -158,3 +160,13 @@ uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
         default: return m_pGlyphFaceCache->glyph(gid)->getMetric(metric);
     }
 }
+
+void GrFace::takeFileFace(FileFace* pFileFace/*takes ownership*/)
+{
+    if (m_pFileFace==pFileFace)
+      return;
+    
+    delete m_pFileFace;
+    m_pFileFace = pFileFace;
+}
+

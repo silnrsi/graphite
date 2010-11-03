@@ -23,54 +23,13 @@
 #include "XmlTraceLog.h"
 #include "GrFaceImp.h"
 
-#ifndef DISABLE_FILE_FACE_HANDLE
-#include "TtfUtil.h"
-#include <cstdio>
-#include <cassert>
-#include "TtfTypes.h"
-//#include <map> // Please don't use map, it forces libstdc++
+#ifndef DISABLE_FILE_FACE
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class TableCacheItem
-{
-public:
-    TableCacheItem(char * theData, size_t theSize) : m_data(theData), m_size(theSize) {}
-    TableCacheItem() : m_data(0), m_size(0) {}
-    ~TableCacheItem()
-    {
-        if (m_size) free(m_data);
-    }
-    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; }
-    const void * data() const { return m_data; }
-    size_t size() const { return m_size; }
-private:
-    char * m_data;
-    size_t m_size;
-};
 
 
-class FileFaceHandle
-{
-public:
-    FileFaceHandle(const char *filename);
-    ~FileFaceHandle();
-//    virtual const void *getTable(unsigned int name, size_t *len) const;
-
-    CLASS_NEW_DELETE
-public:     //for local convenience
-    FILE* m_pfile;
-    mutable TableCacheItem m_tables[TtfUtil::ktiLast];
-    TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
-    TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
-    
-private:		//defensive
-    FileFaceHandle(const FileFaceHandle&);
-    FileFaceHandle& operator=(const FileFaceHandle&);
-};
-
-
-FileFaceHandle::FileFaceHandle(const char *filename) :
+FileFace::FileFace(const char *filename) :
     m_pHeader(NULL),
     m_pTableDir(NULL)
 {
@@ -87,7 +46,7 @@ FileFaceHandle::FileFaceHandle(const char *filename) :
     if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
 }
 
-FileFaceHandle::~FileFaceHandle()
+FileFace::~FileFace()
 {
     free(m_pTableDir);
     free(m_pHeader);
@@ -99,9 +58,9 @@ FileFaceHandle::~FileFaceHandle()
 }
 
 
-static const void *FileFaceHandle_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
+static const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
 {
-    const FileFaceHandle* ttfFaceHandle = (const FileFaceHandle*)appFaceHandle;
+    const FileFace* ttfFaceHandle = (const FileFace*)appFaceHandle;
     TableCacheItem * res;
     switch (name)
     {
@@ -195,13 +154,13 @@ static const void *FileFaceHandle_table_fn(const void* appFaceHandle, unsigned i
     if (len) *len = res->size();
     return res->data();
 }
-#endif			//!DISABLE_FILE_FACE_HANDLE
+#endif			//!DISABLE_FILE_FACE
 
 extern "C" 
 {
-    GRNG_EXPORT GrFace* make_GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, 
+    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, 
                                     EGlyphCacheStrategy requestedStrategy, bool canDumb)
-                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_GrFace    
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
     {
         GrFace *res = new GrFace(appFaceHandle, getTable);
     #ifndef DISABLE_TRACING
@@ -227,13 +186,13 @@ extern "C"
     }
     
 
-    GRNG_EXPORT Features* get_features(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+    GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
         return pFace->theFeatures().cloneFeatures(langname);
     }
 
 
-    GRNG_EXPORT FeatureRef* feature(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         const FeatureRef* pRef = pFace->feature(index);
         if (!pRef)
@@ -242,7 +201,9 @@ extern "C"
         return new FeatureRef(*pRef);
     }
 
-    GRNG_EXPORT uint16 *face_get_name(const GrFace * pFace, uint16 nameid, uint16 lid)
+ #if 0      //hidden since no way to release atm.
+ 
+    GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)
     {
         size_t nLen = 0, lOffset = 0, lSize = 0;
         const void *pName = pFace->getTable(tagName, &nLen);
@@ -256,8 +217,9 @@ extern "C"
         res[lSize] = 0;
         return res;
     }
+#endif
 
-    GRNG_EXPORT void destroy_GrFace(GrFace *face)
+    GRNG_EXPORT void destroy_face(GrFace *face)
     {
         delete face;
     }
@@ -269,62 +231,57 @@ extern "C"
     }
 
 
-    GRNG_EXPORT bool set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+    GRNG_EXPORT bool set_face_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
     {
         return pFace->setGlyphCacheStrategy(requestedStrategy);
     }
 
 
-    GRNG_EXPORT EGlyphCacheStrategy get_glyph_strategy(const GrFace* pFace)
+    GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->getEnum();
     }
 
 
-    GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_num_glyphs(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numGlyphs();
     }
 
 
-    GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_num_glyph_accesses(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numAccesses();
     }
 
 
-    GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_num_glyph_loads(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numLoads();
     }
 
 
-#ifndef DISABLE_FILE_FACE_HANDLE
-    GRNG_EXPORT FileFaceHandle* make_file_face_handle(const char *filename)   //returns NULL on failure. //TBD better error handling
-                      //when finished with, call destroy_TTF_face_handle
+#ifndef DISABLE_FILE_FACE
+    GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy)   //returns NULL on failure. //TBD better error handling
+                      //when finished with, call destroy_face
     {
-        FileFaceHandle* res = new FileFaceHandle(filename);
-        if (res->m_pTableDir)
-            return res;
+        FileFace* pFileFace = new FileFace(filename);
+        if (pFileFace->m_pTableDir)
+        {
+          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn, requestedStrategy);
+          if (pRes)
+          {
+            pRes->takeFileFace(pFileFace);        //takes ownership
+            return pRes;
+          }
+        }
         
         //error when loading
 
-        delete res;
+        delete pFileFace;
         return NULL;
     }
-    
-    
-    GRNG_EXPORT void destroy_file_face_handle(FileFaceHandle* appFaceHandle/*non-NULL*/)
-    {
-        delete appFaceHandle;
-    }
-    
-    
-    GRNG_EXPORT GrFace* make_GrFace_from_file_face_handle(const FileFaceHandle* appFaceHandle/*non-NULL*/, EGlyphCacheStrategy requestedStrategy)
-    {                  //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_TTF_face_handle 
-        return make_GrFace(appFaceHandle/*non-NULL*/, &FileFaceHandle_table_fn, requestedStrategy);
-    }
-#endif      //!DISABLE_FILE_FACE_HANDLE
+#endif      //!DISABLE_FILE_FACE
 }
 
 }}}}// end namespace
