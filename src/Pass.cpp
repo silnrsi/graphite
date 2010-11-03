@@ -200,38 +200,41 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
 bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * o_rule_map)
 {
-  m_startStates = gralloc<int16>(m_maxPreCtxt - m_minPreCtxt + 1);
-  m_states      = gralloc<State>(m_sSuccess);
-  m_sTable      = gralloc<int16>(m_sTransition * m_sColumns);
+  m_startStates = gralloc<State *>(m_maxPreCtxt - m_minPreCtxt + 1);
+  m_states      = gralloc<State>(m_sRows);
+  m_sTable      = gralloc<State *>(m_sTransition * m_sColumns);
 
   // load start states
-  for (int16 * s = m_startStates, 
-             * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
+  for (State * * s = m_startStates, 
+             * * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
   {
-    *s = swap16(*starts++);
-    if (*s < 0 || *s >= m_sRows) return true;
+    *s = m_states + swap16(*starts++);
+    if (*s < m_states || *s >= m_states + m_sRows) return true;
   }
   
   // load state transition table.
-  for (int16 *           t = m_sTable, 
-             * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
+  for (State * *               t = m_sTable, 
+             * * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
   {
-    *t = swap16(*states++);
-    if (*t < 0 || *t >= m_sRows) return false;
+    *t = m_states + swap16(*states++);
+    if (*t < m_states || *t >= m_states + m_sRows) return false;
   }
 
-  // success states
-  State * s = m_states;
+  State * s = m_states,
+        * const transitions_end = m_states + m_sTransition,
+	* const success_begin   = m_states + m_sRows - m_sSuccess;
   const RuleEntry * rule_map_end = m_ruleMap + swap16(o_rule_map[m_sSuccess]);
-  for (size_t n = m_sSuccess; n; --n, ++s)
+  for (size_t n = m_sRows; n; --n, ++s)
   {
-      RuleEntry *begin = m_ruleMap + swap16(*o_rule_map++),
-                *end   = m_ruleMap + swap16(*o_rule_map);
+      s->transitions = s < transitions_end ? m_sTable + (s-m_states)*m_sColumns : 0;
+      RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map++),
+                * const end   = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map);
       
       if (begin >= rule_map_end || end > rule_map_end || begin > end)
 	return false;
       
-      new (s) State(begin, end);
+      s->rules = begin;
+      s->rules_end = end;
   }
 
   logStates();
@@ -330,7 +333,7 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
   return true;
 }
 
-void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
+void Pass::runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & fsm) const
 {
     if (!testPassConstraint(seg)) return;
     
@@ -340,7 +343,7 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
     for (Slot *s = seg->first(); s; )
     {
         int count = 0;
-        s = findNDoRule(seg, s, count, face);
+        s = findNDoRule(seg, s, count, face, fsm);
         currCount += count;
         if (currCount <= maxIndex)
         {
@@ -359,9 +362,8 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
     }
 }
 
-Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *face) const
+Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *face, FiniteStateMachine & fsm) const
 {
-    int state;
     Slot *startSlot = iSlot;
     int iCtxt = 0;
     int lcount = count;
@@ -371,10 +373,9 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         count = 1;
         return startSlot->next();
     }
-    state = m_startStates[m_maxPreCtxt - iCtxt];
-    
-    FiniteStateMachine fsm;
-    const int16 success_base = m_sRows - m_sSuccess;
+
+    fsm.rules.clear();
+    const State * state = m_startStates[m_maxPreCtxt - iCtxt];
     while (true)
     {
         if (!iSlot)
@@ -382,7 +383,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
             iSlot = seg->last();
             break;
         }
-        uint16 gid = iSlot->gid();
+        const uint16 gid = iSlot->gid();
         if (gid >= m_numGlyphs) break;
         fsm.slotMap[lcount] = iSlot;
         uint16 iCol = m_cols[gid];
@@ -399,10 +400,10 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         }
 #endif
         if (iCol == 0xffffU) break;
-        state = m_sTable[state * m_sColumns + iCol];
-        if (state >= success_base)
-	    fsm.rules.accumulate_rules(m_states[state - success_base], lcount - iCtxt);
-        if (!state || state >= m_sTransition) break;
+        state = state->transitions[iCol];
+        if (state->is_success())
+          fsm.rules.accumulate_rules(*state, lcount - iCtxt);
+        if (state == m_states || !state->is_transition()) break;
         iSlot = iSlot->next();
     }
     fsm.slotMap[lcount] = iSlot ? iSlot->next() : iSlot;

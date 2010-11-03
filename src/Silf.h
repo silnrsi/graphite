@@ -46,7 +46,7 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
+    void runGraphite(GrSegment *seg, const GrFace *face) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;

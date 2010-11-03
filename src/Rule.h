@@ -53,22 +53,28 @@ struct RuleEntry
 
 struct State
 {
-  const RuleEntry * const rules,
-		  * const rules_end;
-//  const State   * * const transitions;
+  const RuleEntry     * rules,
+		      * rules_end;
+  const State * const * transitions;
   
   size_t size() const;
-  
-  inline State(RuleEntry * begin, RuleEntry * end)
-  : rules(begin), rules_end(end)
-  {
-    std::sort(begin, end);
-  }
+  bool   is_success() const;
+  bool   is_transition() const;
 };
 
 inline size_t State::size() const 
 {
   return rules_end - rules;
+}
+
+inline bool State::is_success() const
+{
+  return rules;
+}
+
+inline bool State::is_transition() const
+{
+  return transitions;
 }
 
 

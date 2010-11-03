@@ -23,6 +23,7 @@
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegment.h"
+#include "Rule.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -411,8 +412,9 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
+void Silf::runGraphite(GrSegment *seg, const GrFace *face) const
 {
+    FiniteStateMachine fsm;
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -423,7 +425,7 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, vms);
+        m_passes[i].runGraphite(seg, face, fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
 	    XmlTraceLog::get().closeElement(ElementRunPass);

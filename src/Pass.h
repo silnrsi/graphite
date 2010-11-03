@@ -22,7 +22,6 @@
 #pragma once
 
 #include <cstdlib>
-#include "VMScratch.h"
 #include "Code.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -33,6 +32,7 @@ class Silf;
 class Rule;
 class RuleEntry;
 class State;
+class FiniteStateMachine;
 
 class Pass
 {   
@@ -41,13 +41,13 @@ public:
     ~Pass();
     
     bool readPass(void *pPass, size_t lPass);
-    void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
+    void runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & fsm) const;
     Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, GrSegment* seg, Slot** map) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE
 private:
-    Slot * findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face) const;
+    Slot * findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, FiniteStateMachine& fsm) const;
     bool   testPassConstraint(GrSegment *seg) const;
     int    testConstraint(const RuleEntry& re, Slot* iSlot, int nCtxt, GrSegment* seg, int nMap, Slot** map) const;
     bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
@@ -62,10 +62,10 @@ private:
 
     const Silf* m_silf;
     uint16    * m_cols;
-    int16     * m_startStates; // prectxt length
     Rule      * m_rules; // rules
     RuleEntry * m_ruleMap;
-    int16     * m_sTable;
+    State *   * m_startStates; // prectxt length
+    State *   * m_sTable;
     State     * m_states;
     
     byte     m_iMaxLoop;
