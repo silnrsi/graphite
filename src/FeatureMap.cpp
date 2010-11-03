@@ -43,8 +43,8 @@ bool FeatureMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
 bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lFeat;
-    char *pFeat = (char *)((*getTable)(appFaceHandle, ktiFeat, &lFeat));
-    char *pOrig = pFeat;
+    const byte *pFeat = reinterpret_cast<const byte *>((*getTable)(appFaceHandle, ktiFeat, &lFeat));
+    const byte *pOrig = pFeat;
     uint16 *defVals;
     uint32 version;
     if (!pFeat) return true;
@@ -88,7 +88,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
         }
         uint16 flags = read16(pFeat);
         uint16 uiName = read16(pFeat);
-        char *pSet = pOrig + offset;
+        const byte *pSet = pOrig + offset;
         uint16 maxVal = 0;
 
 #ifndef DISABLE_TRACING
@@ -155,12 +155,12 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
 bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lSill;
-    char *pSill = (char *)((*getTable)(appFaceHandle, ktiSill, &lSill));
-    char *pBase = pSill;
+    const byte *pSill = reinterpret_cast<const byte *>(((*getTable)(appFaceHandle, ktiSill, &lSill)));
+    const byte *pBase = pSill;
 
     if (!pSill) return true;
     if (lSill < 12) return false;
-    if (read32(pSill) != 0x00010000) return false;
+    if (read32(pSill) != 0x00010000UL) return false;
     m_numLanguages = read16(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
     if (!m_langFeats) { m_numLanguages = 0; return NULL; }		//defensive
@@ -175,7 +175,7 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
         FeaturesHandle feats = cloneFeatures(0/*0 means default*/);
-        char *pLSet = pBase + offset;
+        const byte *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
         {

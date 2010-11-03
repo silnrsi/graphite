@@ -89,8 +89,8 @@ void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num)
     m_attrs = grzeroalloc<uint16>(num);
     while (start < end)
     {
-        int attr = ((uint8 *)pGlat)[start];
-        int count = ((uint8 *)pGlat)[start + 1];
+        unsigned int attr = ((uint8 *)pGlat)[start];
+        unsigned int count = ((uint8 *)pGlat)[start + 1];
         if (attr + count > num)
         {
 #ifndef DISABLE_TRACING
@@ -98,7 +98,7 @@ void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num)
 #endif
             return;
         }
-        for (int i = 0; i < count; i++)
+        for (unsigned int i = 0; i < count; i++)
         {
             m_attrs[attr + i] = swap16(((uint16 *)((char *)pGlat + start))[1 + i]);
 #ifndef DISABLE_TRACING

@@ -108,7 +108,7 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
 
 /*virtual*/ GlyphFaceCacheOneItem::~GlyphFaceCacheOneItem()
 {
-    if (m_LoadedGlyphNo==-1)   //-1 means none loaded
+    if (m_LoadedGlyphNo==unsigned(-1))   //-1 means none loaded
         return;
     
     delete glyphDirect();       //invoke destructor
@@ -129,7 +129,7 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
     
     incLoads();
     
-    if (m_LoadedGlyphNo!=-1)   //-1 means none loaded
+    if (m_LoadedGlyphNo!=unsigned(-1))   //-1 means none loaded
         delete glyphDirect();       //invoke destructor
         
     m_LoadedGlyphNo = glyphid;

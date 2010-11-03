@@ -27,15 +27,31 @@
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
 
 #if !defined WORDS_BIGENDIAN || defined PC_OS
-#define swap16(x) (((x & 0xff) << 8) | ((x & 0xff00) >> 8))
-#define swap32(x) (((x & 0xff) << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24))
+namespace org { namespace sil { namespace graphite { namespace v2 {
+inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
+inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }
+inline uint32 swap32(uint32 x) { return (uint32(swap16(uint16(x))) << 16) | swap16(uint16(x >> 16)); }
+inline  int32 swap32(int32 x)  { return int16(swap16(uint16(x))); }
+}}}}
 #else
 #define swap16(x) (x)
 #define swap32(x) (x)
 #endif
 
-#define read16(x) (x+=sizeof(uint16), swap16(*(uint16 *)(x-sizeof(uint16))))
-#define read32(x) (x+=sizeof(uint32), swap32(*(uint32 *)(x-sizeof(uint32))))
+namespace org { namespace sil { namespace graphite { namespace v2 {
+inline uint16 read16(const byte *&x) { 
+  const uint16 r = swap16(*reinterpret_cast<const uint16 *&>(x));
+  x += sizeof(uint16);
+  return r;
+}
+inline uint16 read16(byte *&x) { return read16(const_cast<const byte * &>(x)); }
+inline uint32 read32(const byte *&x) { 
+  const uint32 r = swap32(*reinterpret_cast<const uint32 *&>(x));
+  x += sizeof(uint32);
+  return r;
+}
+inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
+}}}}
 
 #define CLASS_NEW_DELETE \
     void * operator new[](size_t size) {return malloc(size);} \

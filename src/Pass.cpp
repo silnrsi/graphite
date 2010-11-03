@@ -365,7 +365,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
                 iCol, gid, iSlot);
         }
 #endif
-        if (iCol == 65535) break;
+        if (iCol == 0xffffU) break;
         state = m_sTable[state * m_sColumns + iCol];
         if (state >= m_sRows - m_sSuccess)
             for (int i = m_ruleidx[state - m_sRows + m_sSuccess]; i < m_ruleidx[state - m_sRows + m_sSuccess + 1]; ++i) {

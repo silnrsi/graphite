@@ -220,7 +220,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 
 size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
 {
-    char *p = (char *)pClass;
+    const byte *p = reinterpret_cast<const byte *>(pClass);
     m_nClass = read16(p);
     m_nLinear = read16(p);
     m_classOffsets = gralloc<uint16>(m_nClass + 1);
@@ -323,7 +323,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
             return -1;
     }
 #endif
-    return (p - (char *)pClass);
+    return (p - reinterpret_cast<const byte*>(pClass));
 }
 
 uint16 Silf::findPseudo(uint32 uid) const
