@@ -49,11 +49,16 @@ void fixup_cntxt_item_target(const byte*, byte * &);
 } // end namespace
 
 
-Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, CodeContext *cContexts)
+Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
  :  _code(0), _data_size(0), _instr_count(0), _status(loaded), 
     _constrained(constrained), _own(true)
 {
     assert(bytecode_begin != 0);
+    if (bytecode_begin == bytecode_end)
+    {
+      ::new (this) Code();
+      return;
+    }
     assert(bytecode_end > bytecode_begin);
     const opcode_t *    op_to_fn = Machine::getOpcodeTable();
     const byte *        cd_ptr = bytecode_begin;
@@ -74,6 +79,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
+    CodeContext cContexts[256];
     cContexts[0] = CodeContext(0, 0, 0);
     do {
         opc = opcode(*cd_ptr++);
@@ -223,13 +229,6 @@ void fixup_cntxt_item_target(const byte* cdp,
     dp[-1] -= data_skip;
     *dp++   = data_skip;
 }
-
-// inline void fixup_slotref(int8 * const arg, uint8 is, const CodeContext *const cContexts) {
-//    if (*arg < 0 && -*arg <= is)
-//        *arg -= cContexts[is + *arg].nInserts;
-//    else
-//        *arg += ctxtins(is);
-// }
 
 } // end of namespace
 

@@ -75,7 +75,7 @@ private:
     void fixup_instruction_offsets(const opcode, size_t, int8  *, size_t, byte &, CodeContext *);
 public:
     Code() throw();
-    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end, CodeContext* cContexts);
+    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end);
     Code(const Code &) throw();
     ~Code() throw();
     

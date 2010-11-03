@@ -30,6 +30,9 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrSegment;
 class GrFace;
 class Silf;
+class Rule;
+class RuleEntry;
+class State;
 
 class Pass
 {   
@@ -38,35 +41,43 @@ public:
     ~Pass();
     
     bool readPass(void *pPass, size_t lPass);
-    int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts);
     void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
-    Slot *findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, VMScratch* vms) const;
-    int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, int nCtxt, GrSegment* seg, int nMap, Slot** map) const;
-    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, int len, GrSegment* seg, Slot** map) const;
+    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, GrSegment* seg, Slot** map) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE
 private:
-    Silf *m_silf;
-    byte m_iMaxLoop;
-    uint16 m_numGlyphs;
-    uint16 m_numRules;
-    uint16 m_sRows;
-    uint16 m_sTransition;
-    uint16 m_sSuccess;
-    uint16 m_sColumns;
-    uint16 *m_cols;
-    uint16 *m_ruleidx;
-    uint16 *m_ruleMap;
-    uint16 *m_ruleSorts;
-    byte m_minPreCtxt;
-    byte m_maxPreCtxt;
-    uint16 *m_startStates;
-    byte *m_rulePreCtxt;
+    Slot * findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face) const;
+    bool   testPassConstraint(GrSegment *seg) const;
+    int    testConstraint(const RuleEntry& re, Slot* iSlot, int nCtxt, GrSegment* seg, int nMap, Slot** map) const;
+    bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
+    bool   readRules(const uint16 * rule_map, const size_t num_entries, 
+		     const byte *precontext, const uint16 * sort_key,
+		     const uint16 * o_constraint, const byte *constraint_data, 
+		     const uint16 * o_action, const byte * action_data);
+    bool   readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
+    bool   readRanges(const uint16* ranges, size_t num_ranges);
+    void   logRule(const Rule * r, const uint16 * sort_key) const;
+    void   logStates() const;
+
+    const Silf* m_silf;
+    uint16    * m_cols;
+    int16     * m_startStates; // prectxt length
+    Rule      * m_rules; // rules
+    RuleEntry * m_ruleMap;
+    int16     * m_sTable;
+    State     * m_states;
+    
+    byte     m_iMaxLoop;
+    uint16   m_numGlyphs;
+    uint16   m_numRules;
+    uint16   m_sRows;
+    uint16   m_sTransition;
+    uint16   m_sSuccess;
+    uint16   m_sColumns;
+    byte     m_minPreCtxt;
+    byte     m_maxPreCtxt;
     vm::Code m_cPConstraint;
-    vm::Code *m_cConstraint;
-    vm::Code *m_cActions;
-    int16 *m_sTable;
     
 private:		//defensive
     Pass(const Pass&);
