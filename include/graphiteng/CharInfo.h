@@ -8,8 +8,8 @@ class CharInfo;
   
 extern "C"
 {
-    GRNG_EXPORT unsigned int unicode_char(const CharInfo* p/*not NULL*/);
-    GRNG_EXPORT int break_weight(const CharInfo* p/*not NULL*/);
+    GRNG_EXPORT unsigned int cinfo_unicode_char(const CharInfo* p/*not NULL*/);
+    GRNG_EXPORT int cinfo_break_weight(const CharInfo* p/*not NULL*/);
 }
 
 
