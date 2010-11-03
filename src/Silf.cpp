@@ -20,6 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <cstdlib>
+#include "graphiteng/CharInfo.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"
@@ -456,6 +457,88 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 #endif
     }
 
-    
+    // find where the segment can be broken
+    Slot * subSegStartSlot = seg->first();
+    Slot * subSegEndSlot = subSegStartSlot;
+    int subSegStart = 0;
+    bool spaceOnly = true;
+    for (int i = 0; i < seg->charInfoCount(); i++)
+    {
+        if (subSegEndSlot->gid() != m_segCache->space())
+        {
+            spaceOnly = false;
+        }
+        // at this stage the character to slot mapping is still 1 to 1
+        if ((seg->charinfo(i)->breakWeight() > 0 && seg->charinfo(i)->breakWeight() <= eBreakWord) ||
+            (i + 1 < seg->charInfoCount() &&
+             (seg->charinfo(i)->breakWeight() < 0 &&
+              seg->charinfo(i)->breakWeight() > -eBreakWord) ||
+             (subSegEndSlot->next() && subSegEndSlot->next()->gid() == m_segCache->space()))
+            )
+        {
+            if (spaceOnly)
+            {
+                // spaces should be left untouched by graphite rules in any sane font
+            }
+            else
+            {
+                // found a break position, check for a cache of the sub sequence
+                SegCacheEntry * entry = m_segCache->find(subSegStartSlot, i - subSegStart + 1);
+#ifndef DISABLE_TRACING
+                if (XmlTraceLog::get().active())
+                {
+                    XmlTraceLog::get().openElement(ElementSubSeg);
+                    XmlTraceLog::get().addAttribute(AttrFirstId, subSegStart);
+                    XmlTraceLog::get().addAttribute(AttrLastId, i);
+                }
+#endif
+                if (!entry)
+                {
+                    entry =runGraphiteOnSubSeg(seg, face, vms, subSegStartSlot, subSegStart, i - subSegStart + 1);
+                }
+                if (entry)
+                {
+                    seg->splice(subSegStart, i - subSegStart + 1, subSegStartSlot, subSegEndSlot, entry);
+                }
+#ifndef DISABLE_TRACING
+                if (XmlTraceLog::get().active())
+                {
+                    XmlTraceLog::get().closeElement(ElementSubSeg);
+                }
+#endif
+            }
+            subSegEndSlot = subSegEndSlot->next();
+            subSegStartSlot = subSegEndSlot;
+            subSegStart = i + 1;
+        }
+        else
+        {
+            subSegEndSlot = subSegEndSlot->next();
+        }
+    }
+}
 
+SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
+                               VMScratch *vms, const Slot * startSlot,
+                               size_t offset, size_t length) const
+{
+
+    GrSegment subSeg(*seg, startSlot, offset, length);
+    for (size_t i = m_sPass; i < m_numPasses; ++i)
+    {
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRunPass);
+            XmlTraceLog::get().addAttribute(AttrNum, i);
+        }
+#endif
+        // test whether to reorder, prepare for positioning
+        m_passes[i].runGraphite(&subSeg, face, vms);
+#ifndef DISABLE_TRACING
+        subSeg.logSegment();
+        XmlTraceLog::get().closeElement(ElementRunPass);
+#endif
+    }
+    m_segCache->cache(startSlot, length, &subSeg);
 }

@@ -30,6 +30,7 @@
 #include "SlotImp.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
+#include "SegCacheEntry.h"
 #include "graphiteng/GrSegment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -51,6 +52,32 @@ GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, i
     freeSlot(newSlot());
     for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
     m_bufSize = i;                  // log2(numchars)
+}
+
+GrSegment::GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t offset, size_t subLength) :
+        m_numGlyphs(subLength),
+        m_numCharinfo(subLength),
+        m_face(parent.m_face),
+        m_charinfo(new CharInfo[subLength]),
+        m_silf(parent.m_silf),
+        m_dir(parent.m_dir),
+        m_freeSlots(NULL),
+        m_last(NULL),
+        m_first(NULL),
+        m_bbox(Rect(Position(0, 0), Position(0, 0)))
+{
+    unsigned int i, j;
+    m_bufSize = subLength + 10;
+    freeSlot(newSlot());
+    for (i = 0, j = 1; j < subLength; i++, j <<= 1) {}
+    m_bufSize = i;
+    // TODO optimize this since newSlot has already done nearly the same iteration
+    for (i = 0; i < subLength; i++)
+    {
+        appendSlot(i, parent.charinfo(offset + i)->unicodeChar(),
+                   firstSlot->gid(), parent.charinfo(offset + i)->fid(),
+                   parent.charinfo(offset + i)->breakWeight());
+    }
 }
 
 GrSegment::~GrSegment()
@@ -147,6 +174,81 @@ void GrSegment::freeSlot(Slot *aSlot)
         aSlot->next(m_freeSlots);
     m_freeSlots = aSlot;
 }
+
+void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
+                       Slot * endSlot, SegCacheEntry * entry)
+{
+    const Slot * replacement = entry->first();
+    Slot * slot = startSlot;
+    // insert extra slots if needed
+    while (entry->glyphLength() > length)
+    {
+        Slot * extra = newSlot();
+        extra->prev(endSlot);
+        extra->next(endSlot->next());
+        endSlot->next(extra);
+        if (extra->next())
+            extra->next()->prev(extra);
+        endSlot = extra;
+        ++length;
+    }
+    // remove any extra
+    while (entry->glyphLength() < length)
+    {
+        endSlot = endSlot->prev();
+        freeSlot(endSlot->next());
+        --length;
+    }
+    assert(entry->glyphLength() == length);
+    // keep a record of consecutive slots wrt start of splice to minimize
+    // iterative next/prev calls
+    Slot * slotArray[eMaxCachedSeg];
+    uint16 slotPosition = 0;
+    for (uint16 i = 0; i < entry->glyphLength(); i++)
+    {
+        if (slotPosition <= i)
+        {
+            slotArray[i] = slot;
+            slotPosition = i;
+        }
+        *slot = *replacement;
+        if (replacement->attachedTo())
+        {
+            uint16 parentPos = replacement->attachedTo() - entry->first();
+            while (slotPosition < parentPos)
+            {
+                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
+                ++slotPosition;
+            }
+            slot->attachTo(slotArray[parentPos]);
+        }
+        if (replacement->sibling())
+        {
+            uint16 pos = replacement->sibling() - entry->first();
+            while (slotPosition < pos)
+            {
+                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
+                ++slotPosition;
+            }
+            slot->sibling(slotArray[pos]);
+        }
+        if (replacement->child())
+        {
+            uint16 pos = replacement->child() - entry->first();
+            while (slotPosition < pos)
+            {
+                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
+                ++slotPosition;
+            }
+            slot->child(slotArray[pos]);
+        }
+        slot->before(replacement->before() + offset);
+        slot->after(replacement->after() + offset);
+        slot = slot->next();
+        replacement = replacement->next();
+    }
+}
+
         
 void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
 {

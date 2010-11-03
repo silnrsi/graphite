@@ -31,6 +31,15 @@ Slot::Slot() :
 {
 }
 
+// take care, this does not copy any of the Slot pointer fields
+Slot::Slot(const Slot & orig) :
+        m_glyphid(orig.m_glyphid), m_realglyphid(orig.m_realglyphid),
+        m_before(orig.m_before), m_after(orig.m_after), m_parent(NULL), m_child(NULL), m_sibling(NULL),
+        m_position(orig.m_position), m_advance(orig.m_advance),
+        m_shift(orig.m_shift), m_flags(orig.m_flags), m_next(NULL), m_prev(NULL)
+{
+}
+
 void Slot::update(int numSlots, int numCharInfo, Position &relpos)
 {
     m_before += numCharInfo;

@@ -31,6 +31,7 @@ class GrFace;
 class VMScratch;
 class GrSegment;
 class SegCache;
+class SegCacheEntry;
 
 class Pseudo
 {
@@ -47,7 +48,6 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
     void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
@@ -60,6 +60,9 @@ public:
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
+    void runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
+    SegCacheEntry * runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face, VMScratch *vms,
+                             const Slot * firstSlot, size_t offset, size_t length) const;
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;

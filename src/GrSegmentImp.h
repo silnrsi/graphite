@@ -69,6 +69,7 @@ public:
     int8 dir() const { return m_dir; }
 
     GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
+    GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t offset, size_t subLength);
     ~GrSegment();
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
@@ -98,6 +99,7 @@ public:
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachTo() ? is : findRoot(is->attachTo()); }
     int numAttrs() { return m_silf->numUser(); }
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, SegCacheEntry * entry);
 
     CLASS_NEW_DELETE
 

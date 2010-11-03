@@ -46,6 +46,7 @@ public:
     int after() const { return m_after; }
 
     Slot();
+    Slot(const Slot & slot);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }
     Slot *prev() const { return m_prev; }
@@ -76,7 +77,9 @@ public:
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     void child(Slot *ap);
+    const Slot * child() const { return m_child; }
     void sibling(Slot *ap);
+    const Slot * sibling() const { return m_sibling; }
     Slot *attachTo() const { return m_parent; }
     uint32 clusterMetric(const GrSegment* seg, uint8 metric, uint8 attrLevel);
     void positionShift(Position a) { m_position += a; }
