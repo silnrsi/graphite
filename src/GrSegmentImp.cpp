@@ -64,7 +64,8 @@ GrSegment::GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t of
         m_freeSlots(NULL),
         m_last(NULL),
         m_first(NULL),
-        m_bbox(Rect(Position(0, 0), Position(0, 0)))
+        m_bbox(Rect(Position(0, 0), Position(0, 0))),
+        m_feats(parent.m_feats)
 {
     unsigned int i, j;
     m_bufSize = subLength + 10;
@@ -77,6 +78,7 @@ GrSegment::GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t of
         appendSlot(i, parent.charinfo(offset + i)->unicodeChar(),
                    firstSlot->gid(), parent.charinfo(offset + i)->fid(),
                    parent.charinfo(offset + i)->breakWeight());
+        firstSlot = firstSlot->next();
     }
 }
 
@@ -139,14 +141,12 @@ void GrSegment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
 
 Slot *GrSegment::newSlot()
 {
+    int numUser = m_silf->numUser();
     if (!m_freeSlots)
     {
-        int numUser = m_silf->numUser();
         Slot *newSlots = gralloc<Slot>(m_bufSize);
-        uint16 *newAttrs = gralloc<uint16>(numUser * m_bufSize);
-        
-        memset(newAttrs, 0, numUser * m_bufSize * sizeof(uint16));
-        
+        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+
         for (size_t i = 0; i < m_bufSize - 1; i++)
         {
             newSlots[i].next(newSlots + i + 1);
@@ -160,6 +160,7 @@ Slot *GrSegment::newSlot()
     }
     Slot *res = m_freeSlots;
     m_freeSlots = m_freeSlots->next();
+    // (re)initialize the Slot (new must leave userAttrs pointer untouched)
     ::new (res) Slot;
     return res;
 }
@@ -180,6 +181,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
 {
     const Slot * replacement = entry->first();
     Slot * slot = startSlot;
+    extendLength(entry->glyphLength() - length);
     // insert extra slots if needed
     while (entry->glyphLength() > length)
     {
@@ -189,15 +191,24 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         endSlot->next(extra);
         if (extra->next())
             extra->next()->prev(extra);
+        if (m_last == endSlot)
+            m_last = extra;
         endSlot = extra;
         ++length;
     }
     // remove any extra
-    while (entry->glyphLength() < length)
+    if (entry->glyphLength() < length)
     {
-        endSlot = endSlot->prev();
-        freeSlot(endSlot->next());
-        --length;
+        Slot * afterSplice = endSlot->next();
+        do
+        {
+            endSlot = endSlot->prev();
+            freeSlot(endSlot->next());
+            --length;
+        } while (entry->glyphLength() < length);
+        endSlot->next(afterSplice);
+        if (afterSplice)
+            afterSplice->prev(endSlot);
     }
     assert(entry->glyphLength() == length);
     // keep a record of consecutive slots wrt start of splice to minimize
@@ -211,7 +222,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             slotArray[i] = slot;
             slotPosition = i;
         }
-        *slot = *replacement;
+        slot->set(*replacement, m_silf->numUser());
         if (replacement->attachedTo())
         {
             uint16 parentPos = replacement->attachedTo() - entry->first();
@@ -244,6 +255,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         }
         slot->before(replacement->before() + offset);
         slot->after(replacement->after() + offset);
+        slot->originate(replacement->original() + offset);
         slot = slot->next();
         replacement = replacement->next();
     }

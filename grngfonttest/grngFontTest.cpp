@@ -83,6 +83,7 @@ public:
     bool useLineFill;
     bool useCodes;
     bool justification;
+    bool enableCache;
     float width;
     int textArgIndex;
     unsigned int * pText32;
@@ -124,6 +125,7 @@ void Parameters::clear()
     useLineFill = false;
     useCodes = false;
     justification = false;
+    enableCache = false;
     width = 100.0f;
     pText32 = NULL;
     textArgIndex = 0;
@@ -334,6 +336,11 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 {
                     option = NONE;
                     ws = true;
+                }
+                else if (strcmp(argv[a], "-cache") == 0)
+                {
+                    option = NONE;
+                    enableCache = true;
                 }
                 else if (strcmp(argv[a], "-feat") == 0)
                 {
@@ -557,6 +564,11 @@ int Parameters::testFileFont() const
         {
             fprintf(stderr, "Invalid font, failed to parse tables\n");
             return 3;
+        }
+
+        if (enableCache)
+        {
+            gr2::enable_segment_cache(face, 4096, 0);
         }
 
         gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);

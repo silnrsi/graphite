@@ -9,7 +9,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrFace;
 class FileFaceHandle;
 
-enum EGlyphCacheStrategy{ eOneCache=0, eLoadOnDemand=100/*never unloaded*/, ePreload=200, eSegCache=400 } ;        //don't change numbering
+enum EGlyphCacheStrategy{ eOneCache=0x0, eLoadOnDemand=0x100/*never unloaded*/, ePreload=0x200 } ;        //don't change numbering
 
 extern "C"
 {
@@ -27,6 +27,8 @@ extern "C"
     GRNG_EXPORT unsigned short num_glyphs(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_accesses(const GrFace* pFace);
     GRNG_EXPORT unsigned long num_glyph_loads(const GrFace* pFace);
+
+    GRNG_EXPORT void enable_segment_cache(GrFace* pFace, size_t maxSegments, uint32 flags = 0); // flags is reserved for future use
 
 #ifndef DISABLE_FILE_FACE_HANDLE
     GRNG_EXPORT FileFaceHandle* make_file_face_handle(const char *filename);   //returns NULL on failure. //TBD better error handling

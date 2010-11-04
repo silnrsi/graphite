@@ -409,10 +409,14 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
+void Silf::enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags)
+{
+    if (!m_segCache) m_segCache = new SegCache(face, maxSegments, flags);
+}
+
 void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
-    EGlyphCacheStrategy cacheStrategy = get_glyph_strategy(face);
-    if (cacheStrategy & eSegCache)
+    if (m_segCache)
     {
         runGraphiteWithCache(seg, face, vms);
         return;
@@ -437,7 +441,7 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 
 void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
-    if (!m_segCache) m_segCache = new SegCache(face);
+    
 
     // run up to substitution pass, i.e. run the line break passes
     for (size_t i = 0; i < m_sPass; ++i)
@@ -470,12 +474,15 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
         }
         // at this stage the character to slot mapping is still 1 to 1
         if ((seg->charinfo(i)->breakWeight() > 0 && seg->charinfo(i)->breakWeight() <= eBreakWord) ||
+            (i + 1 == seg->charInfoCount()) ||
             (i + 1 < seg->charInfoCount() &&
              (seg->charinfo(i)->breakWeight() < 0 &&
               seg->charinfo(i)->breakWeight() > -eBreakWord) ||
              (subSegEndSlot->next() && subSegEndSlot->next()->gid() == m_segCache->space()))
             )
         {
+            // record the next slot before any splicing
+            Slot * nextSlot = subSegEndSlot->next();
             if (spaceOnly)
             {
                 // spaces should be left untouched by graphite rules in any sane font
@@ -507,9 +514,10 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
                 }
 #endif
             }
-            subSegEndSlot = subSegEndSlot->next();
-            subSegStartSlot = subSegEndSlot;
+            subSegEndSlot = nextSlot;
+            subSegStartSlot = nextSlot;
             subSegStart = i + 1;
+            spaceOnly = true;
         }
         else
         {
@@ -540,5 +548,5 @@ SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
         XmlTraceLog::get().closeElement(ElementRunPass);
 #endif
     }
-    m_segCache->cache(startSlot, length, &subSeg);
+    return m_segCache->cache(startSlot, length, &subSeg);
 }

@@ -268,14 +268,15 @@ int main(int argc, char ** argv)
 
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
+    int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
 
     if (rendererOptions[OptAlternativeFont].exists())
     {
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
         if (rendererOptions[OptGraphiteNg].exists())
         {
-            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction));
+            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
+            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction, segCacheSize));
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
@@ -299,7 +300,7 @@ int main(int argc, char ** argv)
             renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
 #endif
         if (rendererOptions[OptGraphiteNg].exists())
-            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
             renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));

@@ -298,6 +298,10 @@ extern "C"
         return pFace->getGlyphFaceCache()->numLoads();
     }
 
+    GRNG_EXPORT void enable_segment_cache(GrFace* pFace, size_t maxSegments, uint32 flags)
+    {
+        pFace->enableSegmentCache(maxSegments, flags);
+    }
 
 #ifndef DISABLE_FILE_FACE_HANDLE
     GRNG_EXPORT FileFaceHandle* make_file_face_handle(const char *filename)   //returns NULL on failure. //TBD better error handling

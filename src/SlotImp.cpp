@@ -26,18 +26,41 @@
 using namespace org::sil::graphite::v2;
 
 Slot::Slot() :
-        m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
-        m_position(0, 0), m_advance(-1, -1), m_shift(0, 0), m_flags(0), m_next(NULL), m_prev(NULL)
+    m_next(NULL), m_prev(NULL),
+    m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
+    m_parent(NULL), m_child(NULL), m_sibling(NULL),
+    m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
+    m_attach(0, 0), m_with(0, 0),
+    m_flags(0)
+    // Do not set m_userAttr since it is set *before* new is called since this
+    // is used as a positional new to reset the Slot
 {
 }
 
 // take care, this does not copy any of the Slot pointer fields
-Slot::Slot(const Slot & orig) :
-        m_glyphid(orig.m_glyphid), m_realglyphid(orig.m_realglyphid),
-        m_before(orig.m_before), m_after(orig.m_after), m_parent(NULL), m_child(NULL), m_sibling(NULL),
-        m_position(orig.m_position), m_advance(orig.m_advance),
-        m_shift(orig.m_shift), m_flags(orig.m_flags), m_next(NULL), m_prev(NULL)
+void Slot::set(const Slot & orig, uint8 numUserAttr)
 {
+    // leave m_next and m_prev unchanged
+    m_glyphid = orig.m_glyphid;
+    m_realglyphid = orig.m_realglyphid;
+    m_original = m_original;
+    m_before = orig.m_before;
+    m_after = orig.m_after;
+    m_parent = NULL;
+    m_child = NULL;
+    m_sibling = NULL;
+    m_position = orig.m_position;
+    m_shift = orig.m_shift;
+    m_advance = orig.m_advance;
+    m_attach = orig.m_attach;
+    m_with = orig.m_with;
+    m_flags = orig.m_flags;
+    m_attLevel = orig.m_attLevel;
+    assert(!orig.m_userAttr || m_userAttr);
+    if (m_userAttr && orig.m_userAttr)
+    {
+        memcpy(m_userAttr, orig.m_userAttr, numUserAttr * sizeof(*m_userAttr));
+    }
 }
 
 void Slot::update(int numSlots, int numCharInfo, Position &relpos)

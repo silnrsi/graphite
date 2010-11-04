@@ -92,7 +92,7 @@ public:
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
-
+    void enableSegmentCache(size_t maxSegments, uint32 flags);
     
     CLASS_NEW_DELETE
 private:

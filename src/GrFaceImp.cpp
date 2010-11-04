@@ -158,3 +158,11 @@ uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
         default: return m_pGlyphFaceCache->glyph(gid)->getMetric(metric);
     }
 }
+
+void GrFace::enableSegmentCache(size_t maxSegments, uint32 flags)
+{
+    for (size_t i = 0; i < m_numSilf; i++)
+    {
+        m_silfs[i].enableSegmentCache(this, maxSegments, flags);
+    }
+}

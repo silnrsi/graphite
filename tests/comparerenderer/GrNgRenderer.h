@@ -13,14 +13,20 @@ namespace gr2 = org::sil::graphite::v2;
 class GrNgRenderer : public Renderer
 {
 public:
-    GrNgRenderer(const char * fontFile, int fontSize, int textDir)
+    GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_fileFace(gr2::make_file_face_handle(fontFile)),
         m_rtl(textDir),
         m_grFace(make_GrFace_from_file_face_handle(m_fileFace, gr2::ePreload)),
         m_grFont(0)
     {
         if (m_grFace)
+        {
             m_grFont = gr2::make_GrFont(static_cast<float>(fontSize), m_grFace);
+            if (cache > 0)
+            {
+                gr2::enable_segment_cache(m_grFace, cache, 0);
+            }
+        }
     }
     virtual ~GrNgRenderer()
     {

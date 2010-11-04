@@ -55,6 +55,7 @@ public:
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
     uint8 aBreak() const { return m_aBreak; }
+    void enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags);
 
     CLASS_NEW_DELETE
 
