@@ -2,6 +2,7 @@ project(testing)
 
 # add_subdirectory(vm)
 add_subdirectory(comparerenderer)
+add_subdirectory(segcache)
 
 if (EXISTS ${PROJECT_SOURCE_DIR}/grlist)
 add_subdirectory(grlist)

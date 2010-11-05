@@ -48,7 +48,6 @@ private:
     SegCacheEntry * m_entries[eMaxCachedSeg];
 };
 
-
 class SegCache
 {
 public:
@@ -60,6 +59,8 @@ public:
 
     uint16 space() const { return m_spaceGid; }
     uint16 maxCmapGlyph() const { return m_maxCmapGid; }
+    long long totalAccessCount() const { return m_totalAccessCount; }
+    size_t segmentCount() const { return m_segmentCount; }
 
     CLASS_NEW_DELETE
 private:
@@ -67,8 +68,8 @@ private:
     uint16 m_maxCmapGid;
     uint16 m_prefixLength;
     uint16 m_maxCachedSegLength;
-    long long m_segmentCount;
-    long long m_maxSegmentCount;
+    size_t m_segmentCount;
+    size_t m_maxSegmentCount;
     mutable long long m_totalAccessCount;
     void ** m_prefixes;
 };

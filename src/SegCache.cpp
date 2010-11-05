@@ -64,21 +64,23 @@ SegCacheEntry* SegCache::cache(const Slot * firstUnprocessedSlot, size_t length,
     uint16 pos = 0;
     const Slot * slot = firstUnprocessedSlot;
     if (!length) return NULL;
-    void * pEntry = m_prefixes[firstUnprocessedSlot->gid()];
-    while (++pos < m_prefixLength)
+    void ** pArray = m_prefixes;
+    while (pos + 1 < m_prefixLength)
     {
-        if (!pEntry)
-        {
-            pEntry = grzeroalloc<void*>(m_maxCmapGid);
-        }
+        if (!pArray[(pos < length)? slot->gid() : 0])
+            pArray[(pos < length)? slot->gid() : 0] = grzeroalloc<void*>(m_maxCmapGid);
+        pArray = (void**)pArray[(pos < length)? slot->gid() : 0];
         if (slot) slot = slot->next();
-        assert(slot || pos >= length);
-        pEntry = ((void**)pEntry)[(pos < length)? slot->gid() : 0];
+        ++pos;
     }
-    if (!pEntry)
-        pEntry = new SegCachePrefixEntry();
-    if (!pEntry) return NULL;
-    SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(pEntry);
+
+    SegCachePrefixEntry * prefixEntry = (SegCachePrefixEntry*)pArray[(pos < length)? slot->gid() : 0];
+    if (!prefixEntry)
+    {
+        prefixEntry = new SegCachePrefixEntry();
+        pArray[(pos < length)? slot->gid() : 0] = prefixEntry;
+    }
+    if (!prefixEntry) return NULL;
     SegCacheEntry * oldEntries = prefixEntry->m_entries[length];
     size_t listSize = prefixEntry->m_entryCounts[length] + 1;
     prefixEntry->m_entries[length] = gralloc<SegCacheEntry>(listSize);
@@ -100,6 +102,7 @@ SegCacheEntry* SegCache::cache(const Slot * firstUnprocessedSlot, size_t length,
     }
     ::new (prefixEntry->m_entries[length] + listSize - 1)
         SegCacheEntry(firstUnprocessedSlot, length, seg, m_totalAccessCount);
+    ++m_segmentCount;
     return prefixEntry->m_entries[length] + listSize - 1;
 }
 

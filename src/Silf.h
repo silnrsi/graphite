@@ -56,6 +56,7 @@ public:
     uint8 aPseudo() const { return m_aPseudo; }
     uint8 aBreak() const { return m_aBreak; }
     void enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags);
+    SegCache * segmentCache() const { return m_segCache; }
 
     CLASS_NEW_DELETE
 
