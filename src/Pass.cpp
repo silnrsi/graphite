@@ -512,7 +512,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
             ++ret;
             --count;
         }
-        while (++ret <= 0)
+        while (++ret <= 0 && iSlot)
         {
             iSlot = iSlot->prev();
             --count;
@@ -526,14 +526,14 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, int
             --ret;
             ++count;
         }
-        while (--ret >= 0)
+        while (--ret >= 0 && iSlot)
         {
             iSlot = iSlot->next();
             ++count;
         }
     }
     count -= nPre;
-    if (status != Machine::finished) return iSlot->next();
+    if (status != Machine::finished && iSlot) return iSlot->next();
     return iSlot;
 }
 

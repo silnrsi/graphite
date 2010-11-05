@@ -4,7 +4,7 @@ Graphite fonts have user features. These are values that can be set to control
 all kinds of rendering effects from choosing particular glyph styles for a
 group of languages to how bad sequences should be displayed to almost anything.
 
-A font has a set of features. Each feature has an identifier which is a 32-bit
+A font (strictly speaking a face) has a set of features. Each feature has an identifier which is a 32-bit
 number which can take the form of a tag (4 characters) or if the top byte is 0
 a number. Also each feature can take one of a set of values. Each feature has a
 UI name from the name table. In addition each value also has a UI name
@@ -12,9 +12,9 @@ associated with it. This allows an application to list all the features in a
 font and to show their names and values in a user interface to allow user
 selection.
 
-When a font is read, the graphite engine reads the features into a featureMap which is indexed by feature index. This returns a featureRef which is used to help store the value in a features structure. To save space and time, a features structure is a bit vector with all the values squashed up together. The featureRef is what allows reading and writing in the bit vector at the right place for a given feature identifier.
+When a face is read, the graphite engine reads the features into a featureMap which is indexed by feature index. This returns a featureRef which is used to help store the value in a features structure. To save space and time, a features structure is a bit vector with all the values squashed up together. The featureRef is what allows reading and writing in the bit vector at the right place for a given feature identifier.
 
-A font has a default set of feature settings. In fact it has different defaults for different languages. This is what language specific settings are, a set of default feature values. For a particular run of text, the application would ask for a copy of the default features for the font for the language associated with the run, if known, and then would modify it by setting new values according to specific feature settings for that run, and then pass this to the engine when shaping the run.
+A face has a default set of feature settings. In fact it has different defaults for different languages. This is what language specific settings are, a set of default feature values. For a particular run of text, the application would ask for a copy of the default features from the face, for the language associated with the run, if known, and then would modify it by setting new values according to specific feature settings for that run, and then pass this to the engine when shaping the run.
 
 ----
 #include <graphiteng/GrFace.h>
@@ -31,6 +31,7 @@ struct feat {
     uint32 id;
     uint16 val;
 } *local_feats;     <2>
+// local_feats = {{make_tag('utal'), 1}, {0, 0}};
 
 bool pError;
 
@@ -42,11 +43,13 @@ using gr2
     GrFace *face = make_GrFace_from_file_face_handle(fileface, ePreLoad);
     GrFont *sizeFont = make_GrFont(pointsize * dpi / 72, face);
 
-    Features defFeats = get_features(face, langTag);  <3>
+    Features feats = get_features(face, langTag);  <3>
     while (local_feats->id != 0)    <4>
     {
-        FeatureRef *aRef = lookup_feature(face, local_feats->id);   <5>
-        apply_value_to_feature(local_feats->id, aRef, defFeats);    <6>
+        const FeatureRef *aRef = lookup_feature(face, local_feats->id);   <5>
+        if (aRef)
+            apply_value_to_feature(local_feats->val, aRef, feats);    <6>
+        local_feats++;
     }
 
     size_t numCodePoints = SegmentHandle::countUnicodeCharacters(SegmentHandle::kutf8,
@@ -67,7 +70,7 @@ using gr2
 ----
 
 <1> The language tag is a tag so 32 bit, or 0 if undefined.
-<2> An application specific data structure to store feature information in for the run.
+<2> An application specific data structure to store feature information in for the run. For the sake of this example the list of feature settings is delimited by a 0 id.
 <3> Get a copy of the default features for the given language
 <4> Iterate over all the application specific user feature settings for this run.
 <5> Get a featureRef for the given feature id. Notice that this is a readonly object, no need to destroy it. Notice that we pass a uint32 here to lookup in the map.

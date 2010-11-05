@@ -112,13 +112,13 @@ void GrSegment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
 
 Slot *GrSegment::newSlot()
 {
+    int numUser = m_silf->numUser();
     if (!m_freeSlots)
     {
-        int numUser = m_silf->numUser();
         Slot *newSlots = gralloc<Slot>(m_bufSize);
         uint16 *newAttrs = gralloc<uint16>(numUser * m_bufSize);
         
-        memset(newAttrs, 0, numUser * m_bufSize * sizeof(uint16));
+//        memset(newAttrs, 0, numUser * m_bufSize * sizeof(uint16));
         
         for (size_t i = 0; i < m_bufSize - 1; i++)
         {
@@ -134,6 +134,7 @@ Slot *GrSegment::newSlot()
     Slot *res = m_freeSlots;
     m_freeSlots = m_freeSlots->next();
     ::new (res) Slot;
+    memset(res->userAttrs(), 0, numUser * sizeof(uint16));
     return res;
 }
 

@@ -245,10 +245,12 @@ STARTOP(put_copy)
     const int  slot_ref = int8(*param);
     if (slot_ref != 0)
     {
-        memcpy(is->userAttrs(), slotat(slot_ref)->userAttrs(), seg.numAttrs() * sizeof(uint16));
+        uint16 *tempUserAttrs = is->userAttrs();
+        memcpy(tempUserAttrs, slotat(slot_ref)->userAttrs(), seg.numAttrs() * sizeof(uint16));
         Slot *prev = is->prev();
         Slot *next = is->next();
         memcpy(is, slotat(slot_ref), sizeof(Slot));
+        is->userAttrs(tempUserAttrs);
         is->next(next);
         is->prev(prev);
         is->markCopied(false);
@@ -667,7 +669,10 @@ ENDOP
 
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
+    uint16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
+    newSlot->userAttrs(tempUserAttrs);
+    memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->markCopied(true);
     map[count] = newSlot;
     flags |= FLAGS_CHANGED;
