@@ -51,59 +51,66 @@ SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
     m_prefixes = grzeroalloc<void*>(m_maxCmapGid);
 }
 
+void SegCache::freeLevel(void ** prefixes, size_t level)
+{
+    for (size_t i = 0; i < m_maxCmapGid; i++)
+    {
+        if (prefixes[i])
+        {
+            if (level + 1 < ePrefixLength)
+                freeLevel((void**)prefixes[i], level + 1);
+            else
+            {
+                SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(prefixes[i]);
+                delete prefixEntry;
+            }
+        }
+    }
+    free(prefixes);
+}
+
 SegCache::~SegCache()
 {
-    // TODO walk tree freeing objects
-    free(m_prefixes);
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementSegCache);
+        XmlTraceLog::get().addAttribute(AttrNum, m_segmentCount);
+        XmlTraceLog::get().addAttribute(AttrAccessCount, m_totalAccessCount);
+    }
+#endif
+    freeLevel(m_prefixes, 0);
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().closeElement(ElementSegCache);
+    }
+#endif
     m_prefixes = NULL;
 }
 
-
-SegCacheEntry* SegCache::cache(const Slot * firstUnprocessedSlot, size_t length, GrSegment * seg)
+SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset)
 {
     uint16 pos = 0;
-    const Slot * slot = firstUnprocessedSlot;
     if (!length) return NULL;
     void ** pArray = m_prefixes;
     while (pos + 1 < m_prefixLength)
     {
-        if (!pArray[(pos < length)? slot->gid() : 0])
-            pArray[(pos < length)? slot->gid() : 0] = grzeroalloc<void*>(m_maxCmapGid);
-        pArray = (void**)pArray[(pos < length)? slot->gid() : 0];
-        if (slot) slot = slot->next();
+        if (!pArray[(pos < length)? cmapGlyphs[pos] : 0])
+            pArray[(pos < length)? cmapGlyphs[pos] : 0] = grzeroalloc<void*>(m_maxCmapGid);
+        pArray = (void**)pArray[(pos < length)? cmapGlyphs[pos] : 0];
         ++pos;
     }
 
-    SegCachePrefixEntry * prefixEntry = (SegCachePrefixEntry*)pArray[(pos < length)? slot->gid() : 0];
+    SegCachePrefixEntry * prefixEntry = (SegCachePrefixEntry*)pArray[(pos < length)? cmapGlyphs[pos] : 0];
     if (!prefixEntry)
     {
         prefixEntry = new SegCachePrefixEntry();
-        pArray[(pos < length)? slot->gid() : 0] = prefixEntry;
+        pArray[(pos < length)? cmapGlyphs[pos] : 0] = prefixEntry;
     }
     if (!prefixEntry) return NULL;
-    SegCacheEntry * oldEntries = prefixEntry->m_entries[length];
-    size_t listSize = prefixEntry->m_entryCounts[length] + 1;
-    prefixEntry->m_entries[length] = gralloc<SegCacheEntry>(listSize);
-    if (!prefixEntry->m_entries[length])
-    {
-        // out of memory
-        free(oldEntries);
-        prefixEntry->m_entryCounts[length] = 0;
-        return NULL;
-    }
-    else
-    {
-        prefixEntry->m_entryCounts[length] = listSize;
-    }
-    if (listSize > 1)
-    {
-        memcpy(prefixEntry->m_entries[length], oldEntries, sizeof(SegCacheEntry) * (listSize-1));
-        free(oldEntries);
-    }
-    ::new (prefixEntry->m_entries[length] + listSize - 1)
-        SegCacheEntry(firstUnprocessedSlot, length, seg, m_totalAccessCount);
     ++m_segmentCount;
-    return prefixEntry->m_entries[length] + listSize - 1;
+    return prefixEntry->cache(cmapGlyphs, length, seg, charOffset, m_totalAccessCount);
 }
 
 }}}} // namespace

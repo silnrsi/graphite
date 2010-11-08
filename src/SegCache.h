@@ -40,7 +40,70 @@ class SegCachePrefixEntry
 {
 public:
     SegCachePrefixEntry() { memset(this, 0, sizeof(SegCachePrefixEntry)); }
-    friend class SegCache;
+    ~SegCachePrefixEntry()
+    {
+        for (size_t j = 0; j < eMaxCachedSeg; j++)
+        {
+            if (m_entryCounts[j])
+            {
+                assert(m_entries[j]);
+                for (size_t k = 0; k < m_entryCounts[j]; k++)
+                {
+                    m_entries[j][k].log(j);
+                    m_entries[j][k].clear();
+                }
+                free(m_entries[j]);
+            }
+        }
+    }
+    const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const
+    {
+        if (length <= ePrefixLength)
+        {
+            assert(m_entryCounts[length] <= 1);
+            if (m_entries[length])
+                return m_entries[length];
+            return NULL;
+        }
+        for (uint16 i = 0; i < m_entryCounts[length]; i++)
+        {
+            bool equal = true;
+            for (size_t pos = ePrefixLength; pos < length && equal; pos++)
+            {
+                equal = (cmapGlyphs[pos] == m_entries[length][i].m_unicode[pos]);
+            }
+            if (equal)
+            {
+                return m_entries[length] + i;
+            }
+        }
+        return NULL;
+    }
+    SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, unsigned long long totalAccessCount)
+    {
+        SegCacheEntry * oldEntries = m_entries[length];
+        size_t listSize = m_entryCounts[length] + 1;
+        m_entries[length] = gralloc<SegCacheEntry>(listSize);
+        if (!m_entries[length])
+        {
+            // out of memory
+            free(oldEntries);
+            m_entryCounts[length] = 0;
+            return NULL;
+        }
+        else
+        {
+            m_entryCounts[length] = listSize;
+        }
+        if (listSize > 1)
+        {
+            memcpy(m_entries[length], oldEntries, sizeof(SegCacheEntry) * (listSize-1));
+            free(oldEntries);
+        }
+        ::new (m_entries[length] + listSize - 1)
+            SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
+        return m_entries[length] + listSize - 1;
+    }
     CLASS_NEW_DELETE
 private:
     /** m_entries is a null terminated list of entries */
@@ -54,8 +117,8 @@ public:
     SegCache(const GrFace * face, size_t maxSegments, uint32 flags);
     ~SegCache();
 
-    SegCacheEntry * find(const Slot * firstSlot, size_t length) const;
-    SegCacheEntry * cache(const Slot * firstUnprocessedSlot, size_t length, GrSegment * seg);
+    const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
+    SegCacheEntry * cache(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
 
     uint16 space() const { return m_spaceGid; }
     uint16 maxCmapGlyph() const { return m_maxCmapGid; }
@@ -64,50 +127,37 @@ public:
 
     CLASS_NEW_DELETE
 private:
+    void freeLevel(void ** prefixes, size_t level);
+
     uint16 m_spaceGid;
     uint16 m_maxCmapGid;
     uint16 m_prefixLength;
     uint16 m_maxCachedSegLength;
     size_t m_segmentCount;
     size_t m_maxSegmentCount;
-    mutable long long m_totalAccessCount;
+    mutable unsigned long long m_totalAccessCount;
     void ** m_prefixes;
 };
 
-inline SegCacheEntry * SegCache::find(const Slot * firstSlot, size_t length) const
+inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t length) const
 {
     uint16 pos = 0;
-    const Slot * slot = firstSlot;
-    if (!length) return NULL;
-    void ** pEntry = (void **) m_prefixes[firstSlot->gid()];
+    if (!length || length > eMaxCachedSeg) return NULL;
+    void ** pEntry = (void **) m_prefixes[cmapGlyphs[0]];
     while (++pos < m_prefixLength)
     {
         if (!pEntry) return NULL;
-        if (slot) slot = slot->next();
-        assert(slot || pos >= length);
-        pEntry = (void **)pEntry[(pos < length)? slot->gid() : 0];
+        pEntry = (void **)pEntry[(pos < length)? cmapGlyphs[pos] : 0];
     }
     if (!pEntry) return NULL;
     SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(pEntry);
-    const Slot * lastPrefixSlot = slot;
-    
-    for (uint16 i = 0; i < prefixEntry->m_entryCounts[length]; i++)
+    const SegCacheEntry * entry = prefixEntry->find(cmapGlyphs, length);
+    if (entry)
     {
-        bool equal = true;
-        slot = lastPrefixSlot;
-        for (pos = m_prefixLength; pos < length && equal; pos++)
-        {
-            slot = slot->next();
-            equal = (slot->gid() == prefixEntry->m_entries[length][i].m_unicode[pos]);
-        }
-        if (equal)
-        {
-            ++m_totalAccessCount;
-            prefixEntry->m_entries[length][i].accessed(m_totalAccessCount);
-            return prefixEntry->m_entries[length] + i;
-        }
+        ++m_totalAccessCount;
+        entry->accessed(m_totalAccessCount);
     }
-    return NULL;
+    return entry;
 }
     
 }}}} // end namespace

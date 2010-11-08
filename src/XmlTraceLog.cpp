@@ -62,37 +62,6 @@ XmlTraceLog::~XmlTraceLog()
     }
 }
 
-void XmlTraceLog::addArrayElement(XmlTraceLogElement eId, const byte *start, int num)
-{
-    if (!m_file) return;
-    if (m_inElement)
-    {
-        if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
-            fprintf(m_file, ">");
-    }
-    if (xmlTraceLogElements[eId].mFlags & m_mask)
-    {
-        if (!m_lastNodeText)
-        {
-            fprintf(m_file, "\n");
-            for (size_t i = 0; i < m_depth; i++)
-            {
-                fprintf(m_file, " ");
-            }
-        }
-        fprintf(m_file, "<%s>\n", xmlTraceLogElements[eId].mName);
-	while (num-- > 0)
-	{
-	    for (size_t i = 0; i < m_depth + 1; i++) fprintf(m_file, " ");
-	    fprintf(m_file, "<val>%d</val>\n", (uint32)*start++);
-	}
-	for (size_t i = 0; i < m_depth; i++) fprintf(m_file, " ");
-        fprintf(m_file, "</%s>", xmlTraceLogElements[eId].mName);
-	m_inElement = false;
-	m_lastNodeText = false;
-    }
-}
-
 void XmlTraceLog::addSingleElement(XmlTraceLogElement eId, const int value)
 {
     if (!m_file) return;

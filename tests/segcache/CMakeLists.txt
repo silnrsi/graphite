@@ -2,7 +2,8 @@ project(grsegcachetest)
 
 include_directories(../../src)
 
-add_executable(grsegcachetest segcachetest.cpp)
+# TtfUtil isn't exported, so we need to link it twice, ugly, but this is only a test
+add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp)
 
 target_link_libraries(grsegcachetest graphiteng)
 

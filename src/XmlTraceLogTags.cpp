@@ -70,6 +70,9 @@ const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
     XmlTraceLogTag("Params", GRLOG_OPCODE),
     XmlTraceLogTag("Push", GRLOG_OPCODE),
     XmlTraceLogTag("SubSeg", GRLOG_SEGMENT),
+    XmlTraceLogTag("SegCache", GRLOG_SEGMENT),
+    XmlTraceLogTag("SegCacheEntry", GRLOG_SEGMENT),
+    XmlTraceLogTag("Glyph", GRLOG_SEGMENT),
 
     XmlTraceLogTag("Error", GRLOG_ALL),
     XmlTraceLogTag("Warning", GRLOG_ALL)
@@ -155,7 +158,8 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "encoding",
     "name",
     "result",
-    "default"
+    "default",
+    "accessCount"
 };
 
 }}}} // namespace

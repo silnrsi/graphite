@@ -41,21 +41,27 @@ typedef enum {
  */
 class SegCacheEntry
 {
-    friend class SegCache;
+    friend class SegCachePrefixEntry;
 public:
-    SegCacheEntry(const Slot * firstUnprocessedSlot, size_t length, GrSegment * seg, long long cacheTime);
-    ~SegCacheEntry();
-    size_t glyphLength() { return m_glyphLength; }
+    SegCacheEntry() :
+        m_glyphLength(0), m_unicode(NULL), m_glyph(NULL), m_attr(NULL),
+        m_accessCount(0), m_lastAccess(0)
+    {}
+    SegCacheEntry(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime);
+    ~SegCacheEntry() { clear(); };
+    void clear();
+    size_t glyphLength() const { return m_glyphLength; }
     const Slot * first() const { ++m_accessCount; return m_glyph; }
     const Slot * last() const { return m_glyph + (m_glyphLength - 1); }
 
-    CLASS_NEW_DELETE
-private:
-    // methods accessed only from SegCache
+    void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
-    long long accessCount() { return m_accessCount; }
+    long long accessCount() const { return m_accessCount; }
     /** "time" of last access where "time" is measured in accesses to the cache owning this entry */
     void accessed(long long cacheTime) const { m_lastAccess = cacheTime; ++m_accessCount; };
+
+    CLASS_NEW_DELETE
+private:
 
     size_t m_glyphLength;
     /** glyph ids resulting from cmap mapping from unicode to glyph before substitution
@@ -64,8 +70,8 @@ private:
     /** slots after shapping and positioning */
     Slot * m_glyph;
     uint16 * m_attr;
-    mutable long long m_accessCount;
-    mutable long long m_lastAccess;
+    mutable unsigned long long m_accessCount;
+    mutable unsigned long long m_lastAccess;
 };
 
 }}}} // end namespace

@@ -27,26 +27,15 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCacheEntry::SegCacheEntry(const Slot * firstUnprocessedSlot, size_t length, GrSegment * seg, long long cacheTime)
+SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime)
     : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL)
 {
-    const Slot * slot = firstUnprocessedSlot;
-    for (uint16 i = 0; i < length; i++)
-    {
-        m_unicode[i] = slot->gid();
-        slot = slot->next();
-    }
-    size_t glyphCount = 0;
-    slot = seg->first();
-    while (slot)
-    {
-        ++glyphCount;
-        slot = slot->next();
-    }
+    memcpy(m_unicode, cmapGlyphs, length * sizeof(*cmapGlyphs));
+    size_t glyphCount = seg->slotCount();
+    const Slot * slot = seg->first();
     m_glyph = new Slot[glyphCount];
     m_attr = gralloc<uint16>(glyphCount * seg->numAttrs());
     m_glyphLength = glyphCount;
-    slot = seg->first();
     Slot * slotCopy = m_glyph;
     m_glyph->prev(NULL);
     static const char SLOT_PARENT = 1;
@@ -66,7 +55,7 @@ SegCacheEntry::SegCacheEntry(const Slot * firstUnprocessedSlot, size_t length, G
     while (slot)
     {
         slotCopy->userAttrs(m_attr + pos * seg->numAttrs());
-        slotCopy->set(*slot, seg->numAttrs());
+        slotCopy->set(*slot, -charOffset, seg->numAttrs());
         if (slot->child())
         {
             new(parentGlyphs + numParents) Index2Slot( pos, slot );
@@ -127,7 +116,31 @@ SegCacheEntry::SegCacheEntry(const Slot * firstUnprocessedSlot, size_t length, G
     }
 }
 
-SegCacheEntry::~SegCacheEntry()
+void SegCacheEntry::log(size_t unicodeLength) const
+{
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::get().active())
+    {
+        XmlTraceLog::get().openElement(ElementSegCacheEntry);
+        XmlTraceLog::get().addAttribute(AttrAccessCount, m_accessCount);
+        XmlTraceLog::get().addArrayElement(ElementText, m_unicode, unicodeLength);
+        for (size_t i = 0; i < m_glyphLength; i++)
+        {
+            
+            XmlTraceLog::get().openElement(ElementGlyph);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, m_glyph[i].gid());
+            XmlTraceLog::get().addAttribute(AttrX, m_glyph[i].origin().x);
+            XmlTraceLog::get().addAttribute(AttrY, m_glyph[i].origin().y);
+            XmlTraceLog::get().addAttribute(AttrBefore, m_glyph[i].before());
+            XmlTraceLog::get().addAttribute(AttrAfter, m_glyph[i].after());
+            XmlTraceLog::get().closeElement(ElementGlyph);
+        }
+        XmlTraceLog::get().closeElement(ElementSegCacheEntry);
+    }
+#endif
+}
+
+void SegCacheEntry::clear()
 {
     free(m_unicode);
     free(m_attr);

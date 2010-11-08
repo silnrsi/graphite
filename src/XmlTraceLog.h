@@ -42,12 +42,14 @@ public:
     bool active() { return (m_file != NULL); };
     void openElement(XmlTraceLogElement eId);
     void closeElement(XmlTraceLogElement eId);
-    void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
+    template<class T> void addArrayElement(XmlTraceLogElement eId, const T *start, int num);
+    //void addArrayElement(XmlTraceLogElement eId, const byte *start, int num);
     void addSingleElement(XmlTraceLogElement eId, const int value);
     void addAttribute(XmlTraceLogAttribute aId, const char * value);
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
+    void addAttribute(XmlTraceLogAttribute aId, unsigned long long value);
 #if SIZEOF_SIZE_T == 8
     void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
 #endif
@@ -183,6 +185,15 @@ inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int val
     }
 }
 
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned long long value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%Lu\"", xmlTraceLogAttributes[aId], value);
+    }
+}
 
 inline void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 value)
 {
@@ -197,7 +208,36 @@ inline void XmlTraceLog::addAttributeFixed(XmlTraceLogAttribute aId, uint32 valu
     }
 }
 
-
+template<class T> void XmlTraceLog::addArrayElement(XmlTraceLogElement eId, const T *start, int num)
+{
+    if (!m_file) return;
+    if (m_inElement)
+    {
+        if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+            fprintf(m_file, ">");
+    }
+    if (xmlTraceLogElements[eId].mFlags & m_mask)
+    {
+        if (!m_lastNodeText)
+        {
+            fprintf(m_file, "\n");
+            for (size_t i = 0; i < m_depth; i++)
+            {
+                fprintf(m_file, " ");
+            }
+        }
+        fprintf(m_file, "<%s>\n", xmlTraceLogElements[eId].mName);
+    while (num-- > 0)
+    {
+        for (size_t i = 0; i < m_depth + 1; i++) fprintf(m_file, " ");
+        fprintf(m_file, "<val>%d</val>\n", (uint32)*start++);
+    }
+    for (size_t i = 0; i < m_depth; i++) fprintf(m_file, " ");
+        fprintf(m_file, "</%s>", xmlTraceLogElements[eId].mName);
+    m_inElement = false;
+    m_lastNodeText = false;
+    }
+}
 
 }}}} // namespace
 
