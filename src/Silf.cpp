@@ -39,6 +39,7 @@ Silf::Silf() throw()
 Silf::~Silf() throw()
 {
     releaseBuffers();
+    if (m_segCache) delete m_segCache;
 }
 
 void Silf::releaseBuffers() throw()
@@ -464,21 +465,27 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
     // find where the segment can be broken
     Slot * subSegStartSlot = seg->first();
     Slot * subSegEndSlot = subSegStartSlot;
+    uint16 cmapGlyphs[eMaxCachedSeg];
     int subSegStart = 0;
     bool spaceOnly = true;
-    for (int i = 0; i < seg->charInfoCount(); i++)
+    for (unsigned int i = 0; i < seg->charInfoCount(); i++)
     {
+        if (i - subSegStart < eMaxCachedSeg)
+        {
+            cmapGlyphs[i-subSegStart] = subSegEndSlot->gid();
+        }
         if (subSegEndSlot->gid() != m_segCache->space())
         {
             spaceOnly = false;
         }
         // at this stage the character to slot mapping is still 1 to 1
-        if ((seg->charinfo(i)->breakWeight() > 0 && seg->charinfo(i)->breakWeight() <= eBreakWord) ||
+        if (((seg->charinfo(i)->breakWeight() > 0) &&
+             (seg->charinfo(i)->breakWeight() <= eBreakWord)) ||
             (i + 1 == seg->charInfoCount()) ||
-            (i + 1 < seg->charInfoCount() &&
-             (seg->charinfo(i)->breakWeight() < 0 &&
-              seg->charinfo(i)->breakWeight() > -eBreakWord) ||
-             (subSegEndSlot->next() && subSegEndSlot->next()->gid() == m_segCache->space()))
+            ((i + 1 < seg->charInfoCount()) &&
+             (((seg->charinfo(i+1)->breakWeight() < 0) &&
+              (seg->charinfo(i+1)->breakWeight() >= -eBreakWord)) ||
+              (subSegEndSlot->next() && (subSegEndSlot->next()->gid() == m_segCache->space()))))
             )
         {
             // record the next slot before any splicing
@@ -490,7 +497,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
             else
             {
                 // found a break position, check for a cache of the sub sequence
-                SegCacheEntry * entry = m_segCache->find(subSegStartSlot, i - subSegStart + 1);
+                const SegCacheEntry * entry = m_segCache->find(cmapGlyphs, i - subSegStart + 1);
 #ifndef DISABLE_TRACING
                 if (XmlTraceLog::get().active())
                 {
@@ -501,9 +508,11 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 #endif
                 if (!entry)
                 {
-                    entry =runGraphiteOnSubSeg(seg, face, vms, subSegStartSlot, subSegStart, i - subSegStart + 1);
+                    entry =runGraphiteOnSubSeg(seg, face, vms, cmapGlyphs,
+                                               subSegStartSlot, subSegEndSlot,
+                                               subSegStart, i - subSegStart + 1);
                 }
-                if (entry)
+                else
                 {
                     seg->splice(subSegStart, i - subSegStart + 1, subSegStartSlot, subSegEndSlot, entry);
                 }
@@ -527,11 +536,13 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 }
 
 SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
-                               VMScratch *vms, const Slot * startSlot,
+                               VMScratch *vms, const uint16 * cmapGlyphs,
+                               Slot * startSlot, Slot * endSlot,
                                size_t offset, size_t length) const
 {
 
-    GrSegment subSeg(*seg, startSlot, offset, length);
+    //GrSegment subSeg(*seg, startSlot, offset, length);
+    SegmentScopeState scopeState = seg->setScope(startSlot, endSlot, length);
     for (size_t i = m_sPass; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -542,11 +553,15 @@ SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(&subSeg, face, vms);
+        m_passes[i].runGraphite(seg, face, vms);
 #ifndef DISABLE_TRACING
-        subSeg.logSegment();
+        seg->logSegment();
         XmlTraceLog::get().closeElement(ElementRunPass);
 #endif
     }
-    return m_segCache->cache(startSlot, length, &subSeg);
+    SegCacheEntry * entry = NULL;
+    if (length < eMaxCachedSeg)
+        entry = m_segCache->cache(cmapGlyphs, length, seg, offset);
+    seg->removeScope(scopeState);
+    return entry;
 }

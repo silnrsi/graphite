@@ -38,14 +38,14 @@ Slot::Slot() :
 }
 
 // take care, this does not copy any of the Slot pointer fields
-void Slot::set(const Slot & orig, uint8 numUserAttr)
+void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
 {
     // leave m_next and m_prev unchanged
     m_glyphid = orig.m_glyphid;
     m_realglyphid = orig.m_realglyphid;
-    m_original = m_original;
-    m_before = orig.m_before;
-    m_after = orig.m_after;
+    m_original = orig.m_original + charOffset;
+    m_before = orig.m_before + charOffset;
+    m_after = orig.m_after + charOffset;
     m_parent = NULL;
     m_child = NULL;
     m_sibling = NULL;

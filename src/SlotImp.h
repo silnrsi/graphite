@@ -46,7 +46,7 @@ public:
     int after() const { return m_after; }
 
     Slot();
-    void set(const Slot & slot, uint8 numUserAttr);
+    void set(const Slot & slot, int charOffset, uint8 numUserAttr);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }
     Slot *prev() const { return m_prev; }

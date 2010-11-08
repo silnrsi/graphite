@@ -82,6 +82,40 @@ GrSegment::GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t of
     }
 }
 
+SegmentScopeState GrSegment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
+{
+    SegmentScopeState state;
+    state.numGlyphsOutsideScope = m_numGlyphs - subLength;
+    state.realFirstSlot = m_first;
+    state.slotBeforeScope = firstSlot->prev();
+    state.slotAfterScope = lastSlot->next();
+    state.realLastSlot = m_last;
+    firstSlot->prev(NULL);
+    lastSlot->next(NULL);
+    m_numGlyphs = subLength;
+    m_first = firstSlot;
+    m_last = lastSlot;
+    return state;
+}
+
+void GrSegment::removeScope(SegmentScopeState & state)
+{
+    m_numGlyphs = state.numGlyphsOutsideScope + m_numGlyphs;
+    if (state.slotBeforeScope)
+    {
+        state.slotBeforeScope->next(m_first);
+        m_first->prev(state.slotBeforeScope);
+        m_first = state.realFirstSlot;
+    }
+    if (state.slotAfterScope)
+    {
+        state.slotAfterScope->prev(m_last);
+        m_last->next(state.slotAfterScope);
+        m_last = state.realLastSlot;
+    }
+}
+
+
 GrSegment::~GrSegment()
 {
     SlotRope::iterator i;
@@ -177,7 +211,7 @@ void GrSegment::freeSlot(Slot *aSlot)
 }
 
 void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
-                       Slot * endSlot, SegCacheEntry * entry)
+                       Slot * endSlot, const SegCacheEntry * entry)
 {
     const Slot * replacement = entry->first();
     Slot * slot = startSlot;
@@ -222,7 +256,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             slotArray[i] = slot;
             slotPosition = i;
         }
-        slot->set(*replacement, m_silf->numUser());
+        slot->set(*replacement, offset, m_silf->numUser());
         if (replacement->attachedTo())
         {
             uint16 parentPos = replacement->attachedTo() - entry->first();
@@ -253,9 +287,6 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             }
             slot->child(slotArray[pos]);
         }
-        slot->before(replacement->before() + offset);
-        slot->after(replacement->after() + offset);
-        slot->originate(replacement->original() + offset);
         slot = slot->next();
         replacement = replacement->next();
     }

@@ -64,7 +64,8 @@ private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
     void runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
     SegCacheEntry * runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face, VMScratch *vms,
-                             const Slot * firstSlot, size_t offset, size_t length) const;
+                             const uint16 * cmapGlyphs, Slot * firstSlot, Slot * lastSlot,
+                             size_t offset, size_t length) const;
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;
