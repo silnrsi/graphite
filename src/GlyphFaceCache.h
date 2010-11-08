@@ -103,7 +103,7 @@ private:
     GlyphFace *glyphDirect() const { return (GlyphFace *)&m_Buffer[0];}
 
 private:
-    mutable unsigned int m_LoadedGlyphNo;   //-1 means none loaded
+    mutable int m_LoadedGlyphNo;   //-1 means none loaded
 //    mutable GlyphFace m_Buffer;           //Not good - d'tor invoked twice
 //    mutable char m_Buffer[sizeof(GlyphFace)];     //Not good possibly bad alignment on Solaris and similar
     mutable int m_Buffer[(sizeof(GlyphFace)+sizeof(int)-1)/sizeof(int)];

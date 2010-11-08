@@ -251,7 +251,7 @@ extern "C"
             return NULL;
         lSize >>= 1;
         res = gralloc<uint16>(lSize + 1);
-        for (int i = 0; i < lSize; ++i)
+        for (size_t i = 0; i < lSize; ++i)
             res[i] = swap16(*(uint16 *)((char *)pName + lOffset));
         res[lSize] = 0;
         return res;
