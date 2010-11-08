@@ -22,6 +22,7 @@
 #endif
 
 #include "GrNgRenderer.h"
+#include "graphiteng/XmlLog.h"
 
 #ifdef HAVE_HARFBUZZNG
 #include "HbNgRenderer.h"
@@ -269,6 +270,11 @@ int main(int argc, char ** argv)
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
+    
+    {
+        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "w");
+        gr2::startGraphiteLogging(traceFile, gr2::GRLOG_SEGMENT);
+    }
 
     if (rendererOptions[OptAlternativeFont].exists())
     {
@@ -337,6 +343,7 @@ int main(int argc, char ** argv)
         }
     }
     if (rendererOptions[OptLogFile].exists()) fclose(log);
+    if (rendererOptions[OptTrace].exists()) gr2::stopGraphiteLogging();
 
     return status;
 }
