@@ -121,16 +121,9 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Usage: %s font.ttf\n", argv[0]);
         return 1;
     }
-    gr2::FileFaceHandle *fileface;
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::startGraphiteLogging(log, GRLOG_SEGMENT);
-    if (!(fileface = gr2::make_file_face_handle(fileName)))
-    {
-        fprintf(stderr, "Invalid font, failed to read tables\n");
-        return 2;
-    }
-
-    gr2::GrFace *face = gr2::make_GrFace_from_file_face_handle(fileface, gr2::ePreload);
+    gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
@@ -182,9 +175,8 @@ int main(int argc, char ** argv)
         return -2;
     }
     destroy_GrFont(sizedFont);
-    destroy_GrFace(face);
-    destroy_file_face_handle(fileface);
-    
+    destroy_face(face);
+
     gr2::stopGraphiteLogging();
     return 0;
 }
