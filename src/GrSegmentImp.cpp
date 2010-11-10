@@ -179,7 +179,7 @@ Slot *GrSegment::newSlot()
     if (!m_freeSlots)
     {
         Slot *newSlots = gralloc<Slot>(m_bufSize);
-        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+        uint16 *newAttrs = gralloc<uint16>(numUser * m_bufSize);
 
         for (size_t i = 0; i < m_bufSize - 1; i++)
         {
@@ -196,6 +196,7 @@ Slot *GrSegment::newSlot()
     m_freeSlots = m_freeSlots->next();
     // (re)initialize the Slot (new must leave userAttrs pointer untouched)
     ::new (res) Slot;
+    memset(res->userAttrs(), 0, numUser * sizeof(uint16));
     return res;
 }
 

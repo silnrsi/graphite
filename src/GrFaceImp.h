@@ -30,6 +30,11 @@
 #include "FeatureMap.h"
 #include "GlyphFaceCache.h"
 
+#ifndef DISABLE_FILE_FACE
+#include <cstdio>
+#include <cassert>
+#include "TtfTypes.h"
+#endif      //!DISABLE_FILE_FACE
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
@@ -58,7 +63,53 @@ class Features;
 #define tagSile MAKE_TAG('S','i','l','e')
 #define tagSill MAKE_TAG('S','i','l','l')
 
-class GrFace 	// an IFace loaded into an object
+#ifndef DISABLE_FILE_FACE
+class TableCacheItem
+{
+public:
+    TableCacheItem(char * theData, size_t theSize) : m_data(theData), m_size(theSize) {}
+    TableCacheItem() : m_data(0), m_size(0) {}
+    ~TableCacheItem()
+    {
+        if (m_size) free(m_data);
+    }
+    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; }
+    const void * data() const { return m_data; }
+    size_t size() const { return m_size; }
+private:
+    char * m_data;
+    size_t m_size;
+};
+#endif      //!DISABLE_FILE_FACE
+
+
+
+
+class FileFace
+{
+#ifndef DISABLE_FILE_FACE
+public:
+    FileFace(const char *filename);
+    ~FileFace();
+//    virtual const void *getTable(unsigned int name, size_t *len) const;
+
+    CLASS_NEW_DELETE
+public:     //for local convenience
+    FILE* m_pfile;
+    mutable TableCacheItem m_tables[TtfUtil::ktiLast];
+    TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
+    TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
+#endif      //!DISABLE_FILE_FACE
+   
+private:        //defensive
+    FileFace(const FileFace&);
+    FileFace& operator=(const FileFace&);
+};
+
+
+
+
+class GrFace
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
@@ -69,7 +120,7 @@ public:
 
 public:
     GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
-        m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL), m_numSilf(0)  {}
+        m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL)  {}
     ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
@@ -92,6 +143,7 @@ public:
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
+    void takeFileFace(FileFace* pFileFace/*takes ownership*/);
     void enableSegmentCache(size_t maxSegments, uint32 flags);
     
     CLASS_NEW_DELETE
@@ -108,8 +160,9 @@ private:
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.
     FeatureMap m_features;
+    FileFace* m_pFileFace;      //owned
     
-  private:		//defensive on m_pGlyphFaceCache and m_silfs
+private:		//defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     GrFace(const GrFace&);
     GrFace& operator=(const GrFace&);
 };
