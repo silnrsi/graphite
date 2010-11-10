@@ -220,7 +220,7 @@ STARTOP(next_n)
 ENDOP
 
 STARTOP(copy_next)
-    is = is->next();
+    if (is) is = is->next();
     count++;
 ENDOP
 
@@ -314,7 +314,7 @@ STARTOP(delete_)
     }
     else
     {
-        is = is->next();
+//        is = is->next();
     }
     seg.extendLength(-1);
     flags |= FLAGS_CHANGED;
