@@ -116,6 +116,7 @@ public:
     Slot *findRoot(Slot *is) const { return is->attachTo() ? is : findRoot(is->attachTo()); }
     int numAttrs() { return m_silf->numUser(); }
     void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, const SegCacheEntry * entry);
+    int defaultOriginal() const { return m_defaultOriginal; }
 
     CLASS_NEW_DELETE
 
@@ -136,6 +137,7 @@ private:
     Slot *m_last;               // last slot in segment
     unsigned int m_bufSize;     // how big a buffer to create when need more slots
     unsigned int m_numGlyphs;
+    int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
     CharInfo *m_charinfo;       // character info, one per input character
     unsigned int m_numCharinfo; // size of the array and number of input characters

@@ -38,6 +38,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
+        m_defaultOriginal(0),
         m_face(face),
         m_charinfo(new CharInfo[numchars]),
         m_silf(face->chooseSilf(script)),
@@ -92,6 +93,8 @@ SegmentScopeState GrSegment::setScope(Slot * firstSlot, Slot * lastSlot, size_t 
     state.realLastSlot = m_last;
     firstSlot->prev(NULL);
     lastSlot->next(NULL);
+    assert(m_defaultOriginal == 0);
+    m_defaultOriginal = firstSlot->original();
     m_numGlyphs = subLength;
     m_first = firstSlot;
     m_last = lastSlot;
@@ -113,6 +116,7 @@ void GrSegment::removeScope(SegmentScopeState & state)
         m_last->next(state.slotAfterScope);
         m_last = state.realLastSlot;
     }
+    m_defaultOriginal = 0;
 }
 
 

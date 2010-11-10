@@ -30,7 +30,7 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
-    : m_spaceGid(3), m_maxCmapGid(num_glyphs(face)),
+    : m_spaceGid(3), m_maxCmapGid(face_num_glyphs(face)),
     m_prefixLength(ePrefixLength),
     m_maxCachedSegLength(eMaxCachedSeg),
     m_segmentCount(0),
