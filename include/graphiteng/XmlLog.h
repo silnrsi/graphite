@@ -10,6 +10,7 @@ typedef enum {
     GRLOG_FACE = 0x01,
     GRLOG_SEGMENT = 0x02,
     GRLOG_PASS = 0x04,
+    GRLOG_CACHE = 0x08,
     
     GRLOG_OPCODE = 0x80,
     GRLOG_ALL = 0xFF

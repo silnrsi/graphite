@@ -273,7 +273,9 @@ int main(int argc, char ** argv)
     
     {
         FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "w");
-        gr2::startGraphiteLogging(traceFile, gr2::GRLOG_SEGMENT);
+        int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
+            (gr2::GRLOG_SEGMENT | gr2::GRLOG_CACHE);
+        gr2::startGraphiteLogging(traceFile, static_cast<gr2::GrLogMask>(logMask));
     }
 
     if (rendererOptions[OptAlternativeFont].exists())

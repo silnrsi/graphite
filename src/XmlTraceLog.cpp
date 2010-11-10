@@ -81,9 +81,9 @@ void XmlTraceLog::addSingleElement(XmlTraceLogElement eId, const int value)
             }
         }
         fprintf(m_file, "<%s val=\"%d\"/>", xmlTraceLogElements[eId].mName, value);
-	m_inElement = false;
-	m_lastNodeText = false;
     }
+    m_inElement = false;
+    m_lastNodeText = false;
 }
     
 void XmlTraceLog::writeElementArray(XmlTraceLogElement eId, XmlTraceLogAttribute aId, int16 values [], size_t length)

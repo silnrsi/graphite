@@ -160,6 +160,8 @@ typedef enum {
     AttrResult,
     AttrDefault,
     AttrAccessCount,
+    AttrLastAccess,
+    AttrMisses,
 
     NumAttributes // Last
 } XmlTraceLogAttribute;

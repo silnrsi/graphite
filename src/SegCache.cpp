@@ -35,7 +35,7 @@ SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
     m_maxCachedSegLength(eMaxCachedSeg),
     m_segmentCount(0),
     m_maxSegmentCount(maxSegments),
-    m_totalAccessCount(0l),
+    m_totalAccessCount(0l), m_totalMisses(0l),
     m_prefixes(NULL)
 {
     void * bmpTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1);
@@ -77,6 +77,7 @@ SegCache::~SegCache()
         XmlTraceLog::get().openElement(ElementSegCache);
         XmlTraceLog::get().addAttribute(AttrNum, m_segmentCount);
         XmlTraceLog::get().addAttribute(AttrAccessCount, m_totalAccessCount);
+        XmlTraceLog::get().addAttribute(AttrMisses, m_totalMisses);
     }
 #endif
     freeLevel(m_prefixes, 0);
@@ -93,6 +94,7 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
 {
     uint16 pos = 0;
     if (!length) return NULL;
+    assert(length < m_maxCachedSegLength);
     void ** pArray = m_prefixes;
     while (pos + 1 < m_prefixLength)
     {

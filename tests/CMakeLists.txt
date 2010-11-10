@@ -30,6 +30,8 @@ fonttest(padauk5 Padauk.ttf 1000 103c 1031 102c 1004 1037 103a)
 fonttest(padauk6 Padauk.ttf 1000 102D 1005 1039 1006 102C)
 # padauk7 can cause an infinite loop, though the text is miss-spelt
 fonttest(padauk7 Padauk.ttf 1017 1014 103c 103d 102f)
+fonttest(padauk8 Padauk.ttf 1004 103A 1039)
+fonttest(padauk9 Padauk.ttf 1004 103A 1039 1005)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)

@@ -83,6 +83,10 @@ public:
     {
         SegCacheEntry * oldEntries = m_entries[length];
         size_t listSize = m_entryCounts[length] + 1;
+        // hack TODO sort the list and use a binary search
+        // the problem comes when you get incremental numeric ids in a large doc
+        //if (listSize > 8)
+        //    return NULL;
         m_entries[length] = gralloc<SegCacheEntry>(listSize);
         if (!m_entries[length])
         {
@@ -136,6 +140,7 @@ private:
     size_t m_segmentCount;
     size_t m_maxSegmentCount;
     mutable unsigned long long m_totalAccessCount;
+    mutable unsigned long long m_totalMisses;
     void ** m_prefixes;
 };
 
@@ -146,10 +151,18 @@ inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t le
     void ** pEntry = (void **) m_prefixes[cmapGlyphs[0]];
     while (++pos < m_prefixLength)
     {
-        if (!pEntry) return NULL;
+        if (!pEntry)
+        {
+            ++m_totalMisses;
+            return NULL;
+        }
         pEntry = (void **)pEntry[(pos < length)? cmapGlyphs[pos] : 0];
     }
-    if (!pEntry) return NULL;
+    if (!pEntry)
+    {
+        ++m_totalMisses;
+        return NULL;
+    }
     SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(pEntry);
     const SegCacheEntry * entry = prefixEntry->find(cmapGlyphs, length);
     if (entry)
@@ -157,6 +170,10 @@ inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t le
         ++m_totalAccessCount;
         entry->accessed(m_totalAccessCount);
     }
+    else
+    {
+        ++m_totalMisses;
+    }   
     return entry;
 }
     

@@ -58,7 +58,7 @@ public:
     /** Total number of times this entry has been accessed since creation */
     long long accessCount() const { return m_accessCount; }
     /** "time" of last access where "time" is measured in accesses to the cache owning this entry */
-    void accessed(long long cacheTime) const { m_lastAccess = cacheTime; ++m_accessCount; };
+    void accessed(unsigned long long cacheTime) const { m_lastAccess = cacheTime; ++m_accessCount; };
 
     CLASS_NEW_DELETE
 private:
