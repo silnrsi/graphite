@@ -19,12 +19,8 @@ enum encform {
 
 extern "C"
 {
-    //in the following methods, pError may be NULL. if it is not NULL, and the buffer contains some bad bytes not in the utf range, then *pError is set to point at the first bad byte. Otherwise, *pError is set to NULL.
-    size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, const void** pError);
-    size_t count_unicode_characters_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount, const void** pError);
-    size_t count_unicode_characters_to_nul(encform enc, const void* buffer_begin, const void** pError);  //the nul is not in the count
-    size_t count_unicode_characters_to_nul_or_end(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/, const void** pError);   //the nul is not in the count
-    size_t count_unicode_characters_to_nul_or_end_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end*/, size_t maxCount, const void** pError);  //the nul is not in the count
+    //in the following method, pError may be NULL. if it is not NULL, and the buffer contains some bad bytes not in the utf range, then *pError is set to point at the first bad byte. Otherwise, *pError is set to NULL.
+    size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError);   //Also stops on nul. Any nul is not in the count
 }
 
 

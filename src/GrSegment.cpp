@@ -26,27 +26,6 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class CharCounter
-{
-public:
-      CharCounter()
-      :	  m_nCharsProcessed(0) 
-      {
-      }	  
-
-      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
-      {
-	  ++m_nCharsProcessed;
-	  return true;
-      }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      size_t m_nCharsProcessed ;
-};
-
-
 template <class LIMIT, class CHARPROCESSOR>
 size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
 {
@@ -102,43 +81,20 @@ static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint
 
 extern "C" 
 {
-GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, const void** pError)
+GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
+  if (buffer_end)
+  {
     BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounter counter;
+    CharCounterToNul counter;
     return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount, const void** pError)
-{
-    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
-    CharCounter counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_to_nul(encform enc, const void* buffer_begin, const void** pError)	//the nul is not in the count
-{
+  }
+  else
+  {
     NoLimit limit(enc, buffer_begin);
     CharCounterToNul counter;
     return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_to_nul_or_end(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, const void** pError)	//the nul is not in the count
-{
-    BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_to_nul_or_end_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount, const void** pError)	//the nul is not in the count
-{
-    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
+  }
 }
 
 
