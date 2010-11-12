@@ -60,58 +60,169 @@ public:
     {
         if (length <= ePrefixLength)
         {
-            assert(m_entryCounts[length] <= 1);
-            if (m_entries[length])
-                return m_entries[length];
+            assert(m_entryCounts[length-1] <= 1);
+            if (m_entries[length-1])
+                return m_entries[length-1];
             return NULL;
         }
-        for (uint16 i = 0; i < m_entryCounts[length]; i++)
+        SegCacheEntry * entry = NULL;
+        uint16 pos = findPosition(cmapGlyphs, length, &entry);
+        /*
+        for (uint16 i = 0; i < m_entryCounts[length-1]; i++)
         {
             bool equal = true;
             for (size_t pos = ePrefixLength; pos < length && equal; pos++)
             {
-                equal = (cmapGlyphs[pos] == m_entries[length][i].m_unicode[pos]);
+                equal = (cmapGlyphs[pos] == m_entries[length-1][i].m_unicode[pos]);
             }
             if (equal)
             {
-                return m_entries[length] + i;
+                return m_entries[length-1] + i;
             }
         }
-        return NULL;
+        */
+        return entry;
     }
     SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, unsigned long long totalAccessCount)
     {
-        SegCacheEntry * oldEntries = m_entries[length];
-        size_t listSize = m_entryCounts[length] + 1;
-        // hack TODO sort the list and use a binary search
-        // the problem comes when you get incremental numeric ids in a large doc
-        //if (listSize > 8)
-        //    return NULL;
-        m_entries[length] = gralloc<SegCacheEntry>(listSize);
-        if (!m_entries[length])
+        size_t listSize = m_entryBSIndex[length-1]? (m_entryBSIndex[length-1] << 1) - 1 : 0;
+        SegCacheEntry * newEntries = NULL;
+        if (m_entryCounts[length-1] + 1u > listSize)
         {
-            // out of memory
-            free(oldEntries);
-            m_entryCounts[length] = 0;
-            return NULL;
-        }
+            if (m_entryCounts[length-1] == 0)
+            {
+                listSize = 1;
+            }
+            else
+            {
+                // the problem comes when you get incremental numeric ids in a large doc
+                if (listSize > eMaxSuffixCount)
+                    return NULL;
+                listSize = (m_entryBSIndex[length-1] << 2) - 1;
+            }
+            newEntries = gralloc<SegCacheEntry>(listSize);
+            if (!newEntries)
+            {
+                return NULL;
+            }
+        }        
+
+        uint16 insertPos = 0;
+        if (m_entryCounts[length-1] > 0)
+        {
+            insertPos = findPosition(cmapGlyphs, length, NULL);
+            if (!newEntries)
+            {
+                // same buffer, shift entries up
+                memmove(m_entries[length-1] + insertPos + 1, m_entries[length-1] + insertPos,
+                    sizeof(SegCacheEntry) * (m_entryCounts[length-1] - insertPos));
+            }
+            else
+            {
+                memcpy(newEntries, m_entries[length-1], sizeof(SegCacheEntry) * (insertPos));
+                memcpy(newEntries + insertPos + 1, m_entries[length-1] + insertPos,
+                   sizeof(SegCacheEntry) * (m_entryCounts[length-1] - insertPos));
+                
+                free(m_entries[length-1]);
+                m_entries[length-1] = newEntries;
+                assert (m_entryBSIndex[length-1]);
+                m_entryBSIndex[length-1] <<= 1;
+            }
+        } 
         else
         {
-            m_entryCounts[length] = listSize;
+            m_entryBSIndex[length-1] = 1;
+            m_entries[length-1] = newEntries;
         }
-        if (listSize > 1)
-        {
-            memcpy(m_entries[length], oldEntries, sizeof(SegCacheEntry) * (listSize-1));
-            free(oldEntries);
-        }
-        ::new (m_entries[length] + listSize - 1)
+        m_entryCounts[length-1] += 1;
+        ::new (m_entries[length-1] + insertPos)
             SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
-        return m_entries[length] + listSize - 1;
+        return m_entries[length-1]  + insertPos;
     }
     CLASS_NEW_DELETE
 private:
+    uint16 findPosition(const uint16 * cmapGlyphs, uint16 length, SegCacheEntry ** entry) const
+    {
+        int dir = 0;
+        if (m_entryCounts[length-1] == 0)
+        {
+            if (entry) *entry = NULL;
+            return 0;
+        }
+        else if (m_entryCounts[length-1] == 0)
+        {
+            // optimize single entry case
+            for (int i = ePrefixLength; i < length; i++)
+            {
+                if (cmapGlyphs[i] > m_entries[length-1][0].m_unicode[i])
+                {
+                    return 1;
+                }
+                else if (cmapGlyphs[i] < m_entries[length-1][0].m_unicode[i])
+                {
+                    return 0;
+                }
+            }
+            if (entry)
+                *entry = m_entries[length-1];
+            return 0;
+        }
+        uint16 searchIndex = m_entryBSIndex[length-1] - 1;
+        uint16 stepSize = m_entryBSIndex[length-1] >> 1;
+        size_t prevIndex = searchIndex;
+        do
+        {
+            dir = 0;
+            if (searchIndex >= m_entryCounts[length-1])
+            {
+                dir = -1;
+                searchIndex -= stepSize;
+                stepSize >>= 1;
+            }
+            else
+            {
+                for (int i = ePrefixLength; i < length; i++)
+                {
+                    if (cmapGlyphs[i] > m_entries[length-1][searchIndex].m_unicode[i])
+                    {
+                        dir = 1;
+                        searchIndex += stepSize;
+                        stepSize >>= 1;
+                        break;
+                    }
+                    else if (cmapGlyphs[i] < m_entries[length-1][searchIndex].m_unicode[i])
+                    {
+                        dir = -1;
+                        searchIndex -= stepSize;
+                        stepSize >>= 1;
+                        break;
+                    }
+                }
+            }
+            if (prevIndex == searchIndex)
+                break;
+            prevIndex = searchIndex;
+        } while (dir != 0);
+        if (entry)
+        {
+            if (dir == 0)
+                *entry = m_entries[length-1] + searchIndex;
+            else
+                *entry = NULL;
+        }
+        else
+        {
+            // if entry is null, then this is for inserting a new value, which
+            // shouldn't already be in the cache
+            assert(dir != 0);
+            if (dir > 0)
+                ++searchIndex;
+        }
+        return searchIndex;
+    }
     /** m_entries is a null terminated list of entries */
     uint16 m_entryCounts[eMaxCachedSeg];
+    uint16 m_entryBSIndex[eMaxCachedSeg];
     SegCacheEntry * m_entries[eMaxCachedSeg];
 };
 

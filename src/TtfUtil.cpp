@@ -976,8 +976,6 @@ gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId)
 	Returns 0xFFFF as the last item.
 	pRangeKey is an optional key that is used to optimize the search; its value is the range
 	in which the character is found.
-
-	Note: this method is not currently used by the Graphite engine.
 ----------------------------------------------------------------------------------------------*/
 unsigned int Cmap31NextCodepoint(const void *pCmap31, unsigned int nUnicodeId, int * pRangeKey)
 {
@@ -1039,8 +1037,6 @@ unsigned int Cmap31NextCodepoint(const void *pCmap31, unsigned int nUnicodeId, i
 
 /*----------------------------------------------------------------------------------------------
 	Check the Microsoft UCS-4 subtable for expected values.
-
-	Note: this method is not currently used by the Graphite engine.
 ----------------------------------------------------------------------------------------------*/
 bool CheckCmap310Subtable(const void *pCmap310)
 {
@@ -1080,8 +1076,6 @@ gid16 Cmap310Lookup(const void * pCmap310, unsigned int uUnicodeId)
 	Returns 0x10FFFF as the last item.
 	pRangeKey is an optional key that is used to optimize the search; its value is the range
 	in which the character is found.
-
-	Note: this method is not currently used by the Graphite engine.
 ----------------------------------------------------------------------------------------------*/
 unsigned int Cmap310NextCodepoint(const void *pCmap310, unsigned int nUnicodeId, int * pRangeKey)
 {

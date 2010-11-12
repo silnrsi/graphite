@@ -145,8 +145,11 @@ public:
     virtual ~GlyphFaceCachePreloaded();
 
     virtual EGlyphCacheStrategy getEnum() const;
-    virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
-    
+    virtual const GlyphFace *glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+    {
+        incAccesses();
+        return glyphDirect(glyphid);
+    }
 private:
     const GlyphFace *glyphDirect(unsigned short glyphid) const { return (const GlyphFace *)((const char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}
     GlyphFace *glyphDirect(unsigned short glyphid) { return (GlyphFace *)((char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}

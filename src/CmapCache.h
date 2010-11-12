@@ -21,28 +21,27 @@
 */
 #pragma once
 
-#include <cstddef>
+#include <graphiteng/Types.h>
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-typedef unsigned char uint8;
-typedef uint8    byte;
-typedef signed char int8;
-typedef unsigned short uint16;
-typedef short   int16;
-typedef unsigned int    uint32;
-typedef int     int32;
-
-#ifdef _MSC_VER
-#define GRNG_EXPORT __declspec(dllexport)
-#else
-#ifdef __GNUC__
-#define GRNG_EXPORT __attribute__ ((visibility("default")))
-#else
-#define GRNG_EXPORT
-#endif
-#endif
-
+class CmapCache
+{
+public:
+    CmapCache(const void * cmapTable);
+    ~CmapCache();
+    uint16 lookup(unsigned int unicode) const {
+        if ((m_isBmpOnly && unicode > 0xFFFF) || (unicode > 0x10FFFF))
+            return 0;
+        unsigned int block = (0xFFFFFF & unicode) >> 8;
+        if (m_blocks && m_blocks[block])
+            return m_blocks[block][unicode & 0xFF];
+        return 0;
+    };
+    CLASS_NEW_DELETE
+private:
+    bool m_isBmpOnly;
+    uint16 ** m_blocks;
+};
 
 }}}} // namespace
-

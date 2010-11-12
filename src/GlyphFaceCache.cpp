@@ -225,9 +225,9 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
 }
 
 
-/*virtual*/ const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+/*virtual const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
     incAccesses();
     return glyphDirect(glyphid); 
 }
-
+*/

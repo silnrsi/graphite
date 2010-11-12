@@ -23,6 +23,7 @@
 #include "VMScratch.h"
 #include <string.h>
 #include "GrSegmentImp.h"
+#include "CmapCache.h"
 #include "XmlTraceLog.h"
 
 using namespace org::sil::graphite::v2;
@@ -30,8 +31,10 @@ using namespace org::sil::graphite::v2;
 GrFace::~GrFace()
 {
     delete m_pGlyphFaceCache;
+    delete m_cmapCache;
     delete[] m_silfs;
     m_pGlyphFaceCache = NULL;
+    m_cmapCache = NULL;
     m_silfs = NULL;
     delete m_pFileFace;
     m_pFileFace = NULL;
@@ -40,7 +43,19 @@ GrFace::~GrFace()
 
 bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const      //glyphs already loaded are unloaded
 {
-    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache, requestedStrategy);
+    if (requestedStrategy & eCmap)
+    {
+        if (!m_cmapCache)
+             m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+    }
+    else
+    {
+        delete m_cmapCache;
+        m_cmapCache = NULL;
+    }
+
+    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache,
+        static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
     if (!pNewCache)
         return false;
     
@@ -55,7 +70,13 @@ bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
 
-    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr, requestedStrategy);
+    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr,
+        static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
+
+    if (requestedStrategy & eCmap)
+    {
+        m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+    }
 
     if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);

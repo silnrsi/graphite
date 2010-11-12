@@ -39,6 +39,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
 class Features;
+class CmapCache;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
 
@@ -120,7 +121,8 @@ public:
 
 public:
     GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
-        m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL)  {}
+        m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
+        m_cmapCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL)  {}
     ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
@@ -145,7 +147,8 @@ public:
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
     void takeFileFace(FileFace* pFileFace/*takes ownership*/);
     void enableSegmentCache(size_t maxSegments, uint32 flags);
-    
+    CmapCache * getCmapCache() const { return m_cmapCache; };
+
     CLASS_NEW_DELETE
 private:
     const void* m_appFaceHandle/*non-NULL*/;
@@ -156,6 +159,7 @@ private:
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs
     mutable GlyphFaceCache* m_pGlyphFaceCache;      //owned - never NULL
+    mutable CmapCache* m_cmapCache; // cmap cache if available
     unsigned short m_upem;          // design units per em
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.

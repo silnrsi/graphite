@@ -132,7 +132,8 @@ int main(int argc, char ** argv)
     gr2::enable_segment_cache(face, 4096, 0);
     gr2::GrFont *sizedFont = gr2::make_GrFont(12, face);
     const void * badUtf8 = NULL;
-    const char * testStrings[] = { "a", "aa", "aaa", "aaaa", "aaab", "a b c", "aaa ", " aa" };
+    const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
+        "aaa ", " aa", "aaaf", "aaad", "aaaa"};
     uint16 * testGlyphStrings[sizeof(testStrings)/sizeof(char*)];
     size_t testLengths[sizeof(testStrings)/sizeof(char*)];
     const size_t numTestStrings = sizeof(testStrings) / sizeof (char*);
@@ -155,7 +156,7 @@ int main(int argc, char ** argv)
     }
     size_t segCount = face->silf(0)->segmentCache()->segmentCount();
     long long accessCount = face->silf(0)->segmentCache()->totalAccessCount();
-    if (segCount != 7 || accessCount != 13)
+    if (segCount != 10 || accessCount != 16)
     {
         fprintf(stderr, "SegCache contains %lu entries, which were used %Ld times\n",
             segCount, accessCount);
@@ -168,7 +169,7 @@ int main(int argc, char ** argv)
     }
     segCount = face->silf(0)->segmentCache()->segmentCount();
     accessCount = face->silf(0)->segmentCache()->totalAccessCount();
-    if (segCount != 7 || accessCount != 23)
+    if (segCount != 10 || accessCount != 29)
     {
         fprintf(stderr, "SegCache after repeat contains %lu entries, which were used %Ld times\n",
             segCount, accessCount);

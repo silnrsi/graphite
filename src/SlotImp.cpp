@@ -338,11 +338,21 @@ void Slot::sibling(Slot *ap)
         m_sibling->sibling(ap);
 }
 
-void Slot::setGlyph(GrSegment *seg, uint16 glyphid)
+void Slot::setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
-    m_realglyphid = seg->glyphAttr(glyphid, seg->silf()->aPseudo());
-    m_advance = Position(seg->glyphAdvance(glyphid), 0.);
+    if (!theGlyph)
+    {
+        theGlyph = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyphid);
+        if (!theGlyph)
+        {
+            m_realglyphid = 0;
+            m_advance = Position(0.,0.);
+            return;
+        }
+    }
+    m_realglyphid = theGlyph->getAttr(seg->silf()->aPseudo());
+    m_advance = Position(theGlyph->theAdvance().x, 0.);
 }
 
 void Slot::floodShift(Position adj)

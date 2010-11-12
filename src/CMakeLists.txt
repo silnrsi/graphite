@@ -72,6 +72,7 @@ file(GLOB PRIVATE_HEADERS *.h)
 add_library(graphiteng SHARED
     call_machine.cpp
     CharInfo.cpp
+    CmapCache.cpp
     Code.cpp
     FeatureMap.cpp
     Features.cpp
@@ -89,9 +90,9 @@ add_library(graphiteng SHARED
     Slot.cpp
     Silf.cpp
     Pass.cpp
-    TtfUtil.cpp
     SegCache.cpp
     SegCacheEntry.cpp
+    TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
     ${GRAPHITE_HEADERS}

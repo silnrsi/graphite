@@ -30,6 +30,7 @@
 #include "SlotImp.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
+#include "CmapCache.h"
 #include "SegCacheEntry.h"
 #include "graphiteng/GrSegment.h"
 
@@ -53,34 +54,6 @@ GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, i
     freeSlot(newSlot());
     for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
     m_bufSize = i;                  // log2(numchars)
-}
-
-GrSegment::GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t offset, size_t subLength) :
-        m_numGlyphs(subLength),
-        m_numCharinfo(subLength),
-        m_face(parent.m_face),
-        m_charinfo(new CharInfo[subLength]),
-        m_silf(parent.m_silf),
-        m_dir(parent.m_dir),
-        m_freeSlots(NULL),
-        m_last(NULL),
-        m_first(NULL),
-        m_bbox(Rect(Position(0, 0), Position(0, 0))),
-        m_feats(parent.m_feats)
-{
-    unsigned int i, j;
-    m_bufSize = subLength + 10;
-    freeSlot(newSlot());
-    for (i = 0, j = 1; j < subLength; i++, j <<= 1) {}
-    m_bufSize = i;
-    // TODO optimize this since newSlot has already done nearly the same iteration
-    for (i = 0; i < subLength; i++)
-    {
-        appendSlot(i, parent.charinfo(offset + i)->unicodeChar(),
-                   firstSlot->gid(), parent.charinfo(offset + i)->fid(),
-                   parent.charinfo(offset + i)->breakWeight());
-        firstSlot = firstSlot->next();
-    }
 }
 
 SegmentScopeState GrSegment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
@@ -159,15 +132,24 @@ void GrSegment::append(const GrSegment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void GrSegment::appendSlot(int id, int cid, int gid, int iFeats, int bw)
+void GrSegment::appendSlot(int id, int cid, int gid, int iFeats)
 {
     Slot *aSlot = newSlot();
+    
     m_charinfo[id].init(cid, id);
     m_charinfo[id].feats(iFeats);
-    m_charinfo[id].breakWeight(bw);
+    const GlyphFace * theGlyph = m_face->getGlyphFaceCache()->glyphSafe(gid);
+    if (theGlyph)
+    {
+        m_charinfo[id].breakWeight(theGlyph->getAttr(m_silf->aBreak()));
+    }
+    else
+    {
+        m_charinfo[id].breakWeight(0);
+    }
     
     aSlot->child(NULL);
-    aSlot->setGlyph(this, gid);
+    aSlot->setGlyph(this, gid, theGlyph);
     aSlot->originate(id);
     aSlot->before(id);
     aSlot->after(id);
@@ -182,10 +164,10 @@ Slot *GrSegment::newSlot()
     int numUser = m_silf->numUser();
     if (!m_freeSlots)
     {
-        Slot *newSlots = gralloc<Slot>(m_bufSize);
-        uint16 *newAttrs = gralloc<uint16>(numUser * m_bufSize);
-
-        for (size_t i = 0; i < m_bufSize - 1; i++)
+        Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
+        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+        newSlots[0].userAttrs(newAttrs);
+        for (size_t i = 1; i < m_bufSize - 1; i++)
         {
             newSlots[i].next(newSlots + i + 1);
             newSlots[i].userAttrs(newAttrs + i * numUser);
@@ -194,13 +176,12 @@ Slot *GrSegment::newSlot()
         newSlots[m_bufSize - 1].next(NULL);
         m_slots.push_back(newSlots);
         m_userAttrs.push_back(newAttrs);
-        m_freeSlots = newSlots;
+        m_freeSlots = (m_bufSize > 1)? newSlots + 1 : NULL;
+        return newSlots;
     }
     Slot *res = m_freeSlots;
     m_freeSlots = m_freeSlots->next();
-    // (re)initialize the Slot (new must leave userAttrs pointer untouched)
-    ::new (res) Slot;
-    memset(res->userAttrs(), 0, numUser * sizeof(uint16));
+    res->next(NULL);
     return res;
 }
 
@@ -208,6 +189,10 @@ void GrSegment::freeSlot(Slot *aSlot)
 {
     if (m_last == aSlot) m_last = aSlot->prev();
     if (m_first == aSlot) m_first = aSlot->next();
+    // reset the slot incase it is reused
+    ::new (aSlot) Slot;
+    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(uint16));
+    // update next pointer
     if (!m_freeSlots)
         aSlot->next(NULL);
     else
@@ -411,7 +396,7 @@ public:
 	  m_fid(pDest2->addFeatures(*pFeats)),
 	  m_nCharsProcessed(0) 
       {
-      }	  
+      }
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
@@ -419,8 +404,8 @@ public:
 	  uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
           if (!gid)
               gid = m_face->findPseudo(cid);
-          int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
-          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, bw);
+         // int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
+          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);
 	  ++m_nCharsProcessed;
 	  return true;
       }
@@ -436,14 +421,56 @@ private:
       size_t m_nCharsProcessed ;
 };
 
+class CachedSlotBuilder
+{
+public:
+    CachedSlotBuilder(const GrFace *face2, const Features* pFeats/*must not be NULL*/, GrSegment* pDest2)
+    :  m_face(face2),
+    m_cmap(face2->getCmapCache()),
+    m_pDest(pDest2),
+    m_breakAttr(pDest2->silf()->aBreak()),
+    m_fid(pDest2->addFeatures(*pFeats)),
+    m_nCharsProcessed(0)
+    {
+    }
+
+    bool processChar(uint32 cid/*unicode character*/)     //return value indicates if should stop processing
+    {
+        uint16 realgid = 0;
+        uint16 gid = m_cmap->lookup(cid);
+        if (!gid)
+            gid = m_face->findPseudo(cid);
+        //int16 bw = m_face->glyphAttr(gid, m_breakAttr);
+        m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);
+        ++m_nCharsProcessed;
+        return true;
+    }
+
+      size_t charsProcessed() const { return m_nCharsProcessed; }
+
+private:
+      const GrFace *m_face;
+      const CmapCache *m_cmap;
+      GrSegment *m_pDest;
+      uint8 m_breakAttr;
+      const unsigned int m_fid;
+      size_t m_nCharsProcessed ;
+};
 
 void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars)
 {
-    SlotBuilder slotBuilder(face, pFeats, this);
     CharacterCountLimit limit(enc, pStart, nChars);
     IgnoreErrors ignoreErrors;
-
-    processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
+    if (face->getCmapCache())
+    {
+        CachedSlotBuilder slotBuilder(face, pFeats, this);
+        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
+    }
+    else
+    {
+        SlotBuilder slotBuilder(face, pFeats, this);
+        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
+    }
 }
 
 void GrSegment::prepare_pos(const GrFont *font)

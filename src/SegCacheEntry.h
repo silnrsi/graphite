@@ -30,9 +30,10 @@ class GrSegment;
 typedef enum {
     /** number of characters used in initial tree */
     ePrefixLength = 3,
+    eMaxSuffixCount = 31,
     /** sub-Segments longer than this are not cached
         * (in Unicode code points) */
-    eMaxCachedSeg = 16
+    eMaxCachedSeg = 24
 } SegCacheLength;
 
 /**

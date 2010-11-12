@@ -52,7 +52,7 @@ public:
     Slot *prev() const { return m_prev; }
     void prev(Slot *s) { m_prev = s; }
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(GrSegment *seg, uint16 glyphid);
+    void setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }

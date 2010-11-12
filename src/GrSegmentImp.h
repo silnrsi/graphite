@@ -83,7 +83,6 @@ public:
     int8 dir() const { return m_dir; }
 
     GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
-    GrSegment(const GrSegment & parent, const Slot * firstSlot, size_t offset, size_t subLength);
     ~GrSegment();
     SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
     void removeScope(SegmentScopeState & state);
@@ -91,7 +90,7 @@ public:
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
     void last(Slot *p) { m_last = p; }
-    void appendSlot(int i, int cid, int gid, int fid, int bw);
+    void appendSlot(int i, int cid, int gid, int fid);
     Slot *newSlot();
     void freeSlot(Slot *);
     void positionSlots(const GrFont *font, Slot *iStart = NULL, Slot *iEnd = NULL);
@@ -117,6 +116,7 @@ public:
     int numAttrs() { return m_silf->numUser(); }
     void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, const SegCacheEntry * entry);
     int defaultOriginal() const { return m_defaultOriginal; }
+    const GrFace * getFace() const { return m_face; }
 
     CLASS_NEW_DELETE
 
