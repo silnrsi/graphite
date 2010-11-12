@@ -43,7 +43,9 @@ extern "C"
     GRNG_EXPORT float advance(const Slot* p/*not NULL*/, const GrFont *font);
     GRNG_EXPORT int before(const Slot* p/*not NULL*/);
     GRNG_EXPORT int after(const Slot* p/*not NULL*/);
-    GRNG_EXPORT int get_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex);
+    GRNG_EXPORT int get_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex); //tbd - do we need to expose this?
+    //tbd (07:42:59) ks: the internal isBase, attachedTo, child, sibling need exposing
+    
     GRNG_EXPORT bool is_insert_before(const Slot* p/*not NULL*/);
     GRNG_EXPORT int original(const Slot* p/*not NULL*/);
 //  GRNG_EXPORT size_t id(const Slot* p/*not NULL*/);

@@ -552,7 +552,7 @@ int Parameters::testFileFont() const
             return 3;
         }
 
-        gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);
+        gr2::GrFont *sizedFont = gr2::make_font(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -666,7 +666,7 @@ int Parameters::testFileFont() const
         gr2::destroy_GrSegment(pSeg);
        }
         
-        gr2::destroy_GrFont(sizedFont);
+        gr2::destroy_font(sizedFont);
         gr2::destroy_face(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed

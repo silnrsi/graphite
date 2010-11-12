@@ -19,11 +19,11 @@ public:
         m_grFont(0)
     {
         if (m_grFace)
-            m_grFont = gr2::make_GrFont(static_cast<float>(fontSize), m_grFace);
+            m_grFont = gr2::make_font(static_cast<float>(fontSize), m_grFace);
     }
     virtual ~GrNgRenderer()
     {
-        gr2::destroy_GrFont(m_grFont);
+        gr2::destroy_font(m_grFont);
         gr2::destroy_face(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
