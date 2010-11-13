@@ -21,6 +21,7 @@
 */
 #pragma once
 
+#include <stdint.h>
 #include <graphiteng/GrSegment.h>
 #include "Main.h"
 #include "SlotImp.h"
@@ -139,7 +140,8 @@ public:
             SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
         return m_entries[length-1]  + insertPos;
     }
-    unsigned long long purge(unsigned long long minAccessCount, unsigned long long oldAccessTime);
+    unsigned long long purge(unsigned long long minAccessCount, unsigned long long oldAccessTime,
+        unsigned long long currentTime);
     CLASS_NEW_DELETE
 private:
     uint16 findPosition(const uint16 * cmapGlyphs, uint16 length, SegCacheEntry ** entry) const
@@ -225,6 +227,21 @@ private:
     uint16 m_entryCounts[eMaxCachedSeg];
     uint16 m_entryBSIndex[eMaxCachedSeg];
     SegCacheEntry * m_entries[eMaxCachedSeg];
+    unsigned long long m_lastPurge;
+};
+
+union SegCachePrefixArray;
+
+#define SEG_CACHE_MIN_INDEX (m_maxCmapGid)
+#define SEG_CACHE_MAX_INDEX (m_maxCmapGid+1u)
+#define SEG_CACHE_UNSET_INDEX (m_maxCmapGid+2u)
+
+union SegCachePrefixArray
+{
+    void ** raw;
+    SegCachePrefixArray * array;
+    SegCachePrefixEntry ** prefixEntries;
+    uintptr_t * range;
 };
 
 class SegCache
@@ -244,8 +261,8 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    void freeLevel(void ** prefixes, size_t level);
-    void purgeLevel(void ** prefixes, size_t level, unsigned long long minAccessCount);
+    void freeLevel(SegCachePrefixArray prefixes, size_t level);
+    void purgeLevel(SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount);
 
     uint16 m_spaceGid;
     uint16 m_maxCmapGid;
@@ -253,31 +270,36 @@ private:
     uint16 m_maxCachedSegLength;
     size_t m_segmentCount;
     size_t m_maxSegmentCount;
+    SegCachePrefixArray m_prefixes;
     mutable unsigned long long m_totalAccessCount;
     mutable unsigned long long m_totalMisses;
-    void ** m_prefixes;
 };
 
 inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t length) const
 {
     uint16 pos = 0;
     if (!length || length > eMaxCachedSeg) return NULL;
-    void ** pEntry = (void **) m_prefixes[cmapGlyphs[0]];
-    while (++pos < m_prefixLength)
+    SegCachePrefixArray pEntry = m_prefixes.array[cmapGlyphs[0]];
+    while (++pos < m_prefixLength - 1)
     {
-        if (!pEntry)
+        if (!pEntry.raw)
         {
             ++m_totalMisses;
             return NULL;
         }
-        pEntry = (void **)pEntry[(pos < length)? cmapGlyphs[pos] : 0];
+        pEntry = pEntry.array[(pos < length)? cmapGlyphs[pos] : 0];
     }
-    if (!pEntry)
+    if (!pEntry.raw)
     {
         ++m_totalMisses;
         return NULL;
     }
-    SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(pEntry);
+    SegCachePrefixEntry * prefixEntry = pEntry.prefixEntries[(pos < length)? cmapGlyphs[pos] : 0];
+    if (!prefixEntry)
+    {
+        ++m_totalMisses;
+        return NULL;
+    }
     const SegCacheEntry * entry = prefixEntry->find(cmapGlyphs, length);
     if (entry)
     {

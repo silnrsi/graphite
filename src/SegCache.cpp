@@ -35,8 +35,7 @@ SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
     m_maxCachedSegLength(eMaxCachedSeg),
     m_segmentCount(0),
     m_maxSegmentCount(maxSegments),
-    m_totalAccessCount(0l), m_totalMisses(0l),
-    m_prefixes(NULL)
+    m_totalAccessCount(0l), m_totalMisses(0l)
 {
     void * bmpTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1);
     void * supplementaryTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 10);
@@ -48,25 +47,28 @@ SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
         // The Pseudo glyphs may mean that it isn't worth the effort
         
     }
-    m_prefixes = grzeroalloc<void*>(m_maxCmapGid);
+    m_prefixes.raw = grzeroalloc<void*>(m_maxCmapGid+2);
+    m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;
+    m_prefixes.range[SEG_CACHE_MAX_INDEX] = SEG_CACHE_UNSET_INDEX;
+    assert(sizeof(void*) == sizeof(uintptr_t));
 }
 
-void SegCache::freeLevel(void ** prefixes, size_t level)
+void SegCache::freeLevel(SegCachePrefixArray prefixes, size_t level)
 {
     for (size_t i = 0; i < m_maxCmapGid; i++)
     {
-        if (prefixes[i])
+        if (prefixes.array[i].raw)
         {
             if (level + 1 < ePrefixLength)
-                freeLevel((void**)prefixes[i], level + 1);
+                freeLevel(prefixes.array[i], level + 1);
             else
             {
-                SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(prefixes[i]);
+                SegCachePrefixEntry * prefixEntry = prefixes.prefixEntries[i];
                 delete prefixEntry;
             }
         }
     }
-    free(prefixes);
+    free(prefixes.raw);
 }
 
 SegCache::~SegCache()
@@ -87,7 +89,7 @@ SegCache::~SegCache()
         XmlTraceLog::get().closeElement(ElementSegCache);
     }
 #endif
-    m_prefixes = NULL;
+    m_prefixes.raw = NULL;
 }
 
 SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset)
@@ -95,24 +97,63 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
     uint16 pos = 0;
     if (!length) return NULL;
     assert(length < m_maxCachedSegLength);
-    void ** pArray = m_prefixes;
+    SegCachePrefixArray pArray = m_prefixes;
     while (pos + 1 < m_prefixLength)
     {
-        if (!pArray[(pos < length)? cmapGlyphs[pos] : 0])
-            pArray[(pos < length)? cmapGlyphs[pos] : 0] = grzeroalloc<void*>(m_maxCmapGid);
-        pArray = (void**)pArray[(pos < length)? cmapGlyphs[pos] : 0];
+        uint16 gid = (pos < length)? cmapGlyphs[pos] : 0;
+        if (!pArray.array[gid].raw)
+        {
+            pArray.array[gid].raw = grzeroalloc<void*>(m_maxCmapGid+2);
+            if (!pArray.array[gid].raw)
+                return NULL; // malloc failed
+            if (pArray.range[SEG_CACHE_MIN_INDEX] == SEG_CACHE_UNSET_INDEX)
+            {
+                pArray.range[SEG_CACHE_MIN_INDEX] = gid;
+                pArray.range[SEG_CACHE_MAX_INDEX] = gid;
+            }
+            else
+            {
+                if (gid < pArray.range[SEG_CACHE_MIN_INDEX])
+                    pArray.range[SEG_CACHE_MIN_INDEX] = gid;
+                else if (gid > pArray.range[SEG_CACHE_MAX_INDEX])
+                    pArray.range[SEG_CACHE_MAX_INDEX] = gid;
+            }
+        }
+        pArray = pArray.array[gid];
         ++pos;
     }
-
-    SegCachePrefixEntry * prefixEntry = (SegCachePrefixEntry*)pArray[(pos < length)? cmapGlyphs[pos] : 0];
+    uint16 gid = (pos < length)? cmapGlyphs[pos] : 0;
+    SegCachePrefixEntry * prefixEntry = pArray.prefixEntries[gid];
     if (!prefixEntry)
     {
         prefixEntry = new SegCachePrefixEntry();
-        pArray[(pos < length)? cmapGlyphs[pos] : 0] = prefixEntry;
+        pArray.prefixEntries[gid] = prefixEntry;
+        if (pArray.range[SEG_CACHE_MIN_INDEX] == SEG_CACHE_UNSET_INDEX)
+        {
+            pArray.range[SEG_CACHE_MIN_INDEX] = gid;
+            pArray.range[SEG_CACHE_MAX_INDEX] = gid;
+        }
+        else
+        {
+            if (gid < pArray.range[SEG_CACHE_MIN_INDEX])
+                pArray.range[SEG_CACHE_MIN_INDEX] = gid;
+            else if (gid > pArray.range[SEG_CACHE_MAX_INDEX])
+                pArray.range[SEG_CACHE_MAX_INDEX] = gid;
+        }
     }
     if (!prefixEntry) return NULL;
+    // if the cache is full run a purge - this is slow, since it walks the tree
     if (m_segmentCount + 1 > m_maxSegmentCount)
         purge();
+    // if the cache is nearing full, try a purge on just the current prefixEntry
+    //else if (m_segmentCount > .75 * m_maxSegmentCount)
+    //{
+    //    unsigned long long minAccessCount = m_totalAccessCount / (ePurgeFactor * m_maxSegmentCount);
+    //    if (minAccessCount < 2) minAccessCount = 2;
+    //    prefixEntry->purge(minAccessCount,
+    //                       m_totalAccessCount - m_maxSegmentCount / 2,
+    //                       m_totalAccessCount);
+    //}
     ++m_segmentCount;
     return prefixEntry->cache(cmapGlyphs, length, seg, charOffset, m_totalAccessCount);
 }
@@ -124,29 +165,40 @@ void SegCache::purge()
     purgeLevel(m_prefixes, 0, minAccessCount);
 }
 
-void SegCache::purgeLevel(void ** prefixes, size_t level, unsigned long long minAccessCount)
+void SegCache::purgeLevel(SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount)
 {
-    for (size_t i = 0; i < m_maxCmapGid; i++)
+    if (prefixes.range[SEG_CACHE_MIN_INDEX] == SEG_CACHE_UNSET_INDEX) return;
+    size_t maxGlyphCached = prefixes.range[SEG_CACHE_MAX_INDEX];
+    for (size_t i = prefixes.range[SEG_CACHE_MIN_INDEX]; i <= maxGlyphCached; i++)
     {
-        if (prefixes[i])
+        if (prefixes.array[i].raw)
         {
             if (level + 1 < ePrefixLength)
-                purgeLevel((void**)prefixes[i], level + 1, minAccessCount);
+                purgeLevel(prefixes.array[i], level + 1, minAccessCount);
             else
             {
-                SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(prefixes[i]);
-                m_segmentCount -= prefixEntry->purge(minAccessCount, m_totalAccessCount - m_maxSegmentCount / 2);
+                SegCachePrefixEntry * prefixEntry = prefixes.prefixEntries[i];
+                m_segmentCount -= prefixEntry->purge(minAccessCount,
+                    m_totalAccessCount - m_maxSegmentCount / 2, m_totalAccessCount);
             }
         }
     }
 }
 
-unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount, unsigned long long oldAccessTime)
+unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
+                                              unsigned long long oldAccessTime,
+                                              unsigned long long currentTime)
 {
+    // ignore the purge request if another has been done recently
+    //if (m_lastPurge > oldAccessTime)
+    //    return 0;
+
     long long totalPurged = 0;
     // real length is length + 1 in this loop
     for (uint16 length = 0; length < eMaxCachedSeg; length++)
     {
+        if (m_entryCounts[length] == 0)
+            continue;
         uint16 purgeIndices[eMaxSuffixCount];
         uint16 purgeCount = 0;
         for (uint16 j = 0; j < m_entryCounts[length]; j++)
@@ -188,6 +240,7 @@ unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
         }
         totalPurged += purgeCount;
     }
+    m_lastPurge = currentTime;
     return totalPurged;
 }
 

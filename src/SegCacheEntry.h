@@ -27,6 +27,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
 class Slot;
+class SegCacheEntry;
 
 typedef enum {
     /** number of characters used in initial prefix tree */
@@ -41,6 +42,7 @@ typedef enum {
         * (in Unicode code points) */
     eMaxCachedSeg = 24
 } SegCacheLength;
+
 
 /**
  * SegCacheEntry stores the result of running the engine for specific unicode
@@ -58,17 +60,29 @@ public:
     ~SegCacheEntry() { clear(); };
     void clear();
     size_t glyphLength() const { return m_glyphLength; }
-    const Slot * first() const { ++m_accessCount; return m_glyph; }
+    const Slot * first() const { return m_glyph; }
     const Slot * last() const { return m_glyph + (m_glyphLength - 1); }
 
     void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
     unsigned long long accessCount() const { return m_accessCount; }
     /** "time" of last access where "time" is measured in accesses to the cache owning this entry */
-    void accessed(unsigned long long cacheTime) const { m_lastAccess = cacheTime; ++m_accessCount; };
+    void accessed(unsigned long long cacheTime) const
+    {
+        m_lastAccess = cacheTime; ++m_accessCount;
+    };
+
+    int compareRank(const SegCacheEntry & entry) const
+    {
+        if (m_accessCount > entry.m_accessCount) return 1;
+        else if (m_accessCount < entry.m_accessCount) return 1;
+        else if (m_lastAccess > entry.m_lastAccess) return 1;
+        else if (m_lastAccess < entry.m_lastAccess) return -1;
+        return 0;
+    }
+    long unsigned int lastAccess() const { return m_lastAccess; };
 
     CLASS_NEW_DELETE
-    long unsigned int lastAccess() const { return m_lastAccess; };
 private:
 
     size_t m_glyphLength;

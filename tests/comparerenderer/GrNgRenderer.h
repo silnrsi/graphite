@@ -36,7 +36,7 @@ class GrNgRenderer : public Renderer
 public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_rtl(textDir),
-        m_grFace(make_file_face(fontFile, gr2::ePreloadWithCmap)),
+        m_grFace(gr2::make_file_face(fontFile, gr2::ePreloadWithCmap)),
         m_grFont(0)
     {
         if (m_grFace)
