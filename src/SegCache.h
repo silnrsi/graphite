@@ -139,6 +139,7 @@ public:
             SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
         return m_entries[length-1]  + insertPos;
     }
+    unsigned long long purge(unsigned long long minAccessCount, unsigned long long oldAccessTime);
     CLASS_NEW_DELETE
 private:
     uint16 findPosition(const uint16 * cmapGlyphs, uint16 length, SegCacheEntry ** entry) const
@@ -234,6 +235,7 @@ public:
 
     const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
     SegCacheEntry * cache(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
+    void purge();
 
     uint16 space() const { return m_spaceGid; }
     uint16 maxCmapGlyph() const { return m_maxCmapGid; }
@@ -243,6 +245,7 @@ public:
     CLASS_NEW_DELETE
 private:
     void freeLevel(void ** prefixes, size_t level);
+    void purgeLevel(void ** prefixes, size_t level, unsigned long long minAccessCount);
 
     uint16 m_spaceGid;
     uint16 m_maxCmapGid;

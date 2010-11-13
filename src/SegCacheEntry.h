@@ -26,10 +26,16 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
+class Slot;
 
 typedef enum {
-    /** number of characters used in initial tree */
+    /** number of characters used in initial prefix tree */
     ePrefixLength = 3,
+    /** Segments are purged according to the formular:
+     * accessCount < (totalAccesses)/(ePurgeFactor * maxSegments) */
+    ePurgeFactor = 10,
+    /** Maximum number of Segments to store which have the same
+     * prefix. Needed to prevent unique identifiers flooding the cache */
     eMaxSuffixCount = 31,
     /** sub-Segments longer than this are not cached
         * (in Unicode code points) */
@@ -57,11 +63,12 @@ public:
 
     void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
-    long long accessCount() const { return m_accessCount; }
+    unsigned long long accessCount() const { return m_accessCount; }
     /** "time" of last access where "time" is measured in accesses to the cache owning this entry */
     void accessed(unsigned long long cacheTime) const { m_lastAccess = cacheTime; ++m_accessCount; };
 
     CLASS_NEW_DELETE
+    long unsigned int lastAccess() const { return m_lastAccess; };
 private:
 
     size_t m_glyphLength;

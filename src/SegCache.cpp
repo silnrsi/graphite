@@ -111,8 +111,84 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
         pArray[(pos < length)? cmapGlyphs[pos] : 0] = prefixEntry;
     }
     if (!prefixEntry) return NULL;
+    if (m_segmentCount + 1 > m_maxSegmentCount)
+        purge();
     ++m_segmentCount;
     return prefixEntry->cache(cmapGlyphs, length, seg, charOffset, m_totalAccessCount);
+}
+
+void SegCache::purge()
+{
+    unsigned long long minAccessCount = m_totalAccessCount / (ePurgeFactor * m_maxSegmentCount);
+    if (minAccessCount < 2) minAccessCount = 2;
+    purgeLevel(m_prefixes, 0, minAccessCount);
+}
+
+void SegCache::purgeLevel(void ** prefixes, size_t level, unsigned long long minAccessCount)
+{
+    for (size_t i = 0; i < m_maxCmapGid; i++)
+    {
+        if (prefixes[i])
+        {
+            if (level + 1 < ePrefixLength)
+                purgeLevel((void**)prefixes[i], level + 1, minAccessCount);
+            else
+            {
+                SegCachePrefixEntry * prefixEntry = reinterpret_cast<SegCachePrefixEntry*>(prefixes[i]);
+                m_segmentCount -= prefixEntry->purge(minAccessCount, m_totalAccessCount - m_maxSegmentCount / 2);
+            }
+        }
+    }
+}
+
+unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount, unsigned long long oldAccessTime)
+{
+    long long totalPurged = 0;
+    // real length is length + 1 in this loop
+    for (uint16 length = 0; length < eMaxCachedSeg; length++)
+    {
+        uint16 purgeIndices[eMaxSuffixCount];
+        uint16 purgeCount = 0;
+        for (uint16 j = 0; j < m_entryCounts[length]; j++)
+        {
+            SegCacheEntry & tempEntry = m_entries[length][j];
+            // purge entries with a low access count which haven't been
+            // accessed recently
+            if (tempEntry.accessCount() < minAccessCount &&
+                tempEntry.lastAccess() < oldAccessTime)
+            {
+                tempEntry.clear();
+                purgeIndices[purgeCount++] = j;
+            }
+        }
+        if (purgeCount == m_entryCounts[length])
+        {
+            m_entryCounts[length] = 0;
+            m_entryBSIndex[length] = 0;
+            free(m_entries[length]);
+            m_entries[length] = NULL;
+        }
+        else if (purgeCount > 0)
+        {
+            uint16 oldIndex = 0;
+            uint16 purgedCount = 0;
+            uint16 newLength = m_entryCounts[length] - purgeCount;
+            for (uint16 newIndex = 0; newIndex < newLength; newIndex++, oldIndex++)
+            {
+                while ((oldIndex == purgeIndices[purgedCount]) &&
+                    (purgedCount < purgeCount))
+                {
+                    ++purgedCount;
+                    ++oldIndex;
+                }
+                if (oldIndex > newIndex)
+                    m_entries[length][newIndex] = m_entries[length][oldIndex];
+            }
+            m_entryCounts[length] = newLength;
+        }
+        totalPurged += purgeCount;
+    }
+    return totalPurged;
 }
 
 }}}} // namespace
