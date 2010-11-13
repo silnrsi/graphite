@@ -73,10 +73,27 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
 Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
-    float scale = font ? font->scale() : 1.0;
-    Position shift = m_shift * scale;
-    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
-//    float tAdvance = font ? m_advance.x * scale + advance(font) : m_advance.x + seg->glyphAdvance(m_glyphid);
+    float scale = 1.0;
+    Position shift = m_shift;
+    float tAdvance = m_advance.x;
+    const GlyphFace * glyphFace = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyph());
+    if (font)
+    {
+        scale = font->scale();
+        shift *= scale;
+        if (font->isHinted())
+        {
+            if (glyphFace)
+                tAdvance = (m_advance.x - glyphFace->theAdvance().x) * scale + font->advance(m_glyphid);
+            else
+                tAdvance = (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid);
+        }
+        else
+            tAdvance *= scale;
+    }    
+//    float scale = font ? font->scale() : 1.0;
+//    Position shift = m_shift * scale;
+//    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
     Position res;
 
     m_position = *base + shift;
@@ -93,8 +110,13 @@ Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base
         res = Position(tAdv, 0);
     }
 
-    Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
-    bbox->widen(ourBbox);
+    if (glyphFace)
+    {
+        Rect ourBbox = glyphFace->theBBox() * scale + m_position;
+        bbox->widen(ourBbox);
+    }
+    //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
+    //bbox->widen(ourBbox);
 
     if (m_parent && m_position.x < *cMin) *cMin = m_position.x;
 

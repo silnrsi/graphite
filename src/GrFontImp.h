@@ -45,6 +45,7 @@ public:
 //    Position scale(const Position& p) const { return Position(m_scale * p.x, m_scale * p.y); }
 //    float scale(float p) const { return m_scale * p; }
     float scale() const { return m_scale; }
+    virtual bool isHinted() const { return false; }
 
     CLASS_NEW_DELETE
 private:
@@ -64,8 +65,8 @@ private:			//defensive on m_advances
 class GrHintedFont : public GrFont
 {
 public:
-   GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face);
-
+    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face);
+    virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 

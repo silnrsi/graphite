@@ -161,9 +161,9 @@ void GrSegment::appendSlot(int id, int cid, int gid, int iFeats)
 
 Slot *GrSegment::newSlot()
 {
-    int numUser = m_silf->numUser();
     if (!m_freeSlots)
     {
+        int numUser = m_silf->numUser();
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
         newSlots[0].userAttrs(newAttrs);
