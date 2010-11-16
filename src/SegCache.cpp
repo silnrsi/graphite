@@ -26,26 +26,35 @@
 #include "TtfUtil.h"
 #include "SegCache.h"
 #include "SegCacheEntry.h"
+#include "CmapCache.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCache::SegCache(const GrFace * face, size_t maxSegments, uint32 flags)
+SegCache::SegCache(const GrFace * face, const Features & feats, size_t maxSegments, uint32 flags)
     : m_spaceGid(3), m_maxCmapGid(face_num_glyphs(face)),
     m_prefixLength(ePrefixLength),
     m_maxCachedSegLength(eMaxCachedSeg),
     m_segmentCount(0),
     m_maxSegmentCount(maxSegments),
-    m_totalAccessCount(0l), m_totalMisses(0l)
+    m_totalAccessCount(0l), m_totalMisses(0l),
+    m_features(feats)
 {
-    void * bmpTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1);
-    void * supplementaryTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 10);
-
-    if (bmpTable)
+    if (face->getCmapCache())
     {
-        m_spaceGid = TtfUtil::Cmap31Lookup(bmpTable, 0x20);
-        // TODO find out if the Cmap(s) can be parsed to find a m_maxCmapGid < num_glyphs
-        // The Pseudo glyphs may mean that it isn't worth the effort
-        
+        m_spaceGid = face->getCmapCache()->lookup(0x20);
+    }
+    else
+    {
+        void * bmpTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1);
+        void * supplementaryTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 10);
+
+        if (bmpTable)
+        {
+            m_spaceGid = TtfUtil::Cmap31Lookup(bmpTable, 0x20);
+            // TODO find out if the Cmap(s) can be parsed to find a m_maxCmapGid < num_glyphs
+            // The Pseudo glyphs may mean that it isn't worth the effort
+
+        }
     }
     m_prefixes.raw = grzeroalloc<void*>(m_maxCmapGid+2);
     m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;

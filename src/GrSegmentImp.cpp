@@ -459,6 +459,7 @@ private:
 
 void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars)
 {
+    assert(pFeats);
     CharacterCountLimit limit(enc, pStart, nChars);
     IgnoreErrors ignoreErrors;
     if (face->getCmapCache())
