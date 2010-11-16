@@ -25,6 +25,7 @@
 #include <graphiteng/GrSegment.h>
 #include "Main.h"
 #include "SlotImp.h"
+#include "FeaturesImp.h"
 #include "SegCacheEntry.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -247,7 +248,7 @@ union SegCachePrefixArray
 class SegCache
 {
 public:
-    SegCache(const GrFace * face, size_t maxSegments, uint32 flags);
+    SegCache(const GrFace * face, const Features& features, size_t maxSegments, uint32 flags);
     ~SegCache();
 
     const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
@@ -258,6 +259,7 @@ public:
     uint16 maxCmapGlyph() const { return m_maxCmapGid; }
     long long totalAccessCount() const { return m_totalAccessCount; }
     size_t segmentCount() const { return m_segmentCount; }
+    const Features & features() const { return m_features; }
 
     CLASS_NEW_DELETE
 private:
@@ -271,6 +273,7 @@ private:
     size_t m_segmentCount;
     size_t m_maxSegmentCount;
     SegCachePrefixArray m_prefixes;
+    Features m_features;
     mutable unsigned long long m_totalAccessCount;
     mutable unsigned long long m_totalMisses;
 };

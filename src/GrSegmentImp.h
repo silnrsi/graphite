@@ -117,6 +117,7 @@ public:
     void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, const SegCacheEntry * entry);
     int defaultOriginal() const { return m_defaultOriginal; }
     const GrFace * getFace() const { return m_face; }
+    const Features & getFeatures(unsigned int charIndex) { assert(m_feats.size() == 1); return m_feats[0]; }
 
     CLASS_NEW_DELETE
 

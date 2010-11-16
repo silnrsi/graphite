@@ -25,6 +25,7 @@
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"
 #include "SegCache.h"
+#include "SegCacheStore.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -32,14 +33,18 @@ Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_segCache(0)
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_segCacheStore(0)
 {
 }
 
 Silf::~Silf() throw()
 {
     releaseBuffers();
-    if (m_segCache) delete m_segCache;
+    if (m_segCacheStore)
+    {
+        delete m_segCacheStore;
+        m_segCacheStore = NULL;
+    }
 }
 
 void Silf::releaseBuffers() throw()
@@ -412,12 +417,12 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
 
 void Silf::enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags)
 {
-    if (!m_segCache) m_segCache = new SegCache(face, maxSegments, flags);
+    if (!m_segCacheStore) m_segCacheStore = new SegCacheStore(maxSegments, flags);
 }
 
 void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
-    if (m_segCache)
+    if (m_segCacheStore)
     {
         runGraphiteWithCache(seg, face, vms);
         return;
@@ -442,8 +447,6 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 
 void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const
 {
-    
-
     // run up to substitution pass, i.e. run the line break passes
     for (size_t i = 0; i < m_sPass; ++i)
     {
@@ -462,6 +465,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 #endif
     }
 
+    SegCache * segCache = m_segCacheStore->getOrCreate(face, seg->getFeatures(0));
     // find where the segment can be broken
     Slot * subSegStartSlot = seg->first();
     Slot * subSegEndSlot = subSegStartSlot;
@@ -474,18 +478,22 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
         {
             cmapGlyphs[i-subSegStart] = subSegEndSlot->gid();
         }
-        if (subSegEndSlot->gid() != m_segCache->space())
+        if (subSegEndSlot->gid() != segCache->space())
         {
             spaceOnly = false;
         }
         // at this stage the character to slot mapping is still 1 to 1
-        if (((seg->charinfo(i)->breakWeight() > 0) &&
-             (seg->charinfo(i)->breakWeight() <= eBreakWord)) ||
+        int breakWeight = seg->charinfo(i)->breakWeight();
+        int nextBreakWeight = (i + 1 < seg->charInfoCount())?
+            seg->charinfo(i+1)->breakWeight() : 0;
+        if (((breakWeight > 0) &&
+             (breakWeight <= eBreakWord)) ||
             (i + 1 == seg->charInfoCount()) ||
+            (subSegEndSlot->gid() == segCache->space()) ||
             ((i + 1 < seg->charInfoCount()) &&
-             (((seg->charinfo(i+1)->breakWeight() < 0) &&
-              (seg->charinfo(i+1)->breakWeight() >= -eBreakWord)) ||
-              (subSegEndSlot->next() && (subSegEndSlot->next()->gid() == m_segCache->space()))))
+             (((nextBreakWeight < 0) &&
+              (nextBreakWeight >= -eBreakWord)) ||
+              (subSegEndSlot->next() && (subSegEndSlot->next()->gid() == segCache->space()))))
             )
         {
             // record the next slot before any splicing
@@ -497,7 +505,9 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
             else
             {
                 // found a break position, check for a cache of the sub sequence
-                const SegCacheEntry * entry = m_segCache->find(cmapGlyphs, i - subSegStart + 1);
+                const SegCacheEntry * entry = (segCache)?
+                    segCache->find(cmapGlyphs, i - subSegStart + 1) : NULL;
+                // TODO disable cache for words at start/end of line with contextuals
 #ifndef DISABLE_TRACING
                 if (XmlTraceLog::get().active())
                 {
@@ -508,7 +518,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 #endif
                 if (!entry)
                 {
-                    entry =runGraphiteOnSubSeg(seg, face, vms, cmapGlyphs,
+                    entry =runGraphiteOnSubSeg(segCache, seg, face, vms, cmapGlyphs,
                                                subSegStartSlot, subSegEndSlot,
                                                subSegStart, i - subSegStart + 1);
                 }
@@ -535,7 +545,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
     }
 }
 
-SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
+SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg, const GrFace *face,
                                VMScratch *vms, const uint16 * cmapGlyphs,
                                Slot * startSlot, Slot * endSlot,
                                size_t offset, size_t length) const
@@ -560,8 +570,8 @@ SegCacheEntry * Silf::runGraphiteOnSubSeg(GrSegment *seg, const GrFace *face,
 #endif
     }
     SegCacheEntry * entry = NULL;
-    if (length < eMaxCachedSeg)
-        entry = m_segCache->cache(cmapGlyphs, length, seg, offset);
+    if (length < eMaxCachedSeg && cache)
+        entry = cache->cache(cmapGlyphs, length, seg, offset);
     seg->removeScope(scopeState);
     return entry;
 }
