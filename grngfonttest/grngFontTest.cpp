@@ -34,6 +34,14 @@ diagnostic log of the segment creation in grSegmentLog.txt
 
 namespace gr2 = org::sil::graphite::v2;
 
+#if !defined WORDS_BIGENDIAN || defined PC_OS
+#define swap16(x) (((x & 0xff) << 8) | ((x & 0xff00) >> 8))
+#define swap32(x) (((x & 0xff) << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24))
+#else
+#define swap16(x) (x)
+#define swap32(x) (x)
+#endif
+
 class GrngTextSrc
 {
 
@@ -71,6 +79,7 @@ public:
     void closeLog();
     bool loadFromArgs(int argc, char *argv[]);
     int testFileFont() const;
+    gr2::Features* parseFeatures(const gr2::GrFace * face) const;
 public:
     const char * fileName;
     const char * features;
@@ -278,7 +287,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 option = NONE;
                 break;
         case LOG:
-	    closeLog();
+            closeLog();
             log = fopen(argv[a], "w");
             if (log == NULL)
             {
@@ -522,6 +531,92 @@ void listFeatures(gr::Font & font)
 }
 #endif
 
+union FeatID
+{
+    gr2::uint8 uChar[4];
+    gr2::uint32 uId;
+};
+
+gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
+{
+    gr2::Features * featureList = NULL;
+    const char * pLang = NULL;
+    FeatID lang;
+    lang.uId = 0;
+    if (features && (pLang = strstr(features, "lang=")))
+    {
+        pLang += 5;
+        size_t i = 0;
+        while ((i < 4) && (*pLang != '0') && (*pLang != '&'))
+        {
+            lang.uChar[i] = *pLang;
+            ++pLang;
+        }
+        lang.uId = swap32(lang.uId);
+    }
+    featureList = gr2::face_features_for_lang(face, lang.uId);
+    if (!features || strlen(features) == 0)
+        return featureList;
+    size_t featureLength = strlen(features);
+    const char * name = features;
+    const char * valueText = NULL;
+    size_t nameLength = 0;
+    size_t valueLength = 0;
+    gr2::int32 value = 0;
+    FeatID featId;
+    gr2::FeatureRef* ref = NULL;
+    featId.uId = 0;
+    for (size_t i = 0; i < featureLength; i++)
+    {
+        switch (features[i])
+        {
+            case '&':
+                value = atoi(valueText);
+                if (ref)
+                {
+                    gr2::apply_value_to_feature(value, ref, featureList);
+                    gr2::destroy_FeatureRef(ref);
+                    ref = NULL;
+                }
+                valueText = NULL;
+                name = features + i + 1;
+                nameLength = 0;
+                featId.uId = 0;
+                break;
+            case '=':
+                if (nameLength <= 4)
+                {
+                    featId.uId = swap32(featId.uId);
+                    ref = gr2::face_feature_ref(face, featId.uId);
+                }
+                if (!ref)
+                {
+                    featId.uId = atoi(name);
+                    ref = gr2::face_feature_ref(face, featId.uId);
+                }
+                valueText = features + i + 1;
+                name = NULL;
+                break;
+            default:
+                if (valueText == NULL)
+                {
+                    if (nameLength < 4)
+                    {
+                        featId.uChar[nameLength++] = features[i];
+                    }
+                }
+        }
+        if (ref)
+        {
+            value = atoi(valueText);
+            gr2::apply_value_to_feature(value, ref, featureList);
+            gr2::destroy_FeatureRef(ref);
+            ref = NULL;
+        }
+    }
+    return featureList;
+}
+
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
@@ -565,21 +660,8 @@ int Parameters::testFileFont() const
         }
 
         gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);
+        gr2::Features * featureList = NULL;
 #if 0
-        grutils::GrFeatureParser * featureParser = NULL;
-        if (parameters.features != NULL)
-        {
-            featureParser =
-                new grutils::GrFeatureParser(*fileFont, parameters.features);
-            if (featureParser->parseErrors())
-            {
-                fprintf(stderr,"grfonttest: failed to parse features: %s\n",
-                        parameters.features);
-                return 6;
-            }
-            textSrc.setFeatures(featureParser);
-        }
-
         layout.setStartOfLine(parameters.lineStart);
         layout.setEndOfLine(parameters.lineEnd);
         layout.setDumbFallback(true);
@@ -620,12 +702,23 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        gr2::GrSegment* pSeg = make_GrSegment(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
-
+        gr2::GrSegment* pSeg = NULL;
+        if (features)
+        {
+            featureList = parseFeatures(face);
+            pSeg = gr2::make_GrSegment_using_features(sizedFont,
+                face, 0, featureList, textSrc.utfEncodingForm(),
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+        }
+        else
+        {
+            pSeg = gr2::make_GrSegment(sizedFont, face, 0, textSrc.utfEncodingForm(),
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+        }
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        size_t *map = (size_t*)malloc((gr2::number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::Slot* slot = gr2::first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
@@ -677,7 +770,7 @@ int Parameters::testFileFont() const
         free(map);
         gr2::destroy_GrSegment(pSeg);
        }
-        
+        if (featureList) gr2::destroy_Features(featureList);
         gr2::destroy_GrFont(sizedFont);
         gr2::destroy_face(face);
 //            delete featureParser;

@@ -33,8 +33,9 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class FeatureRef
 {
 public:
-    FeatureRef(byte bits=0, byte index=0, uint32 mask=0, uint16 flags=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL) throw() 
-      : m_mask(mask), m_bits(bits), m_index(index), m_max(mask >> bits),
+    FeatureRef(byte bits=0, byte index=0, uint32 mask=0, uint16 flags=0,
+               uint32 name=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL) throw()
+      : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
       m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
     ~FeatureRef() {
         free(m_nameValues);
@@ -56,8 +57,14 @@ public:
 	if (m_index < feats.m_length) 
 	    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
 	else 
-	    return 0; 
+	    return 0;
     }
+
+    uint32 getId() const { return m_id; }
+    uint16 getNameId() const { return m_nameid; }
+    uint16 getNumSettings() const { return m_numSet; }
+    uint16 getSettingName(uint16 index) const { return m_nameValues[index]; }
+
 //     void * operator new (size_t s, FeatureRef * p)
 //     {
 //         return p;
@@ -66,6 +73,7 @@ public:
     CLASS_NEW_DELETE
 private:
     uint32 m_mask;              // bit mask to get the value from the vector
+    uint32 m_id;                // feature identifier/name
     uint16 m_max;               // max value the value can take
     byte m_bits;                // how many bits to shift the value into place
     byte m_index;               // index into the array to find the ulong to mask
@@ -86,28 +94,33 @@ private:
         CLASS_NEW_DELETE
     };
 public:
-    FeatureMap() : m_langFeats(NULL), m_feats(NULL), m_defaultFeatures(NULL) {}
+    FeatureMap() : m_numFeats(0), m_numLanguages(0), m_searchIndex(0),
+        m_sortedIndexes(NULL), m_langFeats(NULL),
+        m_feats(NULL), m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; delete m_defaultFeatures; }
     
     bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    const FeatureRef *featureRef(uint32 name);
+    void createSortedFeatureList(); // public for testing purposes
+    const FeatureRef *featureRef(uint32 name) const;
     FeatureRef *feature(uint8 index) const { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
     Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    uint16 numFeatures() const { return m_numFeats; };
     CLASS_NEW_DELETE
 private:
-    byte m_numFeats;
-//    std::map<uint32, byte> m_map;
-//    std::map<uint32, Features *>m_langMap;
-    LangFeaturePair * m_langFeats;
+
+    uint16 m_numFeats;
     uint16 m_numLanguages;
+    uint16 m_searchIndex;
+    uint16 * m_sortedIndexes;
+    LangFeaturePair * m_langFeats;
 
     FeatureRef *m_feats;
     Features* m_defaultFeatures;        //owned
-    
-private:		//defensive on m_langFeats and m_feats
+
+private: //defensive on m_langFeats and m_feats
     FeatureMap(const FeatureMap&);
     FeatureMap& operator=(const FeatureMap&);
 };

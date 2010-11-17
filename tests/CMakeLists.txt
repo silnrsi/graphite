@@ -35,3 +35,5 @@ fonttest(padauk9 Padauk.ttf 1004 103A 1039)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
+
+add_subdirectory(featuremap)

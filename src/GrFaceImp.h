@@ -93,6 +93,7 @@ public:
     FileFace(const char *filename);
     ~FileFace();
 //    virtual const void *getTable(unsigned int name, size_t *len) const;
+    bool isValid() const { return m_pfile && m_pHeader && m_pTableDir; }
 
     CLASS_NEW_DELETE
 public:     //for local convenience
@@ -141,7 +142,7 @@ public:
     bool readFeatures() { return m_features.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
     const FeatureMap& theFeatures() const { return m_features; }
-    const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
+    const FeatureRef *feature(uint16 index) const { return m_features.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL

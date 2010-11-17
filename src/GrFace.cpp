@@ -48,8 +48,10 @@ FileFace::FileFace(const char *filename) :
 
 FileFace::~FileFace()
 {
-    free(m_pTableDir);
-    free(m_pHeader);
+    if (m_pTableDir)
+        free(m_pTableDir);
+    if (m_pHeader)
+        free(m_pHeader);
     if (m_pfile)
         fclose(m_pfile);
     m_pTableDir = NULL;
@@ -192,9 +194,9 @@ extern "C"
     }
 
 
-    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
-        const FeatureRef* pRef = pFace->feature(index);
+        const FeatureRef* pRef = pFace->theFeatures().featureRef(featId);
         if (!pRef)
             return NULL;
 

@@ -37,7 +37,46 @@ bool FeatureMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
 {
     if (!readFeats(appFaceHandle, getTable)) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
+    createSortedFeatureList();
     return true;
+}
+
+void FeatureMap::createSortedFeatureList()
+{
+    // create a list of the indices of the features in the font sorted by feature ID
+    m_sortedIndexes = gralloc<uint16>(m_numFeats);
+    if (m_sortedIndexes)
+    {
+        m_searchIndex = 1;
+        m_sortedIndexes[0] = 0;
+        for (uint16 i = 1; i < m_numFeats; i++)
+        {
+            if (m_searchIndex << 1 <= m_numFeats)
+                m_searchIndex <<= 1;
+            uint16 j = i;
+            // find the position to insert
+            while ((j > 0) && (m_feats[m_sortedIndexes[j-1]].getId() > m_feats[i].getId()))
+            {
+                assert(j != 0);
+                --j;
+            }
+            // move existing items up if necessary
+            if (j < i)
+            {
+                uint16 k = i - 1;
+                do
+                {
+                    m_sortedIndexes[k+1] = m_sortedIndexes[k];
+                    if (k == j) break;
+                    assert(k != 0);
+                    --k;
+                } while(true);
+            }
+            // insert the new value
+            m_sortedIndexes[j] = i;
+        }
+        m_searchIndex -= 1;
+    }
 }
 
 bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
@@ -55,7 +94,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     m_numFeats = read16(pFeat);
     read16(pFeat);
     read32(pFeat);
-    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
+    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }        //defensive
     m_feats = new FeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
     byte currIndex = 0;
@@ -132,10 +171,12 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
                 {
                     currIndex++;
                     currBits = 0;
-		    mask = 2;
+                    mask = 2;
                 }
                 currBits += bits;
-                ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, flags, uiName, numSet, uiSet);
+                ::new (m_feats + i) FeatureRef(currBits, currIndex,
+                                               (mask - 1) << currBits, flags,
+                                               name, uiName, numSet, uiSet);
                 break;
             }
         }
@@ -145,7 +186,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     }
     m_defaultFeatures = new Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
-	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+    m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -165,7 +206,7 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
     if (read32(pSill) != 0x00010000) return false;
     m_numLanguages = read16(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
-    if (!m_langFeats) { m_numLanguages = 0; return NULL; }		//defensive
+    if (!m_langFeats) { m_numLanguages = 0; return NULL; }        //defensive
 
     pSill += 6;     // skip the fast search
     if (lSill < m_numLanguages * 8U + 12) return false;
@@ -184,10 +225,10 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const FeatureRef* pRef = featureRef(name);
-	    if (pRef)
-		pRef->applyValToFeature(val, feats);
- 	}
+        const FeatureRef* pRef = featureRef(name);
+        if (pRef)
+        pRef->applyValToFeature(val, feats);
+     }
         //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         //m_langMap.insert(kvalue);
         m_langFeats[i].m_lang = langid;
@@ -196,11 +237,41 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
     return true;
 }
 
-const FeatureRef *FeatureMap::featureRef(uint32 name)
+const FeatureRef *FeatureMap::featureRef(uint32 name) const
 {
-    // TODO reimplement without MAP (nothing is currently put int the map anyway!)
-//    std::map<uint32, byte>::iterator res = m_map.find(name);
-//    return res == m_map.end() ? NULL : m_feats + res->second;
+    if (m_sortedIndexes)
+    {
+        uint16 i = m_searchIndex;
+        int16 step = (m_searchIndex + 1) >> 1;
+        do
+        {
+            size_t featIndex = m_sortedIndexes[i];
+            if (i >= m_numFeats || m_feats[featIndex].getId() > name)
+            {
+                if (step == 0) return NULL;
+                i -= step;
+                step >>= 1;
+            }
+            else if (m_feats[featIndex].getId() < name)
+            {
+                if (step == 0) return NULL;
+                i += step;
+                step >>= 1;
+            }
+            else
+            {
+                return &(m_feats[featIndex]);
+            }
+        } while (true);
+    }
+    else
+    {
+        for (size_t i = 0; i < m_numFeats; i++)
+        {
+            if (m_feats[i].getId() == name)
+                return &(m_feats[i]);
+        }
+    }
     return NULL;
 }
 
