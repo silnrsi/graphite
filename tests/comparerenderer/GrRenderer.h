@@ -22,20 +22,30 @@ public:
     }
     void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
+        if ((length == 0) || !m_fileFont.isValid())
+            new(result) RenderedLine();
         GrUtfTextSrc textSrc;
         textSrc.setText(reinterpret_cast<gr::utf8 *>(const_cast<char*>(utf8)), length);
-        gr::RangeSegment seg(&m_fileFont, &textSrc, &m_layout, 0, length);
-        std::pair<gr::GlyphIterator,gr::GlyphIterator> glyphs = seg.glyphs();
-        int numGlyphs = glyphs.second - glyphs.first;
-        RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs, seg.advanceWidth());
-        int i = 0;
-        gr::GlyphIterator iGlyph = glyphs.first;
-        while (iGlyph != glyphs.second)
+        try
         {
-            gr::GlyphInfo & gi = *iGlyph;
-            (*renderedLine)[i].set(gi.glyphID(), gi.origin(), gi.yOffset(), gi.firstChar(), gi.lastChar());
-            ++iGlyph;
-            ++i;
+            gr::RangeSegment seg(&m_fileFont, &textSrc, &m_layout, 0, length);
+            std::pair<gr::GlyphIterator,gr::GlyphIterator> glyphs = seg.glyphs();
+            int numGlyphs = glyphs.second - glyphs.first;
+            RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs, seg.advanceWidth());
+            int i = 0;
+            gr::GlyphIterator iGlyph = glyphs.first;
+            while (iGlyph != glyphs.second)
+            {
+                gr::GlyphInfo & gi = *iGlyph;
+                (*renderedLine)[i].set(gi.glyphID(), gi.origin(), gi.yOffset(), gi.firstChar(), gi.lastChar());
+                ++iGlyph;
+                ++i;
+            }
+        }
+        catch (...)
+        {
+            fprintf(stderr, "Exception in Graphite\n");
+            new(result) RenderedLine();
         }
     }
     virtual const char * name() const { return "graphite"; }

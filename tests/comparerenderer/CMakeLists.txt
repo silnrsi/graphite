@@ -7,7 +7,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     pkg_check_modules(GR silgraphite)
     pkg_check_modules(HB harfbuzz)
     pkg_check_modules(GLIB glib-2.0)
-    pkg_check_modules(GRNG graphite)
+    # pkg_check_modules(GRNG graphite)
 
     if (${HB_FOUND})
         if (${FREETYPE_FOUND})

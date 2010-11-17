@@ -58,7 +58,11 @@ public:
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
         const void * pError = NULL;
-        if (!m_grFace) return;
+        if (!m_grFace)
+        {
+            new(result) RenderedLine();
+            return;
+        }
         size_t numCodePoints = gr2::count_unicode_characters(gr2::kutf8,
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
