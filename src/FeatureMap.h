@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
+#include <cstring>
 #include "graphiteng/Types.h"
 #include "graphiteng/GrFace.h"
 #include "graphiteng/Features.h"
@@ -37,8 +37,20 @@ public:
                uint32 name=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL) throw()
       : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
       m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
+    FeatureRef(const FeatureRef & toCopy)
+        : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_bits(toCopy.m_bits),
+        m_index(toCopy.m_index), m_max(toCopy.m_max), m_flags(toCopy.m_flags),
+        m_nameid(toCopy.m_nameid), m_numSet(toCopy.m_numSet),
+        m_nameValues((toCopy.m_nameValues)? gralloc<uint16>(toCopy.m_numSet) : NULL)
+    {
+        // most of the time these name values aren't used, so NULL might be acceptable
+        if (toCopy.m_nameValues)
+        {
+            memcpy(m_nameValues, toCopy.m_nameValues, sizeof(uint16) * m_numSet);
+        }
+    }
     ~FeatureRef() {
-        free(m_nameValues);
+        if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
     void applyValToFeature(uint16 val, Features* pDest) const { 
