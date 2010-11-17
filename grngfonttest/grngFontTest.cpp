@@ -551,6 +551,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         {
             lang.uChar[i] = *pLang;
             ++pLang;
+            ++i;
         }
         lang.uId = swap32(lang.uId);
     }
