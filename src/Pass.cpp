@@ -342,7 +342,8 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & 
     if (!testPassConstraint(seg)) return;
     // advance may be negative, so it is dangerous to use unsigned for i
     int loopCount = m_iMaxLoop;
-    int maxIndex = 0, currCount = 0;
+    unsigned int maxIndex = 0;
+    unsigned int currCount = 0;
     for (Slot *s = seg->first(); s; )
     {
 	int count = 0;
