@@ -608,18 +608,18 @@ int Parameters::testFileFont() const
           }
 #endif
        {
-        gr2::GrSegment* pSeg = make_GrSegment(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+        gr2::GrSegment* pSeg = make_seg(sizedFont, face, 0, textSrc.utfEncodingForm(), textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
 
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        size_t *map = (size_t*)malloc((seg_n_slots(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         {
             float orgX = origin_X(slot);
             float orgY = origin_Y(slot);
@@ -627,7 +627,7 @@ int Parameters::testFileFont() const
                     i, gid(slot), lookup(map, attached_to(slot)),
                     get_attr(slot, pSeg, gr2::kslatAttX, 0),
                     get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
-                    gr2::cinfo_break_weight(charInfo(pSeg, original(slot))), before(slot), after(slot));
+                    gr2::cinfo_break_weight(seg_cinfo(pSeg, original(slot))), before(slot), after(slot));
            
             if (pText32 != NULL)
             {
@@ -660,10 +660,10 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = advance_X(pSeg);
+        float advanceWidth = seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         free(map);
-        gr2::destroy_GrSegment(pSeg);
+        gr2::destroy_seg(pSeg);
        }
         
         gr2::destroy_font(sizedFont);

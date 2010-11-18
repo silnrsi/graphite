@@ -26,22 +26,22 @@ extern "C"
 
 extern "C"
 {
-    GRNG_EXPORT GrSegment* make_GrSegment(const GrFont* font, const GrFace* face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir);
+    GRNG_EXPORT GrSegment* make_seg(const GrFont* font, const GrFace* face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir);
                       //When finished with the GrFont, call destroy_GrSegment    
-    GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont* font, const GrFace* face, uint32 script, const Features* pFeats, encform enc, const void* pStart, size_t nChars, int dir);
+    GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont* font, const GrFace* face, uint32 script, const Features* pFeats, encform enc, const void* pStart, size_t nChars, int dir);
                       //When finished with the GrFont, call destroy_GrSegment    
-    GRNG_EXPORT void destroy_GrSegment(GrSegment* p);
+    GRNG_EXPORT void destroy_seg(GrSegment* p);
 
-    GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT unsigned int number_of_CharInfo(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
-    GRNG_EXPORT void run_graphite(GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT void choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
-    GRNG_EXPORT unsigned int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
-    GRNG_EXPORT const Slot* first_slot_in_segment(GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+    GRNG_EXPORT void seg_run_graphite(GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT void seg_choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script);
+    GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
+    GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/);
     
-    GRNG_EXPORT int add_features(GrSegment* pSeg/*not NULL*/, const Features* feats);
+    GRNG_EXPORT int seg_add_features(GrSegment* pSeg/*not NULL*/, const Features* feats);       //tbd what is return value?
 }
   
   
