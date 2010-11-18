@@ -19,31 +19,45 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/font.h"
-#include "GrFont.h"
+#include "graphiteng/Features.h"
+#include "FeaturesImp.h"
 
-using namespace org::sil::graphite::v2;
+namespace org { namespace sil { namespace graphite { namespace v2 {
 
-extern "C" 
+GRNG_EXPORT Features* make_empty_Features()
+{                      //When finished with the Features, call destroy_Features    
+    return new Features;
+}
+
+
+GRNG_EXPORT Features* clone_Features(const Features* pfeatures)
+{                      //When finished with the Features, call destroy_Features    
+    if (pfeatures)
+    return pfeatures->clone();
+    else
+    return new Features;
+}
+
+
+GRNG_EXPORT bool maskedOr(Features* pSrc, const Features* pOther, const Features* pMask)    //returns false iff any of the Features* are NULL
 {
-    GRNG_EXPORT GrFont* make_GrFont(float ppm/*pixels per em*/, const GrFace *face)
-    {
-        return new GrFont(ppm, face);
-    }
-
-
-    GRNG_EXPORT GrFont* make_GrFont_with_hints(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face)
-    {                 //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_GrFont    
-        return new GrHintedFont(ppm, appFontHandle, advance, face);
-    }
-
-
-    GRNG_EXPORT void destroy_GrFont(GrFont *font)
-    {
-        delete font;
-    }
+    if (!pSrc)
+    return false;
+    if (!pOther)
+    return false;
+    if (!pMask)
+    return false;
+    
+    pSrc->maskedOr(*pOther, *pMask);
+    return true;
+}
+ 
+  
+GRNG_EXPORT void destroy_Features(Features *p)
+{
+    delete p;
 }
 
 
 
-
+}}}} // namespace

@@ -24,13 +24,13 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "graphiteng/Types.h"
-#include "graphiteng/segment.h"
-#include "graphiteng/SlotHandle.h"
-#include "graphiteng/font.h"
-#include "graphiteng/face.h"
+#include "graphiteng/GrSegment.h"
+#include "graphiteng/Slot.h"
+#include "graphiteng/GrFont.h"
+#include "graphiteng/GrFace.h"
 #include "graphiteng/XmlLog.h"
 
-#include "CharInfo.h" // temp
+#include "graphiteng/CharInfo.h"
 
 namespace gr2 = org::sil::graphite::v2;
 
@@ -518,7 +518,6 @@ void listFeatures(gr::Font & font)
 int Parameters::testFileFont() const
 {
     int returnCode = 0;
-    gr2::FileFaceHandle *fileface;
 //    try
     {
         // use the -trace option to specify a file
@@ -546,20 +545,14 @@ int Parameters::testFileFont() const
         }
 #endif
         GrngTextSrc textSrc(pText32, charLength);
-        if (!(fileface = gr2::make_file_face_handle(fileName)))
-        {
-            fprintf(stderr, "Invalid font, failed to read tables\n");
-            return 2;
-        }
-        
-        gr2::GrFace *face = gr2::make_GrFace_from_file_face_handle(fileface, gr2::ePreload);
+        gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
         if (!face)
         {
-            fprintf(stderr, "Invalid font, failed to parse tables\n");
+            fprintf(stderr, "Invalid font, failed to read or parse tables\n");
             return 3;
         }
 
-        gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);
+        gr2::GrFont *sizedFont = gr2::make_font(pointSize * dpi / 72, face);
 #if 0
         grutils::GrFeatureParser * featureParser = NULL;
         if (parameters.features != NULL)
@@ -619,28 +612,28 @@ int Parameters::testFileFont() const
 
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((length(pSeg) + 1) * sizeof(size_t));
-        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
-        { map[i] = slot.id(); }
+        size_t *map = (size_t*)malloc((number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (gr2::SlotHandle slot = first(pSeg); !slot.isNull(); slot = slot.next(), ++i)
+        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
         {
-            float orgX = slot.originX();
-            float orgY = slot.originY();
+            float orgX = origin_X(slot);
+            float orgY = origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot.gid(), lookup(map, slot.attachedTo()),
-                    slot.getAttr(pSeg, gr2::kslatAttX, 0),
-                    slot.getAttr(pSeg, gr2::kslatAttY, 0), orgX, orgY, slot.isInsertBefore() ? 1 : 0,
-                    charInfo(pSeg, slot.original())->breakWeight(), slot.before(), slot.after());
-            
+                    i, gid(slot), lookup(map, attached_to(slot)),
+                    get_attr(slot, pSeg, gr2::kslatAttX, 0),
+                    get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
+                    gr2::cinfo_break_weight(charInfo(pSeg, original(slot))), before(slot), after(slot));
+           
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[slot.before() + offset],
-                    pText32[slot.after() + offset]);
+                    pText32[before(slot) + offset],
+                    pText32[after(slot) + offset]);
             }
 #if 0
             if (parameters.justification)
@@ -673,9 +666,8 @@ int Parameters::testFileFont() const
         gr2::destroy_GrSegment(pSeg);
        }
         
-        gr2::destroy_GrFont(sizedFont);
-        gr2::destroy_GrFace(face);
-        gr2::destroy_file_face_handle(fileface);
+        gr2::destroy_font(sizedFont);
+        gr2::destroy_face(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;

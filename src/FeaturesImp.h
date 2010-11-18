@@ -55,7 +55,7 @@ public:
         return *this;
     }
     
-    FeaturesHandle clone() const { return new Features(*this); }
+    Features* clone() const { return new Features(*this); }
     
 //    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
 

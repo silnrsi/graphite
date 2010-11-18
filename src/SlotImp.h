@@ -22,9 +22,10 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/segment.h"
+#include "graphiteng/GrSegment.h"
+#include "graphiteng/Slot.h"
 #include "Main.h"
-#include "GrFont.h"
+#include "GrFontImp.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
@@ -40,7 +41,7 @@ class Slot
 public:
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
-//    float advance(const GrFont *font) const { return font->advance(m_glyphid); }
+    float advance(const GrFont *font) const { return font->advance(m_glyphid); }
     int before() const { return m_before; }
     int after() const { return m_after; }
 
@@ -84,7 +85,6 @@ public:
     CLASS_NEW_DELETE
 
 private:
-friend class SlotHandle;
     Slot *m_next;           // linked list of slots
     Slot *m_prev;
     unsigned short m_glyphid;        // glyph id

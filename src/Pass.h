@@ -40,14 +40,14 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(void *pPass, size_t lPass);
+    bool readPass(void* pPass, size_t pass_length, size_t subtable_base);
     void runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & fsm) const;
-    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, GrSegment* seg, Slot** map) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE
 private:
     Slot * findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, FiniteStateMachine& fsm) const;
+    Slot * doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, GrSegment* seg, Slot** map, int & flags) const;
     bool   testPassConstraint(GrSegment *seg) const;
     int    testConstraint(const RuleEntry& re, Slot* iSlot, int nCtxt, GrSegment* seg, int nMap, Slot** map) const;
     bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
@@ -68,15 +68,15 @@ private:
     State *   * m_sTable;
     State     * m_states;
     
-    byte     m_iMaxLoop;
-    uint16   m_numGlyphs;
-    uint16   m_numRules;
-    uint16   m_sRows;
-    uint16   m_sTransition;
-    uint16   m_sSuccess;
-    uint16   m_sColumns;
-    byte     m_minPreCtxt;
-    byte     m_maxPreCtxt;
+    byte m_iMaxLoop;
+    uint16 m_numGlyphs;
+    uint16 m_numRules;
+    uint16 m_sRows;
+    uint16 m_sTransition;
+    uint16 m_sSuccess;
+    uint16 m_sColumns;
+    byte m_minPreCtxt;
+    byte m_maxPreCtxt;
     vm::Code m_cPConstraint;
     
 private:		//defensive

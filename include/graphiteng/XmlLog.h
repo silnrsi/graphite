@@ -17,7 +17,10 @@ typedef enum {
 
 // If startGraphiteLogging returns true, logging is enabled and the FILE handle
 // will be closed by graphite when stopGraphiteLogging is called.
+extern "C"
+{
 extern GRNG_EXPORT bool startGraphiteLogging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
 extern GRNG_EXPORT void stopGraphiteLogging();
+}
 
 }}}} // namespace

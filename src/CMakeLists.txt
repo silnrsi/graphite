@@ -55,14 +55,15 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
-    ../include/graphiteng/AutoHandle.h
-    ../include/graphiteng/FeatureRefHandle.h
-    ../include/graphiteng/FeaturesHandle.h
-    ../include/graphiteng/SlotHandle.h
+    ../include/graphiteng/CharInfo.h
+    ../include/graphiteng/Features.h
+    ../include/graphiteng/FeatureRef.h
+    ../include/graphiteng/GrFace.h
+    ../include/graphiteng/GrFeatures.h
+    ../include/graphiteng/GrFont.h
+    ../include/graphiteng/GrSegment.h
+    ../include/graphiteng/Slot.h
     ../include/graphiteng/Types.h
-    ../include/graphiteng/face.h
-    ../include/graphiteng/font.h
-    ../include/graphiteng/segment.h
     ${TRACE_HEADERS}
     )
 
@@ -70,21 +71,22 @@ file(GLOB PRIVATE_HEADERS *.h)
 
 add_library(graphiteng SHARED
     call_machine.cpp
-    face.cpp
-    font.cpp
-    segment.cpp
+    CharInfo.cpp
     Code.cpp
     FeatureMap.cpp
-    FeatureRefHandle.cpp
-    FeaturesHandle.cpp
+    Features.cpp
+    FeatureRef.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
     GrFace.cpp
+    GrFaceImp.cpp
     GrFont.cpp
+    GrFontImp.cpp
     GrSegment.cpp
+    GrSegmentImp.cpp
     Main.cpp
+    SlotImp.cpp
     Slot.cpp
-    SlotHandle.cpp
     Silf.cpp
     Pass.cpp
     TtfUtil.cpp

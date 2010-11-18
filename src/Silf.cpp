@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include "Silf.h"
 #include "XmlTraceLog.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "Rule.h"
 
 using namespace org::sil::graphite::v2;
@@ -56,6 +56,7 @@ void Silf::releaseBuffers() throw()
 bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
 {
     byte *p = (byte *)pSilf;
+    byte *eSilf = p + lSilf;
     uint32 *pPasses;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementSilfSub);
@@ -69,8 +70,10 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
             XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
         }
 #endif
+        if (lSilf < 27) { releaseBuffers(); return false; }
         p += 8;
     }
+    else if (lSilf < 19) { releaseBuffers(); return false; }
     p += 2;     // maxGlyphID
     p += 4;     // extra ascent/descent
     m_numPasses = uint8(*p++);
@@ -122,6 +125,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     XmlTraceLog::get().addAttribute(AttrNumJustLevels, *p);
 #endif
     p += uint8(*p) * 8 + 1;     // ignore justification for now
+    if (p + 9 >= eSilf) { releaseBuffers(); return false; }
     m_aLig = read16(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrLigComp, *p);
@@ -144,7 +148,8 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #endif
     p += uint8(*p) * 2 + 1;        // don't need critical features yet
     p++;        // reserved
-    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
+    if (p >= eSilf) 
+    {
         releaseBuffers();
         return false;
     }
@@ -153,8 +158,10 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #endif
     p += uint8(*p) * 4 + 1;        // skip scripts
     p += 2;     // skip lbGID
-    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
-        releaseBuffers();
+    
+    if (p + 4 * (m_numPasses + 1) + 6 >= eSilf) 
+    {
+        releaseBuffers(); 
         return false;
     }
     pPasses = (uint32 *)p;
@@ -164,6 +171,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     XmlTraceLog::get().addAttribute(AttrNumPseudo, m_numPseudo);
 #endif
     p += 6;
+    if (p + m_numPseudo * 6 >= eSilf) 
+    {
+        releaseBuffers();
+        return false;
+    }
     m_pseudos = new Pseudo[m_numPseudo];
     for (int i = 0; i < m_numPseudo; i++)
     {
@@ -177,7 +189,8 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         XmlTraceLog::get().closeElement(ElementPseudo);
 #endif
     }
-    if (p - (byte *)pSilf >= static_cast<int32>(lSilf)) {
+    if (p >= eSilf) 
+    {
         releaseBuffers();
         return false;
     }
@@ -199,7 +212,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
             XmlTraceLog::get().addAttribute(AttrPassId, i);
         }
 #endif
-        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i])))
+        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), swap32(pPasses[i])))
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);

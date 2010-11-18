@@ -1,0 +1,107 @@
+== Font Features ==
+
+Graphite fonts have user features. These are values that can be set to control
+all kinds of rendering effects from choosing particular glyph styles for a
+group of languages to how bad sequences should be displayed to almost anything.
+
+A font (strictly speaking a face) has a set of features. Each feature has an identifier which is a 32-bit
+number which can take the form of a tag (4 characters) or if the top byte is 0
+a number. Also each feature can take one of a set of values. Each feature has a
+UI name from the name table. In addition each value also has a UI name
+associated with it. This allows an application to list all the features in a
+font and to show their names and values in a user interface to allow user
+selection.
+
+When a face is read, the graphite engine reads the features into a featureMap which is indexed by feature index. This returns a featureRef which is used to help store the value in a features structure. To save space and time, a features structure is a bit vector with all the values squashed up together. The featureRef is what allows reading and writing in the bit vector at the right place for a given feature identifier.
+
+A face has a default set of feature settings. In fact it has different defaults for different languages. This is what language specific settings are, a set of default feature values. For a particular run of text, the application would ask for a copy of the default features from the face, for the language associated with the run, if known, and then would modify it by setting new values according to specific feature settings for that run, and then pass this to the engine when shaping the run.
+
+----
+#include <graphiteng/GrFace.h>
+#include <graphiteng/GrFont.h>
+#include <graphiteng/SegmentHandle.h>
+#include <graphiteng/SlotHandle.h>
+
+size_t length;
+char *pUtf8;
+bool rtl;
+char *font_filename;
+uint32 langTag;     <1>
+struct feat {
+    uint32 id;
+    uint16 val;
+} *local_feats;     <2>
+// local_feats = {{make_tag('utal'), 1}, {0, 0}};
+
+bool pError;
+
+namespace gr2 = org::sil::graphite::v2;
+
+using gr2
+{
+    FileFaceHandle *fileface = make_file_face_handle(font_filename);
+    GrFace *face = make_GrFace_from_file_face_handle(fileface, ePreLoad);
+    GrFont *sizeFont = make_GrFont(pointsize * dpi / 72, face);
+
+    Features feats = get_features(face, langTag);  <3>
+    while (local_feats->id != 0)    <4>
+    {
+        const FeatureRef *aRef = lookup_feature(face, local_feats->id);   <5>
+        if (aRef)
+            apply_value_to_feature(local_feats->val, aRef, feats);    <6>
+        local_feats++;
+    }
+
+    size_t numCodePoints = SegmentHandle::countUnicodeCharacters(SegmentHandle::kutf8,
+            reinterpret_cast<const void*>pUtf8,
+            reinterpret_cast<const void*>(pUtf8 + length), &pError);
+
+    GrSegment *seg = make_segment_using_features(sizedFont, face, 0, defFeats, SegmentHandle::kutf8, pUtf8, numCodePoints, rtl);   <7>
+    destroy_features(defFeats);     <8>
+
+    for (SlotHandle s = seg.first(); s; s = s.next())
+    {
+        // do something with s.gid(), s.originX(), etc.
+    }
+    destroy_GrFont(sizeFont);
+    destroy_GrFace(face);
+    destroy_file_face_handle(fileface);
+}
+----
+
+<1> The language tag is a tag so 32 bit, or 0 if undefined.
+<2> An application specific data structure to store feature information in for the run. For the sake of this example the list of feature settings is delimited by a 0 id.
+<3> Get a copy of the default features for the given language
+<4> Iterate over all the application specific user feature settings for this run.
+<5> Get a featureRef for the given feature id. Notice that this is a readonly object, no need to destroy it. Notice that we pass a uint32 here to lookup in the map.
+<6> Set the value in the features structure.
+<7> Pass the features to the segment builder.
+<8> We are done with the features structure so destroy it.
+
+=== User Interface ===
+
+One problem remains and that is how to present to a user a list of the features a font supports and what values each one may take. A font may contain any features and there is no closed set defined somewhere. Instead all the information is inside the font. So we need to query the font to find all the features and for any given feature to query all the setting names.
+
+----
+GrFace *face;
+uint16 alang;
+
+int numFeats = num_featureRef(face);    <1>
+for (int i = 0; i < numFeats; ++i)
+{
+    FeatureRef *aFeat = get_feature(face, i);   <2>
+    char *name = get_name_utf8(face, aFeat->nameid(), alang);  <3>
+    int numSet = aFeat->numSet();       <4>
+    for (int j = 0; j < numSet; ++j)
+    {
+        char *setName = get_name_utf8(face, aFeat->nameValues(j), alang);
+        uint16 val = aFeat->values(j)   <5>
+    }
+}
+----
+<1> Returns the number of features in the font
+<2> Looks up a featureRef not by id but by index in a list of features
+<3> get_name_utf8 is a general function that needs to be written to query the name table. alang may be 0 for en-US otherwise needs to be a language code, or do we go with langtags here and a string?
+<4> these lookup methods parallel the member variables in featureRef.
+<5> Oops we don't store the values and work with indices which is what we should do. This needs a bit of coding to implement.
+

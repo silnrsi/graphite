@@ -23,8 +23,8 @@
 
 #include "Main.h"
 #include "FeatureMap.h"
-#include "Features.h"
-#include "graphiteng/face.h"
+#include "FeaturesImp.h"
+#include "graphiteng/GrFace.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
 
@@ -102,12 +102,14 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
         }
 #endif
         if (offset + numSet * 4 > lFeat) return false;
+        uint16 *uiSet = gralloc<uint16>(numSet);
         for (int j = 0; j < numSet; j++)
         {
             uint16 val = read16(pSet);
             if (val > maxVal) maxVal = val;
             if (j == 0) defVals[i] = val;
             uint16 label = read16(pSet);
+            uiSet[j] = label;
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())
             {
@@ -130,10 +132,10 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
                 {
                     currIndex++;
                     currBits = 0;
-		    mask = 1;
+		    mask = 2;
                 }
                 currBits += bits;
-                m_feats[i] = FeatureRef(currBits, currIndex, (mask - 1) << currBits);
+                ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, flags, uiName, numSet, uiSet);
                 break;
             }
         }
@@ -143,7 +145,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     }
     m_defaultFeatures = new Features(currIndex + 1);
     for (int i = 0; i < m_numFeats; i++)
-	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures.ptr());
+	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -174,7 +176,7 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
-        FeaturesHandle feats = cloneFeatures(0/*0 means default*/);
+        Features* feats = cloneFeatures(0/*0 means default*/);
         const byte *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
@@ -184,8 +186,8 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
             pLSet += 2;
 	    const FeatureRef* pRef = featureRef(name);
 	    if (pRef)
-		pRef->applyValToFeature(val, feats.ptr());
-	}
+		pRef->applyValToFeature(val, feats);
+ 	}
         //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         //m_langMap.insert(kvalue);
         m_langFeats[i].m_lang = langid;
@@ -202,7 +204,7 @@ const FeatureRef *FeatureMap::featureRef(uint32 name)
     return NULL;
 }
 
-FeaturesHandle FeatureMap::cloneFeatures(uint32 langname/*0 means default*/) const
+Features* FeatureMap::cloneFeatures(uint32 langname/*0 means default*/) const
 {
     if (langname)
     {

@@ -51,7 +51,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef org::sil::graphite::v2::Slot * slotref;
+typedef gr2::Slot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
@@ -116,7 +116,7 @@ public:
                         STACK_GUARD  = 2;
 
     enum status_t {
-        finished,
+        finished = 0,
         stack_underflow,
         stack_not_empty,
         stack_overflow

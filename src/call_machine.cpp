@@ -29,11 +29,11 @@
 
 #include <cassert>
 #include <cstring>
-#include <graphiteng/SlotHandle.h>
+#include <graphiteng/Slot.h>
 #include "Machine.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "XmlTraceLog.h"
-#include "Slot.h"
+#include "SlotImp.h"
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
                             regbank & reg

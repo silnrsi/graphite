@@ -32,9 +32,9 @@
 #include <vector>
 #endif
 
-#include "Slot.h"
-#include "CharInfo.h"
-#include "Features.h"
+#include "SlotImp.h"
+#include "CharInfoImp.h"
+#include "FeaturesImp.h"
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
@@ -57,13 +57,15 @@ class GrFace;
 class GrSegment
 {
 public:
-    unsigned int length() const { return m_numGlyphs; }
+    unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
     void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
-    CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    unsigned int charInfoCount() const { return m_numCharinfo; }
+    const CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     int8 dir() const { return m_dir; }
 
     GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
@@ -105,7 +107,7 @@ public:
 #endif
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
-    void read_text(const GrFace *face, const FeaturesHandle& pFeats/*must not be isNull*/, encform enc, const void*pStart, size_t nChars);
+    void read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const GrFont *font);
     void finalise(const GrFont *font);
   

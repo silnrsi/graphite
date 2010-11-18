@@ -23,7 +23,7 @@
 #include "Pass.h"
 #include <string.h>
 #include <assert.h>
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
 #include "Code.h"
 #include "Rule.h"
 #include "XmlTraceLog.h"
@@ -54,29 +54,28 @@ Pass::~Pass()
     free(m_rules);
 }
 
-bool Pass::readPass(void *pPass, size_t lPass)
+bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
 {
-    const byte *                p = reinterpret_cast<const byte *>(pPass),
+    const byte *                p = reinterpret_cast<const byte *>(pass),
                * const pass_start = p,
-	       * const pass_end   = p + lPass;
+               * const pass_end   = p + pass_length;
     size_t numRanges;
 
     // Read in basic values
     const byte flags = *p++;
-    m_iMaxLoop             = *p++;
+    m_iMaxLoop = *p++;
     const byte nMaxContext = *p++;
     p += sizeof(byte);     // skip maxBackup
-    m_numRules             = read16(p);
+    m_numRules = read16(p);
     p += sizeof(uint16);   // not sure why we would want this
-//    const byte * const pcCode = pass_start + read32(p),
-//               * const rcCode = pass_start + read32(p),
-//               * const aCode  = pass_start + read32(p);
-    p += sizeof(uint32)*3;
+    const byte * const pcCode = pass_start + read32(p) - subtable_base,
+               * const rcCode = pass_start + read32(p) - subtable_base,
+               * const aCode  = pass_start + read32(p) - subtable_base;
     p += sizeof(uint32);
-    m_sRows       = read16(p);
+    m_sRows = read16(p);
     m_sTransition = read16(p);
-    m_sSuccess    = read16(p);
-    m_sColumns    = read16(p);
+    m_sSuccess = read16(p);
+    m_sColumns = read16(p);
     numRanges = read16(p);
     p += sizeof(uint16)   // skip searchRange
       +  sizeof(uint16)   // skip entrySelector
@@ -89,12 +88,12 @@ bool Pass::readPass(void *pPass, size_t lPass)
     XmlTraceLog::get().addAttribute(AttrNumTransition,  m_sTransition);
     XmlTraceLog::get().addAttribute(AttrNumSuccess,     m_sSuccess);
     XmlTraceLog::get().addAttribute(AttrNumColumns,     m_sColumns);
-    XmlTraceLog::get().addAttribute(AttrNumRanges,      numRanges);
+    XmlTraceLog::get().addAttribute(AttrNumRanges, numRanges);
 #endif
     assert(p - pass_start == 40);
     // Perform some sanity checks.
     if (   m_sTransition > m_sRows 
-	|| m_sSuccess > m_sRows) 
+	    || m_sSuccess > m_sRows) 
       return false;
 
     m_numGlyphs = swap16(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
@@ -105,7 +104,9 @@ bool Pass::readPass(void *pPass, size_t lPass)
     p += (m_sSuccess + 1)*sizeof(uint16);
     
     // More sanity checks
-    if (p > pass_end) return false;
+	if (   reinterpret_cast<const byte *>(o_rule_map) > pass_end
+        || p > pass_end)
+      return false;
     const size_t numEntries = swap16(o_rule_map[m_sSuccess]);
     const uint16 * const   rule_map = reinterpret_cast<const uint16 *>(p);
     p += numEntries*sizeof(uint16);
@@ -129,14 +130,11 @@ bool Pass::readPass(void *pPass, size_t lPass)
     const int16 * const states = reinterpret_cast<const int16 *>(p);
     p += m_sTransition*m_sColumns*sizeof(int16);
     p += sizeof(byte);          // skip reserved byte
-//    if (p != pcCode || p >= pass_end) return false;
-    const byte * const pcCode = p;
+    if (p != pcCode || p >= pass_end) return false;
     p += pass_constraint_len; 
-//    if (p != rcCode || p >= pass_end) return false;
-    const byte * const rcCode = p;
+    if (p != rcCode || p >= pass_end) return false;
     p += swap16(o_constraint[m_numRules]); 
-//    if (p != aCode || p >= pass_end) return false;
-    const byte * const aCode = p;
+    if (p != aCode || p >= pass_end) return false;
     if (size_t(rcCode - pcCode) != pass_constraint_len) return false;
 
     // Load the pass constraint if there is one.
@@ -270,11 +268,11 @@ void Pass::logStates() const
 #ifndef DISABLE_TRACING
   if (XmlTraceLog::get().active())
   {
-    for (size_t i = 0; i != (m_maxPreCtxt - m_minPreCtxt + 1); ++i)
+    for (int i = 0; i != (m_maxPreCtxt - m_minPreCtxt + 1); ++i)
     {
       XmlTraceLog::get().openElement(ElementStartState);
       XmlTraceLog::get().addAttribute(AttrContextLen, i + m_minPreCtxt);
-      XmlTraceLog::get().addAttribute(AttrState, m_startStates[i]);
+      XmlTraceLog::get().addAttribute(AttrState, size_t(m_startStates[i] - m_states));
       XmlTraceLog::get().closeElement(ElementStartState);
     }
       
@@ -296,8 +294,14 @@ void Pass::logStates() const
     {
       XmlTraceLog::get().openElement(ElementRow);
       XmlTraceLog::get().addAttribute(AttrIndex, iRow);
-      XmlTraceLog::get().writeElementArray(ElementData, AttrValue, 
-	  m_sTable + iRow * m_sColumns, m_sColumns);
+      const State * const * const row = m_sTable + iRow * m_sColumns;
+      for (int i = 0; i != m_sColumns; ++i)
+      {
+        XmlTraceLog::get().openElement(ElementData);
+        XmlTraceLog::get().addAttribute(AttrIndex, i);
+        XmlTraceLog::get().addAttribute(AttrValue, size_t(row[i] - m_states));
+        XmlTraceLog::get().closeElement(ElementData);
+      }
       XmlTraceLog::get().closeElement(ElementRow);
     }
     XmlTraceLog::get().closeElement(ElementStateTransitions);
@@ -307,10 +311,10 @@ void Pass::logStates() const
 
 bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 {
-  m_cols = gralloc<uint16>(m_numGlyphs);
+    m_cols = gralloc<uint16>(m_numGlyphs);
   std::fill_n(m_cols, m_numGlyphs, uint16(-1));
   for (size_t n = num_ranges; n; --n)
-  {
+    {
       const uint16 first = swap16(*ranges++),
 		   last  = swap16(*ranges++),
 		   col   = swap16(*ranges++);
@@ -319,32 +323,32 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 	return false;
 
 #ifndef DISABLE_TRACING
-      if (XmlTraceLog::get().active())
-      {
-	  XmlTraceLog::get().openElement(ElementRange);
-	  XmlTraceLog::get().addAttribute(AttrFirstId, first);
-	  XmlTraceLog::get().addAttribute(AttrLastId, last);
-	  XmlTraceLog::get().addAttribute(AttrColId, col);
-	  XmlTraceLog::get().closeElement(ElementRange);
-      }
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRange);
+            XmlTraceLog::get().addAttribute(AttrFirstId, first);
+            XmlTraceLog::get().addAttribute(AttrLastId, last);
+            XmlTraceLog::get().addAttribute(AttrColId, col);
+            XmlTraceLog::get().closeElement(ElementRange);
+        }
 #endif
       std::fill(m_cols + first, m_cols + last + 1, col);
-  }
-  return true;
+    }
+    return true;
 }
 
 void Pass::runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & fsm) const
 {
     if (!testPassConstraint(seg)) return;
-    
     // advance may be negative, so it is dangerous to use unsigned for i
     int loopCount = m_iMaxLoop;
     int maxIndex = 0, currCount = 0;
     for (Slot *s = seg->first(); s; )
     {
-        int count = 0;
+	int count = 0;
         s = findNDoRule(seg, s, count, face, fsm);
         currCount += count;
+	assert(currCount <= seg->slotCount());
         if (currCount <= maxIndex)
         {
             if (--loopCount < 0)
@@ -373,7 +377,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         count = 1;
         return startSlot->next();
     }
-
+    
     fsm.rules.clear();
     const State * state = m_startStates[m_maxPreCtxt - iCtxt];
     while (true)
@@ -389,9 +393,9 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         uint16 iCol = m_cols[gid];
         ++lcount;
 #ifdef ENABLE_DEEP_TRACING
-        if (state >= m_sTransition)
+        if (!state->is_transition())
         {
-            XmlTraceLog::get().error("Invalid state %d", state);
+            XmlTraceLog::get().error("Invalid state %d", state-m_states);
         }
         if (iCol >= m_sColumns && iCol != 65535)
         {
@@ -407,57 +411,59 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         iSlot = iSlot->next();
     }
     fsm.slotMap[lcount] = iSlot ? iSlot->next() : iSlot;
-    
     count = lcount;
+    
     for (const RuleEntry *r = fsm.rules.begin(); r != fsm.rules.end(); ++r)
     {
+        int flags = 0;
 #ifdef ENABLE_DEEP_TRACING
-      if (XmlTraceLog::get().active())
-      {
-	XmlTraceLog::get().openElement(ElementTestRule);
-	XmlTraceLog::get().addAttribute(AttrNum, r->rule - m_rules);
-	XmlTraceLog::get().addAttribute(AttrIndex, count);
-      }
+        if (XmlTraceLog::get().active())
+        {
+	        XmlTraceLog::get().openElement(ElementTestRule);
+	        XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
+	        XmlTraceLog::get().addAttribute(AttrIndex, count);
+        }
 #endif
-      if (testConstraint(*r, startSlot, iCtxt, seg, lcount, fsm.slotMap))
-      {
+        if (testConstraint(*r, startSlot, iCtxt, seg, lcount, fsm.slotMap))
+        {
 #ifdef ENABLE_DEEP_TRACING
-	  if (XmlTraceLog::get().active())
-	  {
-		XmlTraceLog::get().closeElement(ElementTestRule);
-		XmlTraceLog::get().openElement(ElementDoRule);
-		XmlTraceLog::get().addAttribute(AttrNum, r->rule - m_rules);
-		XmlTraceLog::get().addAttribute(AttrIndex, count);
-	  }
+            if (XmlTraceLog::get().active())
+            {
+	          XmlTraceLog::get().closeElement(ElementTestRule);
+	          XmlTraceLog::get().openElement(ElementDoRule);
+		      XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
+	          XmlTraceLog::get().addAttribute(AttrIndex, count);
+            }
 #endif
-	  Slot *res = doAction(r->rule->action, startSlot, count, iCtxt, seg, fsm.slotMap);
+            Slot *res = doAction(r->rule->action, startSlot, count, iCtxt, seg, fsm.slotMap, flags);
 #ifdef ENABLE_DEEP_TRACING
-	  if (XmlTraceLog::get().active())
-	  {
-  //	      XmlTraceLog::get().addAttribute(AttrResult, res);
-	  XmlTraceLog::get().closeElement(ElementDoRule);
-	  }
+            if (XmlTraceLog::get().active())
+            {
+              XmlTraceLog::get().addAttribute(AttrResult, int(res- seg->first()));
+              XmlTraceLog::get().closeElement(ElementDoRule);
+            }
 #endif
 //            if (res == -1)
 //                return m_ruleSorts[rulenum];
 //            else
-	  return res;
-      }
+//            fsm.flags |= flags;
+            return res;
+        }
 #ifdef ENABLE_DEEP_TRACING
-      else
-	  XmlTraceLog::get().closeElement(ElementTestRule);
+	else
+	    XmlTraceLog::get().closeElement(ElementTestRule);
 #endif
     }
     count = 1;
     return startSlot->next();
 }
 
-
+    
 inline 
 bool Pass::testPassConstraint(GrSegment *seg) const
 {
     if (!m_cPConstraint) return true;
-    
+ 
     assert(m_cPConstraint.constraint());
     
     Slot *first = seg->first();
@@ -466,7 +472,7 @@ bool Pass::testPassConstraint(GrSegment *seg) const
     int temp = 0;
     const uint32 ret = m_cPConstraint.run(m, *seg, first, temp, temp, 1, &first, status);
     return ret && status != Machine::finished;
-}
+    }
 
 int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, GrSegment *seg, int nMap, Slot **map) const
 {
@@ -481,18 +487,18 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, GrSegment 
   Machine m;
   for (int i = r.preContext; i && iSlot->prev(); --i, iSlot = iSlot->prev());
 
-  for (int i = -r.preContext; i != re.length; ++i, iSlot = iSlot->next())
-  {
-      int temp = i + nCtxt;
-      ret = r.constraint->run(m, *seg, iSlot, temp, nCtxt, nMap, map, status);
-      if (!ret) return 0;
-      if (status != Machine::finished) return 1;
-  }
-  
-  return status == Machine::finished ? ret : 1;
+  for (int i = -r.preContext; i != re.length && iSlot; ++i, iSlot = iSlot->next())
+    {
+        int temp = i + nCtxt;
+        ret = r.constraint->run(m, *seg, iSlot, temp, nCtxt, nMap, map, status);
+        if (!ret) return 0;
+        if (status != Machine::finished) return 1;
+    }
+    
+    return status == Machine::finished ? ret : 1;
 }
 
-Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrSegment *seg, Slot **map) const
+Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrSegment *seg, Slot **map, int &flags) const
 {
     if (!*codeptr)
         return iSlot->next();
@@ -503,9 +509,9 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrS
     Machine m;
     int nMap = count;
     count = nPre;
-    int oldNumGlyphs = seg->length();
+    int oldNumGlyphs = seg->slotCount();
     int32 ret = codeptr->run(m, *seg, iSlot, count, nPre, nMap, map, status);
-    count += seg->length() - oldNumGlyphs;
+    count += seg->slotCount() - oldNumGlyphs;
     
     for (int i = 0; i < nMap; ++i)
     {
@@ -520,7 +526,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrS
             ++ret;
             --count;
         }
-        while (++ret <= 0)
+        while (++ret <= 0 && iSlot)
         {
             iSlot = iSlot->prev();
             --count;
@@ -534,13 +540,14 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrS
             --ret;
             ++count;
         }
-        while (--ret >= 0)
+        while (--ret >= 0 && iSlot)
         {
             iSlot = iSlot->next();
             ++count;
         }
     }
     count -= nPre;
+    if (status != Machine::finished && iSlot) return iSlot->next();
     return iSlot;
 }
 

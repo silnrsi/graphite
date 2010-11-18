@@ -19,30 +19,47 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#pragma once
+#include "GrFontImp.h"
 
-#include "Main.h"
+using namespace org::sil::graphite::v2;
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-class CharInfo // : ICharInfo
+GrFont::GrFont(float ppm, const GrFace *face) :
+    m_face(face),
+    m_scale(ppm / face->upem())
 {
+    size_t nGlyphs=m_face->numGlyphs();
+    m_advances = gralloc<float>(nGlyphs);
+    float *advp = m_advances;
+    for (size_t i = 0; i < nGlyphs; i++)
+    { *advp++ = INVALID_ADVANCE; }
+}
 
-public:
-    void init(int cid, int gindex) { m_char = cid; m_before = m_after = gindex; }
-    void update(int offset) { m_before += offset; m_after += offset; }
-    void feats(int offset) { m_featureid = offset; }
-    int fid() { return m_featureid; }
-    int breakWeight() { return m_break; }
-    void breakWeight(int val) { m_break = val; }
 
-    CLASS_NEW_DELETE
-protected:
-    int m_char;     // Unicode character in character stream
-    int m_before;   // slot id of glyph that cursor before this char is before
-    int m_after;    // slot id of glyph that cursor after this char is after
-    uint8 m_featureid;	// index into features list in the segment
-    int8 m_break;	// breakweight coming from lb table
-};
+/*virtual*/ GrFont::~GrFont()
+{
+    free(m_advances);
+}
 
-}}}} // namespace
+
+/*virtual*/ float GrFont::computeAdvance(unsigned short glyphid) const
+{
+    return m_face->getAdvance(glyphid, m_scale);
+}
+
+
+
+GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance2, const GrFace *face) :
+    GrFont(ppm, face), 
+    m_appFontHandle(appFontHandle),
+    m_advance(advance2)
+{
+}
+
+
+/*virtual*/ float GrHintedFont::computeAdvance(unsigned short glyphid) const
+{
+    return (*m_advance)(m_appFontHandle, glyphid);
+}
+
+
+

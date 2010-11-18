@@ -134,8 +134,10 @@ inline size_t FiniteStateMachine::ResultSet::size() const
 
 inline void FiniteStateMachine::ResultSet::accumulate_rules(const State &state, const unsigned short length)
 {
+  // Only bother if there are rules in the State object.
   if (size() > 0 && state.size() > 0)
   {
+    // Merge the new sorted rules list into the current sorted result set.
     RuleEntry * out = m_begin == m_rules ? m_rules + MAX_RULES : m_rules;    
     const RuleEntry * lre = begin(),
                     * rre = state.rules;
@@ -145,6 +147,7 @@ inline void FiniteStateMachine::ResultSet::accumulate_rules(const State &state, 
       if (*lre < *rre)      *out++ = *lre++;
       else 
       {
+	// We only want to add a rule if it's not already included.
 	if (*lre != *rre)   
 	{
 	  *out = *rre; out->length = length;
@@ -163,6 +166,7 @@ inline void FiniteStateMachine::ResultSet::accumulate_rules(const State &state, 
   }
   else if (size() == 0)
   {
+    // If the ResultSet is currently empty just copy the list into it
     RuleEntry * out = m_begin;
     for (const RuleEntry *rre = state.rules; rre != state.rules_end; ++rre, ++out)
     {

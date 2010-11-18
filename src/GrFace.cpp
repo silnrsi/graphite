@@ -19,140 +19,270 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "GrFace.h"
-#include "VMScratch.h"
-#include <string.h>
-#include "GrSegment.h"
+#include "graphiteng/GrFace.h"
 #include "XmlTraceLog.h"
+#include "GrFaceImp.h"
 
-using namespace org::sil::graphite::v2;
+#ifndef DISABLE_FILE_FACE
 
-GrFace::~GrFace()
+namespace org { namespace sil { namespace graphite { namespace v2 {
+
+
+
+FileFace::FileFace(const char *filename) :
+    m_pHeader(NULL),
+    m_pTableDir(NULL)
 {
-    delete m_pGlyphFaceCache;
-    delete[] m_silfs;
-    m_pGlyphFaceCache = NULL;
-    m_silfs = NULL;
+    if (!(m_pfile = fopen(filename, "rb"))) return;
+    size_t lOffset, lSize;
+    if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
+    m_pHeader = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(lSize);
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
+    if (!TtfUtil::CheckHeader(m_pHeader)) return;
+    if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
+    m_pTableDir = (TtfUtil::Sfnt::OffsetSubTable::Entry*)gralloc<char>(lSize);
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
+}
+
+FileFace::~FileFace()
+{
+    free(m_pTableDir);
+    free(m_pHeader);
+    if (m_pfile)
+        fclose(m_pfile);
+    m_pTableDir = NULL;
+    m_pfile = NULL;
+    m_pHeader = NULL;
 }
 
 
-bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const      //glyphs already loaded are unloaded
+static const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
 {
-    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache, requestedStrategy);
-    if (!pNewCache)
-        return false;
-    
-    delete m_pGlyphFaceCache;
-    m_pGlyphFaceCache = pNewCache;
-    return true;
-}
-
-
-bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
-{
-    GlyphFaceCacheHeader hdr;
-    if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
-
-    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr, requestedStrategy);
-
-    if (!m_pGlyphFaceCache) return false;
-    m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
-    // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
-    
-    return true;
-}
-
-bool GrFace::readGraphite()
-{
-    char *pSilf;
-    size_t lSilf;
-    if ((pSilf = (char *)getTable(tagSilf, &lSilf)) == NULL) return false;
-    uint32 version;
-    uint32 compilerVersion = 0; // wasn't set before GTF version 3
-    uint32 offset32Pos = 2;
-    version = swap32(*(uint32 *)pSilf);
-    if (version < 0x00020000) return false;
-    if (version >= 0x00030000)
+    const FileFace* ttfFaceHandle = (const FileFace*)appFaceHandle;
+    TableCacheItem * res;
+    switch (name)
     {
-        compilerVersion = swap32(((uint32 *)pSilf)[1]);
-        m_numSilf = swap16(((uint16 *)pSilf)[4]);
-        offset32Pos = 3;
+        case tagCmap:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiCmap];
+            break;
+//        case tagCvt:
+//            res = &m_tables[TtfUtil::ktiCvt];
+//            break;
+//        case tagCryp:FileFace
+//            res = &m_tables[TtfUtil::ktiCryp];
+//            break;
+        case tagHead:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHead];
+            break;
+//        case tagFpgm:
+//            res = &m_tables[TtfUtil::ktiFpgm];
+//            break;
+//        case tagGdir:
+//            res = &m_tables[TtfUtil::ktiGdir];
+//            break;
+        case tagGlyf:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlyf];
+            break;
+        case tagHdmx:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHdmx];
+            break;
+        case tagHhea:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHhea];
+            break;
+        case tagHmtx:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHmtx];
+            break;
+        case tagLoca:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiLoca];
+            break;
+        case tagKern:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiKern];
+            break;
+//        case tagLtsh:
+//            res = &m_tables[TtfUtil::ktiLtsh];
+//            break;
+        case tagMaxp:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiMaxp];
+            break;
+        case tagName:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiName];
+            break;
+        case tagOs2:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiOs2];
+            break;
+        case tagPost:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiPost];
+            break;
+//        case tagPrep:
+//            res = &m_tables[TtfUtil::ktiPrep];
+//            break;
+        case tagFeat:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiFeat];
+            break;
+        case tagGlat:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlat];
+            break;
+        case tagGloc:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGloc];
+            break;
+        case tagSilf:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSilf];
+            break;
+        case tagSile:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSile];
+            break;
+        case tagSill:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSill];
+            break;
+        default:
+            res = NULL;
     }
-    else
-        m_numSilf = swap16(((uint16 *)pSilf)[2]);
-
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementSilf);
-            XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
-            XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
-            XmlTraceLog::get().addAttribute(AttrCompilerMajor, compilerVersion >> 16);
-            XmlTraceLog::get().addAttribute(AttrCompilerMinor, compilerVersion & 0xFFFF);
-            XmlTraceLog::get().addAttribute(AttrNum, m_numSilf);
-            if (m_numSilf == 0)
-                XmlTraceLog::get().warning("No Silf subtables!");
-        }
-#endif
-
-    m_silfs = new Silf[m_numSilf];
-    for (int i = 0; i < m_numSilf; i++)
+    assert(res); // don't expect any other table types
+    if (!res) return NULL;
+    if (res->data() == NULL)
     {
-        const uint32 offset = swap32(((uint32 *)pSilf)[offset32Pos + i]);
-        uint32 next;
-        if (i == m_numSilf - 1)
-            next = lSilf;
-        else
-            next = swap32(((uint32 *)pSilf)[offset32Pos + 1 + i]);
-        if (offset > lSilf || next > lSilf)
-        {
-#ifndef DISABLE_TRACING
-            XmlTraceLog::get().error("Invalid table %d offset %d length %u", i, offset, lSilf);
-            XmlTraceLog::get().closeElement(ElementSilf);
-#endif
-            return false;
+        char *tptr;
+        size_t tlen, lOffset;
+        if (!TtfUtil::GetTableInfo(name, ttfFaceHandle->m_pHeader, ttfFaceHandle->m_pTableDir, lOffset, tlen)) return NULL;
+        if (fseek(ttfFaceHandle->m_pfile, lOffset, SEEK_SET)) return NULL;
+        tptr = gralloc<char>(tlen);
+        if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) return NULL;
+        res->set(tptr, tlen);
+    }
+    if (len) *len = res->size();
+    return res->data();
+}
+#endif			//!DISABLE_FILE_FACE
+
+extern "C" 
+{
+    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, 
+                                    EGlyphCacheStrategy requestedStrategy, bool canDumb)
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
+    {
+        GrFace *res = new GrFace(appFaceHandle, getTable);
+    #ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementFace);
+    #endif
+        bool valid = true;
+        valid &= res->readGlyphs(requestedStrategy);
+        if (!valid) {
+            delete res;
+            return 0;
         }
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_pGlyphFaceCache->m_nGlyphs, version))
-        {
-#ifndef DISABLE_TRACING
-            if (XmlTraceLog::get().active())
-            {
-                XmlTraceLog::get().error("Error reading Graphite subtable %d", i);
-                XmlTraceLog::get().closeElement(ElementSilfSub); // for convenience
-                XmlTraceLog::get().closeElement(ElementSilf);
-            }
-#endif
-            return false;
+        valid &= res->readGraphite();
+        valid &= res->readFeatures();
+    #ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementFace);
+    #endif
+        
+        if (!canDumb && !valid) {
+            delete res;
+            return 0;
         }
+        return res;
+    }
+    
+
+    GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+    {
+        return pFace->theFeatures().cloneFeatures(langname);
     }
 
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementSilf);
+
+    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
+    {
+        const FeatureRef* pRef = pFace->feature(index);
+        if (!pRef)
+            return NULL;
+
+        return new FeatureRef(*pRef);
+    }
+
+ #if 0      //hidden since no way to release atm.
+ 
+    GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)
+    {
+        size_t nLen = 0, lOffset = 0, lSize = 0;
+        const void *pName = pFace->getTable(tagName, &nLen);
+        uint16 *res;
+        if (!pName || !TtfUtil::GetNameInfo(pName, 3, 0, lid, nameid, lOffset, lSize))
+            return NULL;
+        lSize >>= 1;
+        res = gralloc<uint16>(lSize + 1);
+        for (int i = 0; i < lSize; ++i)
+            res[i] = swap16(*(uint16 *)((char *)pName + lOffset));
+        res[lSize] = 0;
+        return res;
+    }
 #endif
-    return true;
-}
 
-void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const
-{
-    aSilf->runGraphite(seg, this);
-}
+    GRNG_EXPORT void destroy_face(GrFace *face)
+    {
+        delete face;
+    }
 
-const Silf *GrFace::chooseSilf(uint32 script) const
-{
-    if (m_numSilf == 0)
+
+    GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
+    {
+        return GlyphFaceCache::nearestSupportedStrategy(requested);
+    }
+
+
+    GRNG_EXPORT bool set_face_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+    {
+        return pFace->setGlyphCacheStrategy(requestedStrategy);
+    }
+
+
+    GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->getEnum();
+    }
+
+
+    GRNG_EXPORT unsigned short face_num_glyphs(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numGlyphs();
+    }
+
+
+    GRNG_EXPORT unsigned long face_num_glyph_accesses(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numAccesses();
+    }
+
+
+    GRNG_EXPORT unsigned long face_num_glyph_loads(const GrFace* pFace)
+    {
+        return pFace->getGlyphFaceCache()->numLoads();
+    }
+
+
+#ifndef DISABLE_FILE_FACE
+    GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy)   //returns NULL on failure. //TBD better error handling
+                      //when finished with, call destroy_face
+    {
+        FileFace* pFileFace = new FileFace(filename);
+        if (pFileFace->m_pTableDir)
+        {
+          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn, requestedStrategy);
+          if (pRes)
+          {
+            pRes->takeFileFace(pFileFace);        //takes ownership
+            return pRes;
+          }
+        }
+        
+        //error when loading
+
+        delete pFileFace;
         return NULL;
-    else if (m_numSilf == 1 || script == 0)
-        return m_silfs;
-    else // do more work here
-        return m_silfs;
+    }
+#endif      //!DISABLE_FILE_FACE
 }
 
-uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
-{
-    switch ((enum metrics)metric)
-    {
-        case kgmetAscent : return m_ascent;
-        case kgmetDescent : return m_descent;
-        default: return m_pGlyphFaceCache->glyph(gid)->getMetric(metric);
-    }
-}
+}}}}// end namespace
+
