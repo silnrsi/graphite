@@ -98,72 +98,72 @@ GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begi
 }
 
 
-GRNG_EXPORT GrSegment* make_GrSegment(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
 {
     return makeAndInitialize(font, face, script, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars, dir);
 }
 
 
-GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
     return makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
 }
 
 
-GRNG_EXPORT void destroy_GrSegment(GrSegment* p)
+GRNG_EXPORT void destroy_seg(GrSegment* p)
 {
     delete p;
 }
 
 
-GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->advance().x;
 }
 
 
-GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->advance().y;
 }
 
 
-GRNG_EXPORT unsigned int number_of_CharInfo(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->charInfoCount();
 }
 
 
-GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
+GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
     return pSeg->charinfo(index);
 }
 
-GRNG_EXPORT void runGraphite(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT void seg_run_graphite(GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->runGraphite();
 }
 
 
-GRNG_EXPORT void chooseSilf(GrSegment* pSeg/*not NULL*/, uint32 script)
+GRNG_EXPORT void seg_choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script)
 {
     return pSeg->chooseSilf(script);
 }
 
 
-GRNG_EXPORT unsigned int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->slotCount();
 }
 
 
-GRNG_EXPORT const Slot* first_slot_in_segment(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
 {
     return pSeg->first();
 }
 
 
-GRNG_EXPORT int addFeatures(GrSegment* pSeg/*not NULL*/, const Features* feats)
+GRNG_EXPORT int seg_add_features(GrSegment* pSeg/*not NULL*/, const Features* feats)
 {
     if (!feats)
     return -2;      //the smallest value that can normally be returned is -1

@@ -36,18 +36,18 @@ public:
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %d\n", reinterpret_cast<const char*>(pError) - utf8);
-        gr2::GrSegment* pSeg = make_GrSegment(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
+        gr2::GrSegment* pSeg = make_seg(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
         if (!pSeg) return;
-        RenderedLine * renderedLine = new(result) RenderedLine(gr2::number_of_slots_in_segment(pSeg), advance_X(pSeg));
+        RenderedLine * renderedLine = new(result) RenderedLine(gr2::seg_n_slots(pSeg), seg_advance_X(pSeg));
         int i = 0;
-        for (const gr2::Slot* s = first_slot_in_segment(pSeg); s; s = next_slot_in_segment(s), ++i)
+        for (const gr2::Slot* s = seg_first_slot(pSeg); s; s = next_slot_in_segment(s), ++i)
             (*renderedLine)[i].set(gid(s), origin_X(s), origin_Y(s), before(s), after(s));
         
 //         for (int i = 0; i < seg.length(); i++)
 //         {
 //             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
 //         }
-        gr2::destroy_GrSegment(pSeg);
+        gr2::destroy_seg(pSeg);
     }
     virtual const char * name() const { return "graphiteng"; }
 private:
