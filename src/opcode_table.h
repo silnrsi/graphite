@@ -108,6 +108,7 @@ static const opcode_t opcode_table[] =
       do_(push_glyph_attr_constrained)},            3,  1, "PUSH_GLYPH_ATTR"},
     {{do_(push_att_to_glyph_attr),
       do_(push_att_to_glyph_attr_constrained)},     3,  1, "PUSH_ATT_TO_GLYPH_ATTR"},
+    // private internal private opcodes for internal use only, comes after all other on disk opcodes.
     {{do_(temp_copy), NILOP},                       0,  0, "TEMP_COPY"}
 };
 

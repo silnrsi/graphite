@@ -178,7 +178,7 @@ bool Code::check_opcode(const opcode opc,
     if (opc == CNTXT_ITEM)  // This is a really conditional forward jump,
     {                       // check it doesn't jump outside the program.
         const size_t skip = cd_ptr[1];
-        if (cd_ptr + 2 + skip > cd_end) {
+        if (cd_ptr + 2 + skip >= cd_end) {
             failure(jump_past_end);
             return false;
         }

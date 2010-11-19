@@ -35,16 +35,6 @@ using namespace org::sil::graphite::v2;
 namespace vm
 {
 
-struct CodeContext
-{
-    CodeContext(uint8 ins, uint8 copy, uint8 ref)
-        : nInserts(ins), copySlot(copy), codeRef(ref) {}
-    CodeContext() : nInserts(0), copySlot(0), codeRef(0) {}
-    uint8       nInserts;
-    uint8       copySlot;
-    uint8       codeRef;
-};
-
 class Code 
 {
 public:
@@ -61,6 +51,16 @@ public:
     };
 
 private:
+    struct CodeContext
+    {
+        CodeContext(uint8 ins, uint8 copy, uint8 ref)
+            : nInserts(ins), copySlot(copy), codeRef(ref) {}
+        CodeContext() : nInserts(0), copySlot(0), codeRef(0) {}
+        uint8       nInserts;
+        uint8       copySlot;
+        uint8       codeRef;
+    };
+
     instr *     _code;
     byte  *     _data;
     size_t      _data_size,
