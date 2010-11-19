@@ -62,7 +62,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
     size_t numRanges;
 
     // Read in basic values
-    const byte flags = *p++;
+    m_immutable = (*p++) & 0x1U;
     m_iMaxLoop = *p++;
     const byte nMaxContext = *p++;
     p += sizeof(byte);     // skip maxBackup
@@ -337,19 +337,19 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
     return true;
 }
 
-void Pass::runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & fsm) const
+void Pass::runGraphite(FiniteStateMachine & fsm) const
 {
-    if (!testPassConstraint(seg)) return;
+    if (!testPassConstraint(fsm.seg)) return;
     // advance may be negative, so it is dangerous to use unsigned for i
     int loopCount = m_iMaxLoop;
     unsigned int maxIndex = 0;
     unsigned int currCount = 0;
-    for (Slot *s = seg->first(); s; )
+    for (Slot *s = fsm.seg.first(); s; )
     {
 	int count = 0;
-        s = findNDoRule(seg, s, count, face, fsm);
+        s = findNDoRule(s, count, fsm);
         currCount += count;
-	assert(currCount <= seg->slotCount());
+	assert(currCount <= fsm.seg.slotCount());
         if (currCount <= maxIndex)
         {
             if (--loopCount < 0)
@@ -367,11 +367,10 @@ void Pass::runGraphite(GrSegment *seg, const GrFace *face, FiniteStateMachine & 
     }
 }
 
-Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *face, FiniteStateMachine & fsm) const
+Slot *Pass::findNDoRule(Slot *iSlot, int &count, FiniteStateMachine & fsm) const
 {
     Slot *startSlot = iSlot;
     int iCtxt = 0;
-    int lcount = count;
     for (iCtxt = 0; iCtxt < m_maxPreCtxt && iSlot->prev(); iCtxt++, iSlot = iSlot->prev()) {}
     if (iCtxt < m_minPreCtxt)
     {
@@ -379,20 +378,19 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         return startSlot->next();
     }
     
-    fsm.rules.clear();
+    fsm.clear();
     const State * state = m_startStates[m_maxPreCtxt - iCtxt];
     while (true)
     {
         if (!iSlot)
         {
-            iSlot = seg->last();
+            iSlot = fsm.seg.last();
             break;
         }
         const uint16 gid = iSlot->gid();
         if (gid >= m_numGlyphs) break;
-        fsm.slotMap[lcount] = iSlot;
+        fsm.slots.add(iSlot);
         uint16 iCol = m_cols[gid];
-        ++lcount;
 #ifdef ENABLE_DEEP_TRACING
         if (!state->is_transition())
         {
@@ -407,16 +405,15 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
         if (iCol == 0xffffU) break;
         state = state->transitions[iCol];
         if (state->is_success())
-          fsm.rules.accumulate_rules(*state, lcount - iCtxt);
+          fsm.rules.accumulate_rules(*state, fsm.slots.size() - iCtxt);
         if (state == m_states || !state->is_transition()) break;
         iSlot = iSlot->next();
     }
-    fsm.slotMap[lcount] = iSlot ? iSlot->next() : iSlot;
-    count = lcount;
+    fsm.slots.add(iSlot ? iSlot->next() : iSlot);
+    count = fsm.slots.size() - 1;
     
     for (const RuleEntry *r = fsm.rules.begin(); r != fsm.rules.end(); ++r)
     {
-        int flags = 0;
 #ifdef ENABLE_DEEP_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -425,7 +422,7 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	        XmlTraceLog::get().addAttribute(AttrIndex, count);
         }
 #endif
-        if (testConstraint(*r, startSlot, iCtxt, seg, lcount, fsm.slotMap))
+        if (testConstraint(*r, startSlot, iCtxt, fsm))
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -436,11 +433,11 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 	          XmlTraceLog::get().addAttribute(AttrIndex, count);
             }
 #endif
-            Slot *res = doAction(r->rule->action, startSlot, count, iCtxt, seg, fsm.slotMap, flags);
+            Slot *res = doAction(r->rule->action, startSlot, count, iCtxt, fsm);
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
             {
-              XmlTraceLog::get().addAttribute(AttrResult, int(res- seg->first()));
+              XmlTraceLog::get().addAttribute(AttrResult, int(res- fsm.seg.first()));
               XmlTraceLog::get().closeElement(ElementDoRule);
             }
 #endif
@@ -461,21 +458,21 @@ Slot *Pass::findNDoRule(GrSegment *seg, Slot *iSlot, int &count, const GrFace *f
 
     
 inline 
-bool Pass::testPassConstraint(GrSegment *seg) const
+bool Pass::testPassConstraint(GrSegment & seg) const
 {
     if (!m_cPConstraint) return true;
  
     assert(m_cPConstraint.constraint());
     
-    Slot *first = seg->first();
+    Slot *first = seg.first();
     Machine::status_t status = Machine::finished;
     Machine m;
     int temp = 0;
-    const uint32 ret = m_cPConstraint.run(m, *seg, first, temp, temp, 1, &first, status);
+    const uint32 ret = m_cPConstraint.run(m, seg, first, temp, temp, 1, &first, status);
     return ret && status != Machine::finished;
     }
 
-int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, GrSegment *seg, int nMap, Slot **map) const
+int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, FiniteStateMachine & fsm) const
 {
   const Rule &r = *re.rule;
   uint32 ret = 1;
@@ -491,7 +488,7 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, GrSegment 
   for (int i = -r.preContext; i != re.length && iSlot; ++i, iSlot = iSlot->next())
     {
         int temp = i + nCtxt;
-        ret = r.constraint->run(m, *seg, iSlot, temp, nCtxt, nMap, map, status);
+        ret = r.constraint->run(m, fsm.seg, iSlot, temp, nCtxt, fsm.slots.size(), fsm.slots.begin(), status);
         if (!ret) return 0;
         if (status != Machine::finished) return 1;
     }
@@ -499,7 +496,7 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, GrSegment 
     return status == Machine::finished ? ret : 1;
 }
 
-Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrSegment *seg, Slot **map, int &flags) const
+Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, FiniteStateMachine & fsm) const
 {
     if (!*codeptr)
         return iSlot->next();
@@ -510,20 +507,20 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrS
     Machine m;
     int nMap = count;
     count = nPre;
-    int oldNumGlyphs = seg->slotCount();
-    int32 ret = codeptr->run(m, *seg, iSlot, count, nPre, nMap, map, status);
-    count += seg->slotCount() - oldNumGlyphs;
+    int oldNumGlyphs = fsm.seg.slotCount();
+    int32 ret = codeptr->run(m, fsm.seg, iSlot, count, nPre, nMap, fsm.slots.begin(), status);
+    count += fsm.seg.slotCount() - oldNumGlyphs;
     
-    for (int i = 0; i < nMap; ++i)
+    for (Slot **is = fsm.slots.begin(), *const * const ise = fsm.slots.begin() + nMap; is != ise; ++is)
     {
-        if (map[i]->isCopied() || map[i]->isDeleted())
-            seg->freeSlot(map[i]);
+        if ((*is)->isCopied() || (*is)->isDeleted())
+            fsm.seg.freeSlot(*is);
     }
     if (ret < 0)
     {
         if (!iSlot)
         {
-            iSlot = seg->last();
+            iSlot = fsm.seg.last();
             ++ret;
             --count;
         }
@@ -537,7 +534,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, GrS
     {
         if (!iSlot)
         {
-            iSlot = seg->first();
+            iSlot = fsm.seg.first();
             --ret;
             ++count;
         }

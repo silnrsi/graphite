@@ -136,7 +136,7 @@ bool GrFace::readGraphite()
 
 void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const
 {
-    aSilf->runGraphite(seg, this);
+    aSilf->runGraphite(seg);
 }
 
 const Silf *GrFace::chooseSilf(uint32 script) const

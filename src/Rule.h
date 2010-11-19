@@ -84,10 +84,10 @@ public:
   enum {MAX_RULES=64};
 
 private:
-  class ResultSet
+  class Rules
   {
   public:
-      ResultSet(RuleEntry *begin=0, const RuleEntry * const end=0);
+      Rules();
       void              clear();
       const RuleEntry * begin() const;
       const RuleEntry * end() const;
@@ -99,40 +99,71 @@ private:
       RuleEntry  *      m_begin;
       const RuleEntry * m_end;
   };
-  
+
+  class SlotMap
+  {
+  public:
+      void              clear();
+      Slot          * * begin();
+      Slot    * const * const end() const;
+      size_t            size() const;
+      
+      void              add(Slot * const slot);
+  private:
+      Slot    * m_slot_map[MAX_RULES+1];
+      Slot    * * m_end;
+  };
+
 public:
-  ResultSet  rules;
-  Slot *     slotMap[MAX_RULES+1];
+  FiniteStateMachine(GrSegment & seg);
+
+  void clear();
+  Rules     rules;
+  SlotMap   slots;
+
+  GrSegment & seg;
 };
 
 
-inline FiniteStateMachine::ResultSet::ResultSet(RuleEntry *first, const RuleEntry * const last)
-  : m_begin(first ? first : m_rules)
+inline FiniteStateMachine::FiniteStateMachine(GrSegment& segment)
+: seg(segment)
 {
-  m_end = last ? last : m_begin;
+  clear();
 }
 
-inline void FiniteStateMachine::ResultSet::clear() 
+inline void FiniteStateMachine::clear()
+{
+  rules.clear();
+  slots.clear();
+}
+
+inline FiniteStateMachine::Rules::Rules()
+  : m_begin(m_rules)
 {
   m_end = m_begin;
 }
 
-inline const RuleEntry * FiniteStateMachine::ResultSet::begin() const
+inline void FiniteStateMachine::Rules::clear() 
+{
+  m_end = m_begin;
+}
+
+inline const RuleEntry * FiniteStateMachine::Rules::begin() const
 {
   return m_begin;
 }
 
-inline const RuleEntry * FiniteStateMachine::ResultSet::end() const
+inline const RuleEntry * FiniteStateMachine::Rules::end() const
 {
   return m_end;
 }
 
-inline size_t FiniteStateMachine::ResultSet::size() const
+inline size_t FiniteStateMachine::Rules::size() const
 {
   return m_end - m_begin;
 }
 
-inline void FiniteStateMachine::ResultSet::accumulate_rules(const State &state, const unsigned short length)
+inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, const unsigned short length)
 {
   // Only bother if there are rules in the State object.
   if (size() > 0 && state.size() > 0)
@@ -174,6 +205,32 @@ inline void FiniteStateMachine::ResultSet::accumulate_rules(const State &state, 
     }
     m_end = out;
   }
+}
+
+inline Slot * * FiniteStateMachine::SlotMap::begin()
+{
+  return &m_slot_map[0];
+}
+
+inline Slot * const * const FiniteStateMachine::SlotMap::end() const
+{
+  return m_end;
+}
+
+inline void FiniteStateMachine::SlotMap::clear()
+{
+  m_end = &m_slot_map[0];
+  std::fill_n(m_slot_map, MAX_RULES+1, (Slot *)(-1));
+}
+
+inline size_t FiniteStateMachine::SlotMap::size() const
+{
+  return m_end - m_slot_map;
+}
+
+inline void FiniteStateMachine::SlotMap::add(Slot*const slot)
+{
+  *m_end++ = slot;
 }
 
 }}}}

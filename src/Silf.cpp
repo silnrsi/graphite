@@ -425,9 +425,11 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg, const GrFace *face) const
+void Silf::runGraphite(GrSegment *seg) const
 {
-    FiniteStateMachine fsm;
+    assert(seg != 0);
+    FiniteStateMachine fsm(*seg);
+    
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -438,7 +440,7 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face) const
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, fsm);
+        m_passes[i].runGraphite(fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
 	    XmlTraceLog::get().closeElement(ElementRunPass);
