@@ -79,8 +79,8 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
-    CodeContext cContexts[256];
-    cContexts[0] = CodeContext(0, 0, 0);
+    Context cContexts[256];
+    cContexts[0] = Context();
     do {
         opc = opcode(*cd_ptr++);
         
@@ -129,7 +129,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
     if (!constrained)
         for (int i = iSlot - 1; i >= 0; i--)
-            if (cContexts[i].copySlot == 3)
+            if (cContexts[i].copySlot == Context::READ + Context::WRITE)
             {
                 memmove(_code + cContexts[i].codeRef + 1, _code + cContexts[i].codeRef, (_instr_count - cContexts[i].codeRef) * sizeof(instr));
                 _code[cContexts[i].codeRef] = op_to_fn[TEMP_COPY].impl[constrained];
@@ -234,15 +234,14 @@ void fixup_cntxt_item_target(const byte* cdp,
 
 void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
                                      int8  * dp, size_t param_sz,
-                                     byte & iSlot, CodeContext* cContexts)
+                                     byte & iSlot, Context* cContexts)
 {
-    
     switch (opc)
     {
         case NEXT :
         case COPY_NEXT :
             iSlot++;
-            cContexts[iSlot] = CodeContext(0, 0, cp);
+            cContexts[iSlot] = Context(cp);
             break;
 //         case INSERT :
 //             for (int i = iSlot; i >= 0; --i)
@@ -252,15 +251,15 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
             iSlot--;
             break;
         case PUT_COPY :
-            if (dp[-1] != 0) cContexts[iSlot].copySlot = 1;
+            if (dp[-1] != 0) cContexts[iSlot].copySlot = Context::WRITE;
             if (dp[-1] < 0 && -dp[-1] <= iSlot)
-                cContexts[iSlot + dp[-1]].copySlot |= 2;
+                cContexts[iSlot + dp[-1]].copySlot = Context::READ;
         case PUSH_SLOT_ATTR :
         case PUSH_GLYPH_ATTR_OBS :
         case PUSH_GLYPH_ATTR :
 //             fixup_slotref(dp-1,iSlot,cContexts);
             if (dp[-1] <= 0 && -dp[-1] <= iSlot)
-                cContexts[iSlot + dp[-1]].copySlot |= 2;
+                cContexts[iSlot + dp[-1]].copySlot = Context::READ;
             break;
 //         case PUSH_FEAT :
 //         case PUSH_ATT_TO_GATTR_OBS :
@@ -268,29 +267,29 @@ void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
 //             fixup_slotref(dp-1,iSlot,cContexts);
 //             break;
         case PUSH_ISLOT_ATTR :
-//            cContexts[iSlot].copySlot = 1;
+//            cContexts[iSlot].copySlot = Context::WRITE;
 //             fixup_slotref(dp-2,iSlot,cContexts);
             if (dp[-2] <= 0 && -dp[-2] <= iSlot)
-                cContexts[iSlot + dp[-2]].copySlot |= 2;
+                cContexts[iSlot + dp[-2]].copySlot = Context::READ;
             break;
 //         case PUSH_GLYPH_METRIC :
 //         case PUSH_ATT_TO_GLYPH_METRIC :
 //             fixup_slotref(dp-2,iSlot,cContexts);
 //             break;
         case PUT_SUBS_8BIT_OBS:
-            cContexts[iSlot].copySlot = 1;
+            cContexts[iSlot].copySlot = Context::WRITE;
 //             fixup_slotref(dp-3,iSlot,cContexts);
             if (dp[-3] <= 0 && -dp[-3] <= iSlot)
-                cContexts[iSlot + dp[-3]].copySlot |= 2;
+                cContexts[iSlot + dp[-3]].copySlot = Context::READ;
             break;
 //         case CNTXT_ITEM :
 //             fixup_slotref(dp-3,iSlot,cContexts);
 // 	        break;
         case PUT_SUBS :
-            cContexts[iSlot].copySlot = 1;
+            cContexts[iSlot].copySlot = Context::WRITE;
 //             fixup_slotref(dp-5,iSlot,cContexts);
             if (dp[-5] <= 0 && -dp[-5] <= iSlot)
-                cContexts[iSlot + dp[-5]].copySlot |= 2;
+                cContexts[iSlot + dp[-5]].copySlot = Context::READ;
             break;
 //         case ASSOC :
 //             for (size_t i = 1; i < param_sz; ++i)

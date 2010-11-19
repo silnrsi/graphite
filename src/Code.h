@@ -51,11 +51,10 @@ public:
     };
 
 private:
-    struct CodeContext
+    struct Context
     {
-        CodeContext(uint8 ins, uint8 copy, uint8 ref)
-            : nInserts(ins), copySlot(copy), codeRef(ref) {}
-        CodeContext() : nInserts(0), copySlot(0), codeRef(0) {}
+        enum {WRITE=1, READ=2};
+        Context(uint8 ref=0) : nInserts(0), copySlot(0), codeRef(ref) {}
         uint8       nInserts;
         uint8       copySlot;
         uint8       codeRef;
@@ -72,7 +71,7 @@ private:
     void release_buffers() throw ();
     void failure(const status_t) throw();
     bool check_opcode(const opcode, const byte *, const byte *const);
-    void fixup_instruction_offsets(const opcode, size_t, int8  *, size_t, byte &, CodeContext *);
+    void fixup_instruction_offsets(const opcode, size_t, int8  *, size_t, byte &, Context *);
 public:
     Code() throw();
     Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end);

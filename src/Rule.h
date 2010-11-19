@@ -1,17 +1,17 @@
 /*
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License version 2 as published by the Free Software Foundation.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Library General Public
+  License version 2 as published by the Free Software Foundation.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Library General Public License for more details.
 
-   You should have received a copy of the GNU Library General Public License
-   along with this library; see the file COPYING.LIB.  If not, write to
-   the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.
+  You should have received a copy of the GNU Library General Public License
+  along with this library; see the file COPYING.LIB.  If not, write to
+  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301, USA.
 */
 
 #pragma once
@@ -32,7 +32,7 @@ struct RuleEntry
 {
   const Rule   * rule;
   unsigned short sort,
-		 length;
+                length;
 
   inline bool operator < (const RuleEntry &r) const
   { 
@@ -54,7 +54,7 @@ struct RuleEntry
 struct State
 {
   const RuleEntry     * rules,
-		      * rules_end;
+                      * rules_end;
   const State * const * transitions;
   
   size_t size() const;
@@ -105,22 +105,23 @@ private:
   public:
       void              clear();
       Slot          * * begin();
-      Slot    * const * const end() const;
+      Slot    * const * end() const;
       size_t            size() const;
       
       void              add(Slot * const slot);
   private:
       Slot    * m_slot_map[MAX_RULES+1];
-      Slot    * * m_end;
+      Slot  * * m_end;
   };
 
 public:
   FiniteStateMachine(GrSegment & seg);
 
-  void clear();
+  void      clear();
   Rules     rules;
   SlotMap   slots;
 
+  
   GrSegment & seg;
 };
 
@@ -178,13 +179,13 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, cons
       if (*lre < *rre)      *out++ = *lre++;
       else 
       {
-	// We only want to add a rule if it's not already included.
-	if (*lre != *rre)   
-	{
-	  *out = *rre; out->length = length;
-	  ++out;
-	}
-	++rre;
+        // We only want to add a rule if it's not already included.
+        if (*lre != *rre)   
+        {
+          *out = *rre; out->length = length;
+          ++out;
+        }
+        ++rre;
       }
     }
     std::copy(lre, end(), out);
@@ -212,7 +213,7 @@ inline Slot * * FiniteStateMachine::SlotMap::begin()
   return &m_slot_map[0];
 }
 
-inline Slot * const * const FiniteStateMachine::SlotMap::end() const
+inline Slot * const * FiniteStateMachine::SlotMap::end() const
 {
   return m_end;
 }
@@ -220,7 +221,6 @@ inline Slot * const * const FiniteStateMachine::SlotMap::end() const
 inline void FiniteStateMachine::SlotMap::clear()
 {
   m_end = &m_slot_map[0];
-  std::fill_n(m_slot_map, MAX_RULES+1, (Slot *)(-1));
 }
 
 inline size_t FiniteStateMachine::SlotMap::size() const
