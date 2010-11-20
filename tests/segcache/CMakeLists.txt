@@ -25,6 +25,7 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/SlotImp.cpp
     ../../src/SegCache.cpp
     ../../src/SegCacheEntry.cpp
+    ../../src/SegCacheStore.cpp
     ../../src/XmlTraceLog.cpp
     ../../src/XmlTraceLogTags.cpp)
 

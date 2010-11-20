@@ -19,57 +19,39 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/GrFace.h"
 
 #include "Main.h"
 #include "TtfTypes.h"
 #include "TtfUtil.h"
 #include "SegCache.h"
 #include "SegCacheEntry.h"
+#include "SegCacheStore.h"
 #include "CmapCache.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCache::SegCache(const GrFace * face, const Features & feats, size_t maxSegments, uint32 flags)
-    : m_spaceGid(3), m_maxCmapGid(face_num_glyphs(face)),
+SegCache::SegCache(const SegCacheStore * store, const Features & feats)
+    :
     m_prefixLength(ePrefixLength),
     m_maxCachedSegLength(eMaxCachedSeg),
     m_segmentCount(0),
-    m_maxSegmentCount(maxSegments),
     m_totalAccessCount(0l), m_totalMisses(0l),
     m_features(feats)
 {
-    if (face->getCmapCache())
-    {
-        m_spaceGid = face->getCmapCache()->lookup(0x20);
-    }
-    else
-    {
-        void * bmpTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1);
-        void * supplementaryTable = TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 10);
-
-        if (bmpTable)
-        {
-            m_spaceGid = TtfUtil::Cmap31Lookup(bmpTable, 0x20);
-            // TODO find out if the Cmap(s) can be parsed to find a m_maxCmapGid < num_glyphs
-            // The Pseudo glyphs may mean that it isn't worth the effort
-
-        }
-    }
-    m_prefixes.raw = grzeroalloc<void*>(m_maxCmapGid+2);
+    m_prefixes.raw = grzeroalloc<void*>(store->maxCmapGid() + 2);
     m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;
     m_prefixes.range[SEG_CACHE_MAX_INDEX] = SEG_CACHE_UNSET_INDEX;
     assert(sizeof(void*) == sizeof(uintptr_t));
 }
 
-void SegCache::freeLevel(SegCachePrefixArray prefixes, size_t level)
+void SegCache::freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level)
 {
-    for (size_t i = 0; i < m_maxCmapGid; i++)
+    for (size_t i = 0; i < store->maxCmapGid(); i++)
     {
         if (prefixes.array[i].raw)
         {
             if (level + 1 < ePrefixLength)
-                freeLevel(prefixes.array[i], level + 1);
+                freeLevel(store, prefixes.array[i], level + 1);
             else
             {
                 SegCachePrefixEntry * prefixEntry = prefixes.prefixEntries[i];
@@ -80,9 +62,9 @@ void SegCache::freeLevel(SegCachePrefixArray prefixes, size_t level)
     free(prefixes.raw);
 }
 
-SegCache::~SegCache()
+void SegCache::clear(SegCacheStore * store)
 {
-#ifndef DISABLE_TRACING
+    #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
     {
         XmlTraceLog::get().openElement(ElementSegCache);
@@ -91,7 +73,7 @@ SegCache::~SegCache()
         XmlTraceLog::get().addAttribute(AttrMisses, m_totalMisses);
     }
 #endif
-    freeLevel(m_prefixes, 0);
+    freeLevel(store, m_prefixes, 0);
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
     {
@@ -101,7 +83,12 @@ SegCache::~SegCache()
     m_prefixes.raw = NULL;
 }
 
-SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset)
+SegCache::~SegCache()
+{
+    assert(m_prefixes.raw == NULL);
+}
+
+SegCacheEntry* SegCache::cache(SegCacheStore * store, const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset)
 {
     uint16 pos = 0;
     if (!length) return NULL;
@@ -112,7 +99,7 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
         uint16 gid = (pos < length)? cmapGlyphs[pos] : 0;
         if (!pArray.array[gid].raw)
         {
-            pArray.array[gid].raw = grzeroalloc<void*>(m_maxCmapGid+2);
+            pArray.array[gid].raw = grzeroalloc<void*>(store->maxCmapGid() + 2);
             if (!pArray.array[gid].raw)
                 return NULL; // malloc failed
             if (pArray.range[SEG_CACHE_MIN_INDEX] == SEG_CACHE_UNSET_INDEX)
@@ -152,8 +139,8 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
     }
     if (!prefixEntry) return NULL;
     // if the cache is full run a purge - this is slow, since it walks the tree
-    if (m_segmentCount + 1 > m_maxSegmentCount)
-        purge();
+    if (m_segmentCount + 1 > store->maxSegmentCount())
+        purge(store);
     // if the cache is nearing full, try a purge on just the current prefixEntry
     //else if (m_segmentCount > .75 * m_maxSegmentCount)
     //{
@@ -167,14 +154,15 @@ SegCacheEntry* SegCache::cache(const uint16* cmapGlyphs, size_t length, GrSegmen
     return prefixEntry->cache(cmapGlyphs, length, seg, charOffset, m_totalAccessCount);
 }
 
-void SegCache::purge()
+void SegCache::purge(SegCacheStore * store)
 {
-    unsigned long long minAccessCount = m_totalAccessCount / (ePurgeFactor * m_maxSegmentCount);
+    unsigned long long minAccessCount = m_totalAccessCount /
+        (ePurgeFactor * store->maxSegmentCount());
     if (minAccessCount < 2) minAccessCount = 2;
-    purgeLevel(m_prefixes, 0, minAccessCount);
+    purgeLevel(store, m_prefixes, 0, minAccessCount);
 }
 
-void SegCache::purgeLevel(SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount)
+void SegCache::purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount)
 {
     if (prefixes.range[SEG_CACHE_MIN_INDEX] == SEG_CACHE_UNSET_INDEX) return;
     size_t maxGlyphCached = prefixes.range[SEG_CACHE_MAX_INDEX];
@@ -183,12 +171,12 @@ void SegCache::purgeLevel(SegCachePrefixArray prefixes, size_t level, unsigned l
         if (prefixes.array[i].raw)
         {
             if (level + 1 < ePrefixLength)
-                purgeLevel(prefixes.array[i], level + 1, minAccessCount);
+                purgeLevel(store, prefixes.array[i], level + 1, minAccessCount);
             else
             {
                 SegCachePrefixEntry * prefixEntry = prefixes.prefixEntries[i];
                 m_segmentCount -= prefixEntry->purge(minAccessCount,
-                    m_totalAccessCount - m_maxSegmentCount / 2, m_totalAccessCount);
+                    m_totalAccessCount - store->maxSegmentCount() / 2, m_totalAccessCount);
             }
         }
     }

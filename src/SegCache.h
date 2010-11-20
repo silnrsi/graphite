@@ -233,9 +233,9 @@ private:
 
 union SegCachePrefixArray;
 
-#define SEG_CACHE_MIN_INDEX (m_maxCmapGid)
-#define SEG_CACHE_MAX_INDEX (m_maxCmapGid+1u)
-#define SEG_CACHE_UNSET_INDEX (m_maxCmapGid+2u)
+#define SEG_CACHE_MIN_INDEX (store->maxCmapGid())
+#define SEG_CACHE_MAX_INDEX (store->maxCmapGid()+1u)
+#define SEG_CACHE_UNSET_INDEX (store->maxCmapGid()+2u)
 
 union SegCachePrefixArray
 {
@@ -248,30 +248,26 @@ union SegCachePrefixArray
 class SegCache
 {
 public:
-    SegCache(const GrFace * face, const Features& features, size_t maxSegments, uint32 flags);
+    SegCache(const SegCacheStore * store, const Features& features);
     ~SegCache();
 
     const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
-    SegCacheEntry * cache(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
-    void purge();
+    SegCacheEntry * cache(SegCacheStore * store, const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
+    void purge(SegCacheStore * store);
 
-    uint16 space() const { return m_spaceGid; }
-    uint16 maxCmapGlyph() const { return m_maxCmapGid; }
     long long totalAccessCount() const { return m_totalAccessCount; }
     size_t segmentCount() const { return m_segmentCount; }
     const Features & features() const { return m_features; }
+    void clear(SegCacheStore * store);
 
     CLASS_NEW_DELETE
 private:
-    void freeLevel(SegCachePrefixArray prefixes, size_t level);
-    void purgeLevel(SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount);
+    void freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level);
+    void purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount);
 
-    uint16 m_spaceGid;
-    uint16 m_maxCmapGid;
     uint16 m_prefixLength;
     uint16 m_maxCachedSegLength;
     size_t m_segmentCount;
-    size_t m_maxSegmentCount;
     SegCachePrefixArray m_prefixes;
     Features m_features;
     mutable unsigned long long m_totalAccessCount;

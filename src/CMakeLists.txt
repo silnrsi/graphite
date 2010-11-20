@@ -93,6 +93,7 @@ add_library(graphiteng SHARED
     Pass.cpp
     SegCache.cpp
     SegCacheEntry.cpp
+    SegCacheStore.cpp
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp

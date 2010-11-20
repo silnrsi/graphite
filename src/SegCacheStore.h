@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Main.h"
+#include "CmapCache.h"
 #include "SegCache.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -33,17 +34,15 @@ class GrFace;
 class SegCacheStore
 {
 public:
-    SegCacheStore(size_t maxSegments, uint32 flags) :
-        m_caches(NULL), m_cacheCount(0), m_maxSegments(maxSegments), m_flags(flags)
-    {
-    };
+    SegCacheStore(const GrFace *face, size_t maxSegments, uint32 flags);
     ~SegCacheStore()
     {
         for (size_t i = 0; i < m_cacheCount; i++)
         {
+            m_caches[i]->clear(this);
             delete m_caches[i];
         }
-        free(m_caches);
+        if (m_caches) free(m_caches);
         m_caches = NULL;
     }
     SegCache * getOrCreate(const GrFace * face, const Features & features)
@@ -62,18 +61,25 @@ public:
                 free(m_caches);
             }
             m_caches = newData;
-            m_caches[m_cacheCount] = new SegCache(face, features, m_maxSegments, m_flags);
+            m_caches[m_cacheCount] = new SegCache(this, features);
             m_cacheCount++;
             return m_caches[m_cacheCount - 1];
         }
         return NULL;
     }
+    bool isSpaceGlyph(uint16 gid) const { return (gid == m_spaceGid) || (gid == m_zwspGid); }
+    uint16 maxCmapGid() const { return m_maxCmapGid; }
+    size_t maxSegmentCount() const { return m_maxSegments; };
 
     CLASS_NEW_DELETE
 private:
     SegCache ** m_caches;
     size_t m_maxSegments;
     size_t m_cacheCount;
+    uint16 m_maxCmapGid;
+    uint16 m_spaceGid;
+    uint16 m_zwspGid;
+    uint16 m_numGlyphs;
     uint32 m_flags;
 };
 

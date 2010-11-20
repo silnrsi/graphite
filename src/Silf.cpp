@@ -417,7 +417,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
 
 void Silf::enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags)
 {
-    if (!m_segCacheStore) m_segCacheStore = new SegCacheStore(maxSegments, flags);
+    if (!m_segCacheStore) m_segCacheStore = new SegCacheStore(face, maxSegments, flags);
 }
 
 void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
@@ -478,7 +478,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
         {
             cmapGlyphs[i-subSegStart] = subSegEndSlot->gid();
         }
-        if (subSegEndSlot->gid() != segCache->space())
+        if (!m_segCacheStore->isSpaceGlyph(subSegEndSlot->gid()))
         {
             spaceOnly = false;
         }
@@ -489,12 +489,11 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
         if (((breakWeight > 0) &&
              (breakWeight <= eBreakWord)) ||
             (i + 1 == seg->charInfoCount()) ||
-            (subSegEndSlot->gid() == segCache->space()) ||
+             m_segCacheStore->isSpaceGlyph(subSegEndSlot->gid()) ||
             ((i + 1 < seg->charInfoCount()) &&
              (((nextBreakWeight < 0) &&
               (nextBreakWeight >= -eBreakWord)) ||
-              (subSegEndSlot->next() && (subSegEndSlot->next()->gid() == segCache->space()))))
-            )
+              (subSegEndSlot->next() && m_segCacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
         {
             // record the next slot before any splicing
             Slot * nextSlot = subSegEndSlot->next();
@@ -571,7 +570,7 @@ SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg, const
     }
     SegCacheEntry * entry = NULL;
     if (length < eMaxCachedSeg && cache)
-        entry = cache->cache(cmapGlyphs, length, seg, offset);
+        entry = cache->cache(m_segCacheStore, cmapGlyphs, length, seg, offset);
     seg->removeScope(scopeState);
     return entry;
 }
