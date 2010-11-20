@@ -203,6 +203,30 @@ extern "C"
         return new FeatureRef(*pRef);
     }
 
+    GRNG_EXPORT unsigned short face_num_features(const GrFace* pFace)
+    {
+        return pFace->theFeatures().numFeatures();
+    }
+
+    GRNG_EXPORT FeatureRef* face_feature_by_index(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    {
+        const FeatureRef* pRef = pFace->theFeatures().feature(i);
+        if (!pRef)
+            return NULL;
+
+        return new FeatureRef(*pRef);
+    }
+
+    GRNG_EXPORT unsigned short face_num_languages(const GrFace* pFace)
+    {
+        return pFace->theFeatures().numLanguages();
+    }
+
+    GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i)
+    {
+        return pFace->theFeatures().getLangName(i);
+    }
+
  #if 0      //hidden since no way to release atm.
  
     GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)

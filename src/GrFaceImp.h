@@ -39,6 +39,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrSegment;
 class Features;
+class NameTable;
 class CmapCache;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
@@ -123,7 +124,8 @@ public:
 public:
     GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
-        m_cmapCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL)  {}
+        m_cmapCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL),
+        m_pNames(NULL) {}
     ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
@@ -149,6 +151,7 @@ public:
     void takeFileFace(FileFace* pFileFace/*takes ownership*/);
     void enableSegmentCache(size_t maxSegments, uint32 flags);
     CmapCache * getCmapCache() const { return m_cmapCache; };
+    NameTable * nameTable() const;
 
     CLASS_NEW_DELETE
 private:
@@ -166,6 +169,7 @@ private:
     Silf *m_silfs;                   // silf subtables.
     FeatureMap m_features;
     FileFace* m_pFileFace;      //owned
+    mutable NameTable* m_pNames;
     
 private:		//defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     GrFace(const GrFace&);

@@ -80,6 +80,7 @@ public:
     bool loadFromArgs(int argc, char *argv[]);
     int testFileFont() const;
     gr2::Features* parseFeatures(const gr2::GrFace * face) const;
+    void printFeatures(const gr2::GrFace * face) const;
 public:
     const char * fileName;
     const char * features;
@@ -537,6 +538,68 @@ union FeatID
     gr2::uint32 uId;
 };
 
+void Parameters::printFeatures(const gr2::GrFace * face) const
+{
+    gr2::uint16 numFeatures = gr2::face_num_features(face);
+    fprintf(stdout, "%d features\n", numFeatures);
+    gr2::uint16 langId = 0x0409;
+    for (gr2::uint16 i = 0; i < numFeatures; i++)
+    {
+        gr2::FeatureRef * f = gr2::face_feature_by_index(face, i);
+        gr2::uint32 length = 0;
+        char * label = reinterpret_cast<char *>(gr2::feature_label(face, f, &langId, gr2::kutf8, &length));
+        FeatID featId;
+        featId.uId = gr2::feature_id(f);
+        if (label)
+            if ((featId.uChar[0] >= 0x20 && featId.uChar[0] < 0x7F) &&
+                (featId.uChar[1] >= 0x20 && featId.uChar[1] < 0x7F) &&
+                (featId.uChar[2] >= 0x20 && featId.uChar[2] < 0x7F) &&
+                (featId.uChar[3] >= 0x20 && featId.uChar[3] < 0x7F))
+            {
+#ifdef WORDS_BIGENDIAN
+                printf("%d %c%c%c%c %s\n", featId.uId, featId.uChar[0], featId.uChar[1],
+                       featId.uChar[2], featId.uChar[3], label);
+#else
+                printf("%d %c%c%c%c %s\n", featId.uId, featId.uChar[3], featId.uChar[2],
+                       featId.uChar[1], featId.uChar[0], label);
+#endif
+            }
+            else
+            {
+                printf("%d %s\n", featId.uId, label);
+            }
+        else
+            printf("%d\n", featId.uId);
+        gr2::destroy_feature_label(reinterpret_cast<void*>(label));
+        gr2::uint16 numSettings = gr2::num_feature_settings(f);
+        for (gr2::uint16 j = 0; j < numSettings; j++)
+        {
+            gr2::int16 value = gr2::feature_setting_value(f, j);
+            label = reinterpret_cast<char *>(gr2::feature_setting_label
+                (face, f, j, &langId, gr2::kutf8, &length));
+            printf("\t%d\t%s\n", value, label);
+            gr2::destroy_feature_label(reinterpret_cast<void*>(label));
+        }
+
+        gr2::destroy_FeatureRef(f);
+    }
+    gr2::uint16 numLangs = gr2::face_num_languages(face);
+    printf("Feature Languages:");
+    for (gr2::uint16 i = 0; i < numFeatures; i++)
+    {
+        FeatID langID;
+        langID.uId = gr2::face_lang_by_index(face, i);
+        langID.uId = swap32(langID.uId);
+        printf("\t");
+        for (size_t i = 0; i < 4; i++)
+        {
+            if ((langID.uChar[i]) >= 0x20 && (langID.uChar[i] < 0x80))
+                printf("%c", langID.uChar[i]);
+        }
+    }
+    printf("\n");
+}
+
 gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
 {
     gr2::Features * featureList = NULL;
@@ -628,31 +691,18 @@ int Parameters::testFileFont() const
 #ifndef DISABLE_TRACING
         startGraphiteLogging(trace, static_cast<gr2::GrLogMask>(mask));
 #endif
-        //fileFont = new FileFont(fileName);
-        //if (!fileFont)
-        //{
-        //    fprintf(stderr,"graphitejni:Invalid font!");
-        //    delete fileFont;
-        //    fileFont = NULL;
-        //    return 2;
-        //}
-//            bool isGraphite = fileFont->fontHasGraphiteTables();
-#if 0
-        if (!isGraphite)
-        {
-            fprintf(stderr,"graphitejni: %s does not have graphite tables",
-                    parameters.fileName);
-            delete fileFont;
-            fileFont = NULL;
-            return 3;
-        }
-#endif
-        GrngTextSrc textSrc(pText32, charLength);
+
         gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
         if (!face)
         {
             fprintf(stderr, "Invalid font, failed to read or parse tables\n");
             return 3;
+        }
+        if (charLength == 0)
+        {
+            printFeatures(face);
+            gr2::destroy_face(face);
+            return 0;
         }
 
         if (enableCache)
@@ -702,6 +752,7 @@ int Parameters::testFileFont() const
                        pSegment->rightToLeft());
           }
 #endif
+       GrngTextSrc textSrc(pText32, charLength);
        {
         gr2::GrSegment* pSeg = NULL;
         if (features)
@@ -814,13 +865,12 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
         fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
-        fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
+        //fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
         fprintf(stderr,"-cache\tEnable Segment Cache\n");
-        fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
         return 1;
     }
     return parameters.testFileFont();

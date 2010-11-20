@@ -24,6 +24,7 @@
 #include <string.h>
 #include "GrSegmentImp.h"
 #include "CmapCache.h"
+#include "NameTable.h"
 #include "XmlTraceLog.h"
 
 using namespace org::sil::graphite::v2;
@@ -37,6 +38,7 @@ GrFace::~GrFace()
     m_cmapCache = NULL;
     m_silfs = NULL;
     delete m_pFileFace;
+    delete m_pNames;
     m_pFileFace = NULL;
 }
 
@@ -197,4 +199,14 @@ void GrFace::enableSegmentCache(size_t maxSegments, uint32 flags)
     {
         m_silfs[i].enableSegmentCache(this, maxSegments, flags);
     }
+}
+
+NameTable * GrFace::nameTable() const
+{
+    if (m_pNames) return m_pNames;
+    size_t tableLength = 0;
+    const void * table = getTable(tagName, &tableLength);
+    if (table)
+        m_pNames = new NameTable(table, tableLength);
+    return m_pNames;
 }

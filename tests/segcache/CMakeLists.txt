@@ -19,6 +19,7 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/GrFontImp.cpp
     ../../src/GrSegment.cpp
     ../../src/GrSegmentImp.cpp
+    ../../src/NameTable.cpp
     ../../src/Pass.cpp
     ../../src/Silf.cpp
     ../../src/SlotImp.cpp

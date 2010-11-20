@@ -21,32 +21,35 @@
 */
 #pragma once
 
-#include <cstddef>
+#include <graphiteng/GrSegment.h>
+#include "TtfTypes.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-typedef unsigned char uint8;
-typedef uint8    byte;
-typedef signed char int8;
-typedef unsigned short uint16;
-typedef short   int16;
-typedef unsigned int    uint32;
-typedef int     int32;
+class NameTable
+{
+public:
+    NameTable(const void * data, size_t length, uint16 platfromId=3, uint16 encodingID = 1);
+    ~NameTable() {};
+    enum {
+        eNoFallback = 0,
+        eEnUSFallbackOnly = 1,
+        eEnOrAnyFallback = 2
+    } eNameFallback;
+    uint16 setPlatformEncoding(uint16 platfromId=3, uint16 encodingID = 1);
+    void * getName(uint16 & languageId, uint16 nameId, encform enc, uint32 & length);
 
-enum encform {
-  kutf8 = 1/*sizeof(uint8)*/, kutf16 = 2/*sizeof(uint16)*/, kutf32 = 4/*sizeof(uint32)*/
+    CLASS_NEW_DELETE
+private:
+    uint16 m_platformId;
+    uint16 m_encodingId;
+    uint16 m_languageCount;
+    uint16 m_platformOffset; // offset of first NameRecord with for platform 3, encoding 1
+    uint16 m_platformLastRecord;
+    uint16 m_nameDataLength;
+    const TtfUtil::Sfnt::FontNames * m_table;
+    const uint8 * m_nameData;
 };
 
-#ifdef _MSC_VER
-#define GRNG_EXPORT __declspec(dllexport)
-#else
-#ifdef __GNUC__
-#define GRNG_EXPORT __attribute__ ((visibility("default")))
-#else
-#define GRNG_EXPORT
-#endif
-#endif
 
-
-}}}} // namespace
-
+}}}}

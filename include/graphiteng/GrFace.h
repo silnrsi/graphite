@@ -47,6 +47,10 @@ extern "C"
 
     GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
     GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint32 featId); //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT unsigned short face_num_features(const GrFace* pFace);
+    GRNG_EXPORT FeatureRef* face_feature_by_index(const GrFace* pFace, uint16 i); //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT unsigned short face_num_languages(const GrFace* pFace);
+    GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
     GRNG_EXPORT void destroy_face(GrFace *face);
 
     GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 

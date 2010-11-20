@@ -32,12 +32,6 @@ class Features;
 class Slot;
 class GrFont;
 
-
-enum encform {
-  kutf8 = 1/*sizeof(uint8)*/, kutf16 = 2/*sizeof(uint16)*/, kutf32 = 4/*sizeof(uint32)*/
-};
-
-
 extern "C"
 {
     //in the following methods, pError may be NULL. if it is not NULL, and the buffer contains some bad bytes not in the utf range, then *pError is set to point at the first bad byte. Otherwise, *pError is set to NULL.

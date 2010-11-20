@@ -378,6 +378,80 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
     }
 }
 
+    class ToUtf8Processor
+    {
+    public:
+        // buffer length should be three times the utf16 length or
+        // four times the utf32 length to cover the worst case
+        ToUtf8Processor(uint8 * buffer, size_t maxLength) :
+            m_count(0), m_byteLength(0), m_maxLength(maxLength), m_buffer(buffer)
+        {}
+        bool processChar(uint32 cid)
+        {
+            // taken from Unicode Book ch3.9
+            if (cid <= 0x7F)
+                m_buffer[m_byteLength++] = cid;
+            else if (cid <= 0x07FF)
+            {
+                if (m_byteLength + 2 == m_maxLength)
+                    return false;
+                m_buffer[m_byteLength++] = 0xC0 + (cid >> 6);
+                m_buffer[m_byteLength++] = 0x80 + (cid & 0x3F);
+            }
+            else if (cid <= 0xFFFF)
+            {
+                if (m_byteLength + 3 == m_maxLength)
+                    return false;
+                m_buffer[m_byteLength++] = 0xE0 + (cid >> 12);
+                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x0FC0) >> 6);
+                m_buffer[m_byteLength++] = 0x80 +  (cid & 0x003F);
+            }
+            else if (cid <= 0x10FFFF)
+            {
+                if (m_byteLength + 4 == m_maxLength)
+                    return false;
+                m_buffer[m_byteLength++] = 0xF0 + (cid >> 18);
+                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x3F000) >> 12);
+                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x00FC0) >> 6);
+                m_buffer[m_byteLength++] = 0x80 +  (cid & 0x0003F);
+            }
+            else
+            {
+                // ignore
+            }
+            m_count++;
+            if (m_byteLength == m_maxLength)
+                return false;
+            return true;
+        }
+        size_t charsProcessed() const { return m_count; }
+        size_t bytesProcessed() const { return m_byteLength; }
+    private:
+        size_t m_count;
+        size_t m_byteLength;
+        size_t m_maxLength;
+        uint8 * m_buffer;
+    };
+
+    class ToUtf32Processor
+    {
+    public:
+        ToUtf32Processor(uint32 * buffer, size_t maxLength) :
+            m_count(0), m_maxLength(maxLength), m_buffer(buffer) {}
+        bool processChar(uint32 cid)
+        {
+            m_buffer[m_count++] = cid;
+            if (m_count == m_maxLength)
+                return false;
+            return true;
+        }
+        size_t charsProcessed() const { return m_count; }
+    private:
+        size_t m_count;
+        size_t m_maxLength;
+        uint32 * m_buffer;
+    };
+
 }}}} // namespace
 
 #endif			//!PROCESS_UTF_INCLUDE

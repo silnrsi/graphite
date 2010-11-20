@@ -86,6 +86,7 @@ add_library(graphiteng SHARED
     GrSegment.cpp
     GrSegmentImp.cpp
     Main.cpp
+    NameTable.cpp
     SlotImp.cpp
     Slot.cpp
     Silf.cpp

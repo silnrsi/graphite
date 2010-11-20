@@ -27,6 +27,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class FeatureRef;
 class Features;
+class GrFace;
 
 
 extern "C"
@@ -38,7 +39,17 @@ extern "C"
 
     GRNG_EXPORT void apply_value_to_feature(uint16 val, FeatureRef* pRes, Features* pDest);
     GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, Features* pDest);
-    GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Features* feats);    //returns 0 if either pointer is NULL
+    GRNG_EXPORT uint16 feature_value(const FeatureRef*pfeatureref, const Features* feats);    //returns 0 if either pointer is NULL
+    GRNG_EXPORT uint32 feature_id(const FeatureRef*pfeatureref);
+
+    // Labels may not be available for requested langId, the language actually used
+    // will be returned in langId. The length in bytes will be returned in length
+    // call destroy_feature_label when finished
+    GRNG_EXPORT void* feature_label(const GrFace* pFace, const FeatureRef*pfeatureref, uint16 *langId, encform utf, uint32 *length);
+    GRNG_EXPORT uint16 num_feature_settings(const FeatureRef*pfeatureref);
+    GRNG_EXPORT int16 feature_setting_value(const FeatureRef*pfeatureref, uint16 setting);
+    GRNG_EXPORT void* feature_setting_label(const GrFace* pFace, const FeatureRef*pfeatureref, uint16 setting, uint16 *langId, encform utf, uint32 *length);
+    GRNG_EXPORT void destroy_feature_label(void * label);
 
     GRNG_EXPORT void destroy_FeatureRef(FeatureRef *pfeatureref);
 }
