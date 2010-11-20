@@ -151,6 +151,17 @@ const FeatTableTestE testDataE = {
     {{0,10},{1,11},{0,12},{10,13},{0,14},{1,15},{2,16},{2,17},{4,18},{1,19},{2,20}}
 };
 
+const FeatTableTestE testBadOffset = {
+    { 2, 0, 5, 0, 0},
+    {{400, 3, 0, sizeof(FeatHeader) + 5 * sizeof(FeatDefn) + 4 * sizeof(FeatSetting), 0, 1},
+     {100, 2, 0, sizeof(FeatHeader) + 5 * sizeof(FeatDefn) + 2 * sizeof(FeatSetting), 0, 3},
+     {500, 2, 0, sizeof(FeatHeader) + 5 * sizeof(FeatDefn) + 9 * sizeof(FeatSetting), 0, 3},
+     {300, 2, 0, sizeof(FeatHeader) + 5 * sizeof(FeatDefn), 0, 2},
+     {200, 2, 0, sizeof(FeatHeader) + 5 * sizeof(FeatDefn) + 10 * sizeof(FeatSetting), 0, 2}
+    },
+    {{0,10},{1,11},{0,12},{10,13},{0,14},{1,15},{2,16},{2,17},{4,18},{1,19},{2,20}}
+};
+
 #pragma pack(pop)
 
 class DummyFaceHandle
@@ -218,7 +229,8 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     gr2::FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<T>(table);
-    testFeatureMap.readFeats(&dummyFace, getTestFeat);
+    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
+    testAssert("readFeats", readStatus);
     testFeatureMap.createSortedFeatureList();
     fprintf(stderr, testName, NULL);
     testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeatures(), table.m_header.m_numFeat);
@@ -248,6 +260,13 @@ int main(int argc, char ** argv)
     testFeatTable<FeatTableTestC>(testDataCunsorted, "C\n");
     testFeatTable<FeatTableTestD>(testDataDunsorted, "D\n");
     testFeatTable<FeatTableTestE>(testDataE, "E\n");
+
+    // test a bad settings offset stradling the end of the table
+    gr2::FeatureMap testFeatureMap;
+    DummyFaceHandle dummyFace;
+    dummyFace.init<FeatTableTestE>(testBadOffset);
+    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
+    testAssert("fail gracefully on bad table", !readStatus);
     
     return 0;
 }
