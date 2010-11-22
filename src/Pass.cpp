@@ -395,7 +395,7 @@ int Pass::runFSM(org::sil::graphite::v2::FiniteStateMachine& fsm, Slot * slot) c
         if (iCol >= m_sColumns && iCol != 65535)
         {
             XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
-                iCol, gid, iSlot);
+                iCol, gid, slot);
         }
 #endif
         if (iCol == 0xffffU) break;
