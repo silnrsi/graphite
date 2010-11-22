@@ -81,14 +81,14 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
       +  sizeof(uint16)   // skip entrySelector
       +  sizeof(uint16);  // skip rangeShift
 #ifndef DISABLE_TRACING
-    XmlTraceLog::get().addAttribute(AttrFlags,          flags);
+    XmlTraceLog::get().addAttribute(AttrFlags,          m_immutable);
     XmlTraceLog::get().addAttribute(AttrMaxRuleLoop,    m_iMaxLoop);
     XmlTraceLog::get().addAttribute(AttrNumRules,       m_numRules);
     XmlTraceLog::get().addAttribute(AttrNumRows,        m_sRows);
     XmlTraceLog::get().addAttribute(AttrNumTransition,  m_sTransition);
     XmlTraceLog::get().addAttribute(AttrNumSuccess,     m_sSuccess);
     XmlTraceLog::get().addAttribute(AttrNumColumns,     m_sColumns);
-    XmlTraceLog::get().addAttribute(AttrNumRanges, numRanges);
+    XmlTraceLog::get().addAttribute(AttrNumRanges,      numRanges);
 #endif
     assert(p - pass_start == 40);
     // Perform some sanity checks.
