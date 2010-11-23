@@ -523,7 +523,7 @@ int Parameters::testFileFont() const
         // use the -trace option to specify a file
         //FILE * logFile = fopen("graphitengTrace.xml", "wb");
 #ifndef DISABLE_TRACING
-        startGraphiteLogging(trace, static_cast<gr2::GrLogMask>(mask));
+        graphite_start_logging(trace, static_cast<gr2::GrLogMask>(mask));
 #endif
         //fileFont = new FileFont(fileName);
         //if (!fileFont)
@@ -679,7 +679,7 @@ int Parameters::testFileFont() const
 //        returnCode = 5;
 //    }
 #ifndef DISABLE_TRACING
-    if (trace) gr2::stopGraphiteLogging();
+    if (trace) gr2::graphite_stop_logging();
 #endif
     return returnCode;
 }
