@@ -76,7 +76,7 @@
 
 #define push(n)             *++sp = n; TRACEPUSH(n)
 #define pop()               (*sp--)
-#define slotat(x)           (count + x < maxmap && count + x >= 0 ? map[count + x] : map[maxmap - 1])
+#define slotat(x)           (map[count + (x)])
 #define POSITIONED          1
 
 STARTOP(nop)

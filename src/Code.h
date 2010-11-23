@@ -51,7 +51,6 @@ public:
         missing_return
     };
 
-    typedef std::pair<int, int>  slot_range_t;
 private:
     struct Context
     {
@@ -76,10 +75,10 @@ private:
     instr *     _code;
     byte  *     _data;
     size_t      _data_size,
-                _instr_count,
-                _min_slotref,
+                _instr_count;
+    int         _min_slotref,
                 _max_slotref;
-    status_t    _status;
+    mutable status_t _status;
     bool        _constrained,
                 _immutable;
     mutable bool _own;
@@ -87,7 +86,8 @@ private:
     void release_buffers() throw ();
     void failure(const status_t) throw();
     bool check_opcode(const opcode, const byte *, const byte *const);
-    void analyise_opcode(const opcode, size_t cp, const int8  * dp, size_t param_sz, analysis_context &) throw();
+    void analyse_opcode(const opcode, size_t cp, const int8  * dp, size_t param_sz, analysis_context &) throw();
+    void update_slot_limits(int slotref) throw ();
 public:
     Code() throw();
     Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end);
@@ -100,7 +100,6 @@ public:
     bool          constraint() const throw();
     size_t        dataSize() const throw();
     size_t        instructionCount() const throw();
-    slot_range_t  slotRange() const throw();
     bool          immutable() const throw();
 
     int32 run(Machine &m, GrSegment & seg, slotref & islot_idx, int &count, int &nPre, int maxmap, Slot **map,
@@ -163,10 +162,6 @@ inline size_t Code::dataSize() const throw() {
 
 inline size_t Code::instructionCount() const throw() {
     return _instr_count;
-}
-
-inline Code::slot_range_t Code::slotRange() const throw() {
-  return std::make_pair(_min_slotref, _max_slotref);
 }
 
 inline bool Code::immutable() const

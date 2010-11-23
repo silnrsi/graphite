@@ -107,7 +107,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         }
         
         // Analyise the opcode.
-        analyise_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), param_sz, ac);
+        analyse_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), param_sz, ac);
         
         // Add this instruction
         *ip++ = op.impl[constrained]; 
@@ -245,7 +245,7 @@ void fixup_cntxt_item_target(const byte* cdp,
 
 } // end of namespace
 
-void Code::analyise_opcode(const opcode opc, size_t op_idx,
+void Code::analyse_opcode(const opcode opc, size_t op_idx,
                            const int8  * dp, size_t param_sz,
                            analysis_context & ab)
 {
@@ -312,8 +312,7 @@ void Code::analyise_opcode(const opcode opc, size_t op_idx,
     case PUT_SUBS : 
     {
       _immutable = false;
-      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[0]));
-      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[0]));
+      update_slot_limits(ab.slotref + dp[0]);
       
       Context & ctxt = ab.contexts[ab.slotref];
       ctxt.flags.changed = true;
@@ -323,8 +322,7 @@ void Code::analyise_opcode(const opcode opc, size_t op_idx,
     }
     case PUT_COPY :
     {
-      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[0]));
-      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[0]));
+      update_slot_limits(ab.slotref + dp[0]);
 
       Context & ctxt = ab.contexts[ab.slotref];
       if (dp[0] != 0) ctxt.flags.changed = true;
@@ -343,21 +341,22 @@ void Code::analyise_opcode(const opcode opc, size_t op_idx,
     case PUSH_ATT_TO_GATTR_OBS :
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ATT_TO_GLYPH_ATTR :
-      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[1]));
-      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[1]));
+      update_slot_limits(ab.slotref + dp[1]);
       break;
       
     case ASSOC :                // slotrefs in varargs
       uint8 num = *dp+1;
-      while (--num)
-      {
-        _min_slotref = std::min(_min_slotref, size_t(ab.slotref + *++dp));
-        _max_slotref = std::max(_max_slotref, size_t(ab.slotref + *++dp));
-      }
+      while (--num) update_slot_limits(ab.slotref + *++dp);
       break;
   }
 }
 
+
+inline
+void Code::update_slot_limits(int slotref) throw() {
+  _min_slotref = std::min(_min_slotref, slotref);
+  _max_slotref = std::max(_max_slotref, slotref);
+}
 
 inline 
 void Code::failure(const status_t s) throw() {
@@ -380,6 +379,12 @@ int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, i
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
+    
+    if (count + _min_slotref < 0 || count + _max_slotref >= maxmap)
+    {
+      status_out = Machine::slot_offset_out_bounds;
+      return 0;
+    }
     return m.run(_code, _data, seg, islot_idx, count, nPre, status_out, maxmap, map);
 }
 

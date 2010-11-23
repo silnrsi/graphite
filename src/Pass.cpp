@@ -505,7 +505,7 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, FiniteStat
     return status == Machine::finished ? ret : 1;
 }
 
-Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, FiniteStateMachine & fsm) const
+Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nCtxt, FiniteStateMachine & fsm) const
 {
     if (!*codeptr)
       return iSlot->next();
@@ -515,9 +515,9 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, Fin
     Machine::status_t status;
     Machine m;
     int nMap = count;
-    count = nPre;
+    count = nCtxt;
     int oldNumGlyphs = fsm.seg.slotCount();
-    int32 ret = codeptr->run(m, fsm.seg, iSlot, count, nPre, nMap, fsm.slots.begin(), status);
+    int32 ret = codeptr->run(m, fsm.seg, iSlot, count, nCtxt, fsm.slots.size(), fsm.slots.begin(), status);
     count += fsm.seg.slotCount() - oldNumGlyphs;
     
     for (Slot **is = fsm.slots.begin(), *const * const ise = fsm.slots.begin() + nMap; is != ise; ++is)
@@ -553,7 +553,7 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, int nPre, Fin
             ++count;
         }
     }
-    count -= nPre;
+    count -= nCtxt;
     if (status != Machine::finished && iSlot) return iSlot->next();
         
     return iSlot;
