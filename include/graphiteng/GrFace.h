@@ -16,7 +16,7 @@ extern "C"
     GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, bool canDumb = false);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
   
-    GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
+    GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call features_destroy when done.
     GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index);  //When finished with the FeatureRef, call destroy_FeatureRef
     GRNG_EXPORT void destroy_face(GrFace *face);
 
