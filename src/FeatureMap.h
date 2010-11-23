@@ -68,48 +68,71 @@ private:
     uint32 m_mask;              // bit mask to get the value from the vector
     uint16 m_max;               // max value the value can take
     byte m_bits;                // how many bits to shift the value into place
-    byte m_index;               // index into the array to find the ulong to mask
+    byte m_index;               // index into the Features::m_vec array to find the ulong to mask
     uint16 m_nameid;            // Name table id for feature name
     uint16 *m_nameValues;       // array of name table ids for feature values
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 };
 
+    
 class FeatureMap
+{
+public:
+    FeatureMap() : m_feats(NULL), m_defaultFeatures(NULL) {}
+    ~FeatureMap() { delete[] m_feats; delete m_defaultFeatures; }
+    
+    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    const FeatureRef *featureRef(uint32 name);
+    FeatureRef *feature(uint8 index) const { return m_feats + index; }
+    FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
+    CLASS_NEW_DELETE
+private:
+friend class SillMap;
+    byte m_numFeats;
+//    std::map<uint32, byte> m_map;
+//    std::map<uint32, Features *>m_langMap;
+
+    FeatureRef *m_feats;
+    Features* m_defaultFeatures;        //owned
+    
+private:		//defensive on m_feats
+    FeatureMap(const FeatureMap&);
+    FeatureMap& operator=(const FeatureMap&);
+};
+
+
+class SillMap
 {
 private:
     class LangFeaturePair
     {
     public:
+        LangFeaturePair() : m_pFeatures(NULL) {}
+        ~LangFeaturePair() { delete m_pFeatures; }
+        
         uint32 m_lang;
         Features* m_pFeatures;      //owns
         CLASS_NEW_DELETE
     };
+
 public:
-    FeatureMap() : m_langFeats(NULL), m_feats(NULL), m_defaultFeatures(NULL) {}
-    ~FeatureMap() { delete[] m_langFeats; delete[] m_feats; delete m_defaultFeatures; }
-    
+    SillMap() : m_langFeats(NULL) {}
+    ~SillMap() { delete[] m_langFeats; }
+
     bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    const FeatureRef *featureRef(uint32 name);
-    FeatureRef *feature(uint8 index) const { return m_feats + index; }
-    FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
     Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
-    CLASS_NEW_DELETE
+
 private:
-    byte m_numFeats;
-//    std::map<uint32, byte> m_map;
-//    std::map<uint32, Features *>m_langMap;
+friend class GrFace;
+    FeatureMap m_FeatureMap;        //of face
     LangFeaturePair * m_langFeats;
     uint16 m_numLanguages;
 
-    FeatureRef *m_feats;
-    Features* m_defaultFeatures;        //owned
-    
-private:		//defensive on m_langFeats and m_feats
-    FeatureMap(const FeatureMap&);
-    FeatureMap& operator=(const FeatureMap&);
+private:        //defensive on m_langFeats
+    SillMap(const SillMap&);
+    SillMap& operator=(const SillMap&);
 };
 
 }}}} // namespace

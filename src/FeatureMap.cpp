@@ -33,9 +33,9 @@
 
 using namespace org::sil::graphite::v2;
 
-bool FeatureMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
+bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
-    if (!readFeats(appFaceHandle, getTable)) return false;
+    if (!m_FeatureMap.readFeats(appFaceHandle, getTable)) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
     return true;
 }
@@ -154,7 +154,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     return true;
 }
 
-bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
+bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lSill;
     const byte *pSill = reinterpret_cast<const byte *>(((*getTable)(appFaceHandle, ktiSill, &lSill)));
@@ -176,7 +176,7 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
-        Features* feats = cloneFeatures(0/*0 means default*/);
+        Features* feats = m_FeatureMap.m_defaultFeatures->clone();
         const byte *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
@@ -184,7 +184,7 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const FeatureRef* pRef = featureRef(name);
+	    const FeatureRef* pRef = m_FeatureMap.featureRef(name);
 	    if (pRef)
 		pRef->applyValToFeature(val, feats);
  	}
@@ -204,7 +204,7 @@ const FeatureRef *FeatureMap::featureRef(uint32 name)
     return NULL;
 }
 
-Features* FeatureMap::cloneFeatures(uint32 langname/*0 means default*/) const
+Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
 {
     if (langname)
     {
@@ -219,6 +219,6 @@ Features* FeatureMap::cloneFeatures(uint32 langname/*0 means default*/) const
 //        if (res != m_langMap.end()) 
 //            return new Features(*res->second);
     }
-    return m_defaultFeatures->clone();
+    return m_FeatureMap.m_defaultFeatures->clone();
 }
 

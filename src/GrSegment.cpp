@@ -100,7 +100,7 @@ GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begi
 
 GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
 {
-    return makeAndInitialize(font, face, script, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars, dir);
+    return makeAndInitialize(font, face, script, face->theSill().cloneFeatures(0/*0 means default*/), enc, pStart, nChars, dir);
 }
 
 

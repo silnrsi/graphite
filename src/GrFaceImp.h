@@ -138,10 +138,10 @@ public:
     bool setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const;      //glyphs already loaded are unloaded
     bool readGlyphs(EGlyphCacheStrategy requestedStrategy);
     bool readGraphite();
-    bool readFeatures() { return m_features.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
+    bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
-    const FeatureMap& theFeatures() const { return m_features; }
-    const FeatureRef *feature(uint8 index) const { return m_features.feature(index); }
+    const SillMap& theSill() const { return m_Sill; }
+    const FeatureRef *feature(uint8 index) const { return m_Sill.m_FeatureMap.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
@@ -162,7 +162,7 @@ private:
     unsigned short m_upem;          // design units per em
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.
-    FeatureMap m_features;
+    SillMap m_Sill;
     FileFace* m_pFileFace;      //owned
     
 private:		//defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
