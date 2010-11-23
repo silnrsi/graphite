@@ -39,3 +39,4 @@ fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')
 
 add_subdirectory(featuremap)
+add_subdirectory(nametabletest)

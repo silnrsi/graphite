@@ -267,6 +267,6 @@ int main(int argc, char ** argv)
     dummyFace.init<FeatTableTestE>(testBadOffset);
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
     testAssert("fail gracefully on bad table", !readStatus);
-    
+
     return 0;
 }
