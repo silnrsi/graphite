@@ -40,8 +40,8 @@ public:
         if (!pSeg) return;
         RenderedLine * renderedLine = new(result) RenderedLine(gr2::seg_n_slots(pSeg), seg_advance_X(pSeg));
         int i = 0;
-        for (const gr2::Slot* s = seg_first_slot(pSeg); s; s = next_slot_in_segment(s), ++i)
-            (*renderedLine)[i].set(gid(s), origin_X(s), origin_Y(s), before(s), after(s));
+        for (const gr2::Slot* s = seg_first_slot(pSeg); s; s = slot_next_in_segment(s), ++i)
+            (*renderedLine)[i].set(slot_gid(s), slot_origin_X(s), slot_origin_Y(s), slot_before(s), slot_after(s));
         
 //         for (int i = 0; i < seg.length(); i++)
 //         {

@@ -613,27 +613,27 @@ int Parameters::testFileFont() const
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
         size_t *map = (size_t*)malloc((seg_n_slots(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = slot_next_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = slot_next_in_segment(slot), ++i)
         {
-            float orgX = origin_X(slot);
-            float orgY = origin_Y(slot);
+            float orgX = slot_origin_X(slot);
+            float orgY = slot_origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, gid(slot), lookup(map, attached_to(slot)),
-                    get_attr(slot, pSeg, gr2::kslatAttX, 0),
-                    get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
-                    gr2::cinfo_break_weight(seg_cinfo(pSeg, original(slot))), before(slot), after(slot));
+                    i, slot_gid(slot), lookup(map, (size_t)slot_attached_to(slot)),
+                    slot_attr(slot, pSeg, gr2::kslatAttX, 0),
+                    slot_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, slot_is_insert_before(slot) ? 1 : 0,
+                    gr2::cinfo_break_weight(seg_cinfo(pSeg, slot_original(slot))), slot_before(slot), slot_after(slot));
            
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[before(slot) + offset],
-                    pText32[after(slot) + offset]);
+                    pText32[slot_before(slot) + offset],
+                    pText32[slot_after(slot) + offset]);
             }
 #if 0
             if (parameters.justification)
