@@ -108,7 +108,7 @@ private:
       Slot    * const * end() const;
       size_t            size() const;
       
-      void              add(Slot * const slot);
+      void              push_slot(Slot * const slot);
   private:
       Slot    * m_slot_map[MAX_RULES+1];
       Slot  * * m_end;
@@ -228,7 +228,7 @@ inline size_t FiniteStateMachine::SlotMap::size() const
   return m_end - m_slot_map;
 }
 
-inline void FiniteStateMachine::SlotMap::add(Slot*const slot)
+inline void FiniteStateMachine::SlotMap::push_slot(Slot*const slot)
 {
   *m_end++ = slot;
 }

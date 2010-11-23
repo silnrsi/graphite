@@ -24,6 +24,7 @@
 // from crashing graphite.
 // Author: Tim Eves
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
@@ -49,9 +50,16 @@ void fixup_cntxt_item_target(const byte*, byte * &);
 } // end namespace
 
 
+Code::analysis_context::analysis_context()
+: slotref(0)
+{
+//   contexts[0] = Context();
+}
+
+
 Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
- :  _code(0), _data_size(0), _instr_count(0), _status(loaded), 
-    _constrained(constrained), _own(true)
+ :  _code(0), _data_size(0), _instr_count(0), _status(loaded), _min_slotref(0), _max_slotref(0),
+    _constrained(constrained), _immutable(true), _own(true)
 {
     assert(bytecode_begin != 0);
     if (bytecode_begin == bytecode_end)
@@ -62,7 +70,6 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     assert(bytecode_end > bytecode_begin);
     const opcode_t *    op_to_fn = Machine::getOpcodeTable();
     const byte *        cd_ptr = bytecode_begin;
-    byte                iSlot = 0;
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
@@ -79,8 +86,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
-    Context cContexts[256];
-    cContexts[0] = Context();
+    analysis_context ac;
     do {
         opc = opcode(*cd_ptr++);
         
@@ -100,6 +106,9 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
             return;
         }
         
+        // Analyise the opcode.
+        analyise_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), param_sz, ac);
+        
         // Add this instruction
         *ip++ = op.impl[constrained]; 
         ++_instr_count;
@@ -115,9 +124,6 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         // Fixups to any argument data that needs it.
         if (opc == CNTXT_ITEM)
             fixup_cntxt_item_target(cd_ptr, dp);
-        if (!constrained)
-            fixup_instruction_offsets(opc, _instr_count, reinterpret_cast<int8 *>(dp), param_sz, 
-                                      iSlot, cContexts);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Final sanity check: ensure that the program is correctly terminated.
@@ -126,24 +132,31 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
+    assert((_constrained && _immutable) || !_constrained);
+    assert(ip - _code == ptrdiff_t(_instr_count));
+
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
     if (!constrained)
-        for (int i = iSlot - 1; i >= 0; i--)
-            if (cContexts[i].copySlot == Context::READ + Context::WRITE)
-            {
-                memmove(_code + cContexts[i].codeRef + 1, _code + cContexts[i].codeRef, (_instr_count - cContexts[i].codeRef) * sizeof(instr));
-                _code[cContexts[i].codeRef] = op_to_fn[TEMP_COPY].impl[constrained];
-                _instr_count++;
-            }
+    {
+      for (const Context * c = ac.contexts, * const ce = c + ac.slotref; c != ce; ++c)
+      {
+        if (!c->flags.referenced || !c->flags.changed) continue;
+        
+        instr * const tip = _code + c->codeRef;        
+        std::copy_backward(tip, ip, ip+1);
+        *tip = op_to_fn[TEMP_COPY].impl[constrained];
+        ++_instr_count; ++ip;       
+      }
+    }
 
-//    assert(ip - _code == ptrdiff_t(_instr_count));
+    assert(ip - _code == ptrdiff_t(_instr_count));
     _data_size = sizeof(byte)*(dp - _data);
     
     // Now we know exactly how much code and data the program really needs
     // realloc the buffers to exactly the right size so we don't waste any 
     // memory.
-    assert((bytecode_end - bytecode_begin)*sizeof(instr) >= _instr_count*sizeof(instr));
-    assert((bytecode_end - bytecode_begin)*sizeof(byte) >= _data_size*sizeof(byte));
+    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_instr_count));
+    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_data_size));
     _code = static_cast<instr *>(std::realloc(_code, (_instr_count+1)*sizeof(instr)));
     _data = static_cast<byte *>(std::realloc(_data, (_data_size+1)*sizeof(byte)));
     // Make this RET_ZERO, we should never reach this but just in case ...
@@ -222,7 +235,7 @@ void fixup_cntxt_item_target(const byte* cdp,
         
         if (param_sz == VARARGS)    param_sz = *cdp+1;
         cdp       += param_sz;
-        data_skip += param_sz +(opc == CNTXT_ITEM);
+        data_skip += param_sz + (opc == CNTXT_ITEM);
         count     -= 1 + param_sz;
     }
     assert(count == 0);
@@ -232,70 +245,117 @@ void fixup_cntxt_item_target(const byte* cdp,
 
 } // end of namespace
 
-void Code::fixup_instruction_offsets(const opcode opc, size_t cp,
-                                     int8  * dp, size_t param_sz,
-                                     byte & iSlot, Context* cContexts)
+void Code::analyise_opcode(const opcode opc, size_t op_idx,
+                           const int8  * dp, size_t param_sz,
+                           analysis_context & ab)
 {
-    switch (opc)
+  if (_constrained) return;
+  
+  switch (opc)
+  {
+//     case NOP :                  // no slot ref
+//     case PUSH_BYTE : case PUSH_BYTE_U :
+//     case PUSH_SHORT : case PUSH_SHORT_U :
+//     case PUSH_LONG :
+//     case ADD :
+//     case SUB :
+//     case MUL :
+//     case DIV :
+//     case MIN :
+//     case MAX :
+//     case NEG :
+//     case TRUNC8 : case TRUNC16 :
+//     case COND :
+//     case AND :
+//     case OR :
+//     case NOT :
+//     case EQUAL :
+//     case NOT_EQ :
+//     case LESS :
+//     case GTR :
+//     case LESS_EQ :
+//     case GTR_EQ :
+    case DELETE :
+    case PUT_GLYPH_8BIT_OBS :
+    case PUT_GLYPH :
+    case TEMP_COPY :
+      _immutable = false;
+      break;
+//     case CNTXT_ITEM :
+//     case ATTR_SET :
+//     case ATTR_ADD :
+//     case ATTR_SUB :
+//     case ATTR_SET_SLOT :
+//     case IATTR_SET_SLOT :
+//     case POP_RET : 
+//     case RET_ZERO :
+//     case RET_TRUE :
+//     case IATTR_SET :
+//     case IATTR_ADD :
+//     case IATTR_SUB :
+//     case PUSH_PROC_STATE :
+//     case PUSH_VERSION :
+
+    case NEXT :
+    case COPY_NEXT :
+      if (!ab.contexts[ab.slotref].flags.inserted)
+        ++ab.slotref;
+      ab.contexts[ab.slotref] = Context(op_idx);
+      break;
+      
+    case INSERT :
+      ab.contexts[ab.slotref].flags.inserted = true;
+      _immutable = false;
+      break;
+
+    case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
+    case PUT_SUBS : 
     {
-        case NEXT :
-        case COPY_NEXT :
-            iSlot++;
-            cContexts[iSlot] = Context(cp);
-            break;
-//         case INSERT :
-//             for (int i = iSlot; i >= 0; --i)
-//                 ++cContexts[i].nInserts;
-//             break;
-        case DELETE :
-            iSlot--;
-            break;
-        case PUT_COPY :
-            if (dp[-1] != 0) cContexts[iSlot].copySlot = Context::WRITE;
-            if (dp[-1] < 0 && -dp[-1] <= iSlot)
-                cContexts[iSlot + dp[-1]].copySlot = Context::READ;
-        case PUSH_SLOT_ATTR :
-        case PUSH_GLYPH_ATTR_OBS :
-        case PUSH_GLYPH_ATTR :
-//             fixup_slotref(dp-1,iSlot,cContexts);
-            if (dp[-1] <= 0 && -dp[-1] <= iSlot)
-                cContexts[iSlot + dp[-1]].copySlot = Context::READ;
-            break;
-//         case PUSH_FEAT :
-//         case PUSH_ATT_TO_GATTR_OBS :
-//         case PUSH_ATT_TO_GLYPH_ATTR :
-//             fixup_slotref(dp-1,iSlot,cContexts);
-//             break;
-        case PUSH_ISLOT_ATTR :
-//            cContexts[iSlot].copySlot = Context::WRITE;
-//             fixup_slotref(dp-2,iSlot,cContexts);
-            if (dp[-2] <= 0 && -dp[-2] <= iSlot)
-                cContexts[iSlot + dp[-2]].copySlot = Context::READ;
-            break;
-//         case PUSH_GLYPH_METRIC :
-//         case PUSH_ATT_TO_GLYPH_METRIC :
-//             fixup_slotref(dp-2,iSlot,cContexts);
-//             break;
-        case PUT_SUBS_8BIT_OBS:
-            cContexts[iSlot].copySlot = Context::WRITE;
-//             fixup_slotref(dp-3,iSlot,cContexts);
-            if (dp[-3] <= 0 && -dp[-3] <= iSlot)
-                cContexts[iSlot + dp[-3]].copySlot = Context::READ;
-            break;
-//         case CNTXT_ITEM :
-//             fixup_slotref(dp-3,iSlot,cContexts);
-// 	        break;
-        case PUT_SUBS :
-            cContexts[iSlot].copySlot = Context::WRITE;
-//             fixup_slotref(dp-5,iSlot,cContexts);
-            if (dp[-5] <= 0 && -dp[-5] <= iSlot)
-                cContexts[iSlot + dp[-5]].copySlot = Context::READ;
-            break;
-//         case ASSOC :
-//             for (size_t i = 1; i < param_sz; ++i)
-//                 fixup_slotref(dp-i,iSlot,cContexts);
-//             break;
+      _immutable = false;
+      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[0]));
+      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[0]));
+      
+      Context & ctxt = ab.contexts[ab.slotref];
+      ctxt.flags.changed = true;
+      if (dp[0] <= 0 && -dp[0] <= ab.slotref)
+        ab.contexts[ab.slotref + dp[0] - ctxt.flags.inserted].flags.referenced = true;
+      break;
     }
+    case PUT_COPY :
+    {
+      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[0]));
+      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[0]));
+
+      Context & ctxt = ab.contexts[ab.slotref];
+      if (dp[0] != 0) ctxt.flags.changed = true;
+      if (dp[0] <= 0 && -dp[0] <= ab.slotref)
+        ab.contexts[ab.slotref + dp[0] - ctxt.flags.inserted].flags.referenced = true;
+      break;
+    }
+    case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
+    case PUSH_GLYPH_ATTR_OBS :
+    case PUSH_GLYPH_ATTR :
+    case PUSH_ISLOT_ATTR :
+      if (dp[1] <= 0 && -dp[1] <= ab.slotref)
+        ab.contexts[ab.slotref + dp[1] - ab.contexts[ab.slotref].flags.inserted].flags.referenced = true;
+    case PUSH_GLYPH_METRIC :
+    case PUSH_FEAT :
+    case PUSH_ATT_TO_GATTR_OBS :
+    case PUSH_ATT_TO_GLYPH_METRIC :
+    case PUSH_ATT_TO_GLYPH_ATTR :
+      _min_slotref = std::min(_min_slotref, size_t(ab.slotref + dp[1]));
+      _max_slotref = std::max(_max_slotref, size_t(ab.slotref + dp[1]));
+      break;
+      
+    case ASSOC :                // slotrefs in varargs
+      uint8 num = *dp+1;
+      while (--num)
+      {
+        _min_slotref = std::min(_min_slotref, size_t(ab.slotref + *++dp));
+        _max_slotref = std::max(_max_slotref, size_t(ab.slotref + *++dp));
+      }
+      break;
+  }
 }
 
 
@@ -319,8 +379,6 @@ int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, i
                     Machine::status_t & status_out) const
 {
     assert(_own);
-//    assert(stack_base != 0);
-//    assert(length >= 32);
     assert(*this);          // Check we are actually runnable
     return m.run(_code, _data, seg, islot_idx, count, nPre, status_out, maxmap, map);
 }

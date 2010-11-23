@@ -78,7 +78,6 @@
 #define pop()               (*sp--)
 #define slotat(x)           (count + x < maxmap && count + x >= 0 ? map[count + x] : map[maxmap - 1])
 #define POSITIONED          1
-#define FLAGS_CHANGED       2
 
 STARTOP(nop)
     do {} while (0);
@@ -292,7 +291,6 @@ STARTOP(insert)
 //     map[count] = is;
 //     maxmap++;
     count--;
-    flags |= FLAGS_CHANGED;
 ENDOP
 
 STARTOP(delete_)
@@ -317,7 +315,6 @@ STARTOP(delete_)
 //        is = is->next();
     }
     seg.extendLength(-1);
-    flags |= FLAGS_CHANGED;
 ENDOP
 
 STARTOP(assoc)
@@ -587,6 +584,5 @@ STARTOP(temp_copy)
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->markCopied(true);
     map[count] = newSlot;
-    flags |= FLAGS_CHANGED;
 ENDOP
 

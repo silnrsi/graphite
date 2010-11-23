@@ -386,7 +386,7 @@ int Pass::runFSM(org::sil::graphite::v2::FiniteStateMachine& fsm, Slot * slot) c
         const uint16 gid = slot->gid();
         if (gid >= m_numGlyphs) break;
         const uint16 iCol = m_cols[gid];
-        fsm.slots.add(slot);
+        fsm.slots.push_slot(slot);
 #ifdef ENABLE_DEEP_TRACING
         if (!state->is_transition())
         {
@@ -405,7 +405,7 @@ int Pass::runFSM(org::sil::graphite::v2::FiniteStateMachine& fsm, Slot * slot) c
         if (state == m_states || !state->is_transition()) break;
         slot = slot->next();
     }
-    fsm.slots.add(slot ? slot->next() : slot);
+    fsm.slots.push_slot(slot ? slot->next() : slot);
     return context;
 }
 
