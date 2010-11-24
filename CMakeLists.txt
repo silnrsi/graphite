@@ -19,6 +19,29 @@ option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
 
 option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 
+set(VM_MACHINE_TYPE call CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.   Auto -- depends upon configuration type; Direct -- usually fastest but only on GCC. default for Release configuration with GCC; Call -- slower but universal. defualt for Debug configuration")
+
+string(TOLOWER ${VM_MACHINE_TYPE} VM_MACHINE_TYPE)
+
+if (NOT VM_MACHINE_TYPE MATCHES "auto|direct|call")
+    message(SEND_ERROR "unrecognised vm machine type: ${VM_MACHINE_TYPE}. Only Auto, Direct or Call are available")
+endif (NOT VM_MACHINE_TYPE MATCHES "auto|direct|call")
+
+if (VM_MACHINE_TYPE STREQUAL "auto")
+    if (CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
+        set(VM_MACHINE_TYPE "direct")
+    else(CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
+        set(VM_MACHINE_TYPE "call")
+    endif(CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
+endif (VM_MACHINE_TYPE STREQUAL "auto")
+
+if (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
+    message(WARNING "vm machine type direct can only be built using GCC")
+    set(VM_MACHINE_TYPE "call")
+endif (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
+
+message(STATUS "Using vm machine type: ${VM_MACHINE_TYPE}")
+
 if (DISABLE_TRACING)
     add_definitions(-DDISABLE_TRACING)
     message(STATUS "Tracing disabled")

@@ -16,19 +16,16 @@ endif(DISABLE_TRACING)
 add_library(vm-test-common  STATIC
                 basic_test.cpp
                 ${SRC}/Code.cpp
-                ${SRC}/FeaturesHandle.cpp
+                ${SRC}/FeatureMap.cpp
                 ${SRC}/GlyphFace.cpp
                 ${SRC}/GlyphFaceCache.cpp
                 ${SRC}/GrFace.cpp
-                ${SRC}/GrSegment.cpp
+                ${SRC}/GrFaceImp.cpp
+                ${SRC}/GrSegmentImp.cpp
                 ${SRC}/Pass.cpp
                 ${SRC}/Silf.cpp
-                ${SRC}/Slot.cpp
+                ${SRC}/SlotImp.cpp
                 ${SRC}/TtfUtil.cpp
-                ${SRC}/FeatureMap.cpp
-                ${SRC}/FeaturesHandle.cpp
-                ${SRC}/FeatureRefHandle.cpp
-                ${SRC}/SegmentHandle.cpp
                 ${TRACESUPPORT})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
@@ -36,10 +33,10 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-poin
 add_executable(vm-test-call     ${SRC}/call_machine.cpp)
 target_link_libraries(vm-test-call vm-test-common)
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if  (${CMAKE_COMPILER_IS_GNUCXX})
 	add_executable(vm-test-direct   ${SRC}/direct_machine.cpp)
 	target_link_libraries(vm-test-direct vm-test-common)
-endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
@@ -59,9 +56,9 @@ set_tests_properties(vm-test-call-threading PROPERTIES
         PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
         FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if  (${CMAKE_COMPILER_IS_GNUCXX})
 	add_test(vm-test-direct-threading vm-test-direct 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
 			FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
-endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+endif  (${CMAKE_COMPILER_IS_GNUCXX})

@@ -3,6 +3,7 @@
 #include <vector>
 #include <time.h>
 #include "Code.h"
+#include "Rule.h"
 
 using namespace vm;
 using namespace org::sil::graphite::v2;
@@ -30,6 +31,7 @@ class GrSegment
 
 const char * prog_error_msg[] = {
     _msg(loaded),
+    _msg(empty),
     _msg(alloc_failed), 
     _msg(invalid_opcode), 
     _msg(unimplemented_opcode_used),
@@ -42,22 +44,25 @@ const char * run_error_msg[] = {
     _msg(finished),
     _msg(stack_underflow),
     _msg(stack_not_empty),
-    _msg(stack_overflow)
+    _msg(stack_overflow),
+    _msg(slot_offset_out_bounds)
 };
 
 std::vector<byte> fuzzer(int);
 
 int main(int argc, char *argv[])
 {
-    size_t repeats = 1;
+    size_t repeats = 1,
+           copies  = ((1 << 20)*4 + sizeof(simple_prog)-1) / sizeof(simple_prog);
     
     if (argc > 1)
         repeats = atoi(argv[1]);
+    if (argc > 2)
+        copies  = atoi(argv[2]);
     
     std::cout << "simple program size:    " << sizeof(simple_prog)+1 << " bytes" << std::endl;
     // Replicate the code copies times.
     std::vector<byte> big_prog;
-    size_t copies = ((1 << 20)*4 + sizeof(simple_prog)-1) / sizeof(simple_prog);
     big_prog.push_back(simple_prog[0]);
     big_prog.push_back(simple_prog[1]);
     for(; copies; --copies)
@@ -66,8 +71,7 @@ int main(int argc, char *argv[])
     std::cout << "amplified program size: " << big_prog.size() << " bytes" << std::endl;
     
     // Load the code.
-    CodeContext context[256];
-    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(),context);
+    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size());
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.
         std::cerr << "program failed to load due to: " 
@@ -85,9 +89,12 @@ int main(int argc, char *argv[])
     int is=0;
     uint32 ret;
     Machine::status_t status;
-    Machine m;
+    SlotMap map(seg);
+    Machine m(map);
+    map.pushSlot(0);
+    slotref slot = 0;
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, seg, is, is, status);
+        ret = prog.run(m, slot, is, status);
         switch (status) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:

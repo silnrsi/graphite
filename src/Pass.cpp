@@ -398,10 +398,10 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
       {
           XmlTraceLog::get().error("Invalid state %d", state-m_states);
       }
-      if (iCol >= m_sColumns && iCol != 65535)
+      if (col >= m_sColumns && col != 65535)
       {
           XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
-              iCol, gid, slot);
+              col, slot->gid(), slot);
       }
 #endif
 
@@ -442,7 +442,7 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
 #ifdef ENABLE_DEEP_TRACING
       if (XmlTraceLog::get().active())
       {
-        XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.seg.first()));
+        XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.slots.segment.first()));
         XmlTraceLog::get().closeElement(ElementDoRule);
       }
 #endif

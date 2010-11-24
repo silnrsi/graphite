@@ -33,9 +33,12 @@
 
 
 #include <cassert>
-#include <graphiteng/SlotHandle.h>
+#include <cstring>
 #include "Machine.h"
-#include "GrSegment.h"
+#include "GrSegmentImp.h"
+#include "XmlTraceLog.h"
+#include "SlotImp.h"
+#include "Rule.h"
 
 #define STARTOP(name)           name: {
 #define ENDOP                   }; goto *((sp - sb)/Machine::STACK_MAX ? &&end : *++ip);
@@ -48,30 +51,30 @@ using namespace org::sil::graphite::v2;
 
 namespace {
 
-const void * direct_run(const bool          get_table_mode,
-                        const instr       * program,
-                        const byte        * data,
-                        Machine::stack_t  * stack,
-                        GrSegment     * const seg_ptr,
-                        slotref           & islot_idx,
-                        slotref             iStart)
+const void * direct_run(const bool          __get_table_mode=true,
+                        const instr       * __program=0,
+                        const byte        * __data=0,
+                        Machine::stack_t  * __stack=0,
+                        slotref           * __slot=0,
+                        int               * __count=0,
+                        gr2::SlotMap      * __map=0)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
     #include "opcode_table.h"
-    if (get_table_mode)
+    if (__get_table_mode)
         return opcode_table;
 
     // Declare virtual machine registers
-    const instr       * ip = program;
-    const byte        * dp = data;
-    Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
+    const instr       * ip = __program;
+    const byte        * dp = __data;
+    Machine::stack_t  * sp = __stack + Machine::STACK_GUARD,
                 * const sb = sp;
-    GrSegment       & seg = *seg_ptr;
-    slotref         is=islot_idx, isf=-1, isl=-1;
-    const slotref   isb=iStart;
-    Position        endPos=Position();
-    int8           copies[64] = {-1};
+    gr2::SlotMap     & map = *__map;
+    GrSegment        & seg = map.segment;
+    slotref             is = *__slot;
+    int              count = *__count;
+    int8             flags = 0;
     
     // start the program
     goto **ip;
@@ -80,7 +83,8 @@ const void * direct_run(const bool          get_table_mode,
     #include "opcodes.h"
     
     end:
-    islot_idx = is;
+    *__slot  = is;
+    *__count = count;
     return sp;
 }
 
@@ -88,24 +92,22 @@ const void * direct_run(const bool          get_table_mode,
 
 const opcode_t * Machine::getOpcodeTable() throw()
 {
-    int is_dummy;
-    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, 0, is_dummy, 0));
+    return static_cast<const opcode_t *>(direct_run());
 }
 
 
-Machine::stack_t  Machine::run(const instr  * program,
-                               const byte   * data,
-                               GrSegment      & seg,
-                               slotref      & islot_idx,
-                               slotref        iStart,
-                               status_t     & status)
+Machine::stack_t  Machine::run(const instr   * program,
+                               const byte    * data,
+                               slotref       & slot,
+                               int           & count,
+                               status_t      & status)
 {
     assert(program != 0);
     
     const stack_t *sp = static_cast<const stack_t *>(
-                direct_run(false, program, data, _stack, &seg, islot_idx, iStart));
+                direct_run(false, program, data, _stack, &slot, &count, &_map));
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
     check_final_stack(sp, status);
-    return *sp;
+    return ret;
 }
 

@@ -90,7 +90,7 @@ namespace {
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
                                slotref       & slot,
-                               int &           count,
+                               int           & count,
                                status_t      & status)
 {
     assert(program != 0);
@@ -98,7 +98,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     // Declare virtual machine registers
     const instr   * ip = program-1;
     const byte    * dp = data;
-    stack_t       * sp      = _stack + Machine::STACK_GUARD,
+    stack_t       * sp = _stack + Machine::STACK_GUARD,
             * const sb = sp;
     regbank         reg = {_map, slot, ip, count, 0};
 

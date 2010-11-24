@@ -70,7 +70,7 @@ set(GRAPHITE_HEADERS
 file(GLOB PRIVATE_HEADERS *.h) 
 
 add_library(graphiteng SHARED
-    call_machine.cpp
+    ${VM_MACHINE_TYPE}_machine.cpp
     CharInfo.cpp
     Code.cpp
     FeatureMap.cpp
