@@ -349,7 +349,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 	int count = 0;
         s = findNDoRule(s, count, m, fsm);
         currCount += count;
-	assert(currCount <= m.slotMpa().segment.slotCount());
+	assert(currCount <= m.slotMap().segment.slotCount());
         if (currCount <= maxIndex)
         {
             if (--loopCount < 0)
