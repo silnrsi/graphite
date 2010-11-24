@@ -103,8 +103,8 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden -fno-stack-protector)
     set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc" LINKER_LANGUAGE C)
-     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-     add_test(libgraphiteng-nostdc++ ${PROJECT_SOURCE_DIR}/../tests/nolibstdc++ graphiteng .)
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphiteng>)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

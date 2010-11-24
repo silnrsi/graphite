@@ -7,6 +7,14 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
 
+function(nolib_test LIBNAME OBJECTFILE)
+    string(REGEX REPLACE "[][^$.*+?|()-]" "\\\\\\0" LIBNAME_REGEX ${LIBNAME})
+    add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
+            COMMAND readelf --dynamic ${OBJECTFILE})
+    set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
+            FAIL_REGULAR_EXPRESSION "0x[0-9a-f]+ \\(NEEDED\\)[ \\t]+Shared library: \\[${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}${CMAKE_SHARED_LIBRARY_SUFFIX}.*\\]")
+endfunction(nolib_test)
+
 option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
 
 option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")

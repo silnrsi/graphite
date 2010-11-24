@@ -51,9 +51,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc" )
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
-    add_test(NAME grngfonttest-nostdc++ COMMAND ldd $<TARGET_SONAME_FILE:graphiteng>)
-    set_tests_properties(grngfonttest-nostdc++ PROPERTIES FAIL_REGULAR_EXPRESSION "libstdc\\+\\+")
-
+    nolib_test(stdc++ $<TARGET_FILE:grngfonttest>)
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
