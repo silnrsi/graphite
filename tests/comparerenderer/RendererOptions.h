@@ -1,3 +1,24 @@
+/*  GRAPHITENG LICENSING
+
+    Copyright 2010, SIL International
+    All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation; either version 2.1 of License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should also have received a copy of the GNU Lesser General Public
+    License along with this library in the file named "LICENSE".
+    If not, write to the Free Software Foundation, Inc., 59 Temple Place,
+    Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
+    internet at http://www.fsf.org/licenses/lgpl.html.
+*/
 #pragma once
 
 class Option
@@ -52,6 +73,9 @@ typedef enum {
     OptVerbose,
     OptAlternativeFont,
     OptIgnoreGlyphIdDifferences,
+    OptSegCache,
+    OptTrace,
+    OptLogMask,
     OptFeatures
 } OptionId;
 
@@ -67,10 +91,13 @@ static Option rendererOptions[] = {
     Option("", "--tolerance", "Ignore differences in position smaller than this", Option::OPTION_FLOAT),
     Option("-c", "--compare", "Compare glyph output", Option::OPTION_BOOL),
     Option("-l", "--log", "Log file for results instead of stdout", Option::OPTION_STRING),
-    Option("", "--verbose", "Output lots of info", Option::OPTION_BOOL),
+    Option("-v", "--verbose", "Output lots of info", Option::OPTION_BOOL),
     Option("-a", "--alt-font", "Alternative font file", Option::OPTION_STRING),
-    Option("", "--ignore-gid", "Ignore Glyph IDs in comparison (use with -c -a alt.ttf)", Option::OPTION_BOOL)
-    //Option("", "--features", "Font size", Option::OPTION_STRING),
+    Option("", "--ignore-gid", "Ignore Glyph IDs in comparison (use with -c -a alt.ttf)", Option::OPTION_BOOL),
+    Option("", "--seg-cache", "Enable Segment Cache of given size", Option::OPTION_INT),
+    Option("", "--trace", "XML trace log file", Option::OPTION_STRING),
+    Option("", "--log-mask", "XML trace log mask (only used with --trace)", Option::OPTION_INT),
+    //Option("", "--features", "Feature list", Option::OPTION_STRING),
     
 };
 

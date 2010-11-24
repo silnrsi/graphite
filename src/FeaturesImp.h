@@ -22,6 +22,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include "Main.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -54,7 +55,17 @@ public:
         std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
         return *this;
     }
-    
+    bool operator ==(const Features & b) const
+    {
+        size_t i = 0;
+        assert(m_length);
+        assert(m_length == b.m_length);
+        while (m_vec[i] == b.m_vec[i])
+        {
+            if (++i == m_length) return true;
+        }
+        return false;
+    }
     Features* clone() const { return new Features(*this); }
     
 //    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step

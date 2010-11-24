@@ -30,6 +30,10 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrFace;
 class VMScratch;
 class GrSegment;
+class Features;
+class SegCache;
+class SegCacheStore;
+class SegCacheEntry;
 
 class Pseudo
 {
@@ -53,11 +57,18 @@ public:
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
     uint8 aBreak() const { return m_aBreak; }
+    void enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags);
+    SegCacheStore * segmentCacheStore() const { return m_segCacheStore; }
 
     CLASS_NEW_DELETE
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
+    void runGraphiteWithCache(GrSegment *seg) const;
+    SegCacheEntry * runGraphiteOnSubSeg(SegCache * cache, GrSegment *seg,
+                                        const uint16 * cmapGlyphs,
+                                        Slot * firstSlot, Slot * lastSlot,
+                                        size_t offset, size_t length) const;
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;
@@ -73,6 +84,8 @@ private:
             m_numPseudo,
             m_nClass,
             m_nLinear;
+
+    mutable SegCacheStore * m_segCacheStore;
     
     void releaseBuffers() throw();
     

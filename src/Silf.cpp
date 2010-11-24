@@ -20,9 +20,12 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <cstdlib>
+#include "graphiteng/CharInfo.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"
+#include "SegCache.h"
+#include "SegCacheStore.h"
 #include "Rule.h"
 
 using namespace org::sil::graphite::v2;
@@ -31,13 +34,18 @@ Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0)
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_segCacheStore(0)
 {
 }
 
 Silf::~Silf() throw()
 {
     releaseBuffers();
+    if (m_segCacheStore)
+    {
+        delete m_segCacheStore;
+        m_segCacheStore = NULL;
+    }
 }
 
 void Silf::releaseBuffers() throw()
@@ -425,11 +433,20 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
+void Silf::enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 flags)
+{
+    if (!m_segCacheStore) m_segCacheStore = new SegCacheStore(face, maxSegments, flags);
+}
+
 void Silf::runGraphite(GrSegment *seg) const
 {
     assert(seg != 0);
+    if (m_segCacheStore)
+    {
+        runGraphiteWithCache(seg);
+        return;
+    }
     FiniteStateMachine fsm(*seg);
-    
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -443,8 +460,141 @@ void Silf::runGraphite(GrSegment *seg) const
         m_passes[i].runGraphite(fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
-	    XmlTraceLog::get().closeElement(ElementRunPass);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementRunPass);
+        }
 #endif
     }
 }
 
+void Silf::runGraphiteWithCache(GrSegment *seg) const
+{
+    FiniteStateMachine fsm(*seg);
+    // run up to substitution pass, i.e. run the line break passes
+    for (size_t i = 0; i < m_sPass; ++i)
+    {
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRunPass);
+            XmlTraceLog::get().addAttribute(AttrNum, i);
+        }
+#endif
+        // test whether to reorder, prepare for positioning
+        m_passes[i].runGraphite(fsm);
+#ifndef DISABLE_TRACING
+        seg->logSegment();
+        XmlTraceLog::get().closeElement(ElementRunPass);
+#endif
+    }
+
+    SegCache * segCache = m_segCacheStore->getOrCreate(seg->getFeatures(0));
+    // find where the segment can be broken
+    Slot * subSegStartSlot = seg->first();
+    Slot * subSegEndSlot = subSegStartSlot;
+    uint16 cmapGlyphs[eMaxCachedSeg];
+    int subSegStart = 0;
+    bool spaceOnly = true;
+    for (unsigned int i = 0; i < seg->charInfoCount(); i++)
+    {
+        if (i - subSegStart < eMaxCachedSeg)
+        {
+            cmapGlyphs[i-subSegStart] = subSegEndSlot->gid();
+        }
+        if (!m_segCacheStore->isSpaceGlyph(subSegEndSlot->gid()))
+        {
+            spaceOnly = false;
+        }
+        // at this stage the character to slot mapping is still 1 to 1
+        int breakWeight = seg->charinfo(i)->breakWeight();
+        int nextBreakWeight = (i + 1 < seg->charInfoCount())?
+            seg->charinfo(i+1)->breakWeight() : 0;
+        if (((breakWeight > 0) &&
+             (breakWeight <= eBreakWord)) ||
+            (i + 1 == seg->charInfoCount()) ||
+             m_segCacheStore->isSpaceGlyph(subSegEndSlot->gid()) ||
+            ((i + 1 < seg->charInfoCount()) &&
+             (((nextBreakWeight < 0) &&
+              (nextBreakWeight >= -eBreakWord)) ||
+              (subSegEndSlot->next() && m_segCacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
+        {
+            // record the next slot before any splicing
+            Slot * nextSlot = subSegEndSlot->next();
+            if (spaceOnly)
+            {
+                // spaces should be left untouched by graphite rules in any sane font
+            }
+            else
+            {
+                // found a break position, check for a cache of the sub sequence
+                const SegCacheEntry * entry = (segCache)?
+                    segCache->find(cmapGlyphs, i - subSegStart + 1) : NULL;
+                // TODO disable cache for words at start/end of line with contextuals
+#ifndef DISABLE_TRACING
+                if (XmlTraceLog::get().active())
+                {
+                    XmlTraceLog::get().openElement(ElementSubSeg);
+                    XmlTraceLog::get().addAttribute(AttrFirstId, subSegStart);
+                    XmlTraceLog::get().addAttribute(AttrLastId, i);
+                }
+#endif
+                if (!entry)
+                {
+                    entry =runGraphiteOnSubSeg(segCache, seg, cmapGlyphs,
+                                               subSegStartSlot, subSegEndSlot,
+                                               subSegStart, i - subSegStart + 1);
+                }
+                else
+                {
+                    seg->splice(subSegStart, i - subSegStart + 1, subSegStartSlot, subSegEndSlot, entry);
+                }
+#ifndef DISABLE_TRACING
+                if (XmlTraceLog::get().active())
+                {
+                    XmlTraceLog::get().closeElement(ElementSubSeg);
+                }
+#endif
+            }
+            subSegEndSlot = nextSlot;
+            subSegStartSlot = nextSlot;
+            subSegStart = i + 1;
+            spaceOnly = true;
+        }
+        else
+        {
+            subSegEndSlot = subSegEndSlot->next();
+        }
+    }
+}
+
+SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg,
+                               const uint16 * cmapGlyphs,
+                               Slot * startSlot, Slot * endSlot,
+                               size_t offset, size_t length) const
+{
+    //GrSegment subSeg(*seg, startSlot, offset, length);
+    SegmentScopeState scopeState = seg->setScope(startSlot, endSlot, length);
+    FiniteStateMachine fsm(*seg);
+    for (size_t i = m_sPass; i < m_numPasses; ++i)
+    {
+#ifndef DISABLE_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().openElement(ElementRunPass);
+            XmlTraceLog::get().addAttribute(AttrNum, i);
+        }
+#endif
+        // test whether to reorder, prepare for positioning
+        m_passes[i].runGraphite(fsm);
+#ifndef DISABLE_TRACING
+        seg->logSegment();
+        XmlTraceLog::get().closeElement(ElementRunPass);
+#endif
+    }
+    SegCacheEntry * entry = NULL;
+    if (length < eMaxCachedSeg && cache)
+        entry = cache->cache(m_segCacheStore, cmapGlyphs, length, seg, offset);
+    seg->removeScope(scopeState);
+    return entry;
+}

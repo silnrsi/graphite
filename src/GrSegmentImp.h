@@ -53,7 +53,21 @@ typedef std::vector<Slot *> SlotRope;
 typedef std::vector<uint16 *> AttributeRope;
 #endif
 
+class SegmentScopeState;
 class GrFace;
+class GrSegment;
+
+class SegmentScopeState
+{
+private:
+    friend class GrSegment;
+    Slot * realFirstSlot;
+    Slot * slotBeforeScope;
+    Slot * slotAfterScope;
+    Slot * realLastSlot;
+    size_t numGlyphsOutsideScope;
+};
+
 class GrSegment
 {
 public:
@@ -70,11 +84,13 @@ public:
 
     GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
     ~GrSegment();
+    SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
+    void removeScope(SegmentScopeState & state);
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
     void last(Slot *p) { m_last = p; }
-    void appendSlot(int i, int cid, int gid, int fid, int bw);
+    void appendSlot(int i, int cid, int gid, int fid);
     Slot *newSlot();
     void freeSlot(Slot *);
     void positionSlots(const GrFont *font, Slot *iStart = NULL, Slot *iEnd = NULL);
@@ -98,6 +114,10 @@ public:
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachTo() ? is : findRoot(is->attachTo()); }
     int numAttrs() { return m_silf->numUser(); }
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, const SegCacheEntry * entry);
+    int defaultOriginal() const { return m_defaultOriginal; }
+    const GrFace * getFace() const { return m_face; }
+    const Features & getFeatures(unsigned int charIndex) { assert(m_feats.size() == 1); return m_feats[0]; }
 
     CLASS_NEW_DELETE
 
@@ -118,6 +138,7 @@ private:
     Slot *m_last;               // last slot in segment
     unsigned int m_bufSize;     // how big a buffer to create when need more slots
     unsigned int m_numGlyphs;
+    int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
     CharInfo *m_charinfo;       // character info, one per input character
     unsigned int m_numCharinfo; // size of the array and number of input characters

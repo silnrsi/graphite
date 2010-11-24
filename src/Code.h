@@ -164,7 +164,7 @@ inline size_t Code::instructionCount() const throw() {
     return _instr_count;
 }
 
-inline bool Code::immutable() const
+inline bool Code::immutable() const throw()
 {
   return _immutable;
 }

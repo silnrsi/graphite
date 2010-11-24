@@ -23,6 +23,8 @@
 #include "VMScratch.h"
 #include <string.h>
 #include "GrSegmentImp.h"
+#include "CmapCache.h"
+#include "NameTable.h"
 #include "XmlTraceLog.h"
 
 using namespace org::sil::graphite::v2;
@@ -30,17 +32,32 @@ using namespace org::sil::graphite::v2;
 GrFace::~GrFace()
 {
     delete m_pGlyphFaceCache;
+    delete m_cmapCache;
     delete[] m_silfs;
     m_pGlyphFaceCache = NULL;
+    m_cmapCache = NULL;
     m_silfs = NULL;
     delete m_pFileFace;
+    delete m_pNames;
     m_pFileFace = NULL;
 }
 
 
 bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const      //glyphs already loaded are unloaded
 {
-    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache, requestedStrategy);
+    if (requestedStrategy & eCmap)
+    {
+        if (!m_cmapCache)
+             m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+    }
+    else
+    {
+        delete m_cmapCache;
+        m_cmapCache = NULL;
+    }
+
+    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache,
+        static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
     if (!pNewCache)
         return false;
     
@@ -55,7 +72,13 @@ bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
 
-    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr, requestedStrategy);
+    m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr,
+        static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
+
+    if (requestedStrategy & eCmap)
+    {
+        m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+    }
 
     if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
@@ -168,3 +191,20 @@ void GrFace::takeFileFace(FileFace* pFileFace/*takes ownership*/)
     m_pFileFace = pFileFace;
 }
 
+void GrFace::enableSegmentCache(size_t maxSegments, uint32 flags)
+{
+    for (size_t i = 0; i < m_numSilf; i++)
+    {
+        m_silfs[i].enableSegmentCache(this, maxSegments, flags);
+    }
+}
+
+NameTable * GrFace::nameTable() const
+{
+    if (m_pNames) return m_pNames;
+    size_t tableLength = 0;
+    const void * table = getTable(tagName, &tableLength);
+    if (table)
+        m_pNames = new NameTable(table, tableLength);
+    return m_pNames;
+}

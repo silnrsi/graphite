@@ -438,7 +438,9 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, FiniteStateMachine & fsm) const
 #ifdef ENABLE_DEEP_TRACING
       if (XmlTraceLog::get().active())
       {
+        XmlTraceLog::get().openElement(ElementPassResult);
         XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.seg.first()));
+        XmlTraceLog::get().closeElement(ElementPassResult);
         XmlTraceLog::get().closeElement(ElementDoRule);
       }
 #endif
@@ -491,8 +493,26 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, int nCtxt, FiniteStat
   {
       int temp = i + nCtxt;
       ret = r.constraint->run(m, fsm.seg, iSlot, temp, nCtxt, fsm.slots.size(), fsm.slots.begin(), status);
-      if (!ret) return 0;
-      if (status != Machine::finished) return 1;
+      if (!ret)
+      {
+#ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementTestRule);
+        }
+#endif
+          return 0;
+      }
+      if (status != Machine::finished)
+      {
+#ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementTestRule);
+        }
+#endif
+          return 1;
+      }
   }
     
 #ifdef ENABLE_DEEP_TRACING

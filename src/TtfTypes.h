@@ -341,7 +341,13 @@ namespace Sfnt
 			Fullname, Version, PostScript
 		};
 	};
-	
+
+	struct LangTagRecord
+	{
+		uint16 length,
+			offset;
+	};
+
 	struct FontNames
 	{
 		uint16	format,

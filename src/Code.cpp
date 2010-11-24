@@ -247,7 +247,7 @@ void fixup_cntxt_item_target(const byte* cdp,
 
 void Code::analyse_opcode(const opcode opc, size_t op_idx,
                            const int8  * dp, size_t param_sz,
-                           analysis_context & ab)
+                           analysis_context & ab) throw()
 {
   if (_constrained) return;
   

@@ -43,6 +43,7 @@ public:
 //    Position scale(const Position& p) const { return Position(m_scale * p.x, m_scale * p.y); }
 //    float scale(float p) const { return m_scale * p; }
     float scale() const { return m_scale; }
+    virtual bool isHinted() const { return false; }
 
     CLASS_NEW_DELETE
 private:
@@ -57,7 +58,6 @@ private:			//defensive on m_advances
     GrFont& operator=(const GrFont&);
 };
 
-
 class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
 {
 public:
@@ -68,12 +68,11 @@ private:
     const GrFace *m_face;   // GrFace to get the rest of the info from
 };
 
-
 class GrHintedFont : public GrFont
 {
 public:
-   GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
-
+    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
+    virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 

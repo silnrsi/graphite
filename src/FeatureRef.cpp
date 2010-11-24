@@ -21,6 +21,8 @@
 */
 #include "graphiteng/FeatureRef.h"
 #include "FeatureMap.h"
+#include "GrFaceImp.h"
+#include "NameTable.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -63,7 +65,7 @@ GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, Features* pDest)
 }
 
 
-GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
+GRNG_EXPORT uint16 feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
@@ -73,18 +75,79 @@ GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Feature
     return pfeatureref->getFeatureVal(*feats);
 }
 
+GRNG_EXPORT uint32 feature_id(const FeatureRef*pfeatureref)
+{
+    if (!pfeatureref) return 0;
+    return pfeatureref->getId();
+}
 
 GRNG_EXPORT void destroy_FeatureRef(FeatureRef *p)
 {
     delete p;
 }
 
+GRNG_EXPORT void* feature_label(const GrFace* pFace,
+    const FeatureRef*pfeatureref, uint16 *langId, encform utf, uint32 *length)
+{
+    if(!pfeatureref)
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    uint16 label = pfeatureref->getNameId();
+    NameTable * names = pFace->nameTable();
+    if (!names)
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    return names->getName(*langId, label, utf, *length);
+}
+
+GRNG_EXPORT uint16 num_feature_settings(const FeatureRef*pfeatureref)
+{
+    if(!pfeatureref)
+        return 0;
+    return pfeatureref->getNumSettings();
+}
+
+GRNG_EXPORT int16 feature_setting_value(const FeatureRef*pfeatureref, uint16 setting)
+{
+    if(!pfeatureref || (setting >= pfeatureref->getNumSettings()))
+    {
+        return 0;
+    }
+    return pfeatureref->getSettingValue(setting);
+}
+
+GRNG_EXPORT void* feature_setting_label(const GrFace* pFace,
+    const FeatureRef*pfeatureref, uint16 setting, uint16 *langId, encform utf,
+    uint32 *length)
+{
+    if(!pfeatureref || (setting >= pfeatureref->getNumSettings()))
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    uint16 label = pfeatureref->getSettingName(setting);
+    NameTable * names = pFace->nameTable();
+    if (!names)
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    return names->getName(*langId, label, utf, *length);
+}
 
 
-
-
-
-
-
+GRNG_EXPORT void destroy_feature_label(void * label)
+{
+    if (label)
+        free(label);
+}
 
 }}}} // namespace

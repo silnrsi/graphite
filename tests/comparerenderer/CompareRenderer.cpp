@@ -1,3 +1,24 @@
+/*  GRAPHITENG LICENSING
+
+    Copyright 2010, SIL International
+    All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation; either version 2.1 of License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should also have received a copy of the GNU Lesser General Public
+    License along with this library in the file named "LICENSE".
+    If not, write to the Free Software Foundation, Inc., 59 Temple Place,
+    Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
+    internet at http://www.fsf.org/licenses/lgpl.html.
+*/
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -22,6 +43,7 @@
 #endif
 
 #include "GrNgRenderer.h"
+#include "graphiteng/XmlLog.h"
 
 #ifdef HAVE_HARFBUZZNG
 #include "HbNgRenderer.h"
@@ -268,14 +290,22 @@ int main(int argc, char ** argv)
 
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
+    int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
+    
+    {
+        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "w");
+        int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
+            (gr2::GRLOG_SEGMENT | gr2::GRLOG_CACHE);
+        gr2::graphite_start_logging(traceFile, static_cast<gr2::GrLogMask>(logMask));
+    }
 
     if (rendererOptions[OptAlternativeFont].exists())
     {
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
         if (rendererOptions[OptGraphiteNg].exists())
         {
-            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction));
+            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
+            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction, segCacheSize));
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
@@ -299,7 +329,7 @@ int main(int argc, char ** argv)
             renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
 #endif
         if (rendererOptions[OptGraphiteNg].exists())
-            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
             renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
@@ -336,6 +366,7 @@ int main(int argc, char ** argv)
         }
     }
     if (rendererOptions[OptLogFile].exists()) fclose(log);
+    if (rendererOptions[OptTrace].exists()) gr2::graphite_stop_logging();
 
     return status;
 }
