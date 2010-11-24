@@ -428,7 +428,9 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
 void Silf::runGraphite(GrSegment *seg) const
 {
     assert(seg != 0);
-    FiniteStateMachine fsm(*seg);
+    SlotMap map(*seg);
+    FiniteStateMachine fsm(map);
+    vm::Machine        m(map);
     
     for (size_t i = 0; i < m_numPasses; ++i)
     {
@@ -440,7 +442,7 @@ void Silf::runGraphite(GrSegment *seg) const
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(fsm);
+        m_passes[i].runGraphite(m, fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
 	    XmlTraceLog::get().closeElement(ElementRunPass);

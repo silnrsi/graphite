@@ -102,7 +102,7 @@ public:
     size_t        instructionCount() const throw();
     bool          immutable() const throw();
 
-    int32 run(Machine &m, GrSegment & seg, slotref & islot_idx, int &count, SlotMap & map,
+    int32 run(Machine &m, slotref & islot_idx, int &count,
                     Machine::status_t & status) const;
     CLASS_NEW_DELETE
 };

@@ -57,12 +57,10 @@ using namespace vm;
     using namespace org::sil::graphite::v2;
 
 struct regbank  {
-    GrSegment       & seg;
+    SlotMap       & map;
     slotref         is;
     const instr * & ip;
     int           & count;
-    int             isb;
-    SlotMap       & map;        // given slot index from start of rule give slot to *read* from
     int8            flags;
 };
 
@@ -72,11 +70,10 @@ typedef bool        (* ip_t)(registers);
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
 namespace {
-#define seg     reg.seg
+#define seg     map.segment
 #define is      reg.is
 #define ip      reg.ip
 #define count   reg.count
-#define isb     reg.isb
 #define map     reg.map
 #define flags   reg.flags
 
@@ -86,18 +83,15 @@ namespace {
 #undef is
 #undef ip
 #undef count
-#undef isb
 #undef map
 #undef flags
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               GrSegment &     seg,
-                               slotref &       islot_idx,
+                               slotref       & slot,
                                int &           count,
-                               status_t &      status,
-                               SlotMap &       map)
+                               status_t      & status)
 {
     assert(program != 0);
 
@@ -106,14 +100,14 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, ip, count, map.context(), map, 0};
+    regbank         reg = {_map, slot, ip, count, 0};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
 
     check_final_stack(sp, status);
-    islot_idx = reg.is;
+    slot = reg.is;
     return ret;
 }
 

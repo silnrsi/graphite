@@ -375,17 +375,17 @@ void Code::release_buffers() throw()
 }
 
 
-int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, SlotMap & map,
+int32 Code::run(Machine & m, slotref & islot_idx, int &count,
                     Machine::status_t & status_out) const
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
     
-    if (count + _min_slotref < 0 || size_t(count + _max_slotref) >= map.size())
+    if (count + _min_slotref < 0 || size_t(count + _max_slotref) >= m.slotMap().size())
     {
       status_out = Machine::slot_offset_out_bounds;
       return 0;
     }
-    return m.run(_code, _data, seg, islot_idx, count, status_out, map);
+    return m.run(_code, _data, islot_idx, count, status_out);
 }
 

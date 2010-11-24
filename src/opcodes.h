@@ -287,9 +287,6 @@ STARTOP(insert)
     }
     is = newSlot;
     seg.extendLength(1);
-//     memmove(map + count + 1, map + count, sizeof(Slot *) * (maxmap - count));
-//     map[count] = is;
-//     maxmap++;
     count--;
 ENDOP
 
@@ -308,11 +305,6 @@ STARTOP(delete_)
     if (is->prev())
     {
         is = is->prev();
-//        --count;      // don't do this since following next() will increment to count is->next()
-    }
-    else
-    {
-//        is = is->next();
     }
     seg.extendLength(-1);
 ENDOP
@@ -343,7 +335,7 @@ STARTOP(cntxt_item)
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
-    if (isb + is_arg != count) {
+    if (map.context() + is_arg != count) {
         ip += iskip;
         dp += dskip;
         push(true);

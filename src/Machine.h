@@ -123,19 +123,31 @@ public:
         stack_overflow,
         slot_offset_out_bounds
     };
-   
+
+    Machine(gr2::SlotMap &) throw();
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  gr2::GrSegment & seg, slotref & islot_idx, int & count,
-                                  status_t &status, gr2::SlotMap & map) HOT;
+                                  slotref & islot_idx, int & count,
+                                  status_t &status) HOT;
     CLASS_NEW_DELETE
 
+    gr2::SlotMap   & slotMap() const throw();
 private:
     void check_final_stack(const stack_t * const sp, status_t &status);
 
-    stack_t _stack[STACK_MAX + 2*STACK_GUARD];
+    gr2::SlotMap      & _map;
+    stack_t             _stack[STACK_MAX + 2*STACK_GUARD];
 };
 
+inline Machine::Machine(gr2::SlotMap & map) throw()
+: _map(map)
+{
+}
+
+inline gr2::SlotMap& Machine::slotMap() const throw()
+{
+  return _map;
+}
 
 inline void Machine::check_final_stack(const gr2::int32 * const sp,
                                        status_t & status) {

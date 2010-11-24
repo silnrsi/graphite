@@ -82,7 +82,7 @@ class SlotMap
 {
 public:
   enum {MAX_SLOTS=64};
-  SlotMap();
+  SlotMap(GrSegment & seg);
   
   void           clear();
   Slot       * * begin();
@@ -94,6 +94,8 @@ public:
   Slot * const & operator[](int n) const;
   Slot       * & operator [] (int);
   void           pushSlot(Slot * const slot);
+  
+  GrSegment &    segment;
 private:
   Slot         * m_slot_map[MAX_SLOTS+1];
   unsigned short m_size;
@@ -124,21 +126,15 @@ private:
   };
 
 public:
-  FiniteStateMachine(GrSegment & seg);
-
+  FiniteStateMachine(SlotMap & map);
   void      setContext(short unsigned int);
   Rules     rules;
-  SlotMap   slots;
-
-  
-  GrSegment & seg;
+  SlotMap   & slots;
 };
 
-
-inline FiniteStateMachine::FiniteStateMachine(GrSegment& segment)
-: seg(segment)
+inline FiniteStateMachine::FiniteStateMachine(SlotMap& map)
+: slots(map)
 {
-  setContext(0);
 }
 
 inline void FiniteStateMachine::setContext(short unsigned int ctxt)
@@ -217,8 +213,8 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, cons
   }
 }
 
-inline SlotMap::SlotMap()
-: m_size(0), m_precontext(0)
+inline SlotMap::SlotMap(GrSegment & seg)
+: m_size(0), m_precontext(0), segment(seg)
 {
 }
 
