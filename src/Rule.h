@@ -78,6 +78,29 @@ inline bool State::is_transition() const
 }
 
 
+class SlotMap
+{
+public:
+  enum {MAX_SLOTS=64};
+  SlotMap();
+  
+  void           clear();
+  Slot       * * begin();
+  Slot * const * end() const;
+  size_t         size() const;
+  unsigned short context() const;
+  void           setContext(unsigned short);
+  
+  Slot * const & operator[](int n) const;
+  Slot       * & operator [] (int);
+  void           pushSlot(Slot * const slot);
+private:
+  Slot         * m_slot_map[MAX_SLOTS+1];
+  unsigned short m_size;
+  unsigned short m_precontext;
+};
+
+
 class FiniteStateMachine
 {
 public:
@@ -100,24 +123,10 @@ private:
       const RuleEntry * m_end;
   };
 
-  class SlotMap
-  {
-  public:
-      void              clear();
-      Slot          * * begin();
-      Slot    * const * end() const;
-      size_t            size() const;
-      
-      void              push_slot(Slot * const slot);
-  private:
-      Slot    * m_slot_map[MAX_RULES+1];
-      Slot  * * m_end;
-  };
-
 public:
   FiniteStateMachine(GrSegment & seg);
 
-  void      clear();
+  void      setContext(short unsigned int);
   Rules     rules;
   SlotMap   slots;
 
@@ -129,13 +138,13 @@ public:
 inline FiniteStateMachine::FiniteStateMachine(GrSegment& segment)
 : seg(segment)
 {
-  clear();
+  setContext(0);
 }
 
-inline void FiniteStateMachine::clear()
+inline void FiniteStateMachine::setContext(short unsigned int ctxt)
 {
   rules.clear();
-  slots.clear();
+  slots.setContext(ctxt);
 }
 
 inline FiniteStateMachine::Rules::Rules()
@@ -208,29 +217,50 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, cons
   }
 }
 
-inline Slot * * FiniteStateMachine::SlotMap::begin()
+inline SlotMap::SlotMap()
+: m_size(0), m_precontext(0)
+{
+}
+
+inline Slot * * SlotMap::begin()
 {
   return &m_slot_map[0];
 }
 
-inline Slot * const * FiniteStateMachine::SlotMap::end() const
+inline Slot * const * SlotMap::end() const
 {
-  return m_end;
+  return m_slot_map + m_size;
 }
 
-inline void FiniteStateMachine::SlotMap::clear()
+inline size_t SlotMap::size() const
 {
-  m_end = &m_slot_map[0];
+  return m_size;
 }
 
-inline size_t FiniteStateMachine::SlotMap::size() const
+inline short unsigned int SlotMap::context() const
 {
-  return m_end - m_slot_map;
+  return m_precontext;
 }
 
-inline void FiniteStateMachine::SlotMap::push_slot(Slot*const slot)
+inline void SlotMap::setContext(short unsigned int ctxt)
 {
-  *m_end++ = slot;
+  m_size = 0;
+  m_precontext = ctxt;
+}
+
+inline void SlotMap::pushSlot(Slot*const slot)
+{
+  m_slot_map[m_size++] = slot;
+}
+
+inline Slot * const & SlotMap::operator[](int n) const
+{
+  return m_slot_map[n];
+}
+
+inline Slot * & SlotMap::operator[](int n)
+{
+  return m_slot_map[n];
 }
 
 }}}}

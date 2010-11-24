@@ -34,6 +34,7 @@
 #include "GrSegmentImp.h"
 #include "XmlTraceLog.h"
 #include "SlotImp.h"
+#include "Rule.h"
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
                             regbank & reg
@@ -61,8 +62,7 @@ struct regbank  {
     const instr * & ip;
     int           & count;
     int             isb;
-    int             maxmap;
-    slotref *       map;        // given slot index from start of rule give slot to *read* from
+    SlotMap       & map;        // given slot index from start of rule give slot to *read* from
     int8            flags;
 };
 
@@ -77,7 +77,6 @@ namespace {
 #define ip      reg.ip
 #define count   reg.count
 #define isb     reg.isb
-#define maxmap  reg.maxmap
 #define map     reg.map
 #define flags   reg.flags
 
@@ -88,7 +87,6 @@ namespace {
 #undef ip
 #undef count
 #undef isb
-#undef maxmap
 #undef map
 #undef flags
 }
@@ -98,10 +96,8 @@ Machine::stack_t  Machine::run(const instr   * program,
                                GrSegment &     seg,
                                slotref &       islot_idx,
                                int &           count,
-                               int             nPre,
                                status_t &      status,
-                               int             nMap,
-                               slotref *       map)
+                               SlotMap &       map)
 {
     assert(program != 0);
 
@@ -110,7 +106,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp      = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {seg, islot_idx, ip, count, nPre, nMap, map, 0};
+    regbank         reg = {seg, islot_idx, ip, count, map.context(), map, 0};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}

@@ -43,6 +43,7 @@ namespace gr2 = org::sil::graphite::v2;
 namespace org { namespace sil { namespace graphite { namespace v2 {
     class GrSegment;
     class Slot;
+    class SlotMap;
 }}}}
 
 
@@ -125,8 +126,8 @@ public:
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  gr2::GrSegment & seg, slotref & islot_idx, int & count, int nPre,
-                                  status_t &status, int nMap, slotref * map) HOT;
+                                  gr2::GrSegment & seg, slotref & islot_idx, int & count,
+                                  status_t &status, gr2::SlotMap & map) HOT;
     CLASS_NEW_DELETE
 
 private:

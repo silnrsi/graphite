@@ -71,7 +71,7 @@ public:
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(GrSegment* seg, attrCode index, uint8 subindex, uint16 val, Slot** map, int maxmap);
+    void setAttr(GrSegment* seg, attrCode index, uint8 subindex, uint16 val, const SlotMap & map);
     int getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const;
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }

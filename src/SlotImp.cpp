@@ -22,6 +22,7 @@
 #include "GrSegmentImp.h"
 #include "SlotImp.h"
 #include "CharInfoImp.h"
+#include "Rule.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -192,7 +193,7 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
     }
 }
 
-void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, Slot **map, int maxmap)
+void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, const SlotMap & map)
 {
     int value = *(int16 *)&val;
     if (index == kslatUserDefnV1)
@@ -209,7 +210,7 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, S
         m_advance = Position(m_advance.x, value);
         break;
     case kslatAttTo :
-        if (value >= 0 && value < maxmap)
+        if (value >= 0 && unsigned(value) < map.size())
         {
             Slot *other = map[value];
             m_parent = other;

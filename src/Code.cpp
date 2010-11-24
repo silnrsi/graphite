@@ -31,6 +31,7 @@
 #include <string.h>
 #include "Code.h"
 #include "Machine.h"
+#include "Rule.h"
 #include "XmlTraceLog.h"
 
 #include <cstdio>
@@ -374,17 +375,17 @@ void Code::release_buffers() throw()
 }
 
 
-int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, int &nPre, int maxmap, Slot **map,
+int32 Code::run(Machine & m, GrSegment & seg, slotref & islot_idx, int &count, SlotMap & map,
                     Machine::status_t & status_out) const
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
     
-    if (count + _min_slotref < 0 || count + _max_slotref >= maxmap)
+    if (count + _min_slotref < 0 || size_t(count + _max_slotref) >= map.size())
     {
       status_out = Machine::slot_offset_out_bounds;
       return 0;
     }
-    return m.run(_code, _data, seg, islot_idx, count, nPre, status_out, maxmap, map);
+    return m.run(_code, _data, seg, islot_idx, count, status_out, map);
 }
 
