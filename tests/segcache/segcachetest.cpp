@@ -59,7 +59,7 @@ private:
 bool checkEntries(const GrFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
     Features * defaultFeatures = face_features_for_lang(face, 0);
-    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(face, *defaultFeatures);
+    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(*defaultFeatures);
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
     {
@@ -126,7 +126,7 @@ int main(int argc, char ** argv)
         return 1;
     }
     FILE * log = fopen("grsegcache.xml", "w");
-    gr2::startGraphiteLogging(log, GRLOG_SEGMENT);
+    gr2::graphite_start_logging(log, GRLOG_SEGMENT);
     gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
     if (!face)
     {
@@ -134,7 +134,7 @@ int main(int argc, char ** argv)
         return 3;
     }
     gr2::enable_segment_cache(face, 4096, 0);
-    gr2::GrFont *sizedFont = gr2::make_GrFont(12, face);
+    gr2::GrFont *sizedFont = gr2::make_font(12, face);
     const void * badUtf8 = NULL;
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
@@ -144,7 +144,9 @@ int main(int argc, char ** argv)
     
     for (size_t i = 0; i < numTestStrings; i++)
     {
-        size_t testLength = count_unicode_characters_to_nul(gr2::kutf8, testStrings[i], &badUtf8);
+        size_t testLength = count_unicode_characters(gr2::kutf8, testStrings[i],
+                                                     testStrings[i] + strlen(testStrings[i]),
+                                                     &badUtf8);
         testGlyphStrings[i] = gr2::gralloc<gr2::uint16>(testLength + 1);
         CharacterCountLimit limit(gr2::kutf8, testStrings[i], testLength);
         CmapProcessor cmapProcessor(face, testGlyphStrings[i]);
@@ -152,14 +154,14 @@ int main(int argc, char ** argv)
         testLengths[i] = testLength;
         processUTF(limit, &cmapProcessor, &ignoreErrors);
 
-        gr2::GrSegment * segA = gr2::make_GrSegment(sizedFont, face, 0, gr2::kutf8, testStrings[i],
+        gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, gr2::kutf8, testStrings[i],
                             testLength, 0);
         assert(segA);
         if (!checkEntries(face, testStrings[i], testGlyphStrings[i], testLengths[i]))
             return -1;
     }
     Features * defaultFeatures = face_features_for_lang(face, 0);
-    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(face, *defaultFeatures);
+    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(*defaultFeatures);
     size_t segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 16)
@@ -181,10 +183,10 @@ int main(int argc, char ** argv)
             segCount, accessCount);
         return -2;
     }
-    destroy_GrFont(sizedFont);
+    destroy_font(sizedFont);
     destroy_face(face);
     destroy_Features(defaultFeatures);
 
-    gr2::stopGraphiteLogging();
+    gr2::graphite_stop_logging();
     return 0;
 }

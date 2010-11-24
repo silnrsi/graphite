@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <utility>
 #include <graphiteng/Types.h>
 #include "Main.h"
 #include "Machine.h"
@@ -34,16 +35,6 @@ using namespace org::sil::graphite::v2;
 
 namespace vm
 {
-
-struct CodeContext
-{
-    CodeContext(uint8 ins, uint8 copy, uint8 ref)
-        : nInserts(ins), copySlot(copy), codeRef(ref) {}
-    CodeContext() : nInserts(0), copySlot(0), codeRef(0) {}
-    uint8       nInserts;
-    uint8       copySlot;
-    uint8       codeRef;
-};
 
 class Code 
 {
@@ -61,38 +52,63 @@ public:
     };
 
 private:
+    struct Context
+    {
+        enum {WRITE=1, READ=2};
+        Context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
+        struct { 
+          uint8 changed:1,
+                referenced:1,
+                inserted:1;
+        } flags;
+        uint8       codeRef;
+    };
+
+    struct analysis_context
+    {
+      int       slotref;
+      Context   contexts[256];
+      
+      analysis_context();
+    };
+    
     instr *     _code;
     byte  *     _data;
     size_t      _data_size,
                 _instr_count;
-    status_t    _status;
-    bool        _constrained;
+    int         _min_slotref,
+                _max_slotref;
+    mutable status_t _status;
+    bool        _constrained,
+                _immutable;
     mutable bool _own;
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
     bool check_opcode(const opcode, const byte *, const byte *const);
-    void fixup_instruction_offsets(const opcode, size_t, int8  *, size_t, byte &, CodeContext *);
+    void analyse_opcode(const opcode, size_t cp, const int8  * dp, size_t param_sz, analysis_context &) throw();
+    void update_slot_limits(int slotref) throw ();
 public:
     Code() throw();
-    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end, CodeContext* cContexts);
+    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end);
     Code(const Code &) throw();
     ~Code() throw();
     
     Code & operator=(const Code &rhs) throw();
     operator bool () const throw();
-    status_t    status() const throw();
-    bool        constraint() const throw();
-    size_t      dataSize() const throw();
-    size_t      instructionCount() const throw();
-    
+    status_t      status() const throw();
+    bool          constraint() const throw();
+    size_t        dataSize() const throw();
+    size_t        instructionCount() const throw();
+    bool          immutable() const throw();
+
     int32 run(Machine &m, GrSegment & seg, slotref & islot_idx, int &count, int &nPre, int maxmap, Slot **map,
-                    Machine::status_t & status, int &flags) const;
+                    Machine::status_t & status) const;
     CLASS_NEW_DELETE
 };
 
 inline Code::Code() throw()
-: _code(0), _data(0), _data_size(0), _instr_count(0), 
+: _code(0), _data(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0),
   _status(empty), _own(false) {
 }
 
@@ -100,9 +116,12 @@ inline Code::Code(const Code &obj) throw ()
  :  _code(obj._code), 
     _data(obj._data), 
     _data_size(obj._data_size), 
-    _instr_count(obj._instr_count), 
+    _instr_count(obj._instr_count),
+    _min_slotref(obj._min_slotref),
+    _max_slotref(obj._max_slotref),
     _status(obj._status), 
-    _constrained(obj._constrained), 
+    _constrained(obj._constrained),
+    _immutable(obj._immutable),
     _own(obj._own) 
 {
     obj._own = false;
@@ -115,8 +134,11 @@ inline Code & Code::operator=(const Code &rhs) throw() {
     _data        = rhs._data;
     _data_size   = rhs._data_size; 
     _instr_count = rhs._instr_count;
+    _min_slotref = rhs._min_slotref;
+    _max_slotref = rhs._max_slotref;
     _status      = rhs._status; 
     _constrained = rhs._constrained;
+    _immutable   = rhs._immutable;
     _own         = rhs._own; 
     rhs._own = false;
     return *this;
@@ -142,6 +164,10 @@ inline size_t Code::instructionCount() const throw() {
     return _instr_count;
 }
 
+inline bool Code::immutable() const throw()
+{
+  return _immutable;
+}
 
 
 } // end of namespace vm

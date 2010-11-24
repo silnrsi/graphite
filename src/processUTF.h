@@ -81,19 +81,6 @@ private:
 };
 
 
-class BufferAndCharacterCountLimit : public BufferLimit
-{
-public:
-    BufferAndCharacterCountLimit(encform enc2, const void* pStart2, const void* pEnd/*as in stl i.e. don't use end*/, size_t numchars) : BufferLimit(enc2, pStart2, pEnd), m_numchars(numchars) {}
-  
-    //inBuffer is inherited for convenience 
-    bool needMoreChars(const void* pCharStart, size_t nProcessed) const { return nProcessed<m_numchars && inBuffer(pCharStart); }
-
-private:
-    size_t m_numchars;
-};
-
-
 class IgnoreErrors
 {
 public:

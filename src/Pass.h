@@ -22,7 +22,6 @@
 #pragma once
 
 #include <cstdlib>
-#include "VMScratch.h"
 #include "Code.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -30,6 +29,10 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrSegment;
 class GrFace;
 class Silf;
+class Rule;
+class RuleEntry;
+class State;
+class FiniteStateMachine;
 
 class Pass
 {   
@@ -37,36 +40,46 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(void *pPass, size_t lPass, size_t lBase);
-    int readCodePointers(byte *pCode, byte *pPointers, vm::Code *pRes, int num, bool isConstraint, vm::CodeContext *cContexts, int size);
-    void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
-    Slot *findNDoRule(GrSegment* seg, Slot* iSlot, int& count, const GrFace* face, VMScratch* vms) const;
-    int testConstraint(const vm::Code* codeptr, Slot* iSlot, int num, int nPre, int nCtxt, GrSegment* seg, int nMap, Slot** map, int &flags) const;
-    Slot *doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, int len, GrSegment* seg, Slot** map, int &flags) const;
+    bool readPass(void* pPass, size_t pass_length, size_t subtable_base);
+    void runGraphite(FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
 
     CLASS_NEW_DELETE
 private:
-    Silf *m_silf;
-    byte m_iMaxLoop;
+    Slot * findNDoRule(Slot* iSlot, int& count, FiniteStateMachine& fsm) const;
+    Slot * doAction(const vm::Code* codeptr, Slot* iSlot, int& count, int nPre, FiniteStateMachine & fsm) const;
+    bool   testPassConstraint(GrSegment & seg) const;
+    int    testConstraint(const RuleEntry& re, Slot* iSlot, int nCtxt, FiniteStateMachine & fsm) const;
+    bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
+    bool   readRules(const uint16 * rule_map, const size_t num_entries, 
+		     const byte *precontext, const uint16 * sort_key,
+		     const uint16 * o_constraint, const byte *constraint_data, 
+		     const uint16 * o_action, const byte * action_data);
+    void   logRule(const Rule * r, const uint16 * sort_key) const;
+    bool   readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
+    void   logStates() const;
+    bool   readRanges(const uint16* ranges, size_t num_ranges);
+    int    runFSM(FiniteStateMachine & fsm, Slot * slot) const;
+    
+    const Silf* m_silf;
+    uint16    * m_cols;
+    Rule      * m_rules; // rules
+    RuleEntry * m_ruleMap;
+    State *   * m_startStates; // prectxt length
+    State *   * m_sTable;
+    State     * m_states;
+    
+    bool   m_immutable;
+    byte   m_iMaxLoop;
     uint16 m_numGlyphs;
     uint16 m_numRules;
     uint16 m_sRows;
     uint16 m_sTransition;
     uint16 m_sSuccess;
     uint16 m_sColumns;
-    uint16 *m_cols;
-    uint16 *m_ruleidx;
-    uint16 *m_ruleMap;
-    uint16 *m_ruleSorts;
     byte m_minPreCtxt;
     byte m_maxPreCtxt;
-    uint16 *m_startStates;
-    byte *m_rulePreCtxt;
     vm::Code m_cPConstraint;
-    vm::Code *m_cConstraint;
-    vm::Code *m_cActions;
-    int16 *m_sTable;
     
 private:		//defensive
     Pass(const Pass&);

@@ -73,6 +73,7 @@ typedef enum {
     ElementSegCache,
     ElementSegCacheEntry,
     ElementGlyph,
+    ElementPassResult,
 
     ElementError,
     ElementWarning,

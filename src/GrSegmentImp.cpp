@@ -257,9 +257,9 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             }
             slot->attachTo(slotArray[parentPos]);
         }
-        if (replacement->sibling())
+        if (replacement->nextSibling())
         {
-            uint16 pos = replacement->sibling() - entry->first();
+            uint16 pos = replacement->nextSibling() - entry->first();
             while (slotPosition < pos)
             {
                 slotArray[slotPosition+1] = slotArray[slotPosition]->next();
@@ -267,9 +267,9 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             }
             slot->sibling(slotArray[pos]);
         }
-        if (replacement->child())
+        if (replacement->firstChild())
         {
-            uint16 pos = replacement->child() - entry->first();
+            uint16 pos = replacement->firstChild() - entry->first();
             while (slotPosition < pos)
             {
                 slotArray[slotPosition+1] = slotArray[slotPosition]->next();

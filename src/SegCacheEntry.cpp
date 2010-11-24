@@ -58,7 +58,7 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
     {
         slotCopy->userAttrs(m_attr + pos * seg->numAttrs());
         slotCopy->set(*slot, -charOffset, seg->numAttrs());
-        if (slot->child())
+        if (slot->firstChild())
         {
             new(parentGlyphs + numParents) Index2Slot( pos, slot );
             ++numParents;
@@ -80,22 +80,22 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
     // loop over the attached children finding their siblings and parents
     for (int16 i = 0; i < numChildren; i++)
     {
-        if (childGlyphs[i].m_slot->sibling())
+        if (childGlyphs[i].m_slot->nextSibling())
         {
             for (int16 j = i; j < numChildren; j++)
             {
-                if (childGlyphs[i].m_slot->sibling() == childGlyphs[j].m_slot)
+                if (childGlyphs[i].m_slot->nextSibling() == childGlyphs[j].m_slot)
                 {
                     m_glyph[childGlyphs[i].m_i].sibling(m_glyph + childGlyphs[j].m_i);
                     break;
                 }
             }
-            if (!m_glyph[childGlyphs[i].m_i].sibling())
+            if (!m_glyph[childGlyphs[i].m_i].nextSibling())
             {
                 // search backwards
                 for (int16 j = i-1; j >= 0; j--)
                 {
-                    if (childGlyphs[i].m_slot->sibling() == childGlyphs[j].m_slot)
+                    if (childGlyphs[i].m_slot->nextSibling() == childGlyphs[j].m_slot)
                     {
                         m_glyph[childGlyphs[i].m_i].sibling(m_glyph + childGlyphs[j].m_i);
                         break;
@@ -109,7 +109,7 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
             if (childGlyphs[i].m_slot->attachedTo() == parentGlyphs[j].m_slot)
             {
                 m_glyph[childGlyphs[i].m_i].attachTo(m_glyph + parentGlyphs[j].m_i);
-                if (parentGlyphs[j].m_slot->child() == childGlyphs[i].m_slot)
+                if (parentGlyphs[j].m_slot->firstChild() == childGlyphs[i].m_slot)
                 {
                     m_glyph[parentGlyphs[j].m_i].child(m_glyph + childGlyphs[i].m_i);
                 }

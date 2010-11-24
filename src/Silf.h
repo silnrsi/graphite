@@ -50,7 +50,7 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
+    void runGraphite(GrSegment *seg) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;
@@ -64,9 +64,8 @@ public:
 
 private:
     size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
-    void runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const;
+    void runGraphiteWithCache(GrSegment *seg) const;
     SegCacheEntry * runGraphiteOnSubSeg(SegCache * cache, GrSegment *seg,
-                                        const GrFace *face, VMScratch *vms,
                                         const uint16 * cmapGlyphs,
                                         Slot * firstSlot, Slot * lastSlot,
                                         size_t offset, size_t length) const;

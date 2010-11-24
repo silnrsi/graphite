@@ -26,6 +26,7 @@
 #include "GrSegmentImp.h"
 #include "SegCache.h"
 #include "SegCacheStore.h"
+#include "Rule.h"
 
 using namespace org::sil::graphite::v2;
 
@@ -155,14 +156,22 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 #endif
     p += uint8(*p) * 2 + 1;        // don't need critical features yet
     p++;        // reserved
-    if (p >= eSilf) { releaseBuffers(); return false; }
+    if (p >= eSilf) 
+    {
+        releaseBuffers();
+        return false;
+    }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumScripts, *p);
 #endif
     p += uint8(*p) * 4 + 1;        // skip scripts
     p += 2;     // skip lbGID
     
-    if (p + 4 * (m_numPasses + 1) + 6 >= eSilf) { releaseBuffers(); return false; }
+    if (p + 4 * (m_numPasses + 1) + 6 >= eSilf) 
+    {
+        releaseBuffers(); 
+        return false;
+    }
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
     m_numPseudo = read16(p);
@@ -170,7 +179,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     XmlTraceLog::get().addAttribute(AttrNumPseudo, m_numPseudo);
 #endif
     p += 6;
-    if (p + m_numPseudo * 6 >= eSilf) { releaseBuffers(); return false; }
+    if (p + m_numPseudo * 6 >= eSilf) 
+    {
+        releaseBuffers();
+        return false;
+    }
     m_pseudos = new Pseudo[m_numPseudo];
     for (int i = 0; i < m_numPseudo; i++)
     {
@@ -183,6 +196,11 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         XmlTraceLog::get().writeUnicode(m_pseudos[i].uid);
         XmlTraceLog::get().closeElement(ElementPseudo);
 #endif
+    }
+    if (p >= eSilf) 
+    {
+        releaseBuffers();
+        return false;
     }
 
     int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs + m_numPseudo);
@@ -224,7 +242,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
 
 size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
 {
-    char *p = (char *)pClass;
+    const byte *p = reinterpret_cast<const byte *>(pClass);
     m_nClass = read16(p);
     m_nLinear = read16(p);
     m_classOffsets = gralloc<uint16>(m_nClass + 1);
@@ -327,7 +345,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
             return -1;
     }
 #endif
-    return (p - (char *)pClass);
+    return (p - reinterpret_cast<const byte*>(pClass));
 }
 
 uint16 Silf::findPseudo(uint32 uid) const
@@ -420,13 +438,15 @@ void Silf::enableSegmentCache(const GrFace *face, size_t maxSegments, uint32 fla
     if (!m_segCacheStore) m_segCacheStore = new SegCacheStore(face, maxSegments, flags);
 }
 
-void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
+void Silf::runGraphite(GrSegment *seg) const
 {
+    assert(seg != 0);
     if (m_segCacheStore)
     {
-        runGraphiteWithCache(seg, face, vms);
+        runGraphiteWithCache(seg);
         return;
     }
+    FiniteStateMachine fsm(*seg);
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -437,16 +457,20 @@ void Silf::runGraphite(GrSegment *seg, const GrFace *face, VMScratch *vms) const
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, vms);
+        m_passes[i].runGraphite(fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
-	    XmlTraceLog::get().closeElement(ElementRunPass);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementRunPass);
+        }
 #endif
     }
 }
 
-void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *vms) const
+void Silf::runGraphiteWithCache(GrSegment *seg) const
 {
+    FiniteStateMachine fsm(*seg);
     // run up to substitution pass, i.e. run the line break passes
     for (size_t i = 0; i < m_sPass; ++i)
     {
@@ -458,14 +482,14 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, vms);
+        m_passes[i].runGraphite(fsm);
 #ifndef DISABLE_TRACING
         seg->logSegment();
         XmlTraceLog::get().closeElement(ElementRunPass);
 #endif
     }
 
-    SegCache * segCache = m_segCacheStore->getOrCreate(face, seg->getFeatures(0));
+    SegCache * segCache = m_segCacheStore->getOrCreate(seg->getFeatures(0));
     // find where the segment can be broken
     Slot * subSegStartSlot = seg->first();
     Slot * subSegEndSlot = subSegStartSlot;
@@ -517,7 +541,7 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
 #endif
                 if (!entry)
                 {
-                    entry =runGraphiteOnSubSeg(segCache, seg, face, vms, cmapGlyphs,
+                    entry =runGraphiteOnSubSeg(segCache, seg, cmapGlyphs,
                                                subSegStartSlot, subSegEndSlot,
                                                subSegStart, i - subSegStart + 1);
                 }
@@ -544,14 +568,14 @@ void Silf::runGraphiteWithCache(GrSegment *seg, const GrFace *face, VMScratch *v
     }
 }
 
-SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg, const GrFace *face,
-                               VMScratch *vms, const uint16 * cmapGlyphs,
+SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg,
+                               const uint16 * cmapGlyphs,
                                Slot * startSlot, Slot * endSlot,
                                size_t offset, size_t length) const
 {
-
     //GrSegment subSeg(*seg, startSlot, offset, length);
     SegmentScopeState scopeState = seg->setScope(startSlot, endSlot, length);
+    FiniteStateMachine fsm(*seg);
     for (size_t i = m_sPass; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
@@ -562,7 +586,7 @@ SegCacheEntry * Silf::runGraphiteOnSubSeg(SegCache* cache, GrSegment *seg, const
         }
 #endif
         // test whether to reorder, prepare for positioning
-        m_passes[i].runGraphite(seg, face, vms);
+        m_passes[i].runGraphite(fsm);
 #ifndef DISABLE_TRACING
         seg->logSegment();
         XmlTraceLog::get().closeElement(ElementRunPass);

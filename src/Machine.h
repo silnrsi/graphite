@@ -51,7 +51,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef org::sil::graphite::v2::Slot * slotref;
+typedef gr2::Slot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
@@ -100,9 +100,9 @@ enum opcode {
     PUSH_PROC_STATE,                PUSH_VERSION,
     PUT_SUBS,                       PUT_SUBS2,          PUT_SUBS3,
     PUT_GLYPH,                      PUSH_GLYPH_ATTR,    PUSH_ATT_TO_GLYPH_ATTR,
-// private opcodes for internal use only, comes after any other on disk opcodes
-    TEMP_COPY,
-    MAX_OPCODE
+    MAX_OPCODE,
+    // private opcodes for internal use only, comes after all other on disk opcodes
+    TEMP_COPY = MAX_OPCODE
 };
 
 
@@ -119,13 +119,14 @@ public:
         finished = 0,
         stack_underflow,
         stack_not_empty,
-        stack_overflow
+        stack_overflow,
+        slot_offset_out_bounds
     };
    
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
                                   gr2::GrSegment & seg, slotref & islot_idx, int & count, int nPre,
-                                  status_t &status, int nMap, slotref * map, int &flags) HOT;
+                                  status_t &status, int nMap, slotref * map) HOT;
     CLASS_NEW_DELETE
 
 private:

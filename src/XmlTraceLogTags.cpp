@@ -73,6 +73,7 @@ const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
     XmlTraceLogTag("SegCache", GRLOG_CACHE),
     XmlTraceLogTag("SegCacheEntry", GRLOG_CACHE),
     XmlTraceLogTag("Glyph", GRLOG_CACHE),
+    XmlTraceLogTag("PassResult", GRLOG_OPCODE),
 
     XmlTraceLogTag("Error", GRLOG_ALL),
     XmlTraceLogTag("Warning", GRLOG_ALL)

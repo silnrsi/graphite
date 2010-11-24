@@ -45,7 +45,7 @@ public:
         if (m_caches) free(m_caches);
         m_caches = NULL;
     }
-    SegCache * getOrCreate(const GrFace * face, const Features & features)
+    SegCache * getOrCreate(const Features & features)
     {
         for (size_t i = 0; i < m_cacheCount; i++)
         {

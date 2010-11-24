@@ -26,64 +26,83 @@ using namespace org::sil::graphite::v2;
 
 extern "C" 
 {
-GRNG_EXPORT const Slot* next_slot_in_segment(const Slot* p/*not NULL*/)
+GRNG_EXPORT const Slot* slot_next_in_segment(const Slot* p/*not NULL*/)
 {
     return p->next();
 }
 
 
-GRNG_EXPORT unsigned short gid(const Slot* p/*not NULL*/)
+GRNG_EXPORT const Slot* slot_attached_to(const Slot* p/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
+{
+    return p->attachTo();
+}
+
+
+GRNG_EXPORT const Slot* slot_first_attachment(const Slot* p/*not NULL*/)        //returns NULL iff no attachments.
+{        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
+    return p->firstChild();
+}
+
+    
+GRNG_EXPORT const Slot* slot_next_sibling_attachment(const Slot* p/*not NULL*/)        //returns NULL iff no more attachments.
+{        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
+    return p->nextSibling();
+}
+
+
+GRNG_EXPORT unsigned short slot_gid(const Slot* p/*not NULL*/)
 {
     return p->gid();
 }
 
 
-GRNG_EXPORT float origin_X(const Slot* p/*not NULL*/)
+GRNG_EXPORT float slot_origin_X(const Slot* p/*not NULL*/)
 {
     return p->origin().x;
 }
 
 
-GRNG_EXPORT float origin_Y(const Slot* p/*not NULL*/)
+GRNG_EXPORT float slot_origin_Y(const Slot* p/*not NULL*/)
 {
     return p->origin().y;
 }
 
 
-GRNG_EXPORT float advance(const Slot* p/*not NULL*/, const GrFont *font)
+GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/, const GrFont *font)
 {
     return p->advance(font);
 }
 
 
-GRNG_EXPORT int before(const Slot* p/*not NULL*/)
+GRNG_EXPORT int slot_before(const Slot* p/*not NULL*/)
 {
     return p->before();
 }
 
 
-GRNG_EXPORT int after(const Slot* p/*not NULL*/)
+GRNG_EXPORT int slot_after(const Slot* p/*not NULL*/)
 {
     return p->after();
 }
 
 
-GRNG_EXPORT int get_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex)
+GRNG_EXPORT int slot_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex)
 {
     return p->getAttr(pSeg, index, subindex);
 }
 
 
-GRNG_EXPORT bool is_insert_before(const Slot* p/*not NULL*/)
+GRNG_EXPORT bool slot_is_insert_before(const Slot* p/*not NULL*/)
 {
     return p->isInsertBefore();
 }
 
 
-GRNG_EXPORT int original(const Slot* p/*not NULL*/)
+GRNG_EXPORT int slot_original(const Slot* p/*not NULL*/)
 {
     return p->original();
 }
+
 
 #if 0       //what should this be
 GRNG_EXPORT size_t id(const Slot* p/*not NULL*/)
@@ -91,11 +110,6 @@ GRNG_EXPORT size_t id(const Slot* p/*not NULL*/)
     return (size_t)p->id();
 }
 #endif
-
-GRNG_EXPORT size_t attached_to(const Slot* p/*not NULL*/)
-{
-    return (size_t)p->attachedTo();
-}
 
 
 }

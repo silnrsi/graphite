@@ -76,9 +76,8 @@
 
 #define push(n)             *++sp = n; TRACEPUSH(n)
 #define pop()               (*sp--)
-#define slotat(x)           (count + x < maxmap && count + x >= 0 ? map[count + x] : map[maxmap - 1])
+#define slotat(x)           (map[count + (x)])
 #define POSITIONED          1
-#define FLAGS_CHANGED       2
 
 STARTOP(nop)
     do {} while (0);
@@ -304,7 +303,6 @@ STARTOP(insert)
 //     map[count] = is;
 //     maxmap++;
     count--;
-    flags |= FLAGS_CHANGED;
 ENDOP
 
 STARTOP(delete_)
@@ -329,7 +327,6 @@ STARTOP(delete_)
 //        is = is->next();
     }
     seg.extendLength(-1);
-    flags |= FLAGS_CHANGED;
 ENDOP
 
 STARTOP(assoc)
@@ -353,13 +350,11 @@ ENDOP
 
 STARTOP(cntxt_item)
     // It turns out this is a cunningly disguised condition forward jump.
-    // TODO: Put checks for this one to avoid jumping off the end of the program.
     declare_params(3);    
     const int       is_arg = int8(param[0]);
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
-//    if (isb + is_arg != count) {
     if (isb + is_arg != count) {
         ip += iskip;
         dp += dskip;
@@ -428,18 +423,6 @@ STARTOP(push_slot_attr)
     push(res);
 ENDOP
 
-STARTOP(push_slot_attr_constrained)
-    declare_params(2);
-    const attrCode  	slat     = attrCode(uint8(param[0]));
-    const int           slot_ref = int8(param[1]);
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
-    {
-        seg.positionSlots(NULL, map[0], map[maxmap - 1]);
-        flags |= POSITIONED;
-    }
-    push(slotat(slot_ref)->getAttr(&seg, slat, 0));
-ENDOP
-
 STARTOP(push_glyph_attr_obs)
     declare_params(2);
     const unsigned int  glyph_attr = uint8(param[0]);
@@ -447,22 +430,7 @@ STARTOP(push_glyph_attr_obs)
     push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
 ENDOP
 
-STARTOP(push_glyph_attr_obs_constrained)
-    declare_params(2);
-    const unsigned int  glyph_attr = uint8(param[0]);
-    const int           slot_ref   = int8(param[1]);
-    push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
-ENDOP
-
 STARTOP(push_glyph_metric)
-    declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]);
-    const signed int    attr_level  = uint8(param[2]);
-    push(seg.getGlyphMetric(slotat(slot_ref), glyph_attr, attr_level));
-ENDOP
-
-STARTOP(push_glyph_metric_constrained)
     declare_params(3);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
@@ -478,24 +446,7 @@ STARTOP(push_feat)
     push(seg.getFeature(fid, feat));
 ENDOP
 
-STARTOP(push_feat_constrained)
-    declare_params(2);
-    const unsigned int  feat        = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]);
-    uint8 fid = seg.charinfo(slotat(slot_ref)->original())->fid();
-    push(seg.getFeature(fid, feat));
-ENDOP
-
 STARTOP(push_att_to_gattr_obs)
-    declare_params(2);
-    const unsigned int  glyph_attr  = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.glyphAttr(slot->gid(), glyph_attr));
-ENDOP
-
-STARTOP(push_att_to_gattr_obs_constrained)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
@@ -514,33 +465,9 @@ STARTOP(push_att_to_glyph_metric)
     push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
-STARTOP(push_att_to_glyph_metric_constrained)
-    declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]);
-    const int           slot_ref    = int8(param[1]);
-    const signed int    attr_level  = uint8(param[2]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
-ENDOP
-
 STARTOP(push_islot_attr)
     declare_params(3);
     const attrCode	slat     = attrCode(uint8(param[0]));
-    const int           slot_ref = int8(param[1]),
-                        idx      = uint8(param[2]);
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
-    {
-        seg.positionSlots(NULL, map[0], map[maxmap - 1]);
-        flags |= POSITIONED;
-    }
-    int res = slotat(slot_ref)->getAttr(&seg, slat, idx);
-    push(res);
-ENDOP
-
-STARTOP(push_islot_attr_constrained)
-    declare_params(3);
-    const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
     if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
@@ -651,25 +578,7 @@ STARTOP(push_glyph_attr)
     push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
 ENDOP
 
-STARTOP(push_glyph_attr_constrained)
-    declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]) << 8
-                                    | uint8(param[1]);
-    const int           slot_ref    = int8(param[2]);
-    push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
-ENDOP
-
 STARTOP(push_att_to_glyph_attr)
-    declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]) << 8
-                                    | uint8(param[1]);
-    const int           slot_ref    = int8(param[2]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.glyphAttr(slot->gid(), glyph_attr));
-ENDOP
-
-STARTOP(push_att_to_glyph_attr_constrained)
     declare_params(3);
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
@@ -687,6 +596,5 @@ STARTOP(temp_copy)
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->markCopied(true);
     map[count] = newSlot;
-    flags |= FLAGS_CHANGED;
 ENDOP
 

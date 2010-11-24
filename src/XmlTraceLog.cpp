@@ -209,7 +209,7 @@ void XmlTraceLog::warning(const char * msg, ...)
 
 extern "C"
 {
-bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
+bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
     logFile;			//pointless uses to avoid warnings re implementation not using parameters
@@ -225,7 +225,7 @@ bool startGraphiteLogging(FILE * logFile, GrLogMask mask)
 #endif		//!DISABLE_TRACING
 }
 
-void stopGraphiteLogging()
+void graphite_stop_logging()
 {
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::sLog && XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)

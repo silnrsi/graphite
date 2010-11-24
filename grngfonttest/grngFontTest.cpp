@@ -689,7 +689,7 @@ int Parameters::testFileFont() const
         // use the -trace option to specify a file
         //FILE * logFile = fopen("graphitengTrace.xml", "wb");
 #ifndef DISABLE_TRACING
-        startGraphiteLogging(trace, static_cast<gr2::GrLogMask>(mask));
+        gr2::graphite_start_logging(trace, static_cast<gr2::GrLogMask>(mask));
 #endif
 
         gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
@@ -710,7 +710,7 @@ int Parameters::testFileFont() const
             gr2::enable_segment_cache(face, 4096, 0);
         }
 
-        gr2::GrFont *sizedFont = gr2::make_GrFont(pointSize * dpi / 72, face);
+        gr2::GrFont *sizedFont = gr2::make_font(pointSize * dpi / 72, face);
         gr2::Features * featureList = NULL;
 #if 0
         layout.setStartOfLine(parameters.lineStart);
@@ -758,39 +758,39 @@ int Parameters::testFileFont() const
         if (features)
         {
             featureList = parseFeatures(face);
-            pSeg = gr2::make_GrSegment_using_features(sizedFont,
+            pSeg = gr2::make_seg_using_features(sizedFont,
                 face, 0, featureList, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         else
         {
-            pSeg = gr2::make_GrSegment(sizedFont, face, 0, textSrc.utfEncodingForm(),
+            pSeg = gr2::make_seg(sizedFont, face, 0, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((gr2::number_of_slots_in_segment(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = gr2::first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        size_t *map = (size_t*)malloc((gr2::seg_n_slots(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::Slot* slot = gr2::seg_first_slot(pSeg); slot; slot = gr2::slot_next_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (const gr2::Slot* slot = first_slot_in_segment(pSeg); slot; slot = next_slot_in_segment(slot), ++i)
+        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = slot_next_in_segment(slot), ++i)
         {
-            float orgX = origin_X(slot);
-            float orgY = origin_Y(slot);
+            float orgX = slot_origin_X(slot);
+            float orgY = slot_origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, gid(slot), lookup(map, attached_to(slot)),
-                    get_attr(slot, pSeg, gr2::kslatAttX, 0),
-                    get_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, is_insert_before(slot) ? 1 : 0,
-                    gr2::cinfo_break_weight(charInfo(pSeg, original(slot))), before(slot), after(slot));
+                    i, slot_gid(slot), lookup(map, (size_t)slot_attached_to(slot)),
+                    slot_attr(slot, pSeg, gr2::kslatAttX, 0),
+                    slot_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, slot_is_insert_before(slot) ? 1 : 0,
+                    gr2::cinfo_break_weight(seg_cinfo(pSeg, slot_original(slot))), slot_before(slot), slot_after(slot));
            
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[before(slot) + offset],
-                    pText32[after(slot) + offset]);
+                    pText32[slot_before(slot) + offset],
+                    pText32[slot_after(slot) + offset]);
             }
 #if 0
             if (parameters.justification)
@@ -817,13 +817,13 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = advance_X(pSeg);
+        float advanceWidth = seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         free(map);
-        gr2::destroy_GrSegment(pSeg);
+        gr2::destroy_seg(pSeg);
        }
         if (featureList) gr2::destroy_Features(featureList);
-        gr2::destroy_GrFont(sizedFont);
+        gr2::destroy_font(sizedFont);
         gr2::destroy_face(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
@@ -836,7 +836,7 @@ int Parameters::testFileFont() const
 //        returnCode = 5;
 //    }
 #ifndef DISABLE_TRACING
-    if (trace) gr2::stopGraphiteLogging();
+    if (trace) gr2::graphite_stop_logging();
 #endif
     return returnCode;
 }
@@ -870,6 +870,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
+        fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
         fprintf(stderr,"-cache\tEnable Segment Cache\n");
         return 1;
     }

@@ -28,6 +28,7 @@
 // opcodes) but is slower that the direct threaded interpreter by a factor of 2
 
 #include <cassert>
+#include <cstring>
 #include <graphiteng/Slot.h>
 #include "Machine.h"
 #include "GrSegmentImp.h"
@@ -100,8 +101,7 @@ Machine::stack_t  Machine::run(const instr   * program,
                                int             nPre,
                                status_t &      status,
                                int             nMap,
-                               slotref *       map,
-                               int &           flags)
+                               slotref *       map)
 {
     assert(program != 0);
 
@@ -118,7 +118,6 @@ Machine::stack_t  Machine::run(const instr   * program,
 
     check_final_stack(sp, status);
     islot_idx = reg.is;
-    flags = reg.flags;
     return ret;
 }
 

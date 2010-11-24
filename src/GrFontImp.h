@@ -32,9 +32,7 @@ const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be
 class GrFont
 {
 public:
-    GrFont(float ppm, const GrFace *face);
-private:
-    void initialize();
+    GrFont(float ppm, const GrFace *face/*needed for scaling*/);
 public:
     virtual ~GrFont();
     float advance(unsigned short glyphid) const {
@@ -49,12 +47,10 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    virtual float computeAdvance(unsigned short glyphid) const;
+    virtual float computeAdvance(unsigned short glyphid) const=0;
     
-private:
-    float m_scale;      // scales from design units to ppm
-    const GrFace *m_face;   // GrFace to get the rest of the info from
 protected:
+    float m_scale;      // scales from design units to ppm
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
     
 private:			//defensive on m_advances
@@ -62,10 +58,20 @@ private:			//defensive on m_advances
     GrFont& operator=(const GrFont&);
 };
 
+class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
+{
+public:
+    GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face);
+private:
+    virtual float computeAdvance(unsigned short glyphid) const;
+private:
+    const GrFace *m_face;   // GrFace to get the rest of the info from
+};
+
 class GrHintedFont : public GrFont
 {
 public:
-    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face);
+    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
     virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;

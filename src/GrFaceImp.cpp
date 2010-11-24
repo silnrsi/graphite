@@ -159,9 +159,7 @@ bool GrFace::readGraphite()
 
 void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const
 {
-    VMScratch vms;
-
-    aSilf->runGraphite(seg, this, &vms);
+    aSilf->runGraphite(seg);
 }
 
 const Silf *GrFace::chooseSilf(uint32 script) const

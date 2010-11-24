@@ -26,27 +26,6 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class CharCounter
-{
-public:
-      CharCounter()
-      :	  m_nCharsProcessed(0) 
-      {
-      }	  
-
-      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
-      {
-	  ++m_nCharsProcessed;
-	  return true;
-      }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      size_t m_nCharsProcessed ;
-};
-
-
 template <class LIMIT, class CHARPROCESSOR>
 size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
 {
@@ -102,120 +81,97 @@ static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint
 
 extern "C" 
 {
-GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, const void** pError)
+GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
+  if (buffer_end)
+  {
     BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounter counter;
+    CharCounterToNul counter;
     return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*as in stl i.e. don't use end*/, size_t maxCount, const void** pError)
-{
-    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
-    CharCounter counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_to_nul(encform enc, const void* buffer_begin, const void** pError)	//the nul is not in the count
-{
+  }
+  else
+  {
     NoLimit limit(enc, buffer_begin);
     CharCounterToNul counter;
     return doCountUnicodeCharacters(limit, &counter, pError);
+  }
 }
 
 
-GRNG_EXPORT size_t count_unicode_characters_to_nul_or_end(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, const void** pError)	//the nul is not in the count
-{
-    BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT size_t count_unicode_characters_to_nul_or_end_with_max_count(encform enc, const void* buffer_begin, const void* buffer_end/*don't go past end*/, size_t maxCount, const void** pError)	//the nul is not in the count
-{
-    BufferAndCharacterCountLimit limit(enc, buffer_begin, buffer_end, maxCount);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-}
-
-
-GRNG_EXPORT GrSegment* make_GrSegment(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
 {
     return makeAndInitialize(font, face, script, face->theFeatures().cloneFeatures(0/*0 means default*/), enc, pStart, nChars, dir);
 }
 
 
-GRNG_EXPORT GrSegment* make_GrSegment_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
     return makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
 }
 
 
-GRNG_EXPORT void destroy_GrSegment(GrSegment* p)
+GRNG_EXPORT void destroy_seg(GrSegment* p)
 {
     delete p;
 }
 
 
-GRNG_EXPORT float advance_X(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().x;
 }
 
 
-GRNG_EXPORT float advance_Y(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().y;
 }
 
 
-GRNG_EXPORT unsigned int number_of_CharInfo(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->charInfoCount();
 }
 
 
-GRNG_EXPORT const CharInfo* charInfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
+GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
     assert(pSeg);
     return pSeg->charinfo(index);
 }
 
-GRNG_EXPORT void runGraphite(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT void seg_run_graphite(GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->runGraphite();
 }
 
 
-GRNG_EXPORT void chooseSilf(GrSegment* pSeg/*not NULL*/, uint32 script)
+GRNG_EXPORT void seg_choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script)
 {
     assert(pSeg);
     return pSeg->chooseSilf(script);
 }
 
 
-GRNG_EXPORT unsigned int number_of_slots_in_segment(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->slotCount();
 }
 
 
-GRNG_EXPORT const Slot* first_slot_in_segment(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->first();
 }
 
 
-GRNG_EXPORT int addFeatures(GrSegment* pSeg/*not NULL*/, const Features* feats)
+GRNG_EXPORT int seg_add_features(GrSegment* pSeg/*not NULL*/, const Features* feats)
 {
     if (!feats)
     return -2;      //the smallest value that can normally be returned is -1

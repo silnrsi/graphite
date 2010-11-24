@@ -41,7 +41,7 @@ public:
     {
         if (m_grFace)
         {
-            m_grFont = gr2::make_GrFont(static_cast<float>(fontSize), m_grFace);
+            m_grFont = gr2::make_font(static_cast<float>(fontSize), m_grFace);
             if (cache > 0)
             {
                 gr2::enable_segment_cache(m_grFace, cache, 0);
@@ -50,7 +50,7 @@ public:
     }
     virtual ~GrNgRenderer()
     {
-        gr2::destroy_GrFont(m_grFont);
+        gr2::destroy_font(m_grFont);
         gr2::destroy_face(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
@@ -67,18 +67,21 @@ public:
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %ld\n", reinterpret_cast<const char*>(pError) - utf8);
-        gr2::GrSegment* pSeg = gr2::make_GrSegment(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
+        gr2::GrSegment* pSeg = gr2::make_seg(m_grFont, m_grFace, 0u, gr2::kutf8, utf8, numCodePoints, m_rtl);
         if (!pSeg) return;
-        RenderedLine * renderedLine = new(result) RenderedLine(gr2::number_of_slots_in_segment(pSeg), gr2::advance_X(pSeg));
+        RenderedLine * renderedLine = new(result) RenderedLine(gr2::seg_n_slots(pSeg),
+                                                               gr2::seg_advance_X(pSeg));
         int i = 0;
-        for (const gr2::Slot* s = gr2::first_slot_in_segment(pSeg); s; s = gr2::next_slot_in_segment(s), ++i)
-            (*renderedLine)[i].set(gr2::gid(s), gr2::origin_X(s), gr2::origin_Y(s), gr2::before(s), gr2::after(s));
+        for (const gr2::Slot* s = gr2::seg_first_slot(pSeg); s; s = gr2::slot_next_in_segment(s), ++i)
+            (*renderedLine)[i].set(gr2::slot_gid(s), gr2::slot_origin_X(s),
+                                   gr2::slot_origin_Y(s), gr2::slot_before(s),
+                                   gr2::slot_after(s));
         
 //         for (int i = 0; i < seg.length(); i++)
 //         {
 //             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
 //         }
-        gr2::destroy_GrSegment(pSeg);
+        gr2::destroy_seg(pSeg);
     }
     virtual const char * name() const { return "graphiteng"; }
 private:

@@ -73,21 +73,14 @@ static const opcode_t opcode_table[] =
     {{do_(attr_sub), NILOP},                        1, -1, "ATTR_SUB"},
     {{do_(attr_set_slot), NILOP},                   1, -1, "ATTR_SET_SLOT"},
     {{do_(iattr_set_slot), NILOP},                  2, -1, "IATTR_SET_SLOT"},
-    {{do_(push_slot_attr),
-      do_(push_slot_attr_constrained)},             2,  1, "PUSH_SLOT_ATTR"},
-    {{do_(push_glyph_attr_obs),
-      do_(push_glyph_attr_obs_constrained)},        2,  1, "PUSH_GLYPH_ATTR_OBS"},
-    {{do_(push_glyph_metric),
-      do_(push_glyph_metric_constrained)},          3,  1, "PUSH_GLYPH_METRIC"},
-    {{do_(push_feat),
-      do_(push_feat_constrained)},                  2,  1, "PUSH_FEAT"},
+    {{do2(push_slot_attr)},                         2,  1, "PUSH_SLOT_ATTR"},
+    {{do2(push_glyph_attr_obs)},                    2,  1, "PUSH_GLYPH_ATTR_OBS"},
+    {{do2(push_glyph_metric)},                      3,  1, "PUSH_GLYPH_METRIC"},
+    {{do2(push_feat)},                              2,  1, "PUSH_FEAT"},
 
-    {{do_(push_att_to_gattr_obs),
-      do_(push_att_to_gattr_obs_constrained)},      2,  1, "PUSH_ATT_TO_GATTR_OBS"},
-    {{do_(push_att_to_glyph_metric),
-      do_(push_att_to_glyph_metric_constrained)},   3,  1, "PUSH_ATT_TO_GLYPH_METRIC"},
-    {{do_(push_islot_attr),
-      do_(push_islot_attr_constrained)},            3,  1, "PUSH_ISLOT_ATTR"},
+    {{do2(push_att_to_gattr_obs)},                  2,  1, "PUSH_ATT_TO_GATTR_OBS"},
+    {{do2(push_att_to_glyph_metric)},               3,  1, "PUSH_ATT_TO_GLYPH_METRIC"},
+    {{do2(push_islot_attr)},                        3,  1, "PUSH_ISLOT_ATTR"},
 
     {{NILOP,NILOP},                                 3,  1, "PUSH_IGLYPH_ATTR"},
 
@@ -104,10 +97,9 @@ static const opcode_t opcode_table[] =
     {{NILOP,NILOP},                                 0,  0, "PUT_SUBS2"},
     {{NILOP,NILOP},                                 0,  0, "PUT_SUBS3"},
     {{do_(put_glyph), NILOP},                       2,  0, "PUT_GLYPH"},
-    {{do_(push_glyph_attr),
-      do_(push_glyph_attr_constrained)},            3,  1, "PUSH_GLYPH_ATTR"},
-    {{do_(push_att_to_glyph_attr),
-      do_(push_att_to_glyph_attr_constrained)},     3,  1, "PUSH_ATT_TO_GLYPH_ATTR"},
+    {{do2(push_glyph_attr)},                        3,  1, "PUSH_GLYPH_ATTR"},
+    {{do2(push_att_to_glyph_attr)},                 3,  1, "PUSH_ATT_TO_GLYPH_ATTR"},
+    // private internal private opcodes for internal use only, comes after all other on disk opcodes.
     {{do_(temp_copy), NILOP},                       0,  0, "TEMP_COPY"}
 };
 

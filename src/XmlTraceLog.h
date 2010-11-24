@@ -35,8 +35,8 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class XmlTraceLog
 {
-    friend bool startGraphiteLogging(FILE * logFile, GrLogMask mask);
-    friend void stopGraphiteLogging();
+    friend bool graphite_start_logging(FILE * logFile, GrLogMask mask);
+    friend void graphite_stop_logging();
 public:
     ~XmlTraceLog();
     bool active() { return (m_file != NULL); };

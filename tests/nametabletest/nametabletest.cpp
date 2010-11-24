@@ -131,26 +131,26 @@ void testLangId(void * data, size_t length, const char * id, gr2::uint16 expecte
 template <class T> T * toBigEndian(T & table)
 {
     T * bigEndian = gr2::gralloc<T>(1);
-    bigEndian->m_nameHeader.format = swap16(table.m_nameHeader.format);
-    bigEndian->m_nameHeader.count = swap16(table.m_nameHeader.count);
-    bigEndian->m_nameHeader.string_offset = swap16(table.m_nameHeader.string_offset);
+    bigEndian->m_nameHeader.format = gr2::swap16(table.m_nameHeader.format);
+    bigEndian->m_nameHeader.count = gr2::swap16(table.m_nameHeader.count);
+    bigEndian->m_nameHeader.string_offset = gr2::swap16(table.m_nameHeader.string_offset);
 
     for (gr2::uint16 i = 0; i < table.m_nameHeader.count; i++)
     {
-        bigEndian->m_records[i].platform_id = swap16(table.m_records[i].platform_id);
-        bigEndian->m_records[i].platform_specific_id = swap16(table.m_records[i].platform_specific_id);
-        bigEndian->m_records[i].language_id = swap16(table.m_records[i].language_id);
-        bigEndian->m_records[i].name_id = swap16(table.m_records[i].name_id);
-        bigEndian->m_records[i].length = swap16(table.m_records[i].length);
-        bigEndian->m_records[i].offset = swap16(table.m_records[i].offset);
+        bigEndian->m_records[i].platform_id = gr2::swap16(table.m_records[i].platform_id);
+        bigEndian->m_records[i].platform_specific_id = gr2::swap16(table.m_records[i].platform_specific_id);
+        bigEndian->m_records[i].language_id = gr2::swap16(table.m_records[i].language_id);
+        bigEndian->m_records[i].name_id = gr2::swap16(table.m_records[i].name_id);
+        bigEndian->m_records[i].length = gr2::swap16(table.m_records[i].length);
+        bigEndian->m_records[i].offset = gr2::swap16(table.m_records[i].offset);
     }
 
-    bigEndian->m_nameHeader.name_record[0].platform_id = swap16(table.m_nameHeader.name_record[0].platform_id);
-    bigEndian->m_nameHeader.name_record[0].platform_specific_id = swap16(table.m_nameHeader.name_record[0].platform_specific_id);
-    bigEndian->m_nameHeader.name_record[0].language_id = swap16(table.m_nameHeader.name_record[0].language_id);
-    bigEndian->m_nameHeader.name_record[0].name_id = swap16(table.m_nameHeader.name_record[0].name_id);
-    bigEndian->m_nameHeader.name_record[0].length = swap16(table.m_nameHeader.name_record[0].length);
-    bigEndian->m_nameHeader.name_record[0].offset = swap16(table.m_nameHeader.name_record[0].offset);
+    bigEndian->m_nameHeader.name_record[0].platform_id = gr2::swap16(table.m_nameHeader.name_record[0].platform_id);
+    bigEndian->m_nameHeader.name_record[0].platform_specific_id = gr2::swap16(table.m_nameHeader.name_record[0].platform_specific_id);
+    bigEndian->m_nameHeader.name_record[0].language_id = gr2::swap16(table.m_nameHeader.name_record[0].language_id);
+    bigEndian->m_nameHeader.name_record[0].name_id = gr2::swap16(table.m_nameHeader.name_record[0].name_id);
+    bigEndian->m_nameHeader.name_record[0].length = gr2::swap16(table.m_nameHeader.name_record[0].length);
+    bigEndian->m_nameHeader.name_record[0].offset = gr2::swap16(table.m_nameHeader.name_record[0].offset);
     
     memcpy(bigEndian->m_textData, table.m_textData, sizeof(T::m_textData) );
     return bigEndian;
@@ -159,11 +159,11 @@ template <class T> T * toBigEndian(T & table)
 template <class T> T * toBigEndian1(T & table)
 {
     T * bigEndian = toBigEndian<T>(table);
-    bigEndian->m_langTagCount = swap16(table.m_langTagCount);
+    bigEndian->m_langTagCount = gr2::swap16(table.m_langTagCount);
     for (size_t i = 0; i < table.m_langTagCount; i++)
     {
-        bigEndian->m_languages[i] = swap16(table.m_languages[i]);
-        bigEndian->m_languages[i] = swap16(table.m_languages[i]);
+        bigEndian->m_languages[i] = gr2::swap16(table.m_languages[i]);
+        bigEndian->m_languages[i] = gr2::swap16(table.m_languages[i]);
     }
 }
 
