@@ -36,12 +36,12 @@ using namespace org::sil::graphite::v2;
 bool FeatureMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     if (!readFeats(appFaceHandle, getTable)) return false;
+    if (!createSortedFeatureList()) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
-    createSortedFeatureList();
     return true;
 }
 
-void FeatureMap::createSortedFeatureList()
+bool FeatureMap::createSortedFeatureList()
 {
     // create a list of the indices of the features in the font sorted by feature ID
     m_sortedIndexes = gralloc<uint16>(m_numFeats);
@@ -77,6 +77,11 @@ void FeatureMap::createSortedFeatureList()
         }
         m_searchIndex -= 1;
     }
+    else
+    {
+        return false;
+    }
+    return true;
 }
 
 bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
@@ -248,39 +253,30 @@ bool FeatureMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn ge
 
 const FeatureRef *FeatureMap::featureRef(uint32 name) const
 {
-    if (m_sortedIndexes)
+    assert (m_sortedIndexes);
+    uint16 i = m_searchIndex;
+    int16 step = (m_searchIndex + 1) >> 1;
+    do
     {
-        uint16 i = m_searchIndex;
-        int16 step = (m_searchIndex + 1) >> 1;
-        do
+        size_t featIndex = m_sortedIndexes[i];
+        if (i >= m_numFeats || m_feats[featIndex].getId() > name)
         {
-            size_t featIndex = m_sortedIndexes[i];
-            if (i >= m_numFeats || m_feats[featIndex].getId() > name)
-            {
-                if (step == 0) return NULL;
-                i -= step;
-                step >>= 1;
-            }
-            else if (m_feats[featIndex].getId() < name)
-            {
-                if (step == 0) return NULL;
-                i += step;
-                step >>= 1;
-            }
-            else
-            {
-                return &(m_feats[featIndex]);
-            }
-        } while (true);
-    }
-    else
-    {
-        for (size_t i = 0; i < m_numFeats; i++)
-        {
-            if (m_feats[i].getId() == name)
-                return &(m_feats[i]);
+            if (step == 0) return NULL;
+            i -= step;
+            step >>= 1;
         }
-    }
+        else if (m_feats[featIndex].getId() < name)
+        {
+            if (step == 0) return NULL;
+            i += step;
+            step >>= 1;
+        }
+        else
+        {
+            return &(m_feats[featIndex]);
+        }
+    } while (true);
+
     return NULL;
 }
 

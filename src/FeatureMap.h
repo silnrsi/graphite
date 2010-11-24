@@ -127,7 +127,7 @@ public:
     bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    void createSortedFeatureList(); // public for testing purposes
+    bool createSortedFeatureList(); // public for testing purposes
     const FeatureRef *featureRef(uint32 name) const;
     FeatureRef *feature(uint8 index) const { return m_feats + index; }
     FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
