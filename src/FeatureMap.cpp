@@ -27,9 +27,12 @@
 #include "graphiteng/GrFace.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
+#include <algorithm>
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
+
+//#define IMP_FIND_BY_NAME
 
 using namespace org::sil::graphite::v2;
 
@@ -146,6 +149,11 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     m_defaultFeatures = new Features(currIndex + 1, this);
     for (int i = 0; i < m_numFeats; i++)
 	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+    
+    free(defVals);
+#ifdef IMP_FIND_BY_NAME
+    std::sort(m_feats, m_feats+m_numFeats);
+#endif      //IMP_FIND_BY_NAME
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -184,7 +192,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const FeatureRef* pRef = m_FeatureMap.featureRef(name);
+	    const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
 	    if (pRef)
 		pRef->applyValToFeature(val, feats);
  	}
@@ -198,6 +206,16 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
 
 const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
+#ifdef IMP_FIND_BY_NAME
+    FeatureRef target(name);
+    FeatureRef* it = std::lower_bound(m_feats, m_feats+m_numFeats, target);
+    if (it==m_feats+m_numFeats)
+      return NULL;
+    if (it->name()!=name)
+      return NULL;
+    return it;
+#endif      //IMP_FIND_BY_NAME
+
     // TODO reimplement without MAP (nothing is currently put int the map anyway!)
 //    std::map<uint32, byte>::iterator res = m_map.find(name);
 //    return res == m_map.end() ? NULL : m_feats + res->second;

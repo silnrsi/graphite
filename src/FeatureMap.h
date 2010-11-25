@@ -36,6 +36,7 @@ class FeatureRef
 {
 public:
     FeatureRef() : m_pMap(NULL) {}
+    FeatureRef(uint32 name2) : m_pMap(NULL), m_name(name2) {}
     FeatureRef(byte bits, byte index, uint32 mask, uint16 max, const FeatureMap* pMap/*not NULL*/, uint32 name2 /*, uint16 flags=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL*/) throw() 
       : m_mask(mask), m_bits(bits), m_index(index), m_max(max), m_pMap(pMap), m_name(name2)
       /*,
@@ -80,6 +81,9 @@ public:
     uint32 name() const { return m_name; }
     uint16 maxVal() const { return m_max; }
     
+    bool operator<(const FeatureRef& rhs) const //orders by m_name
+        {   return m_name<rhs.m_name; }
+    
 private:
     uint32 m_mask;              // bit mask to get the value from the vector
     uint16 m_max;               // max value the value can take
@@ -114,7 +118,7 @@ friend class SillMap;
 //    std::map<uint32, byte> m_map;
 //    std::map<uint32, Features *>m_langMap;
 
-    FeatureRef *m_feats;                //owned
+    FeatureRef *m_feats;                //owned         //ordered by name
     Features* m_defaultFeatures;        //owned
     
 private:		//defensive on m_feats
