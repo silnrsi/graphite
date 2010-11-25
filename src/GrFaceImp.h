@@ -110,15 +110,13 @@ private:        //defensive
 };
 
 
-
-
 class GrFace
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
-    void runGraphite(GrSegment *seg, const Silf *silf) const;
+    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
@@ -126,7 +124,7 @@ public:
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
         m_cmapCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL),
         m_pNames(NULL) {}
-    ~GrFace();
+    virtual ~GrFace();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
     const Rect &theBBoxTemporary(uint16 gid) const { return m_pGlyphFaceCache->glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
@@ -151,7 +149,6 @@ public:
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
     void takeFileFace(FileFace* pFileFace/*takes ownership*/);
-    void enableSegmentCache(size_t maxSegments, uint32 flags);
     CmapCache * getCmapCache() const { return m_cmapCache; };
     NameTable * nameTable() const;
 
@@ -167,15 +164,33 @@ private:
     mutable GlyphFaceCache* m_pGlyphFaceCache;      //owned - never NULL
     mutable CmapCache* m_cmapCache; // cmap cache if available
     unsigned short m_upem;          // design units per em
+protected:
     unsigned short m_numSilf;       // number of silf subtables in the silf table
     Silf *m_silfs;                   // silf subtables.
+private:
     SillMap m_Sill;
     FileFace* m_pFileFace;      //owned
     mutable NameTable* m_pNames;
     
-private:		//defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
+private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     GrFace(const GrFace&);
     GrFace& operator=(const GrFace&);
+};
+
+class SegCacheStore;
+
+class CachedGrFace : public GrFace
+{
+public:
+    CachedGrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) :
+        GrFace(appFaceHandle, getTable2),
+        m_cacheStore(NULL) {};
+    bool setupCache(unsigned int cacheSize);
+    virtual ~CachedGrFace();
+    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
+    SegCacheStore * cacheStore() { return m_cacheStore; }
+private:
+    SegCacheStore * m_cacheStore;
 };
 
 }}}} // namespace

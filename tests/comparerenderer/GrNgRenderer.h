@@ -36,16 +36,14 @@ class GrNgRenderer : public Renderer
 public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_rtl(textDir),
-        m_grFace(gr2::make_file_face(fontFile, gr2::ePreloadWithCmap)),
+        m_grFace((cache == 0)?
+            gr2::make_file_face(fontFile, gr2::ePreloadWithCmap):
+            gr2::make_file_face_with_seg_cache(fontFile, gr2::ePreloadWithCmap, cache)),
         m_grFont(0)
     {
         if (m_grFace)
         {
             m_grFont = gr2::make_font(static_cast<float>(fontSize), m_grFace);
-            if (cache > 0)
-            {
-                gr2::enable_segment_cache(m_grFace, cache, 0);
-            }
         }
     }
     virtual ~GrNgRenderer()

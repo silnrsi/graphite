@@ -56,6 +56,7 @@ typedef std::vector<uint16 *> AttributeRope;
 class SegmentScopeState;
 class GrFace;
 class GrSegment;
+class SegCacheEntry;
 
 class SegmentScopeState
 {

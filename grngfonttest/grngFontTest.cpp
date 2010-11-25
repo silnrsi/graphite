@@ -691,7 +691,12 @@ int Parameters::testFileFont() const
         gr2::graphite_start_logging(trace, static_cast<gr2::GrLogMask>(mask));
 #endif
 
-        gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
+        gr2::GrFace *face = NULL;
+        if (enableCache)
+            face = gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 1000);
+        else
+            face = gr2::make_file_face(fileName, gr2::ePreload);
+
         if (!face)
         {
             fprintf(stderr, "Invalid font, failed to read or parse tables\n");
@@ -703,11 +708,6 @@ int Parameters::testFileFont() const
             gr2::destroy_face(face);
             gr2::graphite_stop_logging();
             return 0;
-        }
-
-        if (enableCache)
-        {
-            gr2::enable_segment_cache(face, 4096, 0);
         }
 
         gr2::GrFont *sizedFont = gr2::make_font(pointSize * dpi / 72, face);

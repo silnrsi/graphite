@@ -56,10 +56,10 @@ private:
     size_t m_pos;
 };
 
-bool checkEntries(const GrFace * face, const char * testString, uint16 * glyphString, size_t testLength)
+bool checkEntries(CachedGrFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
     Features * defaultFeatures = face_features_for_lang(face, 0);
-    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(*defaultFeatures);
+    SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
     {
@@ -127,13 +127,13 @@ int main(int argc, char ** argv)
     }
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::graphite_start_logging(log, GRLOG_SEGMENT);
-    gr2::GrFace *face = gr2::make_file_face(fileName, gr2::ePreload);
+    gr2::CachedGrFace *face = reinterpret_cast<gr2::CachedGrFace*>
+        (gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 4000));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
-    gr2::enable_segment_cache(face, 4096, 0);
     gr2::GrFont *sizedFont = gr2::make_font(12, face);
     const void * badUtf8 = NULL;
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
@@ -161,7 +161,7 @@ int main(int argc, char ** argv)
             return -1;
     }
     Features * defaultFeatures = face_features_for_lang(face, 0);
-    SegCache * segCache = face->silf(0)->segmentCacheStore()->getOrCreate(*defaultFeatures);
+    SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     size_t segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 16)
