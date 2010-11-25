@@ -32,7 +32,6 @@
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
-//#define IMP_FIND_BY_NAME
 
 using namespace org::sil::graphite::v2;
 
@@ -62,6 +61,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     if (m_numFeats)
     {
     m_feats = new FeatureRef[m_numFeats];
+    m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
     }
     byte currIndex = 0;
@@ -150,12 +150,14 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     }
     m_defaultFeatures = new Features(currIndex + 1, this);
     for (int i = 0; i < m_numFeats; i++)
+    {
 	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+    m_pNamedFeats[i] = m_feats+i;
+    }
     
     free(defVals);
-#ifdef IMP_FIND_BY_NAME
-    std::sort(m_feats, m_feats+m_numFeats);
-#endif      //IMP_FIND_BY_NAME
+
+    std::sort(m_pNamedFeats, m_pNamedFeats+m_numFeats);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -208,20 +210,13 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
 
 const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
-#ifdef IMP_FIND_BY_NAME
-    FeatureRef target(name);
-    FeatureRef* it = std::lower_bound(m_feats, m_feats+m_numFeats, target);
-    if (it==m_feats+m_numFeats)
+    NameAndFeatureRef target(name);
+    NameAndFeatureRef* it = std::lower_bound(m_pNamedFeats, m_pNamedFeats+m_numFeats, target);
+    if (it==m_pNamedFeats+m_numFeats)
       return NULL;
-    if (it->name()!=name)
+    if (it->m_name!=name)
       return NULL;
-    return it;
-#endif      //IMP_FIND_BY_NAME
-
-    // TODO reimplement without MAP (nothing is currently put int the map anyway!)
-//    std::map<uint32, byte>::iterator res = m_map.find(name);
-//    return res == m_map.end() ? NULL : m_feats + res->second;
-    return NULL;
+    return it->m_pFRef;
 }
 
 Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const

@@ -80,10 +80,7 @@ public:
     
     uint32 name() const { return m_name; }
     uint16 maxVal() const { return m_max; }
-    
-    bool operator<(const FeatureRef& rhs) const //orders by m_name
-        {   return m_name<rhs.m_name; }
-    
+       
 private:
     uint32 m_mask;              // bit mask to get the value from the vector
     uint16 m_max;               // max value the value can take
@@ -99,12 +96,28 @@ private:
 #endif
 };
 
-    
+
+class NameAndFeatureRef
+{
+  public:
+    NameAndFeatureRef() {}
+    NameAndFeatureRef(uint32 name) : m_name(name) {}
+    NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->name()), m_pFRef(p) {}
+
+    bool operator<(const NameAndFeatureRef& rhs) const //orders by m_name
+        {   return m_name<rhs.m_name; }
+
+    CLASS_NEW_DELETE
+ 
+    uint32 m_name;
+    const FeatureRef* m_pFRef;
+};
+
 class FeatureMap
 {
 public:
-    FeatureMap() : m_feats(NULL), m_defaultFeatures(NULL) {}
-    ~FeatureMap() { delete[] m_feats; delete m_defaultFeatures; }
+    FeatureMap() : m_feats(NULL), m_pNamedFeats(NULL), m_defaultFeatures(NULL) {}
+    ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
     
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     const FeatureRef *findFeatureRef(uint32 name) const;
@@ -118,10 +131,11 @@ friend class SillMap;
 //    std::map<uint32, byte> m_map;
 //    std::map<uint32, Features *>m_langMap;
 
-    FeatureRef *m_feats;                //owned         //ordered by name
+    FeatureRef *m_feats;                //owned
+    NameAndFeatureRef* m_pNamedFeats;   //owned
     Features* m_defaultFeatures;        //owned
     
-private:		//defensive on m_feats
+private:		//defensive on m_feats, m_pNamedFeats, and m_defaultFeatures
     FeatureMap(const FeatureMap&);
     FeatureMap& operator=(const FeatureMap&);
 };
