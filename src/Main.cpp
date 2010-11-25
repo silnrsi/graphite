@@ -30,11 +30,6 @@
 
 // define a few basic functions to save using libstdc++
 
-extern "C" __attribute__ ((visibility("internal"))) void __cxa_pure_virtual()
-{
-    assert(false);
-}
-
 // declaration in c++/x.y/bits/functexcept.h
 namespace std
 {

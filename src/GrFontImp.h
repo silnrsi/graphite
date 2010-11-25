@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
+#include <cassert>
 #include "graphiteng/GrFont.h"
 #include "Main.h"
 #include "GrFaceImp.h"
@@ -47,7 +47,7 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    virtual float computeAdvance(unsigned short glyphid) const=0;
+    virtual float computeAdvance(unsigned short glyphid) const { assert(false); return .0f; };
     
 protected:
     float m_scale;      // scales from design units to ppm

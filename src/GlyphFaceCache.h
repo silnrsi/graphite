@@ -63,9 +63,9 @@ public:
 
     GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr), m_nAccesses(0), m_nLoads(0) {}
     virtual ~GlyphFaceCache() {}
-    
-    virtual EGlyphCacheStrategy getEnum() const = 0 ;
-    virtual const GlyphFace *glyph(unsigned short glyphid) const = 0 ;      //result may be changed by subsequent call with a different glyphid
+
+    virtual EGlyphCacheStrategy getEnum() const { assert(false); return eOneCache; };
+    virtual const GlyphFace *glyph(unsigned short glyphid) const { assert(false); return NULL; };      //result may be changed by subsequent call with a different glyphid
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
