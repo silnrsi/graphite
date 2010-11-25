@@ -204,6 +204,18 @@ extern "C"
         return pRef;
     }
 
+
+    GRNG_EXPORT const FeatureRef* face_find_fref(const GrFace* pFace, uint32 name)  //returns NULL if not found. The FeatureRef is owned by the face
+    {
+        const FeatureRef* pRef = pFace->theSill().theFeatureMap().findFeatureRef(name);
+        return pRef;
+    }
+
+
+
+
+
+
  #if 0      //hidden since no way to release atm.
  
     GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)
