@@ -59,10 +59,13 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     read16(pFeat);
     read32(pFeat);
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
+    if (m_numFeats)
+    {
     m_feats = new FeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
+    }
     byte currIndex = 0;
-    byte currBits = 0;
+    byte currBits = 0;     //to cause overflow on first Feature
 
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
@@ -135,11 +138,10 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
                 {
                     currIndex++;
                     currBits = 0;
-		    mask = 2;
                 }
-                currBits += bits;
                 ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, maxVal, this, name/*, flags, uiName, numSet, uiSet*/);
-                break;
+                currBits += bits;
+               break;
             }
         }
 #ifndef DISABLE_TRACING
