@@ -32,7 +32,8 @@ GRNG_EXPORT Features* features_clone(const Features* pfeatures/*may be NULL*/)
     return new Features;
 }
 
-
+#if 0
+//not public since there is no public way of making the mask
 GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, const Features* pMask)    //returns false iff any of the Features* are NULL
 {
     if (!pSrc)
@@ -45,7 +46,7 @@ GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, cons
     pSrc->maskedOr(*pOther, *pMask);
     return true;
 }
- 
+#endif 
   
 GRNG_EXPORT void features_destroy(Features *p)
 {
