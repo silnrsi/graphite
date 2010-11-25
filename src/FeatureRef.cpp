@@ -26,44 +26,39 @@ using namespace org::sil::graphite::v2;
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-  return new FeatureRef(bits, index, mask);
-}
-
-
-GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-    if (pfeatureref)
-    return new FeatureRef(*pfeatureref);
-    else
-    return NULL;
-}
-
-
-GRNG_EXPORT void apply_value_to_feature(uint16 val, FeatureRef* pRef, Features* pDest)
+GRNG_EXPORT uint32 fref_name(const FeatureRef* pfeatureref)    //returns 0 if pointer is NULL
 {
-    if (!pRef)
-    return;
-    if (!pDest)
-    return;
-    
-    pRef->applyValToFeature(val, pDest);
+  if (!pfeatureref)
+    return 0;
+  
+  return pfeatureref->name();
 }
 
 
-GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, Features* pDest)
+GRNG_EXPORT uint16 fref_max_value(const FeatureRef* pfeatureref)    //returns 0 if pointer is NULL
+{
+  if (!pfeatureref)
+    return 0;
+  
+  return pfeatureref->maxVal();
+}
+
+
+  
+  
+  
+GRNG_EXPORT bool fref_set_feature_value(const FeatureRef* pfeatureref, uint16 val, Features* pDest)
 {
     if (!pfeatureref)
-    return;
+    return false;
     if (!pDest)
-    return;
+    return false;
     
-    pfeatureref->maskFeature(pDest);
+    return pfeatureref->applyValToFeature(val, pDest);
 }
 
 
-GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
+GRNG_EXPORT uint16 fref_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
@@ -74,10 +69,6 @@ GRNG_EXPORT uint16 get_feature_value(const FeatureRef*pfeatureref, const Feature
 }
 
 
-GRNG_EXPORT void destroy_FeatureRef(FeatureRef *p)
-{
-    delete p;
-}
 
 
 

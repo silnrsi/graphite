@@ -192,13 +192,16 @@ extern "C"
     }
 
 
-    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT uint8 face_n_fref(const GrFace* pFace)
     {
-        const FeatureRef* pRef = pFace->feature(index);
-        if (!pRef)
-            return NULL;
+        return pFace->theSill().theFeatureMap().numFeats();
+    }
 
-        return new FeatureRef(*pRef);
+
+    GRNG_EXPORT const FeatureRef* face_fref(const GrFace* pFace, uint8 index/*<face_n_fref*/)  //the FeatureRef is owned by the face
+    {
+        const FeatureRef* pRef = pFace->theSill().theFeatureMap().featureRef(index);
+        return pRef;
     }
 
  #if 0      //hidden since no way to release atm.
@@ -243,19 +246,19 @@ extern "C"
     }
 
 
-    GRNG_EXPORT unsigned short face_num_glyphs(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numGlyphs();
     }
 
 
-    GRNG_EXPORT unsigned long face_num_glyph_accesses(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_n_glyph_accesses(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numAccesses();
     }
 
 
-    GRNG_EXPORT unsigned long face_num_glyph_loads(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_n_glyph_loads(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numLoads();
     }

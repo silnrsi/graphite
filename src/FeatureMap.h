@@ -30,22 +30,34 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
+class FeatureMap;
+
 class FeatureRef
 {
 public:
-    FeatureRef(byte bits=0, byte index=0, uint32 mask=0, uint16 flags=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL) throw() 
-      : m_mask(mask), m_bits(bits), m_index(index), m_max(mask >> bits),
-      m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
+    FeatureRef() : m_pMap(NULL) {}
+    FeatureRef(byte bits, byte index, uint32 mask, uint16 max, const FeatureMap* pMap/*not NULL*/, uint32 name2 /*, uint16 flags=0, uint16 uiName=0, uint16 numSet=0, uint16 *uiNames=NULL*/) throw() 
+      : m_mask(mask), m_bits(bits), m_index(index), m_max(max), m_pMap(pMap), m_name(name2)
+      /*,
+      m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames)*/ {}
     ~FeatureRef() {
-        free(m_nameValues);
-        m_nameValues = NULL;
+//        free(m_nameValues);
+//        m_nameValues = NULL;
     }
-    void applyValToFeature(uint16 val, Features* pDest) const { 
-        if (m_index < pDest->m_length && val <= m_max)
+    bool applyValToFeature(uint16 val, Features* pDest) const { 
+        if (val>m_max)
+          return false;
+        if (pDest->m_pMap==NULL)
+          pDest->m_pMap = m_pMap;
+        else
+          if (pDest->m_pMap!=m_pMap)
+            return false;       //incompatible
+        pDest->grow(m_index);
         {
             pDest->m_vec[m_index] &= ~m_mask;
             pDest->m_vec[m_index] |= (val << m_bits);
         }
+        return true;
     }
     void maskFeature(Features* pDest) const { 
 	if (m_index < pDest->m_length) 				//defensive
@@ -53,7 +65,7 @@ public:
     }
 
     uint16 getFeatureVal(const Features& feats) const { 
-	if (m_index < feats.m_length) 
+	if (m_index < feats.m_length && m_pMap==feats.m_pMap) 
 	    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
 	else 
 	    return 0; 
@@ -64,15 +76,23 @@ public:
 //     }
 
     CLASS_NEW_DELETE
+    
+    uint32 name() const { return m_name; }
+    uint16 maxVal() const { return m_max; }
+    
 private:
     uint32 m_mask;              // bit mask to get the value from the vector
     uint16 m_max;               // max value the value can take
     byte m_bits;                // how many bits to shift the value into place
     byte m_index;               // index into the Features::m_vec array to find the ulong to mask
+    const FeatureMap* m_pMap;   //not NULL
+    uint32 m_name;
+#if 0
     uint16 m_nameid;            // Name table id for feature name
     uint16 *m_nameValues;       // array of name table ids for feature values
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
+#endif
 };
 
     
@@ -83,9 +103,10 @@ public:
     ~FeatureMap() { delete[] m_feats; delete m_defaultFeatures; }
     
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    const FeatureRef *featureRef(uint32 name);
-    FeatureRef *feature(uint8 index) const { return m_feats + index; }
-    FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
+    const FeatureRef *findFeatureRef(uint32 name) const;
+    //FeatureRef *feature(uint8 index) const { return m_feats + index; }
+    const FeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
+    byte numFeats() const { return m_numFeats;}
     CLASS_NEW_DELETE
 private:
 friend class SillMap;
@@ -93,7 +114,7 @@ friend class SillMap;
 //    std::map<uint32, byte> m_map;
 //    std::map<uint32, Features *>m_langMap;
 
-    FeatureRef *m_feats;
+    FeatureRef *m_feats;                //owned
     Features* m_defaultFeatures;        //owned
     
 private:		//defensive on m_feats
@@ -123,6 +144,9 @@ public:
     bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    
+    const FeatureMap& theFeatureMap() const { return m_FeatureMap; }
+ 
 
 private:
 friend class GrFace;

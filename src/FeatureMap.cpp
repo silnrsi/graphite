@@ -135,7 +135,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
 		    mask = 2;
                 }
                 currBits += bits;
-                ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, flags, uiName, numSet, uiSet);
+                ::new (m_feats + i) FeatureRef(currBits, currIndex, (mask - 1) << currBits, maxVal, this, name/*, flags, uiName, numSet, uiSet*/);
                 break;
             }
         }
@@ -143,7 +143,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     XmlTraceLog::get().closeElement(ElementFeature);
 #endif
     }
-    m_defaultFeatures = new Features(currIndex + 1);
+    m_defaultFeatures = new Features(currIndex + 1, this);
     for (int i = 0; i < m_numFeats; i++)
 	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
 
@@ -196,7 +196,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
     return true;
 }
 
-const FeatureRef *FeatureMap::featureRef(uint32 name)
+const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
     // TODO reimplement without MAP (nothing is currently put int the map anyway!)
 //    std::map<uint32, byte>::iterator res = m_map.find(name);

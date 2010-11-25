@@ -141,7 +141,6 @@ public:
     bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
-    const FeatureRef *feature(uint8 index) const { return m_Sill.m_FeatureMap.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
