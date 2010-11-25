@@ -56,7 +56,7 @@ public:
         pDest->grow(m_index);
         {
             pDest->m_vec[m_index] &= ~m_mask;
-            pDest->m_vec[m_index] |= (val << m_bits);
+            pDest->m_vec[m_index] |= (uint32(val) << m_bits);
         }
         return true;
     }
