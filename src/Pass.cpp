@@ -178,6 +178,12 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
     if (!r->action || !r->constraint)  
       return false;
+
+    if (!r->constraint->immutable()
+        || r->action->status() != Code::loaded
+        || r->constraint->status() != Code::loaded)
+      return false;
+    
     logRule(r, sort_key);
   }
   
