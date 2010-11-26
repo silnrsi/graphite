@@ -36,6 +36,8 @@ public:
     int fid() const { return m_featureid; }
     int breakWeight() const { return m_break; }
     void breakWeight(int val) { m_break = val; }
+    int glyphBefore() const { return m_before; }
+    int glyphAfter() const { return m_after; }
 
     CLASS_NEW_DELETE
 private:

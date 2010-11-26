@@ -426,14 +426,15 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 numPassesToRun) const
+void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
     SlotMap map(*seg);
     FiniteStateMachine fsm(map);
     vm::Machine        m(map);
-
-    for (size_t i = firstPass; i < numPassesToRun; ++i)
+    if (lastPass == 0)
+        lastPass = m_numPasses;
+    for (size_t i = firstPass; i < lastPass; ++i)
     {
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
