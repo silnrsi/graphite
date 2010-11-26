@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
+#include <cassert>
 #include "graphiteng/GrFont.h"
 #include "Main.h"
 #include "GrFaceImp.h"
@@ -43,10 +43,11 @@ public:
 //    Position scale(const Position& p) const { return Position(m_scale * p.x, m_scale * p.y); }
 //    float scale(float p) const { return m_scale * p; }
     float scale() const { return m_scale; }
+    virtual bool isHinted() const { return false; }
 
     CLASS_NEW_DELETE
 private:
-    virtual float computeAdvance(unsigned short glyphid) const=0;
+    virtual float computeAdvance(unsigned short glyphid) const { assert(false); return .0f; };
     
 protected:
     float m_scale;      // scales from design units to ppm
@@ -56,7 +57,6 @@ private:			//defensive on m_advances
     GrFont(const GrFont&);
     GrFont& operator=(const GrFont&);
 };
-
 
 class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
 {
@@ -68,12 +68,11 @@ private:
     const GrFace *m_face;   // GrFace to get the rest of the info from
 };
 
-
 class GrHintedFont : public GrFont
 {
 public:
-   GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
-
+    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
+    virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 

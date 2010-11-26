@@ -63,9 +63,9 @@ public:
 
     GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr), m_nAccesses(0), m_nLoads(0) {}
     virtual ~GlyphFaceCache() {}
-    
-    virtual EGlyphCacheStrategy getEnum() const = 0 ;
-    virtual const GlyphFace *glyph(unsigned short glyphid) const = 0 ;      //result may be changed by subsequent call with a different glyphid
+
+    virtual EGlyphCacheStrategy getEnum() const { assert(false); return eOneCache; };
+    virtual const GlyphFace *glyph(unsigned short glyphid) const { assert(false); return NULL; };      //result may be changed by subsequent call with a different glyphid
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
@@ -103,7 +103,7 @@ private:
     GlyphFace *glyphDirect() const { return (GlyphFace *)&m_Buffer[0];}
 
 private:
-    mutable unsigned int m_LoadedGlyphNo;   //-1 means none loaded
+    mutable int m_LoadedGlyphNo;   //-1 means none loaded
 //    mutable GlyphFace m_Buffer;           //Not good - d'tor invoked twice
 //    mutable char m_Buffer[sizeof(GlyphFace)];     //Not good possibly bad alignment on Solaris and similar
     mutable int m_Buffer[(sizeof(GlyphFace)+sizeof(int)-1)/sizeof(int)];
@@ -145,8 +145,11 @@ public:
     virtual ~GlyphFaceCachePreloaded();
 
     virtual EGlyphCacheStrategy getEnum() const;
-    virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
-    
+    virtual const GlyphFace *glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+    {
+        incAccesses();
+        return glyphDirect(glyphid);
+    }
 private:
     const GlyphFace *glyphDirect(unsigned short glyphid) const { return (const GlyphFace *)((const char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}
     GlyphFace *glyphDirect(unsigned short glyphid) { return (GlyphFace *)((char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}

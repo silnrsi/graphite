@@ -27,9 +27,41 @@
 using namespace org::sil::graphite::v2;
 
 Slot::Slot() :
-        m_glyphid(0), m_realglyphid(0), m_before(0), m_after(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
-        m_position(0, 0), m_advance(-1, -1), m_shift(0, 0), m_flags(0), m_next(NULL), m_prev(NULL)
+    m_next(NULL), m_prev(NULL),
+    m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
+    m_parent(NULL), m_child(NULL), m_sibling(NULL),
+    m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
+    m_attach(0, 0), m_with(0, 0),
+    m_flags(0)
+    // Do not set m_userAttr since it is set *before* new is called since this
+    // is used as a positional new to reset the Slot
 {
+}
+
+// take care, this does not copy any of the Slot pointer fields
+void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
+{
+    // leave m_next and m_prev unchanged
+    m_glyphid = orig.m_glyphid;
+    m_realglyphid = orig.m_realglyphid;
+    m_original = orig.m_original + charOffset;
+    m_before = orig.m_before + charOffset;
+    m_after = orig.m_after + charOffset;
+    m_parent = NULL;
+    m_child = NULL;
+    m_sibling = NULL;
+    m_position = orig.m_position;
+    m_shift = orig.m_shift;
+    m_advance = orig.m_advance;
+    m_attach = orig.m_attach;
+    m_with = orig.m_with;
+    m_flags = orig.m_flags;
+    m_attLevel = orig.m_attLevel;
+    assert(!orig.m_userAttr || m_userAttr);
+    if (m_userAttr && orig.m_userAttr)
+    {
+        memcpy(m_userAttr, orig.m_userAttr, numUserAttr * sizeof(*m_userAttr));
+    }
 }
 
 void Slot::update(int numSlots, int numCharInfo, Position &relpos)
@@ -42,10 +74,27 @@ void Slot::update(int numSlots, int numCharInfo, Position &relpos)
 Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
-    float scale = font ? font->scale() : 1.0;
-    Position shift = m_shift * scale;
-    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
-//    float tAdvance = font ? m_advance.x * scale + advance(font) : m_advance.x + seg->glyphAdvance(m_glyphid);
+    float scale = 1.0;
+    Position shift = m_shift;
+    float tAdvance = m_advance.x;
+    const GlyphFace * glyphFace = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyph());
+    if (font)
+    {
+        scale = font->scale();
+        shift *= scale;
+        if (font->isHinted())
+        {
+            if (glyphFace)
+                tAdvance = (m_advance.x - glyphFace->theAdvance().x) * scale + font->advance(m_glyphid);
+            else
+                tAdvance = (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid);
+        }
+        else
+            tAdvance *= scale;
+    }    
+//    float scale = font ? font->scale() : 1.0;
+//    Position shift = m_shift * scale;
+//    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
     Position res;
 
     m_position = *base + shift;
@@ -62,8 +111,13 @@ Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base
         res = Position(tAdv, 0);
     }
 
-    Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
-    bbox->widen(ourBbox);
+    if (glyphFace)
+    {
+        Rect ourBbox = glyphFace->theBBox() * scale + m_position;
+        bbox->widen(ourBbox);
+    }
+    //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
+    //bbox->widen(ourBbox);
 
     if (m_parent && m_position.x < *cMin) *cMin = m_position.x;
 
@@ -307,11 +361,21 @@ void Slot::sibling(Slot *ap)
         m_sibling->sibling(ap);
 }
 
-void Slot::setGlyph(GrSegment *seg, uint16 glyphid)
+void Slot::setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
-    m_realglyphid = seg->glyphAttr(glyphid, seg->silf()->aPseudo());
-    m_advance = Position(seg->glyphAdvance(glyphid), 0.);
+    if (!theGlyph)
+    {
+        theGlyph = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyphid);
+        if (!theGlyph)
+        {
+            m_realglyphid = 0;
+            m_advance = Position(0.,0.);
+            return;
+        }
+    }
+    m_realglyphid = theGlyph->getAttr(seg->silf()->aPseudo());
+    m_advance = Position(theGlyph->theAdvance().x, 0.);
 }
 
 void Slot::floodShift(Position adj)

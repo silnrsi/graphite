@@ -48,8 +48,10 @@ FileFace::FileFace(const char *filename) :
 
 FileFace::~FileFace()
 {
-    free(m_pTableDir);
-    free(m_pHeader);
+    if (m_pTableDir)
+        free(m_pTableDir);
+    if (m_pHeader)
+        free(m_pHeader);
     if (m_pfile)
         fclose(m_pfile);
     m_pTableDir = NULL;
@@ -163,9 +165,10 @@ extern "C"
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
     {
         GrFace *res = new GrFace(appFaceHandle, getTable);
-    #ifndef DISABLE_TRACING
+
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementFace);
-    #endif
+#endif
         bool valid = true;
         valid &= res->readGlyphs(requestedStrategy);
         if (!valid) {
@@ -174,9 +177,9 @@ extern "C"
         }
         valid &= res->readGraphite();
         valid &= res->readFeatures();
-    #ifndef DISABLE_TRACING
+#ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementFace);
-    #endif
+#endif
         
         if (!canDumb && !valid) {
             delete res;
@@ -184,21 +187,80 @@ extern "C"
         }
         return res;
     }
-    
+
+    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable,
+                                    EGlyphCacheStrategy requestedStrategy, unsigned int cacheSize, bool canDumb)
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
+    {
+        CachedGrFace *res = new CachedGrFace(appFaceHandle, getTable);
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementFace);
+#endif
+        bool valid = true;
+        valid &= res->readGlyphs(requestedStrategy);
+        if (!valid) {
+            delete res;
+            return 0;
+        }
+        valid &= res->readGraphite();
+        valid &= res->readFeatures();
+        valid &= res->setupCache(cacheSize);
+
+#ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementFace);
+#endif
+
+        if (!canDumb && !valid) {
+            delete res;
+            return 0;
+        }
+        return res;
+    }
+
 
     GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
+        assert(pFace);
         return pFace->theSill().cloneFeatures(langname);
     }
 
 
-    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint8 index)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
-        const FeatureRef* pRef = pFace->feature(index);
+        assert(pFace);
+        const FeatureRef* pRef = pFace->featureById(featId);
         if (!pRef)
             return NULL;
 
         return new FeatureRef(*pRef);
+    }
+
+    GRNG_EXPORT unsigned short face_num_features(const GrFace* pFace)
+    {
+        assert(pFace);
+        return pFace->numFeatures();
+    }
+
+    GRNG_EXPORT FeatureRef* face_feature_by_index(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    {
+        assert(pFace);
+        const FeatureRef* pRef = pFace->feature(i);
+        if (!pRef)
+            return NULL;
+
+        return new FeatureRef(*pRef);
+    }
+
+    GRNG_EXPORT unsigned short face_num_languages(const GrFace* pFace)
+    {
+        assert(pFace);
+        return pFace->theSill().numLanguages();
+    }
+
+    GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i)
+    {
+        assert(pFace);
+        return pFace->theSill().getLangName(i);
     }
 
  #if 0      //hidden since no way to release atm.
@@ -212,7 +274,7 @@ extern "C"
             return NULL;
         lSize >>= 1;
         res = gralloc<uint16>(lSize + 1);
-        for (int i = 0; i < lSize; ++i)
+        for (size_t i = 0; i < lSize; ++i)
             res[i] = swap16(*(uint16 *)((char *)pName + lOffset));
         res[lSize] = 0;
         return res;
@@ -260,7 +322,6 @@ extern "C"
         return pFace->getGlyphFaceCache()->numLoads();
     }
 
-
 #ifndef DISABLE_FILE_FACE
     GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
@@ -276,6 +337,26 @@ extern "C"
           }
         }
         
+        //error when loading
+
+        delete pFileFace;
+        return NULL;
+    }
+
+    GRNG_EXPORT GrFace* make_file_face_with_seg_cache(const char *filename, EGlyphCacheStrategy requestedStrategy, unsigned int cacheSize)   //returns NULL on failure. //TBD better error handling
+                      //when finished with, call destroy_face
+    {
+        FileFace* pFileFace = new FileFace(filename);
+        if (pFileFace->m_pTableDir)
+        {
+          GrFace* pRes = make_face_with_seg_cache(pFileFace, &FileFace_table_fn, requestedStrategy, cacheSize);
+          if (pRes)
+          {
+            pRes->takeFileFace(pFileFace);        //takes ownership
+            return pRes;
+          }
+        }
+
         //error when loading
 
         delete pFileFace;

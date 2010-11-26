@@ -261,9 +261,17 @@ STARTOP(insert)
     Slot *newSlot = seg.newSlot();
     if (!is)
     {
-        seg.last()->next(newSlot);
-        newSlot->prev(seg.last());
-        seg.last(newSlot);
+        if (seg.last())
+        {
+            seg.last()->next(newSlot);
+            newSlot->prev(seg.last());
+            seg.last(newSlot);
+        }
+        else
+        {
+            seg.first(newSlot);
+            seg.last(newSlot);
+        }
     }
     else if (is->prev())
     {
@@ -281,9 +289,13 @@ STARTOP(insert)
         is->prev(newSlot);
         newSlot->originate(is->original());
     }
-    else
+    else if (newSlot->prev())
     {
         newSlot->originate(newSlot->prev()->original());
+    }
+    else
+    {
+        newSlot->originate(seg.defaultOriginal());
     }
     is = newSlot;
     seg.extendLength(1);

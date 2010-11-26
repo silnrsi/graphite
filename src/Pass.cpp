@@ -404,7 +404,6 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
               col, slot->gid(), slot);
       }
 #endif
-
       slot = slot->next();
     } while(slot && state != m_states && state->is_transition());
     

@@ -30,6 +30,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrFace;
 class VMScratch;
 class GrSegment;
+class Features;
 
 class Pseudo
 {
@@ -46,13 +47,18 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(GrSegment *seg) const;
+    void runGraphite(GrSegment *seg, uint8 firstPass, uint8 numPasse) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
     uint8 aBreak() const { return m_aBreak; }
+    uint8 substitutionPass() const { return m_sPass; }
+    uint8 positionPass() const { return m_pPass; }
+    uint8 justificationPass() const { return m_jPass; }
+    uint8 bidiPass() const { return m_bPass; }
+    uint8 numPasses() const { return m_numPasses; }
 
     CLASS_NEW_DELETE
 
@@ -63,7 +69,7 @@ private:
     Pseudo        * m_pseudos;
     uint16        * m_classOffsets, 
                   * m_classData;
-    size_t          m_numPasses;
+    uint8           m_numPasses;
     uint8           m_sPass, m_pPass, m_jPass, m_bPass,
                     m_flags;
 

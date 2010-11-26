@@ -20,6 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <cstdlib>
+#include "graphiteng/CharInfo.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"
@@ -425,14 +426,14 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg) const
+void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 numPassesToRun) const
 {
     assert(seg != 0);
     SlotMap map(*seg);
     FiniteStateMachine fsm(map);
     vm::Machine        m(map);
-    
-    for (size_t i = 0; i < m_numPasses; ++i)
+
+    for (size_t i = firstPass; i < numPassesToRun; ++i)
     {
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
@@ -445,8 +446,10 @@ void Silf::runGraphite(GrSegment *seg) const
         m_passes[i].runGraphite(m, fsm);
 #ifndef DISABLE_TRACING
             seg->logSegment();
-	    XmlTraceLog::get().closeElement(ElementRunPass);
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementRunPass);
+        }
 #endif
     }
 }
-

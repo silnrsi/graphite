@@ -69,6 +69,11 @@ typedef enum {
     ElementRunPass,
     ElementParams,
     ElementPush,
+    ElementSubSeg,
+    ElementSegCache,
+    ElementSegCacheEntry,
+    ElementGlyph,
+    ElementPassResult,
 
     ElementError,
     ElementWarning,
@@ -155,6 +160,9 @@ typedef enum {
     AttrName,
     AttrResult,
     AttrDefault,
+    AttrAccessCount,
+    AttrLastAccess,
+    AttrMisses,
 
     NumAttributes // Last
 } XmlTraceLogAttribute;

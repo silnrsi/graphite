@@ -34,9 +34,9 @@ size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, c
     processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
     if (pError) {
         *pError = breakOnError.m_pErrorPos;
-    }        
+    }
     return pProcessor->charsProcessed();
-}    
+}
 
 class CharCounterToNul
 {
@@ -118,47 +118,55 @@ GRNG_EXPORT void destroy_seg(GrSegment* p)
 
 GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->advance().x;
 }
 
 
 GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->advance().y;
 }
 
 
 GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->charInfoCount();
 }
 
 
 GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
+    assert(pSeg);
     return pSeg->charinfo(index);
 }
 
 GRNG_EXPORT void seg_run_graphite(GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->runGraphite();
 }
 
 
 GRNG_EXPORT void seg_choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script)
 {
+    assert(pSeg);
     return pSeg->chooseSilf(script);
 }
 
 
 GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->slotCount();
 }
 
 
 GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
 {
+    assert(pSeg);
     return pSeg->first();
 }
 
@@ -167,7 +175,7 @@ GRNG_EXPORT int seg_add_features(GrSegment* pSeg/*not NULL*/, const Features* fe
 {
     if (!feats)
     return -2;      //the smallest value that can normally be returned is -1
-    
+    assert(pSeg);
     return pSeg->addFeatures(*feats);
 }
 
