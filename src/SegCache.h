@@ -153,16 +153,16 @@ private:
             if (entry) *entry = NULL;
             return 0;
         }
-        else if (m_entryCounts[length-1] == 0)
+        else if (m_entryCounts[length-1] == 1)
         {
             // optimize single entry case
             for (int i = ePrefixLength; i < length; i++)
             {
-                if (cmapGlyphs[i] > m_entries[length-1][0].m_unicode[i])
+                if (cmapGlyphs[i] > m_entries[length-1][0].m_charInfo[i].m_unicode)
                 {
                     return 1;
                 }
-                else if (cmapGlyphs[i] < m_entries[length-1][0].m_unicode[i])
+                else if (cmapGlyphs[i] < m_entries[length-1][0].m_charInfo[i].m_unicode)
                 {
                     return 0;
                 }
@@ -187,14 +187,14 @@ private:
             {
                 for (int i = ePrefixLength; i < length; i++)
                 {
-                    if (cmapGlyphs[i] > m_entries[length-1][searchIndex].m_unicode[i])
+                    if (cmapGlyphs[i] > m_entries[length-1][searchIndex].m_charInfo[i].m_unicode)
                     {
                         dir = 1;
                         searchIndex += stepSize;
                         stepSize >>= 1;
                         break;
                     }
-                    else if (cmapGlyphs[i] < m_entries[length-1][searchIndex].m_unicode[i])
+                    else if (cmapGlyphs[i] < m_entries[length-1][searchIndex].m_charInfo[i].m_unicode)
                     {
                         dir = -1;
                         searchIndex -= stepSize;

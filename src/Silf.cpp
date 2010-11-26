@@ -433,7 +433,11 @@ void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 lastPass) const
     FiniteStateMachine fsm(map);
     vm::Machine        m(map);
     if (lastPass == 0)
+    {
+        if (firstPass == lastPass)
+            return;
         lastPass = m_numPasses;
+    }
     for (size_t i = firstPass; i < lastPass; ++i)
     {
 #ifndef DISABLE_TRACING

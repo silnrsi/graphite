@@ -280,6 +280,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         slot = slot->next();
         replacement = replacement->next();
     }
+    // TODO charinfo slot associations
 }
 
         

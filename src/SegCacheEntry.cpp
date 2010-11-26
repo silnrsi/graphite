@@ -28,11 +28,16 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime)
-    : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL),
+    : m_glyphLength(0), m_charInfo(gr2::gralloc<SegCacheCharInfo>(length)), m_glyph(NULL),
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
 {
-    memcpy(m_unicode, cmapGlyphs, length * sizeof(*cmapGlyphs));
+    for (uint16 i = 0; i < length; i++)
+    {
+        m_charInfo[i].m_unicode = cmapGlyphs[i] - charOffset;
+        m_charInfo[i].m_before = seg->charinfo(i)->glyphBefore();
+        m_charInfo[i].m_after = seg->charinfo(i)->glyphAfter();
+    }
     size_t glyphCount = seg->slotCount();
     const Slot * slot = seg->first();
     m_glyph = new Slot[glyphCount];
@@ -126,7 +131,14 @@ void SegCacheEntry::log(size_t unicodeLength) const
         XmlTraceLog::get().openElement(ElementSegCacheEntry);
         XmlTraceLog::get().addAttribute(AttrAccessCount, m_accessCount);
         XmlTraceLog::get().addAttribute(AttrLastAccess, m_lastAccess);
-        XmlTraceLog::get().addArrayElement(ElementText, m_unicode, unicodeLength);
+        for (size_t i = 0; i < unicodeLength; i++)
+        {
+            XmlTraceLog::get().openElement(ElementText);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, m_charInfo[i].m_unicode);
+            XmlTraceLog::get().addAttribute(AttrBefore, m_charInfo[i].m_before);
+            XmlTraceLog::get().addAttribute(AttrAfter, m_charInfo[i].m_after);
+            XmlTraceLog::get().closeElement(ElementText);
+        }
         for (size_t i = 0; i < m_glyphLength; i++)
         {
             XmlTraceLog::get().openElement(ElementGlyph);
@@ -144,10 +156,10 @@ void SegCacheEntry::log(size_t unicodeLength) const
 
 void SegCacheEntry::clear()
 {
-    if (m_unicode) free(m_unicode);
+    if (m_charInfo) free(m_charInfo);
     if (m_attr) free(m_attr);
     delete [] m_glyph;
-    m_unicode = NULL;
+    m_charInfo = NULL;
     m_glyph = NULL;
     m_glyphLength = 0;
     m_attr = NULL;
