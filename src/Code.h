@@ -42,7 +42,6 @@ public:
     enum status_t 
     {
         loaded,
-        empty,
         alloc_failed, 
         invalid_opcode, 
         unimplemented_opcode_used,
@@ -131,7 +130,7 @@ inline Code::Code(const Code &obj) throw ()
 }
 
 inline Code & Code::operator=(const Code &rhs) throw() {
-    if (_status != empty)
+    if (_instr_count > 0)
         release_buffers();
     _code        = rhs._code; 
     _data        = rhs._data;
