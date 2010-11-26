@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
+#include <cstring>
 #include <algorithm>
 #include <cassert>
 #include "Main.h"
@@ -28,6 +28,7 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class FeatureRef;
+class FeatureMap;
 
 class Features
 {
@@ -41,12 +42,13 @@ public:
 	return len;
     }
 
-    explicit Features(int num)
-      : m_length(num), m_vec(gralloc<uint32>(num)) {}
-    Features() : m_length(0), m_vec(NULL) { }
-    Features(const Features & o) : m_length(0), m_vec(0) { *this = o; }
+    explicit Features(int num, const FeatureMap* pMap/*not NULL*/)
+      : m_length(num), m_vec(gralloc<uint32>(num)), m_pMap(pMap) {}
+    Features() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
+    Features(const Features & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
     ~Features() { free(m_vec); }
     Features & operator=(const Features & rhs) {
+        m_pMap = rhs.m_pMap;
         if (m_length != rhs.m_length) {
             if (m_vec) free(m_vec);
             m_vec = gralloc<uint32>(rhs.m_length);
@@ -66,6 +68,19 @@ public:
         }
         return false;
     }
+
+    void grow(byte reqIndex ) {
+        if (reqIndex<m_length) {
+          return;
+        }
+        uint32 * vec = gralloc<uint32>(reqIndex+1);
+        std::copy(m_vec, m_vec + m_length, vec);
+        memset(vec+m_length, 0, (reqIndex+1-m_length)*sizeof(uint32));
+        if (m_vec) free(m_vec);
+        m_vec = vec;
+        m_length = reqIndex+1;
+    }
+
     Features* clone() const { return new Features(*this); }
     
 //    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
@@ -82,6 +97,7 @@ private:
 friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
+    const FeatureMap* m_pMap;
 };
 
 }}}} // namespace

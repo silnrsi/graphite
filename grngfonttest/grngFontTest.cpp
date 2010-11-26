@@ -539,16 +539,16 @@ union FeatID
 
 void Parameters::printFeatures(const gr2::GrFace * face) const
 {
-    gr2::uint16 numFeatures = gr2::face_num_features(face);
+    gr2::uint16 numFeatures = gr2::face_n_fref(face);
     fprintf(stdout, "%d features\n", numFeatures);
     gr2::uint16 langId = 0x0409;
     for (gr2::uint16 i = 0; i < numFeatures; i++)
     {
-        gr2::FeatureRef * f = gr2::face_feature_by_index(face, i);
+        gr2::FeatureRef * f = gr2::face_fref(face, i);
         gr2::uint32 length = 0;
         char * label = reinterpret_cast<char *>(gr2::feature_label(face, f, &langId, gr2::kutf8, &length));
         FeatID featId;
-        featId.uId = gr2::feature_id(f);
+        featId.uId = gr2::fref_id(f);
         if (label)
             if ((featId.uChar[0] >= 0x20 && featId.uChar[0] < 0x7F) &&
                 (featId.uChar[1] >= 0x20 && featId.uChar[1] < 0x7F) &&
@@ -582,7 +582,7 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
 
         gr2::destroy_FeatureRef(f);
     }
-    gr2::uint16 numLangs = gr2::face_num_languages(face);
+    gr2::uint16 numLangs = gr2::face_n_languages(face);
     printf("Feature Languages:");
     for (gr2::uint16 i = 0; i < numFeatures; i++)
     {
@@ -637,7 +637,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
                 value = atoi(valueText);
                 if (ref)
                 {
-                    gr2::apply_value_to_feature(value, ref, featureList);
+                    gr2::fref_set_feature_value(ref, value, featureList);
                     gr2::destroy_FeatureRef(ref);
                     ref = NULL;
                 }
@@ -650,12 +650,12 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
                 if (nameLength <= 4)
                 {
                     featId.uId = swap32(featId.uId);
-                    ref = gr2::face_feature_ref(face, featId.uId);
+                    ref = gr2::face_find_fref(face, featId.uId);
                 }
                 if (!ref)
                 {
                     featId.uId = atoi(name);
-                    ref = gr2::face_feature_ref(face, featId.uId);
+                    ref = gr2::face_find_fref(face, featId.uId);
                 }
                 valueText = features + i + 1;
                 name = NULL;
@@ -672,7 +672,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         if (ref)
         {
             value = atoi(valueText);
-            gr2::apply_value_to_feature(value, ref, featureList);
+            gr2::fref_set_feature_value(ref, value, featureList);
             gr2::destroy_FeatureRef(ref);
             ref = NULL;
         }

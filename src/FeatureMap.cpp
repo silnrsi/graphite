@@ -27,6 +27,7 @@
 #include "graphiteng/GrFace.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
+#include <algorithm>
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
@@ -98,11 +99,15 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     m_numFeats = read16(pFeat);
     read16(pFeat);
     read32(pFeat);
-    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }        //defensive
+    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
+    if (m_numFeats)
+    {
     m_feats = new FeatureRef[m_numFeats];
+    m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
+    }
     byte currIndex = 0;
-    byte currBits = 0;
+    byte currBits = 0;     //to cause overflow on first Feature
 
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
@@ -197,9 +202,16 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     XmlTraceLog::get().closeElement(ElementFeature);
 #endif
     }
-    m_defaultFeatures = new Features(currIndex + 1);
+    m_defaultFeatures = new Features(currIndex + 1, this);
     for (int i = 0; i < m_numFeats; i++)
-    m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+    {
+	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+    m_pNamedFeats[i] = m_feats+i;
+    }
+    
+    free(defVals);
+
+    //std::sort(m_pNamedFeats, m_pNamedFeats+m_numFeats);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -238,7 +250,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const FeatureRef* pRef = m_FeatureMap.featureRef(name);
+	    const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
 	    if (pRef)
 		pRef->applyValToFeature(val, feats);
  	}
@@ -250,8 +262,17 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
     return true;
 }
 
-const FeatureRef *FeatureMap::featureRef(uint32 name) const
+const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
+/*
+    NameAndFeatureRef target(name);
+    NameAndFeatureRef* it = std::lower_bound(m_pNamedFeats, m_pNamedFeats+m_numFeats, target);
+    if (it==m_pNamedFeats+m_numFeats)
+      return NULL;
+    if (it->m_name!=name)
+      return NULL;
+    return it->m_pFRef;
+*/
     assert (m_sortedIndexes);
     uint16 i = m_searchIndex;
     int16 step = (m_searchIndex + 1) >> 1;

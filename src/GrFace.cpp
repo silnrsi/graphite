@@ -225,7 +225,7 @@ extern "C"
     }
 
 
-    GRNG_EXPORT FeatureRef* face_feature_ref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT FeatureRef* face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->featureById(featId);
@@ -235,13 +235,13 @@ extern "C"
         return new FeatureRef(*pRef);
     }
 
-    GRNG_EXPORT unsigned short face_num_features(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_n_fref(const GrFace* pFace)
     {
         assert(pFace);
         return pFace->numFeatures();
     }
 
-    GRNG_EXPORT FeatureRef* face_feature_by_index(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT FeatureRef* face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->feature(i);
@@ -251,7 +251,7 @@ extern "C"
         return new FeatureRef(*pRef);
     }
 
-    GRNG_EXPORT unsigned short face_num_languages(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_n_languages(const GrFace* pFace)
     {
         assert(pFace);
         return pFace->theSill().numLanguages();
@@ -305,19 +305,19 @@ extern "C"
     }
 
 
-    GRNG_EXPORT unsigned short face_num_glyphs(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numGlyphs();
     }
 
 
-    GRNG_EXPORT unsigned long face_num_glyph_accesses(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_n_glyph_accesses(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numAccesses();
     }
 
 
-    GRNG_EXPORT unsigned long face_num_glyph_loads(const GrFace* pFace)
+    GRNG_EXPORT unsigned long face_n_glyph_loads(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numLoads();
     }

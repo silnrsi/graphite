@@ -233,11 +233,11 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     testAssert("readFeats", readStatus);
     testFeatureMap.createSortedFeatureList();
     fprintf(stderr, testName, NULL);
-    testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeatures(), table.m_header.m_numFeat);
+    testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
 
     for (size_t i = 0; i < sizeof(table.m_defs) / sizeof(FeatDefn); i++)
     {
-        const gr2::FeatureRef * ref = testFeatureMap.featureRef(table.m_defs[i].m_featId);
+        const gr2::FeatureRef * ref = testFeatureMap.findFeatureRef(table.m_defs[i].m_featId);
         testAssert("test feat\n", ref);
         testAssertEqual("test feat settings %hu %hu\n", ref->getNumSettings(), table.m_defs[i].m_numFeatSettings);
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);

@@ -142,7 +142,7 @@ public:
     bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
-    uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeatures(); }
+    uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeats(); }
     const FeatureRef *featureById(uint32 id) const { return m_Sill.m_FeatureMap.featureRef(id); }
     const FeatureRef *feature(uint16 index) const { return m_Sill.m_FeatureMap.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;

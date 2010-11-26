@@ -441,7 +441,9 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
 #ifdef ENABLE_DEEP_TRACING
       if (XmlTraceLog::get().active())
       {
+        XmlTraceLog::get().openElement(ElementPassResult);
         XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.slots.segment.first()));
+        XmlTraceLog::get().closeElement(ElementPassResult);
         XmlTraceLog::get().closeElement(ElementDoRule);
       }
 #endif

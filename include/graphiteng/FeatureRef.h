@@ -28,6 +28,9 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class FeatureRef;
 class Features;
 class GrFace;
+/*  A FeatureRef provides a handle for efficient access of settings from a set of values called Features.
+    Both the FeatureRef and the Features must be associated with the same face.
+*/
 
 
 extern "C"
@@ -37,10 +40,10 @@ extern "C"
     GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref);
                       //When finished with the FeatureRef, call destroy_FeatureRef    
 
-    GRNG_EXPORT void apply_value_to_feature(uint16 val, FeatureRef* pRes, Features* pDest);
-    GRNG_EXPORT void mask_feature(const FeatureRef* pfeatureref, Features* pDest);
-    GRNG_EXPORT uint16 feature_value(const FeatureRef*pfeatureref, const Features* feats);    //returns 0 if either pointer is NULL
-    GRNG_EXPORT uint32 feature_id(const FeatureRef*pfeatureref);
+    GRNG_EXPORT uint16 fref_max_value(const FeatureRef* pfeatureref);    //returns 0 if pointer is NULL
+    GRNG_EXPORT uint16 fref_feature_value(const FeatureRef*pfeatureref, const Features* feats);    //returns 0 if either pointer is NULL
+    GRNG_EXPORT bool fref_set_feature_value(const FeatureRef* pfeatureref, uint16 val, Features* pDest);    //returns false iff either pointer is NULL. or if they are not for the same face, or val is too big
+    GRNG_EXPORT uint32 fref_id(const FeatureRef*pfeatureref);
 
     // Labels may not be available for requested langId, the language actually used
     // will be returned in langId. The length in bytes will be returned in length

@@ -38,8 +38,6 @@ extern "C"
     GRNG_EXPORT Features* features_clone(const Features* pfeatures/*may be NULL*/);
                       //When finished with the Features, call features_destroy    
 
-    GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, const Features* pMask);    //returns false iff any of the Features* are NULL
-
     GRNG_EXPORT void features_destroy(Features *pfeatures);
 }
 

@@ -65,12 +65,20 @@ public:
         if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
-    void applyValToFeature(uint16 val, Features* pDest) const { 
-        if (m_index < pDest->m_length && val <= m_max)
+    bool applyValToFeature(uint16 val, Features* pDest) const { 
+        if (val>m_max)
+          return false;
+        //if (pDest->m_pMap==NULL)
+        //  pDest->m_pMap = m_pMap;
+        //else
+        //  if (pDest->m_pMap!=m_pMap)
+        //    return false;       //incompatible
+        //pDest->grow(m_index);
         {
             pDest->m_vec[m_index] &= ~m_mask;
-            pDest->m_vec[m_index] |= (val << m_bits);
+            pDest->m_vec[m_index] |= (uint32(val) << m_bits);
         }
+        return true;
     }
     void maskFeature(Features* pDest) const { 
 	if (m_index < pDest->m_length) 				//defensive
@@ -78,7 +86,7 @@ public:
     }
 
     uint16 getFeatureVal(const Features& feats) const { 
-	if (m_index < feats.m_length) 
+	if (m_index < feats.m_length /*&& m_pMap==feats.m_pMap*/) 
 	    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
 	else
 	    return 0;
@@ -89,6 +97,7 @@ public:
     uint16 getNumSettings() const { return m_numSet; }
     uint16 getSettingName(uint16 index) const { return m_nameValues[index].label(); }
     int16 getSettingValue(uint16 index) const { return m_nameValues[index].value(); }
+    uint16 maxVal() const { return m_max; }
 
 //     void * operator new (size_t s, FeatureRef * p)
 //     {
@@ -108,6 +117,23 @@ private:
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 };
 
+
+class NameAndFeatureRef
+{
+  public:
+    NameAndFeatureRef() {}
+    NameAndFeatureRef(uint32 name) : m_name(name) {}
+    NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
+
+    bool operator<(const NameAndFeatureRef& rhs) const //orders by m_name
+        {   return m_name<rhs.m_name; }
+
+    CLASS_NEW_DELETE
+ 
+    uint32 m_name;
+    const FeatureRef* m_pFRef;
+};
+
 class FeatureMap
 {
 public:
@@ -116,14 +142,15 @@ public:
         m_feats(NULL), m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete m_defaultFeatures; }
     
-    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+//    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     bool createSortedFeatureList(); // public for testing purposes
-    const FeatureRef *featureRef(uint32 name) const;
+    const FeatureRef *findFeatureRef(uint32 name) const;
     FeatureRef *feature(uint16 index) const { return m_feats + index; }
-    FeatureRef *ref(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
+    //FeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
+    const FeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
     Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
-    uint16 numFeatures() const { return m_numFeats; };
+    uint16 numFeats() const { return m_numFeats; };
     CLASS_NEW_DELETE
 private:
 friend class SillMap;
@@ -132,9 +159,10 @@ friend class SillMap;
     uint16 * m_sortedIndexes;
 
     FeatureRef *m_feats;
+    NameAndFeatureRef* m_pNamedFeats;   //owned
     Features* m_defaultFeatures;        //owned
     
-private:		//defensive on m_feats
+private:		//defensive on m_feats, m_pNamedFeats, and m_defaultFeatures
     FeatureMap(const FeatureMap&);
     FeatureMap& operator=(const FeatureMap&);
 };
@@ -162,6 +190,7 @@ public:
     uint16 numLanguages() const { return m_numLanguages; };
     uint32 getLangName(uint16 index) const { return (index < m_numLanguages)? m_langFeats[index].m_lang : 0; };
 
+    const FeatureMap & theFeatureMap() const { return m_FeatureMap; };
 private:
 friend class GrFace;
     FeatureMap m_FeatureMap;        //of face
