@@ -16,13 +16,18 @@ endif(DISABLE_TRACING)
 add_library(vm-test-common  STATIC
                 basic_test.cpp
                 ${SRC}/Code.cpp
+                ${SRC}/CmapCache.cpp
                 ${SRC}/FeatureMap.cpp
                 ${SRC}/GlyphFace.cpp
                 ${SRC}/GlyphFaceCache.cpp
                 ${SRC}/GrFace.cpp
                 ${SRC}/GrFaceImp.cpp
                 ${SRC}/GrSegmentImp.cpp
+                ${SRC}/NameTable.cpp
                 ${SRC}/Pass.cpp
+                ${SRC}/SegCache.cpp
+                ${SRC}/SegCacheEntry.cpp
+                ${SRC}/SegCacheStore.cpp
                 ${SRC}/Silf.cpp
                 ${SRC}/SlotImp.cpp
                 ${SRC}/TtfUtil.cpp
