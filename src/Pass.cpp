@@ -513,22 +513,22 @@ Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, vm::Machine &
     if (!*codeptr)
       return iSlot->next();
 
-    assert(!codeptr->constraint());
-    
     SlotMap   & map = m.slotMap();
     GrSegment & seg = map.segment;
     Machine::status_t status;
-    size_t nMap = count;
     count = map.context();
-    int oldNumGlyphs = seg.slotCount();
+    int oldNumGlyphs = seg.slotCount();    
     int32 ret = codeptr->run(m, iSlot, count, status);
     count += seg.slotCount() - oldNumGlyphs;
-    
-    for (Slot **is = map.begin(), *const * const ise = map.begin() + nMap; is != ise; ++is)
+    if (codeptr->deletes())
     {
-        if ((*is)->isCopied() || (*is)->isDeleted())
-            seg.freeSlot(*is);
+      for (Slot **is = m.slotMap().begin(), *const * const ise = m.slotMap().end()-1; is != ise; ++is)
+      {
+        Slot * & slot = *is;
+        if (slot->isDeleted() || slot->isCopied()) seg.freeSlot(slot);
+      }
     }
+    
     if (ret < 0)
     {
         if (!iSlot)

@@ -60,7 +60,7 @@ Code::analysis_context::analysis_context()
 
 Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
  :  _code(0), _data_size(0), _instr_count(0), _status(loaded), _min_slotref(0), _max_slotref(0),
-    _constrained(constrained), _immutable(true), _own(true)
+    _constrained(constrained), _modify(false), _delete(false), _own(true)
 {
     assert(bytecode_begin != 0);
     if (bytecode_begin == bytecode_end)
@@ -133,7 +133,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         return;
     }
     
-    assert((_constrained && _immutable) || !_constrained);
+    assert((_constrained && immutable()) || !_constrained);
     assert(ip - _code == ptrdiff_t(_instr_count));
 
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
@@ -277,10 +277,12 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
 //     case LESS_EQ :
 //     case GTR_EQ :
     case DELETE :
+    case TEMP_COPY :
+      _delete = true;
+      break;
     case PUT_GLYPH_8BIT_OBS :
     case PUT_GLYPH :
-    case TEMP_COPY :
-      _immutable = false;
+      _modify = true;
       break;
 //     case CNTXT_ITEM :
 //     case ATTR_SET :
@@ -306,21 +308,13 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
       
     case INSERT :
       ab.contexts[ab.slotref].flags.inserted = true;
-      _immutable = false;
+      _modify = true;
       break;
 
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
     case PUT_SUBS : 
-    {
-      _immutable = false;
-      update_slot_limits(ab.slotref + dp[0]);
-      
-      Context & ctxt = ab.contexts[ab.slotref];
-      ctxt.flags.changed = true;
-      if (dp[0] <= 0 && -dp[0] <= ab.slotref)
-        ab.contexts[ab.slotref + dp[0] - ctxt.flags.inserted].flags.referenced = true;
-      break;
-    }
+      _modify = true;
+      ab.contexts[ab.slotref].flags.changed = true;
     case PUT_COPY :
     {
       update_slot_limits(ab.slotref + dp[0]);
@@ -380,6 +374,7 @@ int32 Code::run(Machine & m, slotref & islot_idx, int &count,
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
+    assert(islot_idx == m.slotMap()[count]);
     
     if (count + _min_slotref < 0 || size_t(count + _max_slotref) >= m.slotMap().size())
     {
@@ -388,4 +383,3 @@ int32 Code::run(Machine & m, slotref & islot_idx, int &count,
     }
     return m.run(_code, _data, islot_idx, count, status_out);
 }
-
