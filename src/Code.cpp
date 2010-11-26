@@ -90,7 +90,10 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     analysis_context ac;
     do {
         opc = opcode(*cd_ptr++);
-        
+
+        // Filter out the NOPs
+        if (opc == NOP) continue;
+          
         // Do some basic sanity checks based on what we know about the opcodes.
         if (!check_opcode(opc, cd_ptr, bytecode_end))
             return;
@@ -126,6 +129,15 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         if (opc == CNTXT_ITEM)
             fixup_cntxt_item_target(cd_ptr, dp);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
+    
+    // Is this an empty program?
+    if (_instr_count == 0)
+    {
+      release_buffers();
+      ::new (this) Code();
+      return;
+    }
+      
     
     // Final sanity check: ensure that the program is correctly terminated.
     if (!is_return(opc)) {
