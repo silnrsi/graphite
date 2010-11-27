@@ -346,30 +346,18 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     if (!testPassConstraint(m)) return;
-    // advance may be negative, so it is dangerous to use unsigned for i
-    int loopCount = m_iMaxLoop;
-    unsigned int maxIndex = 0;
+
     unsigned int currCount = 0;
-    for (Slot *s = m.slotMap().segment.first(); s; )
+    Slot *s = m.slotMap().segment.first();
+    for (unsigned int maxIndex=0; s; maxIndex = currCount + 1)
     {
-	int count = 0;
+      for (int lc = m_iMaxLoop; lc && s; --lc)
+      {
+        int count = 0;
         s = findNDoRule(s, count, m, fsm);
         currCount += count;
-	assert(currCount <= m.slotMap().segment.slotCount());
-        if (currCount <= maxIndex)
-        {
-            if (--loopCount < 0)
-            {
-                while (++currCount <= maxIndex && s) s = s->next();
-                loopCount = m_iMaxLoop;
-                maxIndex = currCount + 1;
-            }
-        }
-        else
-        {
-            loopCount = m_iMaxLoop;
-            maxIndex = currCount + 1;
-        }
+      }
+      while (s && ++currCount <= maxIndex) s = s->next();
     }
 }
 

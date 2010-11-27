@@ -41,9 +41,9 @@
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\
-			                bool name(registers) { \
+                            bool name(registers) { \
                                 STARTTRACE(name,is);
-#define ENDOP		            ENDTRACE; \
+#define ENDOP                   ENDTRACE; \
                                 return (sp - sb)/Machine::STACK_MAX==0; \
                             }
 
@@ -54,7 +54,7 @@
 
 
 using namespace vm;
-    using namespace org::sil::graphite::v2;
+using namespace org::sil::graphite::v2;
 
 struct regbank  {
     SlotMap       & map;
