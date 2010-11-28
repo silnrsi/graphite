@@ -347,17 +347,13 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     if (!testPassConstraint(m)) return;
 
-    int currCount = 0;
+    int count = 0;
     Slot *s = m.slotMap().segment.first();
-    for (int maxIndex=0; s; maxIndex = currCount + 1)
+    for (int target_count=0; s; target_count = count + 1)
     {
       for (int lc = m_iMaxLoop; lc && s; --lc)
-      {
-        int count = 0;
         s = findNDoRule(s, count, m, fsm);
-        currCount += count;
-      }
-      while (s && ++currCount <= maxIndex) s = s->next();
+      while (s && ++count <= target_count) s = s->next();
     }
 }
 
@@ -412,8 +408,6 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
     
     if (runFSM(fsm, slot))
     {
-      count = fsm.slots.size() - 1;
-    
       // Search for the first rule which passes the constraint
       const RuleEntry *        r = fsm.rules.begin(),
                       * const re = fsm.rules.end();
@@ -441,7 +435,7 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
       }
     }
 
-    count = 1;
+    ++count;
     return slot->next();
 }
 
@@ -512,7 +506,7 @@ Slot *Pass::doAction(const Code *codeptr, int &count, vm::Machine & m) const
     int glyph_diff = -seg.slotCount();    
     int32 ret = codeptr->run(m, map, status);
     glyph_diff += seg.slotCount();
-    count     = map - smap.begin() - smap.context() + glyph_diff + ret;
+    count      += map - smap.begin() - smap.context() + glyph_diff + ret;
     if (codeptr->deletes())
     {
       for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
