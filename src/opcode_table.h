@@ -59,7 +59,7 @@ static const opcode_t opcode_table[] =
 
     {{do_(next), NILOP},                            0,  0, "NEXT"},
     {{do_(next_n), NILOP},                          1,  0, "NEXT_N"},
-    {{do_(copy_next), NILOP},                       0,  0, "COPY_NEXT"},
+    {{do_(next), NILOP},                       0,  0, "COPY_NEXT"},
     {{do_(put_glyph_8bit_obs), NILOP},              1,  0, "PUT_GLYPH_8BIT_OBS"},
     {{do_(put_subs_8bit_obs), NILOP},               3,  0, "PUT_SUBS_8BIT_OBS"},
     {{do_(put_copy), NILOP},                        1,  0, "PUT_COPY"},

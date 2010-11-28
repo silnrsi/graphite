@@ -127,7 +127,7 @@ public:
     Machine(gr2::SlotMap &) throw();
     static const opcode_t *   getOpcodeTable() throw();
     stack_t                   run(const instr * program, const gr2::byte * data,
-                                  slotref & islot_idx, int & count,
+                                  slotref * & map,
                                   status_t &status) HOT;
     CLASS_NEW_DELETE
 
@@ -166,7 +166,7 @@ inline void Machine::check_final_stack(const gr2::int32 * const sp,
 #define STARTTRACE(name,is) if (XmlTraceLog::get().active()) { \
                                 XmlTraceLog::get().openElement(ElementOpCode); \
                                 XmlTraceLog::get().addAttribute(AttrName, # name); \
-                                XmlTraceLog::get().addAttribute(AttrIndex, count); \
+                                XmlTraceLog::get().addAttribute(AttrIndex, unsigned(map - smap.begin())); \
                             }
 
 #define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode);

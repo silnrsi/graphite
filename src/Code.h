@@ -103,8 +103,7 @@ public:
     bool          immutable() const throw();
     bool          deletes() const throw();
 
-    int32 run(Machine &m, slotref & islot_idx, int &count,
-                    Machine::status_t & status) const;
+    int32 run(Machine &m, slotref * & map, Machine::status_t & status) const;
     CLASS_NEW_DELETE
 };
 

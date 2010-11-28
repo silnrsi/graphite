@@ -47,9 +47,9 @@ public:
     CLASS_NEW_DELETE
 private:
     Slot * findNDoRule(Slot* iSlot, int& count, vm::Machine &, FiniteStateMachine& fsm) const;
-    Slot * doAction(const vm::Code* codeptr, Slot* iSlot, int& count, vm::Machine &) const;
+    Slot * doAction(const vm::Code* codeptr, int& count, vm::Machine &) const;
     bool   testPassConstraint(vm::Machine & m) const;
-    int    testConstraint(const RuleEntry& re, Slot* iSlot, vm::Machine &) const;
+    int    testConstraint(const RuleEntry& re, vm::Machine &) const;
     bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
     bool   readRules(const uint16 * rule_map, const size_t num_entries, 
 		     const byte *precontext, const uint16 * sort_key,

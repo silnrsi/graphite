@@ -57,10 +57,11 @@ using namespace vm;
 using namespace org::sil::graphite::v2;
 
 struct regbank  {
-    SlotMap       & map;
     slotref         is;
+    slotref *       map;
+    SlotMap       & smap;
+    slotref * const map_base;
     const instr * & ip;
-    int           & count;
     int8            flags;
 };
 
@@ -70,28 +71,30 @@ typedef bool        (* ip_t)(registers);
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
 namespace {
-#define seg     map.segment
+#define smap    reg.smap
+#define seg     smap.segment
 #define is      reg.is
 #define ip      reg.ip
-#define count   reg.count
 #define map     reg.map
+#define mapb    reg.map_base
 #define flags   reg.flags
 
 #include "opcodes.h"
 
+#undef smap
 #undef seg
 #undef is
 #undef ip
-#undef count
 #undef map
+#undef mapb
 #undef flags
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               slotref       & slot,
-                               int           & count,
+                               slotref     * & map,
                                status_t      & status)
+
 {
     assert(program != 0);
 
@@ -100,14 +103,14 @@ Machine::stack_t  Machine::run(const instr   * program,
     const byte    * dp = data;
     stack_t       * sp = _stack + Machine::STACK_GUARD,
             * const sb = sp;
-    regbank         reg = {_map, slot, ip, count, 0};
+    regbank         reg = {*map, map, _map, _map.begin()+_map.context(), ip, 0};
 
     // Run the program        
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
 
     check_final_stack(sp, status);
-    slot = reg.is;
+    map = reg.map;
     return ret;
 }
 

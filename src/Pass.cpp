@@ -347,9 +347,9 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     if (!testPassConstraint(m)) return;
 
-    unsigned int currCount = 0;
+    int currCount = 0;
     Slot *s = m.slotMap().segment.first();
-    for (unsigned int maxIndex=0; s; maxIndex = currCount + 1)
+    for (int maxIndex=0; s; maxIndex = currCount + 1)
     {
       for (int lc = m_iMaxLoop; lc && s; --lc)
       {
@@ -403,7 +403,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
     } while(slot && state != m_states && state->is_transition());
     
     fsm.slots.pushSlot(slot);
-    return context < m_minPreCtxt;
+    return true;
 }
 
 Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine & fsm) const
@@ -412,37 +412,35 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
     
     if (runFSM(fsm, slot))
     {
-        count = 1;
-        return slot->next();
-    }
-    count = fsm.slots.size() - 1;
+      count = fsm.slots.size() - 1;
     
-    // Search for the first rule which passes the constraint
-    const RuleEntry *        r = fsm.rules.begin(),
-                    * const re = fsm.rules.end();
-    for (; r != re && !testConstraint(*r, slot, m); ++r);
-        
-    if (r != re)
-    {
-#ifdef ENABLE_DEEP_TRACING
-      if (XmlTraceLog::get().active())
+      // Search for the first rule which passes the constraint
+      const RuleEntry *        r = fsm.rules.begin(),
+                      * const re = fsm.rules.end();
+      for (; r != re && !testConstraint(*r, m); ++r);
+          
+      if (r != re)
       {
-        XmlTraceLog::get().openElement(ElementDoRule);
-        XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
-        XmlTraceLog::get().addAttribute(AttrIndex, count);
+  #ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+          XmlTraceLog::get().openElement(ElementDoRule);
+          XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
+          XmlTraceLog::get().addAttribute(AttrIndex, count);
+        }
+  #endif
+        Slot * const res = doAction(r->rule->action, count, m);
+  #ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+          XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.slots.segment.first()));
+          XmlTraceLog::get().closeElement(ElementDoRule);
+        }
+  #endif
+        return res;
       }
-#endif
-      Slot * const res = doAction(r->rule->action, slot, count, m);
-#ifdef ENABLE_DEEP_TRACING
-      if (XmlTraceLog::get().active())
-      {
-        XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.slots.segment.first()));
-        XmlTraceLog::get().closeElement(ElementDoRule);
-      }
-#endif
-      return res;
     }
-    
+
     count = 1;
     return slot->next();
 }
@@ -455,15 +453,15 @@ bool Pass::testPassConstraint(Machine & m) const
 
   assert(m_cPConstraint.constraint());
 
-  m.slotMap()[0] = m.slotMap().segment.first();
+  vm::slotref * map = m.slotMap().begin();
+  *map = m.slotMap().segment.first();
   Machine::status_t status = Machine::finished;
-  int temp = 0;
-  const uint32 ret = m_cPConstraint.run(m, m.slotMap()[0], temp, status);
+  const uint32 ret = m_cPConstraint.run(m, map, status);
 
   return ret && status != Machine::finished;
 }
 
-int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, Machine & m) const
+int Pass::testConstraint(const RuleEntry &re, Machine & m) const
 {
   const Rule &r = *re.rule;
   uint32 ret = 1;
@@ -481,13 +479,12 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, Machine & m) const
 #endif
   
   Machine::status_t status = Machine::finished;
-  for (int i = r.preContext; i && iSlot->prev(); --i, iSlot = iSlot->prev());
 
   const int preContext = m.slotMap().context();
-  for (int i = -r.preContext; i != re.length && iSlot; ++i, iSlot = iSlot->next())
+  for (int i = -r.preContext; i != re.length; ++i)
   {
-      int count = i + preContext;
-      ret = r.constraint->run(m, iSlot, count, status);
+      vm::slotref * map = &m.slotMap()[i + preContext];
+      ret = r.constraint->run(m, map, status);
       if (!ret) return 0;
       if (status != Machine::finished) return 1;
   }
@@ -502,56 +499,55 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, Machine & m) const
     return status == Machine::finished ? ret : 1;
 }
 
-Slot *Pass::doAction(const Code *codeptr, Slot *iSlot, int &count, vm::Machine & m) const
+Slot *Pass::doAction(const Code *codeptr, int &count, vm::Machine & m) const
 {
-    if (!*codeptr)
-      return iSlot->next();
+    SlotMap   & smap = m.slotMap();
+    vm::slotref * map = &smap[smap.context()];
 
-    SlotMap   & map = m.slotMap();
-    GrSegment & seg = map.segment;
+    if (!*codeptr)
+      return (*map)->next();
+
+    GrSegment & seg = smap.segment;
     Machine::status_t status;
-    count = map.context();
-    int oldNumGlyphs = seg.slotCount();    
-    int32 ret = codeptr->run(m, iSlot, count, status);
-    count += seg.slotCount() - oldNumGlyphs;
+    int glyph_diff = -seg.slotCount();    
+    int32 ret = codeptr->run(m, map, status);
+    glyph_diff += seg.slotCount();
+    count     = map - smap.begin() - smap.context() + glyph_diff + ret;
     if (codeptr->deletes())
     {
-      for (Slot **is = m.slotMap().begin(), *const * const ise = m.slotMap().end()-1; is != ise; ++is)
+      for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
       {
-        Slot * & slot = *is;
+        Slot * & slot = *s;
         if (slot->isDeleted() || slot->isCopied()) seg.freeSlot(slot);
       }
     }
     
+    Slot * iSlot = *map;
     if (ret < 0)
     {
         if (!iSlot)
         {
             iSlot = seg.last();
             ++ret;
-            --count;
         }
         while (++ret <= 0 && iSlot)
         {
             iSlot = iSlot->prev();
-            --count;
         }
     }
     else if (ret > 0)
     {
+      assert(iSlot);
         if (!iSlot)
         {
             iSlot = seg.first();
             --ret;
-            ++count;
         }
         while (--ret >= 0 && iSlot)
         {
             iSlot = iSlot->next();
-            ++count;
         }
     }
-    count -= map.context();
     if (status != Machine::finished && iSlot) return iSlot->next();
         
     return iSlot;
