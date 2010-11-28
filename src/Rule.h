@@ -43,11 +43,6 @@ struct RuleEntry
   {
     return rule == r.rule;
   }
-
-  inline bool operator != (const RuleEntry &r) const
-  {
-    return rule != r.rule;
-  }
 };
 
 
@@ -120,9 +115,9 @@ private:
       
       void accumulate_rules(const State &state, const unsigned short length);
   private:
-      RuleEntry	        m_rules[MAX_RULES*2];
-      RuleEntry  *      m_begin;
-      const RuleEntry * m_end;
+      RuleEntry * m_begin, 
+                * m_end,
+                  m_rules[MAX_RULES*2];
   };
 
 public:
@@ -172,45 +167,22 @@ inline size_t FiniteStateMachine::Rules::size() const
 inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, const unsigned short length)
 {
   // Only bother if there are rules in the State object.
-  if (size() > 0 && state.size() > 0)
+  if (state.size() == 0) return;
+  
+  // Merge the new sorted rules list into the current sorted result set.
+  const RuleEntry * lre = begin(), * rre = state.rules;
+  RuleEntry * out = m_rules + (m_begin == m_rules)*MAX_RULES;    
+  m_begin = out; 
+  while (lre != end())
   {
-    // Merge the new sorted rules list into the current sorted result set.
-    RuleEntry * out = m_begin == m_rules ? m_rules + MAX_RULES : m_rules;    
-    const RuleEntry * lre = begin(),
-                    * rre = state.rules;
-    m_begin = out; 
-    while (lre != end() && rre != state.rules_end)
-    {
-      if (*lre < *rre)      *out++ = *lre++;
-      else 
-      {
-        // We only want to add a rule if it's not already included.
-        if (*lre != *rre)   
-        {
-          *out = *rre; out->length = length;
-          ++out;
-        }
-        ++rre;
-      }
-    }
-    std::copy(lre, end(), out);
-    out += end() - lre;
-    for (; rre != state.rules_end; ++rre, ++out)
-    {
-      *out = *rre; out->length = length;
-    }
-    m_end = out;
+    if (*lre < *rre)      *out++ = *lre++;
+    else if (*rre < *lre) { *out = *rre++; out++->length = length; }
+    else                { *out++ = *lre++; ++rre; }
+
+    if (rre == state.rules_end) { m_end = std::copy(lre, end(), out); return; }
   }
-  else if (size() == 0)
-  {
-    // If the ResultSet is currently empty just copy the list into it
-    RuleEntry * out = m_begin;
-    for (const RuleEntry *rre = state.rules; rre != state.rules_end; ++rre, ++out)
-    {
-      *out = *rre; out->length = length;
-    }
-    m_end = out;
-  }
+  while (rre != state.rules_end) { *out = *rre++; out++->length = length; }
+  m_end = out;
 }
 
 inline SlotMap::SlotMap(GrSegment & seg)
