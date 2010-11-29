@@ -225,14 +225,11 @@ extern "C"
     }
 
 
-    GRNG_EXPORT FeatureRef* face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const FeatureRef* face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->featureById(featId);
-        if (!pRef)
-            return NULL;
-
-        return new FeatureRef(*pRef);
+        return pRef;
     }
 
     GRNG_EXPORT unsigned short face_n_fref(const GrFace* pFace)
@@ -241,14 +238,11 @@ extern "C"
         return pFace->numFeatures();
     }
 
-    GRNG_EXPORT FeatureRef* face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const FeatureRef* face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->feature(i);
-        if (!pRef)
-            return NULL;
-
-        return new FeatureRef(*pRef);
+        return pRef;
     }
 
     GRNG_EXPORT unsigned short face_n_languages(const GrFace* pFace)

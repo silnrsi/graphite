@@ -46,20 +46,20 @@ class FeatureRef
 {
 public:
     FeatureRef() :
-      m_mask(0), m_id(0), m_bits(0), m_index(0), m_max(0),
-      m_flags(0), m_nameid(0), m_numSet(0), m_nameValues(NULL)//, m_pMap(NULL)
+        m_nameValues(NULL), m_pMap(NULL)
       {}
     FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
-               FeatureSetting *uiNames/*, const FeatureMap* pMap not NULL*/) throw()
+               FeatureSetting *uiNames, const FeatureMap* pMap /*not NULL*/) throw()
       : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
-      m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
+      m_flags(flags), m_nameid(uiName), m_numSet(numSet),
+      m_nameValues(uiNames), m_pMap(pMap) {}
     FeatureRef(const FeatureRef & toCopy)
         : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_bits(toCopy.m_bits),
         m_index(toCopy.m_index), m_max(toCopy.m_max), m_flags(toCopy.m_flags),
         m_nameid(toCopy.m_nameid), m_numSet(toCopy.m_numSet),
-        m_nameValues((toCopy.m_nameValues)? gralloc<FeatureSetting>(toCopy.m_numSet) : NULL)
-        //m_pMap(NULL)
+        m_nameValues((toCopy.m_nameValues)? gralloc<FeatureSetting>(toCopy.m_numSet) : NULL),
+        m_pMap(NULL)
     {
         // most of the time these name values aren't used, so NULL might be acceptable
         if (toCopy.m_nameValues)
@@ -74,11 +74,11 @@ public:
     bool applyValToFeature(uint16 val, Features* pDest) const { 
         if (val>m_max)
           return false;
-        //if (pDest->m_pMap==NULL)
-        //  pDest->m_pMap = m_pMap;
-        //else
-        //  if (pDest->m_pMap!=m_pMap)
-        //    return false;       //incompatible
+        if (pDest->m_pMap==NULL)
+          pDest->m_pMap = m_pMap;
+        else
+          if (pDest->m_pMap!=m_pMap)
+            return false;       //incompatible
         pDest->grow(m_index);
         {
             pDest->m_vec[m_index] &= ~m_mask;
@@ -119,7 +119,7 @@ private:
     byte m_index;               // index into the array to find the ulong to mask
     uint16 m_nameid;            // Name table id for feature name
     FeatureSetting *m_nameValues;       // array of name table ids for feature values
-    //const FeatureMap* m_pMap;   //not NULL
+    const FeatureMap* m_pMap;   //not NULL
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 };

@@ -35,9 +35,9 @@ class GrFace;
 
 extern "C"
 {
-    GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask);
+    GRNG_EXPORT const FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask);
                       //When finished with the FeatureRef, call destroy_FeatureRef    
-    GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref);
+    GRNG_EXPORT const FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref);
                       //When finished with the FeatureRef, call destroy_FeatureRef    
 
     GRNG_EXPORT uint16 fref_max_value(const FeatureRef* pfeatureref);    //returns 0 if pointer is NULL
@@ -54,7 +54,6 @@ extern "C"
     GRNG_EXPORT void* feature_setting_label(const GrFace* pFace, const FeatureRef*pfeatureref, uint16 setting, uint16 *langId, encform utf, uint32 *length);
     GRNG_EXPORT void destroy_feature_label(void * label);
 
-    GRNG_EXPORT void destroy_FeatureRef(FeatureRef *pfeatureref);
 }
 
 
