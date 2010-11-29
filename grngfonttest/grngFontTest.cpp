@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
         //fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
-        fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with &\n");
+        fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with ,\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
         fprintf(stderr,"\nTrace Logs are written to grSegmentLog.txt if graphite was compiled with\n--enable-tracing.\n");
