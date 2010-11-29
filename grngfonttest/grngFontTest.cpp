@@ -544,7 +544,7 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
     gr2::uint16 langId = 0x0409;
     for (gr2::uint16 i = 0; i < numFeatures; i++)
     {
-        gr2::FeatureRef * f = gr2::face_fref(face, i);
+        const gr2::FeatureRef * f = gr2::face_fref(face, i);
         gr2::uint32 length = 0;
         char * label = reinterpret_cast<char *>(gr2::feature_label(face, f, &langId, gr2::kutf8, &length));
         FeatID featId;
@@ -579,8 +579,6 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
             fprintf(log, "\t%d\t%s\n", value, label);
             gr2::destroy_feature_label(reinterpret_cast<void*>(label));
         }
-
-        gr2::destroy_FeatureRef(f);
     }
     gr2::uint16 numLangs = gr2::face_n_languages(face);
     fprintf(log, "Feature Languages:");
@@ -627,18 +625,18 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
     size_t valueLength = 0;
     gr2::int32 value = 0;
     FeatID featId;
-    gr2::FeatureRef* ref = NULL;
+    const gr2::FeatureRef* ref = NULL;
     featId.uId = 0;
     for (size_t i = 0; i < featureLength; i++)
     {
         switch (features[i])
         {
+            case ',':
             case '&':
                 value = atoi(valueText);
                 if (ref)
                 {
                     gr2::fref_set_feature_value(ref, value, featureList);
-                    gr2::destroy_FeatureRef(ref);
                     ref = NULL;
                 }
                 valueText = NULL;
@@ -673,7 +671,14 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         {
             value = atoi(valueText);
             gr2::fref_set_feature_value(ref, value, featureList);
-            gr2::destroy_FeatureRef(ref);
+            if (featId.uId > 0x20000000)
+            {
+                featId.uId = swap32(featId.uId);
+                fprintf(log, "%c%c%c%c=%d\n", featId.uChar[0], featId.uChar[1],
+                         featId.uChar[2], featId.uChar[3], value);
+            }
+            else
+                fprintf(log, "%u=%d\n", featId.uId, value);
             ref = NULL;
         }
     }
