@@ -501,8 +501,26 @@ int Pass::testConstraint(const RuleEntry &re, Slot *iSlot, Machine & m) const
   {
       int count = i + preContext;
       ret = r.constraint->run(m, iSlot, count, status);
-      if (!ret) return 0;
-      if (status != Machine::finished) return 1;
+      if (!ret)
+      {
+#ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementTestRule);
+        }
+#endif
+          return 0;
+      }
+      if (status != Machine::finished)
+      {
+#ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+            XmlTraceLog::get().closeElement(ElementTestRule);
+        }
+#endif
+          return 1;
+      }
   }
     
 #ifdef ENABLE_DEEP_TRACING
