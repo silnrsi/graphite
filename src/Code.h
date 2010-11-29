@@ -42,7 +42,6 @@ public:
     enum status_t 
     {
         loaded,
-        empty,
         alloc_failed, 
         invalid_opcode, 
         unimplemented_opcode_used,
@@ -80,7 +79,8 @@ private:
                 _max_slotref;
     mutable status_t _status;
     bool        _constrained,
-                _immutable;
+                _modify,
+                _delete;
     mutable bool _own;
 
     void release_buffers() throw ();
@@ -101,6 +101,7 @@ public:
     size_t        dataSize() const throw();
     size_t        instructionCount() const throw();
     bool          immutable() const throw();
+    bool          deletes() const throw();
 
     int32 run(Machine &m, slotref & islot_idx, int &count,
                     Machine::status_t & status) const;
@@ -109,7 +110,7 @@ public:
 
 inline Code::Code() throw()
 : _code(0), _data(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0),
-  _status(empty), _own(false) {
+  _status(loaded), _own(false) {
 }
 
 inline Code::Code(const Code &obj) throw ()
@@ -121,14 +122,15 @@ inline Code::Code(const Code &obj) throw ()
     _max_slotref(obj._max_slotref),
     _status(obj._status), 
     _constrained(obj._constrained),
-    _immutable(obj._immutable),
+    _modify(obj._modify),
+    _delete(obj._delete),
     _own(obj._own) 
 {
     obj._own = false;
 }
 
 inline Code & Code::operator=(const Code &rhs) throw() {
-    if (_status != empty)
+    if (_instr_count > 0)
         release_buffers();
     _code        = rhs._code; 
     _data        = rhs._data;
@@ -138,7 +140,8 @@ inline Code & Code::operator=(const Code &rhs) throw() {
     _max_slotref = rhs._max_slotref;
     _status      = rhs._status; 
     _constrained = rhs._constrained;
-    _immutable   = rhs._immutable;
+    _modify    = rhs._modify;
+    _delete     = rhs._delete;
     _own         = rhs._own; 
     rhs._own = false;
     return *this;
@@ -166,9 +169,13 @@ inline size_t Code::instructionCount() const throw() {
 
 inline bool Code::immutable() const throw()
 {
-  return _immutable;
+  return !(_delete || _modify);
 }
 
+inline bool Code::deletes() const throw()
+{
+  return _delete;
+}
 
 } // end of namespace vm
 

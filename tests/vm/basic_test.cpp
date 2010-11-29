@@ -31,7 +31,6 @@ class GrSegment
 
 const char * prog_error_msg[] = {
     _msg(loaded),
-    _msg(empty),
     _msg(alloc_failed), 
     _msg(invalid_opcode), 
     _msg(unimplemented_opcode_used),
