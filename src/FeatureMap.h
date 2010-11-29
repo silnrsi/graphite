@@ -45,8 +45,13 @@ private:
 class FeatureRef
 {
 public:
-    FeatureRef(byte bits=0, byte index=0, uint32 mask=0, uint16 flags=0,
-               uint32 name=0, uint16 uiName=0, uint16 numSet=0, FeatureSetting *uiNames=NULL) throw()
+    FeatureRef() :
+      m_mask(0), m_id(0), m_bits(0), m_index(0), m_max(0),
+      m_flags(0), m_nameid(0), m_numSet(0), m_nameValues(NULL)//, m_pMap(NULL)
+      {}
+    FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
+               uint32 name, uint16 uiName, uint16 numSet,
+               FeatureSetting *uiNames/*, const FeatureMap* pMap not NULL*/) throw()
       : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
       m_flags(flags), m_nameid(uiName), m_numSet(numSet), m_nameValues(uiNames) {}
     FeatureRef(const FeatureRef & toCopy)
@@ -54,6 +59,7 @@ public:
         m_index(toCopy.m_index), m_max(toCopy.m_max), m_flags(toCopy.m_flags),
         m_nameid(toCopy.m_nameid), m_numSet(toCopy.m_numSet),
         m_nameValues((toCopy.m_nameValues)? gralloc<FeatureSetting>(toCopy.m_numSet) : NULL)
+        //m_pMap(NULL)
     {
         // most of the time these name values aren't used, so NULL might be acceptable
         if (toCopy.m_nameValues)
@@ -73,14 +79,14 @@ public:
         //else
         //  if (pDest->m_pMap!=m_pMap)
         //    return false;       //incompatible
-        //pDest->grow(m_index);
+        pDest->grow(m_index);
         {
             pDest->m_vec[m_index] &= ~m_mask;
             pDest->m_vec[m_index] |= (uint32(val) << m_bits);
         }
         return true;
     }
-    void maskFeature(Features* pDest) const { 
+    void maskFeature(Features* pDest) const {
 	if (m_index < pDest->m_length) 				//defensive
 	    pDest->m_vec[m_index] |= m_mask; 
     }
@@ -113,6 +119,7 @@ private:
     byte m_index;               // index into the array to find the ulong to mask
     uint16 m_nameid;            // Name table id for feature name
     FeatureSetting *m_nameValues;       // array of name table ids for feature values
+    //const FeatureMap* m_pMap;   //not NULL
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 };
@@ -137,14 +144,12 @@ class NameAndFeatureRef
 class FeatureMap
 {
 public:
-    FeatureMap() : m_numFeats(0), m_searchIndex(0),
+    FeatureMap() : m_numFeats(0), m_pNamedFeats(NULL), m_searchIndex(0),
         m_sortedIndexes(NULL),
         m_feats(NULL), m_defaultFeatures(NULL) {}
-    ~FeatureMap() { delete[] m_feats; delete m_defaultFeatures; }
-    
-//    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
+
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    bool createSortedFeatureList(); // public for testing purposes
     const FeatureRef *findFeatureRef(uint32 name) const;
     FeatureRef *feature(uint16 index) const { return m_feats + index; }
     //FeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }

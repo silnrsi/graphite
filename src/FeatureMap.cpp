@@ -41,49 +41,6 @@ bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
     return true;
 }
 
-bool FeatureMap::createSortedFeatureList()
-{
-    // create a list of the indices of the features in the font sorted by feature ID
-    m_sortedIndexes = gralloc<uint16>(m_numFeats);
-    if (m_sortedIndexes)
-    {
-        m_searchIndex = 1;
-        m_sortedIndexes[0] = 0;
-        for (uint16 i = 1; i < m_numFeats; i++)
-        {
-            if (m_searchIndex << 1 <= m_numFeats)
-                m_searchIndex <<= 1;
-            uint16 j = i;
-            // find the position to insert
-            while ((j > 0) && (m_feats[m_sortedIndexes[j-1]].getId() > m_feats[i].getId()))
-            {
-                assert(j != 0);
-                --j;
-            }
-            // move existing items up if necessary
-            if (j < i)
-            {
-                uint16 k = i - 1;
-                do
-                {
-                    m_sortedIndexes[k+1] = m_sortedIndexes[k];
-                    if (k == j) break;
-                    assert(k != 0);
-                    --k;
-                } while(true);
-            }
-            // insert the new value
-            m_sortedIndexes[j] = i;
-        }
-        m_searchIndex -= 1;
-    }
-    else
-    {
-        return false;
-    }
-    return true;
-}
-
 bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
 {
     size_t lFeat;
@@ -211,13 +168,13 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     
     free(defVals);
 
-    //std::sort(m_pNamedFeats, m_pNamedFeats+m_numFeats);
+    std::sort(m_pNamedFeats, m_pNamedFeats+m_numFeats);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
 #endif
 
-    return createSortedFeatureList();
+    return true;
 }
 
 bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
@@ -264,7 +221,6 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
 
 const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
-/*
     NameAndFeatureRef target(name);
     NameAndFeatureRef* it = std::lower_bound(m_pNamedFeats, m_pNamedFeats+m_numFeats, target);
     if (it==m_pNamedFeats+m_numFeats)
@@ -272,32 +228,6 @@ const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
     if (it->m_name!=name)
       return NULL;
     return it->m_pFRef;
-*/
-    assert (m_sortedIndexes);
-    uint16 i = m_searchIndex;
-    int16 step = (m_searchIndex + 1) >> 1;
-    do
-    {
-        size_t featIndex = m_sortedIndexes[i];
-        if (i >= m_numFeats || m_feats[featIndex].getId() > name)
-        {
-            if (step == 0) return NULL;
-            i -= step;
-            step >>= 1;
-        }
-        else if (m_feats[featIndex].getId() < name)
-        {
-            if (step == 0) return NULL;
-            i += step;
-            step >>= 1;
-        }
-        else
-        {
-            return &(m_feats[featIndex]);
-        }
-    } while (true);
-
-    return NULL;
 }
 
 Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
@@ -311,9 +241,6 @@ Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
             if (m_langFeats[i].m_lang == langname)
                 return m_langFeats[i].m_pFeatures->clone();
         }
-//        std::map<uint32, Features *>::const_iterator res = m_langMap.find(name);
-//        if (res != m_langMap.end()) 
-//            return new Features(*res->second);
     }
     return m_FeatureMap.m_defaultFeatures->clone();
 }

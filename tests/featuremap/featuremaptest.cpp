@@ -231,7 +231,6 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     dummyFace.init<T>(table);
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
     testAssert("readFeats", readStatus);
-    testFeatureMap.createSortedFeatureList();
     fprintf(stderr, testName, NULL);
     testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
 
