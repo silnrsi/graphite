@@ -1,0 +1,43 @@
+12 features
+2001 Shadda+kasra placement
+	0	Raised kasra
+	1	Lowered kasra
+2002 Meem alternates
+	0	Standard
+	1	Sindhi
+2003 Heh alternates
+	0	Standard
+	1	Kurdish
+	2	Sindhi
+	3	Urdu
+2004 Eastern digit alternates
+	0	Standard
+	1	Sindhi
+	2	Urdu
+2005 Sukun alternates
+	0	Sukun
+	1	Jasm open down
+	2	Jasm open left
+2009 Dotless head of khah
+	0	Standard
+	1	Jasm open left
+2006 Downward comma
+	0	False
+	1	True
+2007 Six-nine dammatan
+	0	False
+	1	True
+2008 End of ayah
+	0	Standard
+	1	Simplified A
+	2	Simplified B
+3000 Kasra-tcheh adjustment
+	2	Raise kasra
+	1	Lower kasra
+1051 Diacritic selection
+	1	True
+	0	False
+1030 Show invisible characters
+	0	False
+	1	True
+Feature Languages:	bdh	ckb	kmr	kur	plk	scl	sd	sdh	snd	ur	urd

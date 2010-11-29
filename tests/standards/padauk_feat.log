@@ -1,0 +1,33 @@
+10 features
+1801744244 kdot Khamti style dots
+	0	False
+	1	True
+1717858164 fdot Filled dots
+	0	False
+	1	True
+1819042932 lldt Lower dot shifts left
+	0	False
+	1	True
+2004120169 wtri Tear drop style washwe
+	0	False
+	1	True
+1970040686 ulon Long U with Yayit, long UU with Hato
+	0	False
+	1	True
+1970561388 utal U and UU always full height
+	0	False
+	1	True
+1685025891 dotc Insert dotted circles for errors
+	1	True
+	0	False
+1752394862 hsln Slanted hato
+	0	Upright
+	1	Sgaw style slanted leg with horizontal foot
+	2	Slanted leg with right angled foot
+1852733793 nnya Disable great nnya
+	0	False
+	1	True
+1987343457 vtta Variant tta
+	0	False
+	1	True
+Feature Languages:	kht	ksw	kyu

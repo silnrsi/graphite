@@ -1,0 +1,122 @@
+37 features
+1058 Small Caps
+	0	False
+	1	True
+1032 Literacy alternates
+	0	False
+	1	True
+1053 Slant italic specials
+	0	False
+	1	True
+1031 Barred-bowl forms
+	0	False
+	1	True
+1026 Tone numbers
+	0	False
+	1	True
+1050 Hide tone contour staves
+	0	False
+	1	True
+1062 9-level pitches
+	0	Ligated
+	1	Show tramlines
+	2	Non-ligated
+	3	Show tramlines, non-ligated
+1029 Vietnamese-style diacritics
+	0	False
+	1	True
+1041 Romanian-style diacritics
+	0	False
+	1	True
+1057 Chinantec tones
+	0	False
+	1	True
+1052 Bridging diacritics
+	0	False
+	1	True
+1024 Uppercase Eng alternates
+	0	Large eng with descender
+	1	Large eng on baseline
+	3	Large eng with short stem
+	2	Capital N with tail
+1025 Rams horn alternates
+	0	Small bowl
+	1	Large bowl
+	2	Small gamma
+1043 Ogonek alternate
+	0	Curved
+	1	Straight
+1064 Capital B-hook alternate
+	0	False
+	1	True
+1038 Capital H-stroke alternate
+	0	Horizontal stroke
+	1	Vertical stroke
+1049 J-stroke hook alternate
+	0	No serif
+	1	Top serif
+1035 Capital N-left-hook alternate
+	0	Uppercase style
+	1	Lowercase style
+1059 Open-O alternate
+	0	Bottom serif
+	1	Top serif
+1040 Small p-hook alternate
+	0	Left hook
+	1	Right hook
+1039 Capital R-tail alternate
+	0	Uppercase style
+	1	Lowercase style
+1037 Capital T-hook alternate
+	0	Left hook
+	1	Right hook
+1033 V-hook alternates
+	0	Curved
+	1	Straight left
+	2	Straight left high hook
+1034 Capital Y-hook alternate
+	1	Right hook
+	0	Left hook
+1036 Small ezh-curl alternate
+	0	Small bowl
+	1	Large bowl
+1042 Capital Ezh alternates
+	0	Normal
+	1	Reversed sigma
+1045 OU alternates
+	0	Closed
+	1	Open
+1027 Mongolian-style Cyrillic E
+	0	False
+	1	True
+1028 Combining breve Cyrillic form
+	0	False
+	1	True
+1056 Cyrillic shha alternate
+	0	False
+	1	True
+1044 Modifier apostrophe alternates
+	0	Small
+	1	Large
+1047 Modifier colon alternate
+	0	Tight
+	1	Wide
+1063 Non-European caron alternates
+	0	False
+	1	True
+1046 Empty set alternates
+	0	Circle
+	1	Zero
+1077 Show deprecated PUA
+	0	None
+	4	Through Unicode 5.1
+	3	Through Unicode 5.0
+	2	Through Unicode 4.1
+	1	Through Unicode 4.0
+1030 Show invisible characters
+	0	False
+	1	True
+1051 Diacritic selection
+	0	False
+	1	True
+Feature Languages:	chz	kxw	ro	ron	rum	tfr	vi	vie

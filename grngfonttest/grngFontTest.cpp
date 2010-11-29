@@ -540,7 +540,7 @@ union FeatID
 void Parameters::printFeatures(const gr2::GrFace * face) const
 {
     gr2::uint16 numFeatures = gr2::face_n_fref(face);
-    fprintf(stdout, "%d features\n", numFeatures);
+    fprintf(log, "%d features\n", numFeatures);
     gr2::uint16 langId = 0x0409;
     for (gr2::uint16 i = 0; i < numFeatures; i++)
     {
@@ -556,19 +556,19 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
                 (featId.uChar[3] >= 0x20 && featId.uChar[3] < 0x7F))
             {
 #ifdef WORDS_BIGENDIAN
-                printf("%d %c%c%c%c %s\n", featId.uId, featId.uChar[0], featId.uChar[1],
+                fprintf(log, "%d %c%c%c%c %s\n", featId.uId, featId.uChar[0], featId.uChar[1],
                        featId.uChar[2], featId.uChar[3], label);
 #else
-                printf("%d %c%c%c%c %s\n", featId.uId, featId.uChar[3], featId.uChar[2],
+                fprintf(log, "%d %c%c%c%c %s\n", featId.uId, featId.uChar[3], featId.uChar[2],
                        featId.uChar[1], featId.uChar[0], label);
 #endif
             }
             else
             {
-                printf("%d %s\n", featId.uId, label);
+                fprintf(log, "%d %s\n", featId.uId, label);
             }
         else
-            printf("%d\n", featId.uId);
+            fprintf(log, "%d\n", featId.uId);
         gr2::destroy_feature_label(reinterpret_cast<void*>(label));
         gr2::uint16 numSettings = gr2::num_feature_settings(f);
         for (gr2::uint16 j = 0; j < numSettings; j++)
@@ -576,27 +576,27 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
             gr2::int16 value = gr2::feature_setting_value(f, j);
             label = reinterpret_cast<char *>(gr2::feature_setting_label
                 (face, f, j, &langId, gr2::kutf8, &length));
-            printf("\t%d\t%s\n", value, label);
+            fprintf(log, "\t%d\t%s\n", value, label);
             gr2::destroy_feature_label(reinterpret_cast<void*>(label));
         }
 
         gr2::destroy_FeatureRef(f);
     }
     gr2::uint16 numLangs = gr2::face_n_languages(face);
-    printf("Feature Languages:");
-    for (gr2::uint16 i = 0; i < numFeatures; i++)
+    fprintf(log, "Feature Languages:");
+    for (gr2::uint16 i = 0; i < numLangs; i++)
     {
         FeatID langID;
         langID.uId = gr2::face_lang_by_index(face, i);
         langID.uId = swap32(langID.uId);
-        printf("\t");
+        fprintf(log, "\t");
         for (size_t i = 0; i < 4; i++)
         {
             if ((langID.uChar[i]) >= 0x20 && (langID.uChar[i] < 0x80))
-                printf("%c", langID.uChar[i]);
+                fprintf(log, "%c", langID.uChar[i]);
         }
     }
-    printf("\n");
+    fprintf(log, "\n");
 }
 
 gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
