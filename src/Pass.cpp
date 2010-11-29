@@ -345,16 +345,21 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
-    if (!testPassConstraint(m)) return;
-
-    int count = 0;
     Slot *s = m.slotMap().segment.first();
-    for (int target_count=0; s; target_count = count + 1)
+    if (!s || !testPassConstraint(m)) return;
+
+    int hurdle=0, pos = 0, lc = m_iMaxLoop;
+    do 
     {
-      for (int lc = m_iMaxLoop; lc && s && count < target_count; --lc)
-        s = findNDoRule(s, count, m, fsm);
-      while (s && count < target_count) { s = s->next(); ++count; }
-    }
+      pos += findNDoRule(s, m, fsm);
+      if (pos > hurdle) { lc = m_iMaxLoop; hurdle = pos; }
+      else if (--lc == 0)
+      {
+        while (pos <= hurdle && s) { s = s->next(); ++pos; }
+        hurdle = pos;
+        lc = m_iMaxLoop;
+      }
+   } while(s);
 }
 
 inline uint16 Pass::glyphToCol(const uint16 gid) const
@@ -402,7 +407,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
     return true;
 }
 
-Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine & fsm) const
+int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
 {
     assert(slot);
     
@@ -423,7 +428,7 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
           XmlTraceLog::get().addAttribute(AttrIndex, count);
         }
   #endif
-        Slot * const res = doAction(r->rule->action, count, m);
+        const int res = doAction(r->rule->action, slot, m);
   #ifdef ENABLE_DEEP_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -435,8 +440,8 @@ Slot *Pass::findNDoRule(Slot *slot, int &count, Machine &m, FiniteStateMachine &
       }
     }
 
-    ++count;
-    return slot->next();
+    slot = slot->next();
+    return 1;
 }
 
     
@@ -455,12 +460,12 @@ bool Pass::testPassConstraint(Machine & m) const
   return ret && status != Machine::finished;
 }
 
-int Pass::testConstraint(const RuleEntry &re, Machine & m) const
+bool Pass::testConstraint(const RuleEntry &re, Machine & m) const
 {
   const Rule &r = *re.rule;
   uint32 ret = 1;
   
-  if (!*r.constraint) return 1;
+  if (!*r.constraint) return true;
   
   assert(r.constraint->constraint());
     
@@ -479,8 +484,8 @@ int Pass::testConstraint(const RuleEntry &re, Machine & m) const
   {
       vm::slotref * map = &m.slotMap()[i + preContext];
       ret = r.constraint->run(m, map, status);
-      if (!ret) return 0;
-      if (status != Machine::finished) return 1;
+      if (!ret) return false;
+      if (status != Machine::finished) return true;
   }
     
 #ifdef ENABLE_DEEP_TRACING
@@ -490,23 +495,26 @@ int Pass::testConstraint(const RuleEntry &re, Machine & m) const
   }
 #endif
   
-    return status == Machine::finished ? ret : 1;
+    return status == Machine::finished ? ret : true;
 }
 
-Slot *Pass::doAction(const Code *codeptr, int &count, vm::Machine & m) const
+int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
 
     if (!*codeptr)
-      return (*map)->next();
+    {
+      slot_out = (*map)->next();
+      return 1;
+    }
 
     GrSegment & seg = smap.segment;
     Machine::status_t status;
     int glyph_diff = -seg.slotCount();    
     int32 ret = codeptr->run(m, map, status);
     glyph_diff += seg.slotCount();
-    count      += map - smap.begin() - smap.context() + glyph_diff + ret;
+    const int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
     if (codeptr->deletes())
     {
       for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
@@ -516,34 +524,34 @@ Slot *Pass::doAction(const Code *codeptr, int &count, vm::Machine & m) const
       }
     }
     
-    Slot * iSlot = *map;
+    slot_out = *map;
     if (ret < 0)
     {
-        if (!iSlot)
+        if (!slot_out)
         {
-            iSlot = seg.last();
+            slot_out = seg.last();
             ++ret;
         }
-        while (++ret <= 0 && iSlot)
+        while (++ret <= 0 && slot_out)
         {
-            iSlot = iSlot->prev();
+            slot_out = slot_out->prev();
         }
     }
     else if (ret > 0)
     {
-      assert(iSlot);
-        if (!iSlot)
+      assert(slot_out);
+        if (!slot_out)
         {
-            iSlot = seg.first();
+            slot_out = seg.first();
             --ret;
         }
-        while (--ret >= 0 && iSlot)
+        while (--ret >= 0 && slot_out)
         {
-            iSlot = iSlot->next();
+            slot_out = slot_out->next();
         }
     }
-    if (status != Machine::finished && iSlot) return iSlot->next();
+    if (status != Machine::finished && slot_out) slot_out = slot_out->next();
         
-    return iSlot;
+    return count;
 }
 
