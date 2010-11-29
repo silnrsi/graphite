@@ -176,7 +176,7 @@ void SegCache::purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, s
             {
                 SegCachePrefixEntry * prefixEntry = prefixes.prefixEntries[i];
                 m_segmentCount -= prefixEntry->purge(minAccessCount,
-                    m_totalAccessCount - store->maxSegmentCount() / 2, m_totalAccessCount);
+                    m_totalAccessCount - store->maxSegmentCount() / eAgeFactor, m_totalAccessCount);
             }
         }
     }
@@ -203,8 +203,8 @@ unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
             SegCacheEntry & tempEntry = m_entries[length][j];
             // purge entries with a low access count which haven't been
             // accessed recently
-            if (tempEntry.accessCount() < minAccessCount &&
-                tempEntry.lastAccess() < oldAccessTime)
+            if (tempEntry.accessCount() <= minAccessCount &&
+                tempEntry.lastAccess() <= oldAccessTime)
             {
                 tempEntry.clear();
                 purgeIndices[purgeCount++] = j;

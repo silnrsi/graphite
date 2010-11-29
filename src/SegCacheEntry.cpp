@@ -32,11 +32,16 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
 {
+    uint16 baseGlyph = 0;
+    if (charOffset > 0)
+    {
+        baseGlyph = seg->charinfo(charOffset - 1)->glyphAfter();
+    }
     for (uint16 i = 0; i < length; i++)
     {
-        m_charInfo[i].m_unicode = cmapGlyphs[i] - charOffset;
-        m_charInfo[i].m_before = seg->charinfo(i)->glyphBefore();
-        m_charInfo[i].m_after = seg->charinfo(i)->glyphAfter();
+        m_charInfo[i].m_unicode = cmapGlyphs[i];
+        m_charInfo[i].m_before = seg->charinfo(i+charOffset)->glyphBefore();
+        m_charInfo[i].m_after = seg->charinfo(i+charOffset)->glyphAfter();
     }
     size_t glyphCount = seg->slotCount();
     const Slot * slot = seg->first();

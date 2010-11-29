@@ -98,7 +98,7 @@ public:
             else
             {
                 // the problem comes when you get incremental numeric ids in a large doc
-                if (listSize > eMaxSuffixCount)
+                if (listSize >= eMaxSuffixCount)
                     return NULL;
                 listSize = (m_entryBSIndex[length-1] << 2) - 1;
             }

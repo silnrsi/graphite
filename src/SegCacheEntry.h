@@ -32,7 +32,9 @@ class SegCachePrefixEntry;
 
 typedef enum {
     /** number of characters used in initial prefix tree */
-    ePrefixLength =2,
+    ePrefixLength = 2,
+    /** Segments more recent than maxSegmentCount() / eAgeFactor are kept */
+    eAgeFactor = 4,
     /** Segments are purged according to the formular:
      * accessCount < (totalAccesses)/(ePurgeFactor * maxSegments) */
     ePurgeFactor = 5,

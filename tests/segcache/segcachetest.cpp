@@ -111,6 +111,27 @@ bool checkEntries(CachedGrFace * face, const char * testString, uint16 * glyphSt
     return true;
 }
 
+bool testSeg(gr2::CachedGrFace* face, const gr2::GrFont *sizedFont,
+             const char * testString,
+             size_t * testLength, gr2::uint16 ** testGlyphString)
+{
+    const void * badUtf8 = NULL;
+    *testLength = count_unicode_characters(gr2::kutf8, reinterpret_cast<const void*>(testString),
+                                                    testString + strlen(testString),
+                                                    &badUtf8);
+    *testGlyphString = gr2::gralloc<gr2::uint16>(*testLength + 1);
+    CharacterCountLimit limit(gr2::kutf8, testString, *testLength);
+    CmapProcessor cmapProcessor(face, *testGlyphString);
+    IgnoreErrors ignoreErrors;
+    processUTF(limit, &cmapProcessor, &ignoreErrors);
+
+    gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, gr2::kutf8, testString,
+                        *testLength, 0);
+    assert(segA);
+    if (!checkEntries(face, testString, *testGlyphString, *testLength))
+        return -1;
+   
+}
 
 int main(int argc, char ** argv)
 {
@@ -128,7 +149,7 @@ int main(int argc, char ** argv)
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::graphite_start_logging(log, GRLOG_SEGMENT);
     gr2::CachedGrFace *face = reinterpret_cast<gr2::CachedGrFace*>
-        (gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 4000));
+        (gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 10));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
@@ -144,21 +165,7 @@ int main(int argc, char ** argv)
     
     for (size_t i = 0; i < numTestStrings; i++)
     {
-        size_t testLength = count_unicode_characters(gr2::kutf8, testStrings[i],
-                                                     testStrings[i] + strlen(testStrings[i]),
-                                                     &badUtf8);
-        testGlyphStrings[i] = gr2::gralloc<gr2::uint16>(testLength + 1);
-        CharacterCountLimit limit(gr2::kutf8, testStrings[i], testLength);
-        CmapProcessor cmapProcessor(face, testGlyphStrings[i]);
-        IgnoreErrors ignoreErrors;
-        testLengths[i] = testLength;
-        processUTF(limit, &cmapProcessor, &ignoreErrors);
-
-        gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, gr2::kutf8, testStrings[i],
-                            testLength, 0);
-        assert(segA);
-        if (!checkEntries(face, testStrings[i], testGlyphStrings[i], testLengths[i]))
-            return -1;
+        testSeg(face, sizedFont, testStrings[i], &(testLengths[i]), &(testGlyphStrings[i]));
     }
     Features * defaultFeatures = face_features_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
@@ -180,6 +187,18 @@ int main(int argc, char ** argv)
     if (segCount != 10 || accessCount != 29)
     {
         fprintf(stderr, "SegCache after repeat contains %lu entries, which were used %Ld times\n",
+            segCount, accessCount);
+        return -2;
+    }
+    // test purge
+    size_t len = 0;
+    uint16 * testGlyphString = NULL;
+    testSeg(face, sizedFont, "ba", &len, &testGlyphString);
+    segCount = segCache->segmentCount();
+    accessCount = segCache->totalAccessCount();
+    if (segCount > 10 || accessCount != 30)
+    {
+        fprintf(stderr, "SegCache after purge contains %lu entries, which were used %Ld times\n",
             segCount, accessCount);
         return -2;
     }
