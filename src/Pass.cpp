@@ -351,9 +351,9 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
     Slot *s = m.slotMap().segment.first();
     for (int target_count=0; s; target_count = count + 1)
     {
-      for (int lc = m_iMaxLoop; lc && s; --lc)
+      for (int lc = m_iMaxLoop; lc && s && count < target_count; --lc)
         s = findNDoRule(s, count, m, fsm);
-      while (s && ++count <= target_count) s = s->next();
+      while (s && count < target_count) { s = s->next(); ++count; }
     }
 }
 
