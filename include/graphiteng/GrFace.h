@@ -54,6 +54,7 @@ extern "C"
     GRNG_EXPORT unsigned short face_n_languages(const GrFace* pFace);
     GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
     GRNG_EXPORT void destroy_face(GrFace *face);
+    GRNG_EXPORT uint16 face_name_lang_for_locale(GrFace *face, const char * locale);
 
     GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 
     GRNG_EXPORT bool set_face_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.

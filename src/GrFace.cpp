@@ -263,6 +263,15 @@ extern "C"
         return pFace->theSill().getLangName(i);
     }
 
+    GRNG_EXPORT uint16 face_name_lang_for_locale(GrFace *face, const char * locale)
+    {
+        if (face)
+        {
+            return face->languageForLocale(locale);
+        }
+        return 0;
+    }
+
  #if 0      //hidden since no way to release atm.
  
     GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)

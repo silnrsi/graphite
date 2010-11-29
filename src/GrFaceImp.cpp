@@ -203,6 +203,14 @@ NameTable * GrFace::nameTable() const
     return m_pNames;
 }
 
+uint16 GrFace::languageForLocale(const char * locale) const
+{
+    nameTable();
+    if (m_pNames)
+        return m_pNames->getLanguageId(locale);
+    return 0;
+}
+
 /*virtual*/ CachedGrFace::~CachedGrFace()
 {
     delete m_cacheStore;

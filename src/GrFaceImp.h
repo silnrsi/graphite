@@ -151,6 +151,7 @@ public:
     void takeFileFace(FileFace* pFileFace/*takes ownership*/);
     CmapCache * getCmapCache() const { return m_cmapCache; };
     NameTable * nameTable() const;
+    uint16 languageForLocale(const char * locale) const;
 
     CLASS_NEW_DELETE
 private:
