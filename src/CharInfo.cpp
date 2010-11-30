@@ -19,6 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cassert>
 #include "graphiteng/CharInfo.h"
 #include "CharInfoImp.h"
 
@@ -28,16 +29,15 @@ extern "C"
 {
 GRNG_EXPORT unsigned int cinfo_unicode_char(const CharInfo* p/*not NULL*/)
 {
+    assert(p);
     return p->unicodeChar();
 }
 
 
 GRNG_EXPORT int cinfo_break_weight(const CharInfo* p/*not NULL*/)
 {
+    assert(p);
     return p->breakWeight();
 }
 
-
 }
-
-
