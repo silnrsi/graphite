@@ -175,7 +175,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
       return false;
     r->action     = new vm::Code(false, ac_begin, ac_end);
     r->constraint = new vm::Code(true,  rc_begin, rc_end);
-
+    r->sort       = swap16(*sort_key++);
+    
     if (!r->action || !r->constraint)  
       return false;
 
@@ -195,7 +196,6 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     const ptrdiff_t rn = swap16(*rule_map++);
     if (rn >= m_numRules)  return false;
     re->rule = m_rules + rn;
-    re->sort = swap16(sort_key[rn]);
   }
   
   return true;
@@ -370,8 +370,6 @@ inline uint16 Pass::glyphToCol(const uint16 gid) const
 
 bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
 {
-    assert(slot);
-    
     int context = 0;
     for (; context != m_maxPreCtxt && slot->prev(); ++context, slot = slot->prev());
     if (context < m_minPreCtxt)
@@ -387,7 +385,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
 
       state = state->transitions[col];
       if (state->is_success())
-        fsm.rules.accumulate_rules(*state, fsm.slots.size() - context);
+        fsm.rules.accumulate_rules(*state);
       
 #ifdef ENABLE_DEEP_TRACING
       if (!state->is_transition())
@@ -402,7 +400,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
 #endif
 
       slot = slot->next();
-    } while(slot && state != m_states && state->is_transition());
+    } while(state->is_transition() && slot && state != m_states);
     
     fsm.slots.pushSlot(slot);
     return true;
@@ -417,7 +415,7 @@ int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
       // Search for the first rule which passes the constraint
       const RuleEntry *        r = fsm.rules.begin(),
                       * const re = fsm.rules.end();
-      for (; r != re && !testConstraint(*r, m); ++r);
+      for (; r != re && !testConstraint(*r->rule, m); ++r);
           
       if (r != re)
       {
@@ -458,18 +456,15 @@ bool Pass::testPassConstraint(Machine & m) const
   Machine::status_t status = Machine::finished;
   const uint32 ret = m_cPConstraint.run(m, map, status);
 
-  return ret && status != Machine::finished;
+  return ret || status != Machine::finished;
 }
 
-bool Pass::testConstraint(const RuleEntry &re, Machine & m) const
+
+bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
-  const Rule &r = *re.rule;
-  uint32 ret = 1;
-  
   if (!*r.constraint) return true;
-  
   assert(r.constraint->constraint());
-    
+  
 #ifdef ENABLE_DEEP_TRACING
   if (XmlTraceLog::get().active())
   {
@@ -477,16 +472,12 @@ bool Pass::testConstraint(const RuleEntry &re, Machine & m) const
     XmlTraceLog::get().addAttribute(AttrNum, size_t(&r - m_rules));
   }
 #endif
-  
+  vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
   Machine::status_t status = Machine::finished;
-
-  const int preContext = m.slotMap().context();
-  for (int i = -r.preContext; i != re.length; ++i)
+  for (int n = r.sort; n; --n, ++map)
   {
-      vm::slotref * map = &m.slotMap()[i + preContext];
-      ret = r.constraint->run(m, map, status);
-      if (!ret) return false;
-      if (status != Machine::finished) return true;
+      const int32 ret = r.constraint->run(m, map, status);
+      if (!ret || status != Machine::finished) return ret;
   }
     
 #ifdef ENABLE_DEEP_TRACING
@@ -495,9 +486,9 @@ bool Pass::testConstraint(const RuleEntry &re, Machine & m) const
     XmlTraceLog::get().closeElement(ElementTestRule);
   }
 #endif
-  
-    return status == Machine::finished ? ret : true;
+    return true;
 }
+
 
 int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
@@ -511,11 +502,10 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
     }
 
     GrSegment & seg = smap.segment;
-    Machine::status_t status;
     int glyph_diff = -seg.slotCount();    
+    Machine::status_t status;
     int32 ret = codeptr->run(m, map, status);
     glyph_diff += seg.slotCount();
-    const int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
     if (codeptr->deletes())
     {
       for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
@@ -525,6 +515,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
       }
     }
     
+    const int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
     slot_out = *map;
     if (ret < 0)
     {

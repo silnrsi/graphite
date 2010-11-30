@@ -17,26 +17,26 @@
 #pragma once
 
 #include "Code.h"
-#include <bits/stl_algo.h>
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct Rule {
   const vm::Code * constraint, 
                  * action;
+  unsigned short   sort;
   byte             preContext;
+  
 };
 
 
 struct RuleEntry
 {
   const Rule   * rule;
-  unsigned short sort,
-                length;
 
   inline bool operator < (const RuleEntry &r) const
   { 
-    return sort > r.sort || (sort == r.sort && rule < r.rule);
+    const unsigned short lsort = rule->sort, rsort = r.rule->sort; 
+    return lsort > rsort || (lsort == rsort && rule < r.rule);
   }
   
   inline bool operator == (const RuleEntry &r) const
@@ -89,7 +89,7 @@ public:
   Slot * const & operator[](int n) const;
   Slot       * & operator [] (int);
   void           pushSlot(Slot * const slot);
-  
+
   GrSegment &    segment;
 private:
   Slot         * m_slot_map[MAX_SLOTS+1];
@@ -113,7 +113,7 @@ private:
       const RuleEntry * end() const;
       size_t            size() const;
       
-      void accumulate_rules(const State &state, const unsigned short length);
+      void accumulate_rules(const State &state);
   private:
       RuleEntry * m_begin, 
                 * m_end,
@@ -176,12 +176,17 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, cons
   while (lre != end())
   {
     if (*lre < *rre)      *out++ = *lre++;
-    else if (*rre < *lre) { *out = *rre++; out++->length = length; }
+    else if (*rre < *lre) { *out++ = *rre++; }
     else                { *out++ = *lre++; ++rre; }
 
-    if (rre == state.rules_end) { m_end = std::copy(lre, end(), out); return; }
+    if (rre == state.rules_end) 
+    { 
+      while (lre != end()) { *out++ = *lre++; }
+      m_end = out;
+      return;
+    }
   }
-  while (rre != state.rules_end) { *out = *rre++; out++->length = length; }
+  while (rre != state.rules_end) { *out++ = *rre++; }
   m_end = out;
 }
 
