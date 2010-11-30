@@ -866,10 +866,10 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-pt d\tPoint size (12)\n");
         fprintf(stderr,"-codes\tEnter text as hex code points instead of utf8 (false)\n");
         fprintf(stderr,"\te.g. %s font.ttf -codes 1000 102f\n",argv[0]);
-        fprintf(stderr,"-ls\tStart of line = true (false)\n");
-        fprintf(stderr,"-le\tEnd of line = true (false)\n");
+        //fprintf(stderr,"-ls\tStart of line = true (false)\n");
+        //fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
-        fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
+        //fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
         //fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with ,\n");
