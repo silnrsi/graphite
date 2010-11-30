@@ -21,6 +21,8 @@ option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 
 set(VM_MACHINE_TYPE call CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.   Auto -- depends upon configuration type; Direct -- usually fastest but only on GCC. default for Release configuration with GCC; Call -- slower but universal. defualt for Debug configuration")
 
+set(DOXYGEN_CONFIG public CACHE STRING "Specifies the base configuration file for doxygen. Current values: public, all")
+
 string(TOLOWER ${VM_MACHINE_TYPE} VM_MACHINE_TYPE)
 
 if (NOT VM_MACHINE_TYPE MATCHES "auto|direct|call")
