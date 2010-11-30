@@ -239,6 +239,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
       
       s->rules = begin;
       s->rules_end = end;
+      std::sort(begin, end);
   }
 
   logStates();
@@ -328,6 +329,7 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
       if (first > last || last >= m_numGlyphs || col >= m_sColumns) 
 	return false;
 
+      std::fill(m_cols + first, m_cols + last + 1, col);
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {
@@ -338,7 +340,6 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
             XmlTraceLog::get().closeElement(ElementRange);
         }
 #endif
-      std::fill(m_cols + first, m_cols + last + 1, col);
     }
     return true;
 }
@@ -551,7 +552,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
         }
     }
     if (status != Machine::finished && slot_out) slot_out = slot_out->next();
-        
+
     return count;
 }
 
