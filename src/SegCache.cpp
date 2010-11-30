@@ -33,7 +33,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     :
     m_prefixLength(ePrefixLength),
-    m_maxCachedSegLength(eMaxCachedSeg),
+    m_maxCachedSegLength(eMaxSpliceSize),
     m_segmentCount(0),
     m_totalAccessCount(0l), m_totalMisses(0l),
     m_features(feats)
@@ -192,7 +192,7 @@ unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
 
     long long totalPurged = 0;
     // real length is length + 1 in this loop
-    for (uint16 length = 0; length < eMaxCachedSeg; length++)
+    for (uint16 length = 0; length < eMaxSpliceSize; length++)
     {
         if (m_entryCounts[length] == 0)
             continue;

@@ -25,6 +25,7 @@
 #include "Main.h"
 #include "Silf.h"
 #include "GrFaceImp.h"
+#include "GrCachedFace.h"
 #include "GrSegmentImp.h"
 #include "SegCache.h"
 #include "SegCacheStore.h"
@@ -56,7 +57,7 @@ private:
     size_t m_pos;
 };
 
-bool checkEntries(CachedGrFace * face, const char * testString, uint16 * glyphString, size_t testLength)
+bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
     Features * defaultFeatures = face_features_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
@@ -111,7 +112,7 @@ bool checkEntries(CachedGrFace * face, const char * testString, uint16 * glyphSt
     return true;
 }
 
-bool testSeg(gr2::CachedGrFace* face, const gr2::GrFont *sizedFont,
+bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
              const char * testString,
              size_t * testLength, gr2::uint16 ** testGlyphString)
 {
@@ -148,7 +149,7 @@ int main(int argc, char ** argv)
     }
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::graphite_start_logging(log, GRLOG_SEGMENT);
-    gr2::CachedGrFace *face = reinterpret_cast<gr2::CachedGrFace*>
+    gr2::GrCachedFace *face = reinterpret_cast<gr2::GrCachedFace*>
         (gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 10));
     if (!face)
     {

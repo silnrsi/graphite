@@ -79,6 +79,7 @@ add_library(graphiteng SHARED
     FeatureRef.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
+    GrCachedFace.cpp
     GrFace.cpp
     GrFaceImp.cpp
     GrFont.cpp

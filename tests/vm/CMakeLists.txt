@@ -25,9 +25,6 @@ add_library(vm-test-common  STATIC
                 ${SRC}/GrSegmentImp.cpp
                 ${SRC}/NameTable.cpp
                 ${SRC}/Pass.cpp
-                ${SRC}/SegCache.cpp
-                ${SRC}/SegCacheEntry.cpp
-                ${SRC}/SegCacheStore.cpp
                 ${SRC}/Silf.cpp
                 ${SRC}/SlotImp.cpp
                 ${SRC}/TtfUtil.cpp

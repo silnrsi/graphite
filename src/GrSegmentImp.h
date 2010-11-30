@@ -56,7 +56,12 @@ typedef std::vector<uint16 *> AttributeRope;
 class SegmentScopeState;
 class GrFace;
 class GrSegment;
-class SegCacheEntry;
+
+typedef enum {
+/** sub-Segments longer than this are not cached
+ * (in Unicode code points) */
+    eMaxSpliceSize = 16
+} SpliceParam;
 
 class SegmentScopeState
 {
@@ -115,7 +120,8 @@ public:
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachTo() ? is : findRoot(is->attachTo()); }
     int numAttrs() { return m_silf->numUser(); }
-    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, const SegCacheEntry * entry);
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot,
+                const Slot * firstSpliceSlot, size_t numGlyphs);
     int defaultOriginal() const { return m_defaultOriginal; }
     const GrFace * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int charIndex) { assert(m_feats.size() == 1); return m_feats[0]; }

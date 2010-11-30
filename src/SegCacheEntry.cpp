@@ -28,20 +28,13 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime)
-    : m_glyphLength(0), m_charInfo(gr2::gralloc<SegCacheCharInfo>(length)), m_glyph(NULL),
+    : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL),
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
 {
-    uint16 baseGlyph = 0;
-    if (charOffset > 0)
-    {
-        baseGlyph = seg->charinfo(charOffset - 1)->glyphAfter();
-    }
     for (uint16 i = 0; i < length; i++)
     {
-        m_charInfo[i].m_unicode = cmapGlyphs[i];
-        m_charInfo[i].m_before = seg->charinfo(i+charOffset)->glyphBefore();
-        m_charInfo[i].m_after = seg->charinfo(i+charOffset)->glyphAfter();
+        m_unicode[i] = cmapGlyphs[i];
     }
     size_t glyphCount = seg->slotCount();
     const Slot * slot = seg->first();
@@ -59,8 +52,8 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
         uint16 m_i;
         const Slot * m_slot;
     };
-    struct Index2Slot parentGlyphs[eMaxCachedSeg];
-    struct Index2Slot childGlyphs[eMaxCachedSeg];
+    struct Index2Slot parentGlyphs[eMaxSpliceSize];
+    struct Index2Slot childGlyphs[eMaxSpliceSize];
     uint16 numParents = 0;
     uint16 numChildren = 0;
     uint16 pos = 0;
@@ -139,9 +132,7 @@ void SegCacheEntry::log(size_t unicodeLength) const
         for (size_t i = 0; i < unicodeLength; i++)
         {
             XmlTraceLog::get().openElement(ElementText);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, m_charInfo[i].m_unicode);
-            XmlTraceLog::get().addAttribute(AttrBefore, m_charInfo[i].m_before);
-            XmlTraceLog::get().addAttribute(AttrAfter, m_charInfo[i].m_after);
+            XmlTraceLog::get().addAttribute(AttrGlyphId, m_unicode[i]);
             XmlTraceLog::get().closeElement(ElementText);
         }
         for (size_t i = 0; i < m_glyphLength; i++)
@@ -161,10 +152,10 @@ void SegCacheEntry::log(size_t unicodeLength) const
 
 void SegCacheEntry::clear()
 {
-    if (m_charInfo) free(m_charInfo);
+    if (m_unicode) free(m_unicode);
     if (m_attr) free(m_attr);
     delete [] m_glyph;
-    m_charInfo = NULL;
+    m_unicode = NULL;
     m_glyph = NULL;
     m_glyphLength = 0;
     m_attr = NULL;

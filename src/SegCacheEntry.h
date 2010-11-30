@@ -41,10 +41,8 @@ typedef enum {
     /** Maximum number of Segments to store which have the same
      * prefix. Needed to prevent unique identifiers flooding the cache */
     eMaxSuffixCount = 15,
-    /** sub-Segments longer than this are not cached
-        * (in Unicode code points) */
-    eMaxCachedSeg = 16
-} SegCacheLength;
+
+} SegCacheParameters;
 
 class SegCacheCharInfo
 {
@@ -63,7 +61,7 @@ class SegCacheEntry
     friend class SegCachePrefixEntry;
 public:
     SegCacheEntry() :
-        m_glyphLength(0), m_charInfo(NULL), m_glyph(NULL), m_attr(NULL),
+        m_glyphLength(0), m_unicode(NULL), m_glyph(NULL), m_attr(NULL),
         m_accessCount(0), m_lastAccess(0)
     {}
     SegCacheEntry(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime);
@@ -98,7 +96,7 @@ private:
     size_t m_glyphLength;
     /** glyph ids resulting from cmap mapping from unicode to glyph before substitution
      * the length of this array is determined by the position in the SegCachePrefixEntry */
-    SegCacheCharInfo * m_charInfo;
+    uint16 * m_unicode;
     /** slots after shapping and positioning */
     Slot * m_glyph;
     uint16 * m_attr;

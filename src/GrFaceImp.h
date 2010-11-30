@@ -109,6 +109,7 @@ private:        //defensive
     FileFace& operator=(const FileFace&);
 };
 
+const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
 
 class GrFace
 {
@@ -176,22 +177,6 @@ private:
 private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     GrFace(const GrFace&);
     GrFace& operator=(const GrFace&);
-};
-
-class SegCacheStore;
-
-class CachedGrFace : public GrFace
-{
-public:
-    CachedGrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) :
-        GrFace(appFaceHandle, getTable2),
-        m_cacheStore(NULL) {};
-    bool setupCache(unsigned int cacheSize);
-    virtual ~CachedGrFace();
-    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
-    SegCacheStore * cacheStore() { return m_cacheStore; }
-private:
-    SegCacheStore * m_cacheStore;
 };
 
 }}}} // namespace

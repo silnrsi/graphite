@@ -27,11 +27,13 @@
 #include "SlotImp.h"
 #include "FeaturesImp.h"
 #include "SegCacheEntry.h"
+#include "GrSegmentImp.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class SegCache;
 class SegCacheEntry;
+class SegCacheStore;
 
 /**
  * SegPrefixEntry stores lists of word/syllable segments
@@ -44,7 +46,7 @@ public:
     SegCachePrefixEntry() { memset(this, 0, sizeof(SegCachePrefixEntry)); }
     ~SegCachePrefixEntry()
     {
-        for (size_t j = 0; j < eMaxCachedSeg; j++)
+        for (size_t j = 0; j < eMaxSpliceSize; j++)
         {
             if (m_entryCounts[j])
             {
@@ -158,11 +160,11 @@ private:
             // optimize single entry case
             for (int i = ePrefixLength; i < length; i++)
             {
-                if (cmapGlyphs[i] > m_entries[length-1][0].m_charInfo[i].m_unicode)
+                if (cmapGlyphs[i] > m_entries[length-1][0].m_unicode[i])
                 {
                     return 1;
                 }
-                else if (cmapGlyphs[i] < m_entries[length-1][0].m_charInfo[i].m_unicode)
+                else if (cmapGlyphs[i] < m_entries[length-1][0].m_unicode[i])
                 {
                     return 0;
                 }
@@ -187,14 +189,14 @@ private:
             {
                 for (int i = ePrefixLength; i < length; i++)
                 {
-                    if (cmapGlyphs[i] > m_entries[length-1][searchIndex].m_charInfo[i].m_unicode)
+                    if (cmapGlyphs[i] > m_entries[length-1][searchIndex].m_unicode[i])
                     {
                         dir = 1;
                         searchIndex += stepSize;
                         stepSize >>= 1;
                         break;
                     }
-                    else if (cmapGlyphs[i] < m_entries[length-1][searchIndex].m_charInfo[i].m_unicode)
+                    else if (cmapGlyphs[i] < m_entries[length-1][searchIndex].m_unicode[i])
                     {
                         dir = -1;
                         searchIndex -= stepSize;
@@ -225,9 +227,9 @@ private:
         return searchIndex;
     }
     /** m_entries is a null terminated list of entries */
-    uint16 m_entryCounts[eMaxCachedSeg];
-    uint16 m_entryBSIndex[eMaxCachedSeg];
-    SegCacheEntry * m_entries[eMaxCachedSeg];
+    uint16 m_entryCounts[eMaxSpliceSize];
+    uint16 m_entryBSIndex[eMaxSpliceSize];
+    SegCacheEntry * m_entries[eMaxSpliceSize];
     unsigned long long m_lastPurge;
 };
 
@@ -277,7 +279,7 @@ private:
 inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t length) const
 {
     uint16 pos = 0;
-    if (!length || length > eMaxCachedSeg) return NULL;
+    if (!length || length > eMaxSpliceSize) return NULL;
     SegCachePrefixArray pEntry = m_prefixes.array[cmapGlyphs[0]];
     while (++pos < m_prefixLength - 1)
     {

@@ -13,6 +13,7 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/Features.cpp
     ../../src/GlyphFace.cpp
     ../../src/GlyphFaceCache.cpp
+    ../../src/GrCachedFace.cpp
     ../../src/GrFace.cpp
     ../../src/GrFaceImp.cpp
     ../../src/GrFont.cpp

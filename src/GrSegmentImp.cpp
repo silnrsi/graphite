@@ -31,7 +31,6 @@
 #include "Main.h"
 #include "XmlTraceLog.h"
 #include "CmapCache.h"
-#include "SegCacheEntry.h"
 #include "graphiteng/GrSegment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -201,13 +200,14 @@ void GrSegment::freeSlot(Slot *aSlot)
 }
 
 void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
-                       Slot * endSlot, const SegCacheEntry * entry)
+                       Slot * endSlot, const Slot * firstSpliceSlot,
+                       size_t numGlyphs)
 {
-    const Slot * replacement = entry->first();
+    const Slot * replacement = firstSpliceSlot;
     Slot * slot = startSlot;
-    extendLength(entry->glyphLength() - length);
+    extendLength(numGlyphs - length);
     // insert extra slots if needed
-    while (entry->glyphLength() > length)
+    while (numGlyphs > length)
     {
         Slot * extra = newSlot();
         extra->prev(endSlot);
@@ -221,7 +221,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         ++length;
     }
     // remove any extra
-    if (entry->glyphLength() < length)
+    if (numGlyphs < length)
     {
         Slot * afterSplice = endSlot->next();
         do
@@ -229,17 +229,17 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
             endSlot = endSlot->prev();
             freeSlot(endSlot->next());
             --length;
-        } while (entry->glyphLength() < length);
+        } while (numGlyphs < length);
         endSlot->next(afterSplice);
         if (afterSplice)
             afterSplice->prev(endSlot);
     }
-    assert(entry->glyphLength() == length);
+    assert(numGlyphs == length);
     // keep a record of consecutive slots wrt start of splice to minimize
     // iterative next/prev calls
-    Slot * slotArray[eMaxCachedSeg];
+    Slot * slotArray[eMaxSpliceSize];
     uint16 slotPosition = 0;
-    for (uint16 i = 0; i < entry->glyphLength(); i++)
+    for (uint16 i = 0; i < numGlyphs; i++)
     {
         if (slotPosition <= i)
         {
@@ -249,7 +249,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         slot->set(*replacement, offset, m_silf->numUser());
         if (replacement->attachedTo())
         {
-            uint16 parentPos = replacement->attachedTo() - entry->first();
+            uint16 parentPos = replacement->attachedTo() - firstSpliceSlot;
             while (slotPosition < parentPos)
             {
                 slotArray[slotPosition+1] = slotArray[slotPosition]->next();
@@ -259,7 +259,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         }
         if (replacement->nextSibling())
         {
-            uint16 pos = replacement->nextSibling() - entry->first();
+            uint16 pos = replacement->nextSibling() - firstSpliceSlot;
             while (slotPosition < pos)
             {
                 slotArray[slotPosition+1] = slotArray[slotPosition]->next();
@@ -269,7 +269,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         }
         if (replacement->firstChild())
         {
-            uint16 pos = replacement->firstChild() - entry->first();
+            uint16 pos = replacement->firstChild() - firstSpliceSlot;
             while (slotPosition < pos)
             {
                 slotArray[slotPosition+1] = slotArray[slotPosition]->next();
@@ -280,7 +280,6 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
         slot = slot->next();
         replacement = replacement->next();
     }
-    // TODO charinfo slot associations
 }
 
         
