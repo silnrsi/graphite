@@ -50,7 +50,11 @@ bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const 
     if (requestedStrategy & eCmap)
     {
         if (!m_cmapCache)
-             m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+        {
+            size_t length = 0;
+            const void * table = getTable(tagCmap, &length);
+            m_cmapCache = new CmapCache(table, length);
+        }
     }
     else
     {
@@ -79,7 +83,9 @@ bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
 
     if (requestedStrategy & eCmap)
     {
-        m_cmapCache = new CmapCache(getTable(tagCmap, NULL));
+        size_t length = 0;
+        const void * table = getTable(tagCmap, &length);
+        m_cmapCache = new CmapCache(table, length);
     }
 
     if (!m_pGlyphFaceCache) return false;

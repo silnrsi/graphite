@@ -28,7 +28,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class CmapCache
 {
 public:
-    CmapCache(const void * cmapTable);
+    CmapCache(const void * cmapTable, size_t length);
     ~CmapCache();
     uint16 lookup(unsigned int unicode) const {
         if ((m_isBmpOnly && unicode > 0xFFFF) || (unicode > 0x10FFFF))

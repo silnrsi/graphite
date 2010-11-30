@@ -27,10 +27,10 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-CmapCache::CmapCache(const void* cmapTable)
+CmapCache::CmapCache(const void* cmapTable, size_t length)
 {
-    void * table31 = TtfUtil::FindCmapSubtable(cmapTable,3, 1);
-    void * table310 = TtfUtil::FindCmapSubtable(cmapTable,3, 10);
+    const void * table31 = TtfUtil::FindCmapSubtable(cmapTable, 3, 1, length);
+    const void * table310 = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, length);
     m_isBmpOnly = (!table310);
     int rangeKey = 0;
     unsigned int codePoint = 0;
@@ -48,7 +48,7 @@ CmapCache::CmapCache(const void* cmapTable)
                 if (!m_blocks[block])
                     return;
             }
-            m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap310Lookup(table310, codePoint);
+            m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap310Lookup(table310, codePoint, rangeKey);
             codePoint =  TtfUtil::Cmap310NextCodepoint(table310, codePoint, &rangeKey);
         }
     }
@@ -71,7 +71,7 @@ CmapCache::CmapCache(const void* cmapTable)
                 if (!m_blocks[block])
                     return;
             }
-            m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap31Lookup(table31, codePoint);
+            m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap31Lookup(table31, codePoint, rangeKey);
             codePoint =  TtfUtil::Cmap31NextCodepoint(table31, codePoint, &rangeKey);
         }
     }

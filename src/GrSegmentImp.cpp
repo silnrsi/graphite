@@ -391,11 +391,15 @@ public:
       SlotBuilder(const GrFace *face2, const Features* pFeats/*must not be NULL*/, GrSegment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
-	  m_ctable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 1)),
-	  m_stable(TtfUtil::FindCmapSubtable(face2->getTable(tagCmap, NULL), 3, 10)),
+	  m_ctable(NULL),
+	  m_stable(NULL),
 	  m_fid(pDest2->addFeatures(*pFeats)),
 	  m_nCharsProcessed(0) 
       {
+          size_t cmapSize = 0;
+          const void * table = face2->getTable(tagCmap, &cmapSize);
+          m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
+          m_stable = TtfUtil::FindCmapSubtable(table, 3, 10, cmapSize);
       }
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
@@ -415,8 +419,8 @@ public:
 private:
       const GrFace *m_face;
       GrSegment *m_pDest;
-      const void *const   m_ctable;
-      const void *const   m_stable;
+      const void *   m_ctable;
+      const void *   m_stable;
       const unsigned int m_fid;
       size_t m_nCharsProcessed ;
 };

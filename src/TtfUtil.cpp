@@ -876,22 +876,52 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 	subtable. Pass nEncoding as -1 to find first table that matches only nPlatformId.
 	Return NULL if the subtable cannot be found.
 ----------------------------------------------------------------------------------------------*/
-void * FindCmapSubtable(const void * pCmap, 
+const void * FindCmapSubtable(const void * pCmap, 
 								 int nPlatformId, /* =3 */
-								 int nEncodingId) /* = 1 */
+								 int nEncodingId, /* = 1 */
+                                 size_t length)
 {
 	const Sfnt::CharacterCodeMap * pTable = 
 		reinterpret_cast<const Sfnt::CharacterCodeMap *>(pCmap);
 	
 	uint16 csuPlatforms = read(pTable->num_subtables);
+    if (length && (sizeof(Sfnt::CharacterCodeMap) + 8 * (csuPlatforms - 1) > length))
+        return NULL;
 	for (int i = 0; i < csuPlatforms; i++)
 	{
 		if (read(pTable->encoding[i].platform_id) == nPlatformId &&
 			(nEncodingId == -1 || read(pTable->encoding[i].platform_specific_id) == nEncodingId))
 		{
-			const void * pRtn = reinterpret_cast<const uint8 *>(pCmap) + 
-				read(pTable->encoding[i].offset);
-			return const_cast<void *>(pRtn);
+            uint32 offset = read(pTable->encoding[i].offset);
+			const uint8 * pRtn = reinterpret_cast<const uint8 *>(pCmap) + offset;
+            if (length)
+            {
+                if (offset > length) return NULL;
+                uint16 format = read(*reinterpret_cast<const uint16*>(pRtn));
+                if (format == 4)
+                {
+                    uint16 subTableLength = read(*reinterpret_cast<const uint16*>(pRtn + 2));
+                    if (i + 1 == csuPlatforms)
+                    {
+                        if (subTableLength > length - offset)
+                            return NULL;
+                    }
+                    else if (subTableLength > read(pTable->encoding[i+1].offset))
+                        return NULL;
+                }
+                if (format == 12)
+                {
+                    uint32 subTableLength = read(*reinterpret_cast<const uint32*>(pRtn + 2));
+                    if (i + 1 == csuPlatforms)
+                    {
+                        if (subTableLength > length - offset)
+                            return NULL;
+                    }
+                    else if (subTableLength > read(pTable->encoding[i+1].offset))
+                        return NULL;
+                }
+            }
+			return const_cast<void *>(reinterpret_cast<const void *>(pRtn));
 		}
 	}
 
@@ -906,8 +936,13 @@ bool CheckCmap31Subtable(const void * pCmap31)
 	const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmap31);
 	// Bob H says ome freeware TT fonts have version 1 (eg, CALIGULA.TTF) 
 	// so don't check subtable version. 21 Mar 2002 spec changes version to language.
-
-	return read(pTable->format) == 4;
+    if (read(pTable->format) != 4) return false;
+    const Sfnt::CmapSubTableFormat4 * pTable4 = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmap31);
+    uint16 length = read(pTable4->length);
+    if (length < sizeof(Sfnt::CmapSubTableFormat4))
+        return false;
+    uint16 nRanges = read(pTable4->seg_count_x2) >> 1;
+    return (length >= sizeof(Sfnt::CmapSubTableFormat4) + 4 * nRanges * sizeof(uint16));
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -915,7 +950,7 @@ bool CheckCmap31Subtable(const void * pCmap31)
 	(Actually this code only depends on subtable being format 4.)
 	Return 0 if the Unicode ID is not in the subtable.
 ----------------------------------------------------------------------------------------------*/
-gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId)
+gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId, int rangeKey)
 {
 	const Sfnt::CmapSubTableFormat4 * pTable = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmap31);
 
@@ -925,29 +960,38 @@ gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId)
     	const uint16 * pLeft, * pMid;
 	uint16 cMid, chStart, chEnd;
 
-	// Binary search of the endCode[] array
-	pLeft = &(pTable->end_code[0]);
-	n = nSeg;
-	while (n > 0)
-	{
-		cMid = n >> 1;           // Pick an element in the middle
-		pMid = pLeft + cMid;
-		chEnd = read(*pMid);
-		if (nUnicodeId <= chEnd)
-		{
-			if (cMid == 0 || nUnicodeId > read(pMid[-1]))
-					break;          // Must be this seg or none!
-			n = cMid;            // Continue on left side, omitting mid point
-		}
-		else
-		{
-			pLeft = pMid + 1;    // Continue on right side, omitting mid point
-			n -= (cMid + 1);
-		}
-	}
+    if (rangeKey)
+    {
+        pMid = &(pTable->end_code[rangeKey]);
+        chEnd = read(*pMid);
+        n = rangeKey;
+    }
+    else
+    {
+        // Binary search of the endCode[] array
+        pLeft = &(pTable->end_code[0]);
+        n = nSeg;
+        while (n > 0)
+        {
+            cMid = n >> 1;           // Pick an element in the middle
+            pMid = pLeft + cMid;
+            chEnd = read(*pMid);
+            if (nUnicodeId <= chEnd)
+            {
+                if (cMid == 0 || nUnicodeId > read(pMid[-1]))
+                        break;          // Must be this seg or none!
+                n = cMid;            // Continue on left side, omitting mid point
+            }
+            else
+            {
+                pLeft = pMid + 1;    // Continue on right side, omitting mid point
+                n -= (cMid + 1);
+            }
+        }
 
-	if (!n)
-	return 0;
+        if (!n)
+        return 0;
+    }
 
 	// Ok, we're down to one segment and pMid points to the endCode element
 	// Either this is it or none is.
@@ -963,6 +1007,10 @@ gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId)
 			return (uint16)(idDelta + nUnicodeId); // must use modulus 2^16
 
 		// Look up value in glyphIdArray
+        size_t offset = (nUnicodeId - chStart) + (idRangeOffset >> 1) +
+            (reinterpret_cast<const uint8 *>(pMid) - reinterpret_cast<const uint8*>(pTable));
+        if (offset >= pTable->length)
+            return 0;
 		gid16 nGlyphId = read(*(pMid + (nUnicodeId - chStart) + (idRangeOffset >> 1)));
 		// If this value is 0, return 0. Else add the idDelta
 		return nGlyphId ? nGlyphId + idDelta : 0;
@@ -1041,7 +1089,15 @@ unsigned int Cmap31NextCodepoint(const void *pCmap31, unsigned int nUnicodeId, i
 bool CheckCmap310Subtable(const void *pCmap310)
 {
 	const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmap310);
-	return read(pTable->format) == 12;
+    if (read(pTable->format) != 12)
+        return false;
+    const Sfnt::CmapSubTableFormat12 * pTable12 = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmap310);
+    uint32 length = read(pTable12->length);
+    if (length < sizeof(Sfnt::CmapSubTableFormat12))
+        return false;
+    
+	return (length == (sizeof(Sfnt::CmapSubTableFormat12) + (read(pTable12->num_groups) - 1)
+        * sizeof(uint32) * 3));
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1049,14 +1105,14 @@ bool CheckCmap310Subtable(const void *pCmap310)
 	(Actually this code only depends on subtable being format 12.)
 	Return 0 if the Unicode ID is not in the subtable.
 ----------------------------------------------------------------------------------------------*/
-gid16 Cmap310Lookup(const void * pCmap310, unsigned int uUnicodeId)
+gid16 Cmap310Lookup(const void * pCmap310, unsigned int uUnicodeId, int rangeKey)
 {
 	const Sfnt::CmapSubTableFormat12 * pTable = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmap310);
 
 	//uint32 uLength = read(pTable->length); //could use to test for premature end of table
 	uint32 ucGroups = read(pTable->num_groups);
 
-	for (unsigned int i = 0; i < ucGroups; i++)
+	for (unsigned int i = rangeKey; i < ucGroups; i++)
 	{
 		uint32 uStartCode = read(pTable->group[i].start_char_code);
 		uint32 uEndCode = read(pTable->group[i].end_char_code);

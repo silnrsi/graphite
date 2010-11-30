@@ -94,14 +94,14 @@ typedef unsigned short gid16;
 	void SwapWString(void * pWStr, size_t nSize = 0); // throw (std::invalid_argument);
 
 	////////////////////////////////// cmap lookup tools 
-	void * FindCmapSubtable(const void * pCmap, int nPlatformId = 3, 
-		int nEncodingId = 1); 
+	const void * FindCmapSubtable(const void * pCmap, int nPlatformId = 3, 
+		int nEncodingId = 1, size_t length = 0);
 	bool CheckCmap31Subtable(const void * pCmap31);
-	gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId); 
+	gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId, int rangeKey = 0); 
 	unsigned int Cmap31NextCodepoint(const void *pCmap31, unsigned int nUnicodeId,
 		int * pRangeKey = 0);
 	bool CheckCmap310Subtable(const void *pCmap310);
-	gid16 Cmap310Lookup(const void * pCmap310, unsigned int uUnicodeId); 
+	gid16 Cmap310Lookup(const void * pCmap310, unsigned int uUnicodeId, int rangeKey = 0);
 	unsigned int Cmap310NextCodepoint(const void *pCmap310, unsigned int nUnicodeId,
 		int * pRangeKey = 0);
 

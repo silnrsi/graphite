@@ -52,7 +52,7 @@ public:
     }
     size_t charsProcessed() const { return m_pos; } //number of characters processed. Usually starts from 0 and incremented by processChar(). Passed in to LIMIT::needMoreChars
 private:
-    void * m_cmapTable;
+    const void * m_cmapTable;
     uint16 * m_buffer;
     size_t m_pos;
 };
