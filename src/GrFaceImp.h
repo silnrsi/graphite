@@ -140,7 +140,7 @@ public:
     bool setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const;      //glyphs already loaded are unloaded
     bool readGlyphs(EGlyphCacheStrategy requestedStrategy);
     bool readGraphite();
-    bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable); }
+    bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable, this); }
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
     uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeats(); }
@@ -178,5 +178,31 @@ private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     GrFace(const GrFace&);
     GrFace& operator=(const GrFace&);
 };
+
+
+inline bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
+{ 
+    if (val>m_max || !m_pFace)
+      return false;
+    if (pDest->m_pMap==NULL)
+      pDest->m_pMap = &m_pFace->theSill().theFeatureMap();
+    else
+      if (pDest->m_pMap!=&m_pFace->theSill().theFeatureMap())
+        return false;       //incompatible
+    pDest->grow(m_index);
+    {
+        pDest->m_vec[m_index] &= ~m_mask;
+        pDest->m_vec[m_index] |= (uint32(val) << m_bits);
+    }
+    return true;
+}
+
+inline uint16 FeatureRef::getFeatureVal(const Features& feats) const
+{ 
+  if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
+    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
+  else
+    return 0;
+}
 
 }}}} // namespace

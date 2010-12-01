@@ -229,7 +229,8 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     gr2::FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<T>(table);
-    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
+    const gr2::GrFace* npFace=NULL;
+    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("readFeats", readStatus);
     fprintf(stderr, testName, NULL);
     testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
@@ -264,7 +265,8 @@ int main(int argc, char ** argv)
     gr2::FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<FeatTableTestE>(testBadOffset);
-    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat);
+    const gr2::GrFace* npFace=NULL;
+    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("fail gracefully on bad table", !readStatus);
 
     return 0;
