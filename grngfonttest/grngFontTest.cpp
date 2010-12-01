@@ -828,7 +828,7 @@ int Parameters::testFileFont() const
         gr2::destroy_seg(pSeg);
        }
         if (featureList) gr2::features_destroy(featureList);
-        gr2::destroy_font(sizedFont);
+        gr2::font_destroy(sizedFont);
         gr2::face_destroy(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
