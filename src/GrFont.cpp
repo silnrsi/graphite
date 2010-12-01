@@ -38,7 +38,7 @@ extern "C"
     }
 
 
-    GRNG_EXPORT void destroy_font(GrFont *font)
+    GRNG_EXPORT void font_destroy(GrFont *font)
     {
         delete font;
     }

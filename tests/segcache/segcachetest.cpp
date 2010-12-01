@@ -202,7 +202,7 @@ int main(int argc, char ** argv)
             segCount, accessCount);
         return -2;
     }
-    destroy_font(sizedFont);
+    font_destroy(sizedFont);
     face_destroy(face);
     features_destroy(defaultFeatures);
 

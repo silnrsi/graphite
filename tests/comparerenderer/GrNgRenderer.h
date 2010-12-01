@@ -48,7 +48,7 @@ public:
     }
     virtual ~GrNgRenderer()
     {
-        gr2::destroy_font(m_grFont);
+        gr2::font_destroy(m_grFont);
         gr2::face_destroy(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
