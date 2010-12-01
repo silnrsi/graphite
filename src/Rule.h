@@ -17,36 +17,37 @@
 #pragma once
 
 #include "Code.h"
-#include <bits/stl_algo.h>
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct Rule {
+  ~Rule();
   const vm::Code * constraint, 
                  * action;
+  unsigned short   sort;
   byte             preContext;
 };
+
+inline Rule::~Rule()
+{
+  delete constraint;
+  delete action;
+}
 
 
 struct RuleEntry
 {
   const Rule   * rule;
-  unsigned short sort,
-                length;
 
   inline bool operator < (const RuleEntry &r) const
   { 
-    return sort > r.sort || (sort == r.sort && rule < r.rule);
+    const unsigned short lsort = rule->sort, rsort = r.rule->sort; 
+    return lsort > rsort || (lsort == rsort && rule < r.rule);
   }
   
   inline bool operator == (const RuleEntry &r) const
   {
     return rule == r.rule;
-  }
-
-  inline bool operator != (const RuleEntry &r) const
-  {
-    return rule != r.rule;
   }
 };
 
@@ -84,9 +85,8 @@ public:
   enum {MAX_SLOTS=64};
   SlotMap(GrSegment & seg);
   
-  void           clear();
   Slot       * * begin();
-  Slot * const * end() const;
+  Slot       * * end();
   size_t         size() const;
   unsigned short context() const;
   void           setContext(unsigned short);
@@ -94,7 +94,7 @@ public:
   Slot * const & operator[](int n) const;
   Slot       * & operator [] (int);
   void           pushSlot(Slot * const slot);
-  
+
   GrSegment &    segment;
 private:
   Slot         * m_slot_map[MAX_SLOTS+1];
@@ -118,11 +118,12 @@ private:
       const RuleEntry * end() const;
       size_t            size() const;
       
-      void accumulate_rules(const State &state, const unsigned short length);
+      void accumulate_rules(const State &state);
+
   private:
-      RuleEntry	        m_rules[MAX_RULES*2];
-      RuleEntry  *      m_begin;
-      const RuleEntry * m_end;
+      RuleEntry * m_begin, 
+                * m_end,
+                  m_rules[MAX_RULES*2];
   };
 
 public:
@@ -169,48 +170,30 @@ inline size_t FiniteStateMachine::Rules::size() const
   return m_end - m_begin;
 }
 
-inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, const unsigned short length)
+inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 {
   // Only bother if there are rules in the State object.
-  if (size() > 0 && state.size() > 0)
+  if (state.size() == 0) return;
+  
+  // Merge the new sorted rules list into the current sorted result set.
+  const RuleEntry * lre = begin(), * rre = state.rules;
+  RuleEntry * out = m_rules + (m_begin == m_rules)*MAX_RULES;    
+  m_begin = out; 
+  while (lre != end())
   {
-    // Merge the new sorted rules list into the current sorted result set.
-    RuleEntry * out = m_begin == m_rules ? m_rules + MAX_RULES : m_rules;    
-    const RuleEntry * lre = begin(),
-                    * rre = state.rules;
-    m_begin = out; 
-    while (lre != end() && rre != state.rules_end)
-    {
-      if (*lre < *rre)      *out++ = *lre++;
-      else 
-      {
-        // We only want to add a rule if it's not already included.
-        if (*lre != *rre)   
-        {
-          *out = *rre; out->length = length;
-          ++out;
-        }
-        ++rre;
-      }
+    if (*lre < *rre)      *out++ = *lre++;
+    else if (*rre < *lre) { *out++ = *rre++; }
+    else                { *out++ = *lre++; ++rre; }
+
+    if (rre == state.rules_end) 
+    { 
+      while (lre != end()) { *out++ = *lre++; }
+      m_end = out;
+      return;
     }
-    std::copy(lre, end(), out);
-    out += end() - lre;
-    for (; rre != state.rules_end; ++rre, ++out)
-    {
-      *out = *rre; out->length = length;
-    }
-    m_end = out;
   }
-  else if (size() == 0)
-  {
-    // If the ResultSet is currently empty just copy the list into it
-    RuleEntry * out = m_begin;
-    for (const RuleEntry *rre = state.rules; rre != state.rules_end; ++rre, ++out)
-    {
-      *out = *rre; out->length = length;
-    }
-    m_end = out;
-  }
+  while (rre != state.rules_end) { *out++ = *rre++; }
+  m_end = out;
 }
 
 inline SlotMap::SlotMap(GrSegment & seg)
@@ -223,7 +206,7 @@ inline Slot * * SlotMap::begin()
   return &m_slot_map[0];
 }
 
-inline Slot * const * SlotMap::end() const
+inline Slot * * SlotMap::end()
 {
   return m_slot_map + m_size;
 }

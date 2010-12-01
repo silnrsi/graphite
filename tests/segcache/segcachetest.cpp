@@ -32,7 +32,6 @@
 #include "processUTF.h"
 #include "TtfTypes.h"
 #include "TtfUtil.h"
-#include <boost/config/posix_features.hpp>
 
 
 namespace gr2 = org::sil::graphite::v2;

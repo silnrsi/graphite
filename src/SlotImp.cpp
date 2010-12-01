@@ -247,9 +247,8 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
     }
 }
 
-void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, const SlotMap & map)
+void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, const SlotMap & map)
 {
-    int value = *(int16 *)&val;
     if (index == kslatUserDefnV1)
     {
         index = kslatUserDefn;
@@ -264,10 +263,12 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, c
         m_advance = Position(m_advance.x, value);
         break;
     case kslatAttTo :
-        if (value >= 0 && unsigned(value) < map.size())
+    {
+        const uint16 idx = uint16(value);
+        if (idx < map.size())
         {
-            Slot *other = map[value];
-            m_parent = other;
+            Slot *other = map[idx];
+            attachTo(other);
             other->child(this);
             m_attach = Position(seg->glyphAdvance(other->gid()), 0);
         }
@@ -278,6 +279,7 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, uint16 val, c
 #endif
         }
         break;
+    }
     case kslatAttX :
         m_attach = Position(value, m_attach.y);
         break;

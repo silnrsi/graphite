@@ -88,12 +88,12 @@ int main(int argc, char *argv[])
     int is=0;
     uint32 ret;
     Machine::status_t status;
-    SlotMap map(seg);
-    Machine m(map);
-    map.pushSlot(0);
-    slotref slot = 0;
+    SlotMap smap(seg);
+    Machine m(smap);
+    smap.pushSlot(0);
+    slotref * map = smap.begin();
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, slot, is, status);
+        ret = prog.run(m, map, status);
         switch (status) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:

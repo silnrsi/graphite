@@ -53,7 +53,6 @@ public:
 private:
     struct Context
     {
-        enum {WRITE=1, READ=2};
         Context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
         struct { 
           uint8 changed:1,
@@ -103,8 +102,7 @@ public:
     bool          immutable() const throw();
     bool          deletes() const throw();
 
-    int32 run(Machine &m, slotref & islot_idx, int &count,
-                    Machine::status_t & status) const;
+    int32 run(Machine &m, slotref * & map, Machine::status_t & status) const;
     CLASS_NEW_DELETE
 };
 
@@ -140,8 +138,8 @@ inline Code & Code::operator=(const Code &rhs) throw() {
     _max_slotref = rhs._max_slotref;
     _status      = rhs._status; 
     _constrained = rhs._constrained;
-    _modify    = rhs._modify;
-    _delete     = rhs._delete;
+    _modify      = rhs._modify;
+    _delete      = rhs._delete;
     _own         = rhs._own; 
     rhs._own = false;
     return *this;

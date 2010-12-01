@@ -51,29 +51,29 @@ using namespace org::sil::graphite::v2;
 
 namespace {
 
-const void * direct_run(const bool          __get_table_mode=true,
-                        const instr       * __program=0,
-                        const byte        * __data=0,
-                        Machine::stack_t  * __stack=0,
-                        slotref           * __slot=0,
-                        int               * __count=0,
-                        gr2::SlotMap      * __map=0)
+const void * direct_run(const bool          get_table_mode,
+                        const instr       * program,
+                        const byte        * data,
+                        Machine::stack_t  * stack,
+                        slotref         * & __map,
+                        gr2::SlotMap      * __smap=0)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
     #include "opcode_table.h"
-    if (__get_table_mode)
+    if (get_table_mode)
         return opcode_table;
 
     // Declare virtual machine registers
-    const instr       * ip = __program;
-    const byte        * dp = __data;
-    Machine::stack_t  * sp = __stack + Machine::STACK_GUARD,
+    const instr       * ip = program;
+    const byte        * dp = data;
+    Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
                 * const sb = sp;
-    gr2::SlotMap     & map = *__map;
-    GrSegment        & seg = map.segment;
-    slotref             is = *__slot;
-    int              count = *__count;
+    gr2::SlotMap    & smap = *__smap;
+    GrSegment        & seg = smap.segment;
+    slotref             is = *__map,
+                     * map = __map,
+              * const mapb = smap.begin()+smap.context();
     int8             flags = 0;
     
     // start the program
@@ -83,8 +83,7 @@ const void * direct_run(const bool          __get_table_mode=true,
     #include "opcodes.h"
     
     end:
-    *__slot  = is;
-    *__count = count;
+    __map  = map;
     return sp;
 }
 
@@ -92,20 +91,20 @@ const void * direct_run(const bool          __get_table_mode=true,
 
 const opcode_t * Machine::getOpcodeTable() throw()
 {
-    return static_cast<const opcode_t *>(direct_run());
+    slotref * dummy;
+    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, dummy, 0));
 }
 
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               slotref       & slot,
-                               int           & count,
+                               slotref     * & is,
                                status_t      & status)
 {
     assert(program != 0);
     
     const stack_t *sp = static_cast<const stack_t *>(
-                direct_run(false, program, data, _stack, &slot, &count, &_map));
+                direct_run(false, program, data, _stack, is, &_map));
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
     check_final_stack(sp, status);
     return ret;
