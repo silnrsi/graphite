@@ -25,7 +25,6 @@ struct Rule {
                  * action;
   unsigned short   sort;
   byte             preContext;
-  
 };
 
 
@@ -164,7 +163,7 @@ inline size_t FiniteStateMachine::Rules::size() const
   return m_end - m_begin;
 }
 
-inline void FiniteStateMachine::Rules::accumulate_rules(const State &state, const unsigned short length)
+inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 {
   // Only bother if there are rules in the State object.
   if (state.size() == 0) return;

@@ -424,14 +424,16 @@ int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
         {
           XmlTraceLog::get().openElement(ElementDoRule);
           XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
-          XmlTraceLog::get().addAttribute(AttrIndex, count);
+          XmlTraceLog::get().addAttribute(AttrIndex, int(slot - fsm.slots.segment.first()));
         }
   #endif
         const int res = doAction(r->rule->action, slot, m);
   #ifdef ENABLE_DEEP_TRACING
         if (XmlTraceLog::get().active())
         {
-          XmlTraceLog::get().addAttribute(AttrResult, int(res - fsm.slots.segment.first()));
+          XmlTraceLog::get().openElement(ElementPassResult);
+          XmlTraceLog::get().addAttribute(AttrResult, int(slot - fsm.slots.segment.first()));
+          XmlTraceLog::get().closeElement(ElementPassResult);
           XmlTraceLog::get().closeElement(ElementDoRule);
         }
   #endif
@@ -477,7 +479,16 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
   for (int n = r.sort; n; --n, ++map)
   {
       const int32 ret = r.constraint->run(m, map, status);
-      if (!ret || status != Machine::finished) return ret;
+      if (!ret || status != Machine::finished) 
+      {
+#ifdef ENABLE_DEEP_TRACING
+        if (XmlTraceLog::get().active())
+        {
+          XmlTraceLog::get().closeElement(ElementTestRule);
+        }
+#endif
+        return ret;
+      }
   }
     
 #ifdef ENABLE_DEEP_TRACING

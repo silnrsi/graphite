@@ -169,7 +169,7 @@ inline void Machine::check_final_stack(const gr2::int32 * const sp,
                                 XmlTraceLog::get().addAttribute(AttrIndex, unsigned(map - smap.begin())); \
                             }
 
-#define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode);
+#define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode)
 #else
 #define STARTTRACE(name,is)
 #define ENDTRACE

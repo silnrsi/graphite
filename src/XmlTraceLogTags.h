@@ -69,6 +69,7 @@ typedef enum {
     ElementRunPass,
     ElementParams,
     ElementPush,
+    ElementPassResult,
 
     ElementError,
     ElementWarning,

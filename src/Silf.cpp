@@ -435,17 +435,20 @@ void Silf::runGraphite(GrSegment *seg) const
     for (size_t i = 0; i < m_numPasses; ++i)
     {
 #ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-	        XmlTraceLog::get().openElement(ElementRunPass);
-	        XmlTraceLog::get().addAttribute(AttrNum, i);
-        }
+      if (XmlTraceLog::get().active())
+      {
+        XmlTraceLog::get().openElement(ElementRunPass);
+        XmlTraceLog::get().addAttribute(AttrNum, i);
+      }
 #endif
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(m, fsm);
 #ifndef DISABLE_TRACING
-            seg->logSegment();
-	    XmlTraceLog::get().closeElement(ElementRunPass);
+      seg->logSegment();
+      if (XmlTraceLog::get().active())
+      {
+        XmlTraceLog::get().closeElement(ElementRunPass);
+      }
 #endif
     }
 }
