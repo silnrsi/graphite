@@ -48,7 +48,7 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # -lgcc LINKER_LANGUAGE C
     add_definitions(-fno-rtti -fno-exceptions)
-    set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs -lc" )
+    set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" )
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
     nolib_test(stdc++ $<TARGET_FILE:grngfonttest>)
