@@ -46,20 +46,20 @@ class FeatureRef
 {
 public:
     FeatureRef() :
-        m_nameValues(NULL), m_pMap(NULL)
+        m_nameValues(NULL), m_pFace(NULL)
       {}
     FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
-               FeatureSetting *uiNames, const FeatureMap* pMap /*not NULL*/) throw()
+               FeatureSetting *uiNames, const GrFace* pFace/*not NULL*/) throw()
       : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
       m_flags(flags), m_nameid(uiName), m_numSet(numSet),
-      m_nameValues(uiNames), m_pMap(pMap) {}
+      m_nameValues(uiNames), m_pFace(pFace) {}
     FeatureRef(const FeatureRef & toCopy)
         : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_bits(toCopy.m_bits),
         m_index(toCopy.m_index), m_max(toCopy.m_max), m_flags(toCopy.m_flags),
         m_nameid(toCopy.m_nameid), m_numSet(toCopy.m_numSet),
         m_nameValues((toCopy.m_nameValues)? gralloc<FeatureSetting>(toCopy.m_numSet) : NULL),
-        m_pMap(NULL)
+        m_pFace(toCopy.m_pFace)
     {
         // most of the time these name values aren't used, so NULL might be acceptable
         if (toCopy.m_nameValues)
@@ -71,32 +71,13 @@ public:
         if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
-    bool applyValToFeature(uint16 val, Features* pDest) const { 
-        if (val>m_max)
-          return false;
-        if (pDest->m_pMap==NULL)
-          pDest->m_pMap = m_pMap;
-        else
-          if (pDest->m_pMap!=m_pMap)
-            return false;       //incompatible
-        pDest->grow(m_index);
-        {
-            pDest->m_vec[m_index] &= ~m_mask;
-            pDest->m_vec[m_index] |= (uint32(val) << m_bits);
-        }
-        return true;
-    }
+    bool applyValToFeature(uint16 val, Features* pDest) const; //defined in GrFaceImp.h
     void maskFeature(Features* pDest) const {
 	if (m_index < pDest->m_length) 				//defensive
 	    pDest->m_vec[m_index] |= m_mask; 
     }
 
-    uint16 getFeatureVal(const Features& feats) const { 
-	if (m_index < feats.m_length /*&& m_pMap==feats.m_pMap*/) 
-	    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
-	else
-	    return 0;
-    }
+    uint16 getFeatureVal(const Features& feats) const; //defined in GrFaceImp.h
 
     uint32 getId() const { return m_id; }
     uint16 getNameId() const { return m_nameid; }
@@ -104,6 +85,8 @@ public:
     uint16 getSettingName(uint16 index) const { return m_nameValues[index].label(); }
     int16 getSettingValue(uint16 index) const { return m_nameValues[index].value(); }
     uint16 maxVal() const { return m_max; }
+    const GrFace* getFace() const { return m_pFace;}
+    const FeatureMap* getFeatureMap() const;// { return m_pFace;}
 
 //     void * operator new (size_t s, FeatureRef * p)
 //     {
@@ -119,9 +102,12 @@ private:
     byte m_index;               // index into the array to find the ulong to mask
     uint16 m_nameid;            // Name table id for feature name
     FeatureSetting *m_nameValues;       // array of name table ids for feature values
-    const FeatureMap* m_pMap;   //not NULL
+    const GrFace* m_pFace;   //not NULL
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
+
+private:        //unimplemented
+    FeatureRef& operator=(const FeatureRef&);
 };
 
 
@@ -149,7 +135,7 @@ public:
         m_feats(NULL), m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
-    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace);
     const FeatureRef *findFeatureRef(uint32 name) const;
     FeatureRef *feature(uint16 index) const { return m_feats + index; }
     //FeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
@@ -189,7 +175,7 @@ private:
 public:
     SillMap() : m_langFeats(NULL), m_numLanguages(0) {}
     ~SillMap() { delete[] m_langFeats; }
-    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
+    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace);
     bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
     Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numLanguages() const { return m_numLanguages; };

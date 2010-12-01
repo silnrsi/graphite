@@ -43,22 +43,16 @@ GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
 }
 */
 
-GRNG_EXPORT uint32 fref_id(const FeatureRef* pfeatureref)    //returns 0 if pointer is NULL
+GRNG_EXPORT uint16 fref_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
 {
-  if (!pfeatureref)
+    if (!pfeatureref)
     return 0;
-  
-  return pfeatureref->getId();
+    if (!feats)
+    return 0;
+    
+    return pfeatureref->getFeatureVal(*feats);
 }
 
-
-GRNG_EXPORT uint16 fref_max_value(const FeatureRef* pfeatureref)    //returns 0 if pointer is NULL
-{
-  if (!pfeatureref)
-    return 0;
-  
-  return pfeatureref->maxVal();
-}
 
 GRNG_EXPORT bool fref_set_feature_value(const FeatureRef* pfeatureref, uint16 val, Features* pDest)
 {
@@ -70,75 +64,44 @@ GRNG_EXPORT bool fref_set_feature_value(const FeatureRef* pfeatureref, uint16 va
     return pfeatureref->applyValToFeature(val, pDest);
 }
 
-GRNG_EXPORT uint16 fref_feature_value(const FeatureRef*pfeatureref, const Features* feats)    //returns 0 if either pointer is NULL
+
+GRNG_EXPORT uint32 fref_id(const FeatureRef* pfeatureref)    //returns 0 if pointer is NULL
 {
-    if (!pfeatureref)
+  if (!pfeatureref)
     return 0;
-    if (!feats)
-    return 0;
-    
-    return pfeatureref->getFeatureVal(*feats);
+  
+  return pfeatureref->getId();
 }
 
-GRNG_EXPORT uint32 feature_id(const FeatureRef*pfeatureref)
-{
-    if (!pfeatureref) return 0;
-    return pfeatureref->getId();
-}
 
-GRNG_EXPORT void destroy_FeatureRef(FeatureRef *p)
-{
-    delete p;
-}
-
-GRNG_EXPORT void* feature_label(const GrFace* pFace,
-    const FeatureRef*pfeatureref, uint16 *langId, encform utf, uint32 *length)
-{
-    if(!pfeatureref)
-    {
-        langId = 0;
-        length = 0;
-        return NULL;
-    }
-    uint16 label = pfeatureref->getNameId();
-    NameTable * names = pFace->nameTable();
-    if (!names)
-    {
-        langId = 0;
-        length = 0;
-        return NULL;
-    }
-    return names->getName(*langId, label, utf, *length);
-}
-
-GRNG_EXPORT uint16 num_feature_settings(const FeatureRef*pfeatureref)
+GRNG_EXPORT uint16 fref_n_values(const FeatureRef*pfeatureref)
 {
     if(!pfeatureref)
         return 0;
     return pfeatureref->getNumSettings();
 }
 
-GRNG_EXPORT int16 feature_setting_value(const FeatureRef*pfeatureref, uint16 setting)
+
+GRNG_EXPORT int16 fref_value(const FeatureRef*pfeatureref, uint16 settingno)
 {
-    if(!pfeatureref || (setting >= pfeatureref->getNumSettings()))
+    if(!pfeatureref || (settingno >= pfeatureref->getNumSettings()))
     {
         return 0;
     }
-    return pfeatureref->getSettingValue(setting);
+    return pfeatureref->getSettingValue(settingno);
 }
 
-GRNG_EXPORT void* feature_setting_label(const GrFace* pFace,
-    const FeatureRef*pfeatureref, uint16 setting, uint16 *langId, encform utf,
-    uint32 *length)
+
+GRNG_EXPORT void* fref_label(const FeatureRef*pfeatureref, uint16 *langId, encform utf, uint32 *length)
 {
-    if(!pfeatureref || (setting >= pfeatureref->getNumSettings()))
+    if(!pfeatureref || !pfeatureref->getFace())
     {
         langId = 0;
         length = 0;
         return NULL;
     }
-    uint16 label = pfeatureref->getSettingName(setting);
-    NameTable * names = pFace->nameTable();
+    uint16 label = pfeatureref->getNameId();
+    NameTable * names = pfeatureref->getFace()->nameTable();
     if (!names)
     {
         langId = 0;
@@ -149,7 +112,28 @@ GRNG_EXPORT void* feature_setting_label(const GrFace* pFace,
 }
 
 
-GRNG_EXPORT void destroy_feature_label(void * label)
+GRNG_EXPORT void* fref_value_label(const FeatureRef*pfeatureref, uint16 setting, uint16 *langId, encform utf,
+    uint32 *length)
+{
+    if(!pfeatureref || (setting >= pfeatureref->getNumSettings()) || !pfeatureref->getFace())
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    uint16 label = pfeatureref->getSettingName(setting);
+    NameTable * names = pfeatureref->getFace()->nameTable();
+    if (!names)
+    {
+        langId = 0;
+        length = 0;
+        return NULL;
+    }
+    return names->getName(*langId, label, utf, *length);
+}
+
+
+GRNG_EXPORT void label_destroy(void * label)
 {
     if (label)
         free(label);

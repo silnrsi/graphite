@@ -546,7 +546,7 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
     {
         const gr2::FeatureRef * f = gr2::face_fref(face, i);
         gr2::uint32 length = 0;
-        char * label = reinterpret_cast<char *>(gr2::feature_label(face, f, &langId, gr2::kutf8, &length));
+        char * label = reinterpret_cast<char *>(gr2::fref_label(f, &langId, gr2::kutf8, &length));
         FeatID featId;
         featId.uId = gr2::fref_id(f);
         if (label)
@@ -569,15 +569,15 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
             }
         else
             fprintf(log, "%d\n", featId.uId);
-        gr2::destroy_feature_label(reinterpret_cast<void*>(label));
-        gr2::uint16 numSettings = gr2::num_feature_settings(f);
+        gr2::label_destroy(reinterpret_cast<void*>(label));
+        gr2::uint16 numSettings = gr2::fref_n_values(f);
         for (gr2::uint16 j = 0; j < numSettings; j++)
         {
-            gr2::int16 value = gr2::feature_setting_value(f, j);
-            label = reinterpret_cast<char *>(gr2::feature_setting_label
-                (face, f, j, &langId, gr2::kutf8, &length));
+            gr2::int16 value = gr2::fref_value(f, j);
+            label = reinterpret_cast<char *>(gr2::fref_value_label
+                (f, j, &langId, gr2::kutf8, &length));
             fprintf(log, "\t%d\t%s\n", value, label);
-            gr2::destroy_feature_label(reinterpret_cast<void*>(label));
+            gr2::label_destroy(reinterpret_cast<void*>(label));
         }
     }
     gr2::uint16 numLangs = gr2::face_n_languages(face);

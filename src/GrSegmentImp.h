@@ -38,6 +38,7 @@
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
+
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 #ifdef __GNUC__
@@ -54,7 +55,6 @@ typedef std::vector<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
-class GrFace;
 class GrSegment;
 
 typedef enum {
