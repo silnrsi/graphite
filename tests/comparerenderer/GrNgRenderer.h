@@ -79,7 +79,7 @@ public:
 //         {
 //             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
 //         }
-        gr2::destroy_seg(pSeg);
+        gr2::seg_destroy(pSeg);
     }
     virtual const char * name() const { return "graphiteng"; }
 private:

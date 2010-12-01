@@ -42,10 +42,10 @@ extern "C"
 extern "C"
 {
     GRNG_EXPORT GrSegment* make_seg(const GrFont* font, const GrFace* face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir);
-                      //When finished with the GrFont, call destroy_GrSegment    
+                      //When finished with the GrFont, call seg_destroy    
     GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont* font, const GrFace* face, uint32 script, const Features* pFeats, encform enc, const void* pStart, size_t nChars, int dir);
-                      //When finished with the GrFont, call destroy_GrSegment    
-    GRNG_EXPORT void destroy_seg(GrSegment* p);
+                      //When finished with the GrFont, call seg_destroy    
+    GRNG_EXPORT void seg_destroy(GrSegment* p);
 
     GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
