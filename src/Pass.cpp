@@ -181,9 +181,10 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     r->action     = new vm::Code(false, ac_begin, ac_end);
     r->constraint = new vm::Code(true,  rc_begin, rc_end);
     
-    if (!r->constraint->immutable()
-        || r->action->status() != Code::loaded
-        || r->constraint->status() != Code::loaded)
+    if (!r->action || !r->constraint
+      || r->action->status() != Code::loaded
+      || r->constraint->status() != Code::loaded
+      || !r->constraint->immutable())
       return false;
     
     logRule(r, sort_key);
@@ -400,7 +401,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
 #endif
 
       slot = slot->next();
-    } while(state->is_transition() && slot && state != m_states);
+    } while(state->is_transition() && state != m_states && slot);
     
     fsm.slots.pushSlot(slot);
     return true;
@@ -503,14 +504,9 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 
 int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
+    assert(codeptr && *codeptr);
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
-
-    if (!*codeptr)
-    {
-      slot_out = (*map)->next();
-      return 1;
-    }
 
     GrSegment & seg = smap.segment;
     int glyph_diff = -seg.slotCount();    

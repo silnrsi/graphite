@@ -332,7 +332,7 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
       update_slot_limits(ab.slotref + dp[0]);
 
       Context & ctxt = ab.contexts[ab.slotref];
-      if (dp[0] != 0) ctxt.flags.changed = true;
+      if (dp[0] != 0) { ctxt.flags.changed = true; _modify = true; }
       if (dp[0] <= 0 && -dp[0] <= ab.slotref)
         ab.contexts[ab.slotref + dp[0] - ctxt.flags.inserted].flags.referenced = true;
       break;

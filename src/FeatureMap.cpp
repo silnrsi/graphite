@@ -47,7 +47,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     size_t lFeat;
     const byte *pFeat = reinterpret_cast<const byte *>((*getTable)(appFaceHandle, ktiFeat, &lFeat));
     const byte *pOrig = pFeat;
-    uint16 *defVals;
+    uint16 *defVals=0;
     uint32 version;
     if (!pFeat) return true;
     if (lFeat < 12) return false;

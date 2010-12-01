@@ -21,11 +21,18 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct Rule {
+  ~Rule();
   const vm::Code * constraint, 
                  * action;
   unsigned short   sort;
   byte             preContext;
 };
+
+inline Rule::~Rule()
+{
+  delete constraint;
+  delete action;
+}
 
 
 struct RuleEntry
@@ -78,9 +85,8 @@ public:
   enum {MAX_SLOTS=64};
   SlotMap(GrSegment & seg);
   
-  void           clear();
   Slot       * * begin();
-  Slot * const * end() const;
+  Slot       * * end();
   size_t         size() const;
   unsigned short context() const;
   void           setContext(unsigned short);
@@ -113,6 +119,7 @@ private:
       size_t            size() const;
       
       void accumulate_rules(const State &state);
+
   private:
       RuleEntry * m_begin, 
                 * m_end,
@@ -199,7 +206,7 @@ inline Slot * * SlotMap::begin()
   return &m_slot_map[0];
 }
 
-inline Slot * const * SlotMap::end() const
+inline Slot * * SlotMap::end()
 {
   return m_slot_map + m_size;
 }

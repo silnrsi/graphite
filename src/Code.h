@@ -53,7 +53,6 @@ public:
 private:
     struct Context
     {
-        enum {WRITE=1, READ=2};
         Context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
         struct { 
           uint8 changed:1,
