@@ -710,7 +710,7 @@ int Parameters::testFileFont() const
         if (charLength == 0)
         {
             printFeatures(face);
-            gr2::destroy_face(face);
+            gr2::face_destroy(face);
             gr2::graphite_stop_logging();
             return 0;
         }
@@ -829,7 +829,7 @@ int Parameters::testFileFont() const
        }
         if (featureList) gr2::features_destroy(featureList);
         gr2::destroy_font(sizedFont);
-        gr2::destroy_face(face);
+        gr2::face_destroy(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;

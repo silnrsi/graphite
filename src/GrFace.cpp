@@ -228,6 +228,13 @@ extern "C"
         return pFace->theSill().getLangName(i);
     }
 
+
+    GRNG_EXPORT void face_destroy(GrFace *face)
+    {
+        delete face;
+    }
+
+
     GRNG_EXPORT uint16 face_name_lang_for_locale(GrFace *face, const char * locale)
     {
         if (face)
@@ -255,19 +262,13 @@ extern "C"
     }
 #endif
 
-    GRNG_EXPORT void destroy_face(GrFace *face)
-    {
-        delete face;
-    }
-
-
     GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
     {
         return GlyphFaceCache::nearestSupportedStrategy(requested);
     }
 
 
-    GRNG_EXPORT bool set_face_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
+    GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
     {
         return pFace->setGlyphCacheStrategy(requestedStrategy);
     }

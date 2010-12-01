@@ -43,9 +43,9 @@ extern "C"
 {
     typedef const void *(*get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
     GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, bool canDumb = false);
-                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy    
     GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, unsigned int segCacheMaxSize, bool canDumb = false);
-                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy
 
     GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
     GRNG_EXPORT const FeatureRef* face_find_fref(const GrFace* pFace, uint32 featId); //When finished with the FeatureRef, call features_destroy
@@ -53,10 +53,10 @@ extern "C"
     GRNG_EXPORT const FeatureRef* face_fref(const GrFace* pFace, uint16 i); //When finished with the FeatureRef, call features_destroy
     GRNG_EXPORT unsigned short face_n_languages(const GrFace* pFace);
     GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
-    GRNG_EXPORT void destroy_face(GrFace *face);
+    GRNG_EXPORT void face_destroy(GrFace *face);
 
     GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 
-    GRNG_EXPORT bool set_face_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
+    GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
     GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace);
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace);
     GRNG_EXPORT unsigned long face_n_glyph_accesses(const GrFace* pFace);
