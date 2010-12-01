@@ -156,30 +156,31 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 		     const uint16 * o_constraint, const byte *rc_data, 
 		     const uint16 * o_action,     const byte * ac_data)
 {
-  // Load rules
-  Rule    * r;
-  const byte * ac_data_end = ac_data + o_action[m_numRules];
-  const byte * rc_data_end = rc_data + o_constraint[m_numRules];
-  const byte * ac_begin = ac_data + swap16(*o_action++), 
-             * rc_begin = rc_data + swap16(*o_constraint++),
-	     * ac_end = 0, * rc_end = 0;
-  m_rules = r = gralloc<Rule>(m_numRules);
-  for (size_t n = m_numRules; n; --n, ++r, ++o_action, ac_begin = ac_end, ++o_constraint, rc_begin = rc_end)
+  const byte * const ac_data_end = ac_data + o_action[m_numRules];
+  const byte * const rc_data_end = rc_data + o_constraint[m_numRules];
+  
+  m_rules = gralloc<Rule>(m_numRules);  
+  precontext += m_numRules; sort_key   += m_numRules;
+  o_constraint += m_numRules; o_action += m_numRules;
+
+  // Load rules.
+  const byte * ac_begin = 0, * rc_begin = 0,
+	     * ac_end = ac_data + swap16(*o_action), 
+             * rc_end = rc_data + swap16(*o_constraint);
+  Rule * r = m_rules + m_numRules - 1;
+  for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
   {
-    r->preContext = *precontext++;
-    ac_end = *o_action     ? ac_data + swap16(*o_action) : ac_begin;
-    rc_end = *o_constraint ? rc_data + swap16(*o_constraint) : rc_begin;
+    r->preContext = *--precontext;
+    r->sort       = swap16(*--sort_key);
+    ac_begin      = ac_data + swap16(*--o_action);
+    rc_begin      = *--o_constraint ? rc_data + swap16(*o_constraint) : rc_end;
     
     if (ac_begin > ac_end || ac_begin >= ac_data_end || ac_end > ac_data_end
-	|| rc_begin > rc_end || rc_begin >= rc_data_end || rc_end > rc_data_end)
+     || rc_begin > rc_end || rc_begin >= rc_data_end || rc_end > rc_data_end)
       return false;
     r->action     = new vm::Code(false, ac_begin, ac_end);
     r->constraint = new vm::Code(true,  rc_begin, rc_end);
-    r->sort       = swap16(*sort_key++);
     
-    if (!r->action || !r->constraint)  
-      return false;
-
     if (!r->constraint->immutable()
         || r->action->status() != Code::loaded
         || r->constraint->status() != Code::loaded)
@@ -189,8 +190,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
   }
   
   // Load the rule entries map
-  RuleEntry * re;
-  m_ruleMap = re = gralloc<RuleEntry>(num_entries);
+  RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
   for (size_t n = num_entries; n; --n, ++re)
   {
     const ptrdiff_t rn = swap16(*rule_map++);
