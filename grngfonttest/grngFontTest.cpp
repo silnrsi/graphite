@@ -825,7 +825,7 @@ int Parameters::testFileFont() const
         float advanceWidth = seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         free(map);
-        gr2::destroy_seg(pSeg);
+        gr2::seg_destroy(pSeg);
        }
         if (featureList) gr2::features_destroy(featureList);
         gr2::font_destroy(sizedFont);

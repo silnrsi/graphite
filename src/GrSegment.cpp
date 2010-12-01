@@ -110,7 +110,7 @@ GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont *font, const GrFace 
 }
 
 
-GRNG_EXPORT void destroy_seg(GrSegment* p)
+GRNG_EXPORT void seg_destroy(GrSegment* p)
 {
     delete p;
 }
