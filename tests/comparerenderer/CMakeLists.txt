@@ -46,7 +46,7 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
         add_test(NAME ${TESTNAME}_comparison COMMAND $<TARGET_FILE:comparerenderer>
         -t ${PROJECT_SOURCE_DIR}/../texts/${TEXTFILE} -f ${PROJECT_SOURCE_DIR}/../fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_comparison.log -c -g -n)
         add_test(NAME ${TESTNAME}_cached_comparison COMMAND $<TARGET_FILE:comparerenderer>
-        -t ${PROJECT_SOURCE_DIR}/../texts/${TEXTFILE} -f ${PROJECT_SOURCE_DIR}/../fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/{TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096)
+        -t ${PROJECT_SOURCE_DIR}/../texts/${TEXTFILE} -f ${PROJECT_SOURCE_DIR}/../fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096)
     endif (${GR_FOUND})
 endmacro(comparetest)
 

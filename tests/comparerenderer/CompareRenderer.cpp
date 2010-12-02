@@ -242,6 +242,8 @@ protected:
             {
                 m_lineOffsets[++line] = i + 1;
             }
+            if (m_fileBuffer[i] > 0 && m_fileBuffer[i] < 32)
+                m_fileBuffer[i] = 32;
         }
         m_lineOffsets[m_numLines] = m_fileLength;
     }

@@ -391,7 +391,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
     {
         fsm.slots.pushSlot(slot);
         const uint16 col = glyphToCol(slot->gid());
-        if (col == 0xffffU) return false;
+        if (col == 0xffffU) return true;
 
         state = state->transitions[col];
         if (state->is_success())

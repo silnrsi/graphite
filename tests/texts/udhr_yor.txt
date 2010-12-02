@@ -4,215 +4,215 @@ This plain text version prepared by the “UDHR in Unicode”
 project, http://www.unicode.org/udhr.
 ---
 
-ÌKÉDE KÁRÍAYÉ FÚN È̩TÓ̩ O̩MO̩NÌYÀN
-    Ò̩RÒ̩ ÀKÓ̩SO̩
-    Bí ó ti jé̩ pé s̩ís̩e àkíyèsí iyì tó jé̩ àbímó̩ fún è̩dá àti ìdó̩gba è̩tó̩ t̩í kò s̩eé mú kúrò tí è̩dá kò̩ò̩kan ní, ni òkúta ìpìlè̩ fún òmìnira, ìdájó̩ òdodo àti àlàáfíà lágbàáyé,
-    Bí ó ti jé̩ pé àìka àwo̩n è̩tó̩ o̩mo̩nìyàn sí àti ìké̩gàn àwo̩n è̩tó̩ wò̩nyí ti s̩e okùnfà fún àwo̩n ìwà búburú kan, tó mú è̩rí‐o̩kàn è̩dá gbo̩gbé̩, tó sì jé̩ pé ìbè̩rè̩ ìgbé ayé titun, nínú èyí tí àwo̩n ènìyàn yóò ti ní òmìnira òrò̩ síso̩ àti òmìnira láti gba ohun tó bá wù wó̩n gbó̩, òmìnira ló̩wó̩ è̩rù àti òmìnira ló̩wó̩ àìní, ni a ti kà sí àníyàn tó ga jù lo̩ ló̩kàn àwo̩n o̩mo̩‐èniyàn,
-    Bí ó ti jé̩ pé ó s̩e pàtàkì kí a dáàbò bo àwo̩n è̩tó o̩mo̩nìyàn lábé̩ òfin, bí a kò bá fé̩ ti àwo̩n ènìyàn láti ko̩jú ìjà sí ìjo̩ba ipá àti ti amúnisìn, nígbà tí kò bá sí ò̩nà àbáyo̩ mìíràn fún wo̩n láti bèèrè è̩tó̩ wo̩n,
-    Bí ó ti jé̩ pé ó s̩e pàtàkì kí ìdàgbàsókè ìbás̩epò̩ ti ò̩ré̩‐sí‐ò̩ré̩ wà láàrin àwo̩n orílè̩‐èdè,
-    Bí ó ti jé̩ pé gbogbo o̩mo̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé tún ti te̩nu mó̩ ìpinnu tí wó̩n ti s̩e té̩lè̩ nínú ìwé àdéhùn wo̩n, pé àwo̩n ní ìgbàgbó̩ nínú è̩tó̩ o̩mo̩nìyàn tó jé̩ kò‐s̩eé‐má‐nìí, ìgbàgbó̩ nínú iyì àti è̩ye̩ è̩dá ènìyàn, àti ìgbàgbó̩ nínú ìdó̩gba è̩tó̩ láàrin o̩kùnrin àti obìnrin, tó sì jé̩ pé wó̩n tún ti pinnu láti s̩e ìgbéláruge̩ ìtè̩síwájú àwùjo̩ nínú èyí tí òmìnira ètò ìgbé‐ayé rere è̩dá ti lè gbòòrò sí i,
-    Bí ó ti jé̩ pé àwo̩n o̩mo̩ e̩gbé̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé ti jé̩jè̩é̩ láti fo̩wó̩s̩owó̩ pò̩ pè̩lú Àjo̩ náà, kí won lè jo̩ s̩e às̩eyege nípa àmús̩e̩ àwo̩n è̩tó̩ o̩mo̩nìyàn àti òmìnira è̩dá tó jé̩ kò‐s̩eé‐má‐nìí àti láti rí i pé à ń bò̩wò̩ fún àwo̩n è̩tó̩ náà káríayé,
-    Bí ó ti jé̩ pé àfi tí àwo̩n è̩tó̩ àti òmìnira wò̩nyí bá yé ènìyàn nìkan ni a fi lè ní àmús̩e̩ è̩jé̩ yìí ní kíkún,
-    Ní báyìí,
-    Àpapò̩ ìgbìmò̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé s̩e ìkéde káríayé ti è̩tó̩ o̩mo̩nìyàn, gé̩gé̩ bí ohun àfojúsùn tí gbogbo è̩dá àti orílè̩‐èdè jo̩ ń lépa ló̩nà tó jé̩ pé e̩nì kò̩ò̩kan àti è̩ka kò̩ò̩kan láwùjo̩ yóò fi ìkéde yìí só̩kàn, tí wo̩n yóò sì rí i pé àwo̩n lo ètò‐ìkó̩ni àti ètò‐è̩kó̩ láti s̩e ìgbéláruge̩ ìbò̩wò̩ fún è̩tó̩ àti òmìnira wò̩nyí. Bákan náà, a gbo̩dò̩ rí àwo̩n ìgbésè̩ tí ó lè mú ìlo̩síwájú bá orílè̩‐èdè kan s̩os̩o tàbí àwo̩n orílè̩‐èdè sí ara wo̩n, kí a sì rí i pé a fi ò̩wò̩ tó jo̩jú wo̩ àwo̩n òfin wò̩nyí, kí àmúlò wo̩n sì jé̩ káríayé láàrin àwo̩n ènìyàn orílè̩‐èdè tó jé̩ o̩mo̩ Àjo̩‐ìsò̩kan àgbáyé fúnra wo̩n àti láàrin àwo̩n ènìyàn orílè̩‐èdè mìíràn tó wà lábé̩ às̩e̩ wo̩n.
+ÌKÉDE KÁRÍAYÉ FÚN È̩TÓ̩ O̩MO̩NÌYÀN
+    Ò̩RÒ̩ ÀKÓ̩SO̩
+    Bí ó ti jé̩ pé s̩ís̩e àkíyèsí iyì tó jé̩ àbímó̩ fún è̩dá àti ìdó̩gba è̩tó̩ t̩í kò s̩eé mú kúrò tí è̩dá kò̩ò̩kan ní, ni òkúta ìpìlè̩ fún òmìnira, ìdájó̩ òdodo àti àlàáfíà lágbàáyé,
+    Bí ó ti jé̩ pé àìka àwo̩n è̩tó̩ o̩mo̩nìyàn sí àti ìké̩gàn àwo̩n è̩tó̩ wò̩nyí ti s̩e okùnfà fún àwo̩n ìwà búburú kan, tó mú è̩rí‐o̩kàn è̩dá gbo̩gbé̩, tó sì jé̩ pé ìbè̩rè̩ ìgbé ayé titun, nínú èyí tí àwo̩n ènìyàn yóò ti ní òmìnira òrò̩ síso̩ àti òmìnira láti gba ohun tó bá wù wó̩n gbó̩, òmìnira ló̩wó̩ è̩rù àti òmìnira ló̩wó̩ àìní, ni a ti kà sí àníyàn tó ga jù lo̩ ló̩kàn àwo̩n o̩mo̩‐èniyàn,
+    Bí ó ti jé̩ pé ó s̩e pàtàkì kí a dáàbò bo àwo̩n è̩tó o̩mo̩nìyàn lábé̩ òfin, bí a kò bá fé̩ ti àwo̩n ènìyàn láti ko̩jú ìjà sí ìjo̩ba ipá àti ti amúnisìn, nígbà tí kò bá sí ò̩nà àbáyo̩ mìíràn fún wo̩n láti bèèrè è̩tó̩ wo̩n,
+    Bí ó ti jé̩ pé ó s̩e pàtàkì kí ìdàgbàsókè ìbás̩epò̩ ti ò̩ré̩‐sí‐ò̩ré̩ wà láàrin àwo̩n orílè̩‐èdè,
+    Bí ó ti jé̩ pé gbogbo o̩mo̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé tún ti te̩nu mó̩ ìpinnu tí wó̩n ti s̩e té̩lè̩ nínú ìwé àdéhùn wo̩n, pé àwo̩n ní ìgbàgbó̩ nínú è̩tó̩ o̩mo̩nìyàn tó jé̩ kò‐s̩eé‐má‐nìí, ìgbàgbó̩ nínú iyì àti è̩ye̩ è̩dá ènìyàn, àti ìgbàgbó̩ nínú ìdó̩gba è̩tó̩ láàrin o̩kùnrin àti obìnrin, tó sì jé̩ pé wó̩n tún ti pinnu láti s̩e ìgbéláruge̩ ìtè̩síwájú àwùjo̩ nínú èyí tí òmìnira ètò ìgbé‐ayé rere è̩dá ti lè gbòòrò sí i,
+    Bí ó ti jé̩ pé àwo̩n o̩mo̩ e̩gbé̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé ti jé̩jè̩é̩ láti fo̩wó̩s̩owó̩ pò̩ pè̩lú Àjo̩ náà, kí won lè jo̩ s̩e às̩eyege nípa àmús̩e̩ àwo̩n è̩tó̩ o̩mo̩nìyàn àti òmìnira è̩dá tó jé̩ kò‐s̩eé‐má‐nìí àti láti rí i pé à ń bò̩wò̩ fún àwo̩n è̩tó̩ náà káríayé,
+    Bí ó ti jé̩ pé àfi tí àwo̩n è̩tó̩ àti òmìnira wò̩nyí bá yé ènìyàn nìkan ni a fi lè ní àmús̩e̩ è̩jé̩ yìí ní kíkún,
+    Ní báyìí,
+    Àpapò̩ ìgbìmò̩ Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé s̩e ìkéde káríayé ti è̩tó̩ o̩mo̩nìyàn, gé̩gé̩ bí ohun àfojúsùn tí gbogbo è̩dá àti orílè̩‐èdè jo̩ ń lépa ló̩nà tó jé̩ pé e̩nì kò̩ò̩kan àti è̩ka kò̩ò̩kan láwùjo̩ yóò fi ìkéde yìí só̩kàn, tí wo̩n yóò sì rí i pé àwo̩n lo ètò‐ìkó̩ni àti ètò‐è̩kó̩ láti s̩e ìgbéláruge̩ ìbò̩wò̩ fún è̩tó̩ àti òmìnira wò̩nyí. Bákan náà, a gbo̩dò̩ rí àwo̩n ìgbésè̩ tí ó lè mú ìlo̩síwájú bá orílè̩‐èdè kan s̩os̩o tàbí àwo̩n orílè̩‐èdè sí ara wo̩n, kí a sì rí i pé a fi ò̩wò̩ tó jo̩jú wo̩ àwo̩n òfin wò̩nyí, kí àmúlò wo̩n sì jé̩ káríayé láàrin àwo̩n ènìyàn orílè̩‐èdè tó jé̩ o̩mo̩ Àjo̩‐ìsò̩kan àgbáyé fúnra wo̩n àti láàrin àwo̩n ènìyàn orílè̩‐èdè mìíràn tó wà lábé̩ às̩e̩ wo̩n.
   
-    Abala kìíní.
-    Gbogbo ènìyàn ni a bí ní òmìnira; iyì àti è̩tó̩ kò̩ò̩kan sì dó̩gba. Wó̩n ní è̩bùn ti làákàyè àti ti è̩rí‐o̩kàn, ó sì ye̩ kí wo̩n ó máa hùwà sí ara wo̩n gé̩gé̩ bí o̩mo̩ ìyá.
+    Abala kìíní.
+    Gbogbo ènìyàn ni a bí ní òmìnira; iyì àti è̩tó̩ kò̩ò̩kan sì dó̩gba. Wó̩n ní è̩bùn ti làákàyè àti ti è̩rí‐o̩kàn, ó sì ye̩ kí wo̩n ó máa hùwà sí ara wo̩n gé̩gé̩ bí o̩mo̩ ìyá.
   
-    Abala kejì.
-    E̩nì kò̩ò̩kan ló ní ànfàní sí gbogbo è̩tó̩ àti òmìnira tí a ti gbé kalè̩ nínú ìkéde yìí láìfi ti ò̩rò̩ ìyàtò̩ è̩yà kankan s̩e; ìyàtò̩ bí i ti è̩yà ènìyàn, àwò̩, ako̩‐n̄‐bábo, èdè, è̩sìn, ètò ìs̩èlú tàbí ìyàtò̩ nípa èrò e̩ni, orílè̩‐èdè e̩ni, orírun e̩ni, ohun ìní e̩ni, ìbí e̩ni tàbí ìyàtò̩ mìíràn yòówù kó jé̩. Síwájú sí i, a kò gbo̩dò̩ ya e̩nìké̩ni só̩tò̩ nítorí irú ìjo̩ba orílè̩‐èdè rè̩ ní àwùjo̩ àwo̩n orílè̩‐èdè tàbí nítorí ètò‐ìs̩èlú tàbí ètò‐ìdájó̩ orílè̩‐èdè rè̩; orílè̩‐èdè náà ìbáà wà ní òmìnira tàbí kí ó wà lábé̩ ìs̩àkóso ilè̩ mìíràn, wo̩n ìbáà má dàá ìjo̩ba ara wo̩n s̩e tàbí kí wó̩n wà lábé̩ ìkáni‐lápá‐kò yòówù tí ìbáà fé̩ dí òmìnira wo̩n ló̩wó̩ gé̩gé̩ bí orílè̩‐èdè.
+    Abala kejì.
+    E̩nì kò̩ò̩kan ló ní ànfàní sí gbogbo è̩tó̩ àti òmìnira tí a ti gbé kalè̩ nínú ìkéde yìí láìfi ti ò̩rò̩ ìyàtò̩ è̩yà kankan s̩e; ìyàtò̩ bí i ti è̩yà ènìyàn, àwò̩, ako̩‐n̄‐bábo, èdè, è̩sìn, ètò ìs̩èlú tàbí ìyàtò̩ nípa èrò e̩ni, orílè̩‐èdè e̩ni, orírun e̩ni, ohun ìní e̩ni, ìbí e̩ni tàbí ìyàtò̩ mìíràn yòówù kó jé̩. Síwájú sí i, a kò gbo̩dò̩ ya e̩nìké̩ni só̩tò̩ nítorí irú ìjo̩ba orílè̩‐èdè rè̩ ní àwùjo̩ àwo̩n orílè̩‐èdè tàbí nítorí ètò‐ìs̩èlú tàbí ètò‐ìdájó̩ orílè̩‐èdè rè̩; orílè̩‐èdè náà ìbáà wà ní òmìnira tàbí kí ó wà lábé̩ ìs̩àkóso ilè̩ mìíràn, wo̩n ìbáà má dàá ìjo̩ba ara wo̩n s̩e tàbí kí wó̩n wà lábé̩ ìkáni‐lápá‐kò yòówù tí ìbáà fé̩ dí òmìnira wo̩n ló̩wó̩ gé̩gé̩ bí orílè̩‐èdè.
     
   
     Abala ke̩ta.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ láti wà láàyè, è̩tó̩ sí òmìnira àti è̩tó̩ sí ààbò ara rè̩.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ láti wà láàyè, è̩tó̩ sí òmìnira àti è̩tó̩ sí ààbò ara rè̩.
   
     Abala ke̩rin.
-    A kò gbo̩dò̩ mú e̩niké̩ni ní e̩rú tàbí kí a mú un sìn; e̩rú níní àti ò wò e̩rú ni a gbo̩dò̩ fi òfin dè ní gbogbo ò̩nà.
+    A kò gbo̩dò̩ mú e̩niké̩ni ní e̩rú tàbí kí a mú un sìn; e̩rú níní àti ò wò e̩rú ni a gbo̩dò̩ fi òfin dè ní gbogbo ò̩nà.
   
-    Abala karùn‐ún.
-    A kò gbo̩dò̩ dá e̩nì ké̩ni lóró tàbí kí a lò ó ní ìlò ìkà tí kò ye̩ o̩mo̩ ènìyàn tàbí ìlò tó lè tàbùkù è̩dá ènìyàn.
+    Abala karùn‐ún.
+    A kò gbo̩dò̩ dá e̩nì ké̩ni lóró tàbí kí a lò ó ní ìlò ìkà tí kò ye̩ o̩mo̩ ènìyàn tàbí ìlò tó lè tàbùkù è̩dá ènìyàn.
   
-    Abala ke̩fà.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ pé kí a kà á sí gé̩gé̩ bí ènìyàn lábé̩ òfin ní ibi gbogbo.
+    Abala ke̩fà.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ pé kí a kà á sí gé̩gé̩ bí ènìyàn lábé̩ òfin ní ibi gbogbo.
   
     Abala keje.
-    Gbogbo ènìyàn ló dó̩gba lábé̩ òfin. Wó̩n sì ní è̩tó̩ sí àà bò lábé̩ òfin láìsí ìyàsó̩tò̩ kankan. Gbogbo ènìyàn ló ní è̩tó̩ sí ààbò tó dó̩gba kúrò ló̩wó̩ ìyàsó̩tò̩ yòówù tí ìbáà lòdì sí ìkéde yìí àti è̩tó̩ kúrò ló̩wó̩ gbogbo ohun tó bá lè ti ènìyàn láti s̩e irú ìyàsó̩tò̩ bé̩è̩.
+    Gbogbo ènìyàn ló dó̩gba lábé̩ òfin. Wó̩n sì ní è̩tó̩ sí àà bò lábé̩ òfin láìsí ìyàsó̩tò̩ kankan. Gbogbo ènìyàn ló ní è̩tó̩ sí ààbò tó dó̩gba kúrò ló̩wó̩ ìyàsó̩tò̩ yòówù tí ìbáà lòdì sí ìkéde yìí àti è̩tó̩ kúrò ló̩wó̩ gbogbo ohun tó bá lè ti ènìyàn láti s̩e irú ìyàsó̩tò̩ bé̩è̩.
   
     Abala ke̩jo̩.
-    E̩nì kò̩ò̩kan lórílè̩‐èdè, ló ní è̩tó̩ sí àtúns̩e tó jo̩jú ní ilé‐e̩jó̩ fún ìwà tó lòdì sí è̩tó̩ o̩mo̩nìyàn, tó jé̩ kò‐s̩eé‐má‐nìí gé̩gé̩ bó s̩e wà lábé̩ òfin àti bí òfin‐ìpìlè̩ s̩e là á sílè̩.
+    E̩nì kò̩ò̩kan lórílè̩‐èdè, ló ní è̩tó̩ sí àtúns̩e tó jo̩jú ní ilé‐e̩jó̩ fún ìwà tó lòdì sí è̩tó̩ o̩mo̩nìyàn, tó jé̩ kò‐s̩eé‐má‐nìí gé̩gé̩ bó s̩e wà lábé̩ òfin àti bí òfin‐ìpìlè̩ s̩e là á sílè̩.
   
-    Abala ke̩sàn‐án.
-    A kò gbo̩dò̩ s̩àdédé fi òfin mú ènìyàn tàbí kí a kàn gbé ènìyàn tì mó̩lé, tàbí kí a lé ènìyàn jáde ní ìlú láìnídìí.
+    Abala ke̩sàn‐án.
+    A kò gbo̩dò̩ s̩àdédé fi òfin mú ènìyàn tàbí kí a kàn gbé ènìyàn tì mó̩lé, tàbí kí a lé ènìyàn jáde ní ìlú láìnídìí.
   
-    Abala ke̩wàá.
-    E̩nì kò̩ò̩kan tí a bá fi è̩sùn kàn ló ní è̩tó̩ tó dó̩gba, tó sì kún, láti s̩àlàyé ara rè̩ ní gban̄gba, níwájú ilé‐e̩jó̩ tí kò s̩ègbè, kí wo̩n lè s̩e ìpinnu lórí è̩tó̩ àti ojús̩e rè̩ nípa irú è̩sùn ò̩ràn dídá tí a fi kàn án.
+    Abala ke̩wàá.
+    E̩nì kò̩ò̩kan tí a bá fi è̩sùn kàn ló ní è̩tó̩ tó dó̩gba, tó sì kún, láti s̩àlàyé ara rè̩ ní gban̄gba, níwájú ilé‐e̩jó̩ tí kò s̩ègbè, kí wo̩n lè s̩e ìpinnu lórí è̩tó̩ àti ojús̩e rè̩ nípa irú è̩sùn ò̩ràn dídá tí a fi kàn án.
   
-    Abala ko̩kànlá.
+    Abala ko̩kànlá.
     
       
-	E̩nìké̩ni tí a fi è̩sùn kàn ni a gbo̩dò̩ gbà wí pé ó jàrè títí è̩bi rè̩ yóò fi hàn lábé̩ òfin nípasè̩ ìdájó̩ tí a s̩e ní gban̄gba nínú èyí tí e̩ni tí a fi è̩sùn kàn yóò ti ní gbogbo ohun tí ó nílò láti fi s̩e àwíjàre ara rè̩.
+	E̩nìké̩ni tí a fi è̩sùn kàn ni a gbo̩dò̩ gbà wí pé ó jàrè títí è̩bi rè̩ yóò fi hàn lábé̩ òfin nípasè̩ ìdájó̩ tí a s̩e ní gban̄gba nínú èyí tí e̩ni tí a fi è̩sùn kàn yóò ti ní gbogbo ohun tí ó nílò láti fi s̩e àwíjàre ara rè̩.
       
       
-	A kò gbo̩dò̩ dá è̩bi è̩s̩è̩ fún e̩nìké̩ni fún pé ó hu ìwà kan tàbí pé ó s̩e àwo̩n àfojúfò kàn nígbà tó jé̩ pé lásìkò tí èyí s̩e̩lè̩, irú ìwà bé̩è̩ tàbí irú àfojúfò bé̩è̩ kò lòdì sí òfin orílè̩‐èdè e̩ni náà tàbí òfin àwo̩n orílè̩‐èdè àgbáyé mìíràn. Bákan náà, ìje̩níyà tí a lè fún e̩ni tó dé̩s̩è̩ kò gbo̩dò̩ ju èyí tó wà ní ìmúlò ní àsìkò tí e̩ni náà dá è̩s̩è̩ rè̩.
-      
-    
-  
-    Abala kejìlá.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ pé kí a má s̩àdédé s̩e àyo̩júràn sí ò̩rò̩ ìgbésí ayé rè̩, tàbí sí ò̩rò̩e̩bí rè̩ tàbí sí ò̩rò̩ ìdílé rè̩ tàbí ìwé tí a ko̩ sí i; a kò sì gbo̩dò̩ ba iyì àti orúko̩ rè̩ jé̩. E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ààbò lábé̩ òfin kúrò ló̩wó̩ irú àyo̩júràn tàbí ìbanijé̩ bé̩è̩.
-  
-    Abala ke̩tàlá.
-    
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti rìn káàkiri ní òmìnira kí ó sì fi ibi tó bá wù ú s̩e ìbùgbé láàrin orílè̩‐èdè rè̩.
-      
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kúrò lórílè̩‐èdè yòówù kó jé̩, tó fi mó̩ orílè̩‐èdè tirè̩, kí ó sì tún padà sí orílè̩‐èdè tirè̩ nígbà tó bá wù ú.
+	A kò gbo̩dò̩ dá è̩bi è̩s̩è̩ fún e̩nìké̩ni fún pé ó hu ìwà kan tàbí pé ó s̩e àwo̩n àfojúfò kàn nígbà tó jé̩ pé lásìkò tí èyí s̩e̩lè̩, irú ìwà bé̩è̩ tàbí irú àfojúfò bé̩è̩ kò lòdì sí òfin orílè̩‐èdè e̩ni náà tàbí òfin àwo̩n orílè̩‐èdè àgbáyé mìíràn. Bákan náà, ìje̩níyà tí a lè fún e̩ni tó dé̩s̩è̩ kò gbo̩dò̩ ju èyí tó wà ní ìmúlò ní àsìkò tí e̩ni náà dá è̩s̩è̩ rè̩.
       
     
   
-    Abala ke̩rìnlá.
+    Abala kejìlá.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ pé kí a má s̩àdédé s̩e àyo̩júràn sí ò̩rò̩ ìgbésí ayé rè̩, tàbí sí ò̩rò̩e̩bí rè̩ tàbí sí ò̩rò̩ ìdílé rè̩ tàbí ìwé tí a ko̩ sí i; a kò sì gbo̩dò̩ ba iyì àti orúko̩ rè̩ jé̩. E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ààbò lábé̩ òfin kúrò ló̩wó̩ irú àyo̩júràn tàbí ìbanijé̩ bé̩è̩.
+  
+    Abala ke̩tàlá.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti wá ààbò àti láti je̩ àn fàní ààbò yìí ní orílè̩‐èdè mìíràn nígbà tí a bá ń s̩e inúnibíni sí i.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti rìn káàkiri ní òmìnira kí ó sì fi ibi tó bá wù ú s̩e ìbùgbé láàrin orílè̩‐èdè rè̩.
       
       
-	A kò lè lo è̩tó̩ yìí fún e̩ni tí a bá pè lé̩jó̩ tó dájú nítorí e̩ s̩è̩ tí kò je̩ mó̩ ò̩rò̩ ìs̩èlú tàbí ohun mìíràn tí ó s̩e tí kò bá ète àti ìgbékalè̩ Ajo̩‐ìsò̩kan orílè̩‐èdè àgbáyé mu.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kúrò lórílè̩‐èdè yòówù kó jé̩, tó fi mó̩ orílè̩‐èdè tirè̩, kí ó sì tún padà sí orílè̩‐èdè tirè̩ nígbà tó bá wù ú.
       
     
   
-    Abala ke̩è̩é̩dógún.
+    Abala ke̩rìnlá.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti jé̩ o̩mo̩ orílè̩‐èdè kan.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti wá ààbò àti láti je̩ àn fàní ààbò yìí ní orílè̩‐èdè mìíràn nígbà tí a bá ń s̩e inúnibíni sí i.
       
       
-	A kò lè s̩àdédé gba è̩tó̩ jíjé̩ o̩mo̩ orílè̩‐èdè e̩ni ló̩wó̩ e̩nìké̩ni láìnídìí tàbí kí a kò̩ fún e̩nìké̩ni láti yàn láti jé̩ o̩mo̩ orílè̩‐èdè mìíràn.
-      
-    
-  
-    Abala ke̩rìndínlógún.
-    
-      
-	To̩kùnrin tobìnrin tó bá ti bàlágà ló ní è̩tó̩ láti fé̩ ara wo̩n, kí wó̩n sì dá e̩bí ti wo̩n sílè̩ láìsí ìkanilápá‐kò kankan nípa è̩yà wo̩n, tàbí orílè̩‐èdè wo̩n tàbí è̩sìn wo̩n. E̩tó̩ wo̩n dó̩gba nínú ìgbeyàwó ìbáà jé̩ nígbà tí wo̩n wà papò̩ tàbí lé̩yìn tí wó̩n bá ko̩ ara wo̩n.
-      
-      
-	A kò gbo̩dò̩ s̩e ìgbeyàwó kan láìjé̩ pé àwo̩n tí ó fé̩ fé̩ ara wo̩n ní òmìnira àto̩kànwá tó péye láti yàn fúnra wo̩n.
-      
-      
-	E̩bí jé̩ ìpìlè̩ pàtàkì àdánidá ní àwùjo̩, ó sì ní è̩tó̩ pé kí àwùjo̩ àti orílè̩‐èdè ó dáàbò bò ó.
+	A kò lè lo è̩tó̩ yìí fún e̩ni tí a bá pè lé̩jó̩ tó dájú nítorí e̩ s̩è̩ tí kò je̩ mó̩ ò̩rò̩ ìs̩èlú tàbí ohun mìíràn tí ó s̩e tí kò bá ète àti ìgbékalè̩ Ajo̩‐ìsò̩kan orílè̩‐èdè àgbáyé mu.
       
     
   
-    Abala ke̩tàdínlógún.
+    Abala ke̩è̩é̩dógún.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti dá ohun ìní ara rè̩ ní tàbí láti ní in papò̩ pè̩lú àwo̩n mìíràn.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti jé̩ o̩mo̩ orílè̩‐èdè kan.
       
       
-	A kò lè s̩àdédé gba ohun ìní e̩nì kan ló̩wó̩ rè̩ láìnídìí.
-      
-    
-  
-    Abala kejìdínlógún.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmìnira èrò, òmìnira è̩rí‐o̩kàn àti òmìnira e̩ sìn. E̩tó̩ yìí sì gbani láàyè láti pààrò̩ e̩ sìn tàbí ìgbàgbó̩ e̩ni. Ó sì fún e̩yo̩ e̩nì kan tàbí àkójo̩pò̩ ènìyàn láàyè láti s̩e è̩sìn wo̩n àti ìgbàgbó̩ wo̩n bó s̩e je̩ mó̩ ti ìkó̩ni, ìs̩esí, ìjó̩sìn àti ìmús̩e ohun tí wó̩n gbàgbó̩ yálà ní ìkò̩kò̩ tàbí ní gban̄gba.
-  
-    Abala ko̩kàndínlógún.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmì nira láti ní ìmò̩ràn tí ó wù ú, kí ó sì so̩ irú ìmò̩ràn bé̩è̩ jáde; è̩tó̩yìí gbani láàyè láti ní ìmò̩ràn yòówù láìsí àtakò láti ò̩dò̩ e̩nìké̩ni láti wádìí ò̩rò̩, láti gba ìmò̩ràn ló̩dò̩ e̩lòmíràn tàbí láti gbani níyànjú ló̩nàkó̩nà láìka ààlà orílè̩‐èdè kankan kún.
-  
-    Abala ogún.
-    
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmìnira láti pé jo̩ pò̩ àti láti dara pò̩ mó̩ àwo̩n mìíràn ní àlàáfíà.
-      
-      
-	A kò lè fi ipá mú e̩nìké̩ni dara pò̩ mó̩ e̩gbé̩ kankan.
+	A kò lè s̩àdédé gba è̩tó̩ jíjé̩ o̩mo̩ orílè̩‐èdè e̩ni ló̩wó̩ e̩nìké̩ni láìnídìí tàbí kí a kò̩ fún e̩nìké̩ni láti yàn láti jé̩ o̩mo̩ orílè̩‐èdè mìíràn.
       
     
   
-    Abala ko̩kànlélógún.
+    Abala ke̩rìndínlógún.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kópa nínú ìs̩àkóso orílè̩‐èdè rè̩, yálà fúnra rè̩ tàbí nípasè̩ àwo̩n as̩ojú tí a kò fi ipá yàn.
+	To̩kùnrin tobìnrin tó bá ti bàlágà ló ní è̩tó̩ láti fé̩ ara wo̩n, kí wó̩n sì dá e̩bí ti wo̩n sílè̩ láìsí ìkanilápá‐kò kankan nípa è̩yà wo̩n, tàbí orílè̩‐èdè wo̩n tàbí è̩sìn wo̩n. E̩tó̩ wo̩n dó̩gba nínú ìgbeyàwó ìbáà jé̩ nígbà tí wo̩n wà papò̩ tàbí lé̩yìn tí wó̩n bá ko̩ ara wo̩n.
       
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ tó dó̩gba láti s̩e is̩é̩ ìjo̩ba ní orílè̩‐èdè rè̩.
+	A kò gbo̩dò̩ s̩e ìgbeyàwó kan láìjé̩ pé àwo̩n tí ó fé̩ fé̩ ara wo̩n ní òmìnira àto̩kànwá tó péye láti yàn fúnra wo̩n.
       
       
-	I fé̩ àwo̩n ènìyàn ìlú ni yóò jé̩ òkúta ìpìlè̩ fún à s̩e̩ ìjo̩ba; a ó máa fi ìfé̩ yìí hàn nípasè̩ ìbò tòótó̩ tí a ó máa dì láti ìgbà dé ìgbà, nínú èyí tí e̩nì kò̩ò̩kan yóò ní è̩tó̩ sí ìbò kan s̩os̩o tí a dì ní ìkò̩kò̩ tàbí nípasè̩ irú o̩ nà ìdìbò mìíràn tí ó bá irú ìdìbò bé̩è̩ mu.
-      
-    
-  
-    Abala kejìlélógún.
-    E̩nì kò̩ò̩kan gé̩gé̩ bí è̩yà nínú àwùjo̩ ló ní è̩tó̩ sí ìdáàbò bò láti o̩wó̩ ìjo̩ba àti láti jé̩ àn fà ní àwo̩n è̩tó̩ tí ó bá o̩rò̩‐ajé, ìwà láwùjo̩ àti às̩à àbínibí mu; àwo̩n è̩tó̩ tí ó jé̩ kò‐s̩eé‐má‐nìí fún iyì àti ìdàgbàsókè è̩dá ènìyàn, nípa akitiyan nínú orílè̩‐èdè àti ìfo̩wó̩s̩owó̩ pò̩ láàrin àwo̩n orílè̩‐èdè ní ìbámu pè̩lú ètò àti ohun àlùmó̩nì orílè̩‐èdè kò̩ò̩kan.
-  
-    Abala ke̩tàlélógún.
-    
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti s̩is̩é̩, láti yan irú is̩é̩ tí ó wù ú, lábé̩ àdéhùn tí ó tó̩ tí ó sì tún ro̩rùn, kí ó sì ní ààbò kúrò ló̩wó̩ àìrís̩é̩ s̩e.
-      
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti gba iye owó tí ó dó̩gba fún irú is̩é̩ kan náà, láìsí ìyàsó̩tò̩ kankan.
-      
-      
-	E̩nì kò̩ò̩kan tí ó bá ń s̩isé̩ ní è̩tó̩ láti gba owó os̩ù tí ó tó̩ tí yóò sì tó fún òun àti e̩bí rè̩ láti gbé ayé tí ó bu iyì kún ènìyàn; a sì lè fi kún owó yìí nípasè̩ orís̩ìí àwo̩n ètò ìrànló̩wó̩ mìíràn nígbà tí ó bá ye.
-      
-      
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti dá e̩gbé̩ òs̩ìs̩é̩ sílè̩ àti láti dara pò̩ mó̩ irú e̩gbe̩; bé̩è̩ láti dáàbò bo àwo̩n ohun tí ó je̩ é̩ lógún.
+	E̩bí jé̩ ìpìlè̩ pàtàkì àdánidá ní àwùjo̩, ó sì ní è̩tó̩ pé kí àwùjo̩ àti orílè̩‐èdè ó dáàbò bò ó.
       
     
   
-    Abala ke̩rìnlélógún.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ìsinmi àti fàájì pè̩lú àkókò tí kò pò̩ jù lé̩nu is̩é̩ àti àsìkò ìsinmi lé̩nu is̩é̩ láti ìgbà dé ìgbà tí a ó sanwó fún.
-  
-    Abala ke̩è̩é̩dó̩gbò̩n.
+    Abala ke̩tàdínlógún.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti gbé ìgbé ayé tó bójú mu nínú èyí tí òun àti e̩bí rè̩ yóò wà ní ìlera àti àlàáfíà, tí wo̩n yóò sì ní oúnje̩, as̩o̩, ilégbèé, àti àn fàní fún ìwòsàn àti gbogbo ohun tó lè mú è̩dá gbé ìgbé ayé rere. Bákan náà, e̩nì kò̩ò̩kan ló tún ní ààbò nígbà àìnís̩é̩ló̩wó̩, nígbà àìsà n, nígbà tó bá di aláàbò̩‐ara, ní ipò opó, nígbà ogbó rè̩ tàbí ìgbà mìíràn tí ènìyàn kò ní ò̩nà láti rí oúnje̩ òò jó̩, tí eléyìí kì í sì í s̩e è̩bi olúwa rè̩.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti dá ohun ìní ara rè̩ ní tàbí láti ní in papò̩ pè̩lú àwo̩n mìíràn.
       
       
-	A ní láti pèsè ìtó̩jú àti ìrànló̩wó̩ pàtàkì fún àwo̩n abiyamo̩ àti àwo̩n o̩mo̩dé. Gbogbo àwo̩n o̩mo̩dé yóò máa je̩ àwo̩n àn fàní ààbò kan náà nínú àwùjo̩ yálà àwo̩n òbí wo̩n fé̩ ara wo̩n ni tàbí wo̩n kò fé̩ ara wo̩n.
+	A kò lè s̩àdédé gba ohun ìní e̩nì kan ló̩wó̩ rè̩ láìnídìí.
       
     
   
-    Abala ke̩rìndínló̩gbò̩n.
+    Abala kejìdínlógún.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmìnira èrò, òmìnira è̩rí‐o̩kàn àti òmìnira e̩ sìn. E̩tó̩ yìí sì gbani láàyè láti pààrò̩ e̩ sìn tàbí ìgbàgbó̩ e̩ni. Ó sì fún e̩yo̩ e̩nì kan tàbí àkójo̩pò̩ ènìyàn láàyè láti s̩e è̩sìn wo̩n àti ìgbàgbó̩ wo̩n bó s̩e je̩ mó̩ ti ìkó̩ni, ìs̩esí, ìjó̩sìn àti ìmús̩e ohun tí wó̩n gbàgbó̩ yálà ní ìkò̩kò̩ tàbí ní gban̄gba.
+  
+    Abala ko̩kàndínlógún.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmì nira láti ní ìmò̩ràn tí ó wù ú, kí ó sì so̩ irú ìmò̩ràn bé̩è̩ jáde; è̩tó̩yìí gbani láàyè láti ní ìmò̩ràn yòówù láìsí àtakò láti ò̩dò̩ e̩nìké̩ni láti wádìí ò̩rò̩, láti gba ìmò̩ràn ló̩dò̩ e̩lòmíràn tàbí láti gbani níyànjú ló̩nàkó̩nà láìka ààlà orílè̩‐èdè kankan kún.
+  
+    Abala ogún.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kó̩ è̩kó̩. Ó kéré tán, è̩kó̩ gbo̩dò̩ jé̩ ò̩fé̩ ní àwo̩n ilé‐è̩kó̩ alákò̩ó̩bè̩rè̩. E̩kó̩ ní ilé‐è̩kó̩ alákò̩ó̩bè̩rè̩ yìí sì gbo̩dò̩ jé̩ dandan. A gbo̩dò̩ pèsè è̩kó̩ is̩é̩‐o̩wó̩, àti ti ìmò̩‐è̩ro̩ fún àwo̩n ènìyàn lápapò̩. Àn fàní tó dó̩gba ní ilé‐è̩kó̩ gíga gbo̩dò̩ wà ní àró̩wó̩tó gbogbo e̩ni tó bá tó̩ sí.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ sí òmìnira láti pé jo̩ pò̩ àti láti dara pò̩ mó̩ àwo̩n mìíràn ní àlàáfíà.
       
       
-	Ohun tí yóò jé̩ ète è̩kó̩ ni láti mú ìlo̩síwájú tó péye bá è̩dá ènìyàn, kí ó sì túbò̩ rí i pé àwo̩n ènìyàn bò̩wò̩ fún è̩tó̩ o̩mo̩nìyàn àti àwo̩n òmìnira wo̩n, tó jé̩ kò‐s̩eé‐má‐nìí. E tò è̩kó̩ gbo̩dò̩ lè rí i pé è̩mí; ìgbó̩ra‐e̩ni‐yé, ìbágbépò̩ àlàáfíà, àti ìfé̩ ò̩ré̩‐sí‐ò̩ré̩ wà láàrin orílè̩‐èdè, láàrin è̩yà kan sí òmíràn àti láàrin e̩lé̩sìn kan sí òmíràn. E tò‐è̩kó̩ sì gbo̩dò̩ kún àwo̩n akitiyan Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé ló̩wó̩ láti rí i pé àlàáfíà fìdí múlè̩.
-      
-      
-	Àwo̩n òbí ló ní è̩tó̩ tó ga jù lo̩ láti yan è̩kó̩ tí wó̩n bá fé̩ fún àwo̩n o̩mo̩ wo̩n.
+	A kò lè fi ipá mú e̩nìké̩ni dara pò̩ mó̩ e̩gbé̩ kankan.
       
     
   
-    Abala ke̩tàdínló̩gbò̩n.
+    Abala ko̩kànlélógún.
     
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ láìjé̩ pé a fi ipá mú un láti kópa nínú àpapò̩ ìgbé ayé àwùjo̩ rè̩, kí ó je̩ ìgbádùn gbogbo ohun àmús̩e̩ wà ibè̩, kí ó sì kópa nínú ìdàgbàsókè ìmò̩ sáyé̩n sì àti àwo̩n àn fàní tó ń ti ibè̩ jáde.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kópa nínú ìs̩àkóso orílè̩‐èdè rè̩, yálà fúnra rè̩ tàbí nípasè̩ àwo̩n as̩ojú tí a kò fi ipá yàn.
       
       
-	E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ààbò àn fàní ìmo̩yì àti ohun ìní tí ó je̩ yo̩ láti inú is̩é̩ yòówù tí ó bá s̩e ìbáà s̩e ìmò̩ sáyé̩n sì, ìwé kíko̩ tàbí is̩é̩ o̩nà.
-      
-    
-  
-    Abala kejìdínló̩gbò̩n.
-    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ètò nínú àwùjo̩ rè̩ àti ní gbogbo àwùjo̩ àgbáyé níbi tí àwo̩n è̩tó̩ òmìnira tí a ti gbé kalè̩ nínú ìkéde yìí yóò ti jé̩ mímús̩e̩.
-  
-    Abala ko̩kàndínló̩gbò̩n.
-    
-      
-	E̩nì kò̩ò̩kan ló ní àwo̩n ojús̩e kan sí àwùjo̩, nípasè̩ èyí tí ó fi lè s̩eé s̩e fún e̩ni náà láti ní ìdàgbàsókè kíkún gé̩gé̩ bí è̩dá ènìyàn.
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ tó dó̩gba láti s̩e is̩é̩ ìjo̩ba ní orílè̩‐èdè rè̩.
       
       
-	O fin yóò de e̩nì kò̩ò̩kan láti fi ò̩wò̩ àti ìmo̩yì tí ó tó̩ fún è̩tó̩ àti òmìnira àwo̩n e̩lòmíràn nígbà tí e̩ni náà bá ń lo àwo̩n è̩tó̩ àti òmìnira ara rè̩. E yí wà ní ìbámu pè̩lú ò̩nà tó ye̩, tó sì tó̩ láti fi báni lò nínú àwùjo̩ fún ire àti àlàáfíà àwùjo̩ náà nínú èyí tí ìjo̩ba yóò wà ló̩wó̩ gbogbo ènìyàn.
-      
-      
-	A kò gbo̩dò̩ lo àwo̩n è̩tó̩ àti òmìnira wò̩nyí rárá, ní ò̩nà yòówù kó jé̩, tó bá lòdì sí àwo̩n ète àti ìgbékalè̩ Ajo̩‐àpapò̩ orílè̩‐èdè agbáyé.
+	I fé̩ àwo̩n ènìyàn ìlú ni yóò jé̩ òkúta ìpìlè̩ fún à s̩e̩ ìjo̩ba; a ó máa fi ìfé̩ yìí hàn nípasè̩ ìbò tòótó̩ tí a ó máa dì láti ìgbà dé ìgbà, nínú èyí tí e̩nì kò̩ò̩kan yóò ní è̩tó̩ sí ìbò kan s̩os̩o tí a dì ní ìkò̩kò̩ tàbí nípasè̩ irú o̩ nà ìdìbò mìíràn tí ó bá irú ìdìbò bé̩è̩ mu.
       
     
   
-    Abala o̩gbò̩n.
-    A kò gbo̩dò̩ túmò̩ ohunkóhun nínú ìkéde yìí gé̩gé̩ bí ohun tí ó fún orílè̩‐èdè kan tàbí àkójo̩pò̩ àwo̩n ènìyàn kan tàbí e̩nìké̩ni ní è̩tó̩ láti s̩e ohunkóhun tí yóò mú ìparun bá èyíkéyìí nínú àwo̩n è̩tó̩ àti òmìnira tí a kéde yìí.
+    Abala kejìlélógún.
+    E̩nì kò̩ò̩kan gé̩gé̩ bí è̩yà nínú àwùjo̩ ló ní è̩tó̩ sí ìdáàbò bò láti o̩wó̩ ìjo̩ba àti láti jé̩ àn fà ní àwo̩n è̩tó̩ tí ó bá o̩rò̩‐ajé, ìwà láwùjo̩ àti às̩à àbínibí mu; àwo̩n è̩tó̩ tí ó jé̩ kò‐s̩eé‐má‐nìí fún iyì àti ìdàgbàsókè è̩dá ènìyàn, nípa akitiyan nínú orílè̩‐èdè àti ìfo̩wó̩s̩owó̩ pò̩ láàrin àwo̩n orílè̩‐èdè ní ìbámu pè̩lú ètò àti ohun àlùmó̩nì orílè̩‐èdè kò̩ò̩kan.
+  
+    Abala ke̩tàlélógún.
+    
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti s̩is̩é̩, láti yan irú is̩é̩ tí ó wù ú, lábé̩ àdéhùn tí ó tó̩ tí ó sì tún ro̩rùn, kí ó sì ní ààbò kúrò ló̩wó̩ àìrís̩é̩ s̩e.
+      
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti gba iye owó tí ó dó̩gba fún irú is̩é̩ kan náà, láìsí ìyàsó̩tò̩ kankan.
+      
+      
+	E̩nì kò̩ò̩kan tí ó bá ń s̩isé̩ ní è̩tó̩ láti gba owó os̩ù tí ó tó̩ tí yóò sì tó fún òun àti e̩bí rè̩ láti gbé ayé tí ó bu iyì kún ènìyàn; a sì lè fi kún owó yìí nípasè̩ orís̩ìí àwo̩n ètò ìrànló̩wó̩ mìíràn nígbà tí ó bá ye.
+      
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti dá e̩gbé̩ òs̩ìs̩é̩ sílè̩ àti láti dara pò̩ mó̩ irú e̩gbe̩; bé̩è̩ láti dáàbò bo àwo̩n ohun tí ó je̩ é̩ lógún.
+      
+    
+  
+    Abala ke̩rìnlélógún.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ìsinmi àti fàájì pè̩lú àkókò tí kò pò̩ jù lé̩nu is̩é̩ àti àsìkò ìsinmi lé̩nu is̩é̩ láti ìgbà dé ìgbà tí a ó sanwó fún.
+  
+    Abala ke̩è̩é̩dó̩gbò̩n.
+    
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti gbé ìgbé ayé tó bójú mu nínú èyí tí òun àti e̩bí rè̩ yóò wà ní ìlera àti àlàáfíà, tí wo̩n yóò sì ní oúnje̩, as̩o̩, ilégbèé, àti àn fàní fún ìwòsàn àti gbogbo ohun tó lè mú è̩dá gbé ìgbé ayé rere. Bákan náà, e̩nì kò̩ò̩kan ló tún ní ààbò nígbà àìnís̩é̩ló̩wó̩, nígbà àìsà n, nígbà tó bá di aláàbò̩‐ara, ní ipò opó, nígbà ogbó rè̩ tàbí ìgbà mìíràn tí ènìyàn kò ní ò̩nà láti rí oúnje̩ òò jó̩, tí eléyìí kì í sì í s̩e è̩bi olúwa rè̩.
+      
+      
+	A ní láti pèsè ìtó̩jú àti ìrànló̩wó̩ pàtàkì fún àwo̩n abiyamo̩ àti àwo̩n o̩mo̩dé. Gbogbo àwo̩n o̩mo̩dé yóò máa je̩ àwo̩n àn fàní ààbò kan náà nínú àwùjo̩ yálà àwo̩n òbí wo̩n fé̩ ara wo̩n ni tàbí wo̩n kò fé̩ ara wo̩n.
+      
+    
+  
+    Abala ke̩rìndínló̩gbò̩n.
+    
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láti kó̩ è̩kó̩. Ó kéré tán, è̩kó̩ gbo̩dò̩ jé̩ ò̩fé̩ ní àwo̩n ilé‐è̩kó̩ alákò̩ó̩bè̩rè̩. E̩kó̩ ní ilé‐è̩kó̩ alákò̩ó̩bè̩rè̩ yìí sì gbo̩dò̩ jé̩ dandan. A gbo̩dò̩ pèsè è̩kó̩ is̩é̩‐o̩wó̩, àti ti ìmò̩‐è̩ro̩ fún àwo̩n ènìyàn lápapò̩. Àn fàní tó dó̩gba ní ilé‐è̩kó̩ gíga gbo̩dò̩ wà ní àró̩wó̩tó gbogbo e̩ni tó bá tó̩ sí.
+      
+      
+	Ohun tí yóò jé̩ ète è̩kó̩ ni láti mú ìlo̩síwájú tó péye bá è̩dá ènìyàn, kí ó sì túbò̩ rí i pé àwo̩n ènìyàn bò̩wò̩ fún è̩tó̩ o̩mo̩nìyàn àti àwo̩n òmìnira wo̩n, tó jé̩ kò‐s̩eé‐má‐nìí. E tò è̩kó̩ gbo̩dò̩ lè rí i pé è̩mí; ìgbó̩ra‐e̩ni‐yé, ìbágbépò̩ àlàáfíà, àti ìfé̩ ò̩ré̩‐sí‐ò̩ré̩ wà láàrin orílè̩‐èdè, láàrin è̩yà kan sí òmíràn àti láàrin e̩lé̩sìn kan sí òmíràn. E tò‐è̩kó̩ sì gbo̩dò̩ kún àwo̩n akitiyan Àjo̩‐ìsò̩kan orílè̩‐èdè àgbáyé ló̩wó̩ láti rí i pé àlàáfíà fìdí múlè̩.
+      
+      
+	Àwo̩n òbí ló ní è̩tó̩ tó ga jù lo̩ láti yan è̩kó̩ tí wó̩n bá fé̩ fún àwo̩n o̩mo̩ wo̩n.
+      
+    
+  
+    Abala ke̩tàdínló̩gbò̩n.
+    
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ láìjé̩ pé a fi ipá mú un láti kópa nínú àpapò̩ ìgbé ayé àwùjo̩ rè̩, kí ó je̩ ìgbádùn gbogbo ohun àmús̩e̩ wà ibè̩, kí ó sì kópa nínú ìdàgbàsókè ìmò̩ sáyé̩n sì àti àwo̩n àn fàní tó ń ti ibè̩ jáde.
+      
+      
+	E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ààbò àn fàní ìmo̩yì àti ohun ìní tí ó je̩ yo̩ láti inú is̩é̩ yòówù tí ó bá s̩e ìbáà s̩e ìmò̩ sáyé̩n sì, ìwé kíko̩ tàbí is̩é̩ o̩nà.
+      
+    
+  
+    Abala kejìdínló̩gbò̩n.
+    E̩nì kò̩ò̩kan ló ní è̩tó̩ sí ètò nínú àwùjo̩ rè̩ àti ní gbogbo àwùjo̩ àgbáyé níbi tí àwo̩n è̩tó̩ òmìnira tí a ti gbé kalè̩ nínú ìkéde yìí yóò ti jé̩ mímús̩e̩.
+  
+    Abala ko̩kàndínló̩gbò̩n.
+    
+      
+	E̩nì kò̩ò̩kan ló ní àwo̩n ojús̩e kan sí àwùjo̩, nípasè̩ èyí tí ó fi lè s̩eé s̩e fún e̩ni náà láti ní ìdàgbàsókè kíkún gé̩gé̩ bí è̩dá ènìyàn.
+      
+      
+	O fin yóò de e̩nì kò̩ò̩kan láti fi ò̩wò̩ àti ìmo̩yì tí ó tó̩ fún è̩tó̩ àti òmìnira àwo̩n e̩lòmíràn nígbà tí e̩ni náà bá ń lo àwo̩n è̩tó̩ àti òmìnira ara rè̩. E yí wà ní ìbámu pè̩lú ò̩nà tó ye̩, tó sì tó̩ láti fi báni lò nínú àwùjo̩ fún ire àti àlàáfíà àwùjo̩ náà nínú èyí tí ìjo̩ba yóò wà ló̩wó̩ gbogbo ènìyàn.
+      
+      
+	A kò gbo̩dò̩ lo àwo̩n è̩tó̩ àti òmìnira wò̩nyí rárá, ní ò̩nà yòówù kó jé̩, tó bá lòdì sí àwo̩n ète àti ìgbékalè̩ Ajo̩‐àpapò̩ orílè̩‐èdè agbáyé.
+      
+    
+  
+    Abala o̩gbò̩n.
+    A kò gbo̩dò̩ túmò̩ ohunkóhun nínú ìkéde yìí gé̩gé̩ bí ohun tí ó fún orílè̩‐èdè kan tàbí àkójo̩pò̩ àwo̩n ènìyàn kan tàbí e̩nìké̩ni ní è̩tó̩ láti s̩e ohunkóhun tí yóò mú ìparun bá èyíkéyìí nínú àwo̩n è̩tó̩ àti òmìnira tí a kéde yìí.
   
