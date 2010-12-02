@@ -123,11 +123,11 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
 
 /*virtual*/ const GlyphFace *GlyphFaceCacheOneItem::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 {
-    incAccesses();
+//    incAccesses();
     if (m_LoadedGlyphNo==glyphid)
         return glyphDirect();
     
-    incLoads();
+//    incLoads();
     
     if (m_LoadedGlyphNo!=-1)   //-1 means none loaded
         delete glyphDirect();       //invoke destructor
@@ -175,12 +175,12 @@ GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheH
 
 /*virtual*/ const GlyphFace *GlyphFaceCacheLoadedOnDemand::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
-    incAccesses();
+//    incAccesses();
     GlyphFace **p = glyphPtrDirect(glyphid);
     if (*p)
         return *p;
 
-    incLoads();
+//    incLoads();
     *p = (GlyphFace*)malloc(sizeof(GlyphFace));
     new(*p) GlyphFace(*this, glyphid);
     return *p;
@@ -202,7 +202,7 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
 #endif
     for (unsigned int i = 0; i < nGlyphs; i++)
     {
-        incLoads();
+//        incLoads();
         new(glyphDirect(i)) GlyphFace(*this, i);
     }
 #ifndef DISABLE_TRACING

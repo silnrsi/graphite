@@ -262,12 +262,6 @@ extern "C"
     }
 #endif
 
-    GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested)      //old implementations of graphite might not support a requested strategy 
-    {
-        return GlyphFaceCache::nearestSupportedStrategy(requested);
-    }
-
-
     GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
     {
         return pFace->setGlyphCacheStrategy(requestedStrategy);
@@ -285,17 +279,6 @@ extern "C"
         return pFace->getGlyphFaceCache()->numGlyphs();
     }
 
-
-    GRNG_EXPORT unsigned long face_n_glyph_accesses(const GrFace* pFace)
-    {
-        return pFace->getGlyphFaceCache()->numAccesses();
-    }
-
-
-    GRNG_EXPORT unsigned long face_n_glyph_loads(const GrFace* pFace)
-    {
-        return pFace->getGlyphFaceCache()->numLoads();
-    }
 
 #ifndef DISABLE_FILE_FACE
     GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy)   //returns NULL on failure. //TBD better error handling

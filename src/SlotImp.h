@@ -41,7 +41,7 @@ class Slot
 public:
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
-    float advance(const GrFont *font) const { return font->advance(m_glyphid); }
+    float advance() const { return m_advance.x; }
     int before() const { return m_before; }
     int after() const { return m_after; }
 

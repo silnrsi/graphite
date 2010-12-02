@@ -55,12 +55,9 @@ extern "C"
     GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
     GRNG_EXPORT void face_destroy(GrFace *face);
 
-    GRNG_EXPORT EGlyphCacheStrategy nearest_supported_strategy(EGlyphCacheStrategy requested);      //old implementations of graphite might not support a requested strategy 
     GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
     GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace);
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace);
-    GRNG_EXPORT unsigned long face_n_glyph_accesses(const GrFace* pFace);
-    GRNG_EXPORT unsigned long face_n_glyph_loads(const GrFace* pFace);
 
 #ifndef DISABLE_FILE_FACE
     GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy);   //returns NULL on failure. //TBD better error handling

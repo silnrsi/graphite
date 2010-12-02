@@ -125,7 +125,7 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
     IgnoreErrors ignoreErrors;
     processUTF(limit, &cmapProcessor, &ignoreErrors);
 
-    gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, gr2::kutf8, testString,
+    gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, NULL, gr2::kutf8, testString,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))

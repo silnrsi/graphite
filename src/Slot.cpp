@@ -68,9 +68,9 @@ GRNG_EXPORT float slot_origin_Y(const Slot* p/*not NULL*/)
 }
 
 
-GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/, const GrFont *font)
+GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/)
 {
-    return p->advance(font);
+    return p->advance();
 }
 
 
@@ -92,7 +92,7 @@ GRNG_EXPORT int slot_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not 
 }
 
 
-GRNG_EXPORT bool slot_is_insert_before(const Slot* p/*not NULL*/)
+GRNG_EXPORT bool slot_can_insert_before(const Slot* p/*not NULL*/)
 {
     return p->isInsertBefore();
 }

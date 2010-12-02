@@ -44,7 +44,18 @@ enum {
 
 extern "C"
 {
+    /** Returns Unicode character for a charinfo.
+     * 
+     * @param p Pointer to charinfo to return information on.
+     */
     GRNG_EXPORT unsigned int cinfo_unicode_char(const CharInfo* p/*not NULL*/);
+    
+    /** Returns breakweight for a charinfo.
+     * 
+     * @return Breakweight is a number between -50 and 50 indicating the cost of a
+     * break before or after this character.
+     * @param p Pointer to charinfo to return information on.
+     */
     GRNG_EXPORT int cinfo_break_weight(const CharInfo* p/*not NULL*/);
 }
 

@@ -622,7 +622,6 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
     const char * name = features;
     const char * valueText = NULL;
     size_t nameLength = 0;
-    size_t valueLength = 0;
     gr2::int32 value = 0;
     FeatID featId;
     const gr2::FeatureRef* ref = NULL;
@@ -763,13 +762,13 @@ int Parameters::testFileFont() const
         if (features)
         {
             featureList = parseFeatures(face);
-            pSeg = gr2::make_seg_using_features(sizedFont,
+            pSeg = gr2::make_seg(sizedFont,
                 face, 0, featureList, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         else
         {
-            pSeg = gr2::make_seg(sizedFont, face, 0, textSrc.utfEncodingForm(),
+            pSeg = gr2::make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         int i = 0;
@@ -788,7 +787,7 @@ int Parameters::testFileFont() const
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                     i, slot_gid(slot), lookup(map, (size_t)slot_attached_to(slot)),
                     slot_attr(slot, pSeg, gr2::kslatAttX, 0),
-                    slot_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, slot_is_insert_before(slot) ? 1 : 0,
+                    slot_attr(slot, pSeg, gr2::kslatAttY, 0), orgX, orgY, slot_can_insert_before(slot) ? 1 : 0,
                     gr2::cinfo_break_weight(seg_cinfo(pSeg, slot_original(slot))), slot_before(slot), slot_after(slot));
            
             if (pText32 != NULL)

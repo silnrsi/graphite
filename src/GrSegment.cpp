@@ -98,14 +98,10 @@ GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begi
 }
 
 
-GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
 {
-    return makeAndInitialize(font, face, script, face->theSill().cloneFeatures(0/*0 means default*/), enc, pStart, nChars, dir);
-}
-
-
-GRNG_EXPORT GrSegment* make_seg_using_features(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
-{
+    if (pFeats == NULL)
+        pFeats = face->theSill().cloneFeatures(0);
     return makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
 }
 
@@ -143,20 +139,6 @@ GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigne
     return pSeg->charinfo(index);
 }
 
-GRNG_EXPORT void seg_run_graphite(GrSegment* pSeg/*not NULL*/)
-{
-    assert(pSeg);
-    return pSeg->runGraphite();
-}
-
-
-GRNG_EXPORT void seg_choose_silf(GrSegment* pSeg/*not NULL*/, uint32 script)
-{
-    assert(pSeg);
-    return pSeg->chooseSilf(script);
-}
-
-
 GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
@@ -168,15 +150,6 @@ GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->first();
-}
-
-
-GRNG_EXPORT int seg_add_features(GrSegment* pSeg/*not NULL*/, const Features* feats)
-{
-    if (!feats)
-    return -2;      //the smallest value that can normally be returned is -1
-    assert(pSeg);
-    return pSeg->addFeatures(*feats);
 }
 
 }

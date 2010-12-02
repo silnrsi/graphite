@@ -59,7 +59,6 @@ extern "C"
     //slots are owned by their segment
     GRNG_EXPORT const Slot* slot_next_in_segment(const Slot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
     GRNG_EXPORT const Slot* slot_attached_to(const Slot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
-    inline bool slot_is_base(const Slot* p/*not NULL*/) { return slot_attached_to(p)==NULL; }
  
     GRNG_EXPORT const Slot* slot_first_attachment(const Slot* p/*not NULL*/);        //returns NULL iff no attachments.
         //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
@@ -71,12 +70,12 @@ extern "C"
     GRNG_EXPORT unsigned short slot_gid(const Slot* p/*not NULL*/);
     GRNG_EXPORT float slot_origin_X(const Slot* p/*not NULL*/);
     GRNG_EXPORT float slot_origin_Y(const Slot* p/*not NULL*/);
-    GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/, const GrFont *font);
+    GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/);
     GRNG_EXPORT int slot_before(const Slot* p/*not NULL*/);
     GRNG_EXPORT int slot_after(const Slot* p/*not NULL*/);
     GRNG_EXPORT int slot_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex); //tbd - do we need to expose this?
      
-    GRNG_EXPORT bool slot_is_insert_before(const Slot* p/*not NULL*/);
+    GRNG_EXPORT bool slot_can_insert_before(const Slot* p/*not NULL*/);
     GRNG_EXPORT int slot_original(const Slot* p/*not NULL*/);
 //  GRNG_EXPORT size_t id(const Slot* p/*not NULL*/);
 }
