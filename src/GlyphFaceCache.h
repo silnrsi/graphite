@@ -103,6 +103,8 @@ public:
 
     virtual EGlyphCacheStrategy getEnum() const;
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+
+    CLASS_NEW_DELETE
     
 private:
     GlyphFace *glyphDirect() const { return (GlyphFace *)&m_Buffer[0];}
@@ -133,6 +135,8 @@ public:
 
     virtual EGlyphCacheStrategy getEnum() const;
     virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    
+    CLASS_NEW_DELETE
     
 private:
     GlyphFace **glyphPtrDirect(unsigned short glyphid) const { return (GlyphFace **)((const char*)(this)+sizeof(GlyphFaceCacheLoadedOnDemand)+sizeof(GlyphFace*)*glyphid);}
@@ -165,6 +169,9 @@ public:
         incAccesses();
         return glyphDirect(glyphid);
     }
+
+    CLASS_NEW_DELETE
+    
 private:
     const GlyphFace *glyphDirect(unsigned short glyphid) const { return (const GlyphFace *)((const char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}
     GlyphFace *glyphDirect(unsigned short glyphid) { return (GlyphFace *)((char*)(this)+sizeof(GlyphFaceCachePreloaded)+sizeof(GlyphFace)*glyphid);}

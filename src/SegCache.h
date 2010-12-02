@@ -243,7 +243,7 @@ union SegCachePrefixArray
     void ** raw;
     SegCachePrefixArray * array;
     SegCachePrefixEntry ** prefixEntries;
-    uintptr_t * range;
+    uint32 * range;
 };
 
 class SegCache

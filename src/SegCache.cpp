@@ -41,7 +41,6 @@ SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     m_prefixes.raw = grzeroalloc<void*>(store->maxCmapGid() + 2);
     m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;
     m_prefixes.range[SEG_CACHE_MAX_INDEX] = SEG_CACHE_UNSET_INDEX;
-    assert(sizeof(void*) == sizeof(uintptr_t));
 }
 
 void SegCache::freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level)
