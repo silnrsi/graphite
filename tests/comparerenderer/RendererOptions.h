@@ -47,7 +47,7 @@ public:
     bool exists() { return m_position > -1; }
     const char * get(char ** argv) const { return (m_position > -1)? argv[m_position] : NULL; }
     int getInt(char ** argv) const { return (m_position > -1)? atoi(argv[m_position]) : 0; }
-    double getFloat(char ** argv) const { return (m_position > -1)? atof(argv[m_position]) : 0.0; }
+    float getFloat(char ** argv) const { return (m_position > -1)? static_cast<float>(atof(argv[m_position])) : 0.0f; }
     OptionType type() const { return m_type; }
 private:
     const char * m_shortOption;

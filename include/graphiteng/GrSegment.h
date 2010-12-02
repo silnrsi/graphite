@@ -35,7 +35,7 @@ class GrFont;
 extern "C"
 {
     //in the following method, pError may be NULL. if it is not NULL, and the buffer contains some bad bytes not in the utf range, then *pError is set to point at the first bad byte. Otherwise, *pError is set to NULL.
-    size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError);   //Also stops on nul. Any nul is not in the count
+    GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError);   //Also stops on nul. Any nul is not in the count
 }
 
 

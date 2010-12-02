@@ -66,7 +66,9 @@ friend class GlyphFaceCacheOneItem;
     {
         return p;
     }
-    void operator delete (void * p) {}
+    // delete in case an exception is thrown in constructor
+    void operator delete(void*, GlyphFace*) {}
+    void operator delete (void *) {}
 
 public:
 

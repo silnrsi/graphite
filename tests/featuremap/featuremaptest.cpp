@@ -62,13 +62,6 @@ struct FeatSetting
     gr2::uint16 m_label;
 };
 
-struct FeatTable
-{
-    FeatHeader m_header;
-    FeatDefn m_defs[0];
-    FeatSetting m_settings[0];
-};
-
 struct FeatTableTestA
 {
     FeatHeader m_header;
@@ -253,7 +246,6 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 
 int main(int argc, char ** argv)
 {
-    assert(sizeof(struct FeatTable) == sizeof(struct FeatHeader));
     testFeatTable<FeatTableTestA>(testDataA, "A\n");
     testFeatTable<FeatTableTestB>(testDataB, "B\n");
     testFeatTable<FeatTableTestB>(testDataBunsorted, "Bu\n");

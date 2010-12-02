@@ -96,13 +96,13 @@ public:
     }
     bool isSpaceGlyph(uint16 gid) const { return (gid == m_spaceGid) || (gid == m_zwspGid); }
     uint16 maxCmapGid() const { return m_maxCmapGid; }
-    size_t maxSegmentCount() const { return m_maxSegments; };
+    uint32 maxSegmentCount() const { return m_maxSegments; };
 
     CLASS_NEW_DELETE
 private:
     SilfSegCache * m_caches;
     uint8 m_numSilf;
-    size_t m_maxSegments;
+    uint32 m_maxSegments;
     uint16 m_maxCmapGid;
     uint16 m_spaceGid;
     uint16 m_zwspGid;

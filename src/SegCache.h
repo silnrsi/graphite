@@ -21,7 +21,6 @@
 */
 #pragma once
 
-#include <stdint.h>
 #include <graphiteng/GrSegment.h>
 #include "Main.h"
 #include "SlotImp.h"
@@ -143,7 +142,7 @@ public:
             SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
         return m_entries[length-1]  + insertPos;
     }
-    unsigned long long purge(unsigned long long minAccessCount, unsigned long long oldAccessTime,
+    uint32 purge(unsigned long long minAccessCount, unsigned long long oldAccessTime,
         unsigned long long currentTime);
     CLASS_NEW_DELETE
 private:

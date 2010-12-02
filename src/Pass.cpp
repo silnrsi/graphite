@@ -497,7 +497,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
                 XmlTraceLog::get().closeElement(ElementTestRule);
             }
 #endif
-            return ret;
+            return (ret > 0);
         }
     }
 
@@ -518,7 +518,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
     vm::slotref * map = &smap[smap.context()];
 
     GrSegment & seg = smap.segment;
-    int glyph_diff = -seg.slotCount();
+    int glyph_diff = -static_cast<int>(seg.slotCount());
     Machine::status_t status;
     int32 ret = codeptr->run(m, map, status);
     glyph_diff += seg.slotCount();

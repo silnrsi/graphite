@@ -88,7 +88,7 @@ public:
         else if (m_lastAccess < entry.m_lastAccess) return -1;
         return 0;
     }
-    long unsigned int lastAccess() const { return m_lastAccess; };
+    unsigned long long lastAccess() const { return m_lastAccess; };
 
     CLASS_NEW_DELETE
 private:

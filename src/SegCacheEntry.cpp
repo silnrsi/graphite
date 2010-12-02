@@ -60,7 +60,7 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
     while (slot)
     {
         slotCopy->userAttrs(m_attr + pos * seg->numAttrs());
-        slotCopy->set(*slot, -charOffset, seg->numAttrs());
+        slotCopy->set(*slot, -static_cast<int32>(charOffset), seg->numAttrs());
         if (slot->firstChild())
         {
             new(parentGlyphs + numParents) Index2Slot( pos, slot );

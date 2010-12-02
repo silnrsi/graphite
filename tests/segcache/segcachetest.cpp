@@ -63,24 +63,24 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
     {
-        size_t offset = 0;
+        unsigned int offset = 0;
         const char * space = strstr(testString + offset, " ");
         if (space)
         {
             while (space)
             {
-                size_t wordLength = (space - testString) - offset;
+                unsigned int wordLength = (space - testString) - offset;
                 if (wordLength)
                 {
                     entry = segCache->find(glyphString + offset, wordLength);
                     if (!entry)
                     {
-                        fprintf(stderr, "failed to find substring at offset %lu length %lu in '%s'\n",
+                        fprintf(stderr, "failed to find substring at offset %u length %u in '%s'\n",
                                 offset, wordLength, testString);
                         return false;
                     }
                 }
-                while (offset < (space - testString) + 1)
+                while (offset < (space - testString) + 1u)
                 {
                     ++offset;
                 }
@@ -95,7 +95,7 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
                 entry = segCache->find(glyphString + offset, testLength - offset);
                 if (!entry)
                 {
-                    fprintf(stderr, "failed to find last word at offset %lu in '%s'\n",
+                    fprintf(stderr, "failed to find last word at offset %u in '%s'\n",
                             offset, testString);
                     return false;
                 }
@@ -129,8 +129,8 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))
-        return -1;
-   
+        return false;
+   return true;
 }
 
 int main(int argc, char ** argv)
@@ -169,11 +169,11 @@ int main(int argc, char ** argv)
     }
     Features * defaultFeatures = face_features_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
-    size_t segCount = segCache->segmentCount();
+    unsigned int segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 16)
     {
-        fprintf(stderr, "SegCache contains %lu entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache contains %u entries, which were used %Ld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 29)
     {
-        fprintf(stderr, "SegCache after repeat contains %lu entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after repeat contains %u entries, which were used %Ld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -198,7 +198,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount > 10 || accessCount != 30)
     {
-        fprintf(stderr, "SegCache after purge contains %lu entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after purge contains %u entries, which were used %Ld times\n",
             segCount, accessCount);
         return -2;
     }

@@ -145,7 +145,7 @@ public:
     CLASS_NEW_DELETE
 private:
 friend class SillMap;
-    byte m_numFeats;
+    uint16 m_numFeats;
     uint16 m_searchIndex;
     uint16 * m_sortedIndexes;
 

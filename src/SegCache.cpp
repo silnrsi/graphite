@@ -182,7 +182,7 @@ void SegCache::purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, s
     }
 }
 
-unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
+uint32 SegCachePrefixEntry::purge(unsigned long long minAccessCount,
                                               unsigned long long oldAccessTime,
                                               unsigned long long currentTime)
 {
@@ -190,7 +190,7 @@ unsigned long long SegCachePrefixEntry::purge(unsigned long long minAccessCount,
     //if (m_lastPurge > oldAccessTime)
     //    return 0;
 
-    long long totalPurged = 0;
+    uint32 totalPurged = 0;
     // real length is length + 1 in this loop
     for (uint16 length = 0; length < eMaxSpliceSize; length++)
     {
