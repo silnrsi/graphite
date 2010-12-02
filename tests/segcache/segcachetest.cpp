@@ -80,7 +80,7 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
                         return false;
                     }
                 }
-                while (offset < (space - testString) + 1)
+                while (offset < (space - testString) + 1u)
                 {
                     ++offset;
                 }
@@ -129,8 +129,8 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))
-        return -1;
-   
+        return false;
+   return true;
 }
 
 int main(int argc, char ** argv)
