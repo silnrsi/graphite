@@ -29,9 +29,9 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class GrSegment;
 class GrFace;
 class Silf;
-class Rule;
-class RuleEntry;
-class State;
+struct Rule;
+struct RuleEntry;
+struct State;
 class FiniteStateMachine;
 
 class Pass
