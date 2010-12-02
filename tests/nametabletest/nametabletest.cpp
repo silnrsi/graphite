@@ -152,7 +152,7 @@ template <class T> T * toBigEndian(T & table)
     bigEndian->m_nameHeader.name_record[0].length = gr2::swap16(table.m_nameHeader.name_record[0].length);
     bigEndian->m_nameHeader.name_record[0].offset = gr2::swap16(table.m_nameHeader.name_record[0].offset);
     
-    memcpy(bigEndian->m_textData, table.m_textData, sizeof(T::m_textData) );
+    memcpy(bigEndian->m_textData, table.m_textData, sizeof(table.m_textData) );
     return bigEndian;
 }
 
