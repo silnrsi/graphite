@@ -32,6 +32,7 @@ typedef unsigned short uint16;
 typedef short   int16;
 typedef unsigned int    uint32;
 typedef int     int32;
+typedef size_t uintptr;
 
 enum encform {
   kutf8 = 1/*sizeof(uint8)*/, kutf16 = 2/*sizeof(uint16)*/, kutf32 = 4/*sizeof(uint32)*/

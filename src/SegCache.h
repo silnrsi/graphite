@@ -28,10 +28,6 @@
 #include "SegCacheEntry.h"
 #include "GrSegmentImp.h"
 
-#ifdef __GNUC__
-#include <stdint.h>
-#endif
-
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class SegCache;
@@ -247,7 +243,7 @@ union SegCachePrefixArray
     void ** raw;
     SegCachePrefixArray * array;
     SegCachePrefixEntry ** prefixEntries;
-    uintptr_t * range;
+    uintptr * range;
 };
 
 class SegCache

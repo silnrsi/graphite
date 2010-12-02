@@ -135,7 +135,7 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
 
 int main(int argc, char ** argv)
 {
-
+    assert(sizeof(gr2::uintptr) == sizeof(void*));
     const char * fileName = NULL;
     if (argc > 1)
     {
