@@ -36,11 +36,12 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
             size_t locidx = TtfUtil::LocaLookup(glyphid, hdr.m_pLoca, hdr.m_lLoca, hdr.m_pHead);
             void *pGlyph = TtfUtil::GlyfLookup(hdr.m_pGlyf, locidx);
             if (TtfUtil::HorMetrics(glyphid, hdr.m_pHmtx, hdr.m_lHmtx, hdr.m_pHHea, nLsb, nAdvWid))
-                m_advance = Position(nAdvWid, 0);
+                m_advance = Position(static_cast<float>(nAdvWid), 0);
             else
                 m_advance = Position();
             if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-                m_bbox = Rect(Position(xMin, yMin), Position(xMax - xMin, yMax - yMin));
+                m_bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
+                    Position(static_cast<float>(xMax - xMin), static_cast<float>(yMax - yMin)));
             else
                 m_bbox = Rect();
         }
@@ -119,16 +120,16 @@ uint16 GlyphFace::getMetric(uint8 metric) const
 {
     switch ((enum metrics)metric)
     {
-        case kgmetLsb : return m_bbox.bl.x;
-        case kgmetRsb : return (m_advance.x - m_bbox.tr.x);
-        case kgmetBbTop : return m_bbox.tr.y;
-        case kgmetBbBottom : return m_bbox.bl.y;
-        case kgmetBbLeft : return m_bbox.bl.x;
-        case kgmetBbRight : return m_bbox.tr.x;
-        case kgmetBbHeight: return (m_bbox.tr.y - m_bbox.bl.y);
-        case kgmetBbWidth : return (m_bbox.tr.x - m_bbox.bl.x);
-        case kgmetAdvWidth : return m_advance.x;
-        case kgmetAdvHeight : return m_advance.y;
+        case kgmetLsb : return static_cast<uint16>(m_bbox.bl.x);
+        case kgmetRsb : return static_cast<uint16>(m_advance.x - m_bbox.tr.x);
+        case kgmetBbTop : return static_cast<uint16>(m_bbox.tr.y);
+        case kgmetBbBottom : return static_cast<uint16>(m_bbox.bl.y);
+        case kgmetBbLeft : return static_cast<uint16>(m_bbox.bl.x);
+        case kgmetBbRight : return static_cast<uint16>(m_bbox.tr.x);
+        case kgmetBbHeight: return static_cast<uint16>(m_bbox.tr.y - m_bbox.bl.y);
+        case kgmetBbWidth : return static_cast<uint16>(m_bbox.tr.x - m_bbox.bl.x);
+        case kgmetAdvWidth : return static_cast<uint16>(m_advance.x);
+        case kgmetAdvHeight : return static_cast<uint16>(m_advance.y);
         default : return 0;
     }
 }

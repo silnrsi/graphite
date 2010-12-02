@@ -70,12 +70,12 @@ inline size_t State::size() const
 
 inline bool State::is_success() const
 {
-  return rules;
+  return (rules != NULL);
 }
 
 inline bool State::is_transition() const
 {
-  return transitions;
+  return (transitions != NULL);
 }
 
 

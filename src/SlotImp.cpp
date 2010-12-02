@@ -107,7 +107,7 @@ Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base
     {
         float tAdv;
         m_position += (m_attach - m_with) * scale;
-        tAdv = tAdvance > 0. ? m_position.x + tAdvance - shift.x : 0.;
+        tAdv = tAdvance > 0.f ? m_position.x + tAdvance - shift.x : 0.f;
         res = Position(tAdv, 0);
     }
 
@@ -153,25 +153,25 @@ uint32 Slot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
     switch ((enum metrics)metric)
     {
     case kgmetLsb :
-        return bbox.bl.x;
+        return static_cast<uint32>(bbox.bl.x);
     case kgmetRsb :
-        return res.x - bbox.tr.x;
+        return static_cast<uint32>(res.x - bbox.tr.x);
     case kgmetBbTop :
-        return bbox.tr.y;
+        return static_cast<uint32>(bbox.tr.y);
     case kgmetBbBottom :
-        return bbox.bl.y;
+        return static_cast<uint32>(bbox.bl.y);
     case kgmetBbLeft :
-        return bbox.bl.x;
+        return static_cast<uint32>(bbox.bl.x);
     case kgmetBbRight :
-        return bbox.tr.x;
+        return static_cast<uint32>(bbox.tr.x);
     case kgmetBbWidth :
-        return bbox.tr.x - bbox.bl.x;
+        return static_cast<uint32>(bbox.tr.x - bbox.bl.x);
     case kgmetBbHeight :
-        return bbox.tr.y - bbox.bl.y;
+        return static_cast<uint32>(bbox.tr.y - bbox.bl.y);
     case kgmetAdvWidth :
-        return res.x;
+        return static_cast<uint32>(res.x);
     case kgmetAdvHeight :
-        return res.y;
+        return static_cast<uint32>(res.y);
     default :
         return 0;
     }
@@ -187,23 +187,23 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
     switch (index)
     {
     case kslatAdvX :
-        return m_advance.x;
+        return static_cast<int>(m_advance.x);
     case kslatAdvY :
-        return m_advance.y;
+        return static_cast<int>(m_advance.y);
     case kslatAttTo :
         return 0;
     case kslatAttX :
-        return m_attach.x;
+        return static_cast<int>(m_attach.x);
     case kslatAttY :
-        return m_attach.y;
+        return static_cast<int>(m_attach.y);
     case kslatAttXOff :
         return 0;
     case kslatAttYOff :
         return 0;
     case kslatAttWithX :
-        return m_with.x;
+        return static_cast<int>(m_with.x);
     case kslatAttWithY :
-        return m_with.y;
+        return static_cast<int>(m_with.y);
     case kslatAttWithXOff :
         return 0;
     case kslatAttWithYOff :
@@ -219,13 +219,13 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
     case kslatInsert :
         return isInsertBefore();
     case kslatPosX :
-        return m_position.x; // but need to calculate it
+        return static_cast<int>(m_position.x); // but need to calculate it
     case kslatPosY :
-        return m_position.y;
+        return static_cast<int>(m_position.y);
     case kslatShiftX :
-        return m_shift.x;
+        return static_cast<int>(m_shift.x);
     case kslatShiftY :
-        return m_shift.y;
+        return static_cast<int>(m_shift.y);
     case kslatMeasureSol :
         return -1; // err what's this?
     case kslatMeasureEol :
@@ -301,7 +301,9 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, 
     case kslatAttWithYOff :
         break;
     case kslatAttLevel :
-        m_attLevel = value;
+        assert(value < 128);
+        assert(value > -128);
+        m_attLevel = static_cast<byte>(value);
         break;
     case kslatBreak :
         seg->charinfo(m_original)->breakWeight(value);

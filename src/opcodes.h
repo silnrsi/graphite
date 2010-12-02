@@ -558,7 +558,6 @@ STARTOP(push_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    int res;
     push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
 ENDOP
 
