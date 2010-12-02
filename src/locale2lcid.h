@@ -293,7 +293,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
             const char * script = NULL;
             const char * region = NULL;
             size_t regionLength = 0;
-            const char * dash = index(locale, '-');
+            const char * dash = strchr(locale, '-');
             if (dash && (dash != locale))
             {
                 langLength = (dash - locale);
@@ -301,7 +301,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
                 if (nextPartLength >= 2)
                 {
                     script = ++dash;
-                    dash = index(dash, '-');
+                    dash = strchr(dash, '-');
                     if (dash)
                     {
                         nextPartLength = (dash - script);
@@ -319,7 +319,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
                     {
                         if (dash)
                         {
-                            dash = index(dash, '-');
+                            dash = strchr(dash, '-');
                             if (dash)
                             {
                                 nextPartLength = (dash - region);
