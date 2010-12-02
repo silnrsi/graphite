@@ -92,6 +92,11 @@ public:
     {
         return malloc(s);
     }
+    // delete in case an exception is thrown in constructor
+    void operator delete(void* p, const GlyphFaceCacheHeader& )
+    {
+        if (p) free(p);
+    }
 
     GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
     virtual ~GlyphFaceCacheOneItem();
@@ -117,6 +122,11 @@ public:
     {
         return malloc(s + sizeof(GlyphFace*)*hdr.numGlyphs());
     }
+    // delete in case an exception is thrown in constructor
+    void operator delete(void* p, const GlyphFaceCacheHeader& )
+    {
+        if (p) free(p);
+    }
 
     GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
     virtual ~GlyphFaceCacheLoadedOnDemand();
@@ -139,6 +149,11 @@ public:
     void * operator new (size_t s, const GlyphFaceCacheHeader& hdr)
     {
         return malloc(s + sizeof(GlyphFace)*hdr.numGlyphs());
+    }
+    // delete in case an exception is thrown in constructor
+    void operator delete(void* p, const GlyphFaceCacheHeader& )
+    {
+        if (p) free(p);
     }
 
     GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
