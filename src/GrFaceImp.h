@@ -137,7 +137,7 @@ private:
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:
-    bool readGlyphs(/* EGlyphCacheStrategy requestedStrategy */);
+    bool readGlyphs();
     bool readGraphite();
     bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable, this); }
     const Silf *chooseSilf(uint32 script) const;

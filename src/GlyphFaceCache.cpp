@@ -73,73 +73,10 @@ using namespace org::sil::graphite::v2;
     return true;
 }
 
-
-#if 0
-/*static*/ EGlyphCacheStrategy GlyphFaceCache::nearestSupportedStrategy(EGlyphCacheStrategy requested)
+/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr)
 {
-    if (requested>=ePreload) return ePreload;
-    if (requested>=eLoadOnDemand) return eLoadOnDemand;
-    
-    return eOneCache;
+    return new(hdr) GlyphFaceCacheLoadedOnDemand(hdr);           
 }
-#endif
-
-
-/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr /*, EGlyphCacheStrategy requested */)
-{
-//     switch (nearestSupportedStrategy(requested))
-//     {
-//       case ePreload:
-//             return new(hdr) GlyphFaceCachePreloaded(hdr);
-//       case eLoadOnDemand:
-            return new(hdr) GlyphFaceCacheLoadedOnDemand(hdr);           
-//       default:      //eOneCache
-//             return new(hdr) GlyphFaceCacheOneItem(hdr);
-//     }
-}
-
-#if 0
-
-GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   //always use with the above new, passing in the same GlyphFaceCacheHeader
-:   GlyphFaceCache(hdr),
-    m_LoadedGlyphNo(-1)   //-1 means none loaded
-{
-}
-
-
-/*virtual*/ GlyphFaceCacheOneItem::~GlyphFaceCacheOneItem()
-{
-    if (m_LoadedGlyphNo==-1)   //-1 means none loaded
-        return;
-    
-    delete glyphDirect();       //invoke destructor
-}
-
-
-/*virtual*/ EGlyphCacheStrategy GlyphFaceCacheOneItem::getEnum() const
-{
-    return eOneCache;
-}
-
-
-/*virtual*/ const GlyphFace *GlyphFaceCacheOneItem::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
-{
-//    incAccesses();
-    if (m_LoadedGlyphNo==glyphid)
-        return glyphDirect();
-    
-//    incLoads();
-    
-    if (m_LoadedGlyphNo!=-1)   //-1 means none loaded
-        delete glyphDirect();       //invoke destructor
-        
-    m_LoadedGlyphNo = glyphid;
-    new(glyphDirect()) GlyphFace(*this, glyphid);
-    
-    return glyphDirect();
-}
-
-#endif
 
 GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr)
 :   GlyphFaceCache(hdr)
@@ -167,69 +104,13 @@ GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheH
     }
 }
 
-#if 0
-/*virtual*/ EGlyphCacheStrategy GlyphFaceCacheLoadedOnDemand::getEnum() const
-{
-    return eLoadOnDemand;
-}
-#endif
-
 /*virtual*/ const GlyphFace *GlyphFaceCacheLoadedOnDemand::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
-//    incAccesses();
     GlyphFace **p = glyphPtrDirect(glyphid);
     if (*p)
         return *p;
 
-//    incLoads();
     *p = (GlyphFace*)malloc(sizeof(GlyphFace));
     new(*p) GlyphFace(*this, glyphid);
     return *p;
 }
-
-#if 0
-
-GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr)
-:   GlyphFaceCache(hdr)
-{
-    unsigned int nGlyphs = numGlyphs();
-    
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementGlyphs);
-        XmlTraceLog::get().addAttribute(AttrNum, nGlyphs);
-    }
-#endif
-    for (unsigned int i = 0; i < nGlyphs; i++)
-    {
-//        incLoads();
-        new(glyphDirect(i)) GlyphFace(*this, i);
-    }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementGlyphs);
-#endif
-}
-
-/*virtual*/ GlyphFaceCachePreloaded::~GlyphFaceCachePreloaded()
-{
-//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
-    unsigned int nGlyphs = numGlyphs();
-    for (unsigned int i=0 ; i<nGlyphs; ++i)
-        delete glyphDirect(i);      //invokes d'tor. Does not release the memory.
-}
-
-
-/*virtual*/ EGlyphCacheStrategy GlyphFaceCachePreloaded::getEnum() const
-{
-    return ePreload;
-}
-
-
-/*virtual const GlyphFace *GlyphFaceCachePreloaded::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
-{ 
-    incAccesses();
-    return glyphDirect(glyphid); 
-}
-*/
-#endif

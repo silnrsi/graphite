@@ -161,8 +161,7 @@ const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size
 
 extern "C" 
 {
-    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, 
-                                    /* EGlyphCacheStrategy requestedStrategy, */ bool canDumb)
+    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, bool canDumb)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
     {
         GrFace *res = new GrFace(appFaceHandle, getTable);
@@ -171,7 +170,7 @@ extern "C"
         XmlTraceLog::get().openElement(ElementFace);
 #endif
         bool valid = true;
-        valid &= res->readGlyphs(/* requestedStrategy */);
+        valid &= res->readGlyphs();
         if (!valid) {
             delete res;
             return 0;
@@ -269,13 +268,13 @@ extern "C"
 
 
 #ifndef DISABLE_FILE_FACE
-    GRNG_EXPORT GrFace* make_file_face(const char *filename /* , EGlyphCacheStrategy requestedStrategy */)   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* make_file_face(const char *filename)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
     {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn /* , requestedStrategy */);
+          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership

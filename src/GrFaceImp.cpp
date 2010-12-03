@@ -45,20 +45,15 @@ GrFace::~GrFace()
 }
 
 
-bool GrFace::readGlyphs(/* EGlyphCacheStrategy requestedStrategy */)
+bool GrFace::readGlyphs()
 {
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr);
-//          static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
-
-//     if (requestedStrategy & eCmap)
-//     {
-        size_t length = 0;
-        const void * table = getTable(tagCmap, &length);
-        m_cmapCache = new CmapCache(table, length);
-//     }
+    size_t length = 0;
+    const void * table = getTable(tagCmap, &length);
+    m_cmapCache = new CmapCache(table, length);
 
     if (!m_pGlyphFaceCache) return false;
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
