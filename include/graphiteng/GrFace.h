@@ -29,6 +29,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class GrFace;
 
+#if 0
 enum EGlyphCacheStrategy{
     eOneCache=0x0,
     eLoadOnDemand=0x100/*never unloaded*/,
@@ -38,13 +39,14 @@ enum EGlyphCacheStrategy{
     eLoadOnDemandWithCmap=eCmap+eLoadOnDemand,
     ePreloadWithCmap=eCmap+ePreload
 };  //don't change numbering
+#endif
 
 extern "C"
 {
     typedef const void *(*get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
-    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, bool canDumb = false);
+    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, /* EGlyphCacheStrategy requestedStrategy, */ bool canDumb = false);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy    
-    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, EGlyphCacheStrategy requestedStrategy, unsigned int segCacheMaxSize, bool canDumb = false);
+    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, /* EGlyphCacheStrategy requestedStrategy, */ unsigned int segCacheMaxSize, bool canDumb = false);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy
 
     GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
@@ -58,9 +60,9 @@ extern "C"
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace);
 
 #ifndef DISABLE_FILE_FACE
-    GRNG_EXPORT GrFace* make_file_face(const char *filename, EGlyphCacheStrategy requestedStrategy);   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* make_file_face(const char *filename /* , EGlyphCacheStrategy requestedStrategy */);   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
-    GRNG_EXPORT GrFace* make_file_face_with_seg_cache(const char *filename, EGlyphCacheStrategy requestedStrategy, unsigned int segCacheMaxSize);   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* make_file_face_with_seg_cache(const char *filename, /* EGlyphCacheStrategy requestedStrategy, */ unsigned int segCacheMaxSize);   //returns NULL on failure. //TBD better error handling
 #endif      //!DISABLE_FILE_FACE
 }
 

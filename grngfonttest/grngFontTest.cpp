@@ -697,9 +697,9 @@ int Parameters::testFileFont() const
 
         gr2::GrFace *face = NULL;
         if (enableCache)
-            face = gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 1000);
+            face = gr2::make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 1000);
         else
-            face = gr2::make_file_face(fileName, gr2::ePreload);
+            face = gr2::make_file_face(fileName /* , gr2::ePreload */);
 
         if (!face)
         {

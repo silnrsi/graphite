@@ -74,6 +74,7 @@ using namespace org::sil::graphite::v2;
 }
 
 
+#if 0
 /*static*/ EGlyphCacheStrategy GlyphFaceCache::nearestSupportedStrategy(EGlyphCacheStrategy requested)
 {
     if (requested>=ePreload) return ePreload;
@@ -81,23 +82,23 @@ using namespace org::sil::graphite::v2;
     
     return eOneCache;
 }
+#endif
 
 
-
-/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr, EGlyphCacheStrategy requested)
+/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr /*, EGlyphCacheStrategy requested */)
 {
-    switch (nearestSupportedStrategy(requested))
-    {
-      case ePreload:
-            return new(hdr) GlyphFaceCachePreloaded(hdr);
-      case eLoadOnDemand:
+//     switch (nearestSupportedStrategy(requested))
+//     {
+//       case ePreload:
+//             return new(hdr) GlyphFaceCachePreloaded(hdr);
+//       case eLoadOnDemand:
             return new(hdr) GlyphFaceCacheLoadedOnDemand(hdr);           
-      default:      //eOneCache
-            return new(hdr) GlyphFaceCacheOneItem(hdr);
-    }
+//       default:      //eOneCache
+//             return new(hdr) GlyphFaceCacheOneItem(hdr);
+//     }
 }
 
-
+#if 0
 
 GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   //always use with the above new, passing in the same GlyphFaceCacheHeader
 :   GlyphFaceCache(hdr),
@@ -138,7 +139,7 @@ GlyphFaceCacheOneItem::GlyphFaceCacheOneItem(const GlyphFaceCacheHeader& hdr)   
     return glyphDirect();
 }
 
-
+#endif
 
 GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr)
 :   GlyphFaceCache(hdr)
@@ -166,12 +167,12 @@ GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheH
     }
 }
 
-
+#if 0
 /*virtual*/ EGlyphCacheStrategy GlyphFaceCacheLoadedOnDemand::getEnum() const
 {
     return eLoadOnDemand;
 }
-
+#endif
 
 /*virtual*/ const GlyphFace *GlyphFaceCacheLoadedOnDemand::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
@@ -186,7 +187,7 @@ GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheH
     return *p;
 }
 
-
+#if 0
 
 GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr)
 :   GlyphFaceCache(hdr)
@@ -231,3 +232,4 @@ GlyphFaceCachePreloaded::GlyphFaceCachePreloaded(const GlyphFaceCacheHeader& hdr
     return glyphDirect(glyphid); 
 }
 */
+#endif

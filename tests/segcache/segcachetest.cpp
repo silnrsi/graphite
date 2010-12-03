@@ -149,7 +149,7 @@ int main(int argc, char ** argv)
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::graphite_start_logging(log, GRLOG_SEGMENT);
     gr2::GrCachedFace *face = reinterpret_cast<gr2::GrCachedFace*>
-        (gr2::make_file_face_with_seg_cache(fileName, gr2::ePreload, 10));
+        (gr2::make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 10));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
