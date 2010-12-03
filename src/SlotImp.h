@@ -92,9 +92,9 @@ private:
     Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
-    int m_original;	    // charinfo that originated this slot (e.g. for feature values)
-    int m_before;           // charinfo index of before association
-    int m_after;            // charinfo index of after association
+    uint m_original;	    // charinfo that originated this slot (e.g. for feature values)
+    uint m_before;           // charinfo index of before association
+    uint m_after;            // charinfo index of after association
     Slot *m_parent;         // index to parent we are attached to
     Slot *m_child;          // index to first child slot that attaches to us
     Slot *m_sibling;        // index to next child that attaches to our parent

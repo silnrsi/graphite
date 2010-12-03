@@ -51,6 +51,7 @@ extern "C"
     GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
     GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
     GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends);
 }
   
   

@@ -312,6 +312,30 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
     if (iStart == m_first && iEnd == m_last) m_advance = currpos;
 }
 
+
+void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const
+{
+    Slot *s;
+    uint i;
+    if (!begins || !ends) return;
+    memset(begins, m_numGlyphs, m_numCharinfo * sizeof(uint));
+    memset(ends, 0, m_numCharinfo * sizeof(uint));
+    
+    for (s = m_first, i = 0; s; s = s->next(), i++)
+    {
+        if (i < begins[s->before()])
+        {
+            begins[s->before()] = i;
+            if (sbegins) sbegins[s->before()] = s;
+        }
+        if (i > ends[s->after()])
+        {
+            ends[s->after()] = i;
+            if (sends) sends[s->after()] = s;
+        }
+    }
+}
+
 #ifndef DISABLE_TRACING
 void GrSegment::logSegment(encform enc, const void* pStart, size_t nChars) const
 {

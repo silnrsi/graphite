@@ -152,6 +152,14 @@ GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
     return pSeg->first();
 }
 
+
+GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends)
+{
+    assert(pSeg && begins && ends);
+    return pSeg->getCharSlots(begins, ends, sbegins, sends);
+}
+
+
 }
 
 }}}} // namespace

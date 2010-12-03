@@ -125,6 +125,7 @@ public:
     int defaultOriginal() const { return m_defaultOriginal; }
     const GrFace * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int charIndex) { assert(m_feats.size() == 1); return m_feats[0]; }
+    void getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const;
 
     CLASS_NEW_DELETE
 
