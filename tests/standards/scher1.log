@@ -10,3 +10,13 @@ pos  gid   attach	     x	     y	ins bw	  chars		Unicode
 06  1233   3@150,250	   0.4	   0.0	 1  30	  6   6	    627	    627
 07   965   6@47,949	   0.0	  -0.4	 1  30	  7   7	    64e	    64e
 Advance width =   10.7
+
+Char	Unicode	Before	After
+0	0628	0	0
+1	0628	1	1
+2	064E	2	2
+3	0644	3	3
+4	064E	5	5
+5	0654	4	4
+6	0627	6	6
+7	064E	7	7

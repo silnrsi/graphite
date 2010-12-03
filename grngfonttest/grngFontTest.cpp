@@ -823,6 +823,15 @@ int Parameters::testFileFont() const
         // position arrays must be one bigger than what countGlyphs() returned
         float advanceWidth = seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
+        unsigned int numchar = seg_n_cinfo(pSeg);
+        gr2::uint32 *firsts = (gr2::uint32 *)malloc(numchar * sizeof(gr2::uint32));
+        gr2::uint32 *lasts = (gr2::uint32 *)malloc(numchar * sizeof(gr2::uint32));
+        seg_char_slots(pSeg, firsts, lasts, 0, 0);
+        fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
+        for (int i = 0; i < numchar; i++)
+        {
+            fprintf(log, "%d\t%04X\t%d\t%d\n", i, cinfo_unicode_char(seg_cinfo(pSeg, i)), firsts[i], lasts[i]);
+        }
         free(map);
         gr2::seg_destroy(pSeg);
        }

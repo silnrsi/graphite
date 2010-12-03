@@ -318,8 +318,8 @@ void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot 
     Slot *s;
     uint i;
     if (!begins || !ends) return;
-    memset(begins, m_numGlyphs, m_numCharinfo * sizeof(uint));
-    memset(ends, 0, m_numCharinfo * sizeof(uint));
+    std::fill_n(begins, m_numCharinfo, m_numGlyphs);
+    std::fill_n(ends, m_numCharinfo, 0);
     
     for (s = m_first, i = 0; s; s = s->next(), i++)
     {
