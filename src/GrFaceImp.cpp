@@ -45,34 +45,6 @@ GrFace::~GrFace()
 }
 
 
-bool GrFace::setGlyphCacheStrategy(EGlyphCacheStrategy requestedStrategy) const      //glyphs already loaded are unloaded
-{
-    if (requestedStrategy & eCmap)
-    {
-        if (!m_cmapCache)
-        {
-            size_t length = 0;
-            const void * table = getTable(tagCmap, &length);
-            m_cmapCache = new CmapCache(table, length);
-        }
-    }
-    else
-    {
-        delete m_cmapCache;
-        m_cmapCache = NULL;
-    }
-
-    GlyphFaceCache* pNewCache = GlyphFaceCache::makeCache(*m_pGlyphFaceCache,
-        static_cast<EGlyphCacheStrategy>(requestedStrategy & eLoadMask));
-    if (!pNewCache)
-        return false;
-    
-    delete m_pGlyphFaceCache;
-    m_pGlyphFaceCache = pNewCache;
-    return true;
-}
-
-
 bool GrFace::readGlyphs(EGlyphCacheStrategy requestedStrategy)
 {
     GlyphFaceCacheHeader hdr;

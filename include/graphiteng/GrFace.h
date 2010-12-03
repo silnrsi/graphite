@@ -55,8 +55,6 @@ extern "C"
     GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
     GRNG_EXPORT void face_destroy(GrFace *face);
 
-    GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy);       //glyphs already loaded are unloaded. return value indicates success. failure keeps old cache.
-    GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace);
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace);
 
 #ifndef DISABLE_FILE_FACE

@@ -262,18 +262,6 @@ extern "C"
     }
 #endif
 
-    GRNG_EXPORT bool face_set_glyph_cache_strategy(const GrFace* pFace, EGlyphCacheStrategy requestedStrategy)      //glyphs already loaded are unloaded
-    {
-        return pFace->setGlyphCacheStrategy(requestedStrategy);
-    }
-
-
-    GRNG_EXPORT EGlyphCacheStrategy face_glyph_strategy(const GrFace* pFace)
-    {
-        return pFace->getGlyphFaceCache()->getEnum();
-    }
-
-
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace)
     {
         return pFace->getGlyphFaceCache()->numGlyphs();
