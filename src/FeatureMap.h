@@ -22,8 +22,7 @@
 #pragma once
 #include <cstring>
 #include "graphiteng/Types.h"
-#include "graphiteng/GrFace.h"
-#include "graphiteng/Features.h"
+#include "graphiteng/Font.h"
 #include "Main.h"
 #include "FeaturesImp.h"
 //#include <map> // avoid libstdc++

@@ -21,7 +21,7 @@
 */
 #pragma once
 #include <cassert>
-#include "graphiteng/GrFont.h"
+#include "graphiteng/Font.h"
 #include "Main.h"
 #include "GrFaceImp.h"
 

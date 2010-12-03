@@ -22,8 +22,7 @@
 #pragma once
 
 #include "graphiteng/Types.h"
-#include "graphiteng/GrSegment.h"
-#include "graphiteng/Slot.h"
+#include "graphiteng/Segment.h"
 #include "Main.h"
 #include "GrFontImp.h"
 

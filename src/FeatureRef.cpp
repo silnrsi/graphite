@@ -19,7 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/FeatureRef.h"
+#include "graphiteng/Font.h"
 #include "FeatureMap.h"
 #include "GrFaceImp.h"
 #include "NameTable.h"
@@ -54,7 +54,7 @@ GRNG_EXPORT uint16 fref_feature_value(const FeatureRef*pfeatureref, const Featur
 }
 
 
-GRNG_EXPORT bool fref_set_feature_value(const FeatureRef* pfeatureref, uint16 val, Features* pDest)
+GRNG_EXPORT int fref_set_feature_value(const FeatureRef* pfeatureref, uint16 val, Features* pDest)
 {
     if (!pfeatureref)
     return false;

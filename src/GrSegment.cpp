@@ -19,8 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/GrSegment.h"
-#include "graphiteng/Slot.h"
+#include "graphiteng/Segment.h"
 #include "GrSegmentImp.h"
 #include "processUTF.h"
 

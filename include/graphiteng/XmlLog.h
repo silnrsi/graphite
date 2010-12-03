@@ -21,10 +21,14 @@
 */
 #pragma once
 
-#include <cstdio>
 #include <graphiteng/Types.h>
 
+#ifdef __cplusplus
+#include <cstdio>
 namespace org { namespace sil { namespace graphite { namespace v2 {
+#else
+#include <stdio.h>
+#endif
 
 typedef enum {
     GRLOG_NONE = 0x0,
@@ -39,10 +43,15 @@ typedef enum {
 
 // If startGraphiteLogging returns true, logging is enabled and the FILE handle
 // will be closed by graphite when stopGraphiteLogging is called.
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
 extern GRNG_EXPORT bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
 extern GRNG_EXPORT void graphite_stop_logging();
-}
 
+#ifdef __cplusplus
+}
 }}}} // namespace
+#endif

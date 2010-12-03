@@ -19,7 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/Slot.h"
+#include "graphiteng/Segment.h"
 #include "SlotImp.h"
 
 using namespace org::sil::graphite::v2;

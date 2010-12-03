@@ -24,13 +24,8 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <iconv.h>
 
 #include "graphiteng/Types.h"
-#include "graphiteng/GrSegment.h"
-#include "graphiteng/Slot.h"
-#include "graphiteng/GrFont.h"
-#include "graphiteng/GrFace.h"
+#include "graphiteng/Segment.h"
 #include "graphiteng/XmlLog.h"
-
-#include "graphiteng/CharInfo.h"
 
 namespace gr2 = org::sil::graphite::v2;
 

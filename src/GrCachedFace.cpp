@@ -19,7 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include <graphiteng/CharInfo.h>
+#include <graphiteng/Segment.h>
 #include "GrCachedFace.h"
 #include "SegCacheStore.h"
 
@@ -143,7 +143,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
 
 extern "C" {
 
-    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, unsigned int cacheSize, bool canDumb)
+    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, unsigned int cacheSize, int canDumb)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
     {
         GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
@@ -179,7 +179,7 @@ extern "C" {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes = make_face_with_seg_cache(pFileFace, &FileFace_table_fn, cacheSize);
+          GrFace* pRes = make_face_with_seg_cache(pFileFace, &FileFace_table_fn, cacheSize, 0);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership

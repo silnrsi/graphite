@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <graphiteng/GrSegment.h>
+#include <graphiteng/Segment.h>
 #include "Main.h"
 #include "SlotImp.h"
 #include "FeaturesImp.h"

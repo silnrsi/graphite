@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "GlyphFaceCache.h"
-#include "graphiteng/GrFace.h"
+#include "graphiteng/Font.h"
 #include "GrFaceImp.h"     //for the tags
 
 using namespace org::sil::graphite::v2;

@@ -19,7 +19,7 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphiteng/GrFace.h"
+#include "graphiteng/Font.h"
 #include "XmlTraceLog.h"
 #include "GrFaceImp.h"
 #include "GrCachedFace.h"
@@ -161,7 +161,7 @@ const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size
 
 extern "C" 
 {
-    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, bool canDumb)
+    GRNG_EXPORT GrFace* make_face(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, int canDumb)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
     {
         GrFace *res = new GrFace(appFaceHandle, getTable);
@@ -274,7 +274,7 @@ extern "C"
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn);
+          GrFace* pRes = make_face(pFileFace, &FileFace_table_fn, 0);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership

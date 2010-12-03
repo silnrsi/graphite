@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <graphiteng/GrSegment.h>
+#include <graphiteng/Segment.h>
 #include "TtfTypes.h"
 #include "locale2lcid.h"
 

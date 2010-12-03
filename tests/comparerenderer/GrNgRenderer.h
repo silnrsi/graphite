@@ -24,10 +24,7 @@
 #include <new>
 #include "Renderer.h"
 #include <graphiteng/Types.h>
-#include <graphiteng/GrFace.h>
-#include <graphiteng/GrFont.h>
-#include <graphiteng/GrSegment.h>
-#include <graphiteng/Slot.h>
+#include <graphiteng/Segment.h>
 
 namespace gr2 = org::sil::graphite::v2;
 

@@ -21,9 +21,12 @@
 */
 #pragma once
 
+#ifdef __cplusplus
 #include <cstddef>
-
 namespace org { namespace sil { namespace graphite { namespace v2 {
+#else
+#include <stddef.h>
+#endif
 
 typedef unsigned char uint8;
 typedef uint8    byte;
@@ -48,6 +51,7 @@ enum encform {
 #endif
 #endif
 
-
+#ifdef __cplusplus
 }}}} // namespace
+#endif
 
