@@ -197,7 +197,7 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 }
 
 inline SlotMap::SlotMap(GrSegment & seg)
-: m_size(0), m_precontext(0), segment(seg)
+: segment(seg), m_size(0), m_precontext(0)
 {
 }
 

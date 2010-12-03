@@ -35,8 +35,8 @@ SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     m_prefixLength(ePrefixLength),
     m_maxCachedSegLength(eMaxSpliceSize),
     m_segmentCount(0),
-    m_totalAccessCount(0l), m_totalMisses(0l),
-    m_features(feats)
+    m_features(feats),
+    m_totalAccessCount(0l), m_totalMisses(0l)
 {
     m_prefixes.raw = grzeroalloc<void*>(store->maxCmapGid() + 2);
     m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;

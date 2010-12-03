@@ -32,7 +32,7 @@ class Slot;
 class VMScratch
 {
 public:
-    VMScratch() : m_firstPositioned(-1), m_lastPositioned(-1), m_numRules(0) {}
+    VMScratch() : m_numRules(0), m_firstPositioned(-1), m_lastPositioned(-1) {}
     void resetRules() { m_numRules = 0; m_flags = 0; }
     void resetStack() { m_stackptr = 0; }
     uint16 rule(int i) { return m_rules[i]; }
@@ -53,11 +53,11 @@ public:
         m_lengths[i] = len;
         if (m_numRules < VMS_MAX_RULES_PER_SEQUENCE) m_numRules++;
     }
-    Slot *slotMap(int i) { m_slotMap[i]; }
+    Slot *slotMap(int i) { return m_slotMap[i]; }
     void slotMap(int i, Slot *s) { m_slotMap[i] = s; }
     Slot **map() { return m_slotMap; }
     byte flags() { return m_flags; }
-    byte setflag(int val) { m_flags |= val; }
+    void setflag(int val) { m_flags |= val; }
 
 protected:
     byte m_numRules;

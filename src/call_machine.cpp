@@ -36,8 +36,8 @@
 #include "SlotImp.h"
 #include "Rule.h"
 
-#define registers           const byte * & dp, vm::Machine::stack_t * & sp, vm::Machine::stack_t * const sb,\
-                            regbank & reg
+#define registers           GR_UNUSED const byte * & dp, vm::Machine::stack_t * & sp, \
+                            vm::Machine::stack_t * const sb, GR_UNUSED regbank & reg
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\

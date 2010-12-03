@@ -34,8 +34,8 @@ public:
     encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
-    static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
-    static bool needMoreChars(const void* pCharStart, size_t nProcessed) { return true; }
+    static bool inBuffer(const void* /*pCharLastSurrogatePart*/) { return true; }
+    static bool needMoreChars(const void* /*pCharStart*/, size_t /*nProcessed*/) { return true; }
     
 private:
     encform m_enc;
@@ -50,8 +50,8 @@ public:
     encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
-    static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
-    bool needMoreChars(const void* pCharStart, size_t nProcessed) const { return nProcessed<m_numchars; }
+    static bool inBuffer(const void* /*pCharLastSurrogatePart*/) { return true; }
+    bool needMoreChars(const void* /*pCharStart*/, size_t nProcessed) const { return nProcessed<m_numchars; }
     
 private:
     size_t m_numchars;
@@ -72,7 +72,7 @@ public:
   
     bool inBuffer(const void* pCharLastSurrogatePart) const { return pCharLastSurrogatePart<m_pEnd; }	//also called on charstart by needMoreChars()
 
-    bool needMoreChars(const void* pCharStart, size_t nProcessed) const { return inBuffer(pCharStart); }
+    bool needMoreChars(const void* pCharStart, size_t /*nProcessed*/) const { return inBuffer(pCharStart); }
      
 private:
     const void* m_pEnd;
@@ -85,10 +85,10 @@ class IgnoreErrors
 {
 public:
     //for all of the ignore* methods is the parameter is false, the return result must be true
-    static bool ignoreUnicodeOutOfRangeErrors(bool isBad) { return true; }
-    static bool ignoreBadSurrogatesErrors(bool isBad) { return true; }
+    static bool ignoreUnicodeOutOfRangeErrors(bool /*isBad*/) { return true; }
+    static bool ignoreBadSurrogatesErrors(bool /*isBad*/) { return true; }
 
-    static bool handleError(const void* pPositionOfError) { return true;}
+    static bool handleError(const void* /*pPositionOfError*/) { return true;}
 };
 
 
@@ -267,7 +267,7 @@ private:
 
 public:
       template <class LIMIT, class ERRORHANDLER>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+      inline bool consumeChar(const LIMIT& /*limit*/, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *m_pCharStart;
       if (pErrHandler->ignoreUnicodeOutOfRangeErrors(!(*pRes<0xD800 || (*pRes>=0xE000 && *pRes<0x110000)))) {

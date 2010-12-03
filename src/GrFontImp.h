@@ -47,7 +47,7 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    virtual float computeAdvance(unsigned short glyphid) const { assert(false); return .0f; };
+    virtual float computeAdvance(unsigned short /*glyphid*/) const { assert(false); return .0f; };
     
 protected:
     float m_scale;      // scales from design units to ppm

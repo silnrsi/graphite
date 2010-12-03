@@ -183,7 +183,10 @@ void XmlTraceLog::error(const char * msg, ...)
     va_list args;
     va_start(args, msg);
     char buffer[MAX_MSG_LEN];
-    int len = vsnprintf(buffer, MAX_MSG_LEN, msg, args);
+#ifndef NDEBUG
+    int len =
+#endif
+        vsnprintf(buffer, MAX_MSG_LEN, msg, args);
     assert(len + 1 < MAX_MSG_LEN);
     writeText(buffer);
     va_end(args);
@@ -197,7 +200,10 @@ void XmlTraceLog::warning(const char * msg, ...)
     va_list args;
     va_start(args, msg);
     char buffer[MAX_MSG_LEN];
-    int len = vsnprintf(buffer, MAX_MSG_LEN, msg, args);
+#ifndef NDEBUG
+    int len =
+#endif
+        vsnprintf(buffer, MAX_MSG_LEN, msg, args);
     assert(len + 1 < MAX_MSG_LEN);
     writeText(buffer);
     va_end(args);

@@ -59,7 +59,7 @@ Code::analysis_context::analysis_context()
 
 
 Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
- :  _code(0), _data_size(0), _instr_count(0), _status(loaded), _min_slotref(0), _max_slotref(0),
+ :  _code(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0), _status(loaded),
     _constrained(constrained), _modify(false), _delete(false), _own(true)
 {
     assert(bytecode_begin != 0);
@@ -259,7 +259,7 @@ void fixup_cntxt_item_target(const byte* cdp,
 } // end of namespace
 
 void Code::analyse_opcode(const opcode opc, size_t op_idx,
-                           const int8  * dp, size_t param_sz,
+                           const int8  * dp, size_t /*param_sz*/,
                            analysis_context & ab) throw()
 {
   if (_constrained) return;
@@ -352,9 +352,13 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
       break;
       
     case ASSOC :                // slotrefs in varargs
-      uint8 num = *dp+1;
-      while (--num) update_slot_limits(ab.slotref + *++dp);
+      {
+        uint8 num = *dp+1;
+        while (--num) update_slot_limits(ab.slotref + *++dp);
+      }
       break;
+    default:
+        break;
   }
 }
 

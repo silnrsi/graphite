@@ -43,9 +43,6 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
     m_glyphLength = glyphCount;
     Slot * slotCopy = m_glyph;
     m_glyph->prev(NULL);
-    static const char SLOT_PARENT = 1;
-    static const char SLOT_SIBLING = 2;
-    static const char SLOT_CHILD = 4;
     struct Index2Slot {
         Index2Slot(uint16 i, const Slot * s) : m_i(i), m_slot(s) {};
         Index2Slot() : m_i(0), m_slot(NULL) {};

@@ -27,8 +27,11 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 encodingID)
-    : m_table(reinterpret_cast<const TtfUtil::Sfnt::FontNames*>(data)),
-    m_platformOffset(0), m_nameDataLength(0), m_nameData(NULL)
+    :
+    m_platformId(0), m_encodingId(0), m_languageCount(0),
+    m_platformOffset(0), m_platformLastRecord(0), m_nameDataLength(0),
+    m_table(reinterpret_cast<const TtfUtil::Sfnt::FontNames*>(data)),
+    m_nameData(NULL)
 {
     if ((length > sizeof(TtfUtil::Sfnt::FontNames)) &&
         (length > sizeof(TtfUtil::Sfnt::FontNames) +
@@ -64,6 +67,8 @@ uint16 NameTable::setPlatformEncoding(uint16 platformId, uint16 encodingID)
     {
         m_platformLastRecord = i;
     }
+    m_encodingId = encodingID;
+    m_platformId = platformId;
     return 0;
 }
 

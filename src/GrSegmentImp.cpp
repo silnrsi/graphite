@@ -36,17 +36,17 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
+        m_freeSlots(NULL),
+        m_first(NULL),
+        m_last(NULL),
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_defaultOriginal(0),
-        m_face(face),
         m_charinfo(new CharInfo[numchars]),
+        m_face(face),
         m_silf(face->chooseSilf(script)),
-        m_dir(textDir),
-        m_freeSlots(NULL),
-        m_last(NULL),
-        m_first(NULL),
-        m_bbox(Rect(Position(0, 0), Position(0, 0)))
+        m_bbox(Rect(Position(0, 0), Position(0, 0))),
+        m_dir(textDir)
 {
     unsigned int i, j;
     m_bufSize = numchars + 10;
@@ -428,14 +428,12 @@ public:
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
-          uint16 realgid = 0;
-	  uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
+          uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
           if (!gid)
               gid = m_face->findPseudo(cid);
-         // int16 bw = m_face->glyphAttr(gid, m_pDest->silf()->aBreak());
           m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);
-	  ++m_nCharsProcessed;
-	  return true;
+          ++m_nCharsProcessed;
+          return true;
       }
 
       size_t charsProcessed() const { return m_nCharsProcessed; }
@@ -464,7 +462,6 @@ public:
 
     bool processChar(uint32 cid/*unicode character*/)     //return value indicates if should stop processing
     {
-        uint16 realgid = 0;
         uint16 gid = m_cmap->lookup(cid);
         if (!gid)
             gid = m_face->findPseudo(cid);
@@ -502,7 +499,7 @@ void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not b
     }
 }
 
-void GrSegment::prepare_pos(const GrFont *font)
+void GrSegment::prepare_pos(const GrFont */*font*/)
 {
     // copy key changeable metrics into slot (if any);
 }

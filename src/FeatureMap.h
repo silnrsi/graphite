@@ -51,15 +51,17 @@ public:
     FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
                FeatureSetting *uiNames, const GrFace* pFace/*not NULL*/) throw()
-      : m_mask(mask), m_id(name), m_bits(bits), m_index(index), m_max(mask >> bits),
-      m_flags(flags), m_nameid(uiName), m_numSet(numSet),
-      m_nameValues(uiNames), m_pFace(pFace) {}
+      : m_mask(mask), m_id(name), m_max(mask >> bits), m_bits(bits), m_index(index),
+      m_nameid(uiName), m_nameValues(uiNames), m_pFace(pFace), m_flags(flags),
+      m_numSet(numSet)
+      {}
     FeatureRef(const FeatureRef & toCopy)
-        : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_bits(toCopy.m_bits),
-        m_index(toCopy.m_index), m_max(toCopy.m_max), m_flags(toCopy.m_flags),
-        m_nameid(toCopy.m_nameid), m_numSet(toCopy.m_numSet),
+        : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_max(toCopy.m_max),
+        m_bits(toCopy.m_bits), m_index(toCopy.m_index),
+        m_nameid(toCopy.m_nameid),
         m_nameValues((toCopy.m_nameValues)? gralloc<FeatureSetting>(toCopy.m_numSet) : NULL),
-        m_pFace(toCopy.m_pFace)
+        m_pFace(toCopy.m_pFace), m_flags(toCopy.m_flags),
+        m_numSet(toCopy.m_numSet)
     {
         // most of the time these name values aren't used, so NULL might be acceptable
         if (toCopy.m_nameValues)
@@ -130,9 +132,8 @@ class NameAndFeatureRef
 class FeatureMap
 {
 public:
-    FeatureMap() : m_numFeats(0), m_pNamedFeats(NULL), m_searchIndex(0),
-        m_sortedIndexes(NULL),
-        m_feats(NULL), m_defaultFeatures(NULL) {}
+    FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL),
+        m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
     bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace);
@@ -146,8 +147,6 @@ public:
 private:
 friend class SillMap;
     uint16 m_numFeats;
-    uint16 m_searchIndex;
-    uint16 * m_sortedIndexes;
 
     FeatureRef *m_feats;
     NameAndFeatureRef* m_pNamedFeats;   //owned
