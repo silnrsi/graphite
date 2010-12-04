@@ -28,51 +28,63 @@ extern "C"
 {
 GRNG_EXPORT const GrSlot* slot_next_in_segment(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->next();
 }
 
+GRNG_EXPORT const GrSlot* slot_prev_in_segment(const GrSlot* p/*not NULL*/)
+{
+    assert(p);
+    return p->prev();
+}
 
 GRNG_EXPORT const GrSlot* slot_attached_to(const GrSlot* p/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
 {
+    assert(p);
     return p->attachTo();
 }
 
 
 GRNG_EXPORT const GrSlot* slot_first_attachment(const GrSlot* p/*not NULL*/)        //returns NULL iff no attachments.
 {        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
+    assert(p);
     return p->firstChild();
 }
 
     
 GRNG_EXPORT const GrSlot* slot_next_sibling_attachment(const GrSlot* p/*not NULL*/)        //returns NULL iff no more attachments.
 {        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
+    assert(p);
     return p->nextSibling();
 }
 
 
 GRNG_EXPORT unsigned short slot_gid(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->gid();
 }
 
 
 GRNG_EXPORT float slot_origin_X(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->origin().x;
 }
 
 
 GRNG_EXPORT float slot_origin_Y(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->origin().y;
 }
 
 
 GRNG_EXPORT float slot_advance(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->advance();
 }
-
 
 GRNG_EXPORT int slot_before(const GrSlot* p/*not NULL*/)
 {
@@ -84,7 +96,6 @@ GRNG_EXPORT int slot_after(const GrSlot* p/*not NULL*/)
 {
     return p->after();
 }
-
 
 GRNG_EXPORT int slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex)
 {

@@ -133,9 +133,11 @@ typedef struct Slot GrSlot;
     GRNG_EXPORT const GrCharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
     GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
     GRNG_EXPORT const GrSlot* seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* seg_last_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
     GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, gr_uint32 *begins, gr_uint32 *ends, GrSlot **sbegins, GrSlot **sends);
     //slots are owned by their segment
     GRNG_EXPORT const GrSlot* slot_next_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* slot_prev_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
     GRNG_EXPORT const GrSlot* slot_attached_to(const GrSlot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
  
     GRNG_EXPORT const GrSlot* slot_first_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no attachments.

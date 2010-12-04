@@ -144,13 +144,17 @@ GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/)
     return pSeg->slotCount();
 }
 
-
 GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->first();
 }
 
+GRNG_EXPORT const Slot* seg_last_slot(GrSegment* pSeg/*not NULL*/)
+{
+    assert(pSeg);
+    return pSeg->last();
+}
 
 GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends)
 {
