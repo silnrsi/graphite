@@ -3,6 +3,7 @@ Martin Hosken <martin_hosken@sil.org>
 
 :numbered:
 
+include::building.txt[]
 include::calling.txt[]
 include::features.txt[]
 include::hacking.txt[]

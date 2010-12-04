@@ -55,13 +55,8 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
-    ../include/graphiteng/CharInfo.h
-    ../include/graphiteng/Features.h
-    ../include/graphiteng/FeatureRef.h
-    ../include/graphiteng/GrFace.h
-    ../include/graphiteng/GrFont.h
-    ../include/graphiteng/GrSegment.h
-    ../include/graphiteng/Slot.h
+    ../include/graphiteng/Font.h
+    ../include/graphiteng/Segment.h
     ../include/graphiteng/Types.h
     ${TRACE_HEADERS}
     )

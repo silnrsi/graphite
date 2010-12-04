@@ -6,10 +6,49 @@ to create a segment. A segment consists of a linked list of slots which each
 correspond to an output glyph. In addition a segment holds charinfo for each
 character in the input text.
 
-[source, c, numbered]
+[source, c]
 ----
 include::../tests/examples/simple.c[]
 ----
+
+<1> The first parameter to the program is the full path to the font file to be used for
+    rendering. This function loads the font and reads all the graphite tables, etc. If
+    there is a fault in the font, it will fail to load and the function will return NULL.
+
+<2> A font is merely a face at a given size in pixels per em. It is possible to support
+    hinted advances, but this is done via a callback function.
+
+<3> For simplification of memory allocation, graphite works on characters (Unicode
+    codepoints) rather than bytes or uint16s, etc. We need to calculate the number of
+    characters in the input string (the second parameter to the program). Very often
+    applications already know this. If there is an error in the utf-8, the pError variable
+    will point to it and we just exit. But it is possible to render up to that point.
+
+<4> Here we create a segment. A segment is the results of processing a string of text with
+    graphite. It contains all the information necessary for final rendering including all
+    the glyphs, their positions, relationships between glyphs and underlying characters,
+    etc.
+
+<5> A segment primarily consists of a linked list of slots. Each slot corresponds to a
+    glyph in the output. The information about a glyph and its relationships is queried
+    from the slot.
+
+Source for this program may be found in tests/examples/simple.c
+
+Assuming that graphiteng has been built and installed, this example can be built and run on linux using:
+
+----
+gcc -o simple -lgraphiteng simple.c
+LD_LIBRARY_PATH=/usr/local/lib ./simple ../fonts/Padauk.ttf 'Hello World!'
+----
+
+Running simple gives the results:
+
+----
+43(0.000000,0.000000) 72(9.859375,0.000000) 79(17.609375,0.000000) 79(20.796875,0.000000) 82(23.984375,0.000000) 3(32.203125,0.000000) 58(38.109375,0.000000) 82(51.625000,0.000000) 85(59.843750,0.000000) 79(64.875000,0.000000) 71(68.062500,0.000000) 4(76.281250,0.000000)
+----
+
+Not very pretty, but reassuring! Graphite isn't a graphical rendering engine, it merely calculates which glyphs should render where and leaves the actual process of displaying those glyphs to other libraries.
 
 === Details ===
 
