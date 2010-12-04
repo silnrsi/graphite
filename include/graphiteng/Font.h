@@ -42,12 +42,12 @@ extern "C"
     GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, unsigned int segCacheMaxSize, int canDumb);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy
 
-    GRNG_EXPORT GrFeatureVal* face_featureval_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
-    GRNG_EXPORT const GrFeatureRef* face_find_fref(const GrFace* pFace, uint32 featId); //When finished with the FeatureRef, call features_destroy
-    GRNG_EXPORT uint16 face_n_fref(const GrFace* pFace);
-    GRNG_EXPORT const GrFeatureRef* face_fref(const GrFace* pFace, uint16 i); //When finished with the FeatureRef, call features_destroy
+    GRNG_EXPORT GrFeatureVal* face_featureval_for_lang(const GrFace* pFace, gr_uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
+    GRNG_EXPORT const GrFeatureRef* face_find_fref(const GrFace* pFace, gr_uint32 featId); //When finished with the FeatureRef, call features_destroy
+    GRNG_EXPORT gr_uint16 face_n_fref(const GrFace* pFace);
+    GRNG_EXPORT const GrFeatureRef* face_fref(const GrFace* pFace, gr_uint16 i); //When finished with the FeatureRef, call features_destroy
     GRNG_EXPORT unsigned short face_n_languages(const GrFace* pFace);
-    GRNG_EXPORT uint32 face_lang_by_index(const GrFace* pFace, uint16 i);
+    GRNG_EXPORT gr_uint32 face_lang_by_index(const GrFace* pFace, gr_uint16 i);
     GRNG_EXPORT void face_destroy(GrFace *face);
 
     GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace);
@@ -60,25 +60,25 @@ extern "C"
 
     GRNG_EXPORT GrFont* make_font(float ppm/*pixels per em*/, const GrFace *face/*needed for scaling, and the advance hints - must stay alive*/);
                       //When finished with the GrFont, call destroy_font    
-    typedef float (*advance_fn)(const void* appFontHandle, uint16 glyphid);     //amount to advance. positive is in the writing direction
+    typedef float (*advance_fn)(const void* appFontHandle, gr_uint16 glyphid);     //amount to advance. positive is in the writing direction
     GRNG_EXPORT GrFont* make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
                       //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_font    
     GRNG_EXPORT void font_destroy(GrFont *font);
 
-    GRNG_EXPORT uint16 fref_feature_value(const GrFeatureRef*pfeatureref, const GrFeatureVal* feats);    //returns 0 if either pointer is NULL
-    GRNG_EXPORT int fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 val, GrFeatureVal* pDest);    //returns false iff either pointer is NULL. or if they are not for the same face, or val is too big
-    GRNG_EXPORT uint32 fref_id(const GrFeatureRef* pfeatureref);    //returns 0 if pointer is NULL
+    GRNG_EXPORT gr_uint16 fref_feature_value(const GrFeatureRef*pfeatureref, const GrFeatureVal* feats);    //returns 0 if either pointer is NULL
+    GRNG_EXPORT int fref_set_feature_value(const GrFeatureRef* pfeatureref, gr_uint16 val, GrFeatureVal* pDest);    //returns false iff either pointer is NULL. or if they are not for the same face, or val is too big
+    GRNG_EXPORT gr_uint32 fref_id(const GrFeatureRef* pfeatureref);    //returns 0 if pointer is NULL
 
     
     //these two methods can be used to iterate over the possible values for a particular id. There may be gaps.
-    GRNG_EXPORT uint16 fref_n_values(const GrFeatureRef* pfeatureref);
-    GRNG_EXPORT int16 fref_value(const GrFeatureRef* pfeatureref, uint16 settingno);   
+    GRNG_EXPORT gr_uint16 fref_n_values(const GrFeatureRef* pfeatureref);
+    GRNG_EXPORT gr_int16 fref_value(const GrFeatureRef* pfeatureref, gr_uint16 settingno);   
     
     // Labels may not be available for requested langId, the language actually used
     // will be returned in langId. The length in bytes will be returned in length
     // call label_destroy when finished
-    GRNG_EXPORT void* fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, enum encform utf, uint32 *length);
-    GRNG_EXPORT void* fref_value_label(const GrFeatureRef* pfeatureref, uint16 settingno/*rather than a value*/, uint16 *langId, enum encform utf, uint32 *length);
+    GRNG_EXPORT void* fref_label(const GrFeatureRef* pfeatureref, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
+    GRNG_EXPORT void* fref_value_label(const GrFeatureRef* pfeatureref, gr_uint16 settingno/*rather than a value*/, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
     GRNG_EXPORT void label_destroy(void * label);
 
     GRNG_EXPORT GrFeatureVal* featureval_clone(GrFeatureVal* pfeatures/*may be NULL*/);

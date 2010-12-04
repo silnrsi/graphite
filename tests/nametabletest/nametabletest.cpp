@@ -105,7 +105,7 @@ void testName(void * data, size_t length, gr2::uint16 langId,
     gr2::NameTable name(data, length);
     gr2::uint16 lang = langId;
     gr2::uint32 strLen = 0;
-    char * n = reinterpret_cast<char*>(name.getName(lang, nameId, gr2::kutf8, strLen));
+    char * n = reinterpret_cast<char*>(name.getName(lang, nameId, gr2::gr_utf8, strLen));
     if ((n == NULL) || (strncmp(n, utf8Text, strLen) != 0))
     {
         fprintf(stderr, "name=%s expected=%s\n", n, utf8Text);

@@ -114,16 +114,16 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
              size_t * testLength, gr2::uint16 ** testGlyphString)
 {
     const void * badUtf8 = NULL;
-    *testLength = count_unicode_characters(gr2::kutf8, reinterpret_cast<const void*>(testString),
+    *testLength = count_unicode_characters(gr2::gr_utf8, reinterpret_cast<const void*>(testString),
                                                     testString + strlen(testString),
                                                     &badUtf8);
     *testGlyphString = gr2::gralloc<gr2::uint16>(*testLength + 1);
-    CharacterCountLimit limit(gr2::kutf8, testString, *testLength);
+    CharacterCountLimit limit(gr2::gr_utf8, testString, *testLength);
     CmapProcessor cmapProcessor(face, *testGlyphString);
     IgnoreErrors ignoreErrors;
     processUTF(limit, &cmapProcessor, &ignoreErrors);
 
-    gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, NULL, gr2::kutf8, testString,
+    gr2::GrSegment * segA = gr2::make_seg(sizedFont, face, 0, NULL, gr2::gr_utf8, testString,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))

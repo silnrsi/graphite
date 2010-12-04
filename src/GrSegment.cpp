@@ -59,7 +59,7 @@ private:
       size_t m_nCharsProcessed ;
 };
 
-static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars, int dir)
+static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
 {
     // if (!font) return NULL;
     GrSegment* pRes=new GrSegment(nChars, face, script, dir);
@@ -80,7 +80,7 @@ static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint
 
 extern "C" 
 {
-GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
+GRNG_EXPORT size_t count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
   if (buffer_end)
   {
@@ -97,7 +97,7 @@ GRNG_EXPORT size_t count_unicode_characters(encform enc, const void* buffer_begi
 }
 
 
-GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT GrSegment* make_seg(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
 {
     if (pFeats == NULL)
         pFeats = face->theSill().cloneFeatures(0);

@@ -22,7 +22,7 @@
 #ifndef PROCESS_UTF_INCLUDE
 #define PROCESS_UTF_INCLUDE
 
-#include "graphiteng/Types.h"
+#include "Main.h"
 #include "graphiteng/Segment.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -30,15 +30,15 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 class NoLimit		//relies on the processor.processChar() failing, such as because of a terminating nul character
 {
 public:
-    NoLimit(encform enc2, const void* pStart2) : m_enc(enc2), m_pStart(pStart2) {}
-    encform enc() const { return m_enc; }
+    NoLimit(gr_encform enc2, const void* pStart2) : m_enc(enc2), m_pStart(pStart2) {}
+    gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
     static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
     static bool needMoreChars(const void* pCharStart, size_t nProcessed) { return true; }
     
 private:
-    encform m_enc;
+    gr_encform m_enc;
     const void* m_pStart;
 };
 
@@ -46,8 +46,8 @@ private:
 class CharacterCountLimit
 {
 public:
-    CharacterCountLimit(encform enc2, const void* pStart2, size_t numchars) : m_numchars(numchars), m_enc(enc2), m_pStart(pStart2) {}
-    encform enc() const { return m_enc; }
+    CharacterCountLimit(gr_encform enc2, const void* pStart2, size_t numchars) : m_numchars(numchars), m_enc(enc2), m_pStart(pStart2) {}
+    gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
     static bool inBuffer(const void* pCharLastSurrogatePart) { return true; }
@@ -55,7 +55,7 @@ public:
     
 private:
     size_t m_numchars;
-    encform m_enc;
+    gr_encform m_enc;
     const void* m_pStart;
 };
 
@@ -63,11 +63,11 @@ private:
 class BufferLimit
 {
 public:
-    BufferLimit(encform enc2, const void* pStart2, const void* pEnd/*as in stl i.e. don't use end*/) : m_enc(enc2), m_pStart(pStart2) {
+    BufferLimit(gr_encform enc2, const void* pStart2, const void* pEnd/*as in stl i.e. don't use end*/) : m_enc(enc2), m_pStart(pStart2) {
 	size_t nFullTokens = (static_cast<const char*>(pEnd)-static_cast<const char *>(m_pStart))/int(m_enc); //rounds off partial tokens
 	m_pEnd = static_cast<const char *>(m_pStart) + (nFullTokens*int(m_enc));
     }
-    encform enc() const { return m_enc; }
+    gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
   
     bool inBuffer(const void* pCharLastSurrogatePart) const { return pCharLastSurrogatePart<m_pEnd; }	//also called on charstart by needMoreChars()
@@ -76,7 +76,7 @@ public:
      
 private:
     const void* m_pEnd;
-    encform m_enc;
+    gr_encform m_enc;
     const void* m_pStart;
 };
 
@@ -332,7 +332,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
 {
      uint32             cid;
      switch (limit.enc()) {
-       case kutf8 : {
+       case gr_utf8 : {
 	    Utf8Consumer consumer(static_cast<const uint8 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid, pErrHandler))
@@ -342,7 +342,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
             }
             break;
         }
-       case kutf16: {
+       case gr_utf16: {
             Utf16Consumer consumer(static_cast<const uint16 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid, pErrHandler))
@@ -352,7 +352,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
             }
 	    break;
         }
-       case kutf32 : default: {
+       case gr_utf32 : default: {
 	    Utf32Consumer consumer(static_cast<const uint32 *>(limit.pStart()));
             for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
 		if (!consumer.consumeChar(limit, &cid, pErrHandler))

@@ -357,7 +357,7 @@ STARTOP(attr_add)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
@@ -370,7 +370,7 @@ STARTOP(attr_sub)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
@@ -398,7 +398,7 @@ STARTOP(push_slot_attr)
     declare_params(2);
     const attrCode  	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]);
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
@@ -454,7 +454,7 @@ STARTOP(push_islot_attr)
     const attrCode	slat     = attrCode(uint8(param[0]));
     const int           slot_ref = int8(param[1]),
                         idx      = uint8(param[2]);
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
@@ -493,7 +493,7 @@ STARTOP(iattr_add)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
@@ -507,7 +507,7 @@ STARTOP(iattr_sub)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    if ((slat == kslatPosX || slat == kslatPosY) && (flags & POSITIONED) == 0)
+    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;

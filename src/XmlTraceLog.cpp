@@ -22,7 +22,6 @@
 
 #include <cstring>
 #include <stdarg.h>
-
 #include "XmlTraceLog.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {

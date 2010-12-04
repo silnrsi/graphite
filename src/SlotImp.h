@@ -33,6 +33,8 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 #define SLOT_COPIED     4
 #define SLOT_POSITIONED 8
 
+typedef gr_attrCode attrCode;
+
 class GrSegment;
 
 class Slot

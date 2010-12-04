@@ -24,10 +24,10 @@
 
 #include <cstdio>
 #include <graphiteng/Types.h>
-#include "XmlTraceLogTags.h"
 #include <graphiteng/XmlLog.h>
 #include <cassert>
 #include "Main.h"
+#include "XmlTraceLogTags.h"
 
 #ifndef DISABLE_TRACING
 

@@ -76,12 +76,12 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
         int nextBreakWeight = (i + 1 < seg->charInfoCount())?
             seg->charinfo(i+1)->breakWeight() : 0;
         if (((breakWeight > 0) &&
-             (breakWeight <= eBreakWord)) ||
+             (breakWeight <= gr_breakWord)) ||
             (i + 1 == seg->charInfoCount()) ||
              m_cacheStore->isSpaceGlyph(subSegEndSlot->gid()) ||
             ((i + 1 < seg->charInfoCount()) &&
              (((nextBreakWeight < 0) &&
-              (nextBreakWeight >= -eBreakWord)) ||
+              (nextBreakWeight >= gr_breakBeforeWord)) ||
               (subSegEndSlot->next() && m_cacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
         {
             // record the next slot before any splicing

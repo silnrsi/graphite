@@ -28,17 +28,17 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 #include <stddef.h>
 #endif
 
-typedef unsigned char uint8;
-typedef uint8    byte;
-typedef signed char int8;
-typedef unsigned short uint16;
-typedef short   int16;
-typedef unsigned int    uint32;
-typedef int     int32;
-typedef size_t uintptr;
+typedef unsigned char gr_uint8;
+typedef gr_uint8    gr_byte;
+typedef signed char gr_int8;
+typedef unsigned short gr_uint16;
+typedef short   gr_int16;
+typedef unsigned int    gr_uint32;
+typedef int     gr_int32;
+typedef size_t gr_uintptr;
 
-enum encform {
-  kutf8 = 1/*sizeof(uint8)*/, kutf16 = 2/*sizeof(uint16)*/, kutf32 = 4/*sizeof(uint32)*/
+enum gr_encform {
+  gr_utf8 = 1/*sizeof(uint8)*/, gr_utf16 = 2/*sizeof(uint16)*/, gr_utf32 = 4/*sizeof(uint32)*/
 };
 
 #ifdef _MSC_VER

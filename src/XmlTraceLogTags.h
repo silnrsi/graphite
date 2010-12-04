@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
+#include "Main.h"
 #include <graphiteng/Types.h>
 #include <graphiteng/XmlLog.h>
 

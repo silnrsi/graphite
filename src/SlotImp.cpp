@@ -179,68 +179,68 @@ uint32 Slot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
 
 int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
 {
-    if (index == kslatUserDefnV1)
+    if (index == gr_slatUserDefnV1)
     {
-        index = kslatUserDefn;
+        index = gr_slatUserDefn;
         subindex = 0;
     }
     switch (index)
     {
-    case kslatAdvX :
+    case gr_slatAdvX :
         return static_cast<int>(m_advance.x);
-    case kslatAdvY :
+    case gr_slatAdvY :
         return static_cast<int>(m_advance.y);
-    case kslatAttTo :
+    case gr_slatAttTo :
         return 0;
-    case kslatAttX :
+    case gr_slatAttX :
         return static_cast<int>(m_attach.x);
-    case kslatAttY :
+    case gr_slatAttY :
         return static_cast<int>(m_attach.y);
-    case kslatAttXOff :
+    case gr_slatAttXOff :
         return 0;
-    case kslatAttYOff :
+    case gr_slatAttYOff :
         return 0;
-    case kslatAttWithX :
+    case gr_slatAttWithX :
         return static_cast<int>(m_with.x);
-    case kslatAttWithY :
+    case gr_slatAttWithY :
         return static_cast<int>(m_with.y);
-    case kslatAttWithXOff :
+    case gr_slatAttWithXOff :
         return 0;
-    case kslatAttWithYOff :
+    case gr_slatAttWithYOff :
         return 0;
-    case kslatAttLevel :
+    case gr_slatAttLevel :
         return m_attLevel;
-    case kslatBreak :
+    case gr_slatBreak :
         return seg->charinfo(m_original)->breakWeight();
-    case kslatCompRef :
+    case gr_slatCompRef :
         return 0;
-    case kslatDir :
+    case gr_slatDir :
         return seg->dir();
-    case kslatInsert :
+    case gr_slatInsert :
         return isInsertBefore();
-    case kslatPosX :
+    case gr_slatPosX :
         return static_cast<int>(m_position.x); // but need to calculate it
-    case kslatPosY :
+    case gr_slatPosY :
         return static_cast<int>(m_position.y);
-    case kslatShiftX :
+    case gr_slatShiftX :
         return static_cast<int>(m_shift.x);
-    case kslatShiftY :
+    case gr_slatShiftY :
         return static_cast<int>(m_shift.y);
-    case kslatMeasureSol :
+    case gr_slatMeasureSol :
         return -1; // err what's this?
-    case kslatMeasureEol :
+    case gr_slatMeasureEol :
         return -1;
-    case kslatJStretch :
+    case gr_slatJStretch :
         return 0;
-    case kslatJShrink :
+    case gr_slatJShrink :
         return 0;
-    case kslatJStep :
+    case gr_slatJStep :
         return 0;
-    case kslatJWeight :
+    case gr_slatJWeight :
         return 0;
-    case kslatJWidth :
+    case gr_slatJWidth :
         return 0;
-    case kslatUserDefn :
+    case gr_slatUserDefn :
         return m_userAttr[subindex];
     default :
         return 0;
@@ -249,20 +249,20 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
 
 void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, const SlotMap & map)
 {
-    if (index == kslatUserDefnV1)
+    if (index == gr_slatUserDefnV1)
     {
-        index = kslatUserDefn;
+        index = gr_slatUserDefn;
         subindex = 0;
     }
     switch (index)
     {
-    case kslatAdvX :
+    case gr_slatAdvX :
         m_advance = Position(value, m_advance.y);
         break;
-    case kslatAdvY :
+    case gr_slatAdvY :
         m_advance = Position(m_advance.x, value);
         break;
-    case kslatAttTo :
+    case gr_slatAttTo :
     {
         const uint16 idx = uint16(value);
         if (idx < map.size())
@@ -280,66 +280,66 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, 
         }
         break;
     }
-    case kslatAttX :
+    case gr_slatAttX :
         m_attach = Position(value, m_attach.y);
         break;
-    case kslatAttY :
+    case gr_slatAttY :
         m_attach = Position(m_attach.x, value);
         break;
-    case kslatAttXOff :
+    case gr_slatAttXOff :
         break;
-    case kslatAttYOff :
+    case gr_slatAttYOff :
         break;
-    case kslatAttWithX :
+    case gr_slatAttWithX :
         m_with = Position(value, m_with.y);
         break;
-    case kslatAttWithY :
+    case gr_slatAttWithY :
         m_with = Position(m_with.x, value);
         break;
-    case kslatAttWithXOff :
+    case gr_slatAttWithXOff :
         break;
-    case kslatAttWithYOff :
+    case gr_slatAttWithYOff :
         break;
-    case kslatAttLevel :
+    case gr_slatAttLevel :
         assert(value < 128);
         assert(value > -128);
         m_attLevel = static_cast<byte>(value);
         break;
-    case kslatBreak :
+    case gr_slatBreak :
         seg->charinfo(m_original)->breakWeight(value);
         break;
-    case kslatCompRef :
+    case gr_slatCompRef :
         break;      // not sure what to do here
-    case kslatDir :
+    case gr_slatDir :
         break;  // read only
-    case kslatInsert :
+    case gr_slatInsert :
         markInsertBefore(value? true : false);
         break;
-    case kslatPosX :
+    case gr_slatPosX :
         break; // can't set these here
-    case kslatPosY :
+    case gr_slatPosY :
         break;
-    case kslatShiftX :
+    case gr_slatShiftX :
         m_shift = Position(value, m_shift.y);
         break;
-    case kslatShiftY :
+    case gr_slatShiftY :
         m_shift = Position(m_shift.x, value);
         break;
-    case kslatMeasureSol :
+    case gr_slatMeasureSol :
         break;
-    case kslatMeasureEol :
+    case gr_slatMeasureEol :
         break;
-    case kslatJStretch :
+    case gr_slatJStretch :
         break;  // handle these later
-    case kslatJShrink :
+    case gr_slatJShrink :
         break;
-    case kslatJStep :
+    case gr_slatJStep :
         break;
-    case kslatJWeight :
+    case gr_slatJWeight :
         break;
-    case kslatJWidth :
+    case gr_slatJWidth :
         break;
-    case kslatUserDefn :
+    case gr_slatUserDefn :
         m_userAttr[subindex] = value;
         break;
     default :

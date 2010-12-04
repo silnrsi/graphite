@@ -67,7 +67,7 @@ uint16 NameTable::setPlatformEncoding(uint16 platformId, uint16 encodingID)
     return 0;
 }
 
-void* NameTable::getName(uint16& languageId, uint16 nameId, encform enc, uint32& length)
+void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint32& length)
 {
     uint16 anyLang = 0;
     uint16 enUSLang = 0;
@@ -139,28 +139,28 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, encform enc, uint32&
         utf16Name[i] = read16(pName);
     }
     utf16Name[utf16Length] = 0;
-    if (enc == kutf16)
+    if (enc == gr_utf16)
     {
         length = utf16Length;
         return utf16Name;
     }
-    else if (enc == kutf8)
+    else if (enc == gr_utf8)
     {
         uint8* uniBuffer = gralloc<uint8>(3 * utf16Length + 1);
         ToUtf8Processor processor(uniBuffer, 3 * utf16Length + 1);
         IgnoreErrors ignore;
-        BufferLimit bufferLimit(kutf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
+        BufferLimit bufferLimit(gr_utf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
         processUTF<BufferLimit, ToUtf8Processor, IgnoreErrors>(bufferLimit, &processor, &ignore);
         length = processor.bytesProcessed();
         uniBuffer[processor.bytesProcessed()] = 0;
         free(utf16Name);
         return uniBuffer;
     }
-    else if (enc == kutf32)
+    else if (enc == gr_utf32)
     {
         uint32 * uniBuffer = gralloc<uint32>(utf16Length  + 1);
         IgnoreErrors ignore;
-        BufferLimit bufferLimit(kutf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
+        BufferLimit bufferLimit(gr_utf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
 
         ToUtf32Processor processor(uniBuffer, utf16Length);
         processUTF(bufferLimit, &processor, &ignore);

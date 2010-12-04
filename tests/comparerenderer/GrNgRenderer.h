@@ -58,11 +58,11 @@ public:
             new(result) RenderedLine();
             return;
         }
-        size_t numCodePoints = gr2::count_unicode_characters(gr2::kutf8,
+        size_t numCodePoints = gr2::count_unicode_characters(gr2::gr_utf8,
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %d\n", static_cast<int>(reinterpret_cast<const char*>(pError) - utf8));
-        gr2::GrSegment* pSeg = gr2::make_seg(m_grFont, m_grFace, 0u, NULL, gr2::kutf8, utf8, numCodePoints, m_rtl);
+        gr2::GrSegment* pSeg = gr2::make_seg(m_grFont, m_grFace, 0u, NULL, gr2::gr_utf8, utf8, numCodePoints, m_rtl);
         if (!pSeg) return;
         RenderedLine * renderedLine = new(result) RenderedLine(gr2::seg_n_slots(pSeg),
                                                                gr2::seg_advance_X(pSeg));

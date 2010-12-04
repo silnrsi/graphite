@@ -337,7 +337,7 @@ void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot 
 }
 
 #ifndef DISABLE_TRACING
-void GrSegment::logSegment(encform enc, const void* pStart, size_t nChars) const
+void GrSegment::logSegment(gr_encform enc, const void* pStart, size_t nChars) const
 {
     if (XmlTraceLog::get().active())
     {
@@ -348,11 +348,11 @@ void GrSegment::logSegment(encform enc, const void* pStart, size_t nChars) const
             XmlTraceLog::get().addAttribute(AttrLength, nChars);
             switch (enc)
             {
-            case kutf8:
+            case gr_utf8:
                 XmlTraceLog::get().writeText(
                     reinterpret_cast<const char *>(pStart));
                 break;
-            case kutf16:
+            case gr_utf16:
                 for (size_t j = 0; j < nChars; ++j)
                 {
                     uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
@@ -369,7 +369,7 @@ void GrSegment::logSegment(encform enc, const void* pStart, size_t nChars) const
                     XmlTraceLog::get().writeUnicode(code);
                 }
                 break;
-            case kutf32:
+            case gr_utf32:
                 for (size_t j = 0; j < nChars; ++j)
                 {
                     XmlTraceLog::get().writeUnicode(
@@ -485,7 +485,7 @@ private:
       size_t m_nCharsProcessed ;
 };
 
-void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, encform enc, const void* pStart, size_t nChars)
+void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
     assert(pFeats);
     CharacterCountLimit limit(enc, pStart, nChars);

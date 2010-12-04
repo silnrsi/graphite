@@ -38,7 +38,7 @@ public:
         eEnOrAnyFallback = 2
     } eNameFallback;
     uint16 setPlatformEncoding(uint16 platfromId=3, uint16 encodingID = 1);
-    void * getName(uint16 & languageId, uint16 nameId, encform enc, uint32 & length);
+    void * getName(uint16 & languageId, uint16 nameId, gr_encform enc, uint32 & length);
     uint16 getLanguageId(const char * bcp47Locale);
 
     CLASS_NEW_DELETE
