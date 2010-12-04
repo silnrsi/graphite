@@ -42,11 +42,18 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 #ifdef __GNUC__
+#ifdef STLPORT_VERSION
+// standard allocator for other platforms
+typedef std::vector<Features> FeatureList;
+typedef std::vector<Slot *> SlotRope;
+typedef std::vector<uint16 *> AttributeRope;
+#else
 // use the GNU CXX extension malloc_allocator to avoid new/delete
 #include <ext/malloc_allocator.h>
 typedef std::vector<Features, __gnu_cxx::malloc_allocator<Features> > FeatureList;
 typedef std::vector<Slot*, __gnu_cxx::malloc_allocator<Slot*> > SlotRope;
 typedef std::vector<uint16 *, __gnu_cxx::malloc_allocator<uint16 *> > AttributeRope;
+#endif
 #else
 // standard allocator for other platforms
 typedef std::vector<Features> FeatureList;
