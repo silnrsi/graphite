@@ -119,7 +119,7 @@ typedef struct Slot GrSlot;
      * @param dir Specifies whether the segment is processed right to left (1) or left to
      *            right (0)
      */
-    GRNG_EXPORT GrSegment* make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const Features* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
+    GRNG_EXPORT GrSegment* make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const GrFeatureVal* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
     /** Destroys a segment, freeing the memory
      *
