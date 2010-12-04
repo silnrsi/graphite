@@ -68,7 +68,7 @@ public:
     bool isCopied() const { return (m_flags & SLOT_COPIED) ? true : false; }
     void markCopied(bool state) { if (state) m_flags |= SLOT_COPIED; else m_flags &= ~SLOT_COPIED; }
     bool isPositioned() const { return (m_flags & SLOT_POSITIONED) ? true : false; }
-    bool markPositioned(bool state) { if (state) m_flags |= SLOT_POSITIONED; else m_flags &= ~SLOT_POSITIONED; }
+    void markPositioned(bool state) { if (state) m_flags |= SLOT_POSITIONED; else m_flags &= ~SLOT_POSITIONED; }
     bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }

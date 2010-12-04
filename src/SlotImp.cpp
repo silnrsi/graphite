@@ -64,7 +64,7 @@ void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
     }
 }
 
-void Slot::update(int numSlots, int numCharInfo, Position &relpos)
+void Slot::update(int /*numSlots*/, int numCharInfo, Position &relpos)
 {
     m_before += numCharInfo;
     m_after += numCharInfo;

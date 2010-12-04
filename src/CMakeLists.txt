@@ -99,7 +99,7 @@ add_library(graphiteng SHARED
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
+    add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden -fno-stack-protector)
     set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)

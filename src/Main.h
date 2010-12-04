@@ -68,7 +68,13 @@ inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
     void operator delete[] (void * p)throw() { if (p) free(p); } \
     void * operator new(size_t size){ return malloc(size);} \
     void operator delete (void * p) throw() {if (p) free(p);}
-    
+
+#ifdef __GNUC__
+#define GR_UNUSED __attribute__((unused))
+#else
+#define GR_UNUSED
+#endif
+
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
     // typesafe wrapper around malloc for simple types

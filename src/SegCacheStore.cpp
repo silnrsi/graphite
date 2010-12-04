@@ -25,9 +25,9 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments, uint32 flags)
- : m_caches(new SilfSegCache[numSilf]), m_numSilf(numSilf), m_maxCmapGid(0),
-   m_maxSegments(maxSegments), m_flags(flags)
+SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments)
+ : m_caches(new SilfSegCache[numSilf]), m_numSilf(numSilf), m_maxSegments(maxSegments),
+   m_maxCmapGid(0)
 {
     assert(face);
     assert(face->getGlyphFaceCache());
@@ -42,11 +42,12 @@ SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t ma
         size_t cmapSize = 0;
         const void * cmapTable = face->getTable(tagCmap, &cmapSize);
         const void * bmpTable = TtfUtil::FindCmapSubtable(cmapTable, 3, 1, cmapSize);
-        const void * supplementaryTable = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, cmapSize);
+        //const void * supplementaryTable = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, cmapSize);
 
         if (bmpTable)
         {
             m_spaceGid = TtfUtil::Cmap31Lookup(bmpTable, 0x20);
+            m_zwspGid = TtfUtil::Cmap31Lookup(bmpTable, 0x200B);
             // TODO find out if the Cmap(s) can be parsed to find a m_maxCmapGid < num_glyphs
             // The Pseudo glyphs may mean that it isn't worth the effort
         }

@@ -206,7 +206,7 @@ ENDOP
 
 STARTOP(next_n)
     declare_params(1);
-    const size_t    num = uint8(*param);
+    GR_UNUSED const size_t    num = uint8(*param);
     NOT_IMPLEMENTED;
 ENDOP
 
@@ -463,9 +463,11 @@ STARTOP(push_islot_attr)
     push(res);
 ENDOP
 
+#ifndef DIRECT_MACHINE
 STARTOP(push_iglyph_attr) // not implemented
     NOT_IMPLEMENTED;
 ENDOP
+#endif
       
 STARTOP(pop_ret)
     const uint32 ret = pop();
@@ -518,7 +520,7 @@ ENDOP
 
 STARTOP(push_proc_state)
     declare_params(1);
-    const unsigned int  pstate = uint8(*param);
+    GR_UNUSED const unsigned int  pstate = uint8(*param);
     // TODO; Implement body
     push(1);
 ENDOP
@@ -538,6 +540,7 @@ STARTOP(put_subs)
     is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
+#ifndef DIRECT_MACHINE
 STARTOP(put_subs2) // not implemented
     NOT_IMPLEMENTED;
 ENDOP
@@ -545,6 +548,7 @@ ENDOP
 STARTOP(put_subs3) // not implemented
     NOT_IMPLEMENTED;
 ENDOP
+#endif
 
 STARTOP(put_glyph)
     declare_params(2);

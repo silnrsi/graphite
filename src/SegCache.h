@@ -69,21 +69,7 @@ public:
             return NULL;
         }
         SegCacheEntry * entry = NULL;
-        uint16 pos = findPosition(cmapGlyphs, length, &entry);
-        /*
-        for (uint16 i = 0; i < m_entryCounts[length-1]; i++)
-        {
-            bool equal = true;
-            for (size_t pos = ePrefixLength; pos < length && equal; pos++)
-            {
-                equal = (cmapGlyphs[pos] == m_entries[length-1][i].m_unicode[pos]);
-            }
-            if (equal)
-            {
-                return m_entries[length-1] + i;
-            }
-        }
-        */
+        findPosition(cmapGlyphs, length, &entry);
         return entry;
     }
     SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, unsigned long long totalAccessCount)

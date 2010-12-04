@@ -32,7 +32,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 bool GrCachedFace::setupCache(unsigned int cacheSize)
 {
-    m_cacheStore = new SegCacheStore(this, m_numSilf, cacheSize, 0);
+    m_cacheStore = new SegCacheStore(this, m_numSilf, cacheSize);
     return (m_cacheStore != NULL);
 }
 

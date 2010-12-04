@@ -123,7 +123,7 @@ public:
 public:
     GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
-        m_cmapCache(NULL), m_silfs(NULL), m_numSilf(0), m_pFileFace(NULL),
+        m_cmapCache(NULL), m_numSilf(0), m_silfs(NULL), m_pFileFace(NULL),
         m_pNames(NULL) {}
     virtual ~GrFace();
 public:

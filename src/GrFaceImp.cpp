@@ -94,7 +94,7 @@ bool GrFace::readGraphite()
                 XmlTraceLog::get().warning("No Silf subtables!");
         }
 #endif
-
+    bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
@@ -124,12 +124,14 @@ bool GrFace::readGraphite()
 #endif
             return false;
         }
+        if (m_silfs[i].numPasses())
+            havePasses = true;
     }
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementSilf);
 #endif
-    return true;
+    return havePasses;
 }
 
 void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const

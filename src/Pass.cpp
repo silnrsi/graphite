@@ -36,11 +36,11 @@ Pass::Pass()
         :
         m_silf(0),
         m_cols(0),
+        m_rules(0),
+        m_ruleMap(0),
         m_startStates(0),
         m_sTable(0),
-        m_states(0),
-        m_ruleMap(0),
-        m_rules(0)
+        m_states(0)
 {
 }
 
@@ -64,7 +64,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
     // Read in basic values
     m_immutable = (*p++) & 0x1U;
     m_iMaxLoop = *p++;
-    const byte nMaxContext = *p++;
+    GR_UNUSED const byte nMaxContext = *p++;
     p += sizeof(byte);     // skip maxBackup
     m_numRules = read16(p);
     p += sizeof(uint16);   // not sure why we would want this
@@ -144,7 +144,6 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
         m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len);
         if (!m_cPConstraint) return false;
     }
-    bool success = true;
     if (!readRanges(ranges, numRanges)) return false;
     if (!readRules(rule_map, numEntries,  precontext, sort_keys,
                    o_constraint, rcCode, o_actions, aCode)) return false;

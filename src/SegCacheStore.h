@@ -80,7 +80,7 @@ private:
 class SegCacheStore
 {
 public:
-    SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments, uint32 flags);
+    SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments);
     ~SegCacheStore()
     {
         for (size_t i = 0; i < m_numSilf; i++)
@@ -106,8 +106,6 @@ private:
     uint16 m_maxCmapGid;
     uint16 m_spaceGid;
     uint16 m_zwspGid;
-    uint16 m_numGlyphs;
-    uint32 m_flags;
 };
 
 }}}}

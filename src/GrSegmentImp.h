@@ -42,11 +42,18 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 #ifdef __GNUC__
+#ifdef STLPORT_VERSION
+// standard allocator for other platforms
+typedef std::vector<Features> FeatureList;
+typedef std::vector<Slot *> SlotRope;
+typedef std::vector<uint16 *> AttributeRope;
+#else
 // use the GNU CXX extension malloc_allocator to avoid new/delete
 #include <ext/malloc_allocator.h>
 typedef std::vector<Features, __gnu_cxx::malloc_allocator<Features> > FeatureList;
 typedef std::vector<Slot*, __gnu_cxx::malloc_allocator<Slot*> > SlotRope;
 typedef std::vector<uint16 *, __gnu_cxx::malloc_allocator<uint16 *> > AttributeRope;
+#endif
 #else
 // standard allocator for other platforms
 typedef std::vector<Features> FeatureList;
@@ -124,7 +131,7 @@ public:
                 const Slot * firstSpliceSlot, size_t numGlyphs);
     int defaultOriginal() const { return m_defaultOriginal; }
     const GrFace * getFace() const { return m_face; }
-    const Features & getFeatures(unsigned int charIndex) { assert(m_feats.size() == 1); return m_feats[0]; }
+    const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const;
 
     CLASS_NEW_DELETE
@@ -146,10 +153,10 @@ private:
     Slot *m_last;               // last slot in segment
     unsigned int m_bufSize;     // how big a buffer to create when need more slots
     unsigned int m_numGlyphs;
+    unsigned int m_numCharinfo; // size of the array and number of input characters
     int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
     CharInfo *m_charinfo;       // character info, one per input character
-    unsigned int m_numCharinfo; // size of the array and number of input characters
 
     const GrFace *m_face;       // GrFace
     const Silf *m_silf;
