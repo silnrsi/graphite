@@ -56,7 +56,7 @@ private:
 
 bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
-    Features * defaultFeatures = face_features_for_lang(face, 0);
+    GrFeatureVal * defaultFeatures = face_featureval_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
@@ -105,7 +105,7 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
             return false;
         }
     }
-    features_destroy(defaultFeatures);
+    featureval_destroy(defaultFeatures);
     return true;
 }
 
@@ -165,7 +165,7 @@ int main(int argc, char ** argv)
     {
         testSeg(face, sizedFont, testStrings[i], &(testLengths[i]), &(testGlyphStrings[i]));
     }
-    Features * defaultFeatures = face_features_for_lang(face, 0);
+    GrFeatureVal * defaultFeatures = face_featureval_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     unsigned int segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();
@@ -202,7 +202,7 @@ int main(int argc, char ** argv)
     }
     font_destroy(sizedFont);
     face_destroy(face);
-    features_destroy(defaultFeatures);
+    featureval_destroy(defaultFeatures);
 
     gr2::graphite_stop_logging();
     return 0;

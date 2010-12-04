@@ -188,14 +188,14 @@ extern "C"
         return res;
     }
 
-    GRNG_EXPORT Features* face_features_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+    GRNG_EXPORT GrFeatureVal* face_featureval_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
         assert(pFace);
         return pFace->theSill().cloneFeatures(langname);
     }
 
 
-    GRNG_EXPORT const FeatureRef* face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const GrFeatureRef* face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->featureById(featId);
@@ -208,7 +208,7 @@ extern "C"
         return pFace->numFeatures();
     }
 
-    GRNG_EXPORT const FeatureRef* face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const GrFeatureRef* face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
         const FeatureRef* pRef = pFace->feature(i);

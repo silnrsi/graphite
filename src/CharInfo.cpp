@@ -27,14 +27,14 @@ using namespace org::sil::graphite::v2;
 
 extern "C" 
 {
-GRNG_EXPORT unsigned int cinfo_unicode_char(const CharInfo* p/*not NULL*/)
+GRNG_EXPORT unsigned int cinfo_unicode_char(const GrCharInfo* p/*not NULL*/)
 {
     assert(p);
     return p->unicodeChar();
 }
 
 
-GRNG_EXPORT int cinfo_break_weight(const CharInfo* p/*not NULL*/)
+GRNG_EXPORT int cinfo_break_weight(const GrCharInfo* p/*not NULL*/)
 {
     assert(p);
     return p->breakWeight();

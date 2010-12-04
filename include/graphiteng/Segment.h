@@ -70,15 +70,15 @@ enum attrCode {
 };
 
 
-typedef struct CharInfo CharInfo;
+typedef struct CharInfo GrCharInfo;
 typedef struct GrSegment GrSegment;
-typedef struct Slot Slot;
+typedef struct Slot GrSlot;
 
     /** Returns Unicode character for a charinfo.
      * 
      * @param p Pointer to charinfo to return information on.
      */
-    GRNG_EXPORT unsigned int cinfo_unicode_char(const CharInfo* p/*not NULL*/);
+    GRNG_EXPORT unsigned int cinfo_unicode_char(const GrCharInfo* p/*not NULL*/);
     
     /** Returns breakweight for a charinfo.
      * 
@@ -86,7 +86,7 @@ typedef struct Slot Slot;
      * break before or after this character.
      * @param p Pointer to charinfo to return information on.
      */
-    GRNG_EXPORT int cinfo_break_weight(const CharInfo* p/*not NULL*/);
+    GRNG_EXPORT int cinfo_break_weight(const GrCharInfo* p/*not NULL*/);
 
     /** Returns the number of unicode characters in a string
      *
@@ -130,32 +130,32 @@ typedef struct Slot Slot;
     GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
     GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT const CharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+    GRNG_EXPORT const GrCharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
     GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
-    GRNG_EXPORT const Slot* seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends);
+    GRNG_EXPORT const GrSlot* seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, GrSlot **sbegins, GrSlot **sends);
     //slots are owned by their segment
-    GRNG_EXPORT const Slot* slot_next_in_segment(const Slot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const Slot* slot_attached_to(const Slot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
+    GRNG_EXPORT const GrSlot* slot_next_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* slot_attached_to(const GrSlot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
  
-    GRNG_EXPORT const Slot* slot_first_attachment(const Slot* p/*not NULL*/);        //returns NULL iff no attachments.
+    GRNG_EXPORT const GrSlot* slot_first_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no attachments.
         //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
     
-    GRNG_EXPORT const Slot* slot_next_sibling_attachment(const Slot* p/*not NULL*/);        //returns NULL iff no more attachments.
+    GRNG_EXPORT const GrSlot* slot_next_sibling_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no more attachments.
         //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
     
     
-    GRNG_EXPORT unsigned short slot_gid(const Slot* p/*not NULL*/);
-    GRNG_EXPORT float slot_origin_X(const Slot* p/*not NULL*/);
-    GRNG_EXPORT float slot_origin_Y(const Slot* p/*not NULL*/);
-    GRNG_EXPORT float slot_advance(const Slot* p/*not NULL*/);
-    GRNG_EXPORT int slot_before(const Slot* p/*not NULL*/);
-    GRNG_EXPORT int slot_after(const Slot* p/*not NULL*/);
-    GRNG_EXPORT int slot_attr(const Slot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum attrCode index, uint8 subindex); //tbd - do we need to expose this?
+    GRNG_EXPORT unsigned short slot_gid(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float slot_origin_X(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float slot_origin_Y(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float slot_advance(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int slot_before(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int slot_after(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum attrCode index, uint8 subindex); //tbd - do we need to expose this?
      
-    GRNG_EXPORT int slot_can_insert_before(const Slot* p/*not NULL*/);
-    GRNG_EXPORT int slot_original(const Slot* p/*not NULL*/);
-//  GRNG_EXPORT size_t id(const Slot* p/*not NULL*/);
+    GRNG_EXPORT int slot_can_insert_before(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int slot_original(const GrSlot* p/*not NULL*/);
+//  GRNG_EXPORT size_t id(const GrSlot* p/*not NULL*/);
   
 
 #ifdef __cplusplus

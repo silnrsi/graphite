@@ -610,7 +610,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         }
         lang.uId = swap32(lang.uId);
     }
-    featureList = gr2::face_features_for_lang(face, lang.uId);
+    featureList = gr2::face_featureval_for_lang(face, lang.uId);
     if (!features || strlen(features) == 0)
         return featureList;
     size_t featureLength = strlen(features);
@@ -830,7 +830,7 @@ int Parameters::testFileFont() const
         free(map);
         gr2::seg_destroy(pSeg);
        }
-        if (featureList) gr2::features_destroy(featureList);
+        if (featureList) gr2::featureval_destroy(featureList);
         gr2::font_destroy(sizedFont);
         gr2::face_destroy(face);
 //            delete featureParser;
