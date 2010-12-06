@@ -42,7 +42,7 @@ extern "C"
     GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, unsigned int segCacheMaxSize, int canDumb);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy
     GRNG_EXPORT gr_uint32 gr_str_to_tag(const char *str);
-    GRNG_EXPORT void gr_tag_to_str(char *str, gr_uint32 tag);
+    GRNG_EXPORT void gr_tag_to_str(gr_uint32 tag, char *str);
 
     GRNG_EXPORT GrFeatureVal* face_featureval_for_lang(const GrFace* pFace, gr_uint32 langname/*0 means clone default*/); //clones the features. if none for language, clones the default. Call destroy_Features when done.
     GRNG_EXPORT const GrFeatureRef* face_find_fref(const GrFace* pFace, gr_uint32 featId); //When finished with the FeatureRef, call features_destroy

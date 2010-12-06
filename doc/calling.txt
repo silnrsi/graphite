@@ -50,19 +50,16 @@ Running simple gives the results:
 
 Not very pretty, but reassuring! Graphite isn't a graphical rendering engine, it merely calculates which glyphs should render where and leaves the actual process of displaying those glyphs to other libraries.
 
-=== Details ===
+=== Caching ===
 
-Here we talk about the details of working with key classes
+Graphite2 has the capability to make use of a subsegmental cache. What this does is to chop each run of characters at a word break, as defined by the linebreaking pass. Each sub run is then looked up in the cache rather than calculating the values from scratch.
+The cache is most effective when similar runs of text are processed. For raw benchmark testing against wordlists, the cache can be slightly slower than uncached processing. But most people use real text in their documents and that has a much higher level of redundancy.
 
-==== Face ====
+To use the cache, one simply creates a cached face, specifying the size of the cache in elements. A cache size of 5,000 to 10,000 has produced a good compromise between time and space.
 
-Different ways of creating faces. Glyph information caching, etc.
+In the example above, point 1 becomes:
 
-==== Font ====
-
-This can even be NULL.
-
-==== Features ====
-
-Language, script and default values along with modifying them.
+----
+    GrFace *face = make_file_face_with_seg_cache(argv[1]);
+----
 

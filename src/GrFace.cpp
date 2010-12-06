@@ -198,7 +198,7 @@ extern "C"
         return res;
     }
 
-    GRNG_EXPORT void gr_tag_to_str(char *str, uint32 tag)
+    GRNG_EXPORT void gr_tag_to_str(uint32 tag, char *str)
     {
         int i = 4;
         while (--i >= 0)
