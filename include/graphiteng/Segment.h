@@ -31,6 +31,7 @@ extern "C"
 #endif
 
 enum {
+    gr_breakNone = 0,
     /* after break weights */
     gr_breakWhitespace = 10,
     gr_breakWord = 15,
