@@ -5,6 +5,11 @@
 **.txt = native
 **.log = native
 **.ttf = BIN
+**.log = native
+**.pdf = BIN
+**.gdh = native
+**.cfg = native
+**.sh = native
 
 [repository]
 native=LF

@@ -188,6 +188,27 @@ extern "C"
         return res;
     }
 
+    GRNG_EXPORT uint32 gr_str_to_tag(const char *str)
+    {
+        uint32 res = 0;
+        int i = strlen(str);
+        if (i > 4) i = 4;
+        while (--i >= 0)
+            res = (res >> 8) + (str[i] << 24);
+        return res;
+    }
+
+    GRNG_EXPORT void gr_tag_to_str(char *str, uint32 tag)
+    {
+        int i = 4;
+        while (--i >= 0)
+        {
+            str[i] = tag & 0xFF;
+            tag >>= 8;
+        }
+    }
+            
+
     GRNG_EXPORT GrFeatureVal* face_featureval_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
         assert(pFace);
