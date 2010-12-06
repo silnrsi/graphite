@@ -74,7 +74,7 @@ public:
     void closeLog();
     bool loadFromArgs(int argc, char *argv[]);
     int testFileFont() const;
-    gr2::Features* parseFeatures(const gr2::GrFace * face) const;
+    gr2::GrFeatureVal* parseFeatures(const gr2::GrFace * face) const;
     void printFeatures(const gr2::GrFace * face) const;
 public:
     const char * fileName;
@@ -534,16 +534,16 @@ union FeatID
 
 void Parameters::printFeatures(const gr2::GrFace * face) const
 {
-    gr2::gr_uint16 numFeatures = gr2::face_n_fref(face);
+    gr2::gr_uint16 numFeatures = gr2::gr_face_n_fref(face);
     fprintf(log, "%d features\n", numFeatures);
     gr2::gr_uint16 langId = 0x0409;
     for (gr2::gr_uint16 i = 0; i < numFeatures; i++)
     {
-        const gr2::FeatureRef * f = gr2::face_fref(face, i);
+        const gr2::GrFeatureRef * f = gr2::gr_face_fref(face, i);
         gr2::gr_uint32 length = 0;
-        char * label = reinterpret_cast<char *>(gr2::fref_label(f, &langId, gr2::gr_utf8, &length));
+        char * label = reinterpret_cast<char *>(gr2::gr_fref_label(f, &langId, gr2::gr_utf8, &length));
         FeatID featId;
-        featId.uId = gr2::fref_id(f);
+        featId.uId = gr2::gr_fref_id(f);
         if (label)
             if ((featId.uChar[0] >= 0x20 && featId.uChar[0] < 0x7F) &&
                 (featId.uChar[1] >= 0x20 && featId.uChar[1] < 0x7F) &&
@@ -564,23 +564,23 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
             }
         else
             fprintf(log, "%d\n", featId.uId);
-        gr2::label_destroy(reinterpret_cast<void*>(label));
-        gr2::gr_uint16 numSettings = gr2::fref_n_values(f);
+        gr2::gr_label_destroy(reinterpret_cast<void*>(label));
+        gr2::gr_uint16 numSettings = gr2::gr_fref_n_values(f);
         for (gr2::gr_uint16 j = 0; j < numSettings; j++)
         {
-            gr2::gr_int16 value = gr2::fref_value(f, j);
-            label = reinterpret_cast<char *>(gr2::fref_value_label
+            gr2::gr_int16 value = gr2::gr_fref_value(f, j);
+            label = reinterpret_cast<char *>(gr2::gr_fref_value_label
                 (f, j, &langId, gr2::gr_utf8, &length));
             fprintf(log, "\t%d\t%s\n", value, label);
-            gr2::label_destroy(reinterpret_cast<void*>(label));
+            gr2::gr_label_destroy(reinterpret_cast<void*>(label));
         }
     }
-    gr2::gr_uint16 numLangs = gr2::face_n_languages(face);
+    gr2::gr_uint16 numLangs = gr2::gr_face_n_languages(face);
     fprintf(log, "Feature Languages:");
     for (gr2::gr_uint16 i = 0; i < numLangs; i++)
     {
         FeatID langID;
-        langID.uId = gr2::face_lang_by_index(face, i);
+        langID.uId = gr2::gr_face_lang_by_index(face, i);
         langID.uId = swap32(langID.uId);
         fprintf(log, "\t");
         for (size_t i = 0; i < 4; i++)
@@ -592,9 +592,9 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
     fprintf(log, "\n");
 }
 
-gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
+gr2::GrFeatureVal * Parameters::parseFeatures(const gr2::GrFace * face) const
 {
-    gr2::Features * featureList = NULL;
+    gr2::GrFeatureVal * featureList = NULL;
     const char * pLang = NULL;
     FeatID lang;
     lang.uId = 0;
@@ -610,7 +610,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         }
         lang.uId = swap32(lang.uId);
     }
-    featureList = gr2::face_featureval_for_lang(face, lang.uId);
+    featureList = gr2::gr_face_featureval_for_lang(face, lang.uId);
     if (!features || strlen(features) == 0)
         return featureList;
     size_t featureLength = strlen(features);
@@ -619,7 +619,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
     size_t nameLength = 0;
     gr2::gr_int32 value = 0;
     FeatID featId;
-    const gr2::FeatureRef* ref = NULL;
+    const gr2::GrFeatureRef* ref = NULL;
     featId.uId = 0;
     for (size_t i = 0; i < featureLength; i++)
     {
@@ -630,7 +630,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
                 value = atoi(valueText);
                 if (ref)
                 {
-                    gr2::fref_set_feature_value(ref, value, featureList);
+                    gr2::gr_fref_set_feature_value(ref, value, featureList);
                     ref = NULL;
                 }
                 valueText = NULL;
@@ -642,12 +642,12 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
                 if (nameLength <= 4)
                 {
                     featId.uId = swap32(featId.uId);
-                    ref = gr2::face_find_fref(face, featId.uId);
+                    ref = gr2::gr_face_find_fref(face, featId.uId);
                 }
                 if (!ref)
                 {
                     featId.uId = atoi(name);
-                    ref = gr2::face_find_fref(face, featId.uId);
+                    ref = gr2::gr_face_find_fref(face, featId.uId);
                 }
                 valueText = features + i + 1;
                 name = NULL;
@@ -664,7 +664,7 @@ gr2::Features * Parameters::parseFeatures(const gr2::GrFace * face) const
         if (ref)
         {
             value = atoi(valueText);
-            gr2::fref_set_feature_value(ref, value, featureList);
+            gr2::gr_fref_set_feature_value(ref, value, featureList);
             if (featId.uId > 0x20000000)
             {
                 featId.uId = swap32(featId.uId);
@@ -692,9 +692,9 @@ int Parameters::testFileFont() const
 
         gr2::GrFace *face = NULL;
         if (enableCache)
-            face = gr2::make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 1000);
+            face = gr2::gr_make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 1000);
         else
-            face = gr2::make_file_face(fileName /* , gr2::ePreload */);
+            face = gr2::gr_make_file_face(fileName /* , gr2::ePreload */);
 
         if (!face)
         {
@@ -704,13 +704,13 @@ int Parameters::testFileFont() const
         if (charLength == 0)
         {
             printFeatures(face);
-            gr2::face_destroy(face);
+            gr2::gr_face_destroy(face);
             gr2::graphite_stop_logging();
             return 0;
         }
 
-        gr2::GrFont *sizedFont = gr2::make_font(pointSize * dpi / 72, face);
-        gr2::Features * featureList = NULL;
+        gr2::GrFont *sizedFont = gr2::gr_make_font(pointSize * dpi / 72, face);
+        gr2::GrFeatureVal * featureList = NULL;
 #if 0
         layout.setStartOfLine(parameters.lineStart);
         layout.setEndOfLine(parameters.lineEnd);
@@ -757,39 +757,39 @@ int Parameters::testFileFont() const
         if (features)
         {
             featureList = parseFeatures(face);
-            pSeg = gr2::make_seg(sizedFont,
+            pSeg = gr2::gr_make_seg(sizedFont,
                 face, 0, featureList, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         else
         {
-            pSeg = gr2::make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
+            pSeg = gr2::gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         int i = 0;
 //        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((gr2::seg_n_slots(pSeg) + 1) * sizeof(size_t));
-        for (const gr2::Slot* slot = gr2::seg_first_slot(pSeg); slot; slot = gr2::slot_next_in_segment(slot), ++i)
+        size_t *map = (size_t*)malloc((gr2::gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
+        for (const gr2::GrSlot* slot = gr2::gr_seg_first_slot(pSeg); slot; slot = gr2::gr_slot_next_in_segment(slot), ++i)
         { map[i] = (size_t)slot; }
         map[i] = 0;
         fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
         fprintf(log, "\n");
         i = 0;
-        for (const gr2::Slot* slot = seg_first_slot(pSeg); slot; slot = slot_next_in_segment(slot), ++i)
+        for (const gr2::GrSlot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
         {
-            float orgX = slot_origin_X(slot);
-            float orgY = slot_origin_Y(slot);
+            float orgX = gr_slot_origin_X(slot);
+            float orgY = gr_slot_origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, slot_gid(slot), lookup(map, (size_t)slot_attached_to(slot)),
-                    slot_attr(slot, pSeg, gr2::gr_slatAttX, 0),
-                    slot_attr(slot, pSeg, gr2::gr_slatAttY, 0), orgX, orgY, slot_can_insert_before(slot) ? 1 : 0,
-                    gr2::cinfo_break_weight(seg_cinfo(pSeg, slot_original(slot))), slot_before(slot), slot_after(slot));
+                    i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
+                    gr_slot_attr(slot, pSeg, gr2::gr_slatAttX, 0),
+                    gr_slot_attr(slot, pSeg, gr2::gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
+                    gr2::gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
            
             if (pText32 != NULL)
             {
                 fprintf(log, "%7x\t%7x",
-                    pText32[slot_before(slot) + offset],
-                    pText32[slot_after(slot) + offset]);
+                    pText32[gr_slot_before(slot) + offset],
+                    pText32[gr_slot_after(slot) + offset]);
             }
 #if 0
             if (parameters.justification)
@@ -816,23 +816,23 @@ int Parameters::testFileFont() const
         }
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = seg_advance_X(pSeg);
+        float advanceWidth = gr_seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
-        unsigned int numchar = seg_n_cinfo(pSeg);
+        unsigned int numchar = gr_seg_n_cinfo(pSeg);
         gr2::gr_uint32 *firsts = (gr2::gr_uint32 *)malloc(numchar * sizeof(gr2::gr_uint32));
         gr2::gr_uint32 *lasts = (gr2::gr_uint32 *)malloc(numchar * sizeof(gr2::gr_uint32));
-        seg_char_slots(pSeg, firsts, lasts, 0, 0);
+        gr2::gr_seg_char_slots(pSeg, firsts, lasts, 0, 0);
         fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
         for (int i = 0; i < numchar; i++)
         {
-            fprintf(log, "%d\t%04X\t%d\t%d\n", i, cinfo_unicode_char(seg_cinfo(pSeg, i)), firsts[i], lasts[i]);
+            fprintf(log, "%d\t%04X\t%d\t%d\n", i, gr2::gr_cinfo_unicode_char(gr2::gr_seg_cinfo(pSeg, i)), firsts[i], lasts[i]);
         }
         free(map);
-        gr2::seg_destroy(pSeg);
+        gr2::gr_seg_destroy(pSeg);
        }
-        if (featureList) gr2::featureval_destroy(featureList);
-        gr2::font_destroy(sizedFont);
-        gr2::face_destroy(face);
+        if (featureList) gr2::gr_featureval_destroy(featureList);
+        gr2::gr_font_destroy(sizedFont);
+        gr2::gr_face_destroy(face);
 //            delete featureParser;
         // setText copies the text, so it is no longer needed
 //        delete [] parameters.pText32;

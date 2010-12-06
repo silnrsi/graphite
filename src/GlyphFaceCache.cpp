@@ -27,7 +27,7 @@ using namespace org::sil::graphite::v2;
 
 
 
-/*virtual*/ bool GlyphFaceCacheHeader::initialize(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)    //return result indicates success. Do not use if failed.
+/*virtual*/ bool GlyphFaceCacheHeader::initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)    //return result indicates success. Do not use if failed.
 {
     if ((m_pLoca = (*getTable)(appFaceHandle, tagLoca, &m_lLoca)) == NULL) return false;
     size_t lHead;

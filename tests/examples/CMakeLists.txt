@@ -10,9 +10,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-add_executable(simple simple simple.c)
+add_executable(simple simple.c)
 add_dependencies(simple graphiteng)
-add_definitions(simple -I ${PROJECT_SOURCE_DIR}/../../include)
+add_definitions(-I ${PROJECT_SOURCE_DIR}/../../include)
 set_target_properties(simple PROPERTIES LINK_FLAGS "-L ${PROJECT_BINARY_DIR}/../../src" LINKER_LANGUAGE C)
 target_link_libraries(simple -lgraphiteng)
 

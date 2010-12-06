@@ -143,7 +143,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
 
 extern "C" {
 
-    GRNG_EXPORT GrFace* make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, unsigned int cacheSize, int canDumb)
+    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, int canDumb)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
     {
         GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
@@ -173,13 +173,13 @@ extern "C" {
 
 #ifndef DISABLE_FILE_FACE
 
-    GRNG_EXPORT GrFace* make_file_face_with_seg_cache(const char *filename, unsigned int cacheSize)   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int cacheSize)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
     {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes = make_face_with_seg_cache(pFileFace, &FileFace_table_fn, cacheSize, 0);
+          GrFace* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace_table_fn, cacheSize, 0);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership

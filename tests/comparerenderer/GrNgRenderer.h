@@ -34,19 +34,19 @@ public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_rtl(textDir),
         m_grFace((cache == 0)?
-            gr2::make_file_face(fontFile /*, gr2::ePreloadWithCmap */):
-            gr2::make_file_face_with_seg_cache(fontFile, /* gr2::ePreloadWithCmap, */ cache)),
+            gr2::gr_make_file_face(fontFile /*, gr2::ePreloadWithCmap */):
+            gr2::gr_make_file_face_with_seg_cache(fontFile, /* gr2::ePreloadWithCmap, */ cache)),
         m_grFont(0)
     {
         if (m_grFace)
         {
-            m_grFont = gr2::make_font(static_cast<float>(fontSize), m_grFace);
+            m_grFont = gr2::gr_make_font(static_cast<float>(fontSize), m_grFace);
         }
     }
     virtual ~GrNgRenderer()
     {
-        gr2::font_destroy(m_grFont);
-        gr2::face_destroy(m_grFace);
+        gr2::gr_font_destroy(m_grFont);
+        gr2::gr_face_destroy(m_grFace);
         m_grFont = NULL;
         m_grFace = NULL;
     }
@@ -58,25 +58,26 @@ public:
             new(result) RenderedLine();
             return;
         }
-        size_t numCodePoints = gr2::count_unicode_characters(gr2::gr_utf8,
+        size_t numCodePoints = gr2::gr_count_unicode_characters(gr2::gr_utf8,
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %d\n", static_cast<int>(reinterpret_cast<const char*>(pError) - utf8));
-        gr2::GrSegment* pSeg = gr2::make_seg(m_grFont, m_grFace, 0u, NULL, gr2::gr_utf8, utf8, numCodePoints, m_rtl);
+        gr2::GrSegment* pSeg = gr2::gr_make_seg(m_grFont, m_grFace, 0u, NULL, gr2::gr_utf8, utf8, numCodePoints, m_rtl);
         if (!pSeg) return;
-        RenderedLine * renderedLine = new(result) RenderedLine(gr2::seg_n_slots(pSeg),
-                                                               gr2::seg_advance_X(pSeg));
+        RenderedLine * renderedLine = new(result) RenderedLine(gr2::gr_seg_n_slots(pSeg),
+                                                               gr2::gr_seg_advance_X(pSeg));
         int i = 0;
-        for (const gr2::Slot* s = gr2::seg_first_slot(pSeg); s; s = gr2::slot_next_in_segment(s), ++i)
-            (*renderedLine)[i].set(gr2::slot_gid(s), gr2::slot_origin_X(s),
-                                   gr2::slot_origin_Y(s), gr2::slot_before(s),
-                                   gr2::slot_after(s));
+        for (const gr2::GrSlot* s = gr2::gr_seg_first_slot(pSeg); s;
+             s = gr2::gr_slot_next_in_segment(s), ++i)
+            (*renderedLine)[i].set(gr2::gr_slot_gid(s), gr2::gr_slot_origin_X(s),
+                                   gr2::gr_slot_origin_Y(s), gr2::gr_slot_before(s),
+                                   gr2::gr_slot_after(s));
         
 //         for (int i = 0; i < seg.length(); i++)
 //         {
 //             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
 //         }
-        gr2::seg_destroy(pSeg);
+        gr2::gr_seg_destroy(pSeg);
     }
     virtual const char * name() const { return "graphiteng"; }
 private:

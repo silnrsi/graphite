@@ -25,8 +25,8 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrSegment;
-class Slot;
+struct GrSegment;
+struct GrSlot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 

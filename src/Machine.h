@@ -41,8 +41,8 @@ namespace gr2 = org::sil::graphite::v2;
 
 // Forward declarations
 namespace org { namespace sil { namespace graphite { namespace v2 {
-    class GrSegment;
-    class Slot;
+    struct GrSegment;
+    struct GrSlot;
     class SlotMap;
 }}}}
 
@@ -52,7 +52,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef gr2::Slot * slotref;
+typedef gr2::GrSlot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 

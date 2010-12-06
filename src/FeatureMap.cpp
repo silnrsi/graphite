@@ -35,7 +35,7 @@
 
 using namespace org::sil::graphite::v2;
 
-bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace)
+bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace)
 {
     if (!m_FeatureMap.readFeats(appFaceHandle, getTable, pFace)) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
@@ -43,7 +43,7 @@ bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTa
 }
 
 
-bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace)
+bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace)
 {
     size_t lFeat;
     const byte *pFeat = reinterpret_cast<const byte *>((*getTable)(appFaceHandle, ktiFeat, &lFeat));
@@ -61,7 +61,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     if (m_numFeats)
     {
-    m_feats = new FeatureRef[m_numFeats];
+    m_feats = new GrFeatureRef[m_numFeats];
     m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
     }
@@ -179,7 +179,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn g
     return true;
 }
 
-bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable)
+bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)
 {
     size_t lSill;
     const byte *pSill = reinterpret_cast<const byte *>(((*getTable)(appFaceHandle, ktiSill, &lSill)));

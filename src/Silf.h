@@ -27,10 +27,10 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrFace;
+struct GrFace;
+struct GrSegment;
+struct GrFeatureVal;
 class VMScratch;
-class GrSegment;
-class Features;
 
 class Pseudo
 {

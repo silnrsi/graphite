@@ -85,19 +85,19 @@ public:
   enum {MAX_SLOTS=64};
   SlotMap(GrSegment & seg);
   
-  Slot       * * begin();
-  Slot       * * end();
+  GrSlot       * * begin();
+  GrSlot       * * end();
   size_t         size() const;
   unsigned short context() const;
   void           setContext(unsigned short);
   
-  Slot * const & operator[](int n) const;
-  Slot       * & operator [] (int);
-  void           pushSlot(Slot * const slot);
+  GrSlot * const & operator[](int n) const;
+  GrSlot       * & operator [] (int);
+  void           pushSlot(GrSlot * const slot);
 
   GrSegment &    segment;
 private:
-  Slot         * m_slot_map[MAX_SLOTS+1];
+  GrSlot         * m_slot_map[MAX_SLOTS+1];
   unsigned short m_size;
   unsigned short m_precontext;
 };
@@ -201,12 +201,12 @@ inline SlotMap::SlotMap(GrSegment & seg)
 {
 }
 
-inline Slot * * SlotMap::begin()
+inline GrSlot * * SlotMap::begin()
 {
   return &m_slot_map[0];
 }
 
-inline Slot * * SlotMap::end()
+inline GrSlot * * SlotMap::end()
 {
   return m_slot_map + m_size;
 }
@@ -227,17 +227,17 @@ inline void SlotMap::setContext(short unsigned int ctxt)
   m_precontext = ctxt;
 }
 
-inline void SlotMap::pushSlot(Slot*const slot)
+inline void SlotMap::pushSlot(GrSlot*const slot)
 {
   m_slot_map[m_size++] = slot;
 }
 
-inline Slot * const & SlotMap::operator[](int n) const
+inline GrSlot * const & SlotMap::operator[](int n) const
 {
   return m_slot_map[n];
 }
 
-inline Slot * & SlotMap::operator[](int n)
+inline GrSlot * & SlotMap::operator[](int n)
 {
   return m_slot_map[n];
 }

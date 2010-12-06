@@ -62,7 +62,7 @@ typedef std::vector<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
-class GrSegment;
+struct GrSegment;
 
 typedef enum {
 /** sub-Segments longer than this are not cached

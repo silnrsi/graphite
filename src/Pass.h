@@ -46,8 +46,8 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    int    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    int    doAction(const vm::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
+    int    findNDoRule(GrSlot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    int    doAction(const vm::Code* codeptr, GrSlot * & slot_out, vm::Machine &) const;
     bool   testPassConstraint(vm::Machine & m) const;
     bool   testConstraint(const Rule & r, vm::Machine &) const;
     bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
@@ -60,7 +60,7 @@ private:
     void   logStates() const;
     bool   readRanges(const uint16* ranges, size_t num_ranges);
     uint16 glyphToCol(const uint16 gid) const;
-    bool   runFSM(FiniteStateMachine & fsm, Slot * slot) const;
+    bool   runFSM(FiniteStateMachine & fsm, GrSlot * slot) const;
     
     const Silf* m_silf;
     uint16    * m_cols;
