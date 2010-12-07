@@ -13,7 +13,6 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 macro(test_example TESTNAME SRCFILE)
     add_executable(${TESTNAME} ${SRCFILE})
     add_dependencies(${TESTNAME} graphiteng)
-    add_definitions(${TESTNAME} -I ${PROJECT_SOURCE_DIR}/../../include)
     set_target_properties(${TESTNAME} PROPERTIES LINK_FLAGS "-L ${PROJECT_BINARY_DIR}/../../src" LINKER_LANGUAGE C)
     target_link_libraries(${TESTNAME} -lgraphiteng)
 

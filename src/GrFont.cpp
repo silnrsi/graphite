@@ -26,19 +26,19 @@ using namespace org::sil::graphite::v2;
 
 extern "C" 
 {
-    GRNG_EXPORT GrFont* make_font(float ppm/*pixels per em*/, const GrFace *face)
+    GRNG_EXPORT GrFont* gr_make_font(float ppm/*pixels per em*/, const GrFace *face)
     {
         return new GrSimpleFont(ppm, face);
     }
 
 
-    GRNG_EXPORT GrFont* make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/)
+    GRNG_EXPORT GrFont* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/)
     {                 //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_GrFont    
         return new GrHintedFont(ppm, appFontHandle, advance, face);
     }
 
 
-    GRNG_EXPORT void font_destroy(GrFont *font)
+    GRNG_EXPORT void gr_font_destroy(GrFont *font)
     {
         delete font;
     }

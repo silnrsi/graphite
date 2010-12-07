@@ -26,14 +26,14 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrSegment;
-class Features;
+struct GrSegment;
+struct GrFeatureVal;
 
 
 class GlyphFaceCacheHeader
 {
 public:
-    virtual bool initialize(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);    //return result indicates success. Do not use if failed.
+    virtual bool initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);    //return result indicates success. Do not use if failed.
     unsigned short numGlyphs() const { return m_nGlyphs; }
     unsigned short numAttrs() const { return m_numAttrs; }
 

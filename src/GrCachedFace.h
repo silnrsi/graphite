@@ -30,7 +30,7 @@ class SegCacheStore;
 class GrCachedFace : public GrFace
 {
 public:
-    GrCachedFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) :
+    GrCachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) :
         GrFace(appFaceHandle, getTable2),
         m_cacheStore(NULL) {};
     bool setupCache(unsigned int cacheSize);

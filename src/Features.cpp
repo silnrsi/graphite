@@ -48,7 +48,7 @@ GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, cons
 }
 #endif 
   
-GRNG_EXPORT void featureval_destroy(GrFeatureVal *p)
+GRNG_EXPORT void gr_featureval_destroy(GrFeatureVal *p)
 {
     delete p;
 }

@@ -27,13 +27,13 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class FeatureRef;
+struct GrFeatureRef;
 class FeatureMap;
 
-class Features
+class GrFeatureVal
 {
 public:
-    uint32 maskedOr(const Features &other, const Features &mask) {
+    uint32 maskedOr(const GrFeatureVal &other, const GrFeatureVal &mask) {
 	uint32 len = m_length ;
 	if (other.m_length<len) len = other.m_length;		//defensive
 	if (mask.m_length<len) len = mask.m_length;		//defensive
@@ -42,12 +42,12 @@ public:
 	return len;
     }
 
-    explicit Features(int num, const FeatureMap* pMap/*not NULL*/)
+    explicit GrFeatureVal(int num, const FeatureMap* pMap/*not NULL*/)
       : m_length(num), m_vec(gralloc<uint32>(num)), m_pMap(pMap) {}
-    Features() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
-    Features(const Features & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
-    ~Features() { free(m_vec); }
-    Features & operator=(const Features & rhs) {
+    GrFeatureVal() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
+    GrFeatureVal(const GrFeatureVal & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
+    ~GrFeatureVal() { free(m_vec); }
+    GrFeatureVal & operator=(const GrFeatureVal & rhs) {
         m_pMap = rhs.m_pMap;
         if (m_length != rhs.m_length) {
             if (m_vec) free(m_vec);
@@ -57,7 +57,7 @@ public:
         std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
         return *this;
     }
-    bool operator ==(const Features & b) const
+    bool operator ==(const GrFeatureVal & b) const
     {
         size_t i = 0;
         assert(m_length);
@@ -81,7 +81,7 @@ public:
         m_length = reqIndex+1;
     }
 
-    Features* clone() const { return new Features(*this); }
+    GrFeatureVal* clone() const { return new GrFeatureVal(*this); }
     
 //    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
 
@@ -94,10 +94,12 @@ public:
 //    }
     CLASS_NEW_DELETE
 private:
-friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
+    friend class GrFeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
     const FeatureMap* m_pMap;
 };
+
+typedef GrFeatureVal Features;
 
 }}}} // namespace

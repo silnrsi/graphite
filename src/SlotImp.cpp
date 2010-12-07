@@ -26,7 +26,7 @@
 
 using namespace org::sil::graphite::v2;
 
-Slot::Slot() :
+GrSlot::GrSlot() :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_parent(NULL), m_child(NULL), m_sibling(NULL),
@@ -34,12 +34,12 @@ Slot::Slot() :
     m_attach(0, 0), m_with(0, 0),
     m_flags(0)
     // Do not set m_userAttr since it is set *before* new is called since this
-    // is used as a positional new to reset the Slot
+    // is used as a positional new to reset the GrSlot
 {
 }
 
-// take care, this does not copy any of the Slot pointer fields
-void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
+// take care, this does not copy any of the GrSlot pointer fields
+void GrSlot::set(const GrSlot & orig, int charOffset, uint8 numUserAttr)
 {
     // leave m_next and m_prev unchanged
     m_glyphid = orig.m_glyphid;
@@ -64,14 +64,14 @@ void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
     }
 }
 
-void Slot::update(int /*numSlots*/, int numCharInfo, Position &relpos)
+void GrSlot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
 {
     m_before += numCharInfo;
     m_after += numCharInfo;
     m_position = m_position + relpos;
 };
 
-Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
+Position GrSlot::finalise(const GrSegment *seg, const GrFont *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
@@ -143,7 +143,7 @@ Position Slot::finalise(const GrSegment *seg, const GrFont *font, Position *base
     return res;
 }
 
-uint32 Slot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
+uint32 GrSlot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
 {
     Position base;
     Rect bbox;
@@ -177,7 +177,7 @@ uint32 Slot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
     }
 }
 
-int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
+int GrSlot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
 {
     if (index == gr_slatUserDefnV1)
     {
@@ -247,7 +247,7 @@ int Slot::getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const
     }
 }
 
-void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, const SlotMap & map)
+void GrSlot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, const SlotMap & map)
 {
     if (index == gr_slatUserDefnV1)
     {
@@ -267,7 +267,7 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, 
         const uint16 idx = uint16(value);
         if (idx < map.size())
         {
-            Slot *other = map[idx];
+            GrSlot *other = map[idx];
             attachTo(other);
             other->child(this);
             m_attach = Position(seg->glyphAdvance(other->gid()), 0);
@@ -347,7 +347,7 @@ void Slot::setAttr(GrSegment *seg, attrCode index, uint8 subindex, int16 value, 
     }
 }
 
-void Slot::child(Slot *ap)
+void GrSlot::child(GrSlot *ap)
 {
     if (ap == m_child) {}
     else if (!m_child)
@@ -356,7 +356,7 @@ void Slot::child(Slot *ap)
         m_child->sibling(ap);
 }
 
-void Slot::sibling(Slot *ap)
+void GrSlot::sibling(GrSlot *ap)
 {
     if (ap == m_sibling) {}
     else if (!m_sibling)
@@ -365,7 +365,7 @@ void Slot::sibling(Slot *ap)
         m_sibling->sibling(ap);
 }
 
-void Slot::setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph)
+void GrSlot::setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
     if (!theGlyph)
@@ -382,7 +382,7 @@ void Slot::setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph)
     m_advance = Position(theGlyph->theAdvance().x, 0.);
 }
 
-void Slot::floodShift(Position adj)
+void GrSlot::floodShift(Position adj)
 {
     m_position += adj;
     if (m_child) m_child->floodShift(adj);

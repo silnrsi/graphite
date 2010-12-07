@@ -41,20 +41,20 @@ private:
     int16 m_value;
 };
 
-class FeatureRef
+class GrFeatureRef
 {
 public:
-    FeatureRef() :
+    GrFeatureRef() :
         m_nameValues(NULL), m_pFace(NULL)
       {}
-    FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
+    GrFeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
                FeatureSetting *uiNames, const GrFace* pFace/*not NULL*/) throw()
       : m_mask(mask), m_id(name), m_max(mask >> bits), m_bits(bits), m_index(index),
       m_nameid(uiName), m_nameValues(uiNames), m_pFace(pFace), m_flags(flags),
       m_numSet(numSet)
       {}
-    FeatureRef(const FeatureRef & toCopy)
+    GrFeatureRef(const GrFeatureRef & toCopy)
         : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_max(toCopy.m_max),
         m_bits(toCopy.m_bits), m_index(toCopy.m_index),
         m_nameid(toCopy.m_nameid),
@@ -68,7 +68,7 @@ public:
             memcpy(m_nameValues, toCopy.m_nameValues, sizeof(FeatureSetting) * m_numSet);
         }
     }
-    ~FeatureRef() {
+    ~GrFeatureRef() {
         if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
@@ -89,7 +89,7 @@ public:
     const GrFace* getFace() const { return m_pFace;}
     const FeatureMap* getFeatureMap() const;// { return m_pFace;}
 
-//     void * operator new (size_t s, FeatureRef * p)
+//     void * operator new (size_t s, GrFeatureRef * p)
 //     {
 //         return p;
 //     }
@@ -108,16 +108,17 @@ private:
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 
 private:        //unimplemented
-    FeatureRef& operator=(const FeatureRef&);
+    GrFeatureRef& operator=(const GrFeatureRef&);
 };
 
+typedef GrFeatureRef FeatureRef;
 
 class NameAndFeatureRef
 {
   public:
     NameAndFeatureRef() {}
     NameAndFeatureRef(uint32 name) : m_name(name) {}
-    NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
+    NameAndFeatureRef(const GrFeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
 
     bool operator<(const NameAndFeatureRef& rhs) const //orders by m_name
         {   return m_name<rhs.m_name; }
@@ -125,7 +126,7 @@ class NameAndFeatureRef
     CLASS_NEW_DELETE
  
     uint32 m_name;
-    const FeatureRef* m_pFRef;
+    const GrFeatureRef* m_pFRef;
 };
 
 class FeatureMap
@@ -135,21 +136,21 @@ public:
         m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
-    bool readFeats(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace);
-    const FeatureRef *findFeatureRef(uint32 name) const;
-    FeatureRef *feature(uint16 index) const { return m_feats + index; }
-    //FeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
-    const FeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
-    Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    bool readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace);
+    const GrFeatureRef *findFeatureRef(uint32 name) const;
+    GrFeatureRef *feature(uint16 index) const { return m_feats + index; }
+    //GrFeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
+    const GrFeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
+    GrFeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numFeats() const { return m_numFeats; };
     CLASS_NEW_DELETE
 private:
 friend class SillMap;
     uint16 m_numFeats;
 
-    FeatureRef *m_feats;
+    GrFeatureRef *m_feats;
     NameAndFeatureRef* m_pNamedFeats;   //owned
-    Features* m_defaultFeatures;        //owned
+    GrFeatureVal* m_defaultFeatures;        //owned
     
 private:		//defensive on m_feats, m_pNamedFeats, and m_defaultFeatures
     FeatureMap(const FeatureMap&);
@@ -173,9 +174,9 @@ private:
 public:
     SillMap() : m_langFeats(NULL), m_numLanguages(0) {}
     ~SillMap() { delete[] m_langFeats; }
-    bool readFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable, const GrFace* pFace);
-    bool readSill(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable);
-    Features* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    bool readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace);
+    bool readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);
+    GrFeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numLanguages() const { return m_numLanguages; };
     uint32 getLangName(uint16 index) const { return (index < m_numLanguages)? m_langFeats[index].m_lang : 0; };
 

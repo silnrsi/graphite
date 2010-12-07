@@ -37,8 +37,8 @@
 #endif      //!DISABLE_FILE_FACE
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrSegment;
-class Features;
+struct GrSegment;
+struct GrFeatureVal;
 class NameTable;
 class CmapCache;
 
@@ -121,7 +121,7 @@ public:
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    GrFace(const void* appFaceHandle/*non-NULL*/, get_table_fn getTable2) : 
+    GrFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) : 
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
         m_cmapCache(NULL), m_numSilf(0), m_silfs(NULL), m_pFileFace(NULL),
         m_pNames(NULL) {}
@@ -143,8 +143,8 @@ public:
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
     uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeats(); }
-    const FeatureRef *featureById(uint32 id) const { return m_Sill.m_FeatureMap.findFeatureRef(id); }
-    const FeatureRef *feature(uint16 index) const { return m_Sill.m_FeatureMap.feature(index); }
+    const GrFeatureRef *featureById(uint32 id) const { return m_Sill.m_FeatureMap.findFeatureRef(id); }
+    const GrFeatureRef *feature(uint16 index) const { return m_Sill.m_FeatureMap.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
@@ -156,7 +156,7 @@ public:
     CLASS_NEW_DELETE
 private:
     const void* m_appFaceHandle/*non-NULL*/;
-    get_table_fn m_getTable;
+    gr_get_table_fn m_getTable;
     uint16 m_ascent;
     uint16 m_descent;
     // unsigned short *m_glyphidx;     // index for each glyph id in the font

@@ -25,7 +25,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class Slot;
+class GrSlot;
 
 #define VMS_MAX_RULES_PER_SEQUENCE 64
 
@@ -53,9 +53,9 @@ public:
         m_lengths[i] = len;
         if (m_numRules < VMS_MAX_RULES_PER_SEQUENCE) m_numRules++;
     }
-    Slot *slotMap(int i) { return m_slotMap[i]; }
-    void slotMap(int i, Slot *s) { m_slotMap[i] = s; }
-    Slot **map() { return m_slotMap; }
+    GrSlot *slotMap(int i) { return m_slotMap[i]; }
+    void slotMap(int i, GrSlot *s) { m_slotMap[i] = s; }
+    GrSlot **map() { return m_slotMap; }
     byte flags() { return m_flags; }
     void setflag(int val) { m_flags |= val; }
 
@@ -68,7 +68,7 @@ protected:
     uint16 m_rules[VMS_MAX_RULES_PER_SEQUENCE];
     uint16 m_sortKeys[VMS_MAX_RULES_PER_SEQUENCE];
     int16 m_lengths[VMS_MAX_RULES_PER_SEQUENCE];
-    Slot *m_slotMap[VMS_MAX_RULES_PER_SEQUENCE];
+    GrSlot *m_slotMap[VMS_MAX_RULES_PER_SEQUENCE];
 };
 
 }}}} // namespace

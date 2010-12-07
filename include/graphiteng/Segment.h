@@ -31,6 +31,7 @@ extern "C"
 #endif
 
 enum {
+    gr_breakNone = 0,
     /* after break weights */
     gr_breakWhitespace = 10,
     gr_breakWord = 15,
@@ -70,15 +71,15 @@ enum gr_attrCode {
 };
 
 
-typedef struct CharInfo GrCharInfo;
+typedef struct GrCharInfo GrCharInfo;
 typedef struct GrSegment GrSegment;
-typedef struct Slot GrSlot;
+typedef struct GrSlot GrSlot;
 
     /** Returns Unicode character for a charinfo.
      * 
      * @param p Pointer to charinfo to return information on.
      */
-    GRNG_EXPORT unsigned int cinfo_unicode_char(const GrCharInfo* p/*not NULL*/);
+    GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const GrCharInfo* p/*not NULL*/);
     
     /** Returns breakweight for a charinfo.
      * 
@@ -86,7 +87,7 @@ typedef struct Slot GrSlot;
      * break before or after this character.
      * @param p Pointer to charinfo to return information on.
      */
-    GRNG_EXPORT int cinfo_break_weight(const GrCharInfo* p/*not NULL*/);
+    GRNG_EXPORT int gr_cinfo_break_weight(const GrCharInfo* p/*not NULL*/);
 
     /** Returns the number of unicode characters in a string
      *
@@ -99,7 +100,7 @@ typedef struct Slot GrSlot;
      *               in this variable. If no error occurs, pError will contain NULL. NULL
      *               may be passed for pError if no such information is required.
      */
-    GRNG_EXPORT size_t count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
+    GRNG_EXPORT size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
 
     /** Creates and returns a segment
      *
@@ -119,44 +120,44 @@ typedef struct Slot GrSlot;
      * @param dir Specifies whether the segment is processed right to left (1) or left to
      *            right (0)
      */
-    GRNG_EXPORT GrSegment* make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const GrFeatureVal* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
+    GRNG_EXPORT GrSegment* gr_make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const GrFeatureVal* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
     /** Destroys a segment, freeing the memory
      *
      * @param p The segment to destroy
      */
-    GRNG_EXPORT void seg_destroy(GrSegment* p);
+    GRNG_EXPORT void gr_seg_destroy(GrSegment* p);
 
-    GRNG_EXPORT float seg_advance_X(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT float seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT unsigned int seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
-    GRNG_EXPORT const GrCharInfo* seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
-    GRNG_EXPORT unsigned int seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
-    GRNG_EXPORT const GrSlot* seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const GrSlot* seg_last_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT void seg_char_slots(const GrSegment *pSeg, gr_uint32 *begins, gr_uint32 *ends, GrSlot **sbegins, GrSlot **sends);
+    GRNG_EXPORT float gr_seg_advance_X(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT float gr_seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT unsigned int gr_seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
+    GRNG_EXPORT const GrCharInfo* gr_seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+    GRNG_EXPORT unsigned int gr_seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
+    GRNG_EXPORT const GrSlot* gr_seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* gr_seg_last_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT void gr_seg_char_slots(const GrSegment *pSeg, gr_uint32 *begins, gr_uint32 *ends, GrSlot **sbegins, GrSlot **sends);
     //slots are owned by their segment
-    GRNG_EXPORT const GrSlot* slot_next_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const GrSlot* slot_prev_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const GrSlot* slot_attached_to(const GrSlot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
+    GRNG_EXPORT const GrSlot* gr_slot_next_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* gr_slot_prev_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    GRNG_EXPORT const GrSlot* gr_slot_attached_to(const GrSlot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
  
-    GRNG_EXPORT const GrSlot* slot_first_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no attachments.
-        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
+    GRNG_EXPORT const GrSlot* gr_slot_first_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no attachments.
+        //if gr_slot_first_attachment(p) is not NULL, then gr_slot_attached_to(gr_slot_first_attachment(p))==p.
     
-    GRNG_EXPORT const GrSlot* slot_next_sibling_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no more attachments.
-        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
+    GRNG_EXPORT const GrSlot* gr_slot_next_sibling_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no more attachments.
+        //if gr_slot_next_sibling_attachment(p) is not NULL, then gr_slot_attached_to(gr_slot_next_sibling_attachment(p))==gr_slot_attached_to(p).
     
     
-    GRNG_EXPORT unsigned short slot_gid(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float slot_origin_X(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float slot_origin_Y(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float slot_advance(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT int slot_before(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT int slot_after(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT int slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
+    GRNG_EXPORT unsigned short gr_slot_gid(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float gr_slot_origin_X(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float gr_slot_origin_Y(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT float gr_slot_advance(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int gr_slot_before(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int gr_slot_after(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int gr_slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
      
-    GRNG_EXPORT int slot_can_insert_before(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT int slot_original(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int gr_slot_can_insert_before(const GrSlot* p/*not NULL*/);
+    GRNG_EXPORT int gr_slot_original(const GrSlot* p/*not NULL*/);
 //  GRNG_EXPORT size_t id(const GrSlot* p/*not NULL*/);
   
 

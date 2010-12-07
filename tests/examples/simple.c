@@ -11,21 +11,21 @@ int main(int argc, char **argv)
 
     char *pError;               /* location of faulty utf-8 */
 
-    GrFace *face = make_file_face(argv[1]);                                 /*<1>*/
+    GrFace *face = gr_make_file_face(argv[1]);                                 /*<1>*/
     if (!face) return 1;
-    GrFont *font = make_font(pointsize * dpi / 72, face);                   /*<2>*/
+    GrFont *font = gr_make_font(pointsize * dpi / 72, face);                   /*<2>*/
     if (!font) return 2;
-    size_t numCodePoints = count_unicode_characters(gr_utf8, argv[2], NULL,
+    size_t numCodePoints = gr_count_unicode_characters(gr_utf8, argv[2], NULL,
                 (const void **)(&pError));                                  /*<3>*/
     if (pError) return 3;
-    GrSegment *seg = make_seg(font, face, 0, 0, gr_utf8, argv[2], numCodePoints, rtl); /*<4>*/
+    GrSegment *seg = gr_make_seg(font, face, 0, 0, gr_utf8, argv[2], numCodePoints, rtl); /*<4>*/
     if (!seg) return 3;
 
-    GrSlot *s;
-    for (s = seg_first_slot(seg); s; s = slot_next_in_segment(s))           /*<5>*/
-        printf("%d(%f,%f) ", slot_gid(s), slot_origin_X(s), slot_origin_Y(s));
-    seg_destroy(seg);
-    font_destroy(font);
-    face_destroy(face);
+    const GrSlot *s;
+    for (s = gr_seg_first_slot(seg); s; s = gr_slot_next_in_segment(s))           /*<5>*/
+        printf("%d(%f,%f) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s));
+    gr_seg_destroy(seg);
+    gr_font_destroy(font);
+    gr_face_destroy(face);
     return 0;
 }

@@ -323,15 +323,20 @@ void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot 
     
     for (s = m_first, i = 0; s; s = s->next(), i++)
     {
-        if (i < begins[s->before()])
+        for (int j = s->before(); j <= s->after(); j++)
         {
-            begins[s->before()] = i;
-            if (sbegins) sbegins[s->before()] = s;
-        }
-        if (i > ends[s->after()])
-        {
-            ends[s->after()] = i;
-            if (sends) sends[s->after()] = s;
+            assert(j >= 0);
+            assert(j < static_cast<int>(m_numCharinfo));
+            if (i < begins[j])
+            {
+                begins[j] = i;
+                if (sbegins) sbegins[j] = s;
+            }
+            if (i > ends[j])
+            {
+                ends[j] = i;
+                if (sends) sends[j] = s;
+            }
         }
     }
 }

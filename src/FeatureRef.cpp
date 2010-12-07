@@ -43,7 +43,7 @@ GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
 }
 */
 
-GRNG_EXPORT uint16 fref_feature_value(const GrFeatureRef* pfeatureref, const GrFeatureVal* feats)    //returns 0 if either pointer is NULL
+GRNG_EXPORT uint16 gr_fref_feature_value(const GrFeatureRef* pfeatureref, const GrFeatureVal* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
@@ -54,7 +54,7 @@ GRNG_EXPORT uint16 fref_feature_value(const GrFeatureRef* pfeatureref, const GrF
 }
 
 
-GRNG_EXPORT int fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 val, GrFeatureVal* pDest)
+GRNG_EXPORT int gr_fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 val, GrFeatureVal* pDest)
 {
     if (!pfeatureref)
     return false;
@@ -65,7 +65,7 @@ GRNG_EXPORT int fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 v
 }
 
 
-GRNG_EXPORT uint32 fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if pointer is NULL
+GRNG_EXPORT uint32 gr_fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if pointer is NULL
 {
   if (!pfeatureref)
     return 0;
@@ -74,7 +74,7 @@ GRNG_EXPORT uint32 fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if po
 }
 
 
-GRNG_EXPORT uint16 fref_n_values(const GrFeatureRef* pfeatureref)
+GRNG_EXPORT uint16 gr_fref_n_values(const GrFeatureRef* pfeatureref)
 {
     if(!pfeatureref)
         return 0;
@@ -82,7 +82,7 @@ GRNG_EXPORT uint16 fref_n_values(const GrFeatureRef* pfeatureref)
 }
 
 
-GRNG_EXPORT int16 fref_value(const GrFeatureRef* pfeatureref, uint16 settingno)
+GRNG_EXPORT int16 gr_fref_value(const GrFeatureRef* pfeatureref, uint16 settingno)
 {
     if(!pfeatureref || (settingno >= pfeatureref->getNumSettings()))
     {
@@ -92,7 +92,7 @@ GRNG_EXPORT int16 fref_value(const GrFeatureRef* pfeatureref, uint16 settingno)
 }
 
 
-GRNG_EXPORT void* fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, gr_encform utf, uint32 *length)
+GRNG_EXPORT void* gr_fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, gr_encform utf, uint32 *length)
 {
     if(!pfeatureref || !pfeatureref->getFace())
     {
@@ -112,7 +112,7 @@ GRNG_EXPORT void* fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, gr
 }
 
 
-GRNG_EXPORT void* fref_value_label(const GrFeatureRef*pfeatureref, uint16 setting,
+GRNG_EXPORT void* gr_fref_value_label(const GrFeatureRef*pfeatureref, uint16 setting,
     uint16 *langId, gr_encform utf, uint32 *length)
 {
     if(!pfeatureref || (setting >= pfeatureref->getNumSettings()) || !pfeatureref->getFace())
@@ -133,7 +133,7 @@ GRNG_EXPORT void* fref_value_label(const GrFeatureRef*pfeatureref, uint16 settin
 }
 
 
-GRNG_EXPORT void label_destroy(void * label)
+GRNG_EXPORT void gr_label_destroy(void * label)
 {
     if (label)
         free(label);

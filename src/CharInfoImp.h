@@ -25,7 +25,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class CharInfo // : ICharInfo
+struct GrCharInfo // : ICharInfo
 {
 
 public:
@@ -47,5 +47,7 @@ private:
     uint8 m_featureid;	// index into features list in the segment
     int8 m_break;	// breakweight coming from lb table
 };
+
+typedef GrCharInfo CharInfo;
 
 }}}} // namespace

@@ -71,14 +71,14 @@ private:
 class GrHintedFont : public GrFont
 {
 public:
-    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, advance_fn advance, const GrFace *face/*needed for scaling*/);
+    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/);
     virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 
 private:
     const void* m_appFontHandle/*non-NULL*/;
-    advance_fn m_advance;
+    gr_advance_fn m_advance;
 };
 
 }}}} // namespace
