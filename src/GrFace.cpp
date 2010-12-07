@@ -161,7 +161,7 @@ const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size
 
 extern "C" 
 {
-    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, int canDumb)
+    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
     {
         GrFace *res = new GrFace(appFaceHandle, getTable);
@@ -170,7 +170,7 @@ extern "C"
         XmlTraceLog::get().openElement(ElementFace);
 #endif
         bool valid = true;
-        valid &= res->readGlyphs();
+        valid &= res->readGlyphs(faceOptions);
         if (!valid) {
             delete res;
             return 0;
@@ -181,7 +181,7 @@ extern "C"
         XmlTraceLog::get().closeElement(ElementFace);
 #endif
         
-        if (!canDumb && !valid) {
+        if (!(faceOptions & gr_face_dumb_rendering) && !valid) {
             delete res;
             return 0;
         }

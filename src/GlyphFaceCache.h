@@ -33,7 +33,7 @@ struct GrFeatureVal;
 class GlyphFaceCacheHeader
 {
 public:
-    virtual bool initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);    //return result indicates success. Do not use if failed.
+    bool initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);    //return result indicates success. Do not use if failed.
     unsigned short numGlyphs() const { return m_nGlyphs; }
     unsigned short numAttrs() const { return m_numAttrs; }
 
@@ -60,19 +60,12 @@ class GlyphFaceCache : public GlyphFaceCacheHeader
 public:
     static GlyphFaceCache* makeCache(const GlyphFaceCacheHeader& hdr /*, EGlyphCacheStrategy requested */);
 
-    GlyphFaceCache(const GlyphFaceCacheHeader& hdr) : GlyphFaceCacheHeader(hdr) {} //, m_nAccesses(0), m_nLoads(0) {}
-    virtual ~GlyphFaceCache() {}
+    GlyphFaceCache(const GlyphFaceCacheHeader& hdr);
+    ~GlyphFaceCache();
 
-    virtual const GlyphFace *glyph(unsigned short /*glyphid*/) const { assert(false); return NULL; };      //result may be changed by subsequent call with a different glyphid
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
-    CLASS_NEW_DELETE
-};
-
-class GlyphFaceCacheLoadedOnDemand : public GlyphFaceCache
-{
-public:
     void * operator new (size_t s, const GlyphFaceCacheHeader& hdr)
     {
         return malloc(s + sizeof(GlyphFace*)*hdr.numGlyphs());
@@ -83,19 +76,17 @@ public:
         if (p) free(p);
     }
 
-    GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr);   //always use with the above new, passing in the same GlyphFaceCacheHeader
-    virtual ~GlyphFaceCacheLoadedOnDemand();
+    const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    void loadAllGlyphs();
 
-    virtual const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
-    
     CLASS_NEW_DELETE
     
 private:
-    GlyphFace **glyphPtrDirect(unsigned short glyphid) const { return (GlyphFace **)((const char*)(this)+sizeof(GlyphFaceCacheLoadedOnDemand)+sizeof(GlyphFace*)*glyphid);}
+    GlyphFace **glyphPtrDirect(unsigned short glyphid) const { return (GlyphFace **)((const char*)(this)+sizeof(GlyphFaceCache)+sizeof(GlyphFace*)*glyphid);}
 
 private:      //defensive
-    GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheLoadedOnDemand&);
-    GlyphFaceCacheLoadedOnDemand& operator=(const GlyphFaceCacheLoadedOnDemand&);
+    GlyphFaceCache(const GlyphFaceCache&);
+    GlyphFaceCache& operator=(const GlyphFaceCache&);
 };
 
 }}}} // namespace

@@ -32,14 +32,31 @@ typedef struct GrFont GrFont;
 typedef struct GrFeatureRef GrFeatureRef;
 typedef struct GrFeatureVal GrFeatureVal;
 
+/**
+ * The Face Options allow the application to require that certain tables are
+ * read during face construction. This may be of concern if the appFaceHandle
+ * used in the gr_get_table_fn may change.
+ * The values can be combined 
+ */
+enum gr_faceOptions {
+    /** No preload, no cmap caching, fail if the graphite tables are invalid */
+    gr_face_default = 0,
+    /** Dumb rendering will be enabled if the graphite tables are invalid */
+    gr_face_dumb_rendering = 1,
+    /** preload glyphs at construction time */
+    gr_face_preloadGlyphs = 2,
+    /** Cache the lookup from code point to glyph ID at construction time */
+    gr_face_cacheCmap = 4
+};
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
     typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
-    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, int canDumb);
+    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy    
-    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int segCacheMaxSize, int canDumb);
+    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call face_destroy
     GRNG_EXPORT gr_uint32 gr_str_to_tag(const char *str);
     GRNG_EXPORT void gr_tag_to_str(gr_uint32 tag, char *str);
@@ -57,7 +74,7 @@ extern "C"
 #ifndef DISABLE_FILE_FACE
     GRNG_EXPORT GrFace* gr_make_file_face(const char *filename);   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
-    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize);   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize, unsigned int faceOptions);   //returns NULL on failure. //TBD better error handling
 #endif      //!DISABLE_FILE_FACE
 
     GRNG_EXPORT GrFont* gr_make_font(float ppm/*pixels per em*/, const GrFace *face/*needed for scaling, and the advance hints - must stay alive*/);

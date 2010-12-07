@@ -143,7 +143,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
 
 extern "C" {
 
-    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, int canDumb)
+    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
                       //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
     {
         GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
@@ -151,7 +151,7 @@ extern "C" {
         XmlTraceLog::get().openElement(ElementFace);
 #endif
         bool valid = true;
-        valid &= res->readGlyphs();
+        valid &= res->readGlyphs(faceOptions);
         if (!valid) {
             delete res;
             return 0;
@@ -164,7 +164,7 @@ extern "C" {
         XmlTraceLog::get().closeElement(ElementFace);
 #endif
 
-        if (!canDumb && !valid) {
+        if (!(faceOptions & gr_face_dumb_rendering) && !valid) {
             delete res;
             return 0;
         }
@@ -173,13 +173,13 @@ extern "C" {
 
 #ifndef DISABLE_FILE_FACE
 
-    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int cacheSize)   //returns NULL on failure. //TBD better error handling
+    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
                       //when finished with, call destroy_face
     {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace_table_fn, cacheSize, 0);
+          GrFace* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace_table_fn, segCacheMaxSize, faceOptions);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership

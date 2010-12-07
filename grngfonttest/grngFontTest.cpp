@@ -52,14 +52,14 @@ private:
 };
 
 #ifndef HAVE_STRTOF
-float strtof(char * text, char ** ignore)
+float strtof(char * text, char ** /*ignore*/)
 {
   return static_cast<float>(atof(text));
 }
 #endif
 
 #ifndef HAVE_STRTOL
-long strtol(char * text, char ** ignore)
+long strtol(char * text, char ** /*ignore*/)
 {
   return atol(text);
 }
@@ -583,10 +583,10 @@ void Parameters::printFeatures(const gr2::GrFace * face) const
         langID.uId = gr2::gr_face_lang_by_index(face, i);
         langID.uId = swap32(langID.uId);
         fprintf(log, "\t");
-        for (size_t i = 0; i < 4; i++)
+        for (size_t j = 0; j < 4; j++)
         {
-            if ((langID.uChar[i]) >= 0x20 && (langID.uChar[i] < 0x80))
-                fprintf(log, "%c", langID.uChar[i]);
+            if ((langID.uChar[j]) >= 0x20 && (langID.uChar[j] < 0x80))
+                fprintf(log, "%c", langID.uChar[j]);
         }
     }
     fprintf(log, "\n");
@@ -692,7 +692,7 @@ int Parameters::testFileFont() const
 
         gr2::GrFace *face = NULL;
         if (enableCache)
-            face = gr2::gr_make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 1000);
+            face = gr2::gr_make_file_face_with_seg_cache(fileName, 1000, gr2::gr_face_dumb_rendering);
         else
             face = gr2::gr_make_file_face(fileName /* , gr2::ePreload */);
 
@@ -823,9 +823,9 @@ int Parameters::testFileFont() const
         gr2::gr_uint32 *lasts = (gr2::gr_uint32 *)malloc(numchar * sizeof(gr2::gr_uint32));
         gr2::gr_seg_char_slots(pSeg, firsts, lasts, 0, 0);
         fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
-        for (int i = 0; i < numchar; i++)
+        for (unsigned int j = 0; j < numchar; j++)
         {
-            fprintf(log, "%d\t%04X\t%d\t%d\n", i, gr2::gr_cinfo_unicode_char(gr2::gr_seg_cinfo(pSeg, i)), firsts[i], lasts[i]);
+            fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr2::gr_cinfo_unicode_char(gr2::gr_seg_cinfo(pSeg, j)), firsts[j], lasts[j]);
         }
         free(map);
         gr2::gr_seg_destroy(pSeg);

@@ -75,11 +75,11 @@ using namespace org::sil::graphite::v2;
 
 /*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr)
 {
-    return new(hdr) GlyphFaceCacheLoadedOnDemand(hdr);           
+    return new(hdr) GlyphFaceCache(hdr);
 }
 
-GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheHeader& hdr)
-:   GlyphFaceCache(hdr)
+GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
+:   GlyphFaceCacheHeader(hdr)
 {
     unsigned int nGlyphs = numGlyphs();
     
@@ -89,22 +89,48 @@ GlyphFaceCacheLoadedOnDemand::GlyphFaceCacheLoadedOnDemand(const GlyphFaceCacheH
     }
 }
 
-/*virtual*/ GlyphFaceCacheLoadedOnDemand::~GlyphFaceCacheLoadedOnDemand()
+/*virtual*/ GlyphFaceCache::~GlyphFaceCache()
 {
 //    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
     unsigned int nGlyphs = numGlyphs();
-    for (unsigned int i=0 ; i<nGlyphs; ++i)
+    int deltaPointers = (*glyphPtrDirect(nGlyphs-1u) - *glyphPtrDirect(0u));
+    if ((nGlyphs > 0u) && (deltaPointers == static_cast<int>(nGlyphs - 1)))
     {
-        GlyphFace *p = *glyphPtrDirect(i);
-        if (p)
+        for (unsigned int i=0 ; i<nGlyphs; ++i)
         {
+            GlyphFace *p = *glyphPtrDirect(i);
+            assert (p);
             delete p;      //invokes d'tor. Does not release the memory.
-            free(p);
+        }
+        free (*glyphPtrDirect(0));
+    }
+    else
+    {
+        for (unsigned int i=0 ; i<nGlyphs; ++i)
+        {
+            GlyphFace *p = *glyphPtrDirect(i);
+            if (p)
+            {
+                delete p;      //invokes d'tor. Does not release the memory.
+                free(p);
+            }
         }
     }
 }
 
-/*virtual*/ const GlyphFace *GlyphFaceCacheLoadedOnDemand::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
+void GlyphFaceCache::loadAllGlyphs()
+{
+    unsigned int nGlyphs = numGlyphs();
+    GlyphFace * glyphs = gralloc<GlyphFace>(nGlyphs);
+    for (unsigned short glyphid = 0; glyphid < nGlyphs; glyphid++)
+    {
+        GlyphFace **p = glyphPtrDirect(glyphid);
+        *p = &(glyphs[glyphid]);
+        new(*p) GlyphFace(*this, glyphid);
+    }
+}
+
+/*virtual*/ const GlyphFace *GlyphFaceCache::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
     GlyphFace **p = glyphPtrDirect(glyphid);
     if (*p)

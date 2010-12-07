@@ -56,9 +56,7 @@ class GlyphFaceCacheHeader;
 class GlyphFace
 {
 private:
-friend class GlyphFaceCachePreloaded;
-friend class GlyphFaceCacheLoadedOnDemand;
-friend class GlyphFaceCacheOneItem;
+friend class GlyphFaceCache;
     GlyphFace(const DoNotInitialize& dni) : m_bbox(dni), m_advance(dni) {}
     GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid);
     ~GlyphFace() throw();

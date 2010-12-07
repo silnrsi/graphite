@@ -147,14 +147,13 @@ int main(int argc, char ** argv)
     FILE * log = fopen("grsegcache.xml", "w");
     gr2::graphite_start_logging(log, GRLOG_SEGMENT);
     gr2::GrCachedFace *face = reinterpret_cast<gr2::GrCachedFace*>
-        (gr2::gr_make_file_face_with_seg_cache(fileName, /* gr2::ePreload, */ 10));
+        (gr2::gr_make_file_face_with_seg_cache(fileName, 10, gr2::gr_face_default));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
     gr2::GrFont *sizedFont = gr2::gr_make_font(12, face);
-    const void * badUtf8 = NULL;
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
     uint16 * testGlyphStrings[sizeof(testStrings)/sizeof(char*)];

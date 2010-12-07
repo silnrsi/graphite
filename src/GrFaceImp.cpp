@@ -45,17 +45,23 @@ GrFace::~GrFace()
 }
 
 
-bool GrFace::readGlyphs()
+bool GrFace::readGlyphs(unsigned int faceOptions)
 {
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr);
-    size_t length = 0;
-    const void * table = getTable(tagCmap, &length);
-    m_cmapCache = new CmapCache(table, length);
-
     if (!m_pGlyphFaceCache) return false;
+    if (faceOptions & gr_face_cacheCmap)
+    {
+        size_t length = 0;
+        const void * table = getTable(tagCmap, &length);
+        m_cmapCache = new CmapCache(table, length);
+    }
+    if (faceOptions & gr_face_preloadGlyphs)
+    {
+        m_pGlyphFaceCache->loadAllGlyphs();
+    }
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
     
