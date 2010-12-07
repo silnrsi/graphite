@@ -28,13 +28,11 @@ void printList(GrList<int> & v)
     printf("\n");
 }
 
-int main(int argc, char ** argv)
+int main(int /*argc*/, char ** /*argv*/)
 {
     std::vector<int> stdVector(10);
     GrList<int> grList(10);
 
-    size_t vSize = stdVector.size();
-    size_t gSize = grList.size();
     assert(stdVector.size() == grList.size());
 
     for (size_t i = 0; i < 10; i++)

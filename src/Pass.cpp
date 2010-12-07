@@ -250,7 +250,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
 }
 
 
-void Pass::logRule(const Rule * r, const uint16 * sort_key) const
+void Pass::logRule(GR_UNUSED const Rule * r, GR_UNUSED const uint16 * sort_key) const
 {
 #ifndef DISABLE_TRACING
     if (!XmlTraceLog::get().active()) return;

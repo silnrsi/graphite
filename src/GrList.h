@@ -152,8 +152,8 @@ public:
     typedef GrListUnitIterator<T> iterator;
     GrList(size_t suggestedSize) :
         m_lastAccessIndex(0),
-        m_blockSize(suggestedSize),
         m_length(0),
+        m_blockSize(suggestedSize),
         m_numBlocks(1),
         m_currentBlock(0),
         m_back(NULL),
@@ -172,8 +172,8 @@ public:
     }
     GrList(size_t suggestedSize, const T & value) :
         m_lastAccessIndex(0),
-        m_blockSize(suggestedSize),
         m_length(0),
+        m_blockSize(suggestedSize),
         m_numBlocks(1),
         m_currentBlock(0),
         m_back(NULL),
@@ -191,8 +191,8 @@ public:
     }
     GrList() :
         m_lastAccessIndex(0),
-        m_blockSize(0),
         m_length(0),
+        m_blockSize(0),
         m_numBlocks(0),
         m_currentBlock(0),
         m_begin(NULL),

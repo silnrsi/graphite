@@ -22,6 +22,7 @@
 
 #include <cstring>
 #include <stdarg.h>
+#include "Main.h"
 #include "XmlTraceLog.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
@@ -214,11 +215,9 @@ void XmlTraceLog::warning(const char * msg, ...)
 
 extern "C"
 {
-bool graphite_start_logging(FILE * logFile, GrLogMask mask)
+bool graphite_start_logging(GR_UNUSED FILE * logFile, GR_UNUSED GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
-    logFile;			//pointless uses to avoid warnings re implementation not using parameters
-    mask;
     return false;
 #else	//!DISABLE_TRACING
     if (XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
