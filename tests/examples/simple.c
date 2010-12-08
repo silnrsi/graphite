@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 
     char *pError;               /* location of faulty utf-8 */
 
-    GrFace *face = gr_make_file_face(argv[1]);                                 /*<1>*/
+    GrFace *face = gr_make_file_face(argv[1], 0);                             /*<1>*/
     if (!face) return 1;
     GrFont *font = gr_make_font(pointsize * dpi / 72, face);                   /*<2>*/
     if (!font) return 2;

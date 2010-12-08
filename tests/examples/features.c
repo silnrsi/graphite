@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     gr_uint32 lang = 0;
     char idtag[5] = {0, 0, 0, 0, 0};                                /*<1>*/
 
-    GrFace *face = gr_make_file_face(argv[1]);
+    GrFace *face = gr_make_file_face(argv[1], 0);
     if (!face) return 1;
     if (argc > 2) lang = gr_str_to_tag(argv[2]);
     GrFeatureVal *features = gr_face_featureval_for_lang(face, lang);  /*<2>*/

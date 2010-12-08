@@ -62,7 +62,7 @@ extern "C"
      * @param len returned by this function to say how long the table is in memory.
      */
     typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
-    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
+
     /** Create a GrFace object given application information and a getTable function
      *
      * @return GrFace or NULL if the font fails to load for some reason.
@@ -70,10 +70,9 @@ extern "C"
      *                      function. The appFaceHandle must stay alive as long as the GrFace is alive.
      * @param getTable  This function is called whenever graphite needs access to a table of data
      *                  in the font.
-     * @param canDumb   If true then graphite may do dumb rendering for this font if graphite tables are
-     *                  not available or cannot load, otherwise return NULL for a failed font load.
+     * @param faceOptions   Bitfield describing various options. See enum gr_faceOptions for details.
      */
-    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle, gr_get_table_fn getTable, int canDumb);
+    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
 
     /** Create a GrFace object given application information, with subsegmental caching support
      *
@@ -82,8 +81,9 @@ extern "C"
      *                      This may not be NULL and must stay alive as long as the GrFace is alive.
      * @param getTable  The function graphite calls to access font table data
      * @param segCacheMaxSize   How large the segment cache is.
-     * @param canDumb   Do we allow dumb (non smart) rendering if the graphite tables will not load?
+     * @param faceOptions   Bitfield of values from enum gr_faceOptions
      */
+    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
 
     /** Convert a tag in a string into a gr_uint32
      *
@@ -142,16 +142,18 @@ extern "C"
      *
      * @return GrFace that accesses a font file directly. Returns NULL on failure.
      * @param filename Full path and filename to font file
+     * @param faceOptions Bitfile from enum gr_faceOptions to control face options.
      */
-    GRNG_EXPORT GrFace* gr_make_file_face(const char *filename);
+    GRNG_EXPORT GrFace* gr_make_file_face(const char *filename, unsigned int faceOptions);
 
     /** Create GrFace from a font file, with subsegment caching support.
      *
      * @return GrFace that accesses a font file directly. Returns NULL on failure.
      * @param filename Full path and filename to font file
      * @param segCacheMaxSize Specifies how big to make the cache in segments.
+     * @param faceOptions   Bitfield from enum gr_faceOptions to control face options.
      */
-    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize);
+    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize, unsigned int faceOptions);
 #endif      // !DISABLE_FILE_FACE
 
     /** Create a font from a face

@@ -34,7 +34,7 @@ public:
     GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_rtl(textDir),
         m_grFace((cache == 0)?
-            gr2::gr_make_file_face(fontFile /*, gr2::ePreloadWithCmap */):
+            gr2::gr_make_file_face(fontFile, gr2::gr_face_preloadGlyphs):
             gr2::gr_make_file_face_with_seg_cache(fontFile, cache,
                 gr2::gr_face_cacheCmap | gr2::gr_face_preloadGlyphs)),
         m_grFont(0)

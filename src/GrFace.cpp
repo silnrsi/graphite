@@ -289,13 +289,12 @@ extern "C"
 
 
 #ifndef DISABLE_FILE_FACE
-    GRNG_EXPORT GrFace* gr_make_file_face(const char *filename)   //returns NULL on failure. //TBD better error handling
-                      //when finished with, call destroy_face
+    GRNG_EXPORT GrFace* gr_make_file_face(const char *filename, unsigned int faceOptions)
     {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes =gr_make_face(pFileFace, &FileFace_table_fn, 0);
+          GrFace* pRes =gr_make_face(pFileFace, &FileFace_table_fn, faceOptions);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership
