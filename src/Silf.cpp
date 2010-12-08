@@ -54,7 +54,7 @@ void Silf::releaseBuffers() throw()
 }
 
 
-bool Silf::readGraphite(void *pSilf, size_t lSilf, uint32 version)
+bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
 {
     byte *p = (byte *)pSilf;
     byte *eSilf = p + lSilf;
@@ -196,7 +196,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, uint32 version)
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf));
+    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs + m_numPseudo);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -233,7 +233,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, uint32 version)
     return true;
 }
 
-size_t Silf::readClassMap(void *pClass, size_t lClass)
+size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
 {
     const byte *p = reinterpret_cast<const byte *>(pClass);
     m_nClass = read16(p);
