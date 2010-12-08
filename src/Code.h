@@ -85,7 +85,7 @@ private:
     void release_buffers() throw ();
     void failure(const status_t) throw();
     bool check_opcode(const opcode, const byte *, const byte *const);
-    void analyse_opcode(const opcode, size_t cp, const int8  * dp, size_t param_sz, analysis_context &) throw();
+    void analyse_opcode(const opcode, size_t cp, const int8  * dp, analysis_context &) throw();
     void update_slot_limits(int slotref) throw ();
 public:
     Code() throw();

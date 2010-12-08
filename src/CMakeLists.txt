@@ -100,7 +100,7 @@ set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
-     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
+     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden -fno-stack-protector)
     set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)
     target_link_libraries(graphiteng "-lc -lgcc")

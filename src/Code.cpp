@@ -36,6 +36,12 @@
 
 #include <cstdio>
 
+#ifdef DISABLE_TRACING
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+#endif
+
 using namespace org::sil::graphite::v2;
 using namespace vm;
 
@@ -111,7 +117,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         }
         
         // Analyise the opcode.
-        analyse_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), param_sz, ac);
+        analyse_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), ac);
         
         // Add this instruction
         *ip++ = op.impl[constrained]; 
@@ -259,8 +265,7 @@ void fixup_cntxt_item_target(const byte* cdp,
 } // end of namespace
 
 void Code::analyse_opcode(const opcode opc, size_t op_idx,
-                           const int8  * dp, size_t /*param_sz*/,
-                           analysis_context & ab) throw()
+                          const int8  * dp, analysis_context & ab) throw()
 {
   if (_constrained) return;
   

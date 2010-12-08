@@ -36,8 +36,14 @@
 #include "SlotImp.h"
 #include "Rule.h"
 
-#define registers           GR_UNUSED const byte * & dp, vm::Machine::stack_t * & sp, \
-                            vm::Machine::stack_t * const sb, GR_UNUSED regbank & reg
+// Disable the unused parameter warning as th compiler is mistaken since dp
+// is always updated (even if by 0) on every opcode.
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
+#define registers           const byte * & dp, vm::Machine::stack_t * & sp, \
+                            vm::Machine::stack_t * const sb, regbank & reg
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\

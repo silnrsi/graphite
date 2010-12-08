@@ -64,7 +64,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
     // Read in basic values
     m_immutable = (*p++) & 0x1U;
     m_iMaxLoop = *p++;
-    GR_UNUSED const byte nMaxContext = *p++;
+    *p++; // skip maxContext
     p += sizeof(byte);     // skip maxBackup
     m_numRules = read16(p);
     p += sizeof(uint16);   // not sure why we would want this

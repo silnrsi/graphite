@@ -54,7 +54,7 @@ void Silf::releaseBuffers() throw()
 }
 
 
-bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
+bool Silf::readGraphite(void *pSilf, size_t lSilf, uint32 version)
 {
     byte *p = (byte *)pSilf;
     byte *eSilf = p + lSilf;
@@ -196,7 +196,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs + m_numPseudo);
+    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf));
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -233,7 +233,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     return true;
 }
 
-size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
+size_t Silf::readClassMap(void *pClass, size_t lClass)
 {
     const byte *p = reinterpret_cast<const byte *>(pClass);
     m_nClass = read16(p);
@@ -369,9 +369,9 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     }
     else
     {
-        GR_UNUSED uint16 num = m_classData[loc];
+//        uint16 num = m_classData[loc];
         uint16 search = m_classData[loc + 1] << 1;
-        GR_UNUSED uint16 selector = m_classData[loc + 2];
+//        uint16 selector = m_classData[loc + 2];
         uint16 range = m_classData[loc + 3];
 
         uint16 curr = loc + 4 + range * 2;
