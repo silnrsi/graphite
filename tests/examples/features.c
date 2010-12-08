@@ -44,6 +44,7 @@ int main(int argc, char **argv)
             }
         }
     }
+    gr_featureval_destroy(features);
     gr_face_destroy(face);
     return 0;
 }

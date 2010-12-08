@@ -46,28 +46,75 @@ enum {
     gr_breakBeforeClip = -40
 };
 
+/** Used for looking up slot attributes. Most are already available in other functions **/
 enum gr_attrCode {
-    gr_slatAdvX = 0, gr_slatAdvY,
-    gr_slatAttTo,
-    gr_slatAttX, gr_slatAttY, gr_slatAttGpt,
-    gr_slatAttXOff, gr_slatAttYOff,
-    gr_slatAttWithX, gr_slatAttWithY, gr_slatWithGpt,
-    gr_slatAttWithXOff, gr_slatAttWithYOff,
-    gr_slatAttLevel,
-    gr_slatBreak,
-    gr_slatCompRef,
-    gr_slatDir,
-    gr_slatInsert,
-    gr_slatPosX, gr_slatPosY,
-    gr_slatShiftX, gr_slatShiftY,
-    gr_slatUserDefnV1,
-    gr_slatMeasureSol, gr_slatMeasureEol,
-    gr_slatJStretch, gr_slatJShrink, gr_slatJStep, gr_slatJWeight, gr_slatJWidth,
-    
+    /// adjusted glyph advance in x direction
+    gr_slatAdvX = 0,        
+    /// adjusted glyph advance in y direction (usually 0)
+    gr_slatAdvY,            
+    /// returns 0. Deprecated.
+    gr_slatAttTo,           
+    /// This slot attaches to its parent at the given design units in the x direction
+    gr_slatAttX,            
+    /// This slot attaches to its parent at the given design units in the y direction
+    gr_slatAttY,            
+    /// This slot attaches to its parent at the given glyph point (not implemented)
+    gr_slatAttGpt,          
+    /// x-direction adjustment from the given glyph point (not implemented)
+    gr_slatAttXOff,         
+    /// y-direction adjustment from the given glyph point (not implemented)
+    gr_slatAttYOff,         
+    /// Where on this glyph should align with the attachment point on the parent glyph in the x-direction.
+    gr_slatAttWithX,        
+    /// Where on this glyph should align with the attachment point on the parent glyph in the y-direction
+    gr_slatAttWithY,        
+    /// Which glyph point on this glyph should align with the attachment point on the parent glyph (not implemented).
+    gr_slatWithGpt,         
+    /// Adjustment to gr_slatWithGpt in x-direction (not implemented)
+    gr_slatAttWithXOff,     
+    /// Adjustment to gr_slatWithGpt in y-direction (not implemented)
+    gr_slatAttWithYOff,     
+    /// Attach at given nesting level (not implemented)
+    gr_slatAttLevel,        
+    /// Line break breakweight for this glyph
+    gr_slatBreak,           
+    /// Ligature component reference (not implemented)
+    gr_slatCompRef,         
+    /// bidi directionality of this glyph (not implemented)
+    gr_slatDir,             
+    /// Whether insertion is allowed before this glyph
+    gr_slatInsert,          
+    /// Final positioned position of this glyph relative to its parent in x-direction in pixels
+    gr_slatPosX,            
+    /// Final positioned position of this glyph relative to its parent in y-direction in pixels
+    gr_slatPosY,            
+    /// Amount to shift glyph by in x-direction design units
+    gr_slatShiftX,          
+    /// Amount to shift glyph by in y-direction design units
+    gr_slatShiftY,          
+    /// attribute user1
+    gr_slatUserDefnV1,      
+    /// not implemented
+    gr_slatMeasureSol,      
+    /// not implemented
+    gr_slatMeasureEol,      
+    /// Amount this slot can stretch (not implemented)
+    gr_slatJStretch,        
+    /// Amount this slot can shrink (not implemented)
+    gr_slatJShrink,         
+    /// Granularity by which this slot can stretch or shrink (not implemented)
+    gr_slatJStep,           
+    /// Justification weight for this glyph (not implemented)
+    gr_slatJWeight,         
+    /// Amount this slot mush shrink or stretch (not implemented)
+    gr_slatJWidth,          
+    /// User defined attribute, see subattr for user attr number
     gr_slatUserDefn = gr_slatJStretch + 30,
-    
-    gr_slatMax,
-    gr_slatNoEffect = gr_slatMax + 1
+                            
+    /// not implemented
+    gr_slatMax,             
+    /// not implemented
+    gr_slatNoEffect = gr_slatMax + 1    
 };
 
 
@@ -89,12 +136,12 @@ typedef struct GrSlot GrSlot;
      */
     GRNG_EXPORT int gr_cinfo_break_weight(const GrCharInfo* p/*not NULL*/);
 
-    /** Returns the number of unicode characters in a string
+    /** Returns the number of unicode characters in a string.
      *
      * @return number of characters in the string
      * @param enc Specifies the type of data in the string: utf8, utf16, utf32
-     * @param begin The start of the string
-     * @param end Measure up to the first nul or when end is reached, whichever is earliest.
+     * @param buffer_begin The start of the string
+     * @param buffer_end Measure up to the first nul or when end is reached, whichever is earliest.
      *            This parameter may be NULL.
      * @param pError If there is a structural fault in the string, the location is returned
      *               in this variable. If no error occurs, pError will contain NULL. NULL
@@ -102,7 +149,7 @@ typedef struct GrSlot GrSlot;
      */
     GRNG_EXPORT size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
 
-    /** Creates and returns a segment
+    /** Creates and returns a segment.
      *
      * @return a segment that needs seg_destroy called on it.
      * @param font Gives the size of the font in pixels per em for final positioning. If
@@ -111,7 +158,7 @@ typedef struct GrSlot GrSlot;
      * @param face The face containing all the non-size dependent information.
      * @param script This is a tag containing a script identifier that is used to choose
      *               which graphite table within the font to use. Maybe 0.
-     * @param pFests Pointer to a feature values to be used for the segment. Only one
+     * @param pFeats Pointer to a feature values to be used for the segment. Only one
      *               feature values may be used for a segment. If NULL the default features
      *               for the font will be used.
      * @param enc Specifies what encoding form the string is in (utf8, utf16, utf32)
@@ -122,43 +169,147 @@ typedef struct GrSlot GrSlot;
      */
     GRNG_EXPORT GrSegment* gr_make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const GrFeatureVal* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
-    /** Destroys a segment, freeing the memory
+    /** Destroys a segment, freeing the memory.
      *
      * @param p The segment to destroy
      */
     GRNG_EXPORT void gr_seg_destroy(GrSegment* p);
 
+    /** Returns the advance for the whole segment.
+     *
+     * Returns the width of the segment up to the next glyph origin after the segment
+     */
     GRNG_EXPORT float gr_seg_advance_X(const GrSegment* pSeg/*not NULL*/);
+
+    /** Returns the height advance for the segment. **/
     GRNG_EXPORT float gr_seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
+
+    /** Returns the number of GrCharInfos in the segment. **/
     GRNG_EXPORT unsigned int gr_seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
+
+    /** Returns a GrCharInfo at a given index in the segment. **/
     GRNG_EXPORT const GrCharInfo* gr_seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+
+    /** Returns the number of glyph GrSlots in the segment. **/
     GRNG_EXPORT unsigned int gr_seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
+
+    /** Returns the first GrSlot in the segment.
+     *
+     * The first slot in a segment has a gr_slot_prev_in_segment() of NULL. Slots are owned
+     * by their segment and are destroyed along with the segment.
+     */
     GRNG_EXPORT const GrSlot* gr_seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+
+    /** Returns the last GrSlot in the segment.
+     *
+     * The last slot in a segment has a gr_slot_next_in_segment() of NULL
+     */
     GRNG_EXPORT const GrSlot* gr_seg_last_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+    
+    /** Calculates the underlying character to glyph associations.
+     *
+     * @param pSeg  Pointer to the segment we want information on.
+     * @param begins An array of gr_seg_n_cinfo integers giving slot index for each
+     *               charinfo. The value corresponds to which slot a cursor would be before
+     *               if an underlying cursor were before the charinfo at this index.
+     * @param ends  An array of gr_seg_n_cinfo integers giving the slot index for each
+     *              charinfo. The value at an index corresponds to which slot a cursor would
+     *              be after if an underlying cursor were after the charinfo at the index.
+     * @param sbegins   An array of gr_seg_n_cinfo GrSlot * corresponding to the GrSlot at
+     *                  index given by begins. The pointer to the array may be NULL.
+     * @param sends An array of gr_seg_n_cinfo GrSlot * corresponding to the GrSlot at the
+     *              index given by ends. The pointer to the array may be NULL.
+     */
     GRNG_EXPORT void gr_seg_char_slots(const GrSegment *pSeg, gr_uint32 *begins, gr_uint32 *ends, GrSlot **sbegins, GrSlot **sends);
-    //slots are owned by their segment
-    GRNG_EXPORT const GrSlot* gr_slot_next_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const GrSlot* gr_slot_prev_in_segment(const GrSlot* p/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    GRNG_EXPORT const GrSlot* gr_slot_attached_to(const GrSlot* p/*not NULL*/);        //returns NULL iff base. If called repeatedly on result, will get to a base
+
+    /** Returns the next slot along in the segment.
+     *
+     * Slots are held in a linked list. This returns the next in the linked list. The slot
+     * may or may not be attached to another slot. Returns NULL at the end of the segment.
+     */
+    GRNG_EXPORT const GrSlot* gr_slot_next_in_segment(const GrSlot* p);
+
+    /** Returns the previous slot along in the segment.
+     *
+     * Slots are held in a doubly linked list. This returns the previos slot in the linked
+     * list. This slot may or may not be attached to it. Returns NULL at the start of the
+     * segment.
+     */
+    GRNG_EXPORT const GrSlot* gr_slot_prev_in_segment(const GrSlot* p);
+
+    /** Returns the attachment parent slot of this slot.
+     *
+     * Attached slots form a tree. This returns the parent of this slot in that tree. A
+     * base glyph which is not attached to another glyph, always returns NULL.
+     */
+    GRNG_EXPORT const GrSlot* gr_slot_attached_to(const GrSlot* p);
  
-    GRNG_EXPORT const GrSlot* gr_slot_first_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no attachments.
-        //if gr_slot_first_attachment(p) is not NULL, then gr_slot_attached_to(gr_slot_first_attachment(p))==p.
+    /** Returns the first slot attached to this slot.
+     *
+     * Attached slots form a singly linked list from the parent. This returns the first
+     * slot in that list. Note that this is a reference to another slot that is also in
+     * the main segment doubly linked list.
+     *
+     * if gr_slot_first_attachment(p) != NULL then gr_slot_attached_to(gr_slot_first_attachment(p)) == p.
+     */
+    GRNG_EXPORT const GrSlot* gr_slot_first_attachment(const GrSlot* p);
     
-    GRNG_EXPORT const GrSlot* gr_slot_next_sibling_attachment(const GrSlot* p/*not NULL*/);        //returns NULL iff no more attachments.
-        //if gr_slot_next_sibling_attachment(p) is not NULL, then gr_slot_attached_to(gr_slot_next_sibling_attachment(p))==gr_slot_attached_to(p).
+    /** Returns the next slot attached to our attachment parent.
+     *
+     * This returns the next slot in the singly linked list of slots attached to this
+     * slot's parent. If there are no more such slots, NULL is returned.
+     *
+     * if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
+     */
+    GRNG_EXPORT const GrSlot* gr_slot_next_sibling_attachment(const GrSlot* p);
     
     
-    GRNG_EXPORT unsigned short gr_slot_gid(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float gr_slot_origin_X(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float gr_slot_origin_Y(const GrSlot* p/*not NULL*/);
-    GRNG_EXPORT float gr_slot_advance(const GrSlot* p/*not NULL*/);
+    /** Returns glyph id of the slot
+     *
+     * Each slot has a glyphid which is rendered at the position given by the slot. This
+     * glyphid is the real glyph to be rendered and never a pseudo glyph.
+     */
+    GRNG_EXPORT unsigned short gr_slot_gid(const GrSlot* p);
+
+    /** Returns X offset of glyph from start of segment **/
+    GRNG_EXPORT float gr_slot_origin_X(const GrSlot* p);
+
+    /** Returns Y offset of glyph from start of segment **/
+    GRNG_EXPORT float gr_slot_origin_Y(const GrSlot* p);
+
+    /** Returns the glyph advance for this glyph as adjusted for kerning **/
+    GRNG_EXPORT float gr_slot_advance(const GrSlot* p);
+
+    /** Returns the GrCharInfo index before us
+     *
+     * Returns the index of the GrCharInfo that a cursor before this slot, would put
+     * an underlying cursor before.
+     */
     GRNG_EXPORT int gr_slot_before(const GrSlot* p/*not NULL*/);
+
+    /** Returns the GrCharInfo index after us
+     *
+     * Returns the index of the GrCharInfo that a cursor after this slot would put an
+     * underlying cursor after.
+     */
     GRNG_EXPORT int gr_slot_after(const GrSlot* p/*not NULL*/);
+
+    /** Return a slot attribute value
+     *
+     * Given a slot and an attribute along with a possible subattribute, return the
+     * corresponding value in the slot. See enum gr_attrCode for details of each attribute.
+     */
     GRNG_EXPORT int gr_slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
-     
-    GRNG_EXPORT int gr_slot_can_insert_before(const GrSlot* p/*not NULL*/);
+
+    /** Returns whether text may be inserted before this glyph [check this isn't inverted] **/
+    GRNG_EXPORT int gr_slot_can_insert_before(const GrSlot* p);
+
+    /** Returns the original GrCharInfo index this slot refers to.
+     *
+     * Each Slot has a GrCharInfo that it originates from. This is that GrCharInfo. This
+     * information is useful for testing.
+     */
     GRNG_EXPORT int gr_slot_original(const GrSlot* p/*not NULL*/);
-//  GRNG_EXPORT size_t id(const GrSlot* p/*not NULL*/);
   
 
 #ifdef __cplusplus

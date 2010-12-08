@@ -1,4 +1,4 @@
-== Calling GraphiteNG ==
+== Calling Graphite2 ==
 
 === Introduction ===
 The basic model for running graphite is to pass text, font and face information
@@ -19,7 +19,7 @@ include::../tests/examples/simple.c[]
     hinted advances, but this is done via a callback function.
 
 <3> For simplification of memory allocation, graphite works on characters (Unicode
-    codepoints) rather than bytes or uint16s, etc. We need to calculate the number of
+    codepoints) rather than bytes or gr_uint16s, etc. We need to calculate the number of
     characters in the input string (the second parameter to the program). Very often
     applications already know this. If there is an error in the utf-8, the pError variable
     will point to it and we just exit. But it is possible to render up to that point.
@@ -35,7 +35,8 @@ include::../tests/examples/simple.c[]
 
 Source for this program may be found in tests/examples/simple.c
 
-Assuming that graphiteng has been built and installed, this example can be built and run on linux using:
+Assuming that graphite2 has been built and installed, this example can be
+built and run on linux using:
 
 ----
 gcc -o simple -lgraphiteng simple.c
@@ -48,14 +49,54 @@ Running simple gives the results:
 43(0.000000,0.000000) 72(9.859375,0.000000) 79(17.609375,0.000000) 79(20.796875,0.000000) 82(23.984375,0.000000) 3(32.203125,0.000000) 58(38.109375,0.000000) 82(51.625000,0.000000) 85(59.843750,0.000000) 79(64.875000,0.000000) 71(68.062500,0.000000) 4(76.281250,0.000000)
 ----
 
-Not very pretty, but reassuring! Graphite isn't a graphical rendering engine, it merely calculates which glyphs should render where and leaves the actual process of displaying those glyphs to other libraries.
+Not very pretty, but reassuring! Graphite isn't a graphical rendering engine,
+it merely calculates which glyphs should render where and leaves the actual
+process of displaying those glyphs to other libraries.
+
+=== Slots ===
+
+The primary contents of a segment is slots. These slots are organised into a
+doubly linked list and each corresponds to a glyph to be rendered. The linked
+list is terminated at each end by a NULL. There are also functions to get the
+first and last slot in a segment.
+
+In addition to the main slot list, slots may be attached to each other. This
+means that two glyphs have been attached to each other in the GDL. Again,
+attached slots are held in a separate singly linked list associated with the
+slot to which they attach. Thus slots will be in the main linked list and may
+be in an attachment linked list. Each slot in an attachment linked list has the
+same attachment parent accessed via `gr_slot_attached_to()`. To get the start of
+the linked list of all the slots directly attached to a parent, one calls
+`gr_slot_first_attachment()` and then `gr_slot_next_attachment()` to walk forwards
+through that linked list. Given that a diacritic may attach to another
+diacritic, an attached slot may in its turn have a linked list of attached
+slots. In all cases, linked lists terminate with a NULL.
+
+The core information held by a slot is the glyph id of the glyph the slot
+corresponds to (`gr_slot_gid()`); the position relative to the start of the
+segment that the glyph is to be rendered at (`gr_slot_origin_X()` and
+`gr_slot_origin_Y()`); the advance for the glyph which corresponds to the glyph
+metric advance as adjusted by kerning. In addition a slot indicates whether the
+font designer wants to allow a cursor to be placed before this glyph or not.
+This information is accessible via `gr_slot_can_insert_before()`.
+
+=== CharInfo ===
+
+Describe charinfos here.
 
 === Caching ===
 
-Graphite2 has the capability to make use of a subsegmental cache. What this does is to chop each run of characters at a word break, as defined by the linebreaking pass. Each sub run is then looked up in the cache rather than calculating the values from scratch.
-The cache is most effective when similar runs of text are processed. For raw benchmark testing against wordlists, the cache can be slightly slower than uncached processing. But most people use real text in their documents and that has a much higher level of redundancy.
+Graphite2 has the capability to make use of a subsegmental cache. What this
+does is to chop each run of characters at a word break, as defined by the
+linebreaking pass. Each sub run is then looked up in the cache rather than
+calculating the values from scratch.  The cache is most effective when similar
+runs of text are processed. For raw benchmark testing against wordlists, the
+cache can be slightly slower than uncached processing. But most people use real
+text in their documents and that has a much higher level of redundancy.
 
-To use the cache, one simply creates a cached face, specifying the size of the cache in elements. A cache size of 5,000 to 10,000 has produced a good compromise between time and space.
+To use the cache, one simply creates a cached face, specifying the size of the
+cache in elements. A cache size of 5,000 to 10,000 has produced a good
+compromise between time and space.
 
 In the example above, point 1 becomes:
 
