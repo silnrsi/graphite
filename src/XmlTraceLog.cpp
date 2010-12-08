@@ -224,7 +224,7 @@ bool graphite_start_logging(GR_UNUSED FILE * logFile, GR_UNUSED GrLogMask mask)
     {
         delete XmlTraceLog::sLog;
     }
-    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphiteng", mask);
+    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphite2", mask);
     return (XmlTraceLog::sLog != NULL);
 #endif		//!DISABLE_TRACING
 }

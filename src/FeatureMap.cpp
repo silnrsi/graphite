@@ -24,7 +24,7 @@
 #include "Main.h"
 #include "FeatureMap.h"
 #include "FeaturesImp.h"
-#include "graphiteng/Font.h"
+#include "graphite2/Font.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
 #include <algorithm>

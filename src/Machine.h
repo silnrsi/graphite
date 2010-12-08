@@ -26,7 +26,7 @@
 // interface.
 
 #pragma once
-#include <graphiteng/Types.h>
+#include <graphite2/Types.h>
 #include "Main.h"
 
 #if defined(__GNUC__)

@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <cstdlib>
-#include "graphiteng/Segment.h"
+#include "graphite2/Segment.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "GrSegmentImp.h"

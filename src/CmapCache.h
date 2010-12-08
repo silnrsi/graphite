@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <graphiteng/Types.h>
+#include <graphite2/Types.h>
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

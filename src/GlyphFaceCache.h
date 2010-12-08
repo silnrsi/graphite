@@ -22,7 +22,7 @@
 #pragma once
 
 #include "GlyphFace.h"
-#include "graphiteng/Font.h"
+#include "graphite2/Font.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 

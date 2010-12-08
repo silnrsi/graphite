@@ -26,7 +26,7 @@
 #include "Silf.h"
 #include "TtfUtil.h"
 #include "Main.h"
-#include "graphiteng/Font.h"
+#include "graphite2/Font.h"
 #include "FeatureMap.h"
 #include "GlyphFaceCache.h"
 

@@ -21,8 +21,8 @@
 */
 #pragma once
 
-#include "graphiteng/Types.h"
-#include "graphiteng/Font.h"
+#include "graphite2/Types.h"
+#include "graphite2/Font.h"
 
 #ifdef __cplusplus
 namespace org { namespace sil { namespace graphite { namespace v2 {

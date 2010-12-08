@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <graphiteng/Segment.h>
+#include <graphite2/Segment.h>
 #include "Main.h"
 #include "SlotImp.h"
 #include "FeaturesImp.h"

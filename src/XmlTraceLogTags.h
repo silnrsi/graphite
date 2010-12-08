@@ -21,8 +21,8 @@
 */
 #pragma once
 #include "Main.h"
-#include <graphiteng/Types.h>
-#include <graphiteng/XmlLog.h>
+#include <graphite2/Types.h>
+#include <graphite2/XmlLog.h>
 
 #ifdef ENABLE_DEEP_TRACING
 #undef DISABLE_TRACING

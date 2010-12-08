@@ -22,7 +22,7 @@
 #pragma once
 
 #include <cstdlib>
-#include "graphiteng/Types.h"
+#include "graphite2/Types.h"
 
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
 

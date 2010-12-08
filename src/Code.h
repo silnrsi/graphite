@@ -27,7 +27,7 @@
 #pragma once
 
 #include <utility>
-#include <graphiteng/Types.h>
+#include <graphite2/Types.h>
 #include "Main.h"
 #include "Machine.h"
 

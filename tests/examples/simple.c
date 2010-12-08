@@ -1,5 +1,5 @@
 
-#include <graphiteng/Segment.h>
+#include <graphite2/Segment.h>
 #include <stdio.h>
 
 /* usage: ./simple fontfile.ttf string */

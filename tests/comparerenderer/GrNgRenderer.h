@@ -23,8 +23,8 @@
 
 #include <new>
 #include "Renderer.h"
-#include <graphiteng/Types.h>
-#include <graphiteng/Segment.h>
+#include <graphite2/Types.h>
+#include <graphite2/Segment.h>
 
 namespace gr2 = org::sil::graphite::v2;
 

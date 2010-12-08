@@ -23,9 +23,9 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <cstring>
 #include <iconv.h>
 
-#include "graphiteng/Types.h"
-#include "graphiteng/Segment.h"
-#include "graphiteng/XmlLog.h"
+#include "graphite2/Types.h"
+#include "graphite2/Segment.h"
+#include "graphite2/XmlLog.h"
 
 namespace gr2 = org::sil::graphite::v2;
 

@@ -27,7 +27,7 @@
 #include "NameTable.h"
 #include "SegCacheStore.h"
 #include "XmlTraceLog.h"
-#include <graphiteng/Segment.h>
+#include <graphite2/Segment.h>
 
 using namespace org::sil::graphite::v2;
 

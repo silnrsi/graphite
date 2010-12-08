@@ -20,12 +20,12 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
-project(graphiteng_core)
+project(graphite2_core)
 cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckCXXSourceCompiles)
 
-set(GRAPHITE_API_MAJOR 3)
+set(GRAPHITE_API_MAJOR 0)
 set(GRAPHITE_API_MINOR 0)
 set(GRAPHITE_API_PATCH 0)
 set(GRAPHITE_SO_VERSION ${GRAPHITE_API_MAJOR}.${GRAPHITE_API_MINOR}.${GRAPHITE_API_PATCH})
@@ -48,22 +48,22 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
 if (NOT DISABLE_TRACING)
     message(STATUS "Tracing enabled")
-    set(TRACE_HEADERS ../include/graphiteng/XmlLog.h)
+    set(TRACE_HEADERS ../include/graphite2/XmlLog.h)
     if (ENABLE_DEEP_TRACING)
         add_definitions(-DENABLE_DEEP_TRACING)
     endif (ENABLE_DEEP_TRACING)
 endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
-    ../include/graphiteng/Font.h
-    ../include/graphiteng/Segment.h
-    ../include/graphiteng/Types.h
+    ../include/graphite2/Font.h
+    ../include/graphite2/Segment.h
+    ../include/graphite2/Types.h
     ${TRACE_HEADERS}
     )
 
 file(GLOB PRIVATE_HEADERS *.h) 
 
-add_library(graphiteng SHARED
+add_library(graphite2 SHARED
     ${VM_MACHINE_TYPE}_machine.cpp
     CharInfo.cpp
     CmapCache.cpp
@@ -102,10 +102,10 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor
      -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden -fno-stack-protector)
-    set_target_properties(graphiteng PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)
-    target_link_libraries(graphiteng "-lc -lgcc")
+    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)
+    target_link_libraries(graphite2 "-lc -lgcc")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphiteng>)
+    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -113,9 +113,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 
-set_target_properties(graphiteng PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
+set_target_properties(graphite2 PROPERTIES PUBLIC_HEADER "${GRAPHITE_HEADERS}")
 
-set_target_properties(graphiteng PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
-install(TARGETS graphiteng EXPORT graphiteng LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphiteng)
-install(EXPORT graphiteng DESTINATION share/graphiteng NAMESPACE gr_)
+set_target_properties(graphite2 PROPERTIES SOVERSION ${GRAPHITE_SO_VERSION})
+install(TARGETS graphite2 EXPORT graphite2 LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphite2)
+install(EXPORT graphite2 DESTINATION share/graphite2 NAMESPACE gr2_)
 

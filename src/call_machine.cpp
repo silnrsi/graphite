@@ -29,7 +29,7 @@
 
 #include <cassert>
 #include <cstring>
-#include <graphiteng/Segment.h>
+#include <graphite2/Segment.h>
 #include "Machine.h"
 #include "GrSegmentImp.h"
 #include "XmlTraceLog.h"

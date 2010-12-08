@@ -32,8 +32,8 @@ endif (NOT DISABLE_TRACING)
 
 add_executable(grngfonttest grngFontTest.cpp)
 
-target_link_libraries(grngfonttest graphiteng)
-add_dependencies(grngfonttest graphiteng)
+target_link_libraries(grngfonttest graphite2)
+add_dependencies(grngfonttest graphite2)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
@@ -56,7 +56,7 @@ endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
 add_custom_target(copy_dll ALL 
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphiteng${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")

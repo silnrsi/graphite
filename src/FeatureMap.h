@@ -21,8 +21,8 @@
 */
 #pragma once
 #include <cstring>
-#include "graphiteng/Types.h"
-#include "graphiteng/Font.h"
+#include "graphite2/Types.h"
+#include "graphite2/Font.h"
 #include "Main.h"
 #include "FeaturesImp.h"
 //#include <map> // avoid libstdc++

@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <cassert>
-#include "graphiteng/Segment.h"
+#include "graphite2/Segment.h"
 #include "CharInfoImp.h"
 
 using namespace org::sil::graphite::v2;

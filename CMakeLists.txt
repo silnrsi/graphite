@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
-project(graphiteng)
+project(graphite2)
 enable_language(CXX C)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -61,11 +61,11 @@ add_subdirectory(src)
 add_subdirectory(grngfonttest)
 add_subdirectory(tests)
 add_subdirectory(doc)
-set(version 3.0.0)
+set(version 0.0.0)
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
-configure_file(graphite.pc.in graphite.pc)
+configure_file(graphite2.pc.in graphite2.pc)
 
 install(FILES ${PROJECT_BINARY_DIR}/graphite.pc DESTINATION lib/pkgconfig)
 

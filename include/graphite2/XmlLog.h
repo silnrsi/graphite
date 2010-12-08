@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <graphiteng/Types.h>
+#include <graphite2/Types.h>
 
 #ifdef __cplusplus
 #include <cstdio>

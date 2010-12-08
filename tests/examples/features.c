@@ -1,5 +1,5 @@
 
-#include <graphiteng/Font.h>
+#include <graphite2/Font.h>
 #include <stdio.h>
 
 int main(int argc, char **argv)

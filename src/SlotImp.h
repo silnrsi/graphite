@@ -21,8 +21,8 @@
 */
 #pragma once
 
-#include "graphiteng/Types.h"
-#include "graphiteng/Segment.h"
+#include "graphite2/Types.h"
+#include "graphite2/Segment.h"
 #include "Main.h"
 #include "GrFontImp.h"
 
