@@ -23,7 +23,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <graphiteng/Types.h>
+#include <graphite2/Types.h>
 #include "Main.h"
 #include "TtfTypes.h"
 #include "NameTable.h"
