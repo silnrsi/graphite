@@ -46,7 +46,7 @@ public:
     Silf() throw();
     ~Silf() throw();
     
-    bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
+    bool readGraphite(void *pSilf, size_t lSilf, uint32 version);
     void runGraphite(GrSegment *seg, uint8 firstPass=0, uint8 lastPass=0) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
@@ -63,7 +63,7 @@ public:
     CLASS_NEW_DELETE
 
 private:
-    size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
+    size_t readClassMap(void *pClass, size_t lClass);
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;

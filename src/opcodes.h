@@ -196,17 +196,13 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-/*    if (is == NULL && map == smap.begin())
-        is = seg.first();
-    else*/
-        if (is) is = is->next();
-/*    if (map[1] == is)*/
-        ++map;
+    if (is) is = is->next();
+    ++map;
 ENDOP
 
 STARTOP(next_n)
-    declare_params(1);
-    GR_UNUSED const size_t    num = uint8(*param);
+//    declare_params(1);
+//    const size_t    num = uint8(*param);
     NOT_IMPLEMENTED;
 ENDOP
 
@@ -463,7 +459,7 @@ STARTOP(push_islot_attr)
     push(res);
 ENDOP
 
-#ifndef DIRECT_MACHINE
+#if 0
 STARTOP(push_iglyph_attr) // not implemented
     NOT_IMPLEMENTED;
 ENDOP
@@ -520,7 +516,9 @@ ENDOP
 
 STARTOP(push_proc_state)
     declare_params(1);
-    GR_UNUSED const unsigned int  pstate = uint8(*param);
+    unsigned int  pstate = uint8(*param);
+    pstate = 0;     // This is here to stop the compiler bleating about unused 
+                    // variables.
     // TODO; Implement body
     push(1);
 ENDOP
@@ -540,7 +538,7 @@ STARTOP(put_subs)
     is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
-#ifndef DIRECT_MACHINE
+#if 0
 STARTOP(put_subs2) // not implemented
     NOT_IMPLEMENTED;
 ENDOP

@@ -43,7 +43,6 @@
 #define STARTOP(name)           name: {
 #define ENDOP                   }; goto *((sp - sb)/Machine::STACK_MAX ? &&end : *++ip);
 #define EXIT(status)            push(status); goto end
-#define DIRECT_MACHINE 1
 
 #define do_(name)               &&name
 
