@@ -21,7 +21,7 @@ endif(A2X)
 
 if(DOXYGEN AND LATEX)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/doxygen/latex/refman.pdf
-                        DEPENDS ${PROJECT_SOURCE_DIR}/../include/graphiteng/*.h
+                        DEPENDS ${PROJECT_SOURCE_DIR}/../include/graphite2/*.h
                         MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/${DOXYGEN_CONFIG}.cfg
                         COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/${DOXYGEN_CONFIG}.cfg
                         COMMAND make -C ${PROJECT_BINARY_DIR}/doxygen/latex)
