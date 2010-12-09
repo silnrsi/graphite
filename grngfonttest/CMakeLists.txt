@@ -56,7 +56,7 @@ endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that grngfonttest can find it
 add_custom_target(copy_dll ALL 
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
@@ -65,7 +65,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     endif (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-add_dependencies(copy_dll graphiteng iconv grngfonttest)
+add_dependencies(copy_dll graphite2 iconv grngfonttest)
 
 # TODO need to set ENVIRONMENT property for Windows?
 # add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.xml -codes 1000 1031 102C)
