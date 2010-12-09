@@ -244,7 +244,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     }
 }
 
-int main(int argc, char ** argv)
+int main(int /*argc*/, char ** /*argv*/)
 {
     testFeatTable<FeatTableTestA>(testDataA, "A\n");
     testFeatTable<FeatTableTestB>(testDataB, "B\n");
