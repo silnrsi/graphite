@@ -28,15 +28,19 @@ GrFont::GrFont(float ppm, const GrFace *face/*needed for scaling*/) :
 {
     size_t nGlyphs=face->numGlyphs();
     m_advances = gralloc<float>(nGlyphs);
-    float *advp = m_advances;
-    for (size_t i = 0; i < nGlyphs; i++)
-    { *advp++ = INVALID_ADVANCE; }
+    if (m_advances)
+    {
+        float *advp = m_advances;
+        for (size_t i = 0; i < nGlyphs; i++)
+        { *advp++ = INVALID_ADVANCE; }
+    }
 }
 
 
 /*virtual*/ GrFont::~GrFont()
 {
-    free(m_advances);
+    if (m_advances)
+        free(m_advances);
 }
 
 

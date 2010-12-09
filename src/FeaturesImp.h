@@ -46,7 +46,7 @@ public:
       : m_length(num), m_vec(gralloc<uint32>(num)), m_pMap(pMap) {}
     GrFeatureVal() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
     GrFeatureVal(const GrFeatureVal & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
-    ~GrFeatureVal() { free(m_vec); }
+    ~GrFeatureVal() { if (m_vec) free(m_vec); }
     GrFeatureVal & operator=(const GrFeatureVal & rhs) {
         m_pMap = rhs.m_pMap;
         if (m_length != rhs.m_length) {
