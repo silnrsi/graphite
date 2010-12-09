@@ -12,3 +12,29 @@ For graphiteng classes, we declare our own new() methods and friends, allowing
 the use of C++ new() and all that it gives us in terms of constructors. For
 types that are not classes we use malloc() or the type safe version gralloc().+++
 
+=== Missing Features ===
+
+There are various facilities that silgraphite provides that graphite2 as yet does not. The primary motivation in developing graphite2 is that it be use case driven. Thus only those facilities that have a proven use case in the target applications into which graphite is to be integrated will be implemented.
+
+Bidi::
+    Graphite2 expects each text segment to be at the same bidi level with the direction passed
+    as a parameter. Silgraphite does a full bidi processing pass as part of the
+    processing. This has the advantage of allowing per glyph bidi attribution,
+    for example for PUA characters. But since most applications run the bidi
+    processing algorithm before they pass runs to graphite, that facility of
+    silgraphite was rarely available. Graphite2 does not preclude adding a bidi
+    pass should a clear use case become evident and we can find a way to use the
+    per glyph directionality knowledge.
+
+Justification::
+    Silgraphite has the ability to handle complex justification. This is not
+    part of graphite2 yet. But then neither were any external applications making use
+    of this facility within silgraphite.
+
+SegmentPainter::
+    Silgraphite provides a helper class to do range selection, cursor hitting and
+    support text editing within a segment. These facilities were not being used in
+    applications. Graphite2 does not preclude the addition of such a helper class
+    if it would be of help to different applications, since it would be layered
+    on top of graphite2.
+

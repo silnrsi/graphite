@@ -120,10 +120,7 @@ void GrSegment::append(const GrSegment &other)
     m_charinfo = pNewCharInfo;
     pNewCharInfo += m_numCharinfo ;
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
-    {
-	pNewCharInfo[i] = other.m_charinfo[i];
-	pNewCharInfo[i].update(m_numCharinfo);
-    }
+        pNewCharInfo[i] = other.m_charinfo[i];
  
     m_numCharinfo += other.m_numCharinfo;
     m_numGlyphs += other.m_numGlyphs;
@@ -135,7 +132,7 @@ void GrSegment::appendSlot(int id, int cid, int gid, int iFeats)
 {
     Slot *aSlot = newSlot();
     
-    m_charinfo[id].init(cid, id);
+    m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
     const GlyphFace * theGlyph = m_face->getGlyphFaceCache()->glyphSafe(gid);
     if (theGlyph)
