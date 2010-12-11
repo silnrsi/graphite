@@ -942,7 +942,11 @@ bool CheckCmap31Subtable(const void * pCmap31)
     if (length < sizeof(Sfnt::CmapSubTableFormat4))
         return false;
     uint16 nRanges = read(pTable4->seg_count_x2) >> 1;
-    return (length >= sizeof(Sfnt::CmapSubTableFormat4) + 4 * nRanges * sizeof(uint16));
+    if (length < sizeof(Sfnt::CmapSubTableFormat4) + 4 * nRanges * sizeof(uint16))
+        return false;
+    // check last range is properly terminated
+    uint16 chEnd = read(pTable4->end_code[nRanges-1]);
+    return (chEnd == 0xFFFF);
 }
 
 /*----------------------------------------------------------------------------------------------

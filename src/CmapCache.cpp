@@ -34,6 +34,7 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
     m_isBmpOnly = (!table310);
     int rangeKey = 0;
     unsigned int codePoint = 0;
+    unsigned int prevCodePoint = 0;
     if (table310 && TtfUtil::CheckCmap310Subtable(table310))
     {
         m_blocks = grzeroalloc<uint16*>(0x1100);
@@ -49,6 +50,10 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
                     return;
             }
             m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap310Lookup(table310, codePoint, rangeKey);
+            // prevent infinite loop
+            if (codePoint <= prevCodePoint)
+                codePoint = prevCodePoint + 1;
+            prevCodePoint = codePoint;
             codePoint =  TtfUtil::Cmap310NextCodepoint(table310, codePoint, &rangeKey);
         }
     }
@@ -72,6 +77,10 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
                     return;
             }
             m_blocks[block][codePoint & 0xFF] = TtfUtil::Cmap31Lookup(table31, codePoint, rangeKey);
+            // prevent infinite loop
+            if (codePoint <= prevCodePoint)
+                codePoint = prevCodePoint + 1;
+            prevCodePoint = codePoint;
             codePoint =  TtfUtil::Cmap31NextCodepoint(table31, codePoint, &rangeKey);
         }
     }
