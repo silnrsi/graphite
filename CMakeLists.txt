@@ -67,5 +67,5 @@ set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
 configure_file(graphite2.pc.in graphite2.pc)
 
-install(FILES ${PROJECT_BINARY_DIR}/graphite.pc DESTINATION lib/pkgconfig)
+install(FILES ${PROJECT_BINARY_DIR}/graphite2.pc DESTINATION lib/pkgconfig)
 
