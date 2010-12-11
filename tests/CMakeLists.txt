@@ -41,6 +41,7 @@ fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')
+fonttest(charis4 charis_r_gr.ttf 006b 0361 070)
 
 macro(feattest TESTNAME FONTFILE)
     if (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.log)

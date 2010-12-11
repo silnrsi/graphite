@@ -125,7 +125,7 @@ public:
     }
     float glyphAdvance(uint16 gid) const { return m_face->getAdvance(gid, 1.0); }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
-    Slot *findRoot(Slot *is) const { return is->attachTo() ? is : findRoot(is->attachTo()); }
+    Slot *findRoot(Slot *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
     int numAttrs() { return m_silf->numUser(); }
     void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot,
                 const Slot * firstSpliceSlot, size_t numGlyphs);
