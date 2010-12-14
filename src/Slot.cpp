@@ -88,29 +88,34 @@ GRNG_EXPORT float gr_slot_advance(const GrSlot* p/*not NULL*/)
 
 GRNG_EXPORT int gr_slot_before(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->before();
 }
 
 
 GRNG_EXPORT int gr_slot_after(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->after();
 }
 
 GRNG_EXPORT int gr_slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, attrCode index, uint8 subindex)
 {
+    assert(p);
     return p->getAttr(pSeg, index, subindex);
 }
 
 
-GRNG_EXPORT bool gr_slot_can_insert_before(const GrSlot* p/*not NULL*/)
+GRNG_EXPORT int gr_slot_can_insert_before(const GrSlot* p/*not NULL*/)
 {
-    return p->isInsertBefore();
+    assert(p);
+    return (p->isInsertBefore())? 1 : 0;
 }
 
 
 GRNG_EXPORT int gr_slot_original(const GrSlot* p/*not NULL*/)
 {
+    assert(p);
     return p->original();
 }
 
