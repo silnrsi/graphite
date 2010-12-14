@@ -93,9 +93,9 @@ private:
     GrSlot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
-    uint m_original;	    // charinfo that originated this slot (e.g. for feature values)
-    uint m_before;           // charinfo index of before association
-    uint m_after;            // charinfo index of after association
+    uint32 m_original;	    // charinfo that originated this slot (e.g. for feature values)
+    uint32 m_before;           // charinfo index of before association
+    uint32 m_after;            // charinfo index of after association
     GrSlot *m_parent;         // index to parent we are attached to
     GrSlot *m_child;          // index to first child slot that attaches to us
     GrSlot *m_sibling;        // index to next child that attaches to our parent

@@ -313,7 +313,7 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
 void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const
 {
     Slot *s;
-    uint i;
+    uint32 i;
     if (!begins || !ends) return;
     std::fill_n(begins, m_numCharinfo, m_numGlyphs);
     std::fill_n(ends, m_numCharinfo, 0);
@@ -501,7 +501,7 @@ void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not b
     }
 }
 
-void GrSegment::prepare_pos(const GrFont */*font*/)
+void GrSegment::prepare_pos(const GrFont * /*font*/)
 {
     // copy key changeable metrics into slot (if any);
 }
