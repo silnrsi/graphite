@@ -49,6 +49,9 @@
 #include "HbNgRenderer.h"
 #endif
 
+#ifdef HAVE_USP10
+#include "UniscribeRenderer.h"
+#endif
 
 const size_t NUM_RENDERERS = 3;
 

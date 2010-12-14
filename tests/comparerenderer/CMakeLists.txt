@@ -23,20 +23,29 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-include_directories(../common ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
+include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
+
+file(GLOB PRIVATE_HEADERS *.h) 
+set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 add_executable(comparerenderer
     CompareRenderer.cpp
     ${GR_EXTRA_SOURCE}
+    ${PRIVATE_HEADERS}
     )
 
 # rt is for timing
 target_link_libraries(comparerenderer graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	find_file(USP10_H NAMES Usp10.h)
+	find_library(USP10_LIB NAMES Usp10.lib)
+	if (NOT ${USP10_H} STREQUAL "USP10_H_NOTFOUND")
+		add_definitions(-DHAVE_USP10)
+	endif (NOT ${USP10_H} STREQUAL "USP10_H_NOTFOUND")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_custom_target(cr_copy_dll ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphiteng_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(cr_copy_dll graphite2 iconv comparerenderer)
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
