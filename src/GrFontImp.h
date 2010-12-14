@@ -29,7 +29,7 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
-class GrFont
+struct GrFont
 {
 public:
     GrFont(float ppm, const GrFace *face/*needed for scaling*/);

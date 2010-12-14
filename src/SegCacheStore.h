@@ -28,7 +28,7 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class SegCache;
-class GrFace;
+struct GrFace;
 
 class SilfSegCache
 {

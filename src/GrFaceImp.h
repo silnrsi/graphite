@@ -111,7 +111,7 @@ private:        //defensive
 
 const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
 
-class GrFace
+struct GrFace
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
@@ -133,7 +133,7 @@ public:
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_pGlyphFaceCache->glyphAttr(gid, gattr); }
 
 private:
-    friend class GrFont;
+    friend struct GrFont;
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:

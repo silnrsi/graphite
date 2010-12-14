@@ -28,9 +28,9 @@
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct GrFeatureRef;
-class FeatureMap;
+struct FeatureMap;
 
-class GrFeatureVal
+struct GrFeatureVal
 {
 public:
     uint32 maskedOr(const GrFeatureVal &other, const GrFeatureVal &mask) {
@@ -94,7 +94,7 @@ public:
 //    }
     CLASS_NEW_DELETE
 private:
-    friend class GrFeatureRef;		//so that FeatureRefs can manipulate m_vec directly
+    friend struct GrFeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
     const FeatureMap* m_pMap;

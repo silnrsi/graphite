@@ -73,7 +73,7 @@ typedef enum {
 class SegmentScopeState
 {
 private:
-    friend class GrSegment;
+    friend struct GrSegment;
     Slot * realFirstSlot;
     Slot * slotBeforeScope;
     Slot * slotAfterScope;
@@ -81,7 +81,7 @@ private:
     size_t numGlyphsOutsideScope;
 };
 
-class GrSegment
+struct GrSegment
 {
 public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph

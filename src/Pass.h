@@ -26,8 +26,8 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrSegment;
-class GrFace;
+struct GrSegment; // from C interface
+struct GrFace; // from C interface
 class Silf;
 struct Rule;
 struct RuleEntry;

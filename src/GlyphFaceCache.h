@@ -38,7 +38,7 @@ public:
     unsigned short numAttrs() const { return m_numAttrs; }
 
 private:
-friend class GrFace;
+friend struct GrFace;
 friend class GlyphFace;
     const void* m_pGloc;
     size_t m_lLoca;     const void* m_pLoca;

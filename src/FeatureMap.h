@@ -41,7 +41,7 @@ private:
     int16 m_value;
 };
 
-class GrFeatureRef
+struct GrFeatureRef
 {
 public:
     GrFeatureRef() :
@@ -129,7 +129,7 @@ class NameAndFeatureRef
     const GrFeatureRef* m_pFRef;
 };
 
-class FeatureMap
+struct FeatureMap
 {
 public:
     FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL),
@@ -182,7 +182,7 @@ public:
 
     const FeatureMap & theFeatureMap() const { return m_FeatureMap; };
 private:
-friend class GrFace;
+friend struct GrFace;
     FeatureMap m_FeatureMap;        //of face
     LangFeaturePair * m_langFeats;
     uint16 m_numLanguages;

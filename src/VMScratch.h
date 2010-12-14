@@ -25,7 +25,7 @@
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
-class GrSlot;
+struct GrSlot;
 
 #define VMS_MAX_RULES_PER_SEQUENCE 64
 
