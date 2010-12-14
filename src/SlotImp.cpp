@@ -114,7 +114,7 @@ Position GrSlot::finalise(const GrSegment *seg, const GrFont *font, Position *ba
     if (glyphFace)
     {
         Rect ourBbox = glyphFace->theBBox() * scale + m_position;
-        bbox->widen(ourBbox);
+        *bbox = bbox->widen(ourBbox);
     }
     //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
     //bbox->widen(ourBbox);
@@ -146,7 +146,7 @@ Position GrSlot::finalise(const GrSegment *seg, const GrFont *font, Position *ba
 uint32 GrSlot::clusterMetric(const GrSegment *seg, uint8 metric, uint8 attrLevel)
 {
     Position base;
-    Rect bbox;
+    Rect bbox = seg->theGlyphBBoxTemporary(gid());
     float cMin = 0.;
     Position res = finalise(seg, NULL, &base, &bbox, &cMin, attrLevel);
 

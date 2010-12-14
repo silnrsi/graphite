@@ -95,23 +95,23 @@ ENDOP
 
 STARTOP(push_short)
     declare_params(2);
-    const int16 r   = int8(param[0]) << 8 
-                    | int8(param[1]);
+    const int16 r   = int16(param[0]) << 8 
+                    | uint8(param[1]);
     push(r);
 ENDOP
 
 STARTOP(push_short_u)
     declare_params(2);
-    const uint16 r  = uint8(param[0]) << 8
+    const uint16 r  = uint16(param[0]) << 8
                     | uint8(param[1]);
     push(r);
 ENDOP
 
 STARTOP(push_long)
     declare_params(4);
-    const  int32 r  = uint8(param[0]) << 24
-                    | uint8(param[1]) << 16
-                    | uint8(param[2]) << 8
+    const  int32 r  = int32(param[0]) << 24
+                    | uint32(param[1]) << 16
+                    | uint32(param[2]) << 8
                     | uint8(param[3]);
     push(r);
 ENDOP

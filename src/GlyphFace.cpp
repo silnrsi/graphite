@@ -41,7 +41,8 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
                 m_advance = Position();
             if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
                 m_bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
-                    Position(static_cast<float>(xMax - xMin), static_cast<float>(yMax - yMin)));
+//                    Position(static_cast<float>(xMax - xMin), static_cast<float>(yMax - yMin)));
+                    Position(static_cast<float>(xMax), static_cast<float>(yMax)));
             else
                 m_bbox = Rect();
         }
