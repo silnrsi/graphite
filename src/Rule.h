@@ -204,7 +204,8 @@ inline SlotMap::SlotMap(GrSegment & seg)
 
 inline GrSlot * * SlotMap::begin()
 {
-  return &m_slot_map[1];
+  return &m_slot_map[1]; // allow map to go 1 before slot_map when inserting
+                         // at start of segment.
 }
 
 inline GrSlot * * SlotMap::end()

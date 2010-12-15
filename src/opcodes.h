@@ -246,8 +246,6 @@ STARTOP(put_copy)
             is->next(next);
             is->prev(prev);
         }
-        else
-        { while(0) {}; }
         is->markCopied(false);
         is->markDeleted(false);
     }
@@ -297,8 +295,6 @@ STARTOP(insert)
     seg.extendLength(1);
     if (map != &smap[-1]) 
         --map;
-    else
-        seg.extendLength(0);
 ENDOP
 
 STARTOP(delete_)
