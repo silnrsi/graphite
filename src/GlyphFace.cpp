@@ -34,12 +34,12 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
             int nLsb, xMin, yMin, xMax, yMax;
             unsigned int nAdvWid;
             size_t locidx = TtfUtil::LocaLookup(glyphid, hdr.m_pLoca, hdr.m_lLoca, hdr.m_pHead);
-            void *pGlyph = TtfUtil::GlyfLookup(hdr.m_pGlyf, locidx);
+            void *pGlyph = TtfUtil::GlyfLookup(hdr.m_pGlyf, locidx, hdr.m_lGlyf);
             if (TtfUtil::HorMetrics(glyphid, hdr.m_pHmtx, hdr.m_lHmtx, hdr.m_pHHea, nLsb, nAdvWid))
                 m_advance = Position(static_cast<float>(nAdvWid), 0);
             else
                 m_advance = Position();
-            if (TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+            if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
                 m_bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
 //                    Position(static_cast<float>(xMax - xMin), static_cast<float>(yMax - yMin)));
                     Position(static_cast<float>(xMax), static_cast<float>(yMax)));

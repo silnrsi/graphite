@@ -43,7 +43,7 @@ friend class GlyphFace;
     const void* m_pGloc;
     size_t m_lLoca;     const void* m_pLoca;
     const void* m_pHead;
-    const void* m_pGlyf;
+    size_t m_lGlyf; const void* m_pGlyf;
     size_t m_lHmtx;     const void* m_pHmtx;
     const void* m_pHHea;
     const void* m_pGlat;

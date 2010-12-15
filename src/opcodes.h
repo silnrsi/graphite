@@ -196,6 +196,8 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
+    if (map - &smap[0] >= int(smap.size()))
+    { EXIT(1); }
     if (is) is = is->next();
     ++map;
 ENDOP
@@ -206,10 +208,10 @@ STARTOP(next_n)
     NOT_IMPLEMENTED;
 ENDOP
 
-STARTOP(copy_next)
-    if (is) is = is->next();
-    ++map;
-ENDOP
+//STARTOP(copy_next)
+//     if (is) is = is->next();
+//     ++map;
+// ENDOP
 
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
@@ -233,13 +235,19 @@ STARTOP(put_copy)
     if (slot_ref != 0)
     {
         uint16 *tempUserAttrs = is->userAttrs();
-        memcpy(tempUserAttrs, slotat(slot_ref)->userAttrs(), seg.numAttrs() * sizeof(uint16));
-        Slot *prev = is->prev();
-        Slot *next = is->next();
-        memcpy(is, slotat(slot_ref), sizeof(Slot));
-        is->userAttrs(tempUserAttrs);
-        is->next(next);
-        is->prev(prev);
+        Slot *ref = slotat(slot_ref);
+        if (ref)
+        {
+            memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
+            Slot *prev = is->prev();
+            Slot *next = is->next();
+            memcpy(is, slotat(slot_ref), sizeof(Slot));
+            is->userAttrs(tempUserAttrs);
+            is->next(next);
+            is->prev(prev);
+        }
+        else
+        { while(0) {}; }
         is->markCopied(false);
         is->markDeleted(false);
     }
@@ -287,7 +295,10 @@ STARTOP(insert)
     }
     is = newSlot;
     seg.extendLength(1);
-    --map;
+    if (map != &smap[-1]) 
+        --map;
+    else
+        seg.extendLength(0);
 ENDOP
 
 STARTOP(delete_)
@@ -321,8 +332,8 @@ STARTOP(assoc)
     {
         int sr = *assocs++;
         slotref ts = slotat(sr);
-        if (min == -1 || ts->before() < min) min = ts->before();
-        if (ts->after() > max) max = ts->after();
+        if (ts && (min == -1 || ts->before() < min)) min = ts->before();
+        if (ts && ts->after() > max) max = ts->after();
     }
     is->before(min);
     is->after(max);

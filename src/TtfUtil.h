@@ -115,7 +115,7 @@ typedef unsigned short gid16;
 	////////////////////////////////// primitives for loca and glyf lookup 
 	size_t LocaLookup(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, 
 		const void * pHead); // throw (std::out_of_range); 
-	void * GlyfLookup(const void * pGlyf, size_t lGlyfOffset);
+	void * GlyfLookup(const void * pGlyf, size_t lGlyfOffset, size_t lTableLen);
 
 	////////////////////////////////// primitves for simple glyph data
 	bool GlyfBox(const void * pSimpleGlyf, int & xMin, int & yMin, 
@@ -139,21 +139,21 @@ typedef unsigned short gid16;
 
 	////////////////////////////////// operate on composite or simple glyph (auto glyf lookup)
 	void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize, const void * pHead); // primitive used by below methods
+		size_t lGlyfSize, size_t lLocaSize, const void * pHead); // primitive used by below methods
 
 	// below are primary user methods for handling glyf data
 	bool IsSpace(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, const void * pHead);
 	bool IsDeepComposite(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize, const void * pHead);
+		size_t lGlyfSize, size_t lLocaSize, const void * pHead);
 
-	bool GlyfBox(gid16 nGlyphId, const void * pGlyf, const void * pLoca, size_t lLocaSize, 
+	bool GlyfBox(gid16 nGlyphId, const void * pGlyf, const void * pLoca, size_t lGlyfSize, size_t lLocaSize, 
 		const void * pHead, int & xMin, int & yMin, int & xMax, int & yMax);
 	bool GlyfContourCount(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize, const void *pHead, size_t & cnContours);
+		size_t lGlyfSize, size_t lLocaSize, const void *pHead, size_t & cnContours);
 	bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize,	const void * pHead, int * prgnContourEndPoint, size_t cnPoints); 
+		size_t lGlyfSize, size_t lLocaSize, const void * pHead, int * prgnContourEndPoint, size_t cnPoints); 
 	bool GlyfPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize, const void * pHead, const int * prgnContourEndPoint, size_t cnEndPoints, 
+		size_t lGlyfSize, size_t lLocaSize, const void * pHead, const int * prgnContourEndPoint, size_t cnEndPoints, 
 		int * prgnX, int * prgnY, bool * prgfOnCurve, size_t cnPoints);
 
 	// utitily method used by high-level GlyfPoints 

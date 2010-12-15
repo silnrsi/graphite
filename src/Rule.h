@@ -199,16 +199,17 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 inline SlotMap::SlotMap(GrSegment & seg)
 : segment(seg), m_size(0), m_precontext(0)
 {
+    m_slot_map[0] = 0;
 }
 
 inline GrSlot * * SlotMap::begin()
 {
-  return &m_slot_map[0];
+  return &m_slot_map[1];
 }
 
 inline GrSlot * * SlotMap::end()
 {
-  return m_slot_map + m_size;
+  return m_slot_map + m_size + 1;
 }
 
 inline size_t SlotMap::size() const
@@ -229,17 +230,17 @@ inline void SlotMap::setContext(short unsigned int ctxt)
 
 inline void SlotMap::pushSlot(GrSlot*const slot)
 {
-  m_slot_map[m_size++] = slot;
+  m_slot_map[m_size++ + 1] = slot;
 }
 
 inline GrSlot * const & SlotMap::operator[](int n) const
 {
-  return m_slot_map[n];
+  return m_slot_map[n + 1];
 }
 
 inline GrSlot * & SlotMap::operator[](int n)
 {
-  return m_slot_map[n];
+  return m_slot_map[n + 1];
 }
 
 }}}}

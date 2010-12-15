@@ -174,6 +174,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     {
         r->preContext = *--precontext;
         r->sort       = swap16(*--sort_key);
+        if (r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt || r->sort > 63)
+            return false;
         ac_begin      = ac_data + swap16(*--o_action);
         rc_begin      = *--o_constraint ? rc_data + swap16(*o_constraint) : rc_end;
 
@@ -220,22 +222,22 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     }
 
     // load state transition table.
-    for (State * *               t = m_sTable,
-            * * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
+    for (State * * t = m_sTable,
+               * * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
     {
         *t = m_states + swap16(*states++);
         if (*t < m_states || *t >= m_states + m_sRows) return false;
     }
 
     State * s = m_states,
-                * const transitions_end = m_states + m_sTransition,
-                                          * const success_begin   = m_states + m_sRows - m_sSuccess;
+          * const transitions_end = m_states + m_sTransition,
+          * const success_begin = m_states + m_sRows - m_sSuccess;
     const RuleEntry * rule_map_end = m_ruleMap + swap16(o_rule_map[m_sSuccess]);
     for (size_t n = m_sRows; n; --n, ++s)
     {
         s->transitions = s < transitions_end ? m_sTable + (s-m_states)*m_sColumns : 0;
         RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map++),
-                                  * const end   = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map);
+                  * const end   = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map);
 
         if (begin >= rule_map_end || end > rule_map_end || begin > end)
             return false;

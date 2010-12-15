@@ -1231,9 +1231,11 @@ size_t LocaLookup(gid16 nGlyphId,
 	Return a pointer into the glyf table based on the given offset (from LocaLookup).
 	Return NULL on error.
 ----------------------------------------------------------------------------------------------*/
-void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset)
+void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
 {
 	const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
+        if (nGlyfOffset == size_t(-1) || nGlyfOffset > nTableLen)
+            return NULL;
 	return const_cast<uint8 *>(pByte + nGlyfOffset);
 }
 
@@ -1623,7 +1625,7 @@ bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
 	Return NULL on error.
 ----------------------------------------------------------------------------------------------*/
 void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-						   size_t lLocaSize, const void * pHead)
+						   size_t lGlyfSize, size_t lLocaSize, const void * pHead)
 {
 	// test for valid glyph id
 	// CheckTable verifies the index_to_loc_format is valid
@@ -1649,7 +1651,7 @@ void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 	}
 
 	long lGlyfOffset = LocaLookup(nGlyphId, pLoca, lLocaSize, pHead);
-	void * pSimpleGlyf = GlyfLookup(pGlyf, lGlyfOffset); // invalid loca offset returns null
+	void * pSimpleGlyf = GlyfLookup(pGlyf, lGlyfOffset, lGlyfSize); // invalid loca offset returns null
 	return pSimpleGlyf;
 }
 
@@ -1671,11 +1673,11 @@ bool IsSpace(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, const void * 
 	Determine if a particular Glyph ID is a multi-level composite.
 ----------------------------------------------------------------------------------------------*/
 bool IsDeepComposite(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-							 long lLocaSize, const void * pHead)
+					size_t lGlyfSize, long lLocaSize, const void * pHead)
 {
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) {return false;}
 
-	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lLocaSize, pHead);
+	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 	if (pSimpleGlyf == NULL)
 		return false; // no way to really indicate an error occured here
 
@@ -1692,7 +1694,7 @@ bool IsDeepComposite(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 	for (size_t i = 0; i < cCompId; i++)
 	{
 		pSimpleGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), 
-										pGlyf, pLoca, lLocaSize, pHead);
+							pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 		if (pSimpleGlyf == NULL) {return false;}
 
 		if (GlyfContourCount(pSimpleGlyf) < 0)
@@ -1709,13 +1711,13 @@ bool IsDeepComposite(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 		False may indicate a white space glyph
 ----------------------------------------------------------------------------------------------*/
 bool GlyfBox(gid16  nGlyphId, const void * pGlyf, const void * pLoca, 
-		size_t lLocaSize, const void * pHead, int & xMin, int & yMin, int & xMax, int & yMax)
+		size_t lGlyfSize, size_t lLocaSize, const void * pHead, int & xMin, int & yMin, int & xMax, int & yMax)
 {
 	xMin = yMin = xMax = yMax = INT_MIN;
 
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) {return false;}
 
-	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lLocaSize, pHead);
+	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 	if (pSimpleGlyf == NULL) {return false;}
 
 	return GlyfBox(pSimpleGlyf, xMin, yMin, xMax, yMax);
@@ -1728,13 +1730,13 @@ bool GlyfBox(gid16  nGlyphId, const void * pGlyf, const void * pLoca,
 		False may indicate a white space glyph or a multi-level composite glyph.
 ----------------------------------------------------------------------------------------------*/
 bool GlyfContourCount(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-	size_t lLocaSize, const void * pHead, size_t & cnContours)
+	size_t lGlyfSize, size_t lLocaSize, const void * pHead, size_t & cnContours)
 {
 	cnContours = static_cast<size_t>(INT_MIN);
 
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) {return false;}
 
-	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lLocaSize, pHead);
+	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 	if (pSimpleGlyf == NULL) {return false;}
 
 	int cRtnContours = GlyfContourCount(pSimpleGlyf);
@@ -1759,7 +1761,7 @@ bool GlyfContourCount(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 	{
 		if (IsSpace(static_cast<gid16>(rgnCompId[i]), pLoca, lLocaSize, pHead)) {return false;}
 		pSimpleGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), 
-		                         pGlyf, pLoca, lLocaSize, pHead);
+		                         pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 		if (pSimpleGlyf == 0) {return false;}
 		// return false on multi-level composite
 		if ((cTmp = GlyfContourCount(pSimpleGlyf)) < 0) 
@@ -1781,14 +1783,14 @@ bool GlyfContourCount(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 		False may indicate a white space glyph or a multi-level composite glyph.
 ----------------------------------------------------------------------------------------------*/
 bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
-	size_t lLocaSize, const void * pHead, 
+	size_t lGlyfSize, size_t lLocaSize, const void * pHead,
 	int * prgnContourEndPoint, size_t cnPoints)
 {
 	std::fill_n(prgnContourEndPoint, cnPoints, INT_MIN);
 
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) {return false;}
 
-	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lLocaSize, pHead);
+	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 	if (pSimpleGlyf == NULL) {return false;}
 
 	int cContours = GlyfContourCount(pSimpleGlyf);
@@ -1811,7 +1813,7 @@ bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca
 	for (size_t i = 0; i < cCompId; i++)
 	{
 		if (IsSpace(static_cast<gid16>(rgnCompId[i]), pLoca, lLocaSize, pHead)) {return false;}
-		pSimpleGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), pGlyf, pLoca, lLocaSize, pHead);
+		pSimpleGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 		if (pSimpleGlyf == NULL) {return false;}
 		// returns false on multi-level composite
 		if (!GlyfContourEndPoints(pSimpleGlyf, prgnCurrentEndPoint, cCurrentPoints, cActualPts))
@@ -1852,7 +1854,7 @@ bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca
 		relative to current glyph). 
 ----------------------------------------------------------------------------------------------*/
 bool GlyfPoints(gid16 nGlyphId, const void * pGlyf,
-		const void * pLoca, size_t lLocaSize, const void * pHead,
+		const void * pLoca, size_t lGlyfSize, size_t lLocaSize, const void * pHead,
 		const int * /*prgnContourEndPoint*/, size_t /*cnEndPoints*/,
 		int * prgnX, int * prgnY, bool * prgfOnCurve, size_t cnPoints)
 {
@@ -1862,7 +1864,7 @@ bool GlyfPoints(gid16 nGlyphId, const void * pGlyf,
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) 
 		return false;
 
-	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lLocaSize, pHead);
+	void * pSimpleGlyf = GlyfLookup(nGlyphId, pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 	if (pSimpleGlyf == NULL)
 		return false;
 
@@ -1898,7 +1900,7 @@ bool GlyfPoints(gid16 nGlyphId, const void * pGlyf,
 	for (size_t i = 0; i < cCompId; i++)
 	{
 		if (IsSpace(static_cast<gid16>(rgnCompId[i]), pLoca, lLocaSize, pHead)) {return false;}
-		void * pCompGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), pGlyf, pLoca, lLocaSize, pHead);
+		void * pCompGlyf = GlyfLookup(static_cast<gid16>(rgnCompId[i]), pGlyf, pLoca, lGlyfSize, lLocaSize, pHead);
 		if (pCompGlyf == NULL) {return false;}
 		// returns false on multi-level composite
 		if (!GlyfPoints(pCompGlyf, prgnCurrentX, prgnCurrentY, prgbCurrentFlag, 
