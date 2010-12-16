@@ -53,6 +53,10 @@
 #include "UniscribeRenderer.h"
 #endif
 
+#ifdef HAVE_ICU
+#include "IcuRenderer.h"
+#endif
+
 const size_t NUM_RENDERERS = 3;
 
 class CompareRenderer
@@ -326,6 +330,13 @@ int main(int argc, char ** argv)
             renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction));
         }
 #endif
+#ifdef HAVE_ICU
+        else if (rendererOptions[OptIcu].exists())
+        {
+            renderers[0] = (new IcuRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new IcuRenderer(altFontFile, fontSize, direction));
+        }
+#endif
     }
     else
     {
@@ -338,6 +349,10 @@ int main(int argc, char ** argv)
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
             renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+#endif
+#ifdef HAVE_ICU
+        if (rendererOptions[OptIcu].exists())
+            renderers[2] = (new IcuRenderer(fontFile, fontSize, direction));
 #endif
     }
 

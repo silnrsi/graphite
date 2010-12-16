@@ -9,6 +9,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     pkg_check_modules(GLIB glib-2.0)
     # pkg_check_modules(GRNG graphite)
 
+    find_path(ICU_INCLUDE_DIR NAMES unicode/utypes.h DOC "Include directory for the ICU library")
+    find_library(ICU_LIBRARY NAMES icuuc cygicuuc cygicuuc32 DOC "Libraries to link against for the common parts of ICU")
+
     if (${HB_FOUND})
         if (${FREETYPE_FOUND})
             add_definitions(-DHAVE_HARFBUZZNG)
@@ -21,9 +24,16 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif (${GR_FOUND})
     set(RT_LDFLAGS "rt")
 
+    set(ICULE)
+    if (ICU_INCLUDE_DIR AND ICU_LIBRARY)
+        set(ICU_FOUND 1)
+        file(GLOB ICULE icule/*.cpp icule/*.h)
+        add_definitions(-DHAVE_ICU)
+        set(ICU_LDFLAGS -L${ICU_LIBRARY} -licule -licuuc -licudata)
+    endif (ICU_INCLUDE_DIR AND ICU_LIBRARY)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
+include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS} ${ICU_INCLUDE_DIR})
 
 file(GLOB PRIVATE_HEADERS *.h) 
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
@@ -31,11 +41,12 @@ set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 add_executable(comparerenderer
     CompareRenderer.cpp
     ${GR_EXTRA_SOURCE}
+    ${ICULE}
     ${PRIVATE_HEADERS}
     )
 
 # rt is for timing
-target_link_libraries(comparerenderer graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} ${RT_LDFLAGS})
+target_link_libraries(comparerenderer graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	find_file(USP10_H NAMES Usp10.h)
