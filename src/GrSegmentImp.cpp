@@ -283,7 +283,7 @@ void GrSegment::splice(size_t offset, size_t length, Slot * startSlot,
 void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
 {
     Position currpos;
-    Slot *s;
+    Slot *s, *last = NULL;
     float cMin = 0.;
     Rect bbox;
 
@@ -295,7 +295,12 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
         for (s = iEnd; s && s != iStart->prev(); s = s->prev())
         {
             if (s->isBase())
+            {
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
+                if (last)
+                    last->sibling(s);
+                last = s;
+            }
         }
     }
     else
@@ -303,7 +308,12 @@ void GrSegment::positionSlots(const GrFont *font, Slot *iStart, Slot *iEnd)
         for (s = iStart; s && s != iEnd->next(); s = s->next())
         {
             if (s->isBase())
+            {
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0);
+                if (last)
+                    s->sibling(last);
+                last = s;
+            }
         }
     }
     if (iStart == m_first && iEnd == m_last) m_advance = currpos;

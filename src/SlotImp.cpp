@@ -127,7 +127,7 @@ Position GrSlot::finalise(const GrSegment *seg, const GrFont *font, Position *ba
         if (tRes.x > res.x) res = tRes;
     }
 
-    if (m_sibling)
+    if (m_parent && m_sibling)
     {
         Position tRes = m_sibling->finalise(seg, font, base, bbox, cMin, attrLevel);
         if (tRes.x > res.x) res = tRes;
