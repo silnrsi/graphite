@@ -57,7 +57,7 @@
 #include "IcuRenderer.h"
 #endif
 
-const size_t NUM_RENDERERS = 3;
+const size_t NUM_RENDERERS = 5;
 
 class CompareRenderer
 {
@@ -352,11 +352,11 @@ int main(int argc, char ** argv)
 #endif
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
-            renderers[2] = (new IcuRenderer(fontFile, fontSize, direction));
+            renderers[3] = (new IcuRenderer(fontFile, fontSize, direction));
 #endif
     }
 
-    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL)
+    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
