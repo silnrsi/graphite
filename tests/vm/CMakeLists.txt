@@ -30,8 +30,11 @@ add_library(vm-test-common  STATIC
                 ${SRC}/TtfUtil.cpp
                 ${TRACESUPPORT})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
+if  (${CMAKE_COMPILER_IS_GNUCXX})
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
+endif  (${CMAKE_COMPILER_IS_GNUCXX})
+
 add_executable(vm-test-call     ${SRC}/call_machine.cpp)
 target_link_libraries(vm-test-call vm-test-common)
 
