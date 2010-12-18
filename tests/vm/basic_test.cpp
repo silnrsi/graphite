@@ -21,7 +21,7 @@ const byte simple_prog[] =
 };
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
-class GrSegment 
+struct GrSegment 
 {
     byte x;
 };
