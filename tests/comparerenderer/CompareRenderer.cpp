@@ -70,7 +70,7 @@ public:
         struct stat fileStat;
         if (stat(testFile, &fileStat) == 0)
         {
-            FILE * file = fopen(testFile, "r");
+            FILE * file = fopen(testFile, "rb");
             if (file)
             {
                 m_fileBuffer = new char[fileStat.st_size];
@@ -91,6 +91,7 @@ public:
                             m_lineResults[r] = NULL;
                         }
                         m_elapsedTime[r] = 0.0f;
+                        m_glyphCount[r] = 0;
                     }
                 }
                 fclose(file);
@@ -131,8 +132,8 @@ public:
             if (m_renderers[r])
             {
                 for (int i = 0; i < repeat; i++)
-                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r]);
-                fprintf(log, "Ran %s in %fs\n", m_renderers[r]->name(), m_elapsedTime[r]);
+                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r]);
+                fprintf(log, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
             }
         }
     }
@@ -170,8 +171,9 @@ public:
     }
     void setDifferenceMask(LineDifference m) { m_cfMask = m; }
 protected:
-    float runRenderer(Renderer & renderer, RenderedLine * pLineResult)
+    float runRenderer(Renderer & renderer, RenderedLine * pLineResult, unsigned long & glyphCount)
     {
+        glyphCount = 0;
         unsigned int i = 0;
         const char * pLine = m_fileBuffer;
 #ifdef __GNUC__
@@ -196,6 +198,7 @@ protected:
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i);
                 pLineResult[i].dump(stdout);
+                glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }
         }
@@ -206,6 +209,7 @@ protected:
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i);
+                glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }
         }
@@ -262,6 +266,7 @@ private:
     Renderer** m_renderers;
     RenderedLine * m_lineResults[NUM_RENDERERS];
     float m_elapsedTime[NUM_RENDERERS];
+    unsigned long m_glyphCount[NUM_RENDERERS];
     bool m_verbose;
     LineDifference m_cfMask;
 };
@@ -297,10 +302,10 @@ int main(int argc, char ** argv)
 
     // TODO features
 
-    Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL};
+    Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL, NULL, NULL};
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
-    
+    if (rendererOptions[OptTrace].exists())
     {
         FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "w");
         int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
@@ -337,6 +342,13 @@ int main(int argc, char ** argv)
             renderers[1] = (new IcuRenderer(altFontFile, fontSize, direction));
         }
 #endif
+#ifdef HAVE_USP10
+        else if (rendererOptions[OptUniscribe].exists())
+        {
+            renderers[0] = (new UniscribeRenderer(fontFile, rendererOptions[OptUniscribe].get(argv), fontSize, direction));
+            renderers[1] = (new UniscribeRenderer(altFontFile, rendererOptions[OptUniscribe].get(argv), fontSize, direction));
+        }
+#endif
     }
     else
     {
@@ -353,6 +365,16 @@ int main(int argc, char ** argv)
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
             renderers[3] = (new IcuRenderer(fontFile, fontSize, direction));
+#endif
+#ifdef HAVE_USP10
+        if (rendererOptions[OptUniscribe].exists())
+        {
+            const char * defaultUsp10 = "usp10.dll";
+            const char * usp10 = rendererOptions[OptUniscribe].get(argv);
+            if (strlen(usp10) == 0)
+                usp10 = defaultUsp10;
+            renderers[4] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
+        }
 #endif
     }
 

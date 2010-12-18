@@ -1,5 +1,24 @@
 project(comparerenderer)
 
+find_path(ICU_INCLUDE NAMES unicode/utypes.h 
+	PATHS /usr/local/include /usr/include ${PROJECT_SOURCE_DIR}/../../../icu/source/include
+	DOC "Include directory for the ICU library")
+find_library(ICU_LIBRARY NAMES icuuc cygicuuc cygicuuc32
+	PATHS /usr/local/lib /usr/lib ${PROJECT_SOURCE_DIR}/../../../icu/source/lib
+	DOC "Libraries to link against for the common parts of ICU")
+
+set(ICULE)
+if (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
+	set(ICU_FOUND 0)
+	set(ICU_INCLUDE_DIR)
+else (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
+    set(ICU_FOUND 1)
+    file(GLOB ICULE icule/*.cpp icule/*.h)
+    add_definitions(-DHAVE_ICU)
+    set(ICU_INCLUDE_DIR "${ICU_INCLUDE}")
+    set(ICU_LDFLAGS -L${ICU_LIBRARY} -licule -licuuc -licudata)
+endif (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_package(Freetype)
     find_package(PkgConfig)
@@ -8,9 +27,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     pkg_check_modules(HB harfbuzz)
     pkg_check_modules(GLIB glib-2.0)
     # pkg_check_modules(GRNG graphite)
-
-    find_path(ICU_INCLUDE_DIR NAMES unicode/utypes.h DOC "Include directory for the ICU library")
-    find_library(ICU_LIBRARY NAMES icuuc cygicuuc cygicuuc32 DOC "Libraries to link against for the common parts of ICU")
 
     if (${HB_FOUND})
         if (${FREETYPE_FOUND})
@@ -24,22 +40,16 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif (${GR_FOUND})
     set(RT_LDFLAGS "rt")
 
-    set(ICULE)
-    if (ICU_INCLUDE_DIR AND ICU_LIBRARY)
-        set(ICU_FOUND 1)
-        file(GLOB ICULE icule/*.cpp icule/*.h)
-        add_definitions(-DHAVE_ICU)
-        set(ICU_LDFLAGS -L${ICU_LIBRARY} -licule -licuuc -licudata)
-    endif (ICU_INCLUDE_DIR AND ICU_LIBRARY)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS} ${ICU_INCLUDE_DIR})
+include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS})
 
 file(GLOB PRIVATE_HEADERS *.h) 
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 add_executable(comparerenderer
     CompareRenderer.cpp
+    ${PROJECT_SOURCE_DIR}/../../src/TtfUtil.cpp
     ${GR_EXTRA_SOURCE}
     ${ICULE}
     ${PRIVATE_HEADERS}
@@ -54,7 +64,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	if (NOT ${USP10_H} STREQUAL "USP10_H_NOTFOUND")
 		add_definitions(-DHAVE_USP10)
 	endif (NOT ${USP10_H} STREQUAL "USP10_H_NOTFOUND")
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
     add_custom_target(cr_copy_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(cr_copy_dll graphite2 iconv comparerenderer)

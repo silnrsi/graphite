@@ -380,14 +380,14 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
                 m_buffer[m_byteLength++] = cid;
             else if (cid <= 0x07FF)
             {
-                if (m_byteLength + 2 == m_maxLength)
+                if (m_byteLength + 2 >= m_maxLength)
                     return false;
                 m_buffer[m_byteLength++] = 0xC0 + (cid >> 6);
                 m_buffer[m_byteLength++] = 0x80 + (cid & 0x3F);
             }
             else if (cid <= 0xFFFF)
             {
-                if (m_byteLength + 3 == m_maxLength)
+                if (m_byteLength + 3 >= m_maxLength)
                     return false;
                 m_buffer[m_byteLength++] = 0xE0 + (cid >> 12);
                 m_buffer[m_byteLength++] = 0x80 + ((cid & 0x0FC0) >> 6);
@@ -395,7 +395,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
             }
             else if (cid <= 0x10FFFF)
             {
-                if (m_byteLength + 4 == m_maxLength)
+                if (m_byteLength + 4 >= m_maxLength)
                     return false;
                 m_buffer[m_byteLength++] = 0xF0 + (cid >> 18);
                 m_buffer[m_byteLength++] = 0x80 + ((cid & 0x3F000) >> 12);
@@ -407,7 +407,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
                 // ignore
             }
             m_count++;
-            if (m_byteLength == m_maxLength)
+            if (m_byteLength >= m_maxLength)
                 return false;
             return true;
         }
@@ -418,6 +418,50 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
         size_t m_byteLength;
         size_t m_maxLength;
         uint8 * m_buffer;
+    };
+
+    class ToUtf16Processor
+    {
+    public:
+        // buffer length should be twice the utf32 length
+        // to cover the worst case
+        ToUtf16Processor(uint16 * buffer, size_t maxLength) :
+            m_count(0), m_uint16Length(0), m_maxLength(maxLength), m_buffer(buffer)
+        {}
+        bool processChar(uint32 cid)
+        {
+            // taken from Unicode Book ch3.9
+            if (cid <= 0xD800)
+                m_buffer[m_uint16Length++] = cid;
+            else if (cid < 0xE000)
+            {
+                // skip for now
+            }
+            else if (cid >= 0xE000 && cid <= 0xFFFF)
+                m_buffer[m_uint16Length++] = cid;
+            else if (cid <= 0x10FFFF)
+            {
+                if (m_uint16Length + 2 >= m_maxLength)
+                    return false;
+                m_buffer[m_uint16Length++] = 0xD800 + ((cid & 0xFC00) >> 10) + ((cid >> 16) - 1);
+                m_buffer[m_uint16Length++] = 0xDC00 + ((cid & 0x03FF) >> 12);
+            }
+            else
+            {
+                // ignore
+            }
+            m_count++;
+            if (m_uint16Length == m_maxLength)
+                return false;
+            return true;
+        }
+        size_t charsProcessed() const { return m_count; }
+        size_t uint16Processed() const { return m_uint16Length; }
+    private:
+        size_t m_count;
+        size_t m_uint16Length;
+        size_t m_maxLength;
+        uint16 * m_buffer;
     };
 
     class ToUtf32Processor
