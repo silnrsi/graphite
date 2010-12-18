@@ -1,7 +1,13 @@
 project(testing)
 
+option(ENABLE_COMPARE_RENDERER "Build tool to compare output of different renderers" ON) 
+
 add_subdirectory(vm)
-add_subdirectory(comparerenderer)
+
+if (ENABLE_COMPARE_RENDERER)
+    add_subdirectory(comparerenderer)
+endif (ENABLE_COMPARE_RENDERER)
+
 add_subdirectory(segcache)
 add_subdirectory(featuremap)
 add_subdirectory(nametabletest)
