@@ -21,7 +21,9 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <climits>
 #include <iomanip>
 #include <cstring>
+#ifdef HAVE_ICONV
 #include <iconv.h>
+#endif
 
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
