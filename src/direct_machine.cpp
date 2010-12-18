@@ -84,6 +84,7 @@ const void * direct_run(const bool          get_table_mode,
     
     end:
     __map  = map;
+    *__map = is;
     return sp;
 }
 

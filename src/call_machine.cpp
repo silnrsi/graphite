@@ -117,6 +117,7 @@ Machine::stack_t  Machine::run(const instr   * program,
 
     check_final_stack(sp, status);
     map = reg.map;
+    *map = reg.is;
     return ret;
 }
 
