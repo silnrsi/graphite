@@ -48,6 +48,17 @@ public:
     : m_list(list), m_unit(unit) {}
     GrListUnitIterator(const GrListUnitIterator<T> & toCopy)
     : m_list(toCopy.m_list), m_unit(toCopy.m_unit) {}
+    GrListUnitIterator<T> & operator=(const GrListUnitIterator<T> & toCopy)
+    {
+        assert(&m_list == &toCopy.m_list);
+        m_unit = toCopy.m_unit;
+        return *this;
+    }
+    GrListUnitIterator<T> operator++()
+    {
+        operator+(1);
+        return *this;
+    }
     GrListUnitIterator<T> operator+(int value)
     {
         if (m_list.m_sequential)
@@ -82,6 +93,10 @@ public:
             }
         }
         return *this;
+    }
+    T operator *()
+    {
+        return m_unit->m_value;
     }
     GrListUnitIterator< T > operator += (int value)
     {

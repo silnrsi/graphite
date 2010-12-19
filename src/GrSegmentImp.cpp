@@ -94,12 +94,12 @@ void GrSegment::removeScope(SegmentScopeState & state)
 
 GrSegment::~GrSegment()
 {
-    SlotRope::iterator i;
-    AttributeRope::iterator j;
+    SlotRope::iterator i = m_slots.begin();
+    AttributeRope::iterator j = m_userAttrs.begin();
     
-    for (i = m_slots.begin(); i != m_slots.end(); i++)
+    for (i = m_slots.begin(); i != m_slots.end(); ++i)
         free(*i);
-    for (j = m_userAttrs.begin(); j != m_userAttrs.end(); j++)
+    for (j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
         free(*j);
     delete[] m_charinfo;
 }

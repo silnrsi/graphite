@@ -38,9 +38,11 @@
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
+#include "GrList.h"
 
 namespace org { namespace sil { namespace graphite { namespace v2 {
 
+#if 0
 #ifdef __GNUC__
 #ifdef STLPORT_VERSION
 // standard allocator for other platforms
@@ -59,6 +61,12 @@ typedef std::vector<uint16 *, __gnu_cxx::malloc_allocator<uint16 *> > AttributeR
 typedef std::vector<Features> FeatureList;
 typedef std::vector<Slot *> SlotRope;
 typedef std::vector<uint16 *> AttributeRope;
+#endif
+
+#else
+typedef GrList<Features> FeatureList;
+typedef GrList<Slot *> SlotRope;
+typedef GrList<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
