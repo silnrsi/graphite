@@ -6,7 +6,7 @@ find_path(ICU_INCLUDE NAMES unicode/utypes.h
 find_path(ICU_LAYOUT_INCLUDE NAMES layout/LETypes.h
 	PATHS /usr/local/include /usr/include ${PROJECT_SOURCE_DIR}/../../../icu/source
 	DOC "Include directory for the ICU layout engine")
-find_path(ICU_LIBRARY_PATH NAMES ${CMAKE_IMPORT_LIBRARY_PREFIX}icuuc${CMAKE_IMPORT_LIBRARY_SUFFIX} cygicuuc cygicuuc32
+find_path(ICU_LIBRARY_PATH NAMES ${CMAKE_SHARED_LIBRARY_PREFIX}icuuc${CMAKE_SHARED_LIBRARY_SUFFIX} cygicuuc cygicuuc32
 	PATHS /usr/local/lib /usr/lib ${PROJECT_SOURCE_DIR}/../../../icu/source/lib
 	DOC "Libraries to link against for the common parts of ICU")
 
@@ -21,6 +21,7 @@ else (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
     file(GLOB ICULE icule/*.cpp icule/*.h)
     add_definitions(-DHAVE_ICU)
     set(ICU_INCLUDE_DIRS "${ICU_INCLUDE}" "${ICU_LAYOUT_INCLUDE}")
+    link_directories(${ICU_LIBRARY_PATH})
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         set(ICU_LDFLAGS icule icuuc icudt)
     else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -55,8 +56,6 @@ include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE
 
 file(GLOB PRIVATE_HEADERS *.h) 
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
-
-link_directories(${ICU_LIBRARY_PATH})
 
 add_executable(comparerenderer
     CompareRenderer.cpp
