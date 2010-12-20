@@ -36,7 +36,8 @@ class IcuRenderer : public Renderer
 {
 public:
     IcuRenderer(const char * fontFile, int fontSize, int textDir)
-        : m_rtl(textDir), m_font(fontFile, fontSize, m_status)
+        : m_rtl(textDir), m_status(LE_NO_ERROR),
+        m_font(fontFile, static_cast<float>(fontSize), m_status)
     {
     }
 
@@ -48,13 +49,18 @@ public:
     {
         UScriptCode scriptCode = USCRIPT_UNKNOWN;
         LEErrorCode status = LE_NO_ERROR;
+        if (length == 0 || LE_FAILURE(m_status))
+        {
+            new(result) RenderedLine(0, .0f);
+            return;
+        }
         le_int32 langCode = -1;
         int i = 0, count = 0;
-        while (i < length)
+        while (i < static_cast<int>(length))
         {
             UErrorCode ustatus = U_ZERO_ERROR;
             UChar32 c;
-            U8_NEXT(utf8, i, length, c);
+            U8_NEXT(utf8, i, static_cast<int>(length), c);
             if (i == 3 && c == 0xFEFF)
             {
                 utf8 += 3;
@@ -68,11 +74,16 @@ public:
         }
         
         LayoutEngine *eIcu  = LayoutEngine::layoutEngineFactory(&m_font, scriptCode, langCode, status);
+        if (!eIcu || LE_FAILURE(status))
+        {
+            new(result) RenderedLine(0, .0f);
+            return;
+        }
         UnicodeString uText;    //  = UnicodeString::fromUTF8(utf8);
-        for (i = 0; i < length; )
+        for (i = 0; i < static_cast<int>(length); )
         {
             UChar32 c;
-            U8_NEXT(utf8, i, length, c);
+            U8_NEXT(utf8, i, static_cast<int>(length), c);
             uText.append(c);
         }
         int32_t glyphCount = eIcu->layoutChars(uText.getBuffer(), 0, count, count, m_rtl, 0., 0., status);

@@ -158,6 +158,7 @@ public:
                         {
                             fprintf(log, "%c", m_fileBuffer[c]);
                         }
+                        fprintf(log, "\n");
                         m_lineResults[i][line].dump(log);
                         fprintf(log, "%s\n", m_renderers[i]->name());
                         m_lineResults[j][line].dump(log);
@@ -307,7 +308,7 @@ int main(int argc, char ** argv)
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     if (rendererOptions[OptTrace].exists())
     {
-        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "w");
+        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "wb");
         int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
             (gr2::GRLOG_SEGMENT | gr2::GRLOG_CACHE);
         gr2::graphite_start_logging(traceFile, static_cast<gr2::GrLogMask>(logMask));
