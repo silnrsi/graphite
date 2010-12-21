@@ -22,6 +22,7 @@
 #include "Main.h"
 #include "Pass.h"
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "GrSegmentImp.h"
 #include "Code.h"
@@ -206,6 +207,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     return true;
 }
 
+static int cmpRuleEntry(const void *a, const void *b) { return (*(RuleEntry *)a < *(RuleEntry *)b ? -1 :
+                                                                (*(RuleEntry *)b < *(RuleEntry *)a ? 1 : 0)); }
 
 bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * o_rule_map)
 {
@@ -244,7 +247,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
 
         s->rules = begin;
         s->rules_end = end;
-        std::sort(begin, end);
+        qsort(begin, end - begin, sizeof(RuleEntry), &cmpRuleEntry);
     }
 
     logStates();
@@ -324,17 +327,19 @@ void Pass::logStates() const
 bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 {
     m_cols = gralloc<uint16>(m_numGlyphs);
-    std::fill_n(m_cols, m_numGlyphs, uint16(-1));
+    memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
     for (size_t n = num_ranges; n; --n)
     {
         const uint16 first = swap16(*ranges++),
                              last  = swap16(*ranges++),
                                      col   = swap16(*ranges++);
+        uint16 *p;
 
         if (first > last || last >= m_numGlyphs || col >= m_sColumns)
             return false;
 
-        std::fill(m_cols + first, m_cols + last + 1, col);
+        for (p = m_cols + first; p <= m_cols + last; )
+            *p++ = col;
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {

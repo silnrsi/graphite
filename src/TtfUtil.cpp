@@ -824,7 +824,9 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_arg
 	uint16 * pStr = reinterpret_cast<uint16 *>(pWStr);
 	uint16 * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
 
-	std::transform(pStr, pStrEnd, pStr, read<uint16>);
+        while (pStr < pStrEnd)
+            *pStr++ = read(*pStr);
+//	std::transform(pStr, pStrEnd, pStr, read<uint16>);
 
 //		for (int i = 0; i < nSize; i++)
 //		{ // swap the wide characters in the string
@@ -1786,7 +1788,8 @@ bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca
 	size_t lGlyfSize, size_t lLocaSize, const void * pHead,
 	int * prgnContourEndPoint, size_t cnPoints)
 {
-	std::fill_n(prgnContourEndPoint, cnPoints, INT_MIN);
+        memset(prgnContourEndPoint, 0xFF, cnPoints * sizeof(int));
+	// std::fill_n(prgnContourEndPoint, cnPoints, INT_MIN);
 
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) {return false;}
 
@@ -1858,8 +1861,8 @@ bool GlyfPoints(gid16 nGlyphId, const void * pGlyf,
 		const int * /*prgnContourEndPoint*/, size_t /*cnEndPoints*/,
 		int * prgnX, int * prgnY, bool * prgfOnCurve, size_t cnPoints)
 {
-	std::fill_n(prgnX, cnPoints, INT_MAX);
-	std::fill_n(prgnY, cnPoints, INT_MAX);
+        memset(prgnX, 0x7F, cnPoints * sizeof(int));
+        memset(prgnY, 0x7F, cnPoints * sizeof(int));
 
 	if (IsSpace(nGlyphId, pLoca, lLocaSize, pHead)) 
 		return false;

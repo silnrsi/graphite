@@ -27,13 +27,18 @@
 #include "graphite2/Font.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
-#include <algorithm>
+//#include <algorithm>
+#include <stdlib.h>
 #include "GrFaceImp.h"
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
 using namespace org::sil::graphite::v2;
+
+static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndFeatureRef *)a < *(NameAndFeatureRef *)b 
+                                                                        ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
+                                                                                    ? 1 : 0)); }
 
 bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace)
 {
@@ -170,7 +175,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     
     free(defVals);
 
-    std::sort(m_pNamedFeats, m_pNamedFeats+m_numFeats);
+    qsort(m_pNamedFeats, m_numFeats, sizeof(NameAndFeatureRef), &cmpNameAndFeatures);
 
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFeatures);
@@ -223,13 +228,12 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
 
 const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
 {
-    NameAndFeatureRef target(name);
-    NameAndFeatureRef* it = std::lower_bound(m_pNamedFeats, m_pNamedFeats+m_numFeats, target);
-    if (it==m_pNamedFeats+m_numFeats)
-      return NULL;
-    if (it->m_name!=name)
-      return NULL;
-    return it->m_pFRef;
+    NameAndFeatureRef *it;
+    
+    for (it = m_pNamedFeats; it < m_pNamedFeats + m_numFeats; ++it)
+        if (it->m_name == name)
+            return it->m_pFRef;
+    return NULL;
 }
 
 Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const

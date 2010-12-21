@@ -24,7 +24,6 @@
 // from crashing graphite.
 // Author: Tim Eves
 
-#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
@@ -80,9 +79,9 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
-    _code = static_cast<instr *>(std::malloc((bytecode_end - bytecode_begin)
+    _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
                                              * sizeof(instr)));
-    _data = static_cast<byte *>(std::malloc((bytecode_end - bytecode_begin)
+    _data = static_cast<byte *>(malloc((bytecode_end - bytecode_begin)
                                              * sizeof(byte)));
     
     if (!_code || !_data) {
@@ -126,7 +125,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
 
         // Grab the parameters
         if (param_sz) {
-            std::copy(cd_ptr, cd_ptr + param_sz, dp);
+            memmove(dp, cd_ptr, param_sz * sizeof(byte));
             cd_ptr += param_sz;
             dp     += param_sz;
         }
@@ -162,7 +161,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         if (!c->flags.referenced || !c->flags.changed) continue;
         
         instr * const tip = _code + c->codeRef;        
-        std::copy_backward(tip, ip, ip+1);
+        memmove(tip+1, tip, (ip - tip) * sizeof(instr));
         *tip = op_to_fn[TEMP_COPY].impl[constrained];
         ++_instr_count; ++ip;       
       }
@@ -176,8 +175,8 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     // memory.
     assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_data_size));
-    _code = static_cast<instr *>(std::realloc(_code, (_instr_count+1)*sizeof(instr)));
-    _data = static_cast<byte *>(std::realloc(_data, (_data_size+1)*sizeof(byte)));
+    _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
+    _data = static_cast<byte *>(realloc(_data, (_data_size+1)*sizeof(byte)));
     // Make this RET_ZERO, we should never reach this but just in case ...
     _code[_instr_count] = op_to_fn[RET_ZERO].impl[constrained];
     _data[_data_size]   = 0;
@@ -370,8 +369,8 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
 
 inline
 void Code::update_slot_limits(int slotref) throw() {
-  _min_slotref = std::min(_min_slotref, slotref);
-  _max_slotref = std::max(_max_slotref, slotref);
+  _min_slotref = _min_slotref <= slotref ? _min_slotref : slotref;
+  _max_slotref = _max_slotref >= slotref ? _max_slotref : slotref;
 }
 
 inline 
@@ -382,8 +381,8 @@ void Code::failure(const status_t s) throw() {
 
 void Code::release_buffers() throw() 
 {
-    std::free(_code);
-    std::free(_data);
+    free(_code);
+    free(_data);
     _code = 0;
     _data = 0;
     _own  = false;

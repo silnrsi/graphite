@@ -54,7 +54,7 @@ public:
             m_vec = gralloc<uint32>(rhs.m_length);
             m_length = m_vec ? rhs.m_length : 0;
         }
-        std::copy(rhs.m_vec, rhs.m_vec + m_length, m_vec);
+        memmove(m_vec, rhs.m_vec, m_length * sizeof(uint32));
         return *this;
     }
     bool operator ==(const GrFeatureVal & b) const
@@ -74,7 +74,7 @@ public:
           return;
         }
         uint32 * vec = gralloc<uint32>(reqIndex+1);
-        std::copy(m_vec, m_vec + m_length, vec);
+        memmove(vec, m_vec, m_length * sizeof(uint32));
         memset(vec+m_length, 0, (reqIndex+1-m_length)*sizeof(uint32));
         if (m_vec) free(m_vec);
         m_vec = vec;
