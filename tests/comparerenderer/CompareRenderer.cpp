@@ -190,12 +190,16 @@ protected:
             fprintf(stderr, "Warning no high performance counter available\n");
         QueryPerformanceCounter(&startCounter);
 #endif
+        // check for CRLF
+        int lfLength = 1;
+        if ((m_numLines > 1) && (m_lineOffsets[1] > 2) && (m_fileBuffer[m_lineOffsets[1]-2] == '\r'))
+            lfLength = 2;
         if (m_verbose)
         {
             while (i < m_numLines)
             {
                 fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
-                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
+                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i);
                 pLineResult[i].dump(stdout);
@@ -207,7 +211,7 @@ protected:
         {
             while (i < m_numLines)
             {
-                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - 1;
+                size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i);
                 glyphCount += pLineResult[i].numGlyphs();

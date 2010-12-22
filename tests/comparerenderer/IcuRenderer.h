@@ -37,12 +37,14 @@ class IcuRenderer : public Renderer
 public:
     IcuRenderer(const char * fontFile, int fontSize, int textDir)
         : m_rtl(textDir), m_status(LE_NO_ERROR),
-        m_font(fontFile, static_cast<float>(fontSize), m_status)
+        m_font(fontFile, static_cast<float>(fontSize), m_status),
+        m_scriptCode(USCRIPT_UNKNOWN), m_eIcu(NULL)
     {
     }
 
     virtual ~IcuRenderer()
     {
+        delete m_eIcu;
     }
 
     virtual void renderText(const char *utf8, size_t length, RenderedLine *result)
@@ -72,9 +74,13 @@ public:
             if (scriptCode == USCRIPT_UNKNOWN || scriptCode == USCRIPT_INHERITED)
                 scriptCode = uscript_getScript(c, &ustatus);
         }
-        
-        LayoutEngine *eIcu  = LayoutEngine::layoutEngineFactory(&m_font, scriptCode, langCode, status);
-        if (!eIcu || LE_FAILURE(status))
+        le_int32 typographyFlags = 3; // essential for ligatures and kerning
+        if (m_eIcu == NULL || scriptCode != m_scriptCode)
+        {
+            m_eIcu  = LayoutEngine::layoutEngineFactory(&m_font, scriptCode, langCode, typographyFlags, status);
+            m_scriptCode = scriptCode;
+        }
+        if (!m_eIcu || LE_FAILURE(status))
         {
             new(result) RenderedLine(0, .0f);
             return;
@@ -86,24 +92,32 @@ public:
             U8_NEXT(utf8, i, static_cast<int>(length), c);
             uText.append(c);
         }
-        int32_t glyphCount = eIcu->layoutChars(uText.getBuffer(), 0, count, count, m_rtl, 0., 0., status);
+        int32_t glyphCount = m_eIcu->layoutChars(uText.getBuffer(), 0, count, count, m_rtl, 0., 0., status);
         LEGlyphID *glyphs = new LEGlyphID[glyphCount];
         le_int32 *indices = new le_int32[glyphCount];
         float *positions = new float[glyphCount * 2 + 2];
-        eIcu->getGlyphs(glyphs, status);
-        eIcu->getCharIndices(indices, status);
-        eIcu->getGlyphPositions(positions, status);
+        m_eIcu->getGlyphs(glyphs, status);
+        m_eIcu->getCharIndices(indices, status);
+        m_eIcu->getGlyphPositions(positions, status);
 
+        while ((glyphCount > 0) && (glyphs[glyphCount-1] == 65535))
+        {
+            --glyphCount;
+        }
         RenderedLine *renderedLine = new(result) RenderedLine(glyphCount, positions[2*glyphCount]);
+        int j = 0;
         for (i = 0; i < glyphCount; ++i)
         {
-            (*renderedLine)[i].set(glyphs[i], positions[2*i], positions[2*i + 1],
+            if (glyphs[i] == 65535)
+                continue;
+            (*renderedLine)[j++].set(glyphs[i], positions[2*i], positions[2*i + 1],
                                     indices[i], indices[i]);
         }
+        renderedLine->resize(j);
         delete[] glyphs;
         delete[] indices;
         delete[] positions;
-        delete eIcu;
+        m_eIcu->reset();
     }
 
     virtual const char *name() const { return "ICU"; }
@@ -111,5 +125,7 @@ public:
 private :
     int m_rtl;
     LEErrorCode m_status;
-    PortableFontInstance m_font;   
+    PortableFontInstance m_font;
+    UScriptCode m_scriptCode;
+    LayoutEngine * m_eIcu;
 };

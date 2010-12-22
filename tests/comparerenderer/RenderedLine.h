@@ -140,6 +140,20 @@ class RenderedLine
         // define placement new for windows
         void * operator new (size_t size, RenderedLine * p) { return p; }
         void operator delete (void *, RenderedLine * p) { }
+        bool resize(size_t newGlyphCount)
+        {
+            if (newGlyphCount <= m_numGlyphs)
+                m_numGlyphs = newGlyphCount;
+            else
+            {
+                GlyphInfo * newGlyphs = new GlyphInfo[newGlyphCount];
+                memcpy(newGlyphs, m_glyphs, m_numGlyphs * sizeof(GlyphInfo));
+                m_numGlyphs = newGlyphCount;
+                delete []m_glyphs;
+                m_glyphs = newGlyphs;
+            }
+            return true;
+        }
     private:
         size_t m_numGlyphs;
         float m_advance;

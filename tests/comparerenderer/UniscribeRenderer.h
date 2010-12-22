@@ -88,7 +88,7 @@ public:
         m_hFont(NULL), m_hFontOld(NULL),
         m_glyphBufferSize(0),
         m_charBufferSize(0),
-	    m_script(NULL),
+        m_script(NULL),
         m_scriptItems(NULL),
         m_pClusters(NULL),
         m_pVisAttr(NULL),
@@ -113,10 +113,10 @@ public:
     virtual ~UniscribeRenderer()
     {
         SelectObject(m_hdc, m_hFontOld);
-    	DeleteObject(m_hFont);
+        DeleteObject(m_hFont);
         RemoveFontResourceExA(m_fontFile, FR_PRIVATE, 0);
         DeleteDC(m_hdc);
-    	m_hdc = NULL;
+        m_hdc = NULL;
         delete [] m_scriptItems;
         delete [] m_pClusters;
         delete [] m_pVisAttr;
@@ -178,25 +178,25 @@ public:
     }
     LOGFONTW createLogFontFromName(const WCHAR * fontName, int size)
     {
-	    LOGFONTW lf;
-	    memset(&lf, 0, sizeof(lf));
-	    lf.lfQuality = CLEARTYPE_QUALITY;
-	    lf.lfPitchAndFamily = DEFAULT_PITCH;
-	    lf.lfItalic = false;
-        int dpi = GetDeviceCaps(m_hdc, LOGPIXELSY);
-	    lf.lfHeight = MulDiv(size, dpi, 72);
-	    lf.lfWidth = 0;
-	    lf.lfWeight = FW_DONTCARE;
-	    lf.lfCharSet = DEFAULT_CHARSET;
-	    lf.lfUnderline = false;
+        LOGFONTW lf;
+        memset(&lf, 0, sizeof(lf));
+        lf.lfQuality = CLEARTYPE_QUALITY;//ANTIALIASED_QUALITY;//CLEARTYPE_NATURAL_QUALITY;
+        lf.lfPitchAndFamily = DEFAULT_PITCH;
+        lf.lfItalic = false;
+        int dpiY = GetDeviceCaps(m_hdc, LOGPIXELSY);
+        lf.lfHeight = MulDiv(size, dpiY, 72);
+        lf.lfWidth = 0;
+        lf.lfWeight = FW_DONTCARE;
+        lf.lfCharSet = DEFAULT_CHARSET;
+        lf.lfUnderline = false;
 
         if (fontName)
         {
-	        for (unsigned int i = 0; i < wcslen(fontName) && i < LF_FACESIZE - 1; i++)
-		        lf.lfFaceName[i] = fontName[i];
+            for (unsigned int i = 0; i < wcslen(fontName) && i < LF_FACESIZE - 1; i++)
+                lf.lfFaceName[i] = fontName[i];
         }
-	    // name should already be null terminated from the memset above
-	    return lf;
+        // name should already be null terminated from the memset above
+        return lf;
     }
 
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
@@ -217,9 +217,13 @@ public:
         assert(utf16Length > processor.uint16Processed());
         utf16Length = processor.uint16Processed();
         utf16Text[utf16Length] = 0;
-        allocCharBuffers(utf16Length);
+        allocCharBuffers(utf16Length+1);
         int numItems = 0;
-        HRESULT hr = (m_usp.fScriptItemize)(utf16Text, utf16Length, utf16Length, NULL, NULL, m_scriptItems, &numItems);
+        int offset = 0;
+        if (utf16Text[0] == 0xFEFF)
+            offset += 1;
+        // maxItems must be at least 2 otherwise scriptitemize fails
+        HRESULT hr = (m_usp.fScriptItemize)(utf16Text + offset, utf16Length - offset, utf16Length - offset + 1, NULL, NULL, m_scriptItems, &numItems);
         if (FAILED(hr))
         {
             new(result) RenderedLine(0, .0f);
@@ -316,13 +320,13 @@ private:
     UniscribeFunctions m_usp;
     int m_rtl;
     const char * m_fontFile;
-	HDC m_hdc;
-	LOGFONTW m_logFont;
-	HFONT m_hFont;
-	HFONT m_hFontOld;
+    HDC m_hdc;
+    LOGFONTW m_logFont;
+    HFONT m_hFont;
+    HFONT m_hFontOld;
     size_t m_glyphBufferSize;
     size_t m_charBufferSize;
-	SCRIPT_CACHE m_script;
+    SCRIPT_CACHE m_script;
     SCRIPT_ITEM * m_scriptItems;
     WORD * m_pClusters;
     SCRIPT_VISATTR * m_pVisAttr;
