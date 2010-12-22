@@ -25,8 +25,6 @@
 #include "CmapCache.h"
 #include "SegCache.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 class SegCache;
 struct GrFace;
 
@@ -108,5 +106,4 @@ private:
     uint16 m_zwspGid;
 };
 
-}}}}
 

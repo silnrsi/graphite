@@ -7,8 +7,6 @@
 #include "GrList.h"
 
 
-using namespace org::sil::graphite::v2;
-
 void printVector(std::vector<int> & v)
 {
     for (size_t i = 0; i < v.size(); i++)

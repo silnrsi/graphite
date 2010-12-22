@@ -23,8 +23,6 @@
 
 #include "Main.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 struct GrSegment;
 struct GrSlot;
 class SegCacheEntry;
@@ -68,8 +66,8 @@ public:
     ~SegCacheEntry() { clear(); };
     void clear();
     size_t glyphLength() const { return m_glyphLength; }
-    const Slot * first() const { return m_glyph; }
-    const Slot * last() const { return m_glyph + (m_glyphLength - 1); }
+    const GrSlot * first() const { return m_glyph; }
+    const GrSlot * last() const { return m_glyph + (m_glyphLength - 1); }
 
     void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
@@ -98,10 +96,9 @@ private:
      * the length of this array is determined by the position in the SegCachePrefixEntry */
     uint16 * m_unicode;
     /** slots after shapping and positioning */
-    Slot * m_glyph;
+    GrSlot * m_glyph;
     uint16 * m_attr;
     mutable unsigned long long m_accessCount;
     mutable unsigned long long m_lastAccess;
 };
 
-}}}} // end namespace

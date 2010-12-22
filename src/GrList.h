@@ -22,7 +22,6 @@
 
 // designed to have a limited subset of the std::vector api
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 template <class T> class GrList;
 template <class T> class GrListUnitIterator;
@@ -753,4 +752,3 @@ private:
 };
 
 
-}}}}

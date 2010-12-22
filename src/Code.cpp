@@ -41,7 +41,6 @@
 #endif
 #endif
 
-using namespace org::sil::graphite::v2;
 using namespace vm;
 
 namespace {

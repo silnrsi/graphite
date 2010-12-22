@@ -24,7 +24,6 @@
 #include "GlyphFace.h"
 #include "graphite2/Font.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct GrSegment;
 struct GrFeatureVal;
@@ -89,4 +88,3 @@ private:      //defensive
     GlyphFaceCache& operator=(const GlyphFaceCache&);
 };
 
-}}}} // namespace

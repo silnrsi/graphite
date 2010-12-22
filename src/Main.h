@@ -27,7 +27,6 @@
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
 
 #if !defined WORDS_BIGENDIAN || defined PC_OS
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 typedef gr_uint8 uint8;
 typedef gr_uint8 byte;
@@ -42,13 +41,11 @@ inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
 inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }
 inline uint32 swap32(uint32 x) { return (uint32(swap16(uint16(x))) << 16) | swap16(uint16(x >> 16)); }
 inline  int32 swap32(int32 x)  { return int16(swap16(uint16(x))); }
-}}}}
 #else
 #define swap16(x) (x)
 #define swap32(x) (x)
 #endif
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 inline uint16 read16(const byte *&x) { 
   const uint16 r = swap16(*reinterpret_cast<const uint16 *&>(x));
   x += sizeof(uint16);
@@ -61,7 +58,6 @@ inline uint32 read32(const byte *&x) {
   return r;
 }
 inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
-}}}}
 
 #define CLASS_NEW_DELETE \
     void * operator new[](size_t size) {return malloc(size);} \
@@ -75,7 +71,6 @@ inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
 #define GR_UNUSED
 #endif
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
     // typesafe wrapper around malloc for simple types
     // use free(pointer) to deallocate
@@ -89,6 +84,5 @@ namespace org { namespace sil { namespace graphite { namespace v2 {
         return reinterpret_cast<T*>(calloc(n, sizeof(T)));
     }
 
-}}}} // namespace
 
 

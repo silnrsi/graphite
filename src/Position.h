@@ -21,7 +21,6 @@
 */
 #pragma once
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class DoNotInitialize
 {
@@ -43,4 +42,3 @@ public:
     float y;
 };
 
-}}}} // namespace

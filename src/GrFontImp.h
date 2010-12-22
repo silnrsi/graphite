@@ -25,8 +25,6 @@
 #include "Main.h"
 #include "GrFaceImp.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
 struct GrFont
@@ -58,7 +56,12 @@ private:			//defensive on m_advances
     GrFont& operator=(const GrFont&);
 };
 
-class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
+struct gr_font : public GrFont 
+{
+  gr_font(float ppm, const GrFace *face/*needed for scaling*/) : GrFont(ppm, face)  {}
+};
+
+class GrSimpleFont : public gr_font      //has no external hints - gets advance information from the face
 {
 public:
     GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face);
@@ -68,7 +71,7 @@ private:
     const GrFace *m_face;   // GrFace to get the rest of the info from
 };
 
-class GrHintedFont : public GrFont
+class GrHintedFont : public gr_font
 {
 public:
     GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/);
@@ -80,5 +83,3 @@ private:
     const void* m_appFontHandle/*non-NULL*/;
     gr_advance_fn m_advance;
 };
-
-}}}} // namespace

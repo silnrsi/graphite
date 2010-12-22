@@ -49,10 +49,6 @@
 #include <graphite/ITextSource.h>
 
 class nsIGrSegWrapper;
-namespace grutils
-{
-//    class GrFeatureParser;
-}
 /*-----------------------------------------------------------------------------
   Class: ITextSource
   This class provides an interface of a text source for the Graphite engine.
@@ -142,11 +138,6 @@ public: // methods that will go
     int * pichMin, int * pichLim) { return gr::kresNotImpl; };
 
 };
-
-
-#if !defined(GR_NAMESPACE)
-using namespace gr;
-#endif
 
 #endif // !GRUTFTXTSRC_INCLUDED
 

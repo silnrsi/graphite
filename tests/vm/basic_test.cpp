@@ -6,7 +6,6 @@
 #include "Rule.h"
 
 using namespace vm;
-using namespace org::sil::graphite::v2;
 
 const byte simple_prog[] = 
 {
@@ -20,12 +19,10 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 struct GrSegment 
 {
     byte x;
 };
-}}}} // namespace
 
 #define _msg(m) #m
 

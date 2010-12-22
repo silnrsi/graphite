@@ -20,14 +20,16 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-#include <cstring>
-#include "graphite2/Types.h"
+// #include <cstring>
+// #include "graphite2/Types.h"
 #include "graphite2/Font.h"
 #include "Main.h"
 #include "FeaturesImp.h"
-//#include <map> // avoid libstdc++
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+// Forward declarations for implmentation types
+class FeatureMap;
+class GrFace;
+
 
 class FeatureSetting
 {
@@ -111,7 +113,7 @@ private:        //unimplemented
     GrFeatureRef& operator=(const GrFeatureRef&);
 };
 
-typedef GrFeatureRef FeatureRef;
+struct gr_feature_ref : public GrFeatureRef {};
 
 class NameAndFeatureRef
 {
@@ -129,7 +131,7 @@ class NameAndFeatureRef
     const GrFeatureRef* m_pFRef;
 };
 
-struct FeatureMap
+class FeatureMap
 {
 public:
     FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL),
@@ -192,4 +194,3 @@ private:        //defensive on m_langFeats
     SillMap& operator=(const SillMap&);
 };
 
-}}}} // namespace

@@ -21,65 +21,67 @@
 */
 #include "graphite2/Segment.h"
 #include "GrSegmentImp.h"
+#include "SlotImp.h"
 #include "processUTF.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-template <class LIMIT, class CHARPROCESSOR>
-size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
+namespace 
 {
-    BreakOnError breakOnError;
-    
-    processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
-    if (pError) {
-        *pError = breakOnError.m_pErrorPos;
-    }
-    return pProcessor->charsProcessed();
-}
-
-class CharCounterToNul
-{
-public:
-      CharCounterToNul()
-      :	  m_nCharsProcessed(0) 
-      {
-      }	  
-
-      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
-      {
-	  if (cid==0)
-	      return false;
-	  ++m_nCharsProcessed;
-	  return true;
+  template <class LIMIT, class CHARPROCESSOR>
+  size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
+  {
+      BreakOnError breakOnError;
+      
+      processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
+      if (pError) {
+          *pError = breakOnError.m_pErrorPos;
       }
+      return pProcessor->charsProcessed();
+  }
 
-      size_t charsProcessed() const { return m_nCharsProcessed; }
+  class CharCounterToNul
+  {
+  public:
+        CharCounterToNul()
+        :	  m_nCharsProcessed(0) 
+        {
+        }	  
 
-private:
-      size_t m_nCharsProcessed ;
-};
+        bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
+        {
+            if (cid==0)
+                return false;
+            ++m_nCharsProcessed;
+            return true;
+        }
 
-static GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
-{
-    // if (!font) return NULL;
-    GrSegment* pRes=new GrSegment(nChars, face, script, dir);
+        size_t charsProcessed() const { return m_nCharsProcessed; }
 
-    pRes->read_text(face, pFeats, enc, pStart, nChars);
-    pRes->runGraphite();
-    // run the line break passes
-    // run the substitution passes
-    pRes->prepare_pos(font);
-    // run the positioning passes
-    pRes->finalise(font);
-#ifndef DISABLE_TRACING
-    pRes->logSegment(enc, pStart, nChars);
-#endif
-    return pRes;
+  private:
+        size_t m_nCharsProcessed ;
+  };
+
+  static gr_segment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+  {
+      // if (!font) return NULL;
+      GrSegment* pRes=new GrSegment(nChars, face, script, dir);
+
+      pRes->read_text(face, pFeats, enc, pStart, nChars);
+      pRes->runGraphite();
+      // run the line break passes
+      // run the substitution passes
+      pRes->prepare_pos(font);
+      // run the positioning passes
+      pRes->finalise(font);
+  #ifndef DISABLE_TRACING
+      pRes->logSegment(enc, pStart, nChars);
+  #endif
+      return static_cast<gr_segment*>(pRes);
+  }
 }
 
-
-extern "C" 
+extern "C"
 {
+
 GRNG_EXPORT size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
   if (buffer_end)
@@ -97,72 +99,69 @@ GRNG_EXPORT size_t gr_count_unicode_characters(gr_encform enc, const void* buffe
 }
 
 
-GRNG_EXPORT GrSegment* gr_make_seg(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+GRNG_EXPORT gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, uint32 script, const gr_feature_val* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
 {
     if (pFeats == NULL)
-        pFeats = face->theSill().cloneFeatures(0);
+        pFeats = static_cast<const gr_feature_val*>(face->theSill().cloneFeatures(0));
     return makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
 }
 
 
-GRNG_EXPORT void gr_seg_destroy(GrSegment* p)
+GRNG_EXPORT void gr_seg_destroy(gr_segment* p)
 {
     delete p;
 }
 
 
-GRNG_EXPORT float gr_seg_advance_X(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().x;
 }
 
 
-GRNG_EXPORT float gr_seg_advance_Y(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().y;
 }
 
 
-GRNG_EXPORT unsigned int gr_seg_n_cinfo(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->charInfoCount();
 }
 
 
-GRNG_EXPORT const CharInfo* gr_seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
+GRNG_EXPORT const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
     assert(pSeg);
-    return pSeg->charinfo(index);
+    return static_cast<const gr_char_info*>(pSeg->charinfo(index));
 }
 
-GRNG_EXPORT unsigned int gr_seg_n_slots(const GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->slotCount();
 }
 
-GRNG_EXPORT const Slot* gr_seg_first_slot(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return pSeg->first();
+    return static_cast<const gr_slot*>(pSeg->first());
 }
 
-GRNG_EXPORT const Slot* gr_seg_last_slot(GrSegment* pSeg/*not NULL*/)
+GRNG_EXPORT const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return pSeg->last();
+    return static_cast<const gr_slot*>(pSeg->first());
 }
 
-GRNG_EXPORT void gr_seg_char_slots(const GrSegment *pSeg, uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends)
+GRNG_EXPORT void gr_seg_char_slots(const gr_segment *pSeg, uint32 *begins, uint32 *ends, gr_slot **sbegins, gr_slot **sends)
 {
     assert(pSeg && begins && ends);
-    return pSeg->getCharSlots(begins, ends, sbegins, sends);
+    pSeg->getCharSlots(begins, ends, reinterpret_cast<GrSlot**>(sbegins), reinterpret_cast<GrSlot**>(sends));
 }
 
-
-}
-
-}}}} // namespace
+} // extern "C"

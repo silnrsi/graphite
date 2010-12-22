@@ -24,8 +24,6 @@
 #include "CharInfoImp.h"
 #include "Rule.h"
 
-using namespace org::sil::graphite::v2;
-
 GrSlot::GrSlot() :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),

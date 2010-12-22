@@ -22,14 +22,14 @@
 #include "graphite2/Font.h"
 #include "FeaturesImp.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+extern "C" {
 
-GRNG_EXPORT GrFeatureVal* featureval_clone(const GrFeatureVal* pfeatures/*may be NULL*/)
+GRNG_EXPORT gr_feature_val* featureval_clone(const gr_feature_val* pfeatures/*may be NULL*/)
 {                      //When finished with the Features, call features_destroy    
     if (pfeatures)
-    return pfeatures->clone();
+    return static_cast<gr_feature_val*>(pfeatures->clone());
     else
-    return new Features;
+    return static_cast<gr_feature_val*>(new Features);
 }
 
 #if 0
@@ -48,11 +48,11 @@ GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, cons
 }
 #endif 
   
-GRNG_EXPORT void gr_featureval_destroy(GrFeatureVal *p)
+GRNG_EXPORT void gr_featureval_destroy(gr_feature_val *p)
 {
     delete p;
 }
 
 
 
-}}}} // namespace
+} // extern "C"

@@ -26,7 +26,6 @@
 #include "Main.h"
 #include "GrFontImp.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 #define SLOT_DELETED    1
 #define SLOT_INSERT	2
@@ -109,6 +108,5 @@ private:
     uint16 *m_userAttr;     // pointer to user attributes
 };
 
-typedef struct GrSlot Slot;
+struct gr_slot : public GrSlot {};
 
-}}}} // namespace

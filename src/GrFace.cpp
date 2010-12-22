@@ -26,8 +26,6 @@
 
 #ifndef DISABLE_FILE_FACE
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 
 
 FileFace::FileFace(const char *filename) :
@@ -161,10 +159,10 @@ const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size
 
 extern "C" 
 {
-    GRNG_EXPORT GrFace* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
-                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face    
+    GRNG_EXPORT gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
+                      //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
     {
-        GrFace *res = new GrFace(appFaceHandle, getTable);
+        gr_face *res = new gr_face(appFaceHandle, getTable);
 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementFace);
@@ -181,11 +179,11 @@ extern "C"
         XmlTraceLog::get().closeElement(ElementFace);
 #endif
         
-        if (!(faceOptions & gr_face_dumb_rendering) && !valid) {
+        if (!(faceOptions & gr_face_dumbRendering) && !valid) {
             delete res;
             return 0;
         }
-        return res;
+        return static_cast<gr_face *>(res);
     }
 
     GRNG_EXPORT uint32 gr_str_to_tag(const char *str)
@@ -209,53 +207,53 @@ extern "C"
     }
             
 
-    GRNG_EXPORT GrFeatureVal* gr_face_featureval_for_lang(const GrFace* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+    GRNG_EXPORT gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
     {
         assert(pFace);
-        return pFace->theSill().cloneFeatures(langname);
+        return static_cast<gr_feature_val *>(pFace->theSill().cloneFeatures(langname));
     }
 
 
-    GRNG_EXPORT const GrFeatureRef* gr_face_find_fref(const GrFace* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
-        const FeatureRef* pRef = pFace->featureById(featId);
-        return pRef;
+        const GrFeatureRef* pRef = pFace->featureById(featId);
+        return static_cast<const gr_feature_ref*>(pRef);
     }
 
-    GRNG_EXPORT unsigned short gr_face_n_fref(const GrFace* pFace)
+    GRNG_EXPORT unsigned short gr_face_n_fref(const gr_face* pFace)
     {
         assert(pFace);
         return pFace->numFeatures();
     }
 
-    GRNG_EXPORT const GrFeatureRef* gr_face_fref(const GrFace* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+    GRNG_EXPORT const gr_feature_ref* gr_face_fref(const gr_face* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
-        const FeatureRef* pRef = pFace->feature(i);
-        return pRef;
+        const GrFeatureRef* pRef = pFace->feature(i);
+        return static_cast<const gr_feature_ref*>(pRef);
     }
 
-    GRNG_EXPORT unsigned short gr_face_n_languages(const GrFace* pFace)
+    GRNG_EXPORT unsigned short gr_face_n_languages(const gr_face* pFace)
     {
         assert(pFace);
         return pFace->theSill().numLanguages();
     }
 
-    GRNG_EXPORT uint32 gr_face_lang_by_index(const GrFace* pFace, uint16 i)
+    GRNG_EXPORT uint32 gr_face_lang_by_index(const gr_face* pFace, uint16 i)
     {
         assert(pFace);
         return pFace->theSill().getLangName(i);
     }
 
 
-    GRNG_EXPORT void gr_face_destroy(GrFace *face)
+    GRNG_EXPORT void gr_face_destroy(gr_face *face)
     {
         delete face;
     }
 
 
-    GRNG_EXPORT uint16 gr_face_name_lang_for_locale(GrFace *face, const char * locale)
+    GRNG_EXPORT uint16 gr_face_name_lang_for_locale(gr_face *face, const char * locale)
     {
         if (face)
         {
@@ -266,7 +264,7 @@ extern "C"
 
  #if 0      //hidden since no way to release atm.
  
-    GRNG_EXPORT uint16 *face_name(const GrFace * pFace, uint16 nameid, uint16 lid)
+    GRNG_EXPORT uint16 *face_name(const gr_face * pFace, uint16 nameid, uint16 lid)
     {
         size_t nLen = 0, lOffset = 0, lSize = 0;
         const void *pName = pFace->getTable(tagName, &nLen);
@@ -282,19 +280,19 @@ extern "C"
     }
 #endif
 
-    GRNG_EXPORT unsigned short face_n_glyphs(const GrFace* pFace)
+    GRNG_EXPORT unsigned short face_n_glyphs(const gr_face* pFace)
     {
         return pFace->getGlyphFaceCache()->numGlyphs();
     }
 
 
 #ifndef DISABLE_FILE_FACE
-    GRNG_EXPORT GrFace* gr_make_file_face(const char *filename, unsigned int faceOptions)
+    GRNG_EXPORT gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     {
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          GrFace* pRes =gr_make_face(pFileFace, &FileFace_table_fn, faceOptions);
+          gr_face* pRes =gr_make_face(pFileFace, &FileFace_table_fn, faceOptions);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership
@@ -311,5 +309,4 @@ extern "C"
 #endif      //!DISABLE_FILE_FACE
 }
 
-}}}}// end namespace
 

@@ -31,13 +31,13 @@
 // define a few basic functions to save using libstdc++
 
 // declaration in c++/x.y/bits/functexcept.h
-namespace std
-{
-    // it would be nice to remove these eventually
-    // currently they are needed by ext/malloc_allocator.h and vector
-    void __attribute__ ((visibility("internal"))) __throw_bad_alloc(void) { assert(false); };
-    void __attribute__ ((visibility("internal"))) __throw_length_error(const char* c)
-    { fprintf(stderr, "Length error %s\n", c); assert(false);}
-}
+// namespace std
+// {
+//     // it would be nice to remove these eventually
+//     // currently they are needed by ext/malloc_allocator.h and vector
+//     void __attribute__ ((visibility("internal"))) __throw_bad_alloc(void) { assert(false); };
+//     void __attribute__ ((visibility("internal"))) __throw_length_error(const char* c)
+//     { fprintf(stderr, "Length error %s\n", c); assert(false);}
+// }
 
 #endif

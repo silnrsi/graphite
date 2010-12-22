@@ -31,7 +31,6 @@
 #include "Main.h"
 #include "Machine.h"
 
-using namespace org::sil::graphite::v2;
 
 namespace vm
 {

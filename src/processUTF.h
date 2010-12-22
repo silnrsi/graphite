@@ -25,7 +25,6 @@
 #include "Main.h"
 #include "graphite2/Segment.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 class NoLimit		//relies on the processor.processChar() failing, such as because of a terminating nul character
 {
@@ -482,8 +481,6 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
         size_t m_maxLength;
         uint32 * m_buffer;
     };
-
-}}}} // namespace
 
 #endif			//!PROCESS_UTF_INCLUDE
 

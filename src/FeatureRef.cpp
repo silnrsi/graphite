@@ -24,26 +24,10 @@
 #include "GrFaceImp.h"
 #include "NameTable.h"
 
-using namespace org::sil::graphite::v2;
+extern "C"
+{
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-/*
-GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-  return new FeatureRef(bits, index, mask);
-}
-
-
-GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-    if (pfeatureref)
-    return new FeatureRef(*pfeatureref);
-    else
-    return NULL;
-}
-*/
-
-GRNG_EXPORT uint16 gr_fref_feature_value(const GrFeatureRef* pfeatureref, const GrFeatureVal* feats)    //returns 0 if either pointer is NULL
+GRNG_EXPORT gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
@@ -54,7 +38,7 @@ GRNG_EXPORT uint16 gr_fref_feature_value(const GrFeatureRef* pfeatureref, const 
 }
 
 
-GRNG_EXPORT int gr_fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 val, GrFeatureVal* pDest)
+GRNG_EXPORT int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest)
 {
     if (!pfeatureref)
     return false;
@@ -65,7 +49,7 @@ GRNG_EXPORT int gr_fref_set_feature_value(const GrFeatureRef* pfeatureref, uint1
 }
 
 
-GRNG_EXPORT uint32 gr_fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if pointer is NULL
+GRNG_EXPORT uint32 gr_fref_id(const gr_feature_ref* pfeatureref)    //returns 0 if pointer is NULL
 {
   if (!pfeatureref)
     return 0;
@@ -74,7 +58,7 @@ GRNG_EXPORT uint32 gr_fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if
 }
 
 
-GRNG_EXPORT uint16 gr_fref_n_values(const GrFeatureRef* pfeatureref)
+GRNG_EXPORT uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref)
 {
     if(!pfeatureref)
         return 0;
@@ -82,7 +66,7 @@ GRNG_EXPORT uint16 gr_fref_n_values(const GrFeatureRef* pfeatureref)
 }
 
 
-GRNG_EXPORT int16 gr_fref_value(const GrFeatureRef* pfeatureref, uint16 settingno)
+GRNG_EXPORT int16 gr_fref_value(const gr_feature_ref* pfeatureref, uint16 settingno)
 {
     if(!pfeatureref || (settingno >= pfeatureref->getNumSettings()))
     {
@@ -92,7 +76,7 @@ GRNG_EXPORT int16 gr_fref_value(const GrFeatureRef* pfeatureref, uint16 settingn
 }
 
 
-GRNG_EXPORT void* gr_fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, gr_encform utf, uint32 *length)
+GRNG_EXPORT void* gr_fref_label(const gr_feature_ref* pfeatureref, uint16 *langId, gr_encform utf, uint32 *length)
 {
     if(!pfeatureref || !pfeatureref->getFace())
     {
@@ -112,7 +96,7 @@ GRNG_EXPORT void* gr_fref_label(const GrFeatureRef* pfeatureref, uint16 *langId,
 }
 
 
-GRNG_EXPORT void* gr_fref_value_label(const GrFeatureRef*pfeatureref, uint16 setting,
+GRNG_EXPORT void* gr_fref_value_label(const gr_feature_ref*pfeatureref, uint16 setting,
     uint16 *langId, gr_encform utf, uint32 *length)
 {
     if(!pfeatureref || (setting >= pfeatureref->getNumSettings()) || !pfeatureref->getFace())
@@ -139,4 +123,4 @@ GRNG_EXPORT void gr_label_destroy(void * label)
         free(label);
 }
 
-}}}} // namespace
+} // extern "C"

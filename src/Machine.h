@@ -37,14 +37,12 @@
 #define     REGPARM(n)
 #endif
 
-namespace gr2 = org::sil::graphite::v2;
+#define gr2
 
 // Forward declarations
-namespace org { namespace sil { namespace graphite { namespace v2 {
-    struct GrSegment;
-    struct GrSlot;
-    class SlotMap;
-}}}}
+struct GrSegment;
+struct GrSlot;
+class SlotMap;
 
 
 namespace vm 

@@ -23,15 +23,13 @@
 
 #include "GrFaceImp.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 class SegCacheStore;
 
-class GrCachedFace : public GrFace
+class GrCachedFace : public gr_face
 {
 public:
     GrCachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) :
-        GrFace(appFaceHandle, getTable2),
+        gr_face(appFaceHandle, getTable2),
         m_cacheStore(NULL) {};
     bool setupCache(unsigned int cacheSize);
     virtual ~GrCachedFace();
@@ -41,4 +39,3 @@ private:
     SegCacheStore * m_cacheStore;
 };
 
-}}}} // namespace

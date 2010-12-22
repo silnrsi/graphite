@@ -24,7 +24,6 @@
 #include "GlyphFaceCache.h"
 #include "TtfUtil.h"
 
-using namespace org::sil::graphite::v2;
 
 GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 :   m_bbox(DoNotInitialize()), m_advance(DoNotInitialize())

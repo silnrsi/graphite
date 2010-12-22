@@ -25,14 +25,6 @@
 #ifndef DISABLE_TRACING
 
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-
-
-
-
-
-
 // start this at same line number as in XmlTraceLogTags.h
 const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
     XmlTraceLogTag("GraphitengLog", GRLOG_ALL),
@@ -166,5 +158,4 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "misses"
 };
 
-}}}} // namespace
 #endif

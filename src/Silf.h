@@ -25,7 +25,6 @@
 
 #include "Pass.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct GrFace;
 struct GrSegment;
@@ -87,4 +86,3 @@ private:			//defensive
     Silf& operator=(const Silf&);
 };
 
-}}}} // namespace

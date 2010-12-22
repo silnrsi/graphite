@@ -22,27 +22,27 @@
 #include "graphite2/Font.h"
 #include "GrFontImp.h"
 
-using namespace org::sil::graphite::v2;
+extern "C" {
 
-extern "C" 
+GRNG_EXPORT gr_font* gr_make_font(float ppm/*pixels per em*/, const gr_face *face)
 {
-    GRNG_EXPORT GrFont* gr_make_font(float ppm/*pixels per em*/, const GrFace *face)
-    {
-        return new GrSimpleFont(ppm, face);
-    }
-
-
-    GRNG_EXPORT GrFont* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/)
-    {                 //the appFontHandle must stay alive all the time when the GrFont is alive. When finished with the GrFont, call destroy_GrFont    
-        return new GrHintedFont(ppm, appFontHandle, advance, face);
-    }
-
-
-    GRNG_EXPORT void gr_font_destroy(GrFont *font)
-    {
-        delete font;
-    }
+    return new GrSimpleFont(ppm, face);
 }
+
+
+GRNG_EXPORT gr_font* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const gr_face *face/*needed for scaling*/)
+{                 //the appFontHandle must stay alive all the time when the gr_font is alive. When finished with the gr_font, call destroy_gr_font    
+    return new GrHintedFont(ppm, appFontHandle, advance, face);
+}
+
+
+GRNG_EXPORT void gr_font_destroy(gr_font *font)
+{
+    delete font;
+}
+
+
+} // extern "C"
 
 
 

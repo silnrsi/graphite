@@ -314,8 +314,8 @@ int main(int argc, char ** argv)
     {
         FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "wb");
         int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
-            (gr2::GRLOG_SEGMENT | gr2::GRLOG_CACHE);
-        gr2::graphite_start_logging(traceFile, static_cast<gr2::GrLogMask>(logMask));
+            (GRLOG_SEGMENT | GRLOG_CACHE);
+        graphite_start_logging(traceFile, static_cast<GrLogMask>(logMask));
     }
 
     if (rendererOptions[OptAlternativeFont].exists())
@@ -413,7 +413,7 @@ int main(int argc, char ** argv)
         }
     }
     if (rendererOptions[OptLogFile].exists()) fclose(log);
-    if (rendererOptions[OptTrace].exists()) gr2::graphite_stop_logging();
+    if (rendererOptions[OptTrace].exists()) graphite_stop_logging();
 
     return status;
 }

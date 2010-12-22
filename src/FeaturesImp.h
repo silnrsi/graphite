@@ -25,8 +25,6 @@
 #include <cassert>
 #include "Main.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 struct GrFeatureRef;
 struct FeatureMap;
 
@@ -100,6 +98,6 @@ private:
     const FeatureMap* m_pMap;
 };
 
-typedef GrFeatureVal Features;
+struct gr_feature_val : public GrFeatureVal {};
 
-}}}} // namespace
+typedef GrFeatureVal Features;

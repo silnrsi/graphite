@@ -24,8 +24,6 @@
 #include <cstdlib>
 #include "Code.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
 struct GrSegment; // from C interface
 struct GrFace; // from C interface
 class Silf;
@@ -50,7 +48,7 @@ private:
     int    doAction(const vm::Code* codeptr, GrSlot * & slot_out, vm::Machine &) const;
     bool   testPassConstraint(vm::Machine & m) const;
     bool   testConstraint(const Rule & r, vm::Machine &) const;
-    bool   readFSM(const org::sil::graphite::v2::byte* p, const org::sil::graphite::v2::byte*const pass_start, const size_t max_offset);
+    bool   readFSM(const byte* p, const byte*const pass_start, const size_t max_offset);
     bool   readRules(const uint16 * rule_map, const size_t num_entries, 
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
@@ -87,4 +85,3 @@ private:		//defensive
     Pass& operator=(const Pass&);
 };
 
-}}}} // namespace

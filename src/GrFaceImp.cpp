@@ -20,7 +20,6 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "GrFaceImp.h"
-#include "VMScratch.h"
 #include <string.h>
 #include "GrSegmentImp.h"
 #include "CmapCache.h"
@@ -29,7 +28,6 @@
 #include "XmlTraceLog.h"
 #include <graphite2/Segment.h>
 
-using namespace org::sil::graphite::v2;
 
 GrFace::~GrFace()
 {

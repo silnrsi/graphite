@@ -28,7 +28,6 @@
 #include "SegCacheStore.h"
 #include "CmapCache.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     :
@@ -240,4 +239,3 @@ uint32 SegCachePrefixEntry::purge(unsigned long long minAccessCount,
     return totalPurged;
 }
 
-}}}} // namespace

@@ -23,21 +23,20 @@
 #include "graphite2/Segment.h"
 #include "CharInfoImp.h"
 
-using namespace org::sil::graphite::v2;
-
-extern "C" 
+extern "C"
 {
-GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const GrCharInfo* p/*not NULL*/)
+
+GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/)
 {
     assert(p);
     return p->unicodeChar();
 }
 
 
-GRNG_EXPORT int gr_cinfo_break_weight(const GrCharInfo* p/*not NULL*/)
+GRNG_EXPORT int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/)
 {
     assert(p);
     return p->breakWeight();
 }
 
-}
+} // extern "C"

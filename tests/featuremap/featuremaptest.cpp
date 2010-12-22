@@ -29,8 +29,6 @@
 #include "TtfUtil.h"
 
 
-namespace gr2 = org::sil::graphite::v2;
-
 #pragma pack(push, 1)
 
 // TODO fix this for other platforms
@@ -39,27 +37,27 @@ namespace gr2 = org::sil::graphite::v2;
 
 struct FeatHeader
 {
-    gr2::uint16 m_major;
-    gr2::uint16 m_minor;
-    gr2::uint16 m_numFeat;
-    gr2::uint16 m_reserved1;
-    gr2::uint32 m_reserved2;
+    uint16 m_major;
+    uint16 m_minor;
+    uint16 m_numFeat;
+    uint16 m_reserved1;
+    uint32 m_reserved2;
 };
 
 struct FeatDefn
 {
-    gr2::uint32 m_featId;
-    gr2::uint16 m_numFeatSettings;
-    gr2::uint16 m_reserved1;
-    gr2::uint32 m_settingsOffset;
-    gr2::uint16 m_flags;
-    gr2::uint16 m_label;
+    uint32 m_featId;
+    uint16 m_numFeatSettings;
+    uint16 m_reserved1;
+    uint32 m_settingsOffset;
+    uint16 m_flags;
+    uint16 m_label;
 };
 
 struct FeatSetting
 {
-    gr2::int16 m_value;
-    gr2::uint16 m_label;
+    int16 m_value;
+    uint16 m_label;
 };
 
 struct FeatTableTestA
@@ -169,22 +167,22 @@ public:
         memcpy(m_table, &data, sizeof(T));
         // convert to big endian if needed
         T * bigEndian = reinterpret_cast<T*>(m_table);
-        bigEndian->m_header.m_major = gr2::swap16(data.m_header.m_major);
-        bigEndian->m_header.m_minor = gr2::swap16(data.m_header.m_minor);
-        bigEndian->m_header.m_numFeat = gr2::swap16(data.m_header.m_numFeat);
+        bigEndian->m_header.m_major = swap16(data.m_header.m_major);
+        bigEndian->m_header.m_minor = swap16(data.m_header.m_minor);
+        bigEndian->m_header.m_numFeat = swap16(data.m_header.m_numFeat);
         m_tableLen = sizeof(T);
         for (size_t i = 0; i < sizeof(data.m_defs)/sizeof(FeatDefn); i++)
         {
-            bigEndian->m_defs[i].m_featId = gr2::swap32(data.m_defs[i].m_featId);
-            bigEndian->m_defs[i].m_numFeatSettings = gr2::swap16(data.m_defs[i].m_numFeatSettings);
-            bigEndian->m_defs[i].m_settingsOffset = gr2::swap32(data.m_defs[i].m_settingsOffset);
-            bigEndian->m_defs[i].m_flags = gr2::swap16(data.m_defs[i].m_flags);
-            bigEndian->m_defs[i].m_label = gr2::swap16(data.m_defs[i].m_label);
+            bigEndian->m_defs[i].m_featId = swap32(data.m_defs[i].m_featId);
+            bigEndian->m_defs[i].m_numFeatSettings = swap16(data.m_defs[i].m_numFeatSettings);
+            bigEndian->m_defs[i].m_settingsOffset = swap32(data.m_defs[i].m_settingsOffset);
+            bigEndian->m_defs[i].m_flags = swap16(data.m_defs[i].m_flags);
+            bigEndian->m_defs[i].m_label = swap16(data.m_defs[i].m_label);
         }
         for (size_t i = 0; i < sizeof(data.m_settings)/sizeof(FeatSetting); i++)
         {
-            bigEndian->m_settings[i].m_value = gr2::swap16(data.m_settings[i].m_value);
-            bigEndian->m_settings[i].m_label = gr2::swap16(data.m_settings[i].m_label);
+            bigEndian->m_settings[i].m_value = swap16(data.m_settings[i].m_value);
+            bigEndian->m_settings[i].m_label = swap16(data.m_settings[i].m_label);
         }
     }
     void * m_table;
@@ -219,10 +217,10 @@ template <class T> void testAssertEqual(const char * msg, T a, T b)
 
 template <class T> void testFeatTable(const T & table, const char * testName)
 {
-    gr2::FeatureMap testFeatureMap;
+    FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<T>(table);
-    const gr2::GrFace* npFace=NULL;
+    const GrFace* npFace=NULL;
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("readFeats", readStatus);
     fprintf(stderr, testName, NULL);
@@ -230,7 +228,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 
     for (size_t i = 0; i < sizeof(table.m_defs) / sizeof(FeatDefn); i++)
     {
-        const gr2::FeatureRef * ref = testFeatureMap.findFeatureRef(table.m_defs[i].m_featId);
+        const GrFeatureRef * ref = testFeatureMap.findFeatureRef(table.m_defs[i].m_featId);
         testAssert("test feat\n", ref);
         testAssertEqual("test feat settings %hu %hu\n", ref->getNumSettings(), table.m_defs[i].m_numFeatSettings);
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);
@@ -254,10 +252,10 @@ int main(int /*argc*/, char ** /*argv*/)
     testFeatTable<FeatTableTestE>(testDataE, "E\n");
 
     // test a bad settings offset stradling the end of the table
-    gr2::FeatureMap testFeatureMap;
+    FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<FeatTableTestE>(testBadOffset);
-    const gr2::GrFace* npFace=NULL;
+    const GrFace* npFace=NULL;
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("fail gracefully on bad table", !readStatus);
 

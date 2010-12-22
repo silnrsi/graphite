@@ -35,7 +35,6 @@
 #include <cassert>
 #include "TtfTypes.h"
 #endif      //!DISABLE_FILE_FACE
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct GrSegment;
 struct GrFeatureVal;
@@ -179,7 +178,12 @@ private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
 };
 
 
-inline bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
+struct gr_face : public GrFace 
+{
+  gr_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2): GrFace(appFaceHandle, getTable2) {}
+};
+
+inline bool GrFeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
 { 
     if (val>m_max || !m_pFace)
       return false;
@@ -196,7 +200,7 @@ inline bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const
     return true;
 }
 
-inline uint16 FeatureRef::getFeatureVal(const Features& feats) const
+inline uint16 GrFeatureRef::getFeatureVal(const Features& feats) const
 { 
   if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
     return (feats.m_vec[m_index] & m_mask) >> m_bits; 
@@ -204,4 +208,3 @@ inline uint16 FeatureRef::getFeatureVal(const Features& feats) const
     return 0;
 }
 
-}}}} // namespace

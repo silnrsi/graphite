@@ -32,8 +32,6 @@
 #include "TtfUtil.h"
 
 
-namespace gr2 = org::sil::graphite::v2;
-
 
 class CmapProcessor
 {
@@ -56,7 +54,7 @@ private:
 
 bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
-    GrFeatureVal * defaultFeatures = gr_face_featureval_for_lang(face, 0);
+    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
@@ -109,7 +107,7 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
     return true;
 }
 
-bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
+bool testSeg(gr2::GrCachedFace* face, const gr_font *sizedFont,
              const char * testString,
              size_t * testLength, gr2::uint16 ** testGlyphString)
 {
@@ -123,7 +121,7 @@ bool testSeg(gr2::GrCachedFace* face, const gr2::GrFont *sizedFont,
     IgnoreErrors ignoreErrors;
     processUTF(limit, &cmapProcessor, &ignoreErrors);
 
-    gr2::GrSegment * segA = gr2::gr_make_seg(sizedFont, face, 0, NULL, gr2::gr_utf8, testString,
+    gr_segment * segA = gr2::gr_make_seg(sizedFont, face, 0, NULL, gr2::gr_utf8, testString,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))
@@ -153,7 +151,7 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
-    gr2::GrFont *sizedFont = gr2::gr_make_font(12, face);
+    gr_font *sizedFont = gr2::gr_make_font(12, face);
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
     uint16 * testGlyphStrings[sizeof(testStrings)/sizeof(char*)];
@@ -164,7 +162,7 @@ int main(int argc, char ** argv)
     {
         testSeg(face, sizedFont, testStrings[i], &(testLengths[i]), &(testGlyphStrings[i]));
     }
-    GrFeatureVal * defaultFeatures = gr_face_featureval_for_lang(face, 0);
+    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(face, 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     unsigned int segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();

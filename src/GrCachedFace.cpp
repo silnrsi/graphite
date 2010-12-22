@@ -23,7 +23,6 @@
 #include "GrCachedFace.h"
 #include "SegCacheStore.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 /*virtual*/ GrCachedFace::~GrCachedFace()
 {
@@ -56,8 +55,8 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
     assert(m_cacheStore);
     segCache = m_cacheStore->getOrCreate(silfIndex, seg->getFeatures(0));
     // find where the segment can be broken
-    Slot * subSegStartSlot = seg->first();
-    Slot * subSegEndSlot = subSegStartSlot;
+    GrSlot * subSegStartSlot = seg->first();
+    GrSlot * subSegEndSlot = subSegStartSlot;
     uint16 cmapGlyphs[eMaxSpliceSize];
     int subSegStart = 0;
     bool spaceOnly = true;
@@ -85,7 +84,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
               (subSegEndSlot->next() && m_cacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
         {
             // record the next slot before any splicing
-            Slot * nextSlot = subSegEndSlot->next();
+            GrSlot * nextSlot = subSegEndSlot->next();
             if (spaceOnly)
             {
                 // spaces should be left untouched by graphite rules in any sane font
@@ -141,58 +140,53 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
     }
 }
 
-extern "C" {
-
-    GRNG_EXPORT GrFace* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
-                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
-    {
-        GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
+GRNG_EXPORT gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
+                  //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
+{
+    GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
 #ifndef DISABLE_TRACING
-        XmlTraceLog::get().openElement(ElementFace);
+    XmlTraceLog::get().openElement(ElementFace);
 #endif
-        bool valid = true;
-        valid &= res->readGlyphs(faceOptions);
-        if (!valid) {
-            delete res;
-            return 0;
-        }
-        valid &= res->readGraphite();
-        valid &= res->readFeatures();
-        valid &= res->setupCache(cacheSize);
-
-#ifndef DISABLE_TRACING
-        XmlTraceLog::get().closeElement(ElementFace);
-#endif
-
-        if (!(faceOptions & gr_face_dumb_rendering) && !valid) {
-            delete res;
-            return 0;
-        }
-        return res;
+    bool valid = true;
+    valid &= res->readGlyphs(faceOptions);
+    if (!valid) {
+        delete res;
+        return 0;
     }
+    valid &= res->readGraphite();
+    valid &= res->readFeatures();
+    valid &= res->setupCache(cacheSize);
+
+#ifndef DISABLE_TRACING
+    XmlTraceLog::get().closeElement(ElementFace);
+#endif
+
+    if (!(faceOptions & gr_face_dumbRendering) && !valid) {
+        delete res;
+        return 0;
+    }
+    return static_cast<gr_face *>(static_cast<GrFace *>(res));
+}
 
 #ifndef DISABLE_FILE_FACE
 
-    GRNG_EXPORT GrFace* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
-                      //when finished with, call destroy_face
+GRNG_EXPORT gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
+                  //when finished with, call destroy_face
+{
+    FileFace* pFileFace = new FileFace(filename);
+    if (pFileFace->m_pTableDir)
     {
-        FileFace* pFileFace = new FileFace(filename);
-        if (pFileFace->m_pTableDir)
-        {
-          GrFace* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace_table_fn, segCacheMaxSize, faceOptions);
-          if (pRes)
-          {
-            pRes->takeFileFace(pFileFace);        //takes ownership
-            return pRes;
-          }
-        }
-
-        //error when loading
-
-        delete pFileFace;
-        return NULL;
+      gr_face* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace_table_fn, segCacheMaxSize, faceOptions);
+      if (pRes)
+      {
+        pRes->takeFileFace(pFileFace);        //takes ownership
+        return pRes;
+      }
     }
-#endif      //!DISABLE_FILE_FACE
-}
 
-}}}}
+    //error when loading
+
+    delete pFileFace;
+    return NULL;
+}
+#endif      //!DISABLE_FILE_FACE

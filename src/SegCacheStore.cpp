@@ -23,7 +23,6 @@
 #include "SegCacheStore.h"
 #include "GrFaceImp.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments)
  : m_caches(new SilfSegCache[numSilf]), m_numSilf(numSilf), m_maxSegments(maxSegments),
@@ -55,4 +54,3 @@ SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t ma
 }
 
 
-}}}}

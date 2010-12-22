@@ -31,7 +31,7 @@
 
 using vm::Code;
 using vm::Machine;
-using namespace org::sil::graphite::v2;
+
 
 Pass::Pass()
         :
@@ -356,7 +356,7 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
-    Slot *s = m.slotMap().segment.first();
+    GrSlot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
 
     int hurdle=0, pos = 0, lc = m_iMaxLoop;
@@ -384,7 +384,7 @@ inline uint16 Pass::glyphToCol(const uint16 gid) const
     return gid < m_numGlyphs ? m_cols[gid] : 0xffffU;
 }
 
-bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
+bool Pass::runFSM(gr2::FiniteStateMachine& fsm, GrSlot * slot) const
 {
     int context = 0;
     for (; context != m_maxPreCtxt && slot->prev(); ++context, slot = slot->prev());
@@ -422,7 +422,7 @@ bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
     return true;
 }
 
-int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
+int Pass::findNDoRule(GrSlot * & slot, Machine &m, FiniteStateMachine & fsm) const
 {
     assert(slot);
 
@@ -517,7 +517,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 }
 
 
-int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
+int Pass::doAction(const Code *codeptr, GrSlot * & slot_out, vm::Machine & m) const
 {
     assert(codeptr && *codeptr);
     SlotMap   & smap = m.slotMap();
@@ -530,9 +530,9 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
     glyph_diff += seg.slotCount();
     if (codeptr->deletes())
     {
-        for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
+        for (GrSlot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
         {
-            Slot * & slot = *s;
+            GrSlot * & slot = *s;
             if (slot->isDeleted() || slot->isCopied()) seg.freeSlot(slot);
         }
     }

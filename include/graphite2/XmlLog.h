@@ -22,13 +22,7 @@
 #pragma once
 
 #include <graphite2/Types.h>
-
-#ifdef __cplusplus
-#include <cstdio>
-namespace org { namespace sil { namespace graphite { namespace v2 {
-#else
 #include <stdio.h>
-#endif
 
 typedef enum {
     GRLOG_NONE = 0x0,
@@ -53,5 +47,4 @@ extern GRNG_EXPORT void graphite_stop_logging();
 
 #ifdef __cplusplus
 }
-}}}} // namespace
 #endif

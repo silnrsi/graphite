@@ -23,7 +23,6 @@
 
 #include "Main.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
 struct GrCharInfo // : ICharInfo
 {
@@ -43,6 +42,6 @@ private:
     int8 m_break;	// breakweight coming from lb table
 };
 
-typedef GrCharInfo CharInfo;
+struct gr_char_info : public GrCharInfo {};
 
-}}}} // namespace
+
