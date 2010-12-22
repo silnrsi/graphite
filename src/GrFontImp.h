@@ -56,12 +56,10 @@ private:			//defensive on m_advances
     GrFont& operator=(const GrFont&);
 };
 
-struct gr_font : public GrFont 
-{
-  gr_font(float ppm, const GrFace *face/*needed for scaling*/) : GrFont(ppm, face)  {}
-};
+struct gr_font : public GrFont {};
 
-class GrSimpleFont : public gr_font      //has no external hints - gets advance information from the face
+
+class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
 {
 public:
     GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face);
@@ -71,7 +69,8 @@ private:
     const GrFace *m_face;   // GrFace to get the rest of the info from
 };
 
-class GrHintedFont : public gr_font
+
+class GrHintedFont : public GrFont
 {
 public:
     GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/);

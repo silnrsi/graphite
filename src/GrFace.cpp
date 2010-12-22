@@ -162,7 +162,7 @@ extern "C"
     GRNG_EXPORT gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
                       //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
     {
-        gr_face *res = new gr_face(appFaceHandle, getTable);
+        GrFace *res = new GrFace(appFaceHandle, getTable);
 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementFace);

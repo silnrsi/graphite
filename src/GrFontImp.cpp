@@ -44,7 +44,7 @@ GrFont::GrFont(float ppm, const GrFace *face/*needed for scaling*/) :
 
 
 GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face) :
-  gr_font(ppm, face),
+  GrFont(ppm, face),
   m_face(face)
 {
 }
@@ -58,7 +58,7 @@ GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face) :
 
 
 GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const GrFace *face/*needed for scaling*/) :
-    gr_font(ppm, face), 
+    GrFont(ppm, face), 
     m_appFontHandle(appFontHandle),
     m_advance(advance2)
 {

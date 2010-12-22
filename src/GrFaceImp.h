@@ -178,10 +178,7 @@ private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
 };
 
 
-struct gr_face : public GrFace 
-{
-  gr_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2): GrFace(appFaceHandle, getTable2) {}
-};
+struct gr_face : public GrFace {};
 
 inline bool GrFeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
 { 

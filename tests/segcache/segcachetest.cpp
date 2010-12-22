@@ -32,11 +32,12 @@
 #include "TtfUtil.h"
 
 
+inline gr_face * api_cast(GrCachedFace *p) { return static_cast<gr_face*>(static_cast<GrFace*>(p)); }
 
 class CmapProcessor
 {
 public:
-    CmapProcessor(gr2::GrFace * face, uint16 * buffer) :
+    CmapProcessor(GrFace * face, uint16 * buffer) :
         m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1)),
         m_buffer(buffer), m_pos(0) {};
     bool processChar(uint32 cid)      //return value indicates if should stop processing
@@ -54,7 +55,7 @@ private:
 
 bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
-    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(face, 0);
+    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(api_cast(face), 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     const SegCacheEntry * entry = segCache->find(glyphString, testLength);
     if (!entry)
@@ -107,21 +108,21 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
     return true;
 }
 
-bool testSeg(gr2::GrCachedFace* face, const gr_font *sizedFont,
+bool testSeg(GrCachedFace* face, const gr_font *sizedFont,
              const char * testString,
-             size_t * testLength, gr2::uint16 ** testGlyphString)
+             size_t * testLength, uint16 ** testGlyphString)
 {
     const void * badUtf8 = NULL;
-    *testLength = gr_count_unicode_characters(gr2::gr_utf8, reinterpret_cast<const void*>(testString),
+    *testLength = gr_count_unicode_characters(gr_utf8, testString,
                                                     testString + strlen(testString),
                                                     &badUtf8);
-    *testGlyphString = gr2::gralloc<gr2::uint16>(*testLength + 1);
-    CharacterCountLimit limit(gr2::gr_utf8, testString, *testLength);
+    *testGlyphString = gralloc<uint16>(*testLength + 1);
+    CharacterCountLimit limit(gr_utf8, testString, *testLength);
     CmapProcessor cmapProcessor(face, *testGlyphString);
     IgnoreErrors ignoreErrors;
     processUTF(limit, &cmapProcessor, &ignoreErrors);
 
-    gr_segment * segA = gr2::gr_make_seg(sizedFont, face, 0, NULL, gr2::gr_utf8, testString,
+    gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);
     assert(segA);
     if (!checkEntries(face, testString, *testGlyphString, *testLength))
@@ -131,7 +132,7 @@ bool testSeg(gr2::GrCachedFace* face, const gr_font *sizedFont,
 
 int main(int argc, char ** argv)
 {
-    assert(sizeof(gr2::uintptr) == sizeof(void*));
+    assert(sizeof(uintptr) == sizeof(void*));
     const char * fileName = NULL;
     if (argc > 1)
     {
@@ -143,15 +144,15 @@ int main(int argc, char ** argv)
         return 1;
     }
     FILE * log = fopen("grsegcache.xml", "w");
-    gr2::graphite_start_logging(log, GRLOG_SEGMENT);
-    gr2::GrCachedFace *face = reinterpret_cast<gr2::GrCachedFace*>
-        (gr2::gr_make_file_face_with_seg_cache(fileName, 10, gr2::gr_face_default));
+    graphite_start_logging(log, GRLOG_SEGMENT);
+    GrCachedFace *face = static_cast<GrCachedFace*>(static_cast<GrFace*>(
+        (gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default))));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
-    gr_font *sizedFont = gr2::gr_make_font(12, face);
+    gr_font *sizedFont = gr_make_font(12, api_cast(face));
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
     uint16 * testGlyphStrings[sizeof(testStrings)/sizeof(char*)];
@@ -162,7 +163,7 @@ int main(int argc, char ** argv)
     {
         testSeg(face, sizedFont, testStrings[i], &(testLengths[i]), &(testGlyphStrings[i]));
     }
-    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(face, 0);
+    gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(api_cast(face), 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
     unsigned int segCount = segCache->segmentCount();
     long long accessCount = segCache->totalAccessCount();
@@ -198,9 +199,9 @@ int main(int argc, char ** argv)
         return -2;
     }
     gr_font_destroy(sizedFont);
-    gr_face_destroy(face);
+    gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
-    gr2::graphite_stop_logging();
+    graphite_stop_logging();
     return 0;
 }

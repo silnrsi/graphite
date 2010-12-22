@@ -26,13 +26,15 @@ extern "C" {
 
 GRNG_EXPORT gr_font* gr_make_font(float ppm/*pixels per em*/, const gr_face *face)
 {
-    return new GrSimpleFont(ppm, face);
+    GrFont * const res = new GrSimpleFont(ppm, face);
+    return static_cast<gr_font*>(res);
 }
 
 
 GRNG_EXPORT gr_font* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const gr_face *face/*needed for scaling*/)
 {                 //the appFontHandle must stay alive all the time when the gr_font is alive. When finished with the gr_font, call destroy_gr_font    
-    return new GrHintedFont(ppm, appFontHandle, advance, face);
+    GrFont * const res = new GrHintedFont(ppm, appFontHandle, advance, face);
+    return static_cast<gr_font*>(res);
 }
 
 
