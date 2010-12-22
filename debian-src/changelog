@@ -1,0 +1,5 @@
+graphite2 (0.9) UNRELEASED; urgency=low
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- Martin Hosken <martin_hosken@sil.org>  Wed, 22 Dec 2010 10:58:03 +0700

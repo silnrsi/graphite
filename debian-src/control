@@ -1,0 +1,33 @@
+Source: graphite2
+Priority: optional
+Section: libs
+Maintainer: Martin Hosken <martin_hosken@sil.org>
+Build-Depends: debhelper (>= 8.0), cmake, libgraphite-dev, libicu-dev
+Standards-Version: 3.7.2
+
+Package: libgraphite2
+Section: libs
+Architecture: any
+Description: Graphite smart font engine
+ The latest Graphite smart font engine
+
+Package: libgraphite2-dev
+Section: libdev
+Architecture: any
+Depends: libgraphite2 (= ${Source-Version})
+Description: Development libraries for libgraphite2
+ Development libraries for libgraphite2
+
+Package: libgraphite2-dbg
+Priority: extra
+Section: libdevel
+Architecture: any
+Depends: libgraphite2 (= ${Source-Version})
+Description: Debug symbols for libgraphite2
+ Debug symbols for libgraphite2
+
+Package: libgraphite2-doc
+Section: docs
+Architecture: all
+Description: Documentation for libgraphite2
+ PDF and HTML documentation for libgraphite2
