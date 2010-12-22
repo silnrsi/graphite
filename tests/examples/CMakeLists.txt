@@ -10,7 +10,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
     add_custom_target(testexamples_copy_dll ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-	add_dependencies(testexamples_copy_dll graphite2 iconv)
+	add_dependencies(testexamples_copy_dll graphite2 iconv simple features)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 macro(test_example TESTNAME SRCFILE)
