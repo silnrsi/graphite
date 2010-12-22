@@ -101,6 +101,6 @@ compromise between time and space.
 In the example above, point 1 becomes:
 
 ----
-    GrFace *face = make_file_face_with_seg_cache(argv[1]);
+    gr_face *face = make_file_face_with_seg_cache(argv[1]);
 ----
 
