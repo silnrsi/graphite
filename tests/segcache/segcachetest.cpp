@@ -32,12 +32,12 @@
 #include "TtfUtil.h"
 
 
-inline gr_face * api_cast(GrCachedFace *p) { return static_cast<gr_face*>(static_cast<GrFace*>(p)); }
+inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_cast<Face*>(p)); }
 
 class CmapProcessor
 {
 public:
-    CmapProcessor(GrFace * face, uint16 * buffer) :
+    CmapProcessor(Face * face, uint16 * buffer) :
         m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1)),
         m_buffer(buffer), m_pos(0) {};
     bool processChar(uint32 cid)      //return value indicates if should stop processing
@@ -53,7 +53,8 @@ private:
     size_t m_pos;
 };
 
-bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphString, size_t testLength)
+bool checkEntries(CachedFace
+ * face, const char * testString, uint16 * glyphString, size_t testLength)
 {
     gr_feature_val * defaultFeatures = gr_face_featureval_for_lang(api_cast(face), 0);
     SegCache * segCache = face->cacheStore()->getOrCreate(0, *defaultFeatures);
@@ -108,7 +109,8 @@ bool checkEntries(GrCachedFace * face, const char * testString, uint16 * glyphSt
     return true;
 }
 
-bool testSeg(GrCachedFace* face, const gr_font *sizedFont,
+bool testSeg(CachedFace
+* face, const gr_font *sizedFont,
              const char * testString,
              size_t * testLength, uint16 ** testGlyphString)
 {
@@ -145,7 +147,10 @@ int main(int argc, char ** argv)
     }
     FILE * log = fopen("grsegcache.xml", "w");
     graphite_start_logging(log, GRLOG_SEGMENT);
-    GrCachedFace *face = static_cast<GrCachedFace*>(static_cast<GrFace*>(
+    CachedFace
+ *face = static_cast<CachedFace
+*>(static_cast<Face
+*>(
         (gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default))));
     if (!face)
     {

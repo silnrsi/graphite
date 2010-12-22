@@ -34,9 +34,9 @@
 
 typedef gr_attrCode attrCode;
 
-struct GrSegment;
+struct Segment;
 
-struct GrSlot
+struct Slot
 {
 public:
     unsigned short gid() const { return m_glyphid; }
@@ -45,14 +45,14 @@ public:
     int before() const { return m_before; }
     int after() const { return m_after; }
 
-    GrSlot();
-    void set(const GrSlot & slot, int charOffset, uint8 numUserAttr);
-    GrSlot *next() const { return m_next; }
-    void next(GrSlot *s) { m_next = s; }
-    GrSlot *prev() const { return m_prev; }
-    void prev(GrSlot *s) { m_prev = s; }
+    Slot();
+    void set(const Slot & slot, int charOffset, uint8 numUserAttr);
+    Slot *next() const { return m_next; }
+    void next(Slot *s) { m_next = s; }
+    Slot *prev() const { return m_prev; }
+    void prev(Slot *s) { m_prev = s; }
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(GrSegment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
+    void setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int index) { m_original = index; }
@@ -61,7 +61,7 @@ public:
     void after(int index) { m_after = index; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const GrSegment* seg, const GrFont* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel);
+    Position finalise(const Segment* seg, const Font* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel);
     bool isDeleted() const { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isCopied() const { return (m_flags & SLOT_COPIED) ? true : false; }
@@ -72,32 +72,32 @@ public:
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(GrSegment* seg, attrCode index, uint8 subindex, int16 val, const SlotMap & map);
-    int getAttr(const GrSegment *seg, attrCode index, uint8 subindex) const;
-    void attachTo(GrSlot *ap) { m_parent = ap; }
-    GrSlot *attachedTo() const { return m_parent; }
-    GrSlot* firstChild() const { return m_child; }
-    void child(GrSlot *ap);
-    GrSlot* nextSibling() const { return m_sibling; }
-    void sibling(GrSlot *ap);
-    GrSlot *attachTo() const { return m_parent; }
-    uint32 clusterMetric(const GrSegment* seg, uint8 metric, uint8 attrLevel);
+    void setAttr(Segment* seg, attrCode index, uint8 subindex, int16 val, const SlotMap & map);
+    int getAttr(const Segment *seg, attrCode index, uint8 subindex) const;
+    void attachTo(Slot *ap) { m_parent = ap; }
+    Slot *attachedTo() const { return m_parent; }
+    Slot* firstChild() const { return m_child; }
+    void child(Slot *ap);
+    Slot* nextSibling() const { return m_sibling; }
+    void sibling(Slot *ap);
+    Slot *attachTo() const { return m_parent; }
+    uint32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj);
 
     CLASS_NEW_DELETE
 
 private:
-    GrSlot *m_next;           // linked list of slots
-    GrSlot *m_prev;
+    Slot *m_next;           // linked list of slots
+    Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     uint32 m_original;	    // charinfo that originated this slot (e.g. for feature values)
     uint32 m_before;           // charinfo index of before association
     uint32 m_after;            // charinfo index of after association
-    GrSlot *m_parent;         // index to parent we are attached to
-    GrSlot *m_child;          // index to first child slot that attaches to us
-    GrSlot *m_sibling;        // index to next child that attaches to our parent
+    Slot *m_parent;         // index to parent we are attached to
+    Slot *m_child;          // index to first child slot that attaches to us
+    Slot *m_sibling;        // index to next child that attaches to our parent
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
@@ -108,5 +108,5 @@ private:
     uint16 *m_userAttr;     // pointer to user attributes
 };
 
-struct gr_slot : public GrSlot {};
+struct gr_slot : public Slot {};
 

@@ -25,8 +25,8 @@
 #include "graphite2/Font.h"
 
 
-struct GrSegment;
-struct GrFeatureVal;
+struct Segment;
+struct FeatureVal;
 
 
 class GlyphFaceCacheHeader
@@ -37,7 +37,7 @@ public:
     unsigned short numAttrs() const { return m_numAttrs; }
 
 private:
-friend struct GrFace;
+friend struct Face;
 friend class GlyphFace;
     const void* m_pGloc;
     size_t m_lLoca;     const void* m_pLoca;

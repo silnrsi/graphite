@@ -24,7 +24,7 @@
 #include "GrFaceImp.h"
 
 
-SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments)
+SegCacheStore::SegCacheStore(const Face *face, unsigned int numSilf, size_t maxSegments)
  : m_caches(new SilfSegCache[numSilf]), m_numSilf(numSilf), m_maxSegments(maxSegments),
    m_maxCmapGid(0)
 {

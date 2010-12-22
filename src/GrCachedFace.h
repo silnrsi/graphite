@@ -25,15 +25,15 @@
 
 class SegCacheStore;
 
-class GrCachedFace : public GrFace
+class CachedFace : public Face
 {
 public:
-    GrCachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) :
-        GrFace(appFaceHandle, getTable2),
+    CachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) :
+        Face(appFaceHandle, getTable2),
         m_cacheStore(NULL) {};
     bool setupCache(unsigned int cacheSize);
-    virtual ~GrCachedFace();
-    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
+    virtual ~CachedFace();
+    virtual void runGraphite(Segment *seg, const Silf *silf) const;
     SegCacheStore * cacheStore() { return m_cacheStore; }
 private:
     SegCacheStore * m_cacheStore;

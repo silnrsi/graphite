@@ -34,14 +34,14 @@
 #include "graphite2/Segment.h"
 
 
-GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int textDir) :
+Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir) :
         m_freeSlots(NULL),
         m_first(NULL),
         m_last(NULL),
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_defaultOriginal(0),
-        m_charinfo(new GrCharInfo[numchars]),
+        m_charinfo(new CharInfo[numchars]),
         m_face(face),
         m_silf(face->chooseSilf(script)),
         m_bbox(Rect(Position(0, 0), Position(0, 0))),
@@ -54,7 +54,7 @@ GrSegment::GrSegment(unsigned int numchars, const GrFace* face, uint32 script, i
     m_bufSize = i;                  // log2(numchars)
 }
 
-SegmentScopeState GrSegment::setScope(GrSlot * firstSlot, GrSlot * lastSlot, size_t subLength)
+SegmentScopeState Segment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
 {
     SegmentScopeState state;
     state.numGlyphsOutsideScope = m_numGlyphs - subLength;
@@ -72,7 +72,7 @@ SegmentScopeState GrSegment::setScope(GrSlot * firstSlot, GrSlot * lastSlot, siz
     return state;
 }
 
-void GrSegment::removeScope(SegmentScopeState & state)
+void Segment::removeScope(SegmentScopeState & state)
 {
     m_numGlyphs = state.numGlyphsOutsideScope + m_numGlyphs;
     if (state.slotBeforeScope)
@@ -91,7 +91,7 @@ void GrSegment::removeScope(SegmentScopeState & state)
 }
 
 
-GrSegment::~GrSegment()
+Segment::~Segment()
 {
     SlotRope::iterator i = m_slots.begin();
     AttributeRope::iterator j = m_userAttrs.begin();
@@ -103,12 +103,12 @@ GrSegment::~GrSegment()
     delete[] m_charinfo;
 }
 
-void GrSegment::append(const GrSegment &other)
+void Segment::append(const Segment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
 
     m_slots.insert(m_slots.end(), other.m_slots.begin(), other.m_slots.end());
-    GrCharInfo* pNewCharInfo = new GrCharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
+    CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
 	pNewCharInfo[i] = m_charinfo[i];
     m_last->next(other.m_first);
@@ -127,9 +127,9 @@ void GrSegment::append(const GrSegment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void GrSegment::appendSlot(int id, int cid, int gid, int iFeats)
+void Segment::appendSlot(int id, int cid, int gid, int iFeats)
 {
-    GrSlot *aSlot = newSlot();
+    Slot *aSlot = newSlot();
     
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
@@ -154,12 +154,12 @@ void GrSegment::appendSlot(int id, int cid, int gid, int iFeats)
     if (!m_first) m_first = aSlot;
 }
 
-GrSlot *GrSegment::newSlot()
+Slot *Segment::newSlot()
 {
     if (!m_freeSlots)
     {
         int numUser = m_silf->numUser();
-        GrSlot *newSlots = grzeroalloc<GrSlot>(m_bufSize);
+        Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
         newSlots[0].userAttrs(newAttrs);
         for (size_t i = 1; i < m_bufSize - 1; i++)
@@ -174,18 +174,18 @@ GrSlot *GrSegment::newSlot()
         m_freeSlots = (m_bufSize > 1)? newSlots + 1 : NULL;
         return newSlots;
     }
-    GrSlot *res = m_freeSlots;
+    Slot *res = m_freeSlots;
     m_freeSlots = m_freeSlots->next();
     res->next(NULL);
     return res;
 }
 
-void GrSegment::freeSlot(GrSlot *aSlot)
+void Segment::freeSlot(Slot *aSlot)
 {
     if (m_last == aSlot) m_last = aSlot->prev();
     if (m_first == aSlot) m_first = aSlot->next();
     // reset the slot incase it is reused
-    ::new (aSlot) GrSlot;
+    ::new (aSlot) Slot;
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(uint16));
     // update next pointer
     if (!m_freeSlots)
@@ -195,17 +195,17 @@ void GrSegment::freeSlot(GrSlot *aSlot)
     m_freeSlots = aSlot;
 }
 
-void GrSegment::splice(size_t offset, size_t length, GrSlot * startSlot,
-                       GrSlot * endSlot, const GrSlot * firstSpliceSlot,
+void Segment::splice(size_t offset, size_t length, Slot * startSlot,
+                       Slot * endSlot, const Slot * firstSpliceSlot,
                        size_t numGlyphs)
 {
-    const GrSlot * replacement = firstSpliceSlot;
-    GrSlot * slot = startSlot;
+    const Slot * replacement = firstSpliceSlot;
+    Slot * slot = startSlot;
     extendLength(numGlyphs - length);
     // insert extra slots if needed
     while (numGlyphs > length)
     {
-        GrSlot * extra = newSlot();
+        Slot * extra = newSlot();
         extra->prev(endSlot);
         extra->next(endSlot->next());
         endSlot->next(extra);
@@ -219,7 +219,7 @@ void GrSegment::splice(size_t offset, size_t length, GrSlot * startSlot,
     // remove any extra
     if (numGlyphs < length)
     {
-        GrSlot * afterSplice = endSlot->next();
+        Slot * afterSplice = endSlot->next();
         do
         {
             endSlot = endSlot->prev();
@@ -233,7 +233,7 @@ void GrSegment::splice(size_t offset, size_t length, GrSlot * startSlot,
     assert(numGlyphs == length);
     // keep a record of consecutive slots wrt start of splice to minimize
     // iterative next/prev calls
-    GrSlot * slotArray[eMaxSpliceSize];
+    Slot * slotArray[eMaxSpliceSize];
     uint16 slotPosition = 0;
     for (uint16 i = 0; i < numGlyphs; i++)
     {
@@ -279,10 +279,10 @@ void GrSegment::splice(size_t offset, size_t length, GrSlot * startSlot,
 }
 
         
-void GrSegment::positionSlots(const GrFont *font, GrSlot *iStart, GrSlot *iEnd)
+void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
 {
     Position currpos;
-    GrSlot *s, *ls = NULL;
+    Slot *s, *ls = NULL;
     float cMin = 0.;
     Rect bbox;
 
@@ -319,9 +319,9 @@ void GrSegment::positionSlots(const GrFont *font, GrSlot *iStart, GrSlot *iEnd)
 }
 
 
-void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, GrSlot **sbegins, GrSlot **sends) const
+void Segment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const
 {
-    GrSlot *s;
+    Slot *s;
     uint32 i;
     if (!begins || !ends) return;
     memset(begins, 0xFF, m_numCharinfo * sizeof(uint32));
@@ -348,7 +348,7 @@ void GrSegment::getCharSlots(uint32 *begins, uint32 *ends, GrSlot **sbegins, GrS
 }
 
 #ifndef DISABLE_TRACING
-void GrSegment::logSegment(gr_encform enc, const void* pStart, size_t nChars) const
+void Segment::logSegment(gr_encform enc, const void* pStart, size_t nChars) const
 {
     if (XmlTraceLog::get().active())
     {
@@ -394,7 +394,7 @@ void GrSegment::logSegment(gr_encform enc, const void* pStart, size_t nChars) co
     }
 }
 
-void GrSegment::logSegment() const
+void Segment::logSegment() const
 {
     if (XmlTraceLog::get().active())
     {
@@ -402,7 +402,7 @@ void GrSegment::logSegment() const
         XmlTraceLog::get().addAttribute(AttrLength, slotCount());
         XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
         XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
-        for (GrSlot *i = m_first; i; i = i->next())
+        for (Slot *i = m_first; i; i = i->next())
         {
             XmlTraceLog::get().openElement(ElementSlot);
             XmlTraceLog::get().addAttribute(AttrGlyphId, i->gid());
@@ -423,7 +423,7 @@ void GrSegment::logSegment() const
 class SlotBuilder
 {
 public:
-      SlotBuilder(const GrFace *face2, const Features* pFeats/*must not be NULL*/, GrSegment* pDest2)
+      SlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
       :	  m_face(face2), 
 	  m_pDest(pDest2), 
 	  m_ctable(NULL),
@@ -450,8 +450,8 @@ public:
       size_t charsProcessed() const { return m_nCharsProcessed; }
 
 private:
-      const GrFace *m_face;
-      GrSegment *m_pDest;
+      const Face *m_face;
+      Segment *m_pDest;
       const void *   m_ctable;
       const void *   m_stable;
       const unsigned int m_fid;
@@ -461,7 +461,7 @@ private:
 class CachedSlotBuilder
 {
 public:
-    CachedSlotBuilder(const GrFace *face2, const Features* pFeats/*must not be NULL*/, GrSegment* pDest2)
+    CachedSlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
     :  m_face(face2),
     m_cmap(face2->getCmapCache()),
     m_pDest(pDest2),
@@ -485,15 +485,15 @@ public:
       size_t charsProcessed() const { return m_nCharsProcessed; }
 
 private:
-      const GrFace *m_face;
+      const Face *m_face;
       const CmapCache *m_cmap;
-      GrSegment *m_pDest;
+      Segment *m_pDest;
       uint8 m_breakAttr;
       const unsigned int m_fid;
       size_t m_nCharsProcessed ;
 };
 
-void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
+void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
     assert(pFeats);
     CharacterCountLimit limit(enc, pStart, nChars);
@@ -510,12 +510,12 @@ void GrSegment::read_text(const GrFace *face, const Features* pFeats/*must not b
     }
 }
 
-void GrSegment::prepare_pos(const GrFont * /*font*/)
+void Segment::prepare_pos(const Font * /*font*/)
 {
     // copy key changeable metrics into slot (if any);
 }
 
-void GrSegment::finalise(const GrFont *font)
+void Segment::finalise(const Font *font)
 {
     positionSlots(font);
 }

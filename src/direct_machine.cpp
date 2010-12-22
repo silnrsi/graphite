@@ -69,7 +69,7 @@ const void * direct_run(const bool          get_table_mode,
     Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
                 * const sb = sp;
     gr2::SlotMap    & smap = *__smap;
-    GrSegment        & seg = smap.segment;
+    Segment        & seg = smap.segment;
     slotref             is = *__map,
                      * map = __map,
               * const mapb = smap.begin()+smap.context();

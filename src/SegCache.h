@@ -71,7 +71,7 @@ public:
         findPosition(cmapGlyphs, length, &entry);
         return entry;
     }
-    SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, unsigned long long totalAccessCount)
+    SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset, unsigned long long totalAccessCount)
     {
         size_t listSize = m_entryBSIndex[length-1]? (m_entryBSIndex[length-1] << 1) - 1 : 0;
         SegCacheEntry * newEntries = NULL;
@@ -238,7 +238,7 @@ public:
     ~SegCache();
 
     const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
-    SegCacheEntry * cache(SegCacheStore * store, const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
+    SegCacheEntry * cache(SegCacheStore * store, const uint16 * cmapGlyphs, size_t length, Segment * seg, size_t charOffset);
     void purge(SegCacheStore * store);
 
     long long totalAccessCount() const { return m_totalAccessCount; }

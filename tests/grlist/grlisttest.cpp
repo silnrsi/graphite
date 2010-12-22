@@ -16,7 +16,7 @@ void printVector(std::vector<int> & v)
     printf("\n");
 }
 
-void printList(GrList<int> & v)
+void printList(List<int> & v)
 {
     for (size_t i = 0; i < v.size(); i++)
     {
@@ -29,7 +29,7 @@ void printList(GrList<int> & v)
 int main(int /*argc*/, char ** /*argv*/)
 {
     std::vector<int> stdVector(10);
-    GrList<int> grList(10);
+    List<int> grList(10);
 
     assert(stdVector.size() == grList.size());
 
@@ -140,7 +140,7 @@ int main(int /*argc*/, char ** /*argv*/)
     }
 
     std::vector<int> stdVector2;
-    GrList<int> grList2;
+    List<int> grList2;
 
     stdVector2.reserve(8);
     grList2.reserve(8);
@@ -181,7 +181,7 @@ int main(int /*argc*/, char ** /*argv*/)
         assert(grList2[i] == stdVector2[i]);
     }
 
-    GrList <int> grList3;
+    List <int> grList3;
     std::vector <int> stdVector3;
 
     stdVector3.assign(10, 123);

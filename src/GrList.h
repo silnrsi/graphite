@@ -23,42 +23,42 @@
 // designed to have a limited subset of the std::vector api
 
 
-template <class T> class GrList;
-template <class T> class GrListUnitIterator;
+template <class T> class List;
+template <class T> class ListUnitIterator;
 
 template <class T>
-class GrListUnit
+class ListUnit
 {
-    GrListUnit() : m_previous(NULL), m_next(NULL) {}
-    friend class GrList<T>;
-    friend class GrListUnitIterator<T>;
+    ListUnit() : m_previous(NULL), m_next(NULL) {}
+    friend class List<T>;
+    friend class ListUnitIterator<T>;
     T m_value;
-    GrListUnit<T> * m_previous;
-    GrListUnit<T> * m_next;
+    ListUnit<T> * m_previous;
+    ListUnit<T> * m_next;
 public:
     CLASS_NEW_DELETE
 };
 
 template <class T>
-class GrListUnitIterator
+class ListUnitIterator
 {
 public:
-    GrListUnitIterator(const GrList<T> & list, GrListUnit<T> * unit)
+    ListUnitIterator(const List<T> & list, ListUnit<T> * unit)
     : m_list(list), m_unit(unit) {}
-    GrListUnitIterator(const GrListUnitIterator<T> & toCopy)
+    ListUnitIterator(const ListUnitIterator<T> & toCopy)
     : m_list(toCopy.m_list), m_unit(toCopy.m_unit) {}
-    GrListUnitIterator<T> & operator=(const GrListUnitIterator<T> & toCopy)
+    ListUnitIterator<T> & operator=(const ListUnitIterator<T> & toCopy)
     {
         assert(&m_list == &toCopy.m_list);
         m_unit = toCopy.m_unit;
         return *this;
     }
-    GrListUnitIterator<T> operator++()
+    ListUnitIterator<T> operator++()
     {
         operator+(1);
         return *this;
     }
-    GrListUnitIterator<T> operator+(int value)
+    ListUnitIterator<T> operator+(int value)
     {
         if (m_list.m_sequential)
         {
@@ -97,12 +97,12 @@ public:
     {
         return m_unit->m_value;
     }
-    GrListUnitIterator< T > operator += (int value)
+    ListUnitIterator< T > operator += (int value)
     {
         operator +(value);
         return *this;
     }
-    GrListUnitIterator<T> operator-(int value)
+    ListUnitIterator<T> operator-(int value)
     {
         if (m_list.m_sequential)
         {
@@ -138,33 +138,33 @@ public:
         }
         return *this;
     }
-    bool operator == (const GrListUnitIterator<T> & i) const
+    bool operator == (const ListUnitIterator<T> & i) const
     {
         assert(i.m_list == m_list); // check parent list is same
         return m_unit == i.m_unit;
     }
-    bool operator != (const GrListUnitIterator<T> & i) const
+    bool operator != (const ListUnitIterator<T> & i) const
     {
         assert(i.m_list.m_pBlock == m_list.m_pBlock); // check parent list is same
         return m_unit != i.m_unit;
     }
 protected:
-    friend class GrList<T>;
-    const GrList< T > & m_list;
-    GrListUnit<T> * m_unit;
+    friend class List<T>;
+    const List< T > & m_list;
+    ListUnit<T> * m_unit;
 
 };
 
 // A linked list implmentation which allocates memory in blocks
 
 template <class T>
-class GrList
+class List
 {
 protected:
-    friend class GrListUnitIterator<T>;
+    friend class ListUnitIterator<T>;
 public:
-    typedef GrListUnitIterator<T> iterator;
-    GrList(size_t suggestedSize) :
+    typedef ListUnitIterator<T> iterator;
+    List(size_t suggestedSize) :
         m_lastAccessIndex(0),
         m_length(0),
         m_blockSize(suggestedSize),
@@ -174,8 +174,8 @@ public:
         m_sequential(true)
     {
         for (size_t i = 0; i < MAX_EXPANSION; i++) m_pBlock[i] = NULL;
-        m_pBlock[0] = new GrListUnit<T>[m_blockSize];
-//        m_pBlock[0] = gralloc<GrListUnit<T> >(m_blockSize + 1);
+        m_pBlock[0] = new ListUnit<T>[m_blockSize];
+//        m_pBlock[0] = gralloc<ListUnit<T> >(m_blockSize + 1);
         m_firstUnallocated = m_pBlock[0];
         m_lastAccess = m_begin = NULL;
         T value;
@@ -184,7 +184,7 @@ public:
             push_back(value);
         }
     }
-    GrList(size_t suggestedSize, const T & value) :
+    List(size_t suggestedSize, const T & value) :
         m_lastAccessIndex(0),
         m_length(0),
         m_blockSize(suggestedSize),
@@ -194,8 +194,8 @@ public:
         m_sequential(true)
     {
         for (size_t i = 0; i < MAX_EXPANSION; i++) m_pBlock[i] = NULL;
-        //m_pBlock[0] = gralloc<GrListUnit<T> >(m_blockSize + 1);
-        m_pBlock[0] = new GrListUnit<T>[m_blockSize];
+        //m_pBlock[0] = gralloc<ListUnit<T> >(m_blockSize + 1);
+        m_pBlock[0] = new ListUnit<T>[m_blockSize];
         m_firstUnallocated = m_pBlock[0];
         m_lastAccess = m_begin = NULL;
         for (size_t i = 0; i < suggestedSize; i++)
@@ -203,7 +203,7 @@ public:
             push_back(value);
         }
     }
-    GrList() :
+    List() :
         m_lastAccessIndex(0),
         m_length(0),
         m_blockSize(0),
@@ -218,7 +218,7 @@ public:
         for (size_t i = 0; i < MAX_EXPANSION; i++) m_pBlock[i] = NULL;
         
     }        
-    ~GrList()
+    ~List()
     {
         for (size_t i = 0; i < MAX_EXPANSION; i++)
         {
@@ -231,7 +231,7 @@ public:
         }
     }
     // fast for n close to m_lastAccessIndex, otherwise order(m_length)
-    GrListUnit<T> * get(size_t n) const
+    ListUnit<T> * get(size_t n) const
     {
         if (n == m_length) return NULL;
         if (m_sequential)
@@ -284,21 +284,21 @@ public:
     T & operator[](size_t n)
     {
         return get(n)->m_value;
-//        GrListUnit<T> * p = get(n);
+//        ListUnit<T> * p = get(n);
 //        assert(p);
 //        return p->m_value;
     }
     const T & operator[](size_t n) const
     {
         return get(n)->m_value;
-//        GrListUnit<T> * p = get(n);
+//        ListUnit<T> * p = get(n);
 //        assert(p);
 //        return p->m_value;
     }
-    const iterator begin() const { return GrListUnitIterator<T>(*this, m_begin); }
-    const iterator end() const { return GrListUnitIterator<T>(*this, NULL); }
-    iterator begin() { return GrListUnitIterator<T>(*this, m_begin); }
-    iterator end() { return GrListUnitIterator<T>(*this, NULL); }
+    const iterator begin() const { return ListUnitIterator<T>(*this, m_begin); }
+    const iterator end() const { return ListUnitIterator<T>(*this, NULL); }
+    iterator begin() { return ListUnitIterator<T>(*this, m_begin); }
+    iterator end() { return ListUnitIterator<T>(*this, NULL); }
     bool empty() const { return m_length == 0; }
     size_t size() const { return m_length; }
 
@@ -339,8 +339,8 @@ public:
             m_sequential = true;
         }
         m_blockSize = n;
-        //m_pBlock[0] = gralloc<GrListUnit<T> >(m_blockSize);
-        m_pBlock[0] = new GrListUnit<T>[m_blockSize];
+        //m_pBlock[0] = gralloc<ListUnit<T> >(m_blockSize);
+        m_pBlock[0] = new ListUnit<T>[m_blockSize];
         m_firstUnallocated = m_pBlock[0];
         m_lastAccess = m_begin = NULL;
         m_numBlocks = 1;
@@ -355,16 +355,16 @@ public:
         {
             while (m_numBlocks * m_blockSize < n && m_numBlocks + 1 < MAX_EXPANSION)
             {
-                //m_pBlock[m_numBlocks++] = gralloc<GrListUnit<T> >(m_blockSize);
-                m_pBlock[m_numBlocks++] = new GrListUnit<T>[m_blockSize];
+                //m_pBlock[m_numBlocks++] = gralloc<ListUnit<T> >(m_blockSize);
+                m_pBlock[m_numBlocks++] = new ListUnit<T>[m_blockSize];
             }
             assert(m_numBlocks * m_blockSize >= n);
         }
         else // set the block size afresh
         {
             m_blockSize = n;
-            //m_pBlock[0] = gralloc<GrListUnit<T> >(m_blockSize);
-            m_pBlock[0] = new GrListUnit<T>[m_blockSize];
+            //m_pBlock[0] = gralloc<ListUnit<T> >(m_blockSize);
+            m_pBlock[0] = new ListUnit<T>[m_blockSize];
             m_firstUnallocated = m_pBlock[0];
             m_lastAccess = m_begin = NULL;
             m_numBlocks = 1;
@@ -441,7 +441,7 @@ public:
             m_lastAccess = m_begin;
             m_lastAccessIndex = 0;
         }
-        GrListUnit<T>* previous = (i.m_unit)? i.m_unit->m_previous : m_back;
+        ListUnit<T>* previous = (i.m_unit)? i.m_unit->m_previous : m_back;
         m_length += n;
         for (; n > 0; --n)
         {
@@ -488,7 +488,7 @@ public:
             m_lastAccess = m_begin;
             m_lastAccessIndex = 0;
         }
-        GrListUnit<T>* previous = (i.m_unit)? i.m_unit->m_previous : m_back;
+        ListUnit<T>* previous = (i.m_unit)? i.m_unit->m_previous : m_back;
         while (f != l)
         {
             ++m_length;
@@ -576,7 +576,7 @@ public:
             m_lastAccess = m_begin;
             m_lastAccessIndex = 0;
         }
-        GrListUnit<T> * temp = i.m_unit->m_next;
+        ListUnit<T> * temp = i.m_unit->m_next;
         i.m_unit->m_previous = NULL;
         i.m_unit->m_next = NULL;
         i.m_unit = temp;
@@ -588,7 +588,7 @@ public:
         if (m_lastAccess == q.m_unit)
         {
             // adjust the index
-            GrListUnit<T> * temp = q.m_unit;
+            ListUnit<T> * temp = q.m_unit;
             while (temp != p.m_unit)
             {
                 --m_lastAccessIndex;
@@ -602,7 +602,7 @@ public:
         else if (q.m_unit == NULL)
         {
             // q is end of list
-            GrListUnit<T> * temp = p.m_unit;
+            ListUnit<T> * temp = p.m_unit;
             do
             {
                 --m_length;
@@ -645,7 +645,7 @@ public:
                 m_lastAccess = m_begin;
                 m_lastAccessIndex = 0;
             }
-            GrListUnit<T> * temp = q.m_unit;
+            ListUnit<T> * temp = q.m_unit;
             while (temp != p.m_unit)
             {
                 --m_length;
@@ -683,7 +683,7 @@ public:
             }
         }
 
-        GrListUnit<T> * temp = q.m_unit;
+        ListUnit<T> * temp = q.m_unit;
         p.m_unit->m_previous = NULL;
         p.m_unit->m_next = NULL;
         p.m_unit = temp;
@@ -707,8 +707,8 @@ private:
             assert(m_numBlocks >= m_currentBlock);
             assert(m_numBlocks < MAX_EXPANSION);
             m_sequential = false;
-            m_pBlock[m_numBlocks] = new GrListUnit<T>[m_blockSize];
-            //gralloc<GrListUnit<T> >(m_blockSize);
+            m_pBlock[m_numBlocks] = new ListUnit<T>[m_blockSize];
+            //gralloc<ListUnit<T> >(m_blockSize);
             m_firstUnallocated = m_pBlock[m_numBlocks];
             m_currentBlock = m_numBlocks;
             m_numBlocks++;
@@ -727,8 +727,8 @@ private:
         size_t newBlocks = n / m_blockSize;
         if (newBlocks > m_numBlocks)
         {
-            new GrListUnit<T>[m_blockSize];
-            gralloc<GrListUnit<T> >(m_blockSize);
+            new ListUnit<T>[m_blockSize];
+            gralloc<ListUnit<T> >(m_blockSize);
         }
     }*/
     void reset()
@@ -743,11 +743,11 @@ private:
     size_t m_blockSize;
     unsigned short m_numBlocks;
     unsigned short m_currentBlock;
-    GrListUnit<T> * m_pBlock[MAX_EXPANSION];
-    GrListUnit<T> * m_begin;
-    GrListUnit<T> * m_back; // end is 1 past this
-    GrListUnit<T> * m_firstUnallocated; // 1 past allocated
-    mutable GrListUnit<T> * m_lastAccess;
+    ListUnit<T> * m_pBlock[MAX_EXPANSION];
+    ListUnit<T> * m_begin;
+    ListUnit<T> * m_back; // end is 1 past this
+    ListUnit<T> * m_firstUnallocated; // 1 past allocated
+    mutable ListUnit<T> * m_lastAccess;
     bool m_sequential;
 };
 

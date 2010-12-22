@@ -22,7 +22,7 @@
 #include "GrFontImp.h"
 
 
-GrFont::GrFont(float ppm, const GrFace *face/*needed for scaling*/) :
+Font::Font(float ppm, const Face *face/*needed for scaling*/) :
     m_scale(ppm / face->upem())
 {
     size_t nGlyphs=face->numGlyphs();
@@ -36,15 +36,15 @@ GrFont::GrFont(float ppm, const GrFace *face/*needed for scaling*/) :
 }
 
 
-/*virtual*/ GrFont::~GrFont()
+/*virtual*/ Font::~Font()
 {
     if (m_advances)
         free(m_advances);
 }
 
 
-GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face) :
-  GrFont(ppm, face),
+GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const Face *face) :
+  Font(ppm, face),
   m_face(face)
 {
 }
@@ -57,8 +57,8 @@ GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face) :
 
 
 
-GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const GrFace *face/*needed for scaling*/) :
-    GrFont(ppm, face), 
+GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const Face *face/*needed for scaling*/) :
+    Font(ppm, face), 
     m_appFontHandle(appFontHandle),
     m_advance(advance2)
 {

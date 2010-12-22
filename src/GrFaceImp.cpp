@@ -29,7 +29,7 @@
 #include <graphite2/Segment.h>
 
 
-GrFace::~GrFace()
+Face::~Face()
 {
     delete m_pGlyphFaceCache;
     delete m_cmapCache;
@@ -43,7 +43,7 @@ GrFace::~GrFace()
 }
 
 
-bool GrFace::readGlyphs(unsigned int faceOptions)
+bool Face::readGlyphs(unsigned int faceOptions)
 {
     GlyphFaceCacheHeader hdr;
     if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
@@ -66,7 +66,7 @@ bool GrFace::readGlyphs(unsigned int faceOptions)
     return true;
 }
 
-bool GrFace::readGraphite()
+bool Face::readGraphite()
 {
     char *pSilf;
     size_t lSilf;
@@ -138,12 +138,12 @@ bool GrFace::readGraphite()
     return havePasses;
 }
 
-void GrFace::runGraphite(GrSegment *seg, const Silf *aSilf) const
+void Face::runGraphite(Segment *seg, const Silf *aSilf) const
 {
     aSilf->runGraphite(seg, 0, aSilf->numPasses());
 }
 
-const Silf *GrFace::chooseSilf(uint32 script) const
+const Silf *Face::chooseSilf(uint32 script) const
 {
     if (m_numSilf == 0)
         return NULL;
@@ -153,7 +153,7 @@ const Silf *GrFace::chooseSilf(uint32 script) const
         return m_silfs;
 }
 
-uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
+uint16 Face::getGlyphMetric(uint16 gid, uint8 metric) const
 {
     switch ((enum metrics)metric)
     {
@@ -163,7 +163,7 @@ uint16 GrFace::getGlyphMetric(uint16 gid, uint8 metric) const
     }
 }
 
-void GrFace::takeFileFace(FileFace* pFileFace/*takes ownership*/)
+void Face::takeFileFace(FileFace* pFileFace/*takes ownership*/)
 {
     if (m_pFileFace==pFileFace)
       return;
@@ -172,7 +172,7 @@ void GrFace::takeFileFace(FileFace* pFileFace/*takes ownership*/)
     m_pFileFace = pFileFace;
 }
 
-NameTable * GrFace::nameTable() const
+NameTable * Face::nameTable() const
 {
     if (m_pNames) return m_pNames;
     size_t tableLength = 0;
@@ -182,7 +182,7 @@ NameTable * GrFace::nameTable() const
     return m_pNames;
 }
 
-uint16 GrFace::languageForLocale(const char * locale) const
+uint16 Face::languageForLocale(const char * locale) const
 {
     nameTable();
     if (m_pNames)

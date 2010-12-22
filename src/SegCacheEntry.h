@@ -23,8 +23,8 @@
 
 #include "Main.h"
 
-struct GrSegment;
-struct GrSlot;
+struct Segment;
+struct Slot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 
@@ -62,12 +62,12 @@ public:
         m_glyphLength(0), m_unicode(NULL), m_glyph(NULL), m_attr(NULL),
         m_accessCount(0), m_lastAccess(0)
     {}
-    SegCacheEntry(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime);
+    SegCacheEntry(const uint16 * cmapGlyphs, size_t length, Segment * seg, size_t charOffset, long long cacheTime);
     ~SegCacheEntry() { clear(); };
     void clear();
     size_t glyphLength() const { return m_glyphLength; }
-    const GrSlot * first() const { return m_glyph; }
-    const GrSlot * last() const { return m_glyph + (m_glyphLength - 1); }
+    const Slot * first() const { return m_glyph; }
+    const Slot * last() const { return m_glyph + (m_glyphLength - 1); }
 
     void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
@@ -96,7 +96,7 @@ private:
      * the length of this array is determined by the position in the SegCachePrefixEntry */
     uint16 * m_unicode;
     /** slots after shapping and positioning */
-    GrSlot * m_glyph;
+    Slot * m_glyph;
     uint16 * m_attr;
     mutable unsigned long long m_accessCount;
     mutable unsigned long long m_lastAccess;

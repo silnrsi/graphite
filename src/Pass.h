@@ -24,8 +24,8 @@
 #include <cstdlib>
 #include "Code.h"
 
-struct GrSegment; // from C interface
-struct GrFace; // from C interface
+struct Segment; // from C interface
+struct Face; // from C interface
 class Silf;
 struct Rule;
 struct RuleEntry;
@@ -44,8 +44,8 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    int    findNDoRule(GrSlot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    int    doAction(const vm::Code* codeptr, GrSlot * & slot_out, vm::Machine &) const;
+    int    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    int    doAction(const vm::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
     bool   testPassConstraint(vm::Machine & m) const;
     bool   testConstraint(const Rule & r, vm::Machine &) const;
     bool   readFSM(const byte* p, const byte*const pass_start, const size_t max_offset);
@@ -58,7 +58,7 @@ private:
     void   logStates() const;
     bool   readRanges(const uint16* ranges, size_t num_ranges);
     uint16 glyphToCol(const uint16 gid) const;
-    bool   runFSM(FiniteStateMachine & fsm, GrSlot * slot) const;
+    bool   runFSM(FiniteStateMachine & fsm, Slot * slot) const;
     
     const Silf* m_silf;
     uint16    * m_cols;

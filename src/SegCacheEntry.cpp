@@ -26,7 +26,7 @@
 #include "SegCacheEntry.h"
 
 
-SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime)
+SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset, long long cacheTime)
     : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL),
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
@@ -36,17 +36,17 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment 
         m_unicode[i] = cmapGlyphs[i];
     }
     size_t glyphCount = seg->slotCount();
-    const GrSlot * slot = seg->first();
-    m_glyph = new GrSlot[glyphCount];
+    const Slot * slot = seg->first();
+    m_glyph = new Slot[glyphCount];
     m_attr = gralloc<uint16>(glyphCount * seg->numAttrs());
     m_glyphLength = glyphCount;
-    GrSlot * slotCopy = m_glyph;
+    Slot * slotCopy = m_glyph;
     m_glyph->prev(NULL);
     struct Index2Slot {
-        Index2Slot(uint16 i, const GrSlot * s) : m_i(i), m_slot(s) {};
+        Index2Slot(uint16 i, const Slot * s) : m_i(i), m_slot(s) {};
         Index2Slot() : m_i(0), m_slot(NULL) {};
         uint16 m_i;
-        const GrSlot * m_slot;
+        const Slot * m_slot;
     };
     struct Index2Slot parentGlyphs[eMaxSpliceSize];
     struct Index2Slot childGlyphs[eMaxSpliceSize];

@@ -25,13 +25,13 @@
 #include <cassert>
 #include "Main.h"
 
-struct GrFeatureRef;
+struct FeatureRef;
 struct FeatureMap;
 
-struct GrFeatureVal
+struct FeatureVal
 {
 public:
-    uint32 maskedOr(const GrFeatureVal &other, const GrFeatureVal &mask) {
+    uint32 maskedOr(const FeatureVal &other, const FeatureVal &mask) {
 	uint32 len = m_length ;
 	if (other.m_length<len) len = other.m_length;		//defensive
 	if (mask.m_length<len) len = mask.m_length;		//defensive
@@ -40,12 +40,12 @@ public:
 	return len;
     }
 
-    explicit GrFeatureVal(int num, const FeatureMap* pMap/*not NULL*/)
+    explicit FeatureVal(int num, const FeatureMap* pMap/*not NULL*/)
       : m_length(num), m_vec(gralloc<uint32>(num)), m_pMap(pMap) {}
-    GrFeatureVal() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
-    GrFeatureVal(const GrFeatureVal & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
-    ~GrFeatureVal() { if (m_vec) free(m_vec); }
-    GrFeatureVal & operator=(const GrFeatureVal & rhs) {
+    FeatureVal() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
+    FeatureVal(const FeatureVal & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
+    ~FeatureVal() { if (m_vec) free(m_vec); }
+    FeatureVal & operator=(const FeatureVal & rhs) {
         m_pMap = rhs.m_pMap;
         if (m_length != rhs.m_length) {
             if (m_vec) free(m_vec);
@@ -55,7 +55,7 @@ public:
         memmove(m_vec, rhs.m_vec, m_length * sizeof(uint32));
         return *this;
     }
-    bool operator ==(const GrFeatureVal & b) const
+    bool operator ==(const FeatureVal & b) const
     {
         size_t i = 0;
         assert(m_length);
@@ -79,7 +79,7 @@ public:
         m_length = reqIndex+1;
     }
 
-    GrFeatureVal* clone() const { return new GrFeatureVal(*this); }
+    FeatureVal* clone() const { return new FeatureVal(*this); }
     
 //    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
 
@@ -92,12 +92,12 @@ public:
 //    }
     CLASS_NEW_DELETE
 private:
-    friend struct GrFeatureRef;		//so that FeatureRefs can manipulate m_vec directly
+    friend struct FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
     const FeatureMap* m_pMap;
 };
 
-struct gr_feature_val : public GrFeatureVal {};
+struct gr_feature_val : public FeatureVal {};
 
-typedef GrFeatureVal Features;
+typedef FeatureVal Features;

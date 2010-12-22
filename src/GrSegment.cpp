@@ -60,10 +60,10 @@ namespace
         size_t m_nCharsProcessed ;
   };
 
-  static gr_segment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+  static gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
       // if (!font) return NULL;
-      GrSegment* pRes=new GrSegment(nChars, face, script, dir);
+      Segment* pRes=new Segment(nChars, face, script, dir);
 
       pRes->read_text(face, pFeats, enc, pStart, nChars);
       pRes->runGraphite();
@@ -161,7 +161,7 @@ GRNG_EXPORT const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
 GRNG_EXPORT void gr_seg_char_slots(const gr_segment *pSeg, uint32 *begins, uint32 *ends, gr_slot **sbegins, gr_slot **sends)
 {
     assert(pSeg && begins && ends);
-    pSeg->getCharSlots(begins, ends, reinterpret_cast<GrSlot**>(sbegins), reinterpret_cast<GrSlot**>(sends));
+    pSeg->getCharSlots(begins, ends, reinterpret_cast<Slot**>(sbegins), reinterpret_cast<Slot**>(sends));
 }
 
 } // extern "C"

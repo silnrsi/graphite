@@ -38,7 +38,7 @@ static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndF
                                                                         ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
                                                                                     ? 1 : 0)); }
 
-bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace)
+bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
 {
     if (!m_FeatureMap.readFeats(appFaceHandle, getTable, pFace)) return false;
     if (!readSill(appFaceHandle, getTable)) return false;
@@ -46,7 +46,7 @@ bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
 }
 
 
-bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace)
+bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
 {
     size_t lFeat;
     const byte *pFeat = reinterpret_cast<const byte *>((*getTable)(appFaceHandle, ktiFeat, &lFeat));
@@ -64,7 +64,8 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     if (m_numFeats)
     {
-    m_feats = new GrFeatureRef[m_numFeats];
+    m_feats = new FeatureRef
+[m_numFeats];
     m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
     }
@@ -154,7 +155,8 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
                     mask = 2;
                 }
                 currBits += bits;
-                ::new (m_feats + i) GrFeatureRef(currBits, currIndex,
+                ::new (m_feats + i) FeatureRef
+(currBits, currIndex,
                                                (mask - 1) << currBits, flags,
                                                name, uiName, numSet, uiSet, pFace);
                 break;
@@ -212,7 +214,8 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const GrFeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
+	    const FeatureRef
+* pRef = m_FeatureMap.findFeatureRef(name);
 	    if (pRef)
 		pRef->applyValToFeature(val, feats);
  	}
@@ -224,7 +227,8 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
     return true;
 }
 
-const GrFeatureRef *FeatureMap::findFeatureRef(uint32 name) const
+const FeatureRef
+ *FeatureMap::findFeatureRef(uint32 name) const
 {
     NameAndFeatureRef *it;
     

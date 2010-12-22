@@ -239,9 +239,9 @@ STARTOP(put_copy)
         if (ref)
         {
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
-            GrSlot *prev = is->prev();
-            GrSlot *next = is->next();
-            memcpy(is, slotat(slot_ref), sizeof(GrSlot));
+            Slot *prev = is->prev();
+            Slot *next = is->next();
+            memcpy(is, slotat(slot_ref), sizeof(Slot));
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
@@ -252,7 +252,7 @@ STARTOP(put_copy)
 ENDOP
 
 STARTOP(insert)
-    GrSlot *newSlot = seg.newSlot();
+    Slot *newSlot = seg.newSlot();
     if (!is)
     {
         if (seg.last())
@@ -583,7 +583,7 @@ ENDOP
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
     uint16 *tempUserAttrs = newSlot->userAttrs();
-    memcpy(newSlot, is, sizeof(GrSlot));
+    memcpy(newSlot, is, sizeof(Slot));
     newSlot->userAttrs(tempUserAttrs);
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->markCopied(true);

@@ -24,19 +24,19 @@
 #include "SegCacheStore.h"
 
 
-/*virtual*/ GrCachedFace::~GrCachedFace()
+/*virtual*/ CachedFace::~CachedFace()
 {
     delete m_cacheStore;
 }
 
-bool GrCachedFace::setupCache(unsigned int cacheSize)
+bool CachedFace::setupCache(unsigned int cacheSize)
 {
     m_cacheStore = new SegCacheStore(this, m_numSilf, cacheSize);
     return (m_cacheStore != NULL);
 }
 
 
-/*virtual*/ void GrCachedFace::runGraphite(GrSegment *seg, const Silf *pSilf) const
+/*virtual*/ void CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
 {
     assert(pSilf);
     pSilf->runGraphite(seg, 0, pSilf->substitutionPass());
@@ -55,8 +55,8 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
     assert(m_cacheStore);
     segCache = m_cacheStore->getOrCreate(silfIndex, seg->getFeatures(0));
     // find where the segment can be broken
-    GrSlot * subSegStartSlot = seg->first();
-    GrSlot * subSegEndSlot = subSegStartSlot;
+    Slot * subSegStartSlot = seg->first();
+    Slot * subSegEndSlot = subSegStartSlot;
     uint16 cmapGlyphs[eMaxSpliceSize];
     int subSegStart = 0;
     bool spaceOnly = true;
@@ -84,7 +84,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
               (subSegEndSlot->next() && m_cacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
         {
             // record the next slot before any splicing
-            GrSlot * nextSlot = subSegEndSlot->next();
+            Slot * nextSlot = subSegEndSlot->next();
             if (spaceOnly)
             {
                 // spaces should be left untouched by graphite rules in any sane font
@@ -143,7 +143,7 @@ bool GrCachedFace::setupCache(unsigned int cacheSize)
 GRNG_EXPORT gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
 {
-    GrCachedFace *res = new GrCachedFace(appFaceHandle, getTable);
+    CachedFace *res = new CachedFace(appFaceHandle, getTable);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif
@@ -165,7 +165,7 @@ GRNG_EXPORT gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-
         delete res;
         return 0;
     }
-    return static_cast<gr_face *>(static_cast<GrFace *>(res));
+    return static_cast<gr_face *>(static_cast<Face *>(res));
 }
 
 #ifndef DISABLE_FILE_FACE

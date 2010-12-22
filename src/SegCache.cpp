@@ -86,7 +86,7 @@ SegCache::~SegCache()
     assert(m_prefixes.raw == NULL);
 }
 
-SegCacheEntry* SegCache::cache(SegCacheStore * store, const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset)
+SegCacheEntry* SegCache::cache(SegCacheStore * store, const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset)
 {
     uint16 pos = 0;
     if (!length) return NULL;

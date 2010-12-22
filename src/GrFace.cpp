@@ -162,7 +162,7 @@ extern "C"
     GRNG_EXPORT gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
                       //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
     {
-        GrFace *res = new GrFace(appFaceHandle, getTable);
+        Face *res = new Face(appFaceHandle, getTable);
 
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementFace);
@@ -217,7 +217,7 @@ extern "C"
     GRNG_EXPORT const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
-        const GrFeatureRef* pRef = pFace->featureById(featId);
+        const FeatureRef* pRef = pFace->featureById(featId);
         return static_cast<const gr_feature_ref*>(pRef);
     }
 
@@ -230,7 +230,7 @@ extern "C"
     GRNG_EXPORT const gr_feature_ref* gr_face_fref(const gr_face* pFace, uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
     {
         assert(pFace);
-        const GrFeatureRef* pRef = pFace->feature(i);
+        const FeatureRef* pRef = pFace->feature(i);
         return static_cast<const gr_feature_ref*>(pRef);
     }
 

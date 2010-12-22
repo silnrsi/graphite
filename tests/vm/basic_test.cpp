@@ -19,7 +19,7 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
-struct GrSegment 
+struct Segment 
 {
     byte x;
 };
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
               << prog.instructionCount() << " instructions" << std::endl;
     
     // run the program
-    GrSegment seg;
+    Segment seg;
     int is=0;
     uint32 ret;
     Machine::status_t status;

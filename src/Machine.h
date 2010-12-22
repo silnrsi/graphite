@@ -40,8 +40,8 @@
 #define gr2
 
 // Forward declarations
-struct GrSegment;
-struct GrSlot;
+struct Segment;
+struct Slot;
 class SlotMap;
 
 
@@ -50,7 +50,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef gr2::GrSlot * slotref;
+typedef gr2::Slot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 

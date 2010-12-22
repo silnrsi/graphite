@@ -220,7 +220,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<T>(table);
-    const GrFace* npFace=NULL;
+    const Face* npFace=NULL;
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("readFeats", readStatus);
     fprintf(stderr, testName, NULL);
@@ -228,7 +228,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 
     for (size_t i = 0; i < sizeof(table.m_defs) / sizeof(FeatDefn); i++)
     {
-        const GrFeatureRef * ref = testFeatureMap.findFeatureRef(table.m_defs[i].m_featId);
+        const FeatureRef * ref = testFeatureMap.findFeatureRef(table.m_defs[i].m_featId);
         testAssert("test feat\n", ref);
         testAssertEqual("test feat settings %hu %hu\n", ref->getNumSettings(), table.m_defs[i].m_numFeatSettings);
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);
@@ -255,7 +255,7 @@ int main(int /*argc*/, char ** /*argv*/)
     FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<FeatTableTestE>(testBadOffset);
-    const GrFace* npFace=NULL;
+    const Face* npFace=NULL;
     bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
     testAssert("fail gracefully on bad table", !readStatus);
 

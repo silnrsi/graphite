@@ -26,7 +26,7 @@
 #include "SegCache.h"
 
 class SegCache;
-struct GrFace;
+struct Face;
 
 class SilfSegCache
 {
@@ -78,7 +78,7 @@ private:
 class SegCacheStore
 {
 public:
-    SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments);
+    SegCacheStore(const Face *face, unsigned int numSilf, size_t maxSegments);
     ~SegCacheStore()
     {
         for (size_t i = 0; i < m_numSilf; i++)

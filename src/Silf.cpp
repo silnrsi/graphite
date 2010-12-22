@@ -424,7 +424,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 lastPass) const
+void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
     SlotMap map(*seg);
