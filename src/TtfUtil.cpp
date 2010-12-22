@@ -824,8 +824,8 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_arg
 	uint16 * pStr = reinterpret_cast<uint16 *>(pWStr);
 	uint16 * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
 
-        while (pStr < pStrEnd)
-            *pStr++ = read(*pStr);
+        for (; pStr != pStrEnd; ++pStr)
+          *pStr = read(*pStr);
 //	std::transform(pStr, pStrEnd, pStr, read<uint16>);
 
 //		for (int i = 0; i < nSize; i++)
