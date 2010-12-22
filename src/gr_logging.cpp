@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "XmlTraceLog.h"
-#include "graphite2/XmlLog.h"
+// #include "graphite2/XmlLog.h"
 
 
 extern "C"

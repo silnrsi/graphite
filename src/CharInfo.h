@@ -20,9 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-
 #include "Main.h"
-
 
 struct CharInfo // : ICharInfo
 {
@@ -43,5 +41,3 @@ private:
 };
 
 struct gr_char_info : public CharInfo {};
-
-

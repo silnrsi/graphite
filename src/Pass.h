@@ -24,8 +24,8 @@
 #include <cstdlib>
 #include "Code.h"
 
-struct Segment; // from C interface
-struct Face; // from C interface
+struct Segment;
+struct Face;
 class Silf;
 struct Rule;
 struct RuleEntry;

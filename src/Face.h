@@ -90,13 +90,15 @@ class FileFace
 {
 #ifndef DISABLE_FILE_FACE
 public:
+    static const void *table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
+  
     FileFace(const char *filename);
     ~FileFace();
 //    virtual const void *getTable(unsigned int name, size_t *len) const;
     bool isValid() const { return m_pfile && m_pHeader && m_pTableDir; }
 
     CLASS_NEW_DELETE
-public:     //for local convenience
+public:     //for local convenience    
     FILE* m_pfile;
     mutable TableCacheItem m_tables[TtfUtil::ktiLast];
     TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
@@ -107,8 +109,6 @@ private:        //defensive
     FileFace(const FileFace&);
     FileFace& operator=(const FileFace&);
 };
-
-const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
 
 struct Face
 {
@@ -175,42 +175,8 @@ private:
     mutable NameTable* m_pNames;
     
 private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
-    Face
-(const Face
-&);
-    Face
-& operator=(const Face
-&);
+    Face(const Face&);
+    Face& operator=(const Face&);
 };
 
-
-struct gr_face : public Face
- {};
-
-inline bool FeatureRef
-::applyValToFeature(uint16 val, Features* pDest) const 
-{ 
-    if (val>m_max || !m_pFace)
-      return false;
-    if (pDest->m_pMap==NULL)
-      pDest->m_pMap = &m_pFace->theSill().theFeatureMap();
-    else
-      if (pDest->m_pMap!=&m_pFace->theSill().theFeatureMap())
-        return false;       //incompatible
-    pDest->grow(m_index);
-    {
-        pDest->m_vec[m_index] &= ~m_mask;
-        pDest->m_vec[m_index] |= (uint32(val) << m_bits);
-    }
-    return true;
-}
-
-inline uint16 FeatureRef
-::getFeatureVal(const Features& feats) const
-{ 
-  if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
-    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
-  else
-    return 0;
-}
-
+struct gr_face : public Face {};

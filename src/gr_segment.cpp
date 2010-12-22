@@ -20,9 +20,9 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "graphite2/Segment.h"
-#include "Segment.h"
-#include "Slot.h"
 #include "processUTF.h"
+#include "Segment.h"
+//#include "Slot.h"
 
 namespace 
 {

@@ -20,142 +20,11 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "graphite2/Font.h"
-#include "XmlTraceLog.h"
 #include "Face.h"
 #include "CachedFace.h"
-
-#ifndef DISABLE_FILE_FACE
-
+#include "XmlTraceLog.h"
 
 
-FileFace::FileFace(const char *filename) :
-    m_pHeader(NULL),
-    m_pTableDir(NULL)
-{
-    if (!(m_pfile = fopen(filename, "rb"))) return;
-    size_t lOffset, lSize;
-    if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
-    m_pHeader = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(lSize);
-    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
-    if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
-    if (!TtfUtil::CheckHeader(m_pHeader)) return;
-    if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
-    m_pTableDir = (TtfUtil::Sfnt::OffsetSubTable::Entry*)gralloc<char>(lSize);
-    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
-    if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
-}
-
-FileFace::~FileFace()
-{
-    if (m_pTableDir)
-        free(m_pTableDir);
-    if (m_pHeader)
-        free(m_pHeader);
-    if (m_pfile)
-        fclose(m_pfile);
-    m_pTableDir = NULL;
-    m_pfile = NULL;
-    m_pHeader = NULL;
-}
-
-
-const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
-{
-    const FileFace* ttfFaceHandle = (const FileFace*)appFaceHandle;
-    TableCacheItem * res;
-    switch (name)
-    {
-        case tagCmap:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiCmap];
-            break;
-//        case tagCvt:
-//            res = &m_tables[TtfUtil::ktiCvt];
-//            break;
-//        case tagCryp:FileFace
-//            res = &m_tables[TtfUtil::ktiCryp];
-//            break;
-        case tagHead:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHead];
-            break;
-//        case tagFpgm:
-//            res = &m_tables[TtfUtil::ktiFpgm];
-//            break;
-//        case tagGdir:
-//            res = &m_tables[TtfUtil::ktiGdir];
-//            break;
-        case tagGlyf:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlyf];
-            break;
-        case tagHdmx:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHdmx];
-            break;
-        case tagHhea:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHhea];
-            break;
-        case tagHmtx:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHmtx];
-            break;
-        case tagLoca:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiLoca];
-            break;
-        case tagKern:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiKern];
-            break;
-//        case tagLtsh:
-//            res = &m_tables[TtfUtil::ktiLtsh];
-//            break;
-        case tagMaxp:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiMaxp];
-            break;
-        case tagName:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiName];
-            break;
-        case tagOs2:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiOs2];
-            break;
-        case tagPost:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiPost];
-            break;
-//        case tagPrep:
-//            res = &m_tables[TtfUtil::ktiPrep];
-//            break;
-        case tagFeat:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiFeat];
-            break;
-        case tagGlat:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlat];
-            break;
-        case tagGloc:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGloc];
-            break;
-        case tagSilf:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSilf];
-            break;
-        case tagSile:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSile];
-            break;
-        case tagSill:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSill];
-            break;
-        default:
-            res = NULL;
-    }
-    assert(res); // don't expect any other table types
-    if (!res) return NULL;
-    if (res->data() == NULL)
-    {
-        char *tptr;
-        size_t tlen, lOffset;
-        if (!TtfUtil::GetTableInfo(name, ttfFaceHandle->m_pHeader, ttfFaceHandle->m_pTableDir, lOffset, tlen)) return NULL;
-        if (fseek(ttfFaceHandle->m_pfile, lOffset, SEEK_SET)) return NULL;
-        tptr = gralloc<char>(tlen);
-        if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) return NULL;
-        res->set(tptr, tlen);
-    }
-    if (len) *len = res->size();
-    return res->data();
-}
-#endif			//!DISABLE_FILE_FACE
 
 extern "C" 
 {
@@ -186,6 +55,34 @@ extern "C"
         return static_cast<gr_face *>(res);
     }
 
+    GRNG_EXPORT gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
+                      //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
+    {
+        CachedFace *res = new CachedFace(appFaceHandle, getTable);
+    #ifndef DISABLE_TRACING
+        XmlTraceLog::get().openElement(ElementFace);
+    #endif
+        bool valid = true;
+        valid &= res->readGlyphs(faceOptions);
+        if (!valid) {
+            delete res;
+            return 0;
+        }
+        valid &= res->readGraphite();
+        valid &= res->readFeatures();
+        valid &= res->setupCache(cacheSize);
+
+    #ifndef DISABLE_TRACING
+        XmlTraceLog::get().closeElement(ElementFace);
+    #endif
+
+        if (!(faceOptions & gr_face_dumbRendering) && !valid) {
+            delete res;
+            return 0;
+        }
+        return static_cast<gr_face *>(static_cast<Face *>(res));
+    }
+    
     GRNG_EXPORT uint32 gr_str_to_tag(const char *str)
     {
         uint32 res = 0;
@@ -292,7 +189,7 @@ extern "C"
         FileFace* pFileFace = new FileFace(filename);
         if (pFileFace->m_pTableDir)
         {
-          gr_face* pRes =gr_make_face(pFileFace, &FileFace_table_fn, faceOptions);
+          gr_face* pRes =gr_make_face(pFileFace, &FileFace::table_fn, faceOptions);
           if (pRes)
           {
             pRes->takeFileFace(pFileFace);        //takes ownership
@@ -306,6 +203,26 @@ extern "C"
         return NULL;
     }
 
+
+    GRNG_EXPORT gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
+                      //when finished with, call destroy_face
+    {
+        FileFace* pFileFace = new FileFace(filename);
+        if (pFileFace->m_pTableDir)
+        {
+          gr_face* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace::table_fn, segCacheMaxSize, faceOptions);
+          if (pRes)
+          {
+            pRes->takeFileFace(pFileFace);        //takes ownership
+            return pRes;
+          }
+        }
+
+        //error when loading
+
+        delete pFileFace;
+        return NULL;
+    }
 #endif      //!DISABLE_FILE_FACE
 }
 

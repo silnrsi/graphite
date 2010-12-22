@@ -98,53 +98,33 @@ public:
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
     unsigned int charInfoCount() const { return m_numCharinfo; }
-    const CharInfo
- *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
-    CharInfo
- *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    const CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
+    CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     int8 dir() const { return m_dir; }
 
-    Segment
-(unsigned int numchars, const Face
-* face, uint32 script, int dir);
-    ~Segment
-();
-    SegmentScopeState setScope(Slot
- * firstSlot, Slot
- * lastSlot, size_t subLength);
+    Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
+    ~Segment();
+    SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
     void removeScope(SegmentScopeState & state);
-    Slot
- *first() { return m_first; }
-    void first(Slot
- *p) { m_first = p; }
-    Slot
- *last() { return m_last; }
-    void last(Slot
- *p) { m_last = p; }
+    Slot *first() { return m_first; }
+    void first(Slot *p) { m_first = p; }
+    Slot *last() { return m_last; }
+    void last(Slot *p) { m_last = p; }
     void appendSlot(int i, int cid, int gid, int fid);
-    Slot
- *newSlot();
-    void freeSlot(Slot
- *);
-    void positionSlots(const Font
- *font, Slot
- *iStart = NULL, Slot
- *iEnd = NULL);
-    void append(const Segment
- &other);
+    Slot *newSlot();
+    void freeSlot(Slot *);
+    void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);
+    void append(const Segment &other);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
-    uint16 getFeature(int index, uint8 findex) const { const FeatureRef
-* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
+    uint16 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void dir(int8 val) { m_dir = val; }
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_face->glyphAttr(gid, gattr); }
-    uint16 getGlyphMetric(Slot
- *iSlot, uint8 metric, uint8 attrLevel) const {
+    uint16 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const {
         if (attrLevel > 0)
         {
-            Slot
- *is = findRoot(iSlot);
+            Slot *is = findRoot(iSlot);
             return is->clusterMetric(this, metric, attrLevel);
         }
         else
@@ -152,22 +132,14 @@ public:
     }
     float glyphAdvance(uint16 gid) const { return m_face->getAdvance(gid, 1.0); }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
-    Slot
- *findRoot(Slot
- *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
+    Slot *findRoot(Slot *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
     int numAttrs() { return m_silf->numUser(); }
-    void splice(size_t offset, size_t length, Slot
- * startSlot, Slot
- * endSlot,
-                const Slot
- * firstSpliceSlot, size_t numGlyphs);
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, 
+                const Slot * firstSpliceSlot, size_t numGlyphs);
     int defaultOriginal() const { return m_defaultOriginal; }
-    const Face
- * getFace() const { return m_face; }
+    const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
-    void getCharSlots(uint32 *begins, uint32 *ends, Slot
- **sbegins, Slot
- **sends) const;
+    void getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const;
 
     CLASS_NEW_DELETE
 
@@ -177,31 +149,23 @@ public:
 #endif
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
-    void read_text(const Face
- *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
-    void prepare_pos(const Font
- *font);
-    void finalise(const Font
- *font);
+    void read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
+    void prepare_pos(const Font *font);
+    void finalise(const Font *font);
   
 private:
     SlotRope m_slots;           // std::vector of slot buffers
-    Slot
- *m_freeSlots;          // linked list of free slots
-    Slot
- *m_first;              // first slot in segment
-    Slot
- *m_last;               // last slot in segment
+    Slot *m_freeSlots;          // linked list of free slots
+    Slot *m_first;              // first slot in segment
+    Slot *m_last;               // last slot in segment
     unsigned int m_bufSize;     // how big a buffer to create when need more slots
     unsigned int m_numGlyphs;
     unsigned int m_numCharinfo; // size of the array and number of input characters
     int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
-    CharInfo
- *m_charinfo;       // character info, one per input character
+    CharInfo *m_charinfo;       // character info, one per input character
 
-    const Face
- *m_face;       // GrFace
+    const Face *m_face;       // GrFace
     const Silf *m_silf;
     Position m_advance;         // whole segment advance
     Rect m_bbox;                // ink box of the segment
@@ -209,12 +173,8 @@ private:
     FeatureList m_feats;	// feature settings referenced by charinfos in this segment
 
 private:		//defensive on m_charinfo
-    Segment
-(const Segment
-&);
-    Segment
-& operator=(const Segment
-&);
+    Segment(const Segment&);
+    Segment& operator=(const Segment&);
 };
 
 struct gr_segment : public Segment

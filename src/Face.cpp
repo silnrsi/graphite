@@ -189,3 +189,134 @@ uint16 Face::languageForLocale(const char * locale) const
         return m_pNames->getLanguageId(locale);
     return 0;
 }
+
+
+#ifndef DISABLE_FILE_FACE
+
+FileFace::FileFace(const char *filename) :
+    m_pHeader(NULL),
+    m_pTableDir(NULL)
+{
+    if (!(m_pfile = fopen(filename, "rb"))) return;
+    size_t lOffset, lSize;
+    if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
+    m_pHeader = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(lSize);
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pHeader, 1, lSize, m_pfile) != lSize) return;
+    if (!TtfUtil::CheckHeader(m_pHeader)) return;
+    if (!TtfUtil::GetTableDirInfo(m_pHeader, lOffset, lSize)) return;
+    m_pTableDir = (TtfUtil::Sfnt::OffsetSubTable::Entry*)gralloc<char>(lSize);
+    if (fseek(m_pfile, lOffset, SEEK_SET)) return;
+    if (fread(m_pTableDir, 1, lSize, m_pfile) != lSize) return;
+}
+
+FileFace::~FileFace()
+{
+    if (m_pTableDir)
+        free(m_pTableDir);
+    if (m_pHeader)
+        free(m_pHeader);
+    if (m_pfile)
+        fclose(m_pfile);
+    m_pTableDir = NULL;
+    m_pfile = NULL;
+    m_pHeader = NULL;
+}
+
+const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
+{
+    const FileFace* ttfFaceHandle = (const FileFace*)appFaceHandle;
+    TableCacheItem * res;
+    switch (name)
+    {
+        case tagCmap:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiCmap];
+            break;
+//        case tagCvt:
+//            res = &m_tables[TtfUtil::ktiCvt];
+//            break;
+//        case tagCryp:FileFace
+//            res = &m_tables[TtfUtil::ktiCryp];
+//            break;
+        case tagHead:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHead];
+            break;
+//        case tagFpgm:
+//            res = &m_tables[TtfUtil::ktiFpgm];
+//            break;
+//        case tagGdir:
+//            res = &m_tables[TtfUtil::ktiGdir];
+//            break;
+        case tagGlyf:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlyf];
+            break;
+        case tagHdmx:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHdmx];
+            break;
+        case tagHhea:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHhea];
+            break;
+        case tagHmtx:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHmtx];
+            break;
+        case tagLoca:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiLoca];
+            break;
+        case tagKern:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiKern];
+            break;
+//        case tagLtsh:
+//            res = &m_tables[TtfUtil::ktiLtsh];
+//            break;
+        case tagMaxp:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiMaxp];
+            break;
+        case tagName:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiName];
+            break;
+        case tagOs2:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiOs2];
+            break;
+        case tagPost:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiPost];
+            break;
+//        case tagPrep:
+//            res = &m_tables[TtfUtil::ktiPrep];
+//            break;
+        case tagFeat:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiFeat];
+            break;
+        case tagGlat:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlat];
+            break;
+        case tagGloc:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGloc];
+            break;
+        case tagSilf:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSilf];
+            break;
+        case tagSile:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSile];
+            break;
+        case tagSill:
+            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSill];
+            break;
+        default:
+            res = NULL;
+    }
+    assert(res); // don't expect any other table types
+    if (!res) return NULL;
+    if (res->data() == NULL)
+    {
+        char *tptr;
+        size_t tlen, lOffset;
+        if (!TtfUtil::GetTableInfo(name, ttfFaceHandle->m_pHeader, ttfFaceHandle->m_pTableDir, lOffset, tlen)) return NULL;
+        if (fseek(ttfFaceHandle->m_pfile, lOffset, SEEK_SET)) return NULL;
+        tptr = gralloc<char>(tlen);
+        if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) return NULL;
+        res->set(tptr, tlen);
+    }
+    if (len) *len = res->size();
+    return res->data();
+}
+#endif                  //!DISABLE_FILE_FACE

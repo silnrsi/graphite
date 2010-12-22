@@ -59,10 +59,10 @@ private:			//defensive on m_advances
 struct gr_font : public Font {};
 
 
-class GrSimpleFont : public Font      //has no external hints - gets advance information from the face
+class SimpleFont : public Font      //has no external hints - gets advance information from the face
 {
 public:
-    GrSimpleFont(float ppm/*pixels per em*/, const Face *face);
+    SimpleFont(float ppm/*pixels per em*/, const Face *face);
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 private:
@@ -70,10 +70,10 @@ private:
 };
 
 
-class GrHintedFont : public Font
+class HintedFont : public Font
 {
 public:
-    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const Face *face/*needed for scaling*/);
+    HintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const Face *face/*needed for scaling*/);
     virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;

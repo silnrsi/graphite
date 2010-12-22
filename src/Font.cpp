@@ -43,21 +43,21 @@ Font::Font(float ppm, const Face *face/*needed for scaling*/) :
 }
 
 
-GrSimpleFont::GrSimpleFont(float ppm/*pixels per em*/, const Face *face) :
+SimpleFont::SimpleFont(float ppm/*pixels per em*/, const Face *face) :
   Font(ppm, face),
   m_face(face)
 {
 }
   
   
-/*virtual*/ float GrSimpleFont::computeAdvance(unsigned short glyphid) const
+/*virtual*/ float SimpleFont::computeAdvance(unsigned short glyphid) const
 {
     return m_face->getAdvance(glyphid, m_scale);
 }
 
 
 
-GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const Face *face/*needed for scaling*/) :
+HintedFont::HintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const Face *face/*needed for scaling*/) :
     Font(ppm, face), 
     m_appFontHandle(appFontHandle),
     m_advance(advance2)
@@ -65,7 +65,7 @@ GrHintedFont::GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle
 }
 
 
-/*virtual*/ float GrHintedFont::computeAdvance(unsigned short glyphid) const
+/*virtual*/ float HintedFont::computeAdvance(unsigned short glyphid) const
 {
     return (*m_advance)(m_appFontHandle, glyphid);
 }

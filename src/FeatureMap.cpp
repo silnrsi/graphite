@@ -38,14 +38,6 @@ static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndF
                                                                         ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
                                                                                     ? 1 : 0)); }
 
-bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
-{
-    if (!m_FeatureMap.readFeats(appFaceHandle, getTable, pFace)) return false;
-    if (!readSill(appFaceHandle, getTable)) return false;
-    return true;
-}
-
-
 bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
 {
     size_t lFeat;
@@ -64,8 +56,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     if (m_numFeats)
     {
-    m_feats = new FeatureRef
-[m_numFeats];
+    m_feats = new FeatureRef[m_numFeats];
     m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     defVals = gralloc<uint16>(m_numFeats);
     }
@@ -184,6 +175,14 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     return true;
 }
 
+bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
+{
+    if (!m_FeatureMap.readFeats(appFaceHandle, getTable, pFace)) return false;
+    if (!readSill(appFaceHandle, getTable)) return false;
+    return true;
+}
+
+
 bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)
 {
     size_t lSill;
@@ -227,16 +226,6 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
     return true;
 }
 
-const FeatureRef
- *FeatureMap::findFeatureRef(uint32 name) const
-{
-    NameAndFeatureRef *it;
-    
-    for (it = m_pNamedFeats; it < m_pNamedFeats + m_numFeats; ++it)
-        if (it->m_name == name)
-            return it->m_pFRef;
-    return NULL;
-}
 
 Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
 {
@@ -252,4 +241,42 @@ Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
     }
     return m_FeatureMap.m_defaultFeatures->clone();
 }
+
+
+
+const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
+{
+    NameAndFeatureRef *it;
+    
+    for (it = m_pNamedFeats; it < m_pNamedFeats + m_numFeats; ++it)
+        if (it->m_name == name)
+            return it->m_pFRef;
+    return NULL;
+}
+
+bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
+{ 
+    if (val>m_max || !m_pFace)
+      return false;
+    if (pDest->m_pMap==NULL)
+      pDest->m_pMap = &m_pFace->theSill().theFeatureMap();
+    else
+      if (pDest->m_pMap!=&m_pFace->theSill().theFeatureMap())
+        return false;       //incompatible
+    pDest->grow(m_index);
+    {
+        pDest->m_vec[m_index] &= ~m_mask;
+        pDest->m_vec[m_index] |= (uint32(val) << m_bits);
+    }
+    return true;
+}
+
+uint16 FeatureRef::getFeatureVal(const Features& feats) const
+{ 
+  if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
+    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
+  else
+    return 0;
+}
+
 

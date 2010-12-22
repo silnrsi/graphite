@@ -66,7 +66,6 @@ file(GLOB PRIVATE_HEADERS *.h)
 add_library(graphite2 SHARED
     ${VM_MACHINE_TYPE}_machine.cpp
     gr_char_info.cpp
-    gr_feature_ref.cpp
     gr_features.cpp
     gr_face.cpp
     gr_font.cpp
@@ -81,7 +80,6 @@ add_library(graphite2 SHARED
     Font.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
-    Main.cpp
     NameTable.cpp
     Pass.cpp
     SegCache.cpp

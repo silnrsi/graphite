@@ -236,7 +236,7 @@ GRNG_EXPORT void* gr_fref_value_label(const gr_feature_ref* pfeatureref, gr_uint
 GRNG_EXPORT void gr_label_destroy(void * label);
 
 /** Copies a gr_feature_val **/
-GRNG_EXPORT gr_feature_val* gr_featureval_clone(gr_feature_val* pfeatures);
+GRNG_EXPORT gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures);
 
 /** Destroys a gr_feature_val **/
 GRNG_EXPORT void gr_featureval_destroy(gr_feature_val *pfeatures);
