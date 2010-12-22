@@ -20,7 +20,7 @@ add_library(vm-test-common  STATIC
                 ${SRC}/FeatureMap.cpp
                 ${SRC}/GlyphFace.cpp
                 ${SRC}/GlyphFaceCache.cpp
-                ${SRC}/GrFace.cpp
+                ${SRC}/gr_face.cpp
                 ${SRC}/GrFaceImp.cpp
                 ${SRC}/GrSegmentImp.cpp
                 ${SRC}/NameTable.cpp

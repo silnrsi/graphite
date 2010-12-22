@@ -12,7 +12,6 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(featuremaptest featuremaptest.cpp
     ../../src/FeatureMap.cpp
-    ../../src/Features.cpp
     ../../src/XmlTraceLog.cpp
     ../../src/XmlTraceLogTags.cpp)
 

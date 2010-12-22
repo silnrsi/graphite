@@ -15,15 +15,16 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/CmapCache.cpp
     ../../src/Code.cpp
     ../../src/FeatureMap.cpp
-    ../../src/Features.cpp
     ../../src/GlyphFace.cpp
     ../../src/GlyphFaceCache.cpp
+    ../../src/gr_face.cpp
+    ../../src/gr_features.cpp
+    ../../src/gr_font.cpp
+    ../../src/gr_logging.cpp
+    ../../src/gr_segment.cpp
     ../../src/GrCachedFace.cpp
-    ../../src/GrFace.cpp
     ../../src/GrFaceImp.cpp
-    ../../src/GrFont.cpp
     ../../src/GrFontImp.cpp
-    ../../src/GrSegment.cpp
     ../../src/GrSegmentImp.cpp
     ../../src/NameTable.cpp
     ../../src/Pass.cpp

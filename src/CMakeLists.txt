@@ -65,25 +65,26 @@ file(GLOB PRIVATE_HEADERS *.h)
 
 add_library(graphite2 SHARED
     ${VM_MACHINE_TYPE}_machine.cpp
-    CharInfo.cpp
+    gr_char_info.cpp
+    gr_feature_ref.cpp
+    gr_features.cpp
+    gr_face.cpp
+    gr_font.cpp
+    gr_logging.cpp
+    gr_segment.cpp
+    gr_slot.cpp
     CmapCache.cpp
     Code.cpp
     FeatureMap.cpp
-    Features.cpp
-    FeatureRef.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
     GrCachedFace.cpp
-    GrFace.cpp
     GrFaceImp.cpp
-    GrFont.cpp
     GrFontImp.cpp
-    GrSegment.cpp
     GrSegmentImp.cpp
     Main.cpp
     NameTable.cpp
     SlotImp.cpp
-    Slot.cpp
     Silf.cpp
     Pass.cpp
     SegCache.cpp
