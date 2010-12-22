@@ -17,16 +17,16 @@ add_library(vm-test-common  STATIC
                 basic_test.cpp
                 ${SRC}/Code.cpp
                 ${SRC}/CmapCache.cpp
+                ${SRC}/Face.cpp
                 ${SRC}/FeatureMap.cpp
                 ${SRC}/GlyphFace.cpp
                 ${SRC}/GlyphFaceCache.cpp
                 ${SRC}/gr_face.cpp
-                ${SRC}/GrFaceImp.cpp
-                ${SRC}/GrSegmentImp.cpp
                 ${SRC}/NameTable.cpp
                 ${SRC}/Pass.cpp
+                ${SRC}/Segment.cpp
                 ${SRC}/Silf.cpp
-                ${SRC}/SlotImp.cpp
+                ${SRC}/Slot.cpp
                 ${SRC}/TtfUtil.cpp
                 ${TRACESUPPORT})
 

@@ -21,7 +21,7 @@
 */
 #include <cassert>
 #include "graphite2/Segment.h"
-#include "CharInfoImp.h"
+#include "CharInfo.h"
 
 extern "C"
 {

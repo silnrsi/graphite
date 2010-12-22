@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "graphite2/Font.h"
-#include "GrFontImp.h"
+#include "Font.h"
 
 extern "C" {
 

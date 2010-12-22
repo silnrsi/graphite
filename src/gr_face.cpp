@@ -21,8 +21,8 @@
 */
 #include "graphite2/Font.h"
 #include "XmlTraceLog.h"
-#include "GrFaceImp.h"
-#include "GrCachedFace.h"
+#include "Face.h"
+#include "CachedFace.h"
 
 #ifndef DISABLE_FILE_FACE
 

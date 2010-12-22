@@ -24,7 +24,7 @@
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
 #include "Main.h"
-#include "GrFontImp.h"
+#include "Font.h"
 
 
 #define SLOT_DELETED    1

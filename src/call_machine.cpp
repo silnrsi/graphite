@@ -31,9 +31,9 @@
 #include <cstring>
 #include <graphite2/Segment.h>
 #include "Machine.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "XmlTraceLog.h"
-#include "SlotImp.h"
+#include "Slot.h"
 #include "Rule.h"
 
 // Disable the unused parameter warning as th compiler is mistaken since dp

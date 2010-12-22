@@ -23,13 +23,13 @@
 
 #include "Main.h"
 #include "FeatureMap.h"
-#include "FeaturesImp.h"
+#include "FeatureVal.h"
 #include "graphite2/Font.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
 //#include <algorithm>
 #include <stdlib.h>
-#include "GrFaceImp.h"
+#include "Face.h"
 
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')

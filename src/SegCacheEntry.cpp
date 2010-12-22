@@ -20,8 +20,8 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "Main.h"
-#include "SlotImp.h"
-#include "GrSegmentImp.h"
+#include "Slot.h"
+#include "Segment.h"
 #include "SegCache.h"
 #include "SegCacheEntry.h"
 

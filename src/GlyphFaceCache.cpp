@@ -21,7 +21,7 @@
 */
 #include "GlyphFaceCache.h"
 #include "graphite2/Font.h"
-#include "GrFaceImp.h"     //for the tags
+#include "Face.h"     //for the tags
 
 
 

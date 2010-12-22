@@ -35,9 +35,9 @@
 #include <cassert>
 #include <cstring>
 #include "Machine.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "XmlTraceLog.h"
-#include "SlotImp.h"
+#include "Slot.h"
 #include "Rule.h"
 
 #define STARTOP(name)           name: {

@@ -24,7 +24,7 @@
 // #include "graphite2/Types.h"
 #include "graphite2/Font.h"
 #include "Main.h"
-#include "FeaturesImp.h"
+#include "FeatureVal.h"
 
 // Forward declarations for implmentation types
 class FeatureMap;

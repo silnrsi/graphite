@@ -23,10 +23,10 @@
 
 #include <graphite2/Segment.h>
 #include "Main.h"
-#include "SlotImp.h"
-#include "FeaturesImp.h"
+#include "Slot.h"
+#include "FeatureVal.h"
 #include "SegCacheEntry.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 
 
 class SegCache;

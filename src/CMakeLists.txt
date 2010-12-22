@@ -73,23 +73,23 @@ add_library(graphite2 SHARED
     gr_logging.cpp
     gr_segment.cpp
     gr_slot.cpp
+    CachedFace.cpp
     CmapCache.cpp
     Code.cpp
+    Face.cpp
     FeatureMap.cpp
+    Font.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
-    GrCachedFace.cpp
-    GrFaceImp.cpp
-    GrFontImp.cpp
-    GrSegmentImp.cpp
     Main.cpp
     NameTable.cpp
-    SlotImp.cpp
-    Silf.cpp
     Pass.cpp
     SegCache.cpp
     SegCacheEntry.cpp
     SegCacheStore.cpp
+    Segment.cpp
+    Silf.cpp
+    Slot.cpp
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp

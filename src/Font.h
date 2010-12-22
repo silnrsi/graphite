@@ -23,7 +23,7 @@
 #include <cassert>
 #include "graphite2/Font.h"
 #include "Main.h"
-#include "GrFaceImp.h"
+#include "Face.h"
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 

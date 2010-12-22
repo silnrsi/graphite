@@ -22,9 +22,9 @@
 #include <graphite2/Segment.h>
 #include "Main.h"
 #include "Silf.h"
-#include "GrFaceImp.h"
-#include "GrCachedFace.h"
-#include "GrSegmentImp.h"
+#include "Face.h"
+#include "CachedFace.h"
+#include "Segment.h"
 #include "SegCache.h"
 #include "SegCacheStore.h"
 #include "processUTF.h"

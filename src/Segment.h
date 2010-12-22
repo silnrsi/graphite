@@ -32,13 +32,13 @@
 #include <vector>
 #endif
 
-#include "SlotImp.h"
-#include "CharInfoImp.h"
-#include "FeaturesImp.h"
+#include "Slot.h"
+#include "CharInfo.h"
+#include "FeatureVal.h"
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
-#include "GrList.h"
+#include "List.h"
 
 
 #if 0

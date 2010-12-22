@@ -21,7 +21,7 @@
 */
 
 #include "SegCacheStore.h"
-#include "GrFaceImp.h"
+#include "Face.h"
 
 
 SegCacheStore::SegCacheStore(const Face *face, unsigned int numSilf, size_t maxSegments)

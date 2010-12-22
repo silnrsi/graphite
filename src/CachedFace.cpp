@@ -20,7 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <graphite2/Segment.h>
-#include "GrCachedFace.h"
+#include "CachedFace.h"
 #include "SegCacheStore.h"
 
 

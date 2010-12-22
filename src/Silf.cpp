@@ -23,7 +23,7 @@
 #include "graphite2/Segment.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "Rule.h"
 
 Silf::Silf() throw()

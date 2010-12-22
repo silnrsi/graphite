@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include "GrFaceImp.h"
+#include "Face.h"
 
 class SegCacheStore;
 

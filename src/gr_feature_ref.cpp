@@ -21,7 +21,7 @@
 */
 #include "graphite2/Font.h"
 #include "FeatureMap.h"
-#include "GrFaceImp.h"
+#include "Face.h"
 #include "NameTable.h"
 
 extern "C"

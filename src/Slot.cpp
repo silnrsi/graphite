@@ -19,9 +19,9 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "GrSegmentImp.h"
-#include "SlotImp.h"
-#include "CharInfoImp.h"
+#include "Segment.h"
+#include "Slot.h"
+#include "CharInfo.h"
 #include "Rule.h"
 
 Slot::Slot() :

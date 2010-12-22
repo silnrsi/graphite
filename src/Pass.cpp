@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "Code.h"
 #include "Rule.h"
 #include "XmlTraceLog.h"

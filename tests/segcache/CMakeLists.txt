@@ -12,9 +12,12 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/call_machine.cpp
+    ../../src/CachedFace.cpp
     ../../src/CmapCache.cpp
     ../../src/Code.cpp
+    ../../src/Face.cpp
     ../../src/FeatureMap.cpp
+    ../../src/Font.cpp
     ../../src/GlyphFace.cpp
     ../../src/GlyphFaceCache.cpp
     ../../src/gr_face.cpp
@@ -22,17 +25,14 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/gr_font.cpp
     ../../src/gr_logging.cpp
     ../../src/gr_segment.cpp
-    ../../src/GrCachedFace.cpp
-    ../../src/GrFaceImp.cpp
-    ../../src/GrFontImp.cpp
-    ../../src/GrSegmentImp.cpp
     ../../src/NameTable.cpp
     ../../src/Pass.cpp
-    ../../src/Silf.cpp
-    ../../src/SlotImp.cpp
     ../../src/SegCache.cpp
     ../../src/SegCacheEntry.cpp
     ../../src/SegCacheStore.cpp
+    ../../src/Segment.cpp
+    ../../src/Silf.cpp
+    ../../src/Slot.cpp
     ../../src/XmlTraceLog.cpp
     ../../src/XmlTraceLogTags.cpp)
 

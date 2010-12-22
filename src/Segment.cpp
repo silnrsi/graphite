@@ -24,10 +24,10 @@
 #include <stdlib.h>
 #include <new>
 
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "graphite2/Font.h"
-#include "CharInfoImp.h"
-#include "SlotImp.h"
+#include "CharInfo.h"
+#include "Slot.h"
 #include "Main.h"
 #include "XmlTraceLog.h"
 #include "CmapCache.h"
