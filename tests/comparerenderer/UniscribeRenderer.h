@@ -51,7 +51,7 @@ public:
                 GOFFSET *pGoffset, ABC *pABC);
 
     UniscribeFunctions(const char * usp10dll)
-        : fScriptPlace(NULL), fScriptShape(NULL), fScriptItemize(NULL)
+        : fScriptPlace(NULL), fScriptShape(NULL), fScriptItemize(NULL), m_module(NULL)
     {
         m_module = LoadLibraryA(usp10dll);
         if (m_module)
@@ -60,6 +60,10 @@ public:
                 (GetProcAddress(m_module, "ScriptItemize"));
             fScriptShape = reinterpret_cast<uspScriptShape>(GetProcAddress(m_module, "ScriptShape"));
             fScriptPlace = reinterpret_cast<uspScriptPlace>(GetProcAddress(m_module, "ScriptPlace"));
+        }
+        else
+        {
+            fprintf(stderr, "Library %s failed to load\n", usp10dll);
         }
     }
     ~UniscribeFunctions()
@@ -81,7 +85,6 @@ public:
         m_rtl(textDir),
         m_fontFile(fontFile),
         m_hdc(GetDC(NULL)),
-        m_logFont(createLogFontFromName(findFontName(fontFile), fontSize)),
         m_hFont(NULL), m_hFontOld(NULL),
         m_glyphBufferSize(0),
         m_charBufferSize(0),
@@ -94,8 +97,15 @@ public:
         m_pAdvances(NULL),
         m_fontName(NULL)
     {
+        m_logFont = createLogFontFromName(findFontName(fontFile), fontSize);
         if (AddFontResourceExA(fontFile, FR_PRIVATE, 0))
         {
+            m_hFont = CreateFontIndirectW(&m_logFont);
+            m_hFontOld = (HFONT) SelectObject(m_hdc, m_hFont);
+        }
+        else
+        {
+            fprintf(stderr, "AddFontResouce failed, try system font\n");
             m_hFont = CreateFontIndirectW(&m_logFont);
             m_hFontOld = (HFONT) SelectObject(m_hdc, m_hFont);
         }
@@ -129,19 +139,22 @@ public:
         if (!(pFile = fopen(fontFile, "rb"))) return NULL;
         size_t lOffset, lSize;
         if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return NULL;
-        TtfUtil::Sfnt::OffsetSubTable * pHeader = reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable*>(new char[lSize]);
+        char * pRawHeader = new char[lSize];
+        TtfUtil::Sfnt::OffsetSubTable * pHeader = reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable*>(pRawHeader);
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
-        if (fread(pHeader, 1, lSize, pFile) != lSize) return NULL;
+        if (fread(pRawHeader, 1, lSize, pFile) != lSize) return NULL;
         if (!TtfUtil::CheckHeader(pHeader)) return NULL;
         if (!TtfUtil::GetTableDirInfo(pHeader, lOffset, lSize)) return NULL;
-        TtfUtil::Sfnt::OffsetSubTable::Entry* pTableDir = reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable::Entry*>(new char[lSize]);
+        char * pRawTableDir = new char[lSize];
+        TtfUtil::Sfnt::OffsetSubTable::Entry* pTableDir =
+            reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable::Entry*>(pRawTableDir);
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
-        if (fread(pTableDir, 1, lSize, pFile) != lSize) return NULL;
+        if (fread(pRawTableDir, 1, lSize, pFile) != lSize) return NULL;
         if (!TtfUtil::GetTableInfo(0x6e616d65, pHeader, pTableDir, lOffset, lSize)) return NULL;
-        char * pNameTable = new char[lSize];
+        char * pRawNameTable = new char[lSize];
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
-        if (fread(pNameTable, 1, lSize, pFile) != lSize) return NULL;
-        TtfUtil::Sfnt::FontNames * pNames = reinterpret_cast<TtfUtil::Sfnt::FontNames *>(pNameTable);
+        if (fread(pRawNameTable, 1, lSize, pFile) != lSize) return NULL;
+        TtfUtil::Sfnt::FontNames * pNames = reinterpret_cast<TtfUtil::Sfnt::FontNames *>(pRawNameTable);
         TtfUtil::uint16 nameCount = (pNames->count >> 8) + ((pNames->count & 0xFF) << 8);
         if ((nameCount - 1) * sizeof(TtfUtil::Sfnt::NameRecord) + 
             sizeof(TtfUtil::Sfnt::FontNames) > lSize) return NULL;
@@ -149,14 +162,17 @@ public:
         size_t nameSize = 0;
         if (TtfUtil::GetNameInfo(pNames, 3, 1, 0x409, 4, nameOffset, nameSize))
         {
-            m_fontName = new WCHAR[nameSize/2+1];
-            memcpy(m_fontName, pNameTable + nameOffset, nameSize);
-            TtfUtil::SwapWString(m_fontName, nameSize);
-            m_fontName[nameSize/2] = 0;
+            assert(nameSize % 2 == 0);
+            size_t utf16Len = nameSize/2;
+            m_fontName = new WCHAR[utf16Len+1];
+            memcpy(m_fontName, pRawNameTable + nameOffset, nameSize);
+            TtfUtil::SwapWString(m_fontName, utf16Len);
+            m_fontName[utf16Len] = 0;
         }
 
-        delete [] reinterpret_cast<char*>(pHeader);
-        delete [] pNameTable;
+        delete [] pRawHeader;
+        delete [] pRawTableDir;
+        delete [] pRawNameTable;
         fclose(pFile);
         return m_fontName;
     }
@@ -198,6 +214,7 @@ public:
         gr2::IgnoreErrors ignore;
         gr2::BufferLimit bufferLimit(gr2::gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
         gr2::processUTF<gr2::BufferLimit, gr2::ToUtf16Processor, gr2::IgnoreErrors>(bufferLimit, &processor, &ignore);
+        assert(utf16Length > processor.uint16Processed());
         utf16Length = processor.uint16Processed();
         utf16Text[utf16Length] = 0;
         allocCharBuffers(utf16Length);
@@ -238,9 +255,7 @@ public:
                 continue;
             }
             glyphOffset += numGlyphs;
-            //if (i == 0) advance += abc.abcA;
             advance += abc.abcB + abc.abcA + abc.abcC;
-            //if (i == numItems - 1) advance += abc.abcC;
         }
         RenderedLine * renderedLine = new(result) RenderedLine(glyphOffset, static_cast<float>(advance));
         int cumulativeAdvance = 0;
@@ -265,6 +280,7 @@ public:
             cumulativeAdvance += m_pAdvances[j];
         }
         renderedLine->setAdvance(static_cast<float>(cumulativeAdvance));
+        delete [] utf16Text;
     }
     virtual const char * name() const { return "uniscribe"; }
 private:

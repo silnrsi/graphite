@@ -64,7 +64,12 @@ public:
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %d\n", static_cast<int>(reinterpret_cast<const char*>(pError) - utf8));
         gr2::GrSegment* pSeg = gr2::gr_make_seg(m_grFont, m_grFace, 0u, NULL, gr2::gr_utf8, utf8, numCodePoints, m_rtl);
-        if (!pSeg) return;
+        if (!pSeg)
+        {
+            fprintf(stderr, "Failed to create segment\n");
+            new(result) RenderedLine(0, .0f);
+            return;
+        }
         RenderedLine * renderedLine = new(result) RenderedLine(gr2::gr_seg_n_slots(pSeg),
                                                                gr2::gr_seg_advance_X(pSeg));
         int i = 0;
@@ -73,11 +78,6 @@ public:
             (*renderedLine)[i].set(gr2::gr_slot_gid(s), gr2::gr_slot_origin_X(s),
                                    gr2::gr_slot_origin_Y(s), gr2::gr_slot_before(s),
                                    gr2::gr_slot_after(s));
-        
-//         for (int i = 0; i < seg.length(); i++)
-//         {
-//             (*renderedLine)[i].set(seg[i].gid(), seg[i].originX(), seg[i].originY(), seg[i].before(), seg[i].after());
-//         }
         gr2::gr_seg_destroy(pSeg);
     }
     virtual const char * name() const { return "graphiteng"; }
