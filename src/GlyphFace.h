@@ -26,6 +26,8 @@
 #include "Main.h"
 #include "Position.h"
 
+namespace graphite2 {
+
 enum metrics {
     kgmetLsb = 0, kgmetRsb,
     kgmetBbTop, kgmetBbBottom, kgmetBbLeft, kgmetBbRight,
@@ -119,3 +121,4 @@ inline void GlyphFace::setBBox(const Rect& a) {
 }
 #endif
 
+} // namespace graphite2

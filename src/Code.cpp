@@ -41,6 +41,8 @@
 #endif
 #endif
 
+
+using namespace graphite2;
 using namespace vm;
 
 namespace {

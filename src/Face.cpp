@@ -29,6 +29,8 @@
 #include <graphite2/Segment.h>
 
 
+using namespace graphite2;
+
 Face::~Face()
 {
     delete m_pGlyphFaceCache;

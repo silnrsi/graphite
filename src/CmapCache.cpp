@@ -25,6 +25,9 @@
 #include "TtfTypes.h"
 #include "TtfUtil.h"
 
+
+using namespace graphite2;
+
 CmapCache::CmapCache(const void* cmapTable, size_t length)
 {
     const void * table31 = TtfUtil::FindCmapSubtable(cmapTable, 3, 1, length);

@@ -25,6 +25,8 @@
 #include "TtfUtil.h"
 
 
+using namespace graphite2;
+
 GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 {
     if (glyphid < hdr.m_nGlyphsWithGraphics)

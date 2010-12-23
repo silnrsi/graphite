@@ -24,6 +24,9 @@
 #include "CharInfo.h"
 #include "Rule.h"
 
+
+using namespace graphite2;
+
 Slot::Slot() :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),

@@ -28,6 +28,7 @@
 #include "SegCacheEntry.h"
 #include "Segment.h"
 
+namespace graphite2 {
 
 class SegCache;
 class SegCacheEntry;
@@ -298,4 +299,4 @@ inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t le
     return entry;
 }
     
-
+} // namespace graphite2

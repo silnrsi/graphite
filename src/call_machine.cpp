@@ -59,6 +59,7 @@
 #define do_(name)           instr(name)
 
 
+using namespace graphite2;
 using namespace vm;
 
 struct regbank  {

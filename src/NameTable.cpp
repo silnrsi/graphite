@@ -25,6 +25,8 @@
 #include "processUTF.h"
 
 
+using namespace graphite2;
+
 NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 encodingID)
     :
     m_platformId(0), m_encodingId(0), m_languageCount(0),

@@ -19,12 +19,12 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#ifndef PROCESS_UTF_INCLUDE
-#define PROCESS_UTF_INCLUDE
+#pragma once 
 
 #include "Main.h"
 #include "graphite2/Segment.h"
 
+namespace graphite2 {
 
 class NoLimit		//relies on the processor.processChar() failing, such as because of a terminating nul character
 {
@@ -482,5 +482,4 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
         uint32 * m_buffer;
     };
 
-#endif			//!PROCESS_UTF_INCLUDE
-
+} // namespace graphite2

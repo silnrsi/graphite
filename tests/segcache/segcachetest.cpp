@@ -31,6 +31,7 @@
 #include "TtfTypes.h"
 #include "TtfUtil.h"
 
+using namespace graphite2;
 
 inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_cast<Face*>(p)); }
 

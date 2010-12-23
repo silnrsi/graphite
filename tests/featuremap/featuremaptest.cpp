@@ -31,6 +31,8 @@
 
 #pragma pack(push, 1)
 
+using namespace graphite2;
+
 // TODO fix this for other platforms
 
 //#define PACKED __attribute__ ((packed))

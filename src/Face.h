@@ -36,6 +36,8 @@
 #include "TtfTypes.h"
 #endif      //!DISABLE_FILE_FACE
 
+namespace graphite2 {
+
 class Segment;
 class FeatureVal;
 class NameTable;
@@ -177,4 +179,6 @@ private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
     Face& operator=(const Face&);
 };
 
-struct gr_face : public Face {};
+} // namespace graphite2
+
+struct gr_face : public graphite2::Face {};

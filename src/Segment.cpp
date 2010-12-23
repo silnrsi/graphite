@@ -34,6 +34,8 @@
 #include "graphite2/Segment.h"
 
 
+using namespace graphite2;
+
 Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir) :
         m_freeSlots(NULL),
         m_first(NULL),

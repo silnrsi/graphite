@@ -25,6 +25,9 @@
 #include "Main.h"
 #include "XmlTraceLog.h"
 
+
+using namespace graphite2;
+
 #ifndef DISABLE_TRACING
 
 /*static*/ XmlTraceLog XmlTraceLog::sm_NullLog(NULL, NULL, GRLOG_NONE);

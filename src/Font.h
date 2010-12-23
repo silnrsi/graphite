@@ -25,6 +25,8 @@
 #include "Main.h"
 #include "Face.h"
 
+namespace graphite2 {
+
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
 class Font
@@ -56,8 +58,6 @@ private:			//defensive on m_advances
     Font& operator=(const Font&);
 };
 
-struct gr_font : public Font {};
-
 
 class SimpleFont : public Font      //has no external hints - gets advance information from the face
 {
@@ -82,3 +82,7 @@ private:
     const void* m_appFontHandle/*non-NULL*/;
     gr_advance_fn m_advance;
 };
+
+} // namespace graphite2
+
+struct gr_font : public graphite2::Font {};

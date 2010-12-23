@@ -23,6 +23,8 @@
 
 #include "Face.h"
 
+namespace graphite2 {
+
 class SegCacheStore;
 
 class CachedFace : public Face
@@ -37,3 +39,4 @@ private:
     SegCacheStore * m_cacheStore;
 };
 
+} // namespace graphite2

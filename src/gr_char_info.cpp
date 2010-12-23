@@ -26,14 +26,14 @@
 extern "C"
 {
 
-GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/)
+unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/)
 {
     assert(p);
     return p->unicodeChar();
 }
 
 
-GRNG_EXPORT int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/)
+int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/)
 {
     assert(p);
     return p->breakWeight();

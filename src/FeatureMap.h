@@ -26,6 +26,8 @@
 #include "Main.h"
 #include "FeatureVal.h"
 
+namespace graphite2 {
+
 // Forward declarations for implmentation types
 class FeatureMap;
 class Face;
@@ -113,7 +115,6 @@ private:        //unimplemented
     FeatureRef& operator=(const FeatureRef&);
 };
 
-struct gr_feature_ref : public FeatureRef {};
 
 class NameAndFeatureRef
 {
@@ -194,3 +195,6 @@ private:        //defensive on m_langFeats
     SillMap& operator=(const SillMap&);
 };
 
+} // namespace graphite2
+
+struct gr_feature_ref : public graphite2::FeatureRef {};

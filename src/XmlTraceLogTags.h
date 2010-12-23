@@ -28,6 +28,8 @@
 #undef DISABLE_TRACING
 #endif
 
+namespace graphite2 {
+
 #ifndef DISABLE_TRACING
 
 // start this at same line number as in XmlTraceLogTags.cpp
@@ -176,4 +178,6 @@ public:
 extern const XmlTraceLogTag xmlTraceLogElements[NumElements];
 extern const char * xmlTraceLogAttributes[NumAttributes];
 
-#endif
+#endif // !DISABLE_TRACING
+
+} // namespace graphite2

@@ -21,6 +21,7 @@
 */
 #pragma once
 
+namespace graphite2 {
 
 class Position
 {
@@ -37,3 +38,4 @@ public:
     float y;
 };
 
+} // namespace graphite2

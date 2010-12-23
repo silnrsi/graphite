@@ -32,6 +32,8 @@
 #define SLOT_COPIED     4
 #define SLOT_POSITIONED 8
 
+namespace graphite2 {
+
 typedef gr_attrCode attrCode;
 
 class Segment;
@@ -108,5 +110,6 @@ private:
     uint16 *m_userAttr;     // pointer to user attributes
 };
 
-struct gr_slot : public Slot {};
+} // namespace graphite2
 
+struct gr_slot : public graphite2::Slot {};

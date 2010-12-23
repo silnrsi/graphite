@@ -26,8 +26,10 @@
 #include "SegCacheEntry.h"
 
 
+using namespace graphite2;
+
 SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset, long long cacheTime)
-    : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL),
+    : m_glyphLength(0), m_unicode(gralloc<uint16>(length)), m_glyph(NULL),
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
 {

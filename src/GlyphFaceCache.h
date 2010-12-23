@@ -24,6 +24,7 @@
 #include "GlyphFace.h"
 #include "graphite2/Font.h"
 
+namespace graphite2 {
 
 class Segment;
 class FeatureVal;
@@ -88,3 +89,4 @@ private:      //defensive
     GlyphFaceCache& operator=(const GlyphFaceCache&);
 };
 
+} // namespace graphite2

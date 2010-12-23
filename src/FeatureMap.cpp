@@ -34,6 +34,9 @@
 #define ktiFeat MAKE_TAG('F','e','a','t')
 #define ktiSill MAKE_TAG('S','i','l','l')
 
+
+using namespace graphite2;
+
 static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndFeatureRef *)a < *(NameAndFeatureRef *)b 
                                                                         ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
                                                                                     ? 1 : 0)); }

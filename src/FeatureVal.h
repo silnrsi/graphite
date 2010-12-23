@@ -25,6 +25,8 @@
 #include <cassert>
 #include "Main.h"
 
+namespace graphite2 {
+
 class FeatureRef;
 class FeatureMap;
 
@@ -98,6 +100,9 @@ private:
     const FeatureMap* m_pMap;
 };
 
-struct gr_feature_val : public FeatureVal {};
-
 typedef FeatureVal Features;
+
+} // namespace graphite2
+
+
+struct gr_feature_val : public graphite2::FeatureVal {};

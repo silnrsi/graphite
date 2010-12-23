@@ -23,6 +23,8 @@
 
 #include <graphite2/Types.h>
 
+namespace graphite2 {
+
 class CmapCache
 {
 public:
@@ -42,3 +44,4 @@ private:
     uint16 ** m_blocks;
 };
 
+} // namespace graphite2

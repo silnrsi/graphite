@@ -31,9 +31,8 @@
 #include "Main.h"
 #include "Machine.h"
 
-
-namespace vm
-{
+namespace graphite2 {
+namespace vm {
 
 class Code 
 {
@@ -174,5 +173,5 @@ inline bool Code::deletes() const throw()
   return _delete;
 }
 
-} // end of namespace vm
-
+} // namespace vm
+} // namespace graphite2

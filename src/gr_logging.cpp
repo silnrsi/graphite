@@ -23,8 +23,11 @@
 // #include "graphite2/XmlLog.h"
 
 
-extern "C"
-{
+using namespace graphite2;
+
+extern "C" {
+
+
 bool graphite_start_logging(GR_UNUSED FILE * logFile, GR_UNUSED GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
@@ -49,4 +52,6 @@ void graphite_stop_logging()
     }
 #endif		//!DISABLE_TRACING
 }
-}
+
+
+} // extern "C"

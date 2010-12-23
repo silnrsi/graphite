@@ -22,7 +22,8 @@
 #include "graphite2/Segment.h"
 #include "processUTF.h"
 #include "Segment.h"
-//#include "Slot.h"
+
+using namespace graphite2;
 
 namespace 
 {
@@ -77,12 +78,15 @@ namespace
   #endif
       return static_cast<gr_segment*>(pRes);
   }
+
+  
 }
 
-extern "C"
-{
 
-GRNG_EXPORT size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
+extern "C" {
+
+
+size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
   if (buffer_end)
   {
@@ -99,7 +103,7 @@ GRNG_EXPORT size_t gr_count_unicode_characters(gr_encform enc, const void* buffe
 }
 
 
-GRNG_EXPORT gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, uint32 script, const gr_feature_val* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, gr_uint32 script, const gr_feature_val* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
 {
     if (pFeats == NULL)
         pFeats = static_cast<const gr_feature_val*>(face->theSill().cloneFeatures(0));
@@ -107,61 +111,62 @@ GRNG_EXPORT gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, ui
 }
 
 
-GRNG_EXPORT void gr_seg_destroy(gr_segment* p)
+void gr_seg_destroy(gr_segment* p)
 {
     delete p;
 }
 
 
-GRNG_EXPORT float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/)
+float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().x;
 }
 
 
-GRNG_EXPORT float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/)
+float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->advance().y;
 }
 
 
-GRNG_EXPORT unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/)
+unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->charInfoCount();
 }
 
 
-GRNG_EXPORT const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
+const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/)
 {
     assert(pSeg);
     return static_cast<const gr_char_info*>(pSeg->charinfo(index));
 }
 
-GRNG_EXPORT unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
+unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return pSeg->slotCount();
 }
 
-GRNG_EXPORT const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
+const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return static_cast<const gr_slot*>(pSeg->first());
 }
 
-GRNG_EXPORT const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
+const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
     return static_cast<const gr_slot*>(pSeg->first());
 }
 
-GRNG_EXPORT void gr_seg_char_slots(const gr_segment *pSeg, uint32 *begins, uint32 *ends, gr_slot **sbegins, gr_slot **sends)
+void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends)
 {
     assert(pSeg && begins && ends);
     pSeg->getCharSlots(begins, ends, reinterpret_cast<Slot**>(sbegins), reinterpret_cast<Slot**>(sends));
 }
+
 
 } // extern "C"

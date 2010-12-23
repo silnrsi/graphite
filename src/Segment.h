@@ -41,6 +41,8 @@
 #include "List.h"
 
 
+namespace graphite2 {
+
 #if 0
 #ifdef __GNUC__
 #ifdef STLPORT_VERSION
@@ -177,5 +179,7 @@ private:		//defensive on m_charinfo
     Segment& operator=(const Segment&);
 };
 
-struct gr_segment : public Segment {};
+} // namespace graphite2
+
+struct gr_segment : public graphite2::Segment {};
 

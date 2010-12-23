@@ -5,6 +5,7 @@
 #include "Code.h"
 #include "Rule.h"
 
+using namespace graphite2;
 using namespace vm;
 
 const byte simple_prog[] = 
@@ -19,7 +20,7 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
-class Segment 
+class graphite2::Segment 
 {
     byte x;
 };

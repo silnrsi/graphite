@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include "Code.h"
 
+namespace graphite2 {
+
 class Segment;
 class Face;
 class Silf;
@@ -85,3 +87,4 @@ private:		//defensive
     Pass& operator=(const Pass&);
 };
 
+} // namespace graphite2

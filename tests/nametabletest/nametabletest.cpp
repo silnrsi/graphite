@@ -30,6 +30,8 @@
 
 #pragma pack(push, 1)
 
+using namespace graphite2;
+
 struct NameTestA
 {
     TtfUtil::Sfnt::FontNames m_nameHeader;

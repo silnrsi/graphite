@@ -24,6 +24,8 @@
 #include "SegCacheStore.h"
 
 
+using namespace graphite2;
+
 CachedFace::CachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2)
 : Face(appFaceHandle, getTable2), m_cacheStore(0) 
 {

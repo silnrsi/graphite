@@ -18,6 +18,8 @@
 
 #include "Code.h"
 
+namespace graphite2 {
+
 struct Rule {
   ~Rule();
   const vm::Code * constraint, 
@@ -241,3 +243,5 @@ inline Slot * & SlotMap::operator[](int n)
 {
   return m_slot_map[n + 1];
 }
+
+} // namespace graphite2

@@ -25,6 +25,7 @@
 
 #include "Pass.h"
 
+namespace graphite2 {
 
 class Face;
 class Segment;
@@ -86,3 +87,4 @@ private:			//defensive
     Silf& operator=(const Silf&);
 };
 
+} // namespace graphite2

@@ -29,6 +29,8 @@
 #include "Rule.h"
 #include "XmlTraceLog.h"
 
+using namespace graphite2;
+
 using vm::Code;
 using vm::Machine;
 
@@ -384,7 +386,7 @@ inline uint16 Pass::glyphToCol(const uint16 gid) const
     return gid < m_numGlyphs ? m_cols[gid] : 0xffffU;
 }
 
-bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
+bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
 {
     int context = 0;
     for (; context != m_maxPreCtxt && slot->prev(); ++context, slot = slot->prev());

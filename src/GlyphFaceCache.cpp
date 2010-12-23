@@ -24,6 +24,7 @@
 #include "Face.h"     //for the tags
 
 
+using namespace graphite2;
 
 /*virtual*/ bool GlyphFaceCacheHeader::initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)    //return result indicates success. Do not use if failed.
 {

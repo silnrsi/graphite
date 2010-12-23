@@ -28,6 +28,8 @@
 
 #if !defined WORDS_BIGENDIAN || defined PC_OS
 
+namespace graphite2 {
+
 typedef gr_uint8 uint8;
 typedef gr_uint8 byte;
 typedef gr_uint16 uint16;
@@ -59,6 +61,20 @@ inline uint32 read32(const byte *&x) {
 }
 inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
 
+// typesafe wrapper around malloc for simple types
+// use free(pointer) to deallocate
+template <typename T> T * gralloc(size_t n)
+{
+    return reinterpret_cast<T*>(malloc(sizeof(T) * n));
+}
+
+template <typename T> T * grzeroalloc(size_t n)
+{
+    return reinterpret_cast<T*>(calloc(n, sizeof(T)));
+}
+
+} // namespace graphite2
+
 #define CLASS_NEW_DELETE \
     void * operator new[](size_t size) {return malloc(size);} \
     void operator delete[] (void * p)throw() { if (p) free(p); } \
@@ -70,19 +86,3 @@ inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
 #else
 #define GR_UNUSED
 #endif
-
-
-    // typesafe wrapper around malloc for simple types
-    // use free(pointer) to deallocate
-    template <typename T> T * gralloc(size_t n)
-    {
-        return reinterpret_cast<T*>(malloc(sizeof(T) * n));
-    }
-
-    template <typename T> T * grzeroalloc(size_t n)
-    {
-        return reinterpret_cast<T*>(calloc(n, sizeof(T)));
-    }
-
-
-

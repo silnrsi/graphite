@@ -23,7 +23,9 @@
 #include "Main.h"
 
 
-class CharInfo // : ICharInfo
+namespace graphite2 {
+
+class CharInfo
 {
 
 public:
@@ -41,4 +43,7 @@ private:
     int8 m_break;	// breakweight coming from lb table
 };
 
-struct gr_char_info : public CharInfo {};
+} // namespace graphite2
+
+struct gr_char_info : public graphite2::CharInfo {};
+

@@ -22,6 +22,8 @@
 #include "Font.h"
 
 
+using namespace graphite2;
+
 Font::Font(float ppm, const Face *face/*needed for scaling*/) :
     m_scale(ppm / face->upem())
 {

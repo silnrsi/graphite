@@ -23,6 +23,8 @@
 
 #include "Main.h"
 
+namespace graphite2 {
+
 class Segment;
 class Slot;
 class SegCacheEntry;
@@ -102,3 +104,4 @@ private:
     mutable unsigned long long m_lastAccess;
 };
 
+} // namespace graphite2

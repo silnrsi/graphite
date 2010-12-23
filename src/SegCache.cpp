@@ -29,6 +29,8 @@
 #include "CmapCache.h"
 
 
+using namespace graphite2;
+
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     :
     m_prefixLength(ePrefixLength),

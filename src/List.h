@@ -22,6 +22,7 @@
 
 // designed to have a limited subset of the std::vector api
 
+namespace graphite2 {
 
 template <class T> class List;
 template <class T> class ListUnitIterator;
@@ -751,4 +752,4 @@ private:
     bool m_sequential;
 };
 
-
+} // namespace graphite2

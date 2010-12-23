@@ -23,6 +23,7 @@
 #include <cstring>
 #include <cassert>
 
+namespace graphite2 {
 
 struct IsoLangEntry
 {
@@ -426,3 +427,4 @@ private:
     int mSeedPosition;
 };
 
+} // namespace graphite2
