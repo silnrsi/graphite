@@ -67,12 +67,13 @@ class GlyphInfo
         float x() const { return m_x; }
         float y() const { return m_y; }
         size_t glyph() const { return m_gid; }
-        LineDifference compare(GlyphInfo & cf, float tolerance)
+        LineDifference compare(GlyphInfo & cf, float tolerance, float fractional)
         {
             if (m_gid != cf.m_gid) return DIFFERENT_GLYPHS;
-            // do we need a tolerance here?
-            if (m_x > cf.m_x + tolerance || m_x < cf.m_x - tolerance ||
-                m_y > cf.m_y + tolerance || m_y < cf.m_y - tolerance)
+            if (m_x > cf.m_x + tolerance + (fractional * cf.m_x) ||
+                m_x < cf.m_x - tolerance - (fractional * cf.m_x) ||
+                m_y > cf.m_y + tolerance + (fractional * cf.m_y)||
+                m_y < cf.m_y - tolerance - (fractional * cf.m_y))
             {
                 return DIFFERENT_POSITIONS;
             }
@@ -120,7 +121,7 @@ class RenderedLine
             }
             fprintf(f, "(%2u,%4.3f)", (unsigned int)m_numGlyphs, m_advance);
         }
-        LineDifference compare(RenderedLine & cf, float tolerance)
+        LineDifference compare(RenderedLine & cf, float tolerance, float fractional)
         {
             if (m_numGlyphs > cf.m_numGlyphs) return MORE_GLYPHS;
             if (m_numGlyphs < cf.m_numGlyphs) return LESS_GLYPHS;
@@ -128,7 +129,7 @@ class RenderedLine
                 m_advance < cf.m_advance - tolerance) return DIFFERENT_ADVANCE;
             for (size_t i = 0; i < m_numGlyphs; i++)
             {
-                LineDifference ld = (*this)[i].compare(cf[i], tolerance);
+                LineDifference ld = (*this)[i].compare(cf[i], tolerance, fractional);
                 if (ld) return ld;
             }
             return IDENTICAL;

@@ -22,7 +22,8 @@
 #pragma once
 #include "Main.h"
 
-struct CharInfo // : ICharInfo
+
+class CharInfo // : ICharInfo
 {
 
 public:

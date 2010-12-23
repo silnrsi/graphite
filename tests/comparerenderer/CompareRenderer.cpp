@@ -137,7 +137,7 @@ public:
             }
         }
     }
-    int compare(float tolerance, FILE * log)
+    int compare(float tolerance, float fractionalTolerance, FILE * log)
     {
         int status = IDENTICAL;
         for (size_t i = 0; i < NUM_RENDERERS; i++)
@@ -149,7 +149,7 @@ public:
                 fprintf(log, "Comparing %s with %s\n", m_renderers[i]->name(), m_renderers[j]->name());
                 for (size_t line = 0; line < m_numLines; line++)
                 {
-                    LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line], tolerance);
+                    LineDifference ld = m_lineResults[i][line].compare(m_lineResults[j][line], tolerance, fractionalTolerance);
                     ld = (LineDifference)(m_cfMask & ld);
                     if (ld)
                     {
@@ -402,7 +402,8 @@ int main(int argc, char ** argv)
     }
     int status = 0;
     if (rendererOptions[OptCompare].exists())
-        status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv), log);
+        status = compareRenderers.compare(rendererOptions[OptTolerance].getFloat(argv),
+            rendererOptions[OptFractionalTolerance].getFloat(argv), log);
 
     for (size_t i = 0; i < NUM_RENDERERS; i++)
     {

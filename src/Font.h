@@ -27,7 +27,7 @@
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
-struct Font
+class Font
 {
 public:
     Font(float ppm, const Face *face/*needed for scaling*/);

@@ -69,7 +69,7 @@ typedef List<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
-struct Segment;
+class Segment;
 
 typedef enum {
 /** sub-Segments longer than this are not cached
@@ -80,7 +80,7 @@ typedef enum {
 class SegmentScopeState
 {
 private:
-    friend struct Segment;
+    friend class Segment;
     Slot * realFirstSlot;
     Slot * slotBeforeScope;
     Slot * slotAfterScope;
@@ -88,7 +88,7 @@ private:
     size_t numGlyphsOutsideScope;
 };
 
-struct Segment
+class Segment
 {
 public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
@@ -177,6 +177,5 @@ private:		//defensive on m_charinfo
     Segment& operator=(const Segment&);
 };
 
-struct gr_segment : public Segment
- {};
+struct gr_segment : public Segment {};
 

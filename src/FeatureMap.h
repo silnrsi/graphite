@@ -43,7 +43,7 @@ private:
     int16 m_value;
 };
 
-struct FeatureRef
+class FeatureRef
 {
 public:
     FeatureRef() :
@@ -184,7 +184,7 @@ public:
 
     const FeatureMap & theFeatureMap() const { return m_FeatureMap; };
 private:
-friend struct Face;
+friend class Face;
     FeatureMap m_FeatureMap;        //of face
     LangFeaturePair * m_langFeats;
     uint16 m_numLanguages;

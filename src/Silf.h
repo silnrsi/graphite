@@ -26,9 +26,9 @@
 #include "Pass.h"
 
 
-struct Face;
-struct Segment;
-struct FeatureVal;
+class Face;
+class Segment;
+class FeatureVal;
 class VMScratch;
 
 class Pseudo

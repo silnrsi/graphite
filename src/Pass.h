@@ -24,8 +24,8 @@
 #include <cstdlib>
 #include "Code.h"
 
-struct Segment;
-struct Face;
+class Segment;
+class Face;
 class Silf;
 struct Rule;
 struct RuleEntry;

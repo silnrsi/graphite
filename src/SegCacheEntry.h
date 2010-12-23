@@ -23,8 +23,8 @@
 
 #include "Main.h"
 
-struct Segment;
-struct Slot;
+class Segment;
+class Slot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 

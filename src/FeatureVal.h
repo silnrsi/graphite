@@ -25,10 +25,10 @@
 #include <cassert>
 #include "Main.h"
 
-struct FeatureRef;
-struct FeatureMap;
+class FeatureRef;
+class FeatureMap;
 
-struct FeatureVal
+class FeatureVal
 {
 public:
     uint32 maskedOr(const FeatureVal &other, const FeatureVal &mask) {
@@ -92,7 +92,7 @@ public:
 //    }
     CLASS_NEW_DELETE
 private:
-    friend struct FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
+    friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
     uint32 m_length;
     uint32 * m_vec;
     const FeatureMap* m_pMap;

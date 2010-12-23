@@ -19,7 +19,7 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
-struct Segment 
+class Segment 
 {
     byte x;
 };
