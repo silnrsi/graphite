@@ -4,7 +4,7 @@ project(grsegcachetest)
 include_directories(../../src)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
-add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
+add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T} -DGR2_EXPORTING)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)

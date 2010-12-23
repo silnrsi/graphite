@@ -38,7 +38,7 @@ enum gr_encform {
 
 // Definitions for library publicly exported symbols
 #if defined _WIN32 || defined __CYGWIN__
-  #ifdef _EXPORTING
+  #ifdef GR2_EXPORTING
     #ifdef __GNUC__
       #define GR2_API    __attribute__((dllexport))
     #else
