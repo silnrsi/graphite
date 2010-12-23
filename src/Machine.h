@@ -40,8 +40,8 @@
 #define gr2
 
 // Forward declarations
-struct GrSegment;
-struct GrSlot;
+class GrSegment;
+class GrSlot;
 class SlotMap;
 
 

@@ -24,7 +24,7 @@
 #include "Main.h"
 
 
-struct GrCharInfo // : ICharInfo
+class GrCharInfo // : ICharInfo
 {
 
 public:

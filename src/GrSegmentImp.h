@@ -69,7 +69,7 @@ typedef GrList<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
-struct GrSegment;
+class GrSegment;
 
 typedef enum {
 /** sub-Segments longer than this are not cached
@@ -80,7 +80,7 @@ typedef enum {
 class SegmentScopeState
 {
 private:
-    friend struct GrSegment;
+    friend class GrSegment;
     GrSlot * realFirstSlot;
     GrSlot * slotBeforeScope;
     GrSlot * slotAfterScope;
@@ -88,7 +88,7 @@ private:
     size_t numGlyphsOutsideScope;
 };
 
-struct GrSegment
+class GrSegment
 {
 public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph

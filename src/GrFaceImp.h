@@ -36,8 +36,8 @@
 #include "TtfTypes.h"
 #endif      //!DISABLE_FILE_FACE
 
-struct GrSegment;
-struct GrFeatureVal;
+class GrSegment;
+class GrFeatureVal;
 class NameTable;
 class CmapCache;
 
@@ -110,7 +110,7 @@ private:        //defensive
 
 const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
 
-struct GrFace
+class GrFace
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
@@ -132,7 +132,7 @@ public:
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_pGlyphFaceCache->glyphAttr(gid, gattr); }
 
 private:
-    friend struct GrFont;
+    friend class GrFont;
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:

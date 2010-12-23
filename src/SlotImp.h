@@ -34,9 +34,9 @@
 
 typedef gr_attrCode attrCode;
 
-struct GrSegment;
+class GrSegment;
 
-struct GrSlot
+class GrSlot
 {
 public:
     unsigned short gid() const { return m_glyphid; }

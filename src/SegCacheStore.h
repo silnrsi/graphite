@@ -26,7 +26,7 @@
 #include "SegCache.h"
 
 class SegCache;
-struct GrFace;
+class GrFace;
 
 class SilfSegCache
 {

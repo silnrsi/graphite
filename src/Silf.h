@@ -26,9 +26,9 @@
 #include "Pass.h"
 
 
-struct GrFace;
-struct GrSegment;
-struct GrFeatureVal;
+class GrFace;
+class GrSegment;
+class GrFeatureVal;
 class VMScratch;
 
 class Pseudo

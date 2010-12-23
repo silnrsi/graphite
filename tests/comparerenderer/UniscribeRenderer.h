@@ -208,22 +208,21 @@ public:
         }
         // convert to utf16
         size_t utf16Length = length * 2 + 1;
-        WCHAR * utf16Text = new WCHAR[utf16Length];
+        allocCharBuffers(utf16Length+1);
         assert(sizeof(WCHAR) == sizeof(gr2::gr_uint16));
-        gr2::ToUtf16Processor processor(reinterpret_cast<gr2::gr_uint16*>(utf16Text), utf16Length + 1);
-        gr2::IgnoreErrors ignore;
-        gr2::BufferLimit bufferLimit(gr2::gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
-        gr2::processUTF<gr2::BufferLimit, gr2::ToUtf16Processor, gr2::IgnoreErrors>(bufferLimit, &processor, &ignore);
+        ToUtf16Processor processor(reinterpret_cast<gr_uint16*>(m_utf16Text), m_charBufferSize);
+        IgnoreErrors ignore;
+        BufferLimit bufferLimit(gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
+        processUTF<BufferLimit, ToUtf16Processor, IgnoreErrors>(bufferLimit, &processor, &ignore);
         assert(utf16Length > processor.uint16Processed());
         utf16Length = processor.uint16Processed();
-        utf16Text[utf16Length] = 0;
-        allocCharBuffers(utf16Length+1);
+        m_utf16Text[utf16Length] = 0;
         int numItems = 0;
         int offset = 0;
-        if (utf16Text[0] == 0xFEFF)
+        if (m_utf16Text[0] == 0xFEFF)
             offset += 1;
         // maxItems must be at least 2 otherwise scriptitemize fails
-        HRESULT hr = (m_usp.fScriptItemize)(utf16Text + offset, utf16Length - offset, utf16Length - offset + 1, NULL, NULL, m_scriptItems, &numItems);
+        HRESULT hr = (m_usp.fScriptItemize)(m_utf16Text + offset, utf16Length - offset, m_charBufferSize, NULL, NULL, m_scriptItems, &numItems);
         if (FAILED(hr))
         {
             new(result) RenderedLine(0, .0f);
@@ -239,7 +238,7 @@ public:
             ABC abc;
             int itemLength = (i + 1 < numItems)? (m_scriptItems[i+1].iCharPos - m_scriptItems[i].iCharPos) :
                 (utf16Length - m_scriptItems[i].iCharPos);
-            hr = (m_usp.fScriptShape)(m_hdc, &m_script, utf16Text + m_scriptItems[i].iCharPos,
+            hr = (m_usp.fScriptShape)(m_hdc, &m_script, m_utf16Text + m_scriptItems[i].iCharPos,
                 itemLength, maxGlyphs - glyphOffset, &(m_scriptItems[i].a),
                 m_pGlyphs + glyphOffset, m_pClusters + m_scriptItems[i].iCharPos,
                 m_pVisAttr + glyphOffset, &numGlyphs);
@@ -284,7 +283,6 @@ public:
             cumulativeAdvance += m_pAdvances[j];
         }
         renderedLine->setAdvance(static_cast<float>(cumulativeAdvance));
-        delete [] utf16Text;
     }
     virtual const char * name() const { return "uniscribe"; }
 private:
@@ -310,8 +308,10 @@ private:
         {
             delete [] m_pClusters;
             delete [] m_scriptItems;
+            delete [] m_utf16Text;
             m_scriptItems  = new SCRIPT_ITEM[maxSize];
             m_pClusters = new WORD[maxSize];
+            m_utf16Text = new WCHAR[maxSize];
             m_charBufferSize = maxSize;
         }
         return (m_scriptItems && m_pClusters);
@@ -328,6 +328,7 @@ private:
     size_t m_charBufferSize;
     SCRIPT_CACHE m_script;
     SCRIPT_ITEM * m_scriptItems;
+    WCHAR * m_utf16Text;
     WORD * m_pClusters;
     SCRIPT_VISATTR * m_pVisAttr;
     WORD * m_pGlyphs;

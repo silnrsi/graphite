@@ -23,8 +23,8 @@
 
 #include "Main.h"
 
-struct GrSegment;
-struct GrSlot;
+class GrSegment;
+class GrSlot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 
