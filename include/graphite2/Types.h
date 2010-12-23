@@ -36,13 +36,28 @@ enum gr_encform {
   gr_utf8 = 1/*sizeof(uint8)*/, gr_utf16 = 2/*sizeof(uint16)*/, gr_utf32 = 4/*sizeof(uint32)*/
 };
 
-#ifdef _MSC_VER
-#define GRNG_EXPORT __declspec(dllexport)
+// Definitions for library publicly exported symbols
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef _EXPORTING
+    #ifdef __GNUC__
+      #define GR2_API    __attribute__((dllexport))
+    #else
+      #define GR2_API    __declspec(dllexport)
+    #endif
+  #else
+    #ifdef __GNUC__
+      #define GR2_API    __attribute__((dllimport))
+    #else
+      #define GR2_API    __declspec(dllimport)
+    #endif
+  #endif
+  #define GR2_LOCAL
 #else
-#ifdef __GNUC__
-#define GRNG_EXPORT __attribute__ ((visibility("default")))
-#else
-#define GRNG_EXPORT
+  #if __GNUC__ >= 4
+    #define GR2_API      __attribute__ ((visibility("default")))
+    #define GR2_LOCAL       __attribute__ ((visibility("hidden")))
+  #else
+    #define GR2_API
+    #define GR2_LOCAL
+  #endif
 #endif
-#endif
-

@@ -100,7 +100,8 @@ set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
-     -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs -fvisibility=hidden -fno-stack-protector)
+     -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs 
+     -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
     set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)
     target_link_libraries(graphite2 "-lc -lgcc")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
@@ -108,7 +109,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -D_EXPORTING)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 

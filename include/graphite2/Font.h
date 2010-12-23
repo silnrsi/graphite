@@ -69,7 +69,7 @@ typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int n
   *                  in the font.
   * @param faceOptions   Bitfield describing various options. See enum gr_face_options for details.
   */
-GRNG_EXPORT gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
 
 /** Create a gr_face object given application information, with subsegmental caching support
   *
@@ -80,14 +80,14 @@ GRNG_EXPORT gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_
   * @param segCacheMaxSize   How large the segment cache is.
   * @param faceOptions   Bitfield of values from enum gr_face_options
   */
-GRNG_EXPORT gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
 
 /** Convert a tag in a string into a gr_uint32
   *
   * @return gr_uint32 tag, zero padded
   * @param str a nul terminated string of which at most the first 4 characters are read
   */
-GRNG_EXPORT gr_uint32 gr_str_to_tag(const char *str);
+GR2_API gr_uint32 gr_str_to_tag(const char *str);
 
 /** Convert a gr_uint32 tag into a string
   *
@@ -95,7 +95,7 @@ GRNG_EXPORT gr_uint32 gr_str_to_tag(const char *str);
   * @param str is a pointer to a char array of at least size 4 bytes. The first 4 bytes of this array
   *            will be overwritten by this function. No nul is appended.
   */
-GRNG_EXPORT void gr_tag_to_str(gr_uint32 tag, char *str);
+GR2_API void gr_tag_to_str(gr_uint32 tag, char *str);
 
 /** Get feature values for a given language or default
   *
@@ -105,7 +105,7 @@ GRNG_EXPORT void gr_tag_to_str(gr_uint32 tag, char *str);
   * @param langname The language tag to get feature values for. If there is no such language or
   *                  langname is 0, the default feature values for the font are returned
   */
-GRNG_EXPORT gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname);
+GR2_API gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname);
 
 /** Get feature reference for a given feature id from a face
   *
@@ -114,25 +114,25 @@ GRNG_EXPORT gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr
   * @param pFace Font face to get information on.
   * @param featId    Feature id tag to get reference to.
   */
-GRNG_EXPORT const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId);
+GR2_API const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId);
 
 /** Returns number of feature references in a face **/
-GRNG_EXPORT gr_uint16 gr_face_n_fref(const gr_face* pFace);
+GR2_API gr_uint16 gr_face_n_fref(const gr_face* pFace);
 
 /** Returns feature reference at given index in face **/
-GRNG_EXPORT const gr_feature_ref* gr_face_fref(const gr_face* pFace, gr_uint16 i);
+GR2_API const gr_feature_ref* gr_face_fref(const gr_face* pFace, gr_uint16 i);
 
 /** Return number of languages the face knows about **/
-GRNG_EXPORT unsigned short gr_face_n_languages(const gr_face* pFace);
+GR2_API unsigned short gr_face_n_languages(const gr_face* pFace);
 
 /** Returns a language id corresponding to a language of given index in the face **/
-GRNG_EXPORT gr_uint32 gr_face_lang_by_index(const gr_face* pFace, gr_uint16 i);
+GR2_API gr_uint32 gr_face_lang_by_index(const gr_face* pFace, gr_uint16 i);
 
 /** Destroy the given face and free its memory **/
-GRNG_EXPORT void gr_face_destroy(gr_face *face);
+GR2_API void gr_face_destroy(gr_face *face);
 
 /** Returns the number of glyphs in the face **/
-GRNG_EXPORT unsigned short gr_face_n_glyphs(const gr_face* pFace);
+GR2_API unsigned short gr_face_n_glyphs(const gr_face* pFace);
 
 #ifndef DISABLE_FILE_FACE
 /** Create gr_face from a font file
@@ -141,7 +141,7 @@ GRNG_EXPORT unsigned short gr_face_n_glyphs(const gr_face* pFace);
   * @param filename Full path and filename to font file
   * @param faceOptions Bitfile from enum gr_face_options to control face options.
   */
-GRNG_EXPORT gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions);
+GR2_API gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions);
 
 /** Create gr_face from a font file, with subsegment caching support.
   *
@@ -150,7 +150,7 @@ GRNG_EXPORT gr_face* gr_make_file_face(const char *filename, unsigned int faceOp
   * @param segCacheMaxSize Specifies how big to make the cache in segments.
   * @param faceOptions   Bitfield from enum gr_face_options to control face options.
   */
-GRNG_EXPORT gr_face* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize, unsigned int faceOptions);
+GR2_API gr_face* gr_make_file_face_with_seg_cache(const char *filename, unsigned int segCacheMaxSize, unsigned int faceOptions);
 #endif      // !DISABLE_FILE_FACE
 
 /** Create a font from a face
@@ -159,7 +159,7 @@ GRNG_EXPORT gr_face* gr_make_file_face_with_seg_cache(const char *filename, unsi
   * @param ppm Resolution of the font in pixels per em
   * @param face Face this font corresponds to. This must stay alive as long as the font is alive.
   */
-GRNG_EXPORT gr_font* gr_make_font(float ppm, const gr_face *face);
+GR2_API gr_font* gr_make_font(float ppm, const gr_face *face);
 
 /** query function to find the hinted advance width of a glyph **/
 typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
@@ -172,10 +172,10 @@ typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
   * @param advance function to call with appFontHandle and glyphid to get horizontal advance in pixels.
   * @param face the face this font corresponds to. Must stay alive as long as the font does.
   */
-GRNG_EXPORT gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, gr_advance_fn advance, const gr_face *face);
+GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, gr_advance_fn advance, const gr_face *face);
 
 /** Free a font **/
-GRNG_EXPORT void gr_font_destroy(gr_font *font);
+GR2_API void gr_font_destroy(gr_font *font);
 
 /** get a feature value
   *
@@ -183,7 +183,7 @@ GRNG_EXPORT void gr_font_destroy(gr_font *font);
   * @param pfeatureref   gr_feature_ref to the feature
   * @param feats gr_feature_val containing all the values
   */
-GRNG_EXPORT gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats);
+GR2_API gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats);
 
 /** set a feature value
   *
@@ -192,13 +192,13 @@ GRNG_EXPORT gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, c
   * @param val   value to set the feature to
   * @param pDest the gr_feature_val containing all the values for all the features
   */
-GRNG_EXPORT int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest);
+GR2_API int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest);
 
 /** Returns the id tag for a gr_feature_ref **/
-GRNG_EXPORT gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref);
+GR2_API gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref);
 
 /** Returns number of values a feature may take, given a gr_feature_ref **/
-GRNG_EXPORT gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
+GR2_API gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
 
 /** Returns the value associated with a particular value in a feature
   *
@@ -206,7 +206,7 @@ GRNG_EXPORT gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
   * @param pfeatureref gr_feature_ref of the feature of interest
   * @param settingno   Index up to the return value of gr_fref_n_values() of the value
   */
-GRNG_EXPORT gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno);   
+GR2_API gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno);   
 
 /** Returns a string of the UI name of a feature
   *
@@ -217,7 +217,7 @@ GRNG_EXPORT gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 
   * @param utf   Encoding form for the string
   * @param length    Used to return the length of the string returned in bytes.
   */
-GRNG_EXPORT void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
+GR2_API void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
 
 /** Return a UI string for a possible value of a feature
   *
@@ -230,16 +230,16 @@ GRNG_EXPORT void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *la
   * @param utf   Encoding form for the string
   * @param length    Returns the length of the string returned in bytes.
   */
-GRNG_EXPORT void* gr_fref_value_label(const gr_feature_ref* pfeatureref, gr_uint16 settingno/*rather than a value*/, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
+GR2_API void* gr_fref_value_label(const gr_feature_ref* pfeatureref, gr_uint16 settingno/*rather than a value*/, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
 
 /** Destroy a previously returned label string **/
-GRNG_EXPORT void gr_label_destroy(void * label);
+GR2_API void gr_label_destroy(void * label);
 
 /** Copies a gr_feature_val **/
-GRNG_EXPORT gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures);
+GR2_API gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures);
 
 /** Destroys a gr_feature_val **/
-GRNG_EXPORT void gr_featureval_destroy(gr_feature_val *pfeatures);
+GR2_API void gr_featureval_destroy(gr_feature_val *pfeatures);
 
 #ifdef __cplusplus
 }

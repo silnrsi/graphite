@@ -125,7 +125,7 @@ typedef struct gr_slot          gr_slot;
   * 
   * @param p Pointer to charinfo to return information on.
   */
-GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/);
+GR2_API unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/);
 
 /** Returns breakweight for a charinfo.
   * 
@@ -133,7 +133,7 @@ GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/
   * break before or after this character.
   * @param p Pointer to charinfo to return information on.
   */
-GRNG_EXPORT int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/);
+GR2_API int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/);
 
 /** Returns the number of unicode characters in a string.
   *
@@ -146,7 +146,7 @@ GRNG_EXPORT int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/);
   *               in this variable. If no error occurs, pError will contain NULL. NULL
   *               may be passed for pError if no such information is required.
   */
-GRNG_EXPORT size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
+GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
 
 /** Creates and returns a segment.
   *
@@ -166,44 +166,44 @@ GRNG_EXPORT size_t gr_count_unicode_characters(enum gr_encform enc, const void* 
   * @param dir Specifies whether the segment is processed right to left (1) or left to
   *            right (0)
   */
-GRNG_EXPORT gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, gr_uint32 script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
+GR2_API gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, gr_uint32 script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
 /** Destroys a segment, freeing the memory.
   *
   * @param p The segment to destroy
   */
-GRNG_EXPORT void gr_seg_destroy(gr_segment* p);
+GR2_API void gr_seg_destroy(gr_segment* p);
 
 /** Returns the advance for the whole segment.
   *
   * Returns the width of the segment up to the next glyph origin after the segment
   */
-GRNG_EXPORT float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/);
+GR2_API float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/);
 
 /** Returns the height advance for the segment. **/
-GRNG_EXPORT float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/);
+GR2_API float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/);
 
 /** Returns the number of gr_char_infos in the segment. **/
-GRNG_EXPORT unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/);
+GR2_API unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/);
 
 /** Returns a gr_char_info at a given index in the segment. **/
-GRNG_EXPORT const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+GR2_API const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
 
 /** Returns the number of glyph gr_slots in the segment. **/
-GRNG_EXPORT unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/);      //one slot per glyph
+GR2_API unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/);      //one slot per glyph
 
 /** Returns the first gr_slot in the segment.
   *
   * The first slot in a segment has a gr_slot_prev_in_segment() of NULL. Slots are owned
   * by their segment and are destroyed along with the segment.
   */
-GRNG_EXPORT const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+GR2_API const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
 
 /** Returns the last gr_slot in the segment.
   *
   * The last slot in a segment has a gr_slot_next_in_segment() of NULL
   */
-GRNG_EXPORT const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
 
 /** Calculates the underlying character to glyph associations.
   *
@@ -219,14 +219,14 @@ GRNG_EXPORT const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //
   * @param sends An array of gr_seg_n_cinfo gr_slot * corresponding to the gr_slot at the
   *              index given by ends. The pointer to the array may be NULL.
   */
-GRNG_EXPORT void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends);
+GR2_API void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends);
 
 /** Returns the next slot along in the segment.
   *
   * Slots are held in a linked list. This returns the next in the linked list. The slot
   * may or may not be attached to another slot. Returns NULL at the end of the segment.
   */
-GRNG_EXPORT const gr_slot* gr_slot_next_in_segment(const gr_slot* p);
+GR2_API const gr_slot* gr_slot_next_in_segment(const gr_slot* p);
 
 /** Returns the previous slot along in the segment.
   *
@@ -234,14 +234,14 @@ GRNG_EXPORT const gr_slot* gr_slot_next_in_segment(const gr_slot* p);
   * list. This slot may or may not be attached to it. Returns NULL at the start of the
   * segment.
   */
-GRNG_EXPORT const gr_slot* gr_slot_prev_in_segment(const gr_slot* p);
+GR2_API const gr_slot* gr_slot_prev_in_segment(const gr_slot* p);
 
 /** Returns the attachment parent slot of this slot.
   *
   * Attached slots form a tree. This returns the parent of this slot in that tree. A
   * base glyph which is not attached to another glyph, always returns NULL.
   */
-GRNG_EXPORT const gr_slot* gr_slot_attached_to(const gr_slot* p);
+GR2_API const gr_slot* gr_slot_attached_to(const gr_slot* p);
 
 /** Returns the first slot attached to this slot.
   *
@@ -251,7 +251,7 @@ GRNG_EXPORT const gr_slot* gr_slot_attached_to(const gr_slot* p);
   *
   * if gr_slot_first_attachment(p) != NULL then gr_slot_attached_to(gr_slot_first_attachment(p)) == p.
   */
-GRNG_EXPORT const gr_slot* gr_slot_first_attachment(const gr_slot* p);
+GR2_API const gr_slot* gr_slot_first_attachment(const gr_slot* p);
 
 /** Returns the next slot attached to our attachment parent.
   *
@@ -261,7 +261,7 @@ GRNG_EXPORT const gr_slot* gr_slot_first_attachment(const gr_slot* p);
   *
   * if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
   */
-GRNG_EXPORT const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p);
+GR2_API const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p);
 
 
 /** Returns glyph id of the slot
@@ -269,47 +269,47 @@ GRNG_EXPORT const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p);
   * Each slot has a glyphid which is rendered at the position given by the slot. This
   * glyphid is the real glyph to be rendered and never a pseudo glyph.
   */
-GRNG_EXPORT unsigned short gr_slot_gid(const gr_slot* p);
+GR2_API unsigned short gr_slot_gid(const gr_slot* p);
 
 /** Returns X offset of glyph from start of segment **/
-GRNG_EXPORT float gr_slot_origin_X(const gr_slot* p);
+GR2_API float gr_slot_origin_X(const gr_slot* p);
 
 /** Returns Y offset of glyph from start of segment **/
-GRNG_EXPORT float gr_slot_origin_Y(const gr_slot* p);
+GR2_API float gr_slot_origin_Y(const gr_slot* p);
 
 /** Returns the glyph advance for this glyph as adjusted for kerning **/
-GRNG_EXPORT float gr_slot_advance(const gr_slot* p);
+GR2_API float gr_slot_advance(const gr_slot* p);
 
 /** Returns the gr_char_info index before us
   *
   * Returns the index of the gr_char_info that a cursor before this slot, would put
   * an underlying cursor before.
   */
-GRNG_EXPORT int gr_slot_before(const gr_slot* p/*not NULL*/);
+GR2_API int gr_slot_before(const gr_slot* p/*not NULL*/);
 
 /** Returns the gr_char_info index after us
   *
   * Returns the index of the gr_char_info that a cursor after this slot would put an
   * underlying cursor after.
   */
-GRNG_EXPORT int gr_slot_after(const gr_slot* p/*not NULL*/);
+GR2_API int gr_slot_after(const gr_slot* p/*not NULL*/);
 
 /** Return a slot attribute value
   *
   * Given a slot and an attribute along with a possible subattribute, return the
   * corresponding value in the slot. See enum gr_attrCode for details of each attribute.
   */
-GRNG_EXPORT int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
+GR2_API int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
 
 /** Returns whether text may be inserted before this glyph [check this isn't inverted] **/
-GRNG_EXPORT int gr_slot_can_insert_before(const gr_slot* p);
+GR2_API int gr_slot_can_insert_before(const gr_slot* p);
 
 /** Returns the original gr_char_info index this slot refers to.
   *
   * Each Slot has a gr_char_info that it originates from. This is that gr_char_info. This
   * information is useful for testing.
   */
-GRNG_EXPORT int gr_slot_original(const gr_slot* p/*not NULL*/);
+GR2_API int gr_slot_original(const gr_slot* p/*not NULL*/);
   
 #ifdef __cplusplus
 }

@@ -42,8 +42,8 @@ extern "C"
 {
 #endif
 
-extern GRNG_EXPORT bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
-extern GRNG_EXPORT void graphite_stop_logging();
+GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
+GR2_API void graphite_stop_logging();
 
 #ifdef __cplusplus
 }
