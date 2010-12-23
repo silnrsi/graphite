@@ -30,14 +30,14 @@
 
 namespace graphite2 {
 
-typedef gr_uint8 uint8;
-typedef gr_uint8 byte;
-typedef gr_uint16 uint16;
-typedef gr_uint32 uint32;
-typedef gr_int8 int8;
-typedef gr_int16 int16;
-typedef gr_int32 int32;
-typedef gr_uintptr uintptr;
+typedef gr_uint8        uint8;
+typedef gr_uint8        byte;
+typedef gr_uint16       uint16;
+typedef gr_uint32       uint32;
+typedef gr_int8         int8;
+typedef gr_int16        int16;
+typedef gr_int32        int32;
+typedef size_t          uintptr;
 
 inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
 inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }

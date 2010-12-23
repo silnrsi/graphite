@@ -30,7 +30,6 @@ typedef unsigned short  gr_uint16;
 typedef short           gr_int16;
 typedef unsigned int    gr_uint32;
 typedef int             gr_int32;
-typedef size_t          gr_uintptr;
 
 enum gr_encform {
   gr_utf8 = 1/*sizeof(uint8)*/, gr_utf16 = 2/*sizeof(uint16)*/, gr_utf32 = 4/*sizeof(uint32)*/
