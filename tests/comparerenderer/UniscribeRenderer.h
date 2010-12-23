@@ -210,10 +210,10 @@ public:
         size_t utf16Length = length * 2 + 1;
         allocCharBuffers(utf16Length+1);
         assert(sizeof(WCHAR) == sizeof(gr2::gr_uint16));
-        ToUtf16Processor processor(reinterpret_cast<gr_uint16*>(m_utf16Text), m_charBufferSize);
-        IgnoreErrors ignore;
-        BufferLimit bufferLimit(gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
-        processUTF<BufferLimit, ToUtf16Processor, IgnoreErrors>(bufferLimit, &processor, &ignore);
+        graphite2::ToUtf16Processor processor(reinterpret_cast<gr_uint16*>(m_utf16Text), m_charBufferSize);
+        graphite2::IgnoreErrors ignore;
+        graphite2::BufferLimit bufferLimit(gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
+        graphite2::processUTF<graphite2::BufferLimit, graphite2::ToUtf16Processor, graphite2::IgnoreErrors>(bufferLimit, &processor, &ignore);
         assert(utf16Length > processor.uint16Processed());
         utf16Length = processor.uint16Processed();
         m_utf16Text[utf16Length] = 0;
