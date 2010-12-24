@@ -35,10 +35,11 @@
 #include <cassert>
 #include "TtfTypes.h"
 #endif      //!DISABLE_FILE_FACE
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
-struct GrSegment;
-struct GrFeatureVal;
+namespace graphite2 {
+
+class Segment;
+class FeatureVal;
 class NameTable;
 class CmapCache;
 
@@ -91,13 +92,15 @@ class FileFace
 {
 #ifndef DISABLE_FILE_FACE
 public:
+    static const void *table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
+  
     FileFace(const char *filename);
     ~FileFace();
 //    virtual const void *getTable(unsigned int name, size_t *len) const;
     bool isValid() const { return m_pfile && m_pHeader && m_pTableDir; }
 
     CLASS_NEW_DELETE
-public:     //for local convenience
+public:     //for local convenience    
     FILE* m_pfile;
     mutable TableCacheItem m_tables[TtfUtil::ktiLast];
     TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
@@ -109,23 +112,21 @@ private:        //defensive
     FileFace& operator=(const FileFace&);
 };
 
-const void *FileFace_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
-
-struct GrFace
+class Face
 {
 public:
     const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
-    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
+    virtual void runGraphite(Segment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:
-    GrFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) : 
+    Face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) : 
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
         m_cmapCache(NULL), m_numSilf(0), m_silfs(NULL), m_pFileFace(NULL),
         m_pNames(NULL) {}
-    virtual ~GrFace();
+    virtual ~Face();
 public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
     const Rect &theBBoxTemporary(uint16 gid) const { return m_pGlyphFaceCache->glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
@@ -133,7 +134,7 @@ public:
     uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_pGlyphFaceCache->glyphAttr(gid, gattr); }
 
 private:
-    friend struct GrFont;
+    friend class Font;
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:
@@ -143,8 +144,8 @@ public:
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
     uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeats(); }
-    const GrFeatureRef *featureById(uint32 id) const { return m_Sill.m_FeatureMap.findFeatureRef(id); }
-    const GrFeatureRef *feature(uint16 index) const { return m_Sill.m_FeatureMap.feature(index); }
+    const FeatureRef *featureById(uint32 id) const { return m_Sill.m_FeatureMap.findFeatureRef(id); }
+    const FeatureRef *feature(uint16 index) const { return m_Sill.m_FeatureMap.feature(index); }
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
@@ -174,34 +175,10 @@ private:
     mutable NameTable* m_pNames;
     
 private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
-    GrFace(const GrFace&);
-    GrFace& operator=(const GrFace&);
+    Face(const Face&);
+    Face& operator=(const Face&);
 };
 
+} // namespace graphite2
 
-inline bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
-{ 
-    if (val>m_max || !m_pFace)
-      return false;
-    if (pDest->m_pMap==NULL)
-      pDest->m_pMap = &m_pFace->theSill().theFeatureMap();
-    else
-      if (pDest->m_pMap!=&m_pFace->theSill().theFeatureMap())
-        return false;       //incompatible
-    pDest->grow(m_index);
-    {
-        pDest->m_vec[m_index] &= ~m_mask;
-        pDest->m_vec[m_index] |= (uint32(val) << m_bits);
-    }
-    return true;
-}
-
-inline uint16 FeatureRef::getFeatureVal(const Features& feats) const
-{ 
-  if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
-    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
-  else
-    return 0;
-}
-
-}}}} // namespace
+struct gr_face : public graphite2::Face {};

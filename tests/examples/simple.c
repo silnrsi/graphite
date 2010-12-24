@@ -10,11 +10,11 @@ int main(int argc, char **argv)
     int dpi = 96;               /* work with this many dots per inch */
 
     char *pError;               /* location of faulty utf-8 */
-    struct GrFont *font = NULL;
+    gr_font *font = NULL;
     size_t numCodePoints = 0;
-    struct GrSegment * seg = NULL;
-    const GrSlot *s;
-    struct GrFace *face = gr_make_file_face(argv[1], 0);                             /*<1>*/
+    gr_segment * seg = NULL;
+    const gr_slot *s;
+    gr_face *face = gr_make_file_face(argv[1], 0);                             /*<1>*/
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);                   /*<2>*/
     if (!font) return 2;

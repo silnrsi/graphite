@@ -18,7 +18,7 @@
 
 #include "Code.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 struct Rule {
   ~Rule();
@@ -83,21 +83,21 @@ class SlotMap
 {
 public:
   enum {MAX_SLOTS=64};
-  SlotMap(GrSegment & seg);
+  SlotMap(Segment & seg);
   
-  GrSlot       * * begin();
-  GrSlot       * * end();
+  Slot       * * begin();
+  Slot       * * end();
   size_t         size() const;
   unsigned short context() const;
   void           setContext(unsigned short);
   
-  GrSlot * const & operator[](int n) const;
-  GrSlot       * & operator [] (int);
-  void           pushSlot(GrSlot * const slot);
+  Slot * const & operator[](int n) const;
+  Slot       * & operator [] (int);
+  void           pushSlot(Slot * const slot);
 
-  GrSegment &    segment;
+  Segment &    segment;
 private:
-  GrSlot         * m_slot_map[MAX_SLOTS+1];
+  Slot         * m_slot_map[MAX_SLOTS+1];
   unsigned short m_size;
   unsigned short m_precontext;
 };
@@ -196,19 +196,19 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
   m_end = out;
 }
 
-inline SlotMap::SlotMap(GrSegment & seg)
+inline SlotMap::SlotMap(Segment & seg)
 : segment(seg), m_size(0), m_precontext(0)
 {
     m_slot_map[0] = 0;
 }
 
-inline GrSlot * * SlotMap::begin()
+inline Slot * * SlotMap::begin()
 {
   return &m_slot_map[1]; // allow map to go 1 before slot_map when inserting
                          // at start of segment.
 }
 
-inline GrSlot * * SlotMap::end()
+inline Slot * * SlotMap::end()
 {
   return m_slot_map + m_size + 1;
 }
@@ -229,19 +229,19 @@ inline void SlotMap::setContext(short unsigned int ctxt)
   m_precontext = ctxt;
 }
 
-inline void SlotMap::pushSlot(GrSlot*const slot)
+inline void SlotMap::pushSlot(Slot*const slot)
 {
   m_slot_map[m_size++ + 1] = slot;
 }
 
-inline GrSlot * const & SlotMap::operator[](int n) const
+inline Slot * const & SlotMap::operator[](int n) const
 {
   return m_slot_map[n + 1];
 }
 
-inline GrSlot * & SlotMap::operator[](int n)
+inline Slot * & SlotMap::operator[](int n)
 {
   return m_slot_map[n + 1];
 }
 
-}}}}
+} // namespace graphite2

@@ -26,7 +26,7 @@
 #include "Main.h"
 #include "Position.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 enum metrics {
     kgmetLsb = 0, kgmetRsb,
@@ -39,7 +39,6 @@ enum metrics {
 class Rect
 {
 public :
-    Rect(const DoNotInitialize& dni) : bl(dni), tr(dni) {}
     Rect() {}
     Rect(const Position& botLeft, const Position& topRight): bl(botLeft), tr(topRight) {}
     Rect widen(const Rect& other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
@@ -57,7 +56,6 @@ class GlyphFace
 {
 private:
 friend class GlyphFaceCache;
-    GlyphFace(const DoNotInitialize& dni) : m_bbox(dni), m_advance(dni) {}
     GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid);
     ~GlyphFace() throw();
     void * operator new (size_t /*s*/, GlyphFace * p)
@@ -123,4 +121,4 @@ inline void GlyphFace::setBBox(const Rect& a) {
 }
 #endif
 
-}}}} // namespace
+} // namespace graphite2

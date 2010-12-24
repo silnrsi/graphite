@@ -20,14 +20,18 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #pragma once
-#include <cstring>
-#include "graphite2/Types.h"
+// #include <cstring>
+// #include "graphite2/Types.h"
 #include "graphite2/Font.h"
 #include "Main.h"
-#include "FeaturesImp.h"
-//#include <map> // avoid libstdc++
+#include "FeatureVal.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
+
+// Forward declarations for implmentation types
+class FeatureMap;
+class Face;
+
 
 class FeatureSetting
 {
@@ -41,20 +45,20 @@ private:
     int16 m_value;
 };
 
-struct GrFeatureRef
+class FeatureRef
 {
 public:
-    GrFeatureRef() :
+    FeatureRef() :
         m_nameValues(NULL), m_pFace(NULL)
       {}
-    GrFeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
+    FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
-               FeatureSetting *uiNames, const GrFace* pFace/*not NULL*/) throw()
+               FeatureSetting *uiNames, const Face* pFace/*not NULL*/) throw()
       : m_mask(mask), m_id(name), m_max(mask >> bits), m_bits(bits), m_index(index),
       m_nameid(uiName), m_nameValues(uiNames), m_pFace(pFace), m_flags(flags),
       m_numSet(numSet)
       {}
-    GrFeatureRef(const GrFeatureRef & toCopy)
+    FeatureRef(const FeatureRef & toCopy)
         : m_mask(toCopy.m_mask), m_id(toCopy.m_id), m_max(toCopy.m_max),
         m_bits(toCopy.m_bits), m_index(toCopy.m_index),
         m_nameid(toCopy.m_nameid),
@@ -68,7 +72,7 @@ public:
             memcpy(m_nameValues, toCopy.m_nameValues, sizeof(FeatureSetting) * m_numSet);
         }
     }
-    ~GrFeatureRef() {
+    ~FeatureRef() {
         if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
@@ -86,7 +90,7 @@ public:
     uint16 getSettingName(uint16 index) const { return m_nameValues[index].label(); }
     int16 getSettingValue(uint16 index) const { return m_nameValues[index].value(); }
     uint16 maxVal() const { return m_max; }
-    const GrFace* getFace() const { return m_pFace;}
+    const Face* getFace() const { return m_pFace;}
     const FeatureMap* getFeatureMap() const;// { return m_pFace;}
 
 //     void * operator new (size_t s, GrFeatureRef * p)
@@ -103,22 +107,21 @@ private:
     byte m_index;               // index into the array to find the ulong to mask
     uint16 m_nameid;            // Name table id for feature name
     FeatureSetting *m_nameValues;       // array of name table ids for feature values
-    const GrFace* m_pFace;   //not NULL
+    const Face* m_pFace;   //not NULL
     uint16 m_flags;             // feature flags (unused at the moment but read from the font)
     uint16 m_numSet;            // number of values (number of entries in m_nameValues)
 
 private:        //unimplemented
-    GrFeatureRef& operator=(const GrFeatureRef&);
+    FeatureRef& operator=(const FeatureRef&);
 };
 
-typedef GrFeatureRef FeatureRef;
 
 class NameAndFeatureRef
 {
   public:
     NameAndFeatureRef() {}
     NameAndFeatureRef(uint32 name) : m_name(name) {}
-    NameAndFeatureRef(const GrFeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
+    NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
 
     bool operator<(const NameAndFeatureRef& rhs) const //orders by m_name
         {   return m_name<rhs.m_name; }
@@ -126,31 +129,31 @@ class NameAndFeatureRef
     CLASS_NEW_DELETE
  
     uint32 m_name;
-    const GrFeatureRef* m_pFRef;
+    const FeatureRef* m_pFRef;
 };
 
-struct FeatureMap
+class FeatureMap
 {
 public:
     FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL),
         m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
-    bool readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace);
-    const GrFeatureRef *findFeatureRef(uint32 name) const;
-    GrFeatureRef *feature(uint16 index) const { return m_feats + index; }
+    bool readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace);
+    const FeatureRef *findFeatureRef(uint32 name) const;
+    FeatureRef *feature(uint16 index) const { return m_feats + index; }
     //GrFeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
-    const GrFeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
-    GrFeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    const FeatureRef *featureRef(byte index) const { return index < m_numFeats ? m_feats + index : NULL; }
+    FeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numFeats() const { return m_numFeats; };
     CLASS_NEW_DELETE
 private:
 friend class SillMap;
     uint16 m_numFeats;
 
-    GrFeatureRef *m_feats;
+    FeatureRef *m_feats;
     NameAndFeatureRef* m_pNamedFeats;   //owned
-    GrFeatureVal* m_defaultFeatures;        //owned
+    FeatureVal* m_defaultFeatures;        //owned
     
 private:		//defensive on m_feats, m_pNamedFeats, and m_defaultFeatures
     FeatureMap(const FeatureMap&);
@@ -174,15 +177,15 @@ private:
 public:
     SillMap() : m_langFeats(NULL), m_numLanguages(0) {}
     ~SillMap() { delete[] m_langFeats; }
-    bool readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const GrFace* pFace);
+    bool readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace);
     bool readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);
-    GrFeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
+    FeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numLanguages() const { return m_numLanguages; };
     uint32 getLangName(uint16 index) const { return (index < m_numLanguages)? m_langFeats[index].m_lang : 0; };
 
     const FeatureMap & theFeatureMap() const { return m_FeatureMap; };
 private:
-friend struct GrFace;
+friend class Face;
     FeatureMap m_FeatureMap;        //of face
     LangFeaturePair * m_langFeats;
     uint16 m_numLanguages;
@@ -192,4 +195,6 @@ private:        //defensive on m_langFeats
     SillMap& operator=(const SillMap&);
 };
 
-}}}} // namespace
+} // namespace graphite2
+
+struct gr_feature_ref : public graphite2::FeatureRef {};

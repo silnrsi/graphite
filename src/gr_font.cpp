@@ -19,25 +19,37 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include "graphite2/Font.h"
+#include "Font.h"
 
-// local definitions of new, delete
-#include <cstdlib>
-#include <cassert>
-#include <cstdio>
-#include "Main.h"
 
-#ifdef __GNUC__
+using namespace graphite2;
 
-// define a few basic functions to save using libstdc++
+extern "C" {
 
-// declaration in c++/x.y/bits/functexcept.h
-namespace std
+
+gr_font* gr_make_font(float ppm/*pixels per em*/, const gr_face *face)
 {
-    // it would be nice to remove these eventually
-    // currently they are needed by ext/malloc_allocator.h and vector
-    void __attribute__ ((visibility("internal"))) __throw_bad_alloc(void) { assert(false); };
-    void __attribute__ ((visibility("internal"))) __throw_length_error(const char* c)
-    { fprintf(stderr, "Length error %s\n", c); assert(false);}
+    Font * const res = new SimpleFont(ppm, face);
+    return static_cast<gr_font*>(res);
 }
 
-#endif
+
+gr_font* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const gr_face *face/*needed for scaling*/)
+{                 //the appFontHandle must stay alive all the time when the gr_font is alive. When finished with the gr_font, call destroy_gr_font    
+    Font * const res = new HintedFont(ppm, appFontHandle, advance, face);
+    return static_cast<gr_font*>(res);
+}
+
+
+void gr_font_destroy(gr_font *font)
+{
+    delete font;
+}
+
+
+} // extern "C"
+
+
+
+

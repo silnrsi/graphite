@@ -21,24 +21,22 @@
 */
 #pragma once
 
-#include "GrFaceImp.h"
+#include "Face.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 class SegCacheStore;
 
-class GrCachedFace : public GrFace
+class CachedFace : public Face
 {
 public:
-    GrCachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) :
-        GrFace(appFaceHandle, getTable2),
-        m_cacheStore(NULL) {};
+    CachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2);
     bool setupCache(unsigned int cacheSize);
-    virtual ~GrCachedFace();
-    virtual void runGraphite(GrSegment *seg, const Silf *silf) const;
+    virtual ~CachedFace();
+    virtual void runGraphite(Segment *seg, const Silf *silf) const;
     SegCacheStore * cacheStore() { return m_cacheStore; }
 private:
     SegCacheStore * m_cacheStore;
 };
 
-}}}} // namespace
+} // namespace graphite2

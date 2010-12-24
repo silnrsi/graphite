@@ -25,10 +25,10 @@
 #include "CmapCache.h"
 #include "SegCache.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 class SegCache;
-struct GrFace;
+class Face;
 
 class SilfSegCache
 {
@@ -80,7 +80,7 @@ private:
 class SegCacheStore
 {
 public:
-    SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments);
+    SegCacheStore(const Face *face, unsigned int numSilf, size_t maxSegments);
     ~SegCacheStore()
     {
         for (size_t i = 0; i < m_numSilf; i++)
@@ -108,5 +108,4 @@ private:
     uint16 m_zwspGid;
 };
 
-}}}}
-
+} // namespace graphite2

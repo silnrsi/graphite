@@ -24,14 +24,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "Code.h"
 #include "Rule.h"
 #include "XmlTraceLog.h"
 
+using namespace graphite2;
+
 using vm::Code;
 using vm::Machine;
-using namespace org::sil::graphite::v2;
+
 
 Pass::Pass()
         :
@@ -384,7 +386,7 @@ inline uint16 Pass::glyphToCol(const uint16 gid) const
     return gid < m_numGlyphs ? m_cols[gid] : 0xffffU;
 }
 
-bool Pass::runFSM(gr2::FiniteStateMachine& fsm, Slot * slot) const
+bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
 {
     int context = 0;
     for (; context != m_maxPreCtxt && slot->prev(); ++context, slot = slot->prev());
@@ -523,7 +525,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
 
-    GrSegment & seg = smap.segment;
+    Segment & seg = smap.segment;
     int glyph_diff = -static_cast<int>(seg.slotCount());
     Machine::status_t status;
     int32 ret = codeptr->run(m, map, status);

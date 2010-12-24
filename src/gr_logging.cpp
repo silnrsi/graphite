@@ -19,30 +19,39 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#pragma once
+#include "XmlTraceLog.h"
+// #include "graphite2/XmlLog.h"
 
-#include "Main.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+using namespace graphite2;
 
-struct GrCharInfo // : ICharInfo
+extern "C" {
+
+
+bool graphite_start_logging(GR_UNUSED FILE * logFile, GR_UNUSED GrLogMask mask)
 {
+#ifdef DISABLE_TRACING
+    return false;
+#else	//!DISABLE_TRACING
+    if (XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
+    {
+        delete XmlTraceLog::sLog;
+    }
+    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphite2", mask);
+    return (XmlTraceLog::sLog != NULL);
+#endif		//!DISABLE_TRACING
+}
 
-public:
-    void init(int cid) { m_char = cid; }
-    unsigned int unicodeChar() const { return m_char; }
-    void feats(int offset) { m_featureid = offset; }
-    int fid() const { return m_featureid; }
-    int breakWeight() const { return m_break; }
-    void breakWeight(int val) { m_break = val; }
+void graphite_stop_logging()
+{
+#ifndef DISABLE_TRACING
+    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
+    {
+        delete XmlTraceLog::sLog;
+        XmlTraceLog::sLog = &XmlTraceLog::sm_NullLog;
+    }
+#endif		//!DISABLE_TRACING
+}
 
-    CLASS_NEW_DELETE
-private:
-    int m_char;     // Unicode character from character stream
-    uint8 m_featureid;	// index into features list in the segment
-    int8 m_break;	// breakweight coming from lb table
-};
 
-typedef GrCharInfo CharInfo;
-
-}}}} // namespace
+} // extern "C"

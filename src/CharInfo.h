@@ -19,25 +19,31 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include <cassert>
-#include "graphite2/Segment.h"
-#include "CharInfoImp.h"
+#pragma once
+#include "Main.h"
 
-using namespace org::sil::graphite::v2;
 
-extern "C" 
+namespace graphite2 {
+
+class CharInfo
 {
-GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const GrCharInfo* p/*not NULL*/)
-{
-    assert(p);
-    return p->unicodeChar();
-}
 
+public:
+    void init(int cid) { m_char = cid; }
+    unsigned int unicodeChar() const { return m_char; }
+    void feats(int offset) { m_featureid = offset; }
+    int fid() const { return m_featureid; }
+    int breakWeight() const { return m_break; }
+    void breakWeight(int val) { m_break = val; }
 
-GRNG_EXPORT int gr_cinfo_break_weight(const GrCharInfo* p/*not NULL*/)
-{
-    assert(p);
-    return p->breakWeight();
-}
+    CLASS_NEW_DELETE
+private:
+    int m_char;     // Unicode character from character stream
+    uint8 m_featureid;	// index into features list in the segment
+    int8 m_break;	// breakweight coming from lb table
+};
 
-}
+} // namespace graphite2
+
+struct gr_char_info : public graphite2::CharInfo {};
+

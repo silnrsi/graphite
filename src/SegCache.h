@@ -23,12 +23,12 @@
 
 #include <graphite2/Segment.h>
 #include "Main.h"
-#include "SlotImp.h"
-#include "FeaturesImp.h"
+#include "Slot.h"
+#include "FeatureVal.h"
 #include "SegCacheEntry.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 class SegCache;
 class SegCacheEntry;
@@ -72,7 +72,7 @@ public:
         findPosition(cmapGlyphs, length, &entry);
         return entry;
     }
-    SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, unsigned long long totalAccessCount)
+    SegCacheEntry * cache(const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset, unsigned long long totalAccessCount)
     {
         size_t listSize = m_entryBSIndex[length-1]? (m_entryBSIndex[length-1] << 1) - 1 : 0;
         SegCacheEntry * newEntries = NULL;
@@ -239,7 +239,7 @@ public:
     ~SegCache();
 
     const SegCacheEntry * find(const uint16 * cmapGlyphs, size_t length) const;
-    SegCacheEntry * cache(SegCacheStore * store, const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset);
+    SegCacheEntry * cache(SegCacheStore * store, const uint16 * cmapGlyphs, size_t length, Segment * seg, size_t charOffset);
     void purge(SegCacheStore * store);
 
     long long totalAccessCount() const { return m_totalAccessCount; }
@@ -299,5 +299,4 @@ inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t le
     return entry;
 }
     
-}}}} // end namespace
-
+} // namespace graphite2

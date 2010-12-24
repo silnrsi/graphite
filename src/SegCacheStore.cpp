@@ -21,11 +21,12 @@
 */
 
 #include "SegCacheStore.h"
-#include "GrFaceImp.h"
+#include "Face.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t maxSegments)
+using namespace graphite2;
+
+SegCacheStore::SegCacheStore(const Face *face, unsigned int numSilf, size_t maxSegments)
  : m_caches(new SilfSegCache[numSilf]), m_numSilf(numSilf), m_maxSegments(maxSegments),
    m_maxCmapGid(0)
 {
@@ -55,4 +56,3 @@ SegCacheStore::SegCacheStore(const GrFace *face, unsigned int numSilf, size_t ma
 }
 
 
-}}}}

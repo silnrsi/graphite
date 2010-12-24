@@ -37,14 +37,12 @@
 #define     REGPARM(n)
 #endif
 
-namespace gr2 = org::sil::graphite::v2;
+namespace graphite2 {
 
 // Forward declarations
-namespace org { namespace sil { namespace graphite { namespace v2 {
-    struct GrSegment;
-    struct GrSlot;
-    class SlotMap;
-}}}}
+class Segment;
+class Slot;
+class SlotMap;
 
 
 namespace vm 
@@ -52,7 +50,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef gr2::GrSlot * slotref;
+typedef Slot * slotref;
 
 enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
 
@@ -111,7 +109,7 @@ enum opcode {
 class Machine
 {
 public:
-    typedef gr2::int32  stack_t;
+    typedef int32  stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
                         STACK_GUARD  = 2;
@@ -124,32 +122,32 @@ public:
         slot_offset_out_bounds
     };
 
-    Machine(gr2::SlotMap &) throw();
+    Machine(SlotMap &) throw();
     static const opcode_t *   getOpcodeTable() throw();
-    stack_t                   run(const instr * program, const gr2::byte * data,
+    stack_t                   run(const instr * program, const byte * data,
                                   slotref * & map,
                                   status_t &status) HOT;
     CLASS_NEW_DELETE
 
-    gr2::SlotMap   & slotMap() const throw();
+    SlotMap   & slotMap() const throw();
 private:
     void check_final_stack(const stack_t * const sp, status_t &status);
 
-    gr2::SlotMap      & _map;
+    SlotMap      & _map;
     stack_t             _stack[STACK_MAX + 2*STACK_GUARD];
 };
 
-inline Machine::Machine(gr2::SlotMap & map) throw()
+inline Machine::Machine(SlotMap & map) throw()
 : _map(map)
 {
 }
 
-inline gr2::SlotMap& Machine::slotMap() const throw()
+inline SlotMap& Machine::slotMap() const throw()
 {
   return _map;
 }
 
-inline void Machine::check_final_stack(const gr2::int32 * const sp,
+inline void Machine::check_final_stack(const int32 * const sp,
                                        status_t & status) {
     stack_t const * const base  = _stack + STACK_GUARD,
                   * const limit = base + STACK_MAX;
@@ -160,7 +158,8 @@ inline void Machine::check_final_stack(const gr2::int32 * const sp,
 }
 
 
-} // end of namespace vm
+} // namespace vm
+} // namespace graphite2
 
 #ifdef ENABLE_DEEP_TRACING
 #define STARTTRACE(name,is) if (XmlTraceLog::get().active()) { \
@@ -170,10 +169,10 @@ inline void Machine::check_final_stack(const gr2::int32 * const sp,
                             }
 
 #define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode)
-#else
+#else // ENABLE_DEEP_TRACING
 #define STARTTRACE(name,is)
 #define ENDTRACE
-#endif
+#endif // ENABLE_DEEP_TRACING
 
 
 

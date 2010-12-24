@@ -23,18 +23,18 @@
 #include <cassert>
 #include "graphite2/Font.h"
 #include "Main.h"
-#include "GrFaceImp.h"
+#include "Face.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 
-struct GrFont
+class Font
 {
 public:
-    GrFont(float ppm, const GrFace *face/*needed for scaling*/);
+    Font(float ppm, const Face *face/*needed for scaling*/);
 public:
-    virtual ~GrFont();
+    virtual ~Font();
     float advance(unsigned short glyphid) const {
         if (m_advances[glyphid] == INVALID_ADVANCE)
             m_advances[glyphid] = computeAdvance(glyphid);
@@ -54,24 +54,26 @@ protected:
     float *m_advances;  // One advance per glyph in pixels. Nan if not defined
     
 private:			//defensive on m_advances
-    GrFont(const GrFont&);
-    GrFont& operator=(const GrFont&);
+    Font(const Font&);
+    Font& operator=(const Font&);
 };
 
-class GrSimpleFont : public GrFont      //has no external hints - gets advance information from the face
+
+class SimpleFont : public Font      //has no external hints - gets advance information from the face
 {
 public:
-    GrSimpleFont(float ppm/*pixels per em*/, const GrFace *face);
+    SimpleFont(float ppm/*pixels per em*/, const Face *face);
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
 private:
-    const GrFace *m_face;   // GrFace to get the rest of the info from
+    const Face *m_face;   // GrFace to get the rest of the info from
 };
 
-class GrHintedFont : public GrFont
+
+class HintedFont : public Font
 {
 public:
-    GrHintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const GrFace *face/*needed for scaling*/);
+    HintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance, const Face *face/*needed for scaling*/);
     virtual bool isHinted() const { return true; }
 private:
     virtual float computeAdvance(unsigned short glyphid) const;
@@ -81,4 +83,6 @@ private:
     gr_advance_fn m_advance;
 };
 
-}}}} // namespace
+} // namespace graphite2
+
+struct gr_font : public graphite2::Font {};

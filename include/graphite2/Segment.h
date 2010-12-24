@@ -25,12 +25,11 @@
 #include "graphite2/Font.h"
 
 #ifdef __cplusplus
-namespace org { namespace sil { namespace graphite { namespace v2 {
 extern "C"
 {
 #endif
 
-enum {
+enum gr_break_weight {
     gr_breakNone = 0,
     /* after break weights */
     gr_breakWhitespace = 10,
@@ -118,202 +117,200 @@ enum gr_attrCode {
 };
 
 
-typedef struct GrCharInfo GrCharInfo;
-typedef struct GrSegment GrSegment;
-typedef struct GrSlot GrSlot;
+typedef struct gr_char_info     gr_char_info;
+typedef struct gr_segment       gr_segment;
+typedef struct gr_slot          gr_slot;
 
-    /** Returns Unicode character for a charinfo.
-     * 
-     * @param p Pointer to charinfo to return information on.
-     */
-    GRNG_EXPORT unsigned int gr_cinfo_unicode_char(const GrCharInfo* p/*not NULL*/);
-    
-    /** Returns breakweight for a charinfo.
-     * 
-     * @return Breakweight is a number between -50 and 50 indicating the cost of a
-     * break before or after this character.
-     * @param p Pointer to charinfo to return information on.
-     */
-    GRNG_EXPORT int gr_cinfo_break_weight(const GrCharInfo* p/*not NULL*/);
+/** Returns Unicode character for a charinfo.
+  * 
+  * @param p Pointer to charinfo to return information on.
+  */
+GR2_API unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/);
 
-    /** Returns the number of unicode characters in a string.
-     *
-     * @return number of characters in the string
-     * @param enc Specifies the type of data in the string: utf8, utf16, utf32
-     * @param buffer_begin The start of the string
-     * @param buffer_end Measure up to the first nul or when end is reached, whichever is earliest.
-     *            This parameter may be NULL.
-     * @param pError If there is a structural fault in the string, the location is returned
-     *               in this variable. If no error occurs, pError will contain NULL. NULL
-     *               may be passed for pError if no such information is required.
-     */
-    GRNG_EXPORT size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
+/** Returns breakweight for a charinfo.
+  * 
+  * @return Breakweight is a number between -50 and 50 indicating the cost of a
+  * break before or after this character.
+  * @param p Pointer to charinfo to return information on.
+  */
+GR2_API int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/);
 
-    /** Creates and returns a segment.
-     *
-     * @return a segment that needs seg_destroy called on it.
-     * @param font Gives the size of the font in pixels per em for final positioning. If
-     *             NULL, positions are returned in design units, i.e. at a ppm of the upem
-     *             of the face.
-     * @param face The face containing all the non-size dependent information.
-     * @param script This is a tag containing a script identifier that is used to choose
-     *               which graphite table within the font to use. Maybe 0.
-     * @param pFeats Pointer to a feature values to be used for the segment. Only one
-     *               feature values may be used for a segment. If NULL the default features
-     *               for the font will be used.
-     * @param enc Specifies what encoding form the string is in (utf8, utf16, utf32)
-     * @param pStart Start of the string
-     * @param nChars Number of unicode characters to process in the string
-     * @param dir Specifies whether the segment is processed right to left (1) or left to
-     *            right (0)
-     */
-    GRNG_EXPORT GrSegment* gr_make_seg(const GrFont* font, const GrFace* face, gr_uint32 script, const GrFeatureVal* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
+/** Returns the number of unicode characters in a string.
+  *
+  * @return number of characters in the string
+  * @param enc Specifies the type of data in the string: utf8, utf16, utf32
+  * @param buffer_begin The start of the string
+  * @param buffer_end Measure up to the first nul or when end is reached, whichever is earliest.
+  *            This parameter may be NULL.
+  * @param pError If there is a structural fault in the string, the location is returned
+  *               in this variable. If no error occurs, pError will contain NULL. NULL
+  *               may be passed for pError if no such information is required.
+  */
+GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buffer_begin, const void* buffer_end, const void** pError);
 
-    /** Destroys a segment, freeing the memory.
-     *
-     * @param p The segment to destroy
-     */
-    GRNG_EXPORT void gr_seg_destroy(GrSegment* p);
+/** Creates and returns a segment.
+  *
+  * @return a segment that needs seg_destroy called on it.
+  * @param font Gives the size of the font in pixels per em for final positioning. If
+  *             NULL, positions are returned in design units, i.e. at a ppm of the upem
+  *             of the face.
+  * @param face The face containing all the non-size dependent information.
+  * @param script This is a tag containing a script identifier that is used to choose
+  *               which graphite table within the font to use. Maybe 0.
+  * @param pFeats Pointer to a feature values to be used for the segment. Only one
+  *               feature values may be used for a segment. If NULL the default features
+  *               for the font will be used.
+  * @param enc Specifies what encoding form the string is in (utf8, utf16, utf32)
+  * @param pStart Start of the string
+  * @param nChars Number of unicode characters to process in the string
+  * @param dir Specifies whether the segment is processed right to left (1) or left to
+  *            right (0)
+  */
+GR2_API gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, gr_uint32 script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
-    /** Returns the advance for the whole segment.
-     *
-     * Returns the width of the segment up to the next glyph origin after the segment
-     */
-    GRNG_EXPORT float gr_seg_advance_X(const GrSegment* pSeg/*not NULL*/);
+/** Destroys a segment, freeing the memory.
+  *
+  * @param p The segment to destroy
+  */
+GR2_API void gr_seg_destroy(gr_segment* p);
 
-    /** Returns the height advance for the segment. **/
-    GRNG_EXPORT float gr_seg_advance_Y(const GrSegment* pSeg/*not NULL*/);
+/** Returns the advance for the whole segment.
+  *
+  * Returns the width of the segment up to the next glyph origin after the segment
+  */
+GR2_API float gr_seg_advance_X(const gr_segment* pSeg/*not NULL*/);
 
-    /** Returns the number of GrCharInfos in the segment. **/
-    GRNG_EXPORT unsigned int gr_seg_n_cinfo(const GrSegment* pSeg/*not NULL*/);
+/** Returns the height advance for the segment. **/
+GR2_API float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/);
 
-    /** Returns a GrCharInfo at a given index in the segment. **/
-    GRNG_EXPORT const GrCharInfo* gr_seg_cinfo(const GrSegment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
+/** Returns the number of gr_char_infos in the segment. **/
+GR2_API unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/);
 
-    /** Returns the number of glyph GrSlots in the segment. **/
-    GRNG_EXPORT unsigned int gr_seg_n_slots(const GrSegment* pSeg/*not NULL*/);      //one slot per glyph
+/** Returns a gr_char_info at a given index in the segment. **/
+GR2_API const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned int index/*must be <number_of_CharInfo*/);
 
-    /** Returns the first GrSlot in the segment.
-     *
-     * The first slot in a segment has a gr_slot_prev_in_segment() of NULL. Slots are owned
-     * by their segment and are destroyed along with the segment.
-     */
-    GRNG_EXPORT const GrSlot* gr_seg_first_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
+/** Returns the number of glyph gr_slots in the segment. **/
+GR2_API unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/);      //one slot per glyph
 
-    /** Returns the last GrSlot in the segment.
-     *
-     * The last slot in a segment has a gr_slot_next_in_segment() of NULL
-     */
-    GRNG_EXPORT const GrSlot* gr_seg_last_slot(GrSegment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
-    
-    /** Calculates the underlying character to glyph associations.
-     *
-     * @param pSeg  Pointer to the segment we want information on.
-     * @param begins An array of gr_seg_n_cinfo integers giving slot index for each
-     *               charinfo. The value corresponds to which slot a cursor would be before
-     *               if an underlying cursor were before the charinfo at this index.
-     * @param ends  An array of gr_seg_n_cinfo integers giving the slot index for each
-     *              charinfo. The value at an index corresponds to which slot a cursor would
-     *              be after if an underlying cursor were after the charinfo at the index.
-     * @param sbegins   An array of gr_seg_n_cinfo GrSlot * corresponding to the GrSlot at
-     *                  index given by begins. The pointer to the array may be NULL.
-     * @param sends An array of gr_seg_n_cinfo GrSlot * corresponding to the GrSlot at the
-     *              index given by ends. The pointer to the array may be NULL.
-     */
-    GRNG_EXPORT void gr_seg_char_slots(const GrSegment *pSeg, gr_uint32 *begins, gr_uint32 *ends, GrSlot **sbegins, GrSlot **sends);
+/** Returns the first gr_slot in the segment.
+  *
+  * The first slot in a segment has a gr_slot_prev_in_segment() of NULL. Slots are owned
+  * by their segment and are destroyed along with the segment.
+  */
+GR2_API const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
 
-    /** Returns the next slot along in the segment.
-     *
-     * Slots are held in a linked list. This returns the next in the linked list. The slot
-     * may or may not be attached to another slot. Returns NULL at the end of the segment.
-     */
-    GRNG_EXPORT const GrSlot* gr_slot_next_in_segment(const GrSlot* p);
+/** Returns the last gr_slot in the segment.
+  *
+  * The last slot in a segment has a gr_slot_next_in_segment() of NULL
+  */
+GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
 
-    /** Returns the previous slot along in the segment.
-     *
-     * Slots are held in a doubly linked list. This returns the previos slot in the linked
-     * list. This slot may or may not be attached to it. Returns NULL at the start of the
-     * segment.
-     */
-    GRNG_EXPORT const GrSlot* gr_slot_prev_in_segment(const GrSlot* p);
+/** Calculates the underlying character to glyph associations.
+  *
+  * @param pSeg  Pointer to the segment we want information on.
+  * @param begins An array of gr_seg_n_cinfo integers giving slot index for each
+  *               charinfo. The value corresponds to which slot a cursor would be before
+  *               if an underlying cursor were before the charinfo at this index.
+  * @param ends  An array of gr_seg_n_cinfo integers giving the slot index for each
+  *              charinfo. The value at an index corresponds to which slot a cursor would
+  *              be after if an underlying cursor were after the charinfo at the index.
+  * @param sbegins   An array of gr_seg_n_cinfo gr_slot * corresponding to the gr_slot at
+  *                  index given by begins. The pointer to the array may be NULL.
+  * @param sends An array of gr_seg_n_cinfo gr_slot * corresponding to the gr_slot at the
+  *              index given by ends. The pointer to the array may be NULL.
+  */
+GR2_API void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends);
 
-    /** Returns the attachment parent slot of this slot.
-     *
-     * Attached slots form a tree. This returns the parent of this slot in that tree. A
-     * base glyph which is not attached to another glyph, always returns NULL.
-     */
-    GRNG_EXPORT const GrSlot* gr_slot_attached_to(const GrSlot* p);
- 
-    /** Returns the first slot attached to this slot.
-     *
-     * Attached slots form a singly linked list from the parent. This returns the first
-     * slot in that list. Note that this is a reference to another slot that is also in
-     * the main segment doubly linked list.
-     *
-     * if gr_slot_first_attachment(p) != NULL then gr_slot_attached_to(gr_slot_first_attachment(p)) == p.
-     */
-    GRNG_EXPORT const GrSlot* gr_slot_first_attachment(const GrSlot* p);
-    
-    /** Returns the next slot attached to our attachment parent.
-     *
-     * This returns the next slot in the singly linked list of slots attached to this
-     * slot's parent. If there are no more such slots, NULL is returned. If there is no parent, i.e.
-     * the passed slot is a base, then the next base in segment order is returned.
-     *
-     * if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
-     */
-    GRNG_EXPORT const GrSlot* gr_slot_next_sibling_attachment(const GrSlot* p);
-    
-    
-    /** Returns glyph id of the slot
-     *
-     * Each slot has a glyphid which is rendered at the position given by the slot. This
-     * glyphid is the real glyph to be rendered and never a pseudo glyph.
-     */
-    GRNG_EXPORT unsigned short gr_slot_gid(const GrSlot* p);
+/** Returns the next slot along in the segment.
+  *
+  * Slots are held in a linked list. This returns the next in the linked list. The slot
+  * may or may not be attached to another slot. Returns NULL at the end of the segment.
+  */
+GR2_API const gr_slot* gr_slot_next_in_segment(const gr_slot* p);
 
-    /** Returns X offset of glyph from start of segment **/
-    GRNG_EXPORT float gr_slot_origin_X(const GrSlot* p);
+/** Returns the previous slot along in the segment.
+  *
+  * Slots are held in a doubly linked list. This returns the previos slot in the linked
+  * list. This slot may or may not be attached to it. Returns NULL at the start of the
+  * segment.
+  */
+GR2_API const gr_slot* gr_slot_prev_in_segment(const gr_slot* p);
 
-    /** Returns Y offset of glyph from start of segment **/
-    GRNG_EXPORT float gr_slot_origin_Y(const GrSlot* p);
+/** Returns the attachment parent slot of this slot.
+  *
+  * Attached slots form a tree. This returns the parent of this slot in that tree. A
+  * base glyph which is not attached to another glyph, always returns NULL.
+  */
+GR2_API const gr_slot* gr_slot_attached_to(const gr_slot* p);
 
-    /** Returns the glyph advance for this glyph as adjusted for kerning **/
-    GRNG_EXPORT float gr_slot_advance(const GrSlot* p);
+/** Returns the first slot attached to this slot.
+  *
+  * Attached slots form a singly linked list from the parent. This returns the first
+  * slot in that list. Note that this is a reference to another slot that is also in
+  * the main segment doubly linked list.
+  *
+  * if gr_slot_first_attachment(p) != NULL then gr_slot_attached_to(gr_slot_first_attachment(p)) == p.
+  */
+GR2_API const gr_slot* gr_slot_first_attachment(const gr_slot* p);
 
-    /** Returns the GrCharInfo index before us
-     *
-     * Returns the index of the GrCharInfo that a cursor before this slot, would put
-     * an underlying cursor before.
-     */
-    GRNG_EXPORT int gr_slot_before(const GrSlot* p/*not NULL*/);
+/** Returns the next slot attached to our attachment parent.
+  *
+  * This returns the next slot in the singly linked list of slots attached to this
+  * slot's parent. If there are no more such slots, NULL is returned. If there is no parent, i.e.
+  * the passed slot is a base, then the next base in segment order is returned.
+  *
+  * if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
+  */
+GR2_API const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p);
 
-    /** Returns the GrCharInfo index after us
-     *
-     * Returns the index of the GrCharInfo that a cursor after this slot would put an
-     * underlying cursor after.
-     */
-    GRNG_EXPORT int gr_slot_after(const GrSlot* p/*not NULL*/);
 
-    /** Return a slot attribute value
-     *
-     * Given a slot and an attribute along with a possible subattribute, return the
-     * corresponding value in the slot. See enum gr_attrCode for details of each attribute.
-     */
-    GRNG_EXPORT int gr_slot_attr(const GrSlot* p/*not NULL*/, const GrSegment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
+/** Returns glyph id of the slot
+  *
+  * Each slot has a glyphid which is rendered at the position given by the slot. This
+  * glyphid is the real glyph to be rendered and never a pseudo glyph.
+  */
+GR2_API unsigned short gr_slot_gid(const gr_slot* p);
 
-    /** Returns whether text may be inserted before this glyph [check this isn't inverted] **/
-    GRNG_EXPORT int gr_slot_can_insert_before(const GrSlot* p);
+/** Returns X offset of glyph from start of segment **/
+GR2_API float gr_slot_origin_X(const gr_slot* p);
 
-    /** Returns the original GrCharInfo index this slot refers to.
-     *
-     * Each Slot has a GrCharInfo that it originates from. This is that GrCharInfo. This
-     * information is useful for testing.
-     */
-    GRNG_EXPORT int gr_slot_original(const GrSlot* p/*not NULL*/);
+/** Returns Y offset of glyph from start of segment **/
+GR2_API float gr_slot_origin_Y(const gr_slot* p);
+
+/** Returns the glyph advance for this glyph as adjusted for kerning **/
+GR2_API float gr_slot_advance(const gr_slot* p);
+
+/** Returns the gr_char_info index before us
+  *
+  * Returns the index of the gr_char_info that a cursor before this slot, would put
+  * an underlying cursor before.
+  */
+GR2_API int gr_slot_before(const gr_slot* p/*not NULL*/);
+
+/** Returns the gr_char_info index after us
+  *
+  * Returns the index of the gr_char_info that a cursor after this slot would put an
+  * underlying cursor after.
+  */
+GR2_API int gr_slot_after(const gr_slot* p/*not NULL*/);
+
+/** Return a slot attribute value
+  *
+  * Given a slot and an attribute along with a possible subattribute, return the
+  * corresponding value in the slot. See enum gr_attrCode for details of each attribute.
+  */
+GR2_API int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
+
+/** Returns whether text may be inserted before this glyph [check this isn't inverted] **/
+GR2_API int gr_slot_can_insert_before(const gr_slot* p);
+
+/** Returns the original gr_char_info index this slot refers to.
+  *
+  * Each Slot has a gr_char_info that it originates from. This is that gr_char_info. This
+  * information is useful for testing.
+  */
+GR2_API int gr_slot_original(const gr_slot* p/*not NULL*/);
   
-
 #ifdef __cplusplus
 }
-}}}}
 #endif

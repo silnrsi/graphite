@@ -29,14 +29,14 @@
 #include "Main.h"
 #include "XmlTraceLogTags.h"
 
-#ifndef DISABLE_TRACING
+namespace graphite2 {
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+#ifndef DISABLE_TRACING
 
 class XmlTraceLog
 {
-    friend bool graphite_start_logging(FILE * logFile, GrLogMask mask);
-    friend void graphite_stop_logging();
+    friend bool ::graphite_start_logging(FILE * logFile, GrLogMask mask);
+    friend void ::graphite_stop_logging();
 public:
     ~XmlTraceLog();
     bool active() { return (m_file != NULL); };
@@ -239,6 +239,6 @@ template<class T> void XmlTraceLog::addArrayElement(XmlTraceLogElement eId, cons
     m_lastNodeText = false;
 }
 
-}}}} // namespace
+#endif // !DISABLE_TRACING
 
-#endif
+} // namespace graphite2

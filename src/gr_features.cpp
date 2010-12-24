@@ -20,30 +20,17 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "graphite2/Font.h"
+#include "Face.h"
 #include "FeatureMap.h"
-#include "GrFaceImp.h"
+#include "FeatureVal.h"
 #include "NameTable.h"
 
-using namespace org::sil::graphite::v2;
+using namespace graphite2;
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-/*
-GRNG_EXPORT FeatureRef* make_FeatureRef(byte bits, byte index, uint32 mask)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-  return new FeatureRef(bits, index, mask);
-}
+extern "C" {
 
 
-GRNG_EXPORT FeatureRef* clone_FeatureRef(const FeatureRef*pfeatureref)
-{                      //When finished with the FeatureRef, call destroy_FeatureRef    
-    if (pfeatureref)
-    return new FeatureRef(*pfeatureref);
-    else
-    return NULL;
-}
-*/
-
-GRNG_EXPORT uint16 gr_fref_feature_value(const GrFeatureRef* pfeatureref, const GrFeatureVal* feats)    //returns 0 if either pointer is NULL
+gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref)
     return 0;
@@ -54,7 +41,7 @@ GRNG_EXPORT uint16 gr_fref_feature_value(const GrFeatureRef* pfeatureref, const 
 }
 
 
-GRNG_EXPORT int gr_fref_set_feature_value(const GrFeatureRef* pfeatureref, uint16 val, GrFeatureVal* pDest)
+int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest)
 {
     if (!pfeatureref)
     return false;
@@ -65,7 +52,7 @@ GRNG_EXPORT int gr_fref_set_feature_value(const GrFeatureRef* pfeatureref, uint1
 }
 
 
-GRNG_EXPORT uint32 gr_fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if pointer is NULL
+gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref)    //returns 0 if pointer is NULL
 {
   if (!pfeatureref)
     return 0;
@@ -74,7 +61,7 @@ GRNG_EXPORT uint32 gr_fref_id(const GrFeatureRef* pfeatureref)    //returns 0 if
 }
 
 
-GRNG_EXPORT uint16 gr_fref_n_values(const GrFeatureRef* pfeatureref)
+gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref)
 {
     if(!pfeatureref)
         return 0;
@@ -82,7 +69,7 @@ GRNG_EXPORT uint16 gr_fref_n_values(const GrFeatureRef* pfeatureref)
 }
 
 
-GRNG_EXPORT int16 gr_fref_value(const GrFeatureRef* pfeatureref, uint16 settingno)
+gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno)
 {
     if(!pfeatureref || (settingno >= pfeatureref->getNumSettings()))
     {
@@ -92,7 +79,7 @@ GRNG_EXPORT int16 gr_fref_value(const GrFeatureRef* pfeatureref, uint16 settingn
 }
 
 
-GRNG_EXPORT void* gr_fref_label(const GrFeatureRef* pfeatureref, uint16 *langId, gr_encform utf, uint32 *length)
+void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, gr_encform utf, gr_uint32 *length)
 {
     if(!pfeatureref || !pfeatureref->getFace())
     {
@@ -112,8 +99,8 @@ GRNG_EXPORT void* gr_fref_label(const GrFeatureRef* pfeatureref, uint16 *langId,
 }
 
 
-GRNG_EXPORT void* gr_fref_value_label(const GrFeatureRef*pfeatureref, uint16 setting,
-    uint16 *langId, gr_encform utf, uint32 *length)
+void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
+    gr_uint16 *langId, gr_encform utf, gr_uint32 *length)
 {
     if(!pfeatureref || (setting >= pfeatureref->getNumSettings()) || !pfeatureref->getFace())
     {
@@ -133,10 +120,38 @@ GRNG_EXPORT void* gr_fref_value_label(const GrFeatureRef*pfeatureref, uint16 set
 }
 
 
-GRNG_EXPORT void gr_label_destroy(void * label)
+void gr_label_destroy(void * label)
 {
     if (label)
         free(label);
 }
 
-}}}} // namespace
+gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures/*may be NULL*/)
+{                      //When finished with the Features, call features_destroy    
+    return static_cast<gr_feature_val*>(pfeatures ? pfeatures->clone() : new Features);
+}
+
+
+#if 0
+//not public since there is no public way of making the mask
+int gr_featureval_masked_or(gr_feature_val* pSrc, const gr_feature_val* pOther, const gr_feature_val* pMask)    //returns false iff any of the Features* are NULL
+{
+    if (!pSrc)
+    return false;
+    if (!pOther)
+    return false;
+    if (!pMask)
+    return false;
+    
+    pSrc->maskedOr(*pOther, *pMask);
+    return true;
+}
+#endif 
+  
+void gr_featureval_destroy(gr_feature_val *p)
+{
+    delete p;
+}
+
+
+} // extern "C"

@@ -23,10 +23,11 @@
 #include "graphite2/Segment.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "Rule.h"
 
-using namespace org::sil::graphite::v2;
+
+using namespace graphite2;
 
 Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
@@ -426,7 +427,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(GrSegment *seg, uint8 firstPass, uint8 lastPass) const
+void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
     SlotMap map(*seg);

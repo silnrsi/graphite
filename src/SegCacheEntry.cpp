@@ -20,15 +20,16 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "Main.h"
-#include "SlotImp.h"
-#include "GrSegmentImp.h"
+#include "Slot.h"
+#include "Segment.h"
 #include "SegCache.h"
 #include "SegCacheEntry.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
 
-SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime)
-    : m_glyphLength(0), m_unicode(gr2::gralloc<uint16>(length)), m_glyph(NULL),
+using namespace graphite2;
+
+SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * seg, size_t charOffset, long long cacheTime)
+    : m_glyphLength(0), m_unicode(gralloc<uint16>(length)), m_glyph(NULL),
     m_attr(NULL),
     m_accessCount(0), m_lastAccess(cacheTime)
 {
@@ -159,4 +160,3 @@ void SegCacheEntry::clear()
 }
 
 
-}}}}

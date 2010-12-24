@@ -25,11 +25,11 @@
 
 #include "Pass.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
-struct GrFace;
-struct GrSegment;
-struct GrFeatureVal;
+class Face;
+class Segment;
+class FeatureVal;
 class VMScratch;
 
 class Pseudo
@@ -47,7 +47,7 @@ public:
     ~Silf() throw();
     
     bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
-    void runGraphite(GrSegment *seg, uint8 firstPass=0, uint8 lastPass=0) const;
+    void runGraphite(Segment *seg, uint8 firstPass=0, uint8 lastPass=0) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
     uint16 findPseudo(uint32 uid) const;
@@ -87,4 +87,4 @@ private:			//defensive
     Silf& operator=(const Silf&);
 };
 
-}}}} // namespace
+} // namespace graphite2

@@ -28,9 +28,9 @@
 #undef DISABLE_TRACING
 #endif
 
-#ifndef DISABLE_TRACING
+namespace graphite2 {
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+#ifndef DISABLE_TRACING
 
 // start this at same line number as in XmlTraceLogTags.cpp
 typedef enum {
@@ -178,6 +178,6 @@ public:
 extern const XmlTraceLogTag xmlTraceLogElements[NumElements];
 extern const char * xmlTraceLogAttributes[NumAttributes];
 
-}}}} // namespace
+#endif // !DISABLE_TRACING
 
-#endif
+} // namespace graphite2

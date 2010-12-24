@@ -35,9 +35,9 @@
 #include <cassert>
 #include <cstring>
 #include "Machine.h"
-#include "GrSegmentImp.h"
+#include "Segment.h"
 #include "XmlTraceLog.h"
-#include "SlotImp.h"
+#include "Slot.h"
 #include "Rule.h"
 
 #define STARTOP(name)           name: {
@@ -46,8 +46,9 @@
 
 #define do_(name)               &&name
 
+
+using namespace graphite2;
 using namespace vm;
-using namespace org::sil::graphite::v2;
 
 namespace {
 
@@ -56,7 +57,7 @@ const void * direct_run(const bool          get_table_mode,
                         const byte        * data,
                         Machine::stack_t  * stack,
                         slotref         * & __map,
-                        gr2::SlotMap      * __smap=0)
+                        SlotMap           * __smap=0)
 {
     // We need to define and return to opcode table from within this function 
     // other inorder to take the addresses of the instruction bodies.
@@ -69,8 +70,8 @@ const void * direct_run(const bool          get_table_mode,
     const byte        * dp = data;
     Machine::stack_t  * sp = stack + Machine::STACK_GUARD,
                 * const sb = sp;
-    gr2::SlotMap    & smap = *__smap;
-    GrSegment        & seg = smap.segment;
+    SlotMap         & smap = *__smap;
+    Segment          & seg = smap.segment;
     slotref             is = *__map,
                      * map = __map,
               * const mapb = smap.begin()+smap.context();

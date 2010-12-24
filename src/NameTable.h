@@ -25,7 +25,7 @@
 #include "TtfTypes.h"
 #include "locale2lcid.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
 class NameTable
 {
@@ -54,5 +54,4 @@ private:
     Locale2Lang m_locale2Lang;
 };
 
-
-}}}}
+} // namespace graphite2

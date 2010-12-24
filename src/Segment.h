@@ -32,45 +32,46 @@
 #include <vector>
 #endif
 
-#include "SlotImp.h"
-#include "CharInfoImp.h"
-#include "FeaturesImp.h"
+#include "Slot.h"
+#include "CharInfo.h"
+#include "FeatureVal.h"
 #include "XmlTraceLog.h"
 #include "Silf.h"
 
-#include "GrList.h"
+#include "List.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+
+namespace graphite2 {
 
 #if 0
 #ifdef __GNUC__
 #ifdef STLPORT_VERSION
 // standard allocator for other platforms
 typedef std::vector<Features> FeatureList;
-typedef std::vector<Slot *> SlotRope;
+typedef std::vector<GrSlot *> SlotRope;
 typedef std::vector<uint16 *> AttributeRope;
 #else
 // use the GNU CXX extension malloc_allocator to avoid new/delete
 #include <ext/malloc_allocator.h>
 typedef std::vector<Features, __gnu_cxx::malloc_allocator<Features> > FeatureList;
-typedef std::vector<Slot*, __gnu_cxx::malloc_allocator<Slot*> > SlotRope;
+typedef std::vector<GrSlot*, __gnu_cxx::malloc_allocator<GrSlot*> > SlotRope;
 typedef std::vector<uint16 *, __gnu_cxx::malloc_allocator<uint16 *> > AttributeRope;
 #endif
 #else
 // standard allocator for other platforms
 typedef std::vector<Features> FeatureList;
-typedef std::vector<Slot *> SlotRope;
+typedef std::vector<GrSlot *> SlotRope;
 typedef std::vector<uint16 *> AttributeRope;
 #endif
 
 #else
-typedef GrList<Features> FeatureList;
-typedef GrList<Slot *> SlotRope;
-typedef GrList<uint16 *> AttributeRope;
+typedef List<Features> FeatureList;
+typedef List<Slot *> SlotRope;
+typedef List<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
-struct GrSegment;
+class Segment;
 
 typedef enum {
 /** sub-Segments longer than this are not cached
@@ -81,7 +82,7 @@ typedef enum {
 class SegmentScopeState
 {
 private:
-    friend struct GrSegment;
+    friend class Segment;
     Slot * realFirstSlot;
     Slot * slotBeforeScope;
     Slot * slotAfterScope;
@@ -89,7 +90,7 @@ private:
     size_t numGlyphsOutsideScope;
 };
 
-struct GrSegment
+class Segment
 {
 public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
@@ -103,8 +104,8 @@ public:
     CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     int8 dir() const { return m_dir; }
 
-    GrSegment(unsigned int numchars, const GrFace* face, uint32 script, int dir);
-    ~GrSegment();
+    Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
+    ~Segment();
     SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
     void removeScope(SegmentScopeState & state);
     Slot *first() { return m_first; }
@@ -114,8 +115,8 @@ public:
     void appendSlot(int i, int cid, int gid, int fid);
     Slot *newSlot();
     void freeSlot(Slot *);
-    void positionSlots(const GrFont *font, Slot *iStart = NULL, Slot *iEnd = NULL);
-    void append(const GrSegment &other);
+    void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);
+    void append(const Segment &other);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
@@ -135,10 +136,10 @@ public:
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
     int numAttrs() { return m_silf->numUser(); }
-    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot,
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, 
                 const Slot * firstSpliceSlot, size_t numGlyphs);
     int defaultOriginal() const { return m_defaultOriginal; }
-    const GrFace * getFace() const { return m_face; }
+    const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const;
 
@@ -150,9 +151,9 @@ public:
 #endif
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
-    void read_text(const GrFace *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
-    void prepare_pos(const GrFont *font);
-    void finalise(const GrFont *font);
+    void read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
+    void prepare_pos(const Font *font);
+    void finalise(const Font *font);
   
 private:
     SlotRope m_slots;           // std::vector of slot buffers
@@ -166,7 +167,7 @@ private:
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
     CharInfo *m_charinfo;       // character info, one per input character
 
-    const GrFace *m_face;       // GrFace
+    const Face *m_face;       // GrFace
     const Silf *m_silf;
     Position m_advance;         // whole segment advance
     Rect m_bbox;                // ink box of the segment
@@ -174,8 +175,11 @@ private:
     FeatureList m_feats;	// feature settings referenced by charinfos in this segment
 
 private:		//defensive on m_charinfo
-    GrSegment(const GrSegment&);
-    GrSegment& operator=(const GrSegment&);
+    Segment(const Segment&);
+    Segment& operator=(const Segment&);
 };
 
-}}}} // namespace
+} // namespace graphite2
+
+struct gr_segment : public graphite2::Segment {};
+

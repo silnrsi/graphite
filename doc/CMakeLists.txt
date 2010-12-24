@@ -3,7 +3,7 @@ project(docs)
 find_program(A2X a2x)
 find_program(DBLATEX dblatex)
 find_program(DOXYGEN doxygen)
-find_program(LATEX xelatex)
+find_program(LATEX pdflatex)
 
 set(DOC_DEPENDS)
 if(A2X)

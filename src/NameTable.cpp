@@ -24,7 +24,8 @@
 #include "NameTable.h"
 #include "processUTF.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+
+using namespace graphite2;
 
 NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 encodingID)
     :
@@ -218,4 +219,3 @@ uint16 NameTable::getLanguageId(const char * bcp47Locale)
     return localeId;
 }
 
-}}}}

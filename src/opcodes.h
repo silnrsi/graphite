@@ -235,7 +235,7 @@ STARTOP(put_copy)
     if (slot_ref != 0)
     {
         uint16 *tempUserAttrs = is->userAttrs();
-        Slot *ref = slotat(slot_ref);
+        slotref ref = slotat(slot_ref);
         if (ref)
         {
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));

@@ -19,40 +19,24 @@
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include "graphite2/Font.h"
-#include "FeaturesImp.h"
+#include <cassert>
+#include "graphite2/Segment.h"
+#include "CharInfo.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-GRNG_EXPORT GrFeatureVal* featureval_clone(const GrFeatureVal* pfeatures/*may be NULL*/)
-{                      //When finished with the Features, call features_destroy    
-    if (pfeatures)
-    return pfeatures->clone();
-    else
-    return new Features;
-}
-
-#if 0
-//not public since there is no public way of making the mask
-GRNG_EXPORT bool features_masked_or(Features* pSrc, const Features* pOther, const Features* pMask)    //returns false iff any of the Features* are NULL
+extern "C"
 {
-    if (!pSrc)
-    return false;
-    if (!pOther)
-    return false;
-    if (!pMask)
-    return false;
-    
-    pSrc->maskedOr(*pOther, *pMask);
-    return true;
-}
-#endif 
-  
-GRNG_EXPORT void gr_featureval_destroy(GrFeatureVal *p)
+
+unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/)
 {
-    delete p;
+    assert(p);
+    return p->unicodeChar();
 }
 
 
+int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/)
+{
+    assert(p);
+    return p->breakWeight();
+}
 
-}}}} // namespace
+} // extern "C"

@@ -22,19 +22,14 @@
 #include "Main.h"
 #include "XmlTraceLogTags.h"
 
+
+using namespace graphite2;
+
 #ifndef DISABLE_TRACING
 
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-
-
-
-
-
-
-
 // start this at same line number as in XmlTraceLogTags.h
-const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
+const XmlTraceLogTag graphite2::xmlTraceLogElements[NumElements] = {
     XmlTraceLogTag("GraphitengLog", GRLOG_ALL),
     XmlTraceLogTag("Face", GRLOG_FACE | GRLOG_PASS),
     XmlTraceLogTag("Glyphs", GRLOG_FACE),
@@ -84,7 +79,7 @@ const XmlTraceLogTag xmlTraceLogElements[NumElements] = {
 
 
 // start this at same line number as in XmlTraceLogTags.h
-const char * xmlTraceLogAttributes[NumAttributes] = {
+const char * graphite2::xmlTraceLogAttributes[NumAttributes] = {
     "index",
     "version",
     "major",
@@ -166,5 +161,4 @@ const char * xmlTraceLogAttributes[NumAttributes] = {
     "misses"
 };
 
-}}}} // namespace
 #endif

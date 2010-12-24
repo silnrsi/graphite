@@ -21,16 +21,11 @@
 */
 #pragma once
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
-class DoNotInitialize
-{
-};
-  
 class Position
 {
 public:
-    Position(const DoNotInitialize&) {}
     Position() : x(0), y(0) { }
     Position(float inx, float iny) { x = inx; y = iny; }
     Position operator + (const Position& a) const { return Position(x + a.x, y + a.y); }
@@ -43,4 +38,4 @@ public:
     float y;
 };
 
-}}}} // namespace
+} // namespace graphite2

@@ -24,10 +24,10 @@
 #include "GlyphFace.h"
 #include "graphite2/Font.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
-struct GrSegment;
-struct GrFeatureVal;
+class Segment;
+class FeatureVal;
 
 
 class GlyphFaceCacheHeader
@@ -38,7 +38,7 @@ public:
     unsigned short numAttrs() const { return m_numAttrs; }
 
 private:
-friend struct GrFace;
+friend class Face;
 friend class GlyphFace;
     const void* m_pGloc;
     size_t m_lLoca;     const void* m_pLoca;
@@ -89,4 +89,4 @@ private:      //defensive
     GlyphFaceCache& operator=(const GlyphFaceCache&);
 };
 
-}}}} // namespace
+} // namespace graphite2

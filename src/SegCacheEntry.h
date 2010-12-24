@@ -23,10 +23,10 @@
 
 #include "Main.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+namespace graphite2 {
 
-struct GrSegment;
-struct GrSlot;
+class Segment;
+class Slot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 
@@ -64,7 +64,7 @@ public:
         m_glyphLength(0), m_unicode(NULL), m_glyph(NULL), m_attr(NULL),
         m_accessCount(0), m_lastAccess(0)
     {}
-    SegCacheEntry(const uint16 * cmapGlyphs, size_t length, GrSegment * seg, size_t charOffset, long long cacheTime);
+    SegCacheEntry(const uint16 * cmapGlyphs, size_t length, Segment * seg, size_t charOffset, long long cacheTime);
     ~SegCacheEntry() { clear(); };
     void clear();
     size_t glyphLength() const { return m_glyphLength; }
@@ -104,4 +104,4 @@ private:
     mutable unsigned long long m_lastAccess;
 };
 
-}}}} // end namespace
+} // namespace graphite2

@@ -25,7 +25,8 @@
 #include "TtfTypes.h"
 #include "TtfUtil.h"
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
+
+using namespace graphite2;
 
 CmapCache::CmapCache(const void* cmapTable, size_t length)
 {
@@ -98,5 +99,3 @@ CmapCache::~CmapCache()
     m_blocks = NULL;
 }
 
-
-}}}} // namespace

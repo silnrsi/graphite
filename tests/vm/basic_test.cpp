@@ -5,8 +5,8 @@
 #include "Code.h"
 #include "Rule.h"
 
+using namespace graphite2;
 using namespace vm;
-using namespace org::sil::graphite::v2;
 
 const byte simple_prog[] = 
 {
@@ -20,12 +20,10 @@ const byte simple_prog[] =
 //    POP_RET
 };
 
-namespace org { namespace sil { namespace graphite { namespace v2 {
-struct GrSegment 
+class graphite2::Segment 
 {
     byte x;
 };
-}}}} // namespace
 
 #define _msg(m) #m
 
@@ -84,7 +82,7 @@ int main(int argc, char *argv[])
               << prog.instructionCount() << " instructions" << std::endl;
     
     // run the program
-    GrSegment seg;
+    Segment seg;
     int is=0;
     uint32 ret;
     Machine::status_t status;
