@@ -209,7 +209,7 @@ public:
         // convert to utf16
         size_t utf16Length = length * 2 + 1;
         allocCharBuffers(utf16Length+1);
-        assert(sizeof(WCHAR) == sizeof(gr2::gr_uint16));
+        assert(sizeof(WCHAR) == sizeof(gr_uint16));
         graphite2::ToUtf16Processor processor(reinterpret_cast<gr_uint16*>(m_utf16Text), m_charBufferSize);
         graphite2::IgnoreErrors ignore;
         graphite2::BufferLimit bufferLimit(gr_utf8, reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length));
