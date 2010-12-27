@@ -37,7 +37,8 @@ Description:
 
 #include <cstddef>
 //#include <stdexcept>
-
+namespace graphite2
+{
 namespace TtfUtil
 {
 // Enumeration used to specify a table in a TTF file
@@ -161,4 +162,4 @@ typedef unsigned short gid16;
 	bool CalcAbsolutePoints(int * prgnX, int * prgnY, int cnPoints);
 
 } // end of namespace TtfUtil
-
+} // end of namespace graphite2

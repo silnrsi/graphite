@@ -80,19 +80,19 @@ namespace
 	}
 	
 #if !defined WORDS_BIGENDIAN || defined PC_OS
-	template<> inline TtfUtil::uint16 read(const TtfUtil::uint16 d) {
+    template<> inline graphite2::TtfUtil::uint16 read(const graphite2::TtfUtil::uint16 d) {
 		return rev16(d);
 	}
 	
-	template<> inline TtfUtil::int16 read(const TtfUtil::int16 d) {
+	template<> inline graphite2::TtfUtil::int16 read(const graphite2::TtfUtil::int16 d) {
 		return rev16(d);
 	}
 
-	template<> inline TtfUtil::uint32 read(const TtfUtil::uint32 d) {
+	template<> inline graphite2::TtfUtil::uint32 read(const graphite2::TtfUtil::uint32 d) {
 		return rev32(d);
 	}
 	
-	template<> inline TtfUtil::int32 read(const TtfUtil::int32 d) {
+	template<> inline graphite2::TtfUtil::int32 read(const graphite2::TtfUtil::int32 d) {
 		return rev32(d);
 	}
 #endif
@@ -103,7 +103,7 @@ namespace
 	}
 
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
-	const TtfUtil::fontTableId32 mapIdToTag[] = {
+	const graphite2::TtfUtil::fontTableId32 mapIdToTag[] = {
 		MAKE_TAG('c','m','a','p'),
 		MAKE_TAG('c','v','t',' '),
 		MAKE_TAG('c','r','y','p'),
@@ -199,7 +199,8 @@ are not supported. IsDeepComposite can be used to test for this. False is return
 of the methods in this cases. It is unclear how to build composite glyphs in some cases, 
 so this code represents my best guess until test cases can be found. See notes on the high-
 level GlyfPoints method. */
-
+namespace graphite2
+{
 namespace TtfUtil
 {
 
@@ -2043,3 +2044,4 @@ size_t NameTableLength(const byte * pTable)
 #endif
 
 } // end of namespace TtfUtil
+} // end of namespace graphite

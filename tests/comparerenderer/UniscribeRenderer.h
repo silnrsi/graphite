@@ -138,35 +138,37 @@ public:
         m_fontName = NULL;
         if (!(pFile = fopen(fontFile, "rb"))) return NULL;
         size_t lOffset, lSize;
-        if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return NULL;
+        if (!graphite2::TtfUtil::GetHeaderInfo(lOffset, lSize)) return NULL;
         char * pRawHeader = new char[lSize];
-        TtfUtil::Sfnt::OffsetSubTable * pHeader = reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable*>(pRawHeader);
+        graphite2::TtfUtil::Sfnt::OffsetSubTable * pHeader =
+            reinterpret_cast<graphite2::TtfUtil::Sfnt::OffsetSubTable*>(pRawHeader);
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
         if (fread(pRawHeader, 1, lSize, pFile) != lSize) return NULL;
-        if (!TtfUtil::CheckHeader(pHeader)) return NULL;
-        if (!TtfUtil::GetTableDirInfo(pHeader, lOffset, lSize)) return NULL;
+        if (!graphite2::TtfUtil::CheckHeader(pHeader)) return NULL;
+        if (!graphite2::TtfUtil::GetTableDirInfo(pHeader, lOffset, lSize)) return NULL;
         char * pRawTableDir = new char[lSize];
-        TtfUtil::Sfnt::OffsetSubTable::Entry* pTableDir =
-            reinterpret_cast<TtfUtil::Sfnt::OffsetSubTable::Entry*>(pRawTableDir);
+        graphite2::TtfUtil::Sfnt::OffsetSubTable::Entry* pTableDir =
+            reinterpret_cast<graphite2::TtfUtil::Sfnt::OffsetSubTable::Entry*>(pRawTableDir);
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
         if (fread(pRawTableDir, 1, lSize, pFile) != lSize) return NULL;
-        if (!TtfUtil::GetTableInfo(0x6e616d65, pHeader, pTableDir, lOffset, lSize)) return NULL;
+        if (!graphite2::TtfUtil::GetTableInfo(0x6e616d65, pHeader, pTableDir, lOffset, lSize)) return NULL;
         char * pRawNameTable = new char[lSize];
         if (fseek(pFile, lOffset, SEEK_SET)) return NULL;
         if (fread(pRawNameTable, 1, lSize, pFile) != lSize) return NULL;
-        TtfUtil::Sfnt::FontNames * pNames = reinterpret_cast<TtfUtil::Sfnt::FontNames *>(pRawNameTable);
-        TtfUtil::uint16 nameCount = (pNames->count >> 8) + ((pNames->count & 0xFF) << 8);
-        if ((nameCount - 1) * sizeof(TtfUtil::Sfnt::NameRecord) + 
-            sizeof(TtfUtil::Sfnt::FontNames) > lSize) return NULL;
+        graphite2::TtfUtil::Sfnt::FontNames * pNames = 
+            reinterpret_cast<graphite2::TtfUtil::Sfnt::FontNames *>(pRawNameTable);
+        graphite2::TtfUtil::uint16 nameCount = (pNames->count >> 8) + ((pNames->count & 0xFF) << 8);
+        if ((nameCount - 1) * sizeof(graphite2::TtfUtil::Sfnt::NameRecord) + 
+            sizeof(graphite2::TtfUtil::Sfnt::FontNames) > lSize) return NULL;
         size_t nameOffset = 0;
         size_t nameSize = 0;
-        if (TtfUtil::GetNameInfo(pNames, 3, 1, 0x409, 4, nameOffset, nameSize))
+        if (graphite2::TtfUtil::GetNameInfo(pNames, 3, 1, 0x409, 4, nameOffset, nameSize))
         {
             assert(nameSize % 2 == 0);
             size_t utf16Len = nameSize/2;
             m_fontName = new WCHAR[utf16Len+1];
             memcpy(m_fontName, pRawNameTable + nameOffset, nameSize);
-            TtfUtil::SwapWString(m_fontName, utf16Len);
+            graphite2::TtfUtil::SwapWString(m_fontName, utf16Len);
             m_fontName[utf16Len] = 0;
         }
 

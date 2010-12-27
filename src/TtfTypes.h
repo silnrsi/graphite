@@ -38,7 +38,8 @@ Provides types required to represent the TTF basic types.
 //**********************************************************************************************
 //	Include files
 //**********************************************************************************************
-
+namespace graphite2
+{
 namespace TtfUtil
 {
 //**********************************************************************************************
@@ -414,3 +415,4 @@ namespace Sfnt
 } // end of namespace Sfnt
 
 } // end of namespace TtfUtil
+} // end of namespace graphite2

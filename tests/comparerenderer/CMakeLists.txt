@@ -6,14 +6,15 @@ find_path(ICU_INCLUDE NAMES unicode/utypes.h
 find_path(ICU_LAYOUT_INCLUDE NAMES layout/LETypes.h
 	PATHS /usr/local/include /usr/include ${PROJECT_SOURCE_DIR}/../../../icu/source
 	DOC "Include directory for the ICU layout engine")
-find_path(ICU_LIBRARY_PATH NAMES ${CMAKE_SHARED_LIBRARY_PREFIX}icuuc${CMAKE_SHARED_LIBRARY_SUFFIX} cygicuuc cygicuuc32
+find_path(ICU_LIBRARY_PATH NAMES icuuc${CMAKE_LINK_LIBRARY_SUFFIX} 
+	${CMAKE_SHARED_LIBRARY_PREFIX}icuuc${CMAKE_SHARED_LIBRARY_SUFFIX} cygicuuc cygicuuc32
 	PATHS /usr/local/lib /usr/lib ${PROJECT_SOURCE_DIR}/../../../icu/source/lib
 	DOC "Libraries to link against for the common parts of ICU")
 
 set(ICULE)
 if (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
 	set(ICU_FOUND 0)
-	set(ICU_INCLUDE_DIRS)
+	set(ICU_INCLUDE_DIRS) 
 	set(ICU_LDFLAGS)
 	set(ICU_LIBRARY_PATH)
 else (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
@@ -52,6 +53,18 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	find_path(GR_INCLUDE graphite/GrClient.h PATHS ENV SILGRAPHITE_HOME ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.3.1 ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.4.0 ${GRAPHITE_INSTALLED_PATH} ${PROJECT_SOURCE_DIR}/../../../graphite-trunk PATH_SUFFIXES engine/include include)
+    find_library(GR_DEBUG_LIBRARY graphite PATHS ENV SILGRAPHITE_HOME ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.3.1 ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.4.0 ${GR_GRAPHITE_DEBUG} ${PROJECT_SOURCE_DIR}/../../../graphite-trunk PATH_SUFFIXES engine/debug vs9/engine/src/Debug build/engine/src/Debug)
+    find_library(GR_RELEASE_LIBRARY graphite PATHS ENV SILGRAPHITE_HOME ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.3.1 ${PROJECT_SOURCE_DIR}/../../../silgraphite-2.4.0 ${GR_GRAPHITE_RELEASE} ${PROJECT_SOURCE_DIR}/../../../graphite-trunk PATH_SUFFIXES engine/release vs9/engine/src/Release build/engine/src/Release)
+    if (NOT GR_INCLUDE STREQUAL GR_INCLUDE-NOTFOUND)
+		set(GR_FOUND 1)
+		add_definitions(-DHAVE_GRAPHITE)
+		set(GR_INCLUDE_DIRS ${GR_INCLUDE})
+        set(GR_EXTRA_SOURCE GrUtfTextSrc.cpp)
+    endif (NOT GR_INCLUDE STREQUAL GR_INCLUDE-NOTFOUND)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS})
 
 file(GLOB PRIVATE_HEADERS *.h) 
@@ -78,6 +91,18 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_target(cr_copy_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(cr_copy_dll graphite2 iconv comparerenderer)
+    if (${GR_FOUND})
+        target_link_libraries(comparerenderer debug ${GR_DEBUG_LIBRARY})
+        target_link_libraries(comparerenderer optimized ${GR_RELEASE_LIBRARY})
+    endif (${GR_FOUND})
+    if (NOT ${ICU_LIBRARY_PATH} STREQUAL "ICU_LIBRARY_PATH-NOTFOUND")
+        file(GLOB ICU_DLLS ${ICU_LIBRARY_PATH}/*.dll)
+        foreach(ICU_DLL ${ICU_DLLS})
+	        add_custom_command(TARGET cr_copy_dll POST_BUILD
+		        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ICU_DLL} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})        
+	    endforeach(ICU_DLL ${ICU_DLLS})
+    endif (NOT ${ICU_LIBRARY_PATH} STREQUAL "ICU_LIBRARY_PATH-NOTFOUND")
+
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 macro(comparetest TESTNAME FONTFILE TEXTFILE)

@@ -32,7 +32,7 @@ class GrRenderer : public Renderer
 {
 public:
     GrRenderer(const char * fontFile, int fontSize, int direction)
-        : m_fileFont(fontFile, fontSize, 72, 72)
+        : m_fileFont(fontFile, static_cast<float>(fontSize), 72, 72)
         
     {  
         m_layout.setStartOfLine(false);
