@@ -767,6 +767,7 @@ int Parameters::testFileFont() const
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         int i = 0;
+        int numSlots = gr_seg_n_slots(pSeg);
 //        size_t *map = new size_t [seg.length() + 1];
         size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
         for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
@@ -777,6 +778,8 @@ int Parameters::testFileFont() const
         i = 0;
         for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
         {
+            // consistency check for last slot
+            assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
             float orgX = gr_slot_origin_X(slot);
             float orgY = gr_slot_origin_Y(slot);
             fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
@@ -814,6 +817,7 @@ int Parameters::testFileFont() const
 #endif
             fprintf(log, "\n");
         }
+        assert(i == numSlots);
         // assign last point to specify advance of the whole array
         // position arrays must be one bigger than what countGlyphs() returned
         float advanceWidth = gr_seg_advance_X(pSeg);

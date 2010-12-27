@@ -159,7 +159,7 @@ const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
 const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return static_cast<const gr_slot*>(pSeg->first());
+    return static_cast<const gr_slot*>(pSeg->last());
 }
 
 void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends)
