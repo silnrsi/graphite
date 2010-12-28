@@ -406,10 +406,6 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
             fsm.rules.accumulate_rules(*state);
 
 #ifdef ENABLE_DEEP_TRACING
-        if (!state->is_transition())
-        {
-            XmlTraceLog::get().error("Invalid state %d", state-m_states);
-        }
         if (col >= m_sColumns && col != 65535)
         {
             XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",

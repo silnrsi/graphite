@@ -138,7 +138,7 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
-    mask = GRLOG_ALL;
+    mask = GRLOG_SEGMENT | GRLOG_OPCODE;
 }
 
 
