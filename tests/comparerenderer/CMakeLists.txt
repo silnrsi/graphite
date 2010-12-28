@@ -118,6 +118,8 @@ endmacro(comparetest)
 comparetest(charis charis_r_gr.ttf udhr_eng.txt)
 comparetest(padauk Padauk.ttf my_HeadwordSyllables.txt)
 comparetest(charis_yor charis_r_gr.ttf udhr_yor.txt)
+# comparerenderer needs a bidi algorithm before it can run this test
+# comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
 
 # comparerenderer can also be used for font testing
 install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
