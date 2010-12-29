@@ -50,13 +50,13 @@ struct NameTestB
 
 NameTestA testA = {
     {0, 6, (5 * sizeof(TtfUtil::Sfnt::NameRecord)) +
-        sizeof(TtfUtil::Sfnt::FontNames), {0, 0, 0, 1, 1, 0}},
+        sizeof(TtfUtil::Sfnt::FontNames), {{0, 0, 0, 1, 1, 0}}},
     {
         {3, 1, 0x409, 1, 4, 1},
         {3, 1, 0x409, 7, 6, 5},
         {3, 1, 0x455, 7, 4, 11},
         {3, 1, 0x809, 1, 4, 15},
-        {3, 1, 0x809, 7, 8, 19},
+        {3, 1, 0x809, 7, 8, 19}
     },
     {0x41,
      0,0x41,0,0x61,
@@ -70,7 +70,7 @@ NameTestB testB = {
     {1, 8, (7 * sizeof(TtfUtil::Sfnt::NameRecord)) +
         sizeof(TtfUtil::Sfnt::FontNames) +
         2 + 2 * sizeof(TtfUtil::Sfnt::LangTagRecord),
-        {0, 0, 0, 1, 1, 0}},
+        {{0, 0, 0, 1, 1, 0}}},
     {
         {3, 1, 0x409, 1, 4, 1},
         {3, 1, 0x409, 7, 6, 5},

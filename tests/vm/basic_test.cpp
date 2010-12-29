@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     
     // run the program
     Segment seg;
-    uint32 ret;
+    uint32 ret = 0;
     Machine::status_t status;
     SlotMap smap(seg);
     Machine m(smap);
