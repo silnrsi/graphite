@@ -234,7 +234,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
     return true;
 }
 
-size_t Silf::readClassMap(void *pClass, size_t lClass, int numGlyphs)
+size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGlyphs)
 {
     const byte *p = reinterpret_cast<const byte *>(pClass);
     m_nClass = read16(p);

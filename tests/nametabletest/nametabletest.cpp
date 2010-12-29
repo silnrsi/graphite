@@ -167,7 +167,7 @@ template <class T> T * toBigEndian1(T & table)
     }
 }
 
-int main(int argc, char ** argv)
+int main(int, char **)
 {
     struct NameTestA* testAData = toBigEndian<struct NameTestA>(testA);
     testName(testAData, sizeof(NameTestA), 0x409, 0x409, 1, "Aa");

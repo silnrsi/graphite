@@ -128,7 +128,8 @@ bool testSeg(CachedFace
     gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);
     assert(segA);
-    if (!checkEntries(face, testString, *testGlyphString, *testLength))
+    if ((gr_seg_n_slots(segA) == 0) ||
+        !checkEntries(face, testString, *testGlyphString, *testLength))
         return false;
    return true;
 }

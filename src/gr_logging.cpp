@@ -28,7 +28,7 @@ using namespace graphite2;
 extern "C" {
 
 
-bool graphite_start_logging(GR_UNUSED FILE * logFile, GR_UNUSED GrLogMask mask)
+bool graphite_start_logging(GR_MAYBE_UNUSED FILE * logFile, GR_MAYBE_UNUSED GrLogMask mask)
 {
 #ifdef DISABLE_TRACING
     return false;

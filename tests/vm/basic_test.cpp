@@ -45,7 +45,7 @@ const char * run_error_msg[] = {
     _msg(slot_offset_out_bounds)
 };
 
-std::vector<byte> fuzzer(int);
+//std::vector<byte> fuzzer(int);
 
 int main(int argc, char *argv[])
 {
@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
     
     // run the program
     Segment seg;
-    int is=0;
     uint32 ret;
     Machine::status_t status;
     SlotMap smap(seg);
@@ -107,6 +106,10 @@ int main(int argc, char *argv[])
                 repeats -= n-1;
                 n=1;
                 break;
+            default:
+            {
+                // noop
+            }
         }
     }
     
@@ -140,7 +143,7 @@ std::vector<byte> random_sequence(size_t n)
     return seq;
 }
 
-
+/*
 std::vector<byte> fuzzer(int n)
 {
     std::vector<byte>   code(256);
@@ -152,3 +155,4 @@ std::vector<byte> fuzzer(int n)
     
     return code;   
 }
+*/

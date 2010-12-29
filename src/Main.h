@@ -82,7 +82,7 @@ template <typename T> T * grzeroalloc(size_t n)
     void operator delete (void * p) throw() {if (p) free(p);}
 
 #ifdef __GNUC__
-#define GR_UNUSED __attribute__((unused))
+#define GR_MAYBE_UNUSED __attribute__((unused))
 #else
-#define GR_UNUSED
+#define GR_MAYBE_UNUSED
 #endif

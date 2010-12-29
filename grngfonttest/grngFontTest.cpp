@@ -767,7 +767,9 @@ int Parameters::testFileFont() const
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
         }
         int i = 0;
+#ifndef NDEBUG
         int numSlots = gr_seg_n_slots(pSeg);
+#endif
 //        size_t *map = new size_t [seg.length() + 1];
         size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
         for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)

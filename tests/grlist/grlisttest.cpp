@@ -29,8 +29,8 @@ void printList(gr2::List<int> & v)
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    std::vector<int> stdVector(10);
-    gr2::List<int> grList(10);
+    std::vector<int> stdVector(10, 0);
+    gr2::List<int> grList(10, 0);
 
     assert(stdVector.size() == grList.size());
 
