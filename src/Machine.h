@@ -31,7 +31,11 @@
 
 #if defined(__GNUC__)
 #define     HOT             __attribute__((hot))
+#if defined(__x86_64)
 #define     REGPARM(n)      __attribute__((hot, regparm(n)))
+#else
+#define     REGPARM(n)
+#endif
 #else
 #define     HOT
 #define     REGPARM(n)
