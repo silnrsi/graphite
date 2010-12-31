@@ -277,8 +277,19 @@ GR2_API float gr_slot_origin_X(const gr_slot* p);
 /** Returns Y offset of glyph from start of segment **/
 GR2_API float gr_slot_origin_Y(const gr_slot* p);
 
-/** Returns the glyph advance for this glyph as adjusted for kerning **/
-GR2_API float gr_slot_advance(const gr_slot* p);
+/** Returns the glyph advance for this glyph as adjusted for kerning
+  *
+  * @param p    Slot to give results for
+  * @param face gr_face of the glyphs. May be NULL if unhinted advances used
+  * @param font gr_font to scale for pixel results. If NULL returns design units advance. If not NULL then returns pixel advance based on hinted or scaled glyph advances in the font. face must be passed for hinted advances to be used.
+  */
+GR2_API float gr_slot_advance_X(const gr_slot* p, const gr_face* face, const gr_font *font);
+
+/** Returns the vertical advance for the glyph in the slot adjusted for kerning
+  *
+  * Returns design units unless font is not NULL in which case the pixel value is returned scaled for the given font
+  */
+GR2_API float gr_slot_advance_Y(const gr_slot* p, const gr_face* face, const gr_font *font);
 
 /** Returns the gr_char_info index before us
   *
@@ -306,7 +317,7 @@ GR2_API int gr_slot_can_insert_before(const gr_slot* p);
 
 /** Returns the original gr_char_info index this slot refers to.
   *
-  * Each Slot has a gr_char_info that it originates from. This is that gr_char_info. This
+  * Each Slot has a gr_char_info that it originates from. This is that gr_char_info. The index is passed to gr_seg_cinfo(). This
   * information is useful for testing.
   */
 GR2_API int gr_slot_original(const gr_slot* p/*not NULL*/);

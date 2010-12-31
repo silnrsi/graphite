@@ -93,9 +93,6 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
         else
             tAdvance *= scale;
     }    
-//    float scale = font ? font->scale() : 1.0;
-//    Position shift = m_shift * scale;
-//    float tAdvance = font ? (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid) : m_advance.x;
     Position res;
 
     m_position = *base + shift;
@@ -153,9 +150,6 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
             if (m_child) m_child->floodShift(adj);
         }
     }
-    // scale the advances in case the app queries them
-    m_advance.x = tAdvance;
-    m_advance.y *= scale;
     return res;
 }
 

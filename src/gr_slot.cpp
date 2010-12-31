@@ -22,6 +22,7 @@
 #include "graphite2/Segment.h"
 #include "Segment.h"
 #include "Slot.h"
+#include "Font.h"
 
 
 extern "C" {
@@ -81,12 +82,32 @@ float gr_slot_origin_Y(const gr_slot* p/*not NULL*/)
 }
 
 
-float gr_slot_advance(const gr_slot* p/*not NULL*/)
+float gr_slot_advance_X(const gr_slot* p/*not NULL*/, const gr_face *face, const gr_font *font)
 {
     assert(p);
-    return p->advance();
+    float scale = 1.0;
+    float res = p->advance();
+    if (font)
+    {
+        scale = font->scale();
+        if (face && font->isHinted())
+            res = (res - face->advance(p->gid())) * scale + font->advance(p->gid());
+        else
+            res = res * scale;
+    }
+    return res;
 }
 
+float gr_slot_advance_Y(const gr_slot *p/*not NULL*/, const gr_face *face, const gr_font *font)
+{
+    assert(p);
+    float res = p->advancePos().y;
+    if (font && (face || !face))
+        return res * font->scale();
+    else
+        return res;
+}
+        
 int gr_slot_before(const gr_slot* p/*not NULL*/)
 {
     assert(p);
