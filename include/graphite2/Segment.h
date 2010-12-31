@@ -256,8 +256,9 @@ GR2_API const gr_slot* gr_slot_first_attachment(const gr_slot* p);
 /** Returns the next slot attached to our attachment parent.
   *
   * This returns the next slot in the singly linked list of slots attached to this
-  * slot's parent. If there are no more such slots, NULL is returned. If there is no parent, i.e.
-  * the passed slot is a base, then the next base in segment order is returned.
+  * slot's parent. If there are no more such slots, NULL is returned. If there is
+  * no parent, i.e. the passed slot is a base, then the next base in graphical order
+  * (ltr even for rtl text) is returned.
   *
   * if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
   */

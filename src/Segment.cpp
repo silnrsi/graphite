@@ -301,7 +301,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
                 clusterMin = currpos.x;
                 currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0, &clusterMin);
                 if (ls)
-                    s->sibling(ls);
+                    ls->sibling(s);
                 ls = s;
             }
         }
