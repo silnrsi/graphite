@@ -101,7 +101,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
     m_position = *base + shift;
     if (!m_parent)
     {
-        res = *base + Position(tAdvance, m_advance.y);
+        res = *base + Position(tAdvance, m_advance.y * scale);
         *cMin = 0.;
         *clusterMin = base->x;
     }
@@ -153,6 +153,9 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
             if (m_child) m_child->floodShift(adj);
         }
     }
+    // scale the advances in case the app queries them
+    m_advance.x = tAdvance;
+    m_advance.y *= scale;
     return res;
 }
 
