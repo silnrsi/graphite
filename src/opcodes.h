@@ -385,16 +385,16 @@ ENDOP
 STARTOP(attr_set_slot)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
-    const          int  val  = int(pop());
-    is->setAttr(&seg, slat, 0, val + (map - smap.begin()), smap);
+    const          int  val  = int(pop())  + (map - smap.begin())*int(slat == gr_slatAttTo);
+    is->setAttr(&seg, slat, 0, val, smap);
 ENDOP
 
 STARTOP(iattr_set_slot)
     declare_params(2);
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
-    const          int  val  = int(pop());
-    is->setAttr(&seg, slat, idx, val + (map - smap.begin()), smap);
+    const          int  val  = int(pop())  + (map - smap.begin())*int(slat == gr_slatAttTo);
+    is->setAttr(&seg, slat, idx, val, smap);
 ENDOP
 
 STARTOP(push_slot_attr)

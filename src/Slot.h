@@ -71,10 +71,10 @@ public:
     void markCopied(bool state) { if (state) m_flags |= SLOT_COPIED; else m_flags &= ~SLOT_COPIED; }
     bool isPositioned() const { return (m_flags & SLOT_POSITIONED) ? true : false; }
     void markPositioned(bool state) { if (state) m_flags |= SLOT_POSITIONED; else m_flags &= ~SLOT_POSITIONED; }
-    bool isInsertBefore() const { return (m_flags & SLOT_INSERT) ? true : false; }
+    bool isInsertBefore() const { return !(m_flags & SLOT_INSERT); }
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
-    void markInsertBefore(bool state) { if (state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
+    void markInsertBefore(bool state) { if (!state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
     void setAttr(Segment* seg, attrCode index, uint8 subindex, int16 val, const SlotMap & map);
     int getAttr(const Segment *seg, attrCode index, uint8 subindex) const;
     void attachTo(Slot *ap) { m_parent = ap; }

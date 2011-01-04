@@ -1,8 +1,8 @@
 Text codes
 1004	103a	1039	1005	
 pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
-00   119  -1@0,0	   0.0	   0.0	 0 -50	  3   3	   1005	   1005
-01   111   0@288,495	   4.5	   0.0	 1 -50	  0   2	   1004	   1039
+00   119  -1@0,0	   0.0	   0.0	 1 -50	  3   3	   1005	   1005
+01   111   0@288,495	   4.5	   0.0	 0 -50	  0   2	   1004	   1039
 Advance width =    6.8
 
 Char	Unicode	Before	After
