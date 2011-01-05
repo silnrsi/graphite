@@ -63,6 +63,7 @@ bool Face::readGlyphs(unsigned int faceOptions)
         m_pGlyphFaceCache->loadAllGlyphs();
     }
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
+    if (!m_upem) return false;
     // m_glyphidx = new unsigned short[m_numGlyphs];        // only need this if doing occasional glyph reads
     
     return true;

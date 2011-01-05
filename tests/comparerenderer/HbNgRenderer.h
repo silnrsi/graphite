@@ -99,14 +99,15 @@ public:
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);
         RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs);
-        int dx = 0;
+        float dx = 0., dy = 0.;
         for (size_t i = 0; i < numGlyphs; i++)
         {
             // Note cluster numbers are not really same as before/after positions
             (*renderedLine)[i].set(infos[i].codepoint, (dx + positions[i].x_offset)/64.0f,
-                                   positions[i].y_offset/64.0f,
+                                   (dy + positions[i].y_offset)/64.0f,
                                    infos[i].cluster, infos[i].cluster);
             dx += positions[i].x_advance;
+            dy += positions[i].y_advance;
         }
         renderedLine->setAdvance(dx/64.0f);
     }
