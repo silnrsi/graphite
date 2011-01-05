@@ -58,7 +58,7 @@ else(DISABLE_TRACING)
 endif (DISABLE_TRACING)
 
 add_subdirectory(src)
-add_subdirectory(grngfonttest)
+add_subdirectory(gr2fonttest)
 add_subdirectory(tests)
 add_subdirectory(doc)
 set(version 0.0.0)

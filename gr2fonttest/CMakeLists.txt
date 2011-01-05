@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
-project(grngfonttest)
+project(gr2fonttest)
 
 enable_testing()
 
@@ -30,31 +30,28 @@ if (NOT DISABLE_TRACING)
 	endif (ENABLE_DEEP_TRACING)
 endif (NOT DISABLE_TRACING)
 
-add_executable(grngfonttest grngFontTest.cpp)
+add_executable(gr2fonttest gr2FontTest.cpp)
 
-target_link_libraries(grngfonttest graphite2)
-add_dependencies(grngfonttest graphite2)
+target_link_libraries(gr2fonttest graphite2)
+add_dependencies(gr2fonttest graphite2)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
-        target_link_libraries(grngfonttest iconv)
-        add_dependencies(grngfonttest iconv)
+        target_link_libraries(gr2fonttest iconv)
+        add_dependencies(gr2fonttest iconv)
     endif (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-
-# find_file(PADAUK_FONT Padauk.ttf PATHS /usr/share/fonts/truetype/ttf-sil-padauk $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
-# find_file(CHARIS_FONT CharisSILR.ttf PATHS /usr/share/fonts/truetype/ttf-sil-charis $ENV{HOME}/.fonts $ENV{SystemRoot}/Fonts)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # -lgcc LINKER_LANGUAGE C
     add_definitions(-fno-rtti -fno-exceptions)
-    set_target_properties(grngfonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" )
+    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" )
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
-    nolib_test(stdc++ $<TARGET_FILE:grngfonttest>)
+    nolib_test(stdc++ $<TARGET_FILE:gr2fonttest>)
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-# copy the DLL so that grngfonttest can find it
+# copy the DLL so that gr2fonttest can find it
 add_custom_target(copy_dll ALL 
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 
@@ -65,14 +62,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     endif (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-add_dependencies(copy_dll graphite2 iconv grngfonttest)
+add_dependencies(copy_dll graphite2 iconv gr2fonttest)
 
-# TODO need to set ENVIRONMENT property for Windows?
-# add_test(NAME grngfonttestPadauk1 COMMAND $<TARGET_FILE:grngfonttest> ${PADAUK_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.xml -codes 1000 1031 102C)
-# TODO Add expected results to compare with
-#add_test(NAME grngfonttestPadauk1Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/grngfonttestPadauk1.log ${PROJECT_SOURCE_DIR}/expected/grngfonttestPadauk1.log)
-#set_tests_properties(grngfonttestPadauk1Output PROPERTIES DEPENDS grngfonttestPadauk1)
+install(TARGETS gr2fonttest EXPORT gr2fonttest RUNTIME DESTINATION bin)
 
-# add_test(NAME grngfonttestCharis1 COMMAND $<TARGET_FILE:grngfonttest> ${CHARIS_FONT}  -log ${PROJECT_BINARY_DIR}/grngfonttestCharis1.log -trace ${PROJECT_BINARY_DIR}/grngfonttestCharis1.xml -codes 0069 02e6 02e8 02e5)
-
-# set_tests_properties(grngfonttestPadauk1 grngfonttestCharis1 PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})

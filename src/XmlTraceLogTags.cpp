@@ -30,7 +30,7 @@ using namespace graphite2;
 
 // start this at same line number as in XmlTraceLogTags.h
 const XmlTraceLogTag graphite2::xmlTraceLogElements[NumElements] = {
-    XmlTraceLogTag("GraphitengLog", GRLOG_ALL),
+    XmlTraceLogTag("Graphite2Log", GRLOG_ALL),
     XmlTraceLogTag("Face", GRLOG_FACE | GRLOG_PASS),
     XmlTraceLogTag("Glyphs", GRLOG_FACE),
     XmlTraceLogTag("GlyphFace", GRLOG_FACE),

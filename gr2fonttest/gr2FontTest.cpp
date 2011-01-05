@@ -37,11 +37,11 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #define swap32(x) (x)
 #endif
 
-class GrngTextSrc
+class Gr2TextSrc
 {
 
 public:
-    GrngTextSrc(const gr_uint32* base, size_t len) : m_buff(base), m_len(len) { }
+    Gr2TextSrc(const gr_uint32* base, size_t len) : m_buff(base), m_len(len) { }
     gr_encform utfEncodingForm() const { return gr_utf32; }
     size_t getLength() const { return m_len; }
     const void* get_utf_buffer_begin() const { return m_buff; }
@@ -460,72 +460,6 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     return (argError) ? false : true;
 }
 
-
-
-#if 0
-void listFeatures(gr::Font & font)
-{
-    std::pair< gr::FeatureIterator, gr::FeatureIterator > features = font.getFeatures();
-
-    gr::FeatureIterator i = features.first;
-    printf("%d Features\n", features.second - features.first);
-    while (i != features.second)
-    {
-        grutils::FeatId fId;
-        fId.num = *i;
-        fId.label[4] = '\0';// null terminate
-        bool isCharId = (fId.label[0] >= 0x20 && fId.label[0] < 0x80 &&
-            (fId.label[1] == 0 || fId.label[1] >= 0x20) && fId.label[1] < 0x80 &&
-            (fId.label[2] == 0 || fId.label[2] >= 0x20) && fId.label[2] < 0x80 &&
-            (fId.label[3] == 0 || fId.label[3] >= 0x20) && fId.label[3] < 0x80);
-        if (isCharId)
-        {
-            printf("%d\t%c%c%c%c\t",fId.num, fId.label[3], fId.label[2], fId.label[1], fId.label[0]);
-        }
-        else
-            printf("%d\t\t", fId.num);
-        utf16 featLabel[128];
-        lgid enUS=0x0409;
-        if (font.getFeatureLabel(i,enUS, featLabel))
-        {
-            utf8 * pFeatLabel = NULL;
-            int n = convertUtf("utf16","utf8", featLabel, pFeatLabel);
-            if (n)
-                printf("%s", pFeatLabel);
-        }
-
-        printf("\n");
-        std::pair< gr::FeatureSettingIterator, gr::FeatureSettingIterator > settings = 
-           font.getFeatureSettings(i);
-        gr::FeatureSettingIterator iS = settings.first;
-        while(iS != settings.second)
-        {
-            printf("\t%d\t", *iS);
-            if (font.getFeatureSettingLabel (iS, enUS, featLabel))
-            {
-                gr::utf8 * pSettingLabel = NULL;
-                int n = convertUtf("utf16","utf8", featLabel, pSettingLabel);
-                if (n)
-                    printf("%s", pSettingLabel);
-            }
-            printf("\n");
-            ++iS;
-        }
-        ++i;
-    }
-    std::pair<gr::LanguageIterator,gr::LanguageIterator> aSupported
-         = font.getSupportedLanguages();
-    printf("%d Language features:", aSupported.second - aSupported.first);
-    gr::LanguageIterator iL = aSupported.first;
-    while (iL != aSupported.second)
-    {
-        printf("\t%s", (*iL).rgch);
-        ++iL;
-    }
-    printf("\n");
-}
-#endif
-
 union FeatID
 {
     gr_uint8 uChar[4];
@@ -685,7 +619,6 @@ int Parameters::testFileFont() const
 //    try
     {
         // use the -trace option to specify a file
-        //FILE * logFile = fopen("graphitengTrace.xml", "wb");
 #ifndef DISABLE_TRACING
         graphite_start_logging(trace, static_cast<GrLogMask>(mask));
 #endif
@@ -751,7 +684,7 @@ int Parameters::testFileFont() const
                        pSegment->rightToLeft());
           }
 #endif
-       GrngTextSrc textSrc(pText32, charLength);
+       Gr2TextSrc textSrc(pText32, charLength);
        {
         gr_segment* pSeg = NULL;
         if (features)

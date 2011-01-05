@@ -27,10 +27,10 @@
 #include <graphite2/Segment.h>
 
 
-class GrNgRenderer : public Renderer
+class Gr2Renderer : public Renderer
 {
 public:
-    GrNgRenderer(const char * fontFile, int fontSize, int textDir, int cache)
+    Gr2Renderer(const char * fontFile, int fontSize, int textDir, int cache)
         : m_rtl(textDir),
         m_grFace((cache == 0)?
             gr_make_file_face(fontFile, gr_face_preloadGlyphs):
@@ -43,7 +43,7 @@ public:
             m_grFont = gr_make_font(static_cast<float>(fontSize), m_grFace);
         }
     }
-    virtual ~GrNgRenderer()
+    virtual ~Gr2Renderer()
     {
         gr_font_destroy(m_grFont);
         gr_face_destroy(m_grFace);
@@ -79,7 +79,7 @@ public:
                                    gr_slot_after(s));
         gr_seg_destroy(pSeg);
     }
-    virtual const char * name() const { return "graphiteng"; }
+    virtual const char * name() const { return "graphite2"; }
 private:
     int m_rtl;
     gr_face * m_grFace;

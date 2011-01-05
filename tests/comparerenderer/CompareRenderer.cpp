@@ -42,7 +42,7 @@
 #include "GrRenderer.h"
 #endif
 
-#include "GrNgRenderer.h"
+#include "Gr2Renderer.h"
 #include "graphite2/XmlLog.h"
 
 #ifdef HAVE_HARFBUZZNG
@@ -321,10 +321,10 @@ int main(int argc, char ** argv)
     if (rendererOptions[OptAlternativeFont].exists())
     {
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
-        if (rendererOptions[OptGraphiteNg].exists())
+        if (rendererOptions[OptGraphite2].exists())
         {
-            renderers[0] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
-            renderers[1] = (new GrNgRenderer(altFontFile, fontSize, direction, segCacheSize));
+            renderers[0] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize));
+            renderers[1] = (new Gr2Renderer(altFontFile, fontSize, direction, segCacheSize));
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
@@ -361,8 +361,8 @@ int main(int argc, char ** argv)
         if (rendererOptions[OptGraphite].exists())
             renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
 #endif
-        if (rendererOptions[OptGraphiteNg].exists())
-            renderers[1] = (new GrNgRenderer(fontFile, fontSize, direction, segCacheSize));
+        if (rendererOptions[OptGraphite2].exists())
+            renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize));
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
             renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
