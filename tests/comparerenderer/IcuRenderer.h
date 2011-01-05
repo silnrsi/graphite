@@ -110,7 +110,7 @@ public:
         {
             if (glyphs[i] == 65535)
                 continue;
-            (*renderedLine)[j++].set(glyphs[i], positions[2*i], positions[2*i + 1],
+            (*renderedLine)[j++].set(glyphs[i], positions[2*i], -positions[2*i + 1],
                                     indices[i], indices[i]);
         }
         renderedLine->resize(j);
