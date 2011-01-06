@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 project(grsegcachetest)
 
 include_directories(../../src)
+INCLUDE(CheckTypeSize)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
 add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T} -DGR2_EXPORTING)

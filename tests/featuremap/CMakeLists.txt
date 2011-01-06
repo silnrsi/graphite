@@ -2,6 +2,7 @@
 project(featuremaptest)
 
 include_directories(../../src)
+INCLUDE(CheckTypeSize)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
 add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T} -DGR2_EXPORTING)
