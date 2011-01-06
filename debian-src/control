@@ -2,19 +2,20 @@ Source: graphite2
 Priority: optional
 Section: libs
 Maintainer: Martin Hosken <martin_hosken@sil.org>
-Build-Depends: debhelper (>= 8.0), cmake, libfreetype6-dev, libgraphite-dev, libicu-dev, asciidoc, dblatex, libxml2-utils, doxygen, xml-core
-Standards-Version: 3.7.2
+Build-Depends: debhelper (>= 8.0), cmake, libfreetype6-dev, libgraphite-dev, libicu-dev, asciidoc, dblatex, libxml2-utils, doxygen, docbook-xsl
+Standards-Version: 3.9.1
 
 Package: libgraphite2
 Section: libs
 Architecture: any
+Depends: ${Misc:Depends}
 Description: Graphite smart font engine
  The latest Graphite smart font engine
 
 Package: libgraphite2-dev
 Section: libdevel
 Architecture: any
-Depends: libgraphite2 (= ${Source-Version})
+Depends: libgraphite2 (= ${source:Version}), ${Misc:Depends}
 Description: Development libraries for libgraphite2
  Development libraries for libgraphite2
 
@@ -22,12 +23,13 @@ Package: libgraphite2-dbg
 Priority: extra
 Section: libdevel
 Architecture: any
-Depends: libgraphite2 (= ${Source-Version})
+Depends: libgraphite2 (= ${source:Version}), ${Misc:Depends}
 Description: Debug symbols for libgraphite2
  Debug symbols for libgraphite2
 
 Package: libgraphite2-doc
 Section: doc
 Architecture: all
+Depends: ${Misc:Depends}
 Description: Documentation for libgraphite2
  PDF and HTML documentation for libgraphite2
