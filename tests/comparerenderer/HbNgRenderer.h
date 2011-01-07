@@ -94,7 +94,8 @@ public:
         hb_buffer_set_script(m_buffer, script);
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
-        hb_shape(m_font, m_face, m_buffer, NULL, 0);
+        hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
+        hb_shape(m_font, m_face, m_buffer, &feats, 1);
         hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer);
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);
