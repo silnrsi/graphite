@@ -66,8 +66,8 @@ typedef std::vector<uint16 *> AttributeRope;
 
 #else
 typedef List<Features> FeatureList;
-typedef List<Slot *> SlotRope;
-typedef List<uint16 *> AttributeRope;
+// typedef List<Slot *> SlotRope;
+// typedef List<uint16 *> AttributeRope;
 #endif
 
 class SegmentScopeState;
@@ -117,6 +117,7 @@ public:
     void freeSlot(Slot *);
     void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);
     void append(const Segment &other);
+    void appendBuff(void ***member, void **buff);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
@@ -156,7 +157,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     void finalise(const Font *font);
   
 private:
-    SlotRope m_slots;           // std::vector of slot buffers
+    void **m_slots;           // std::vector of slot buffers
     Slot *m_freeSlots;          // linked list of free slots
     Slot *m_first;              // first slot in segment
     Slot *m_last;               // last slot in segment
@@ -164,7 +165,7 @@ private:
     unsigned int m_numGlyphs;
     unsigned int m_numCharinfo; // size of the array and number of input characters
     int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
-    AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
+    void **m_userAttrs;  // std::vector of userAttrs buffers
     CharInfo *m_charinfo;       // character info, one per input character
 
     const Face *m_face;       // GrFace

@@ -95,27 +95,45 @@ void Segment::removeScope(SegmentScopeState & state)
 
 Segment::~Segment()
 {
-    SlotRope::iterator i = m_slots.begin();
-    AttributeRope::iterator j = m_userAttrs.begin();
-    
-    for (i = m_slots.begin(); i != m_slots.end(); ++i)
-        free(*i);
-    for (j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
-        free(*j);
+    while (m_slots)
+    {
+        void **n_slots = (void **)*m_slots;
+        free(m_slots);
+        m_slots = n_slots;
+    }
+
+    while (m_userAttrs)
+    {
+        void **n_userAttrs = (void **)*m_userAttrs;
+        free(m_userAttrs);
+        m_userAttrs = n_userAttrs;
+    }
     delete[] m_charinfo;
+}
+
+void Segment::appendBuff(void ***member, void **buff)
+{
+    if (!*member)
+    {
+        *member = buff;
+        return;
+    }
+    void **end = *member;
+    while (*end) end = (void **)*end;
+    *end = (void *)buff;
 }
 
 void Segment::append(const Segment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
 
-    m_slots.insert(m_slots.end(), other.m_slots.begin(), other.m_slots.end());
+    appendBuff(&m_slots, other.m_slots);
     CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
 	pNewCharInfo[i] = m_charinfo[i];
     m_last->next(other.m_first);
     other.m_last->prev(m_last);
-    m_userAttrs.insert(m_userAttrs.end(), other.m_userAttrs.begin(), other.m_userAttrs.end());
+    appendBuff(&m_userAttrs, other.m_userAttrs);
     
     delete[] m_charinfo;
     m_charinfo = pNewCharInfo;
@@ -161,8 +179,12 @@ Slot *Segment::newSlot()
     if (!m_freeSlots)
     {
         int numUser = m_silf->numUser();
-        Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
-        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+        void **newBuff = (void **)calloc(sizeof(void*) + sizeof(Slot) * m_bufSize, 1);
+        appendBuff(&m_slots, newBuff);
+        Slot *newSlots = (Slot *)(newBuff + 1);
+        void **newAttrsBuff = (void **)calloc(sizeof(void*) + sizeof(uint16) * numUser * m_bufSize, 1);
+        appendBuff(&m_userAttrs, newAttrsBuff);
+        uint16 *newAttrs = (uint16 *)(newAttrsBuff + 1);
         newSlots[0].userAttrs(newAttrs);
         for (size_t i = 1; i < m_bufSize - 1; i++)
         {
@@ -171,8 +193,6 @@ Slot *Segment::newSlot()
         }
         newSlots[m_bufSize - 1].userAttrs(newAttrs + (m_bufSize - 1) * numUser);
         newSlots[m_bufSize - 1].next(NULL);
-        m_slots.push_back(newSlots);
-        m_userAttrs.push_back(newAttrs);
         m_freeSlots = (m_bufSize > 1)? newSlots + 1 : NULL;
         return newSlots;
     }
