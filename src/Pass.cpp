@@ -170,8 +170,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
     // Load rules.
     const byte * ac_begin = 0, * rc_begin = 0,
-                                            * ac_end = ac_data + swap16(*o_action),
-                                                       * rc_end = rc_data + swap16(*o_constraint);
+               * ac_end = ac_data + swap16(*o_action),
+               * rc_end = rc_data + swap16(*o_constraint);
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
@@ -333,8 +333,8 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
     for (size_t n = num_ranges; n; --n)
     {
         const uint16 first = swap16(*ranges++),
-                             last  = swap16(*ranges++),
-                                     col   = swap16(*ranges++);
+                     last  = swap16(*ranges++),
+                     col   = swap16(*ranges++);
         uint16 *p;
 
         if (first > last || last >= m_numGlyphs || col >= m_sColumns)

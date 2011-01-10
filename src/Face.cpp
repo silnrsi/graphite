@@ -158,7 +158,7 @@ const Silf *Face::chooseSilf(uint32 script) const
 
 uint16 Face::getGlyphMetric(uint16 gid, uint8 metric) const
 {
-    switch ((enum metrics)metric)
+    switch (metrics(metric))
     {
         case kgmetAscent : return m_ascent;
         case kgmetDescent : return m_descent;
