@@ -178,7 +178,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     {
         r->preContext = *--precontext;
         r->sort       = swap16(*--sort_key);
-        if (r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt || r->sort > 63)
+        if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
         ac_begin      = ac_data + swap16(*--o_action);
         rc_begin      = *--o_constraint ? rc_data + swap16(*o_constraint) : rc_end;
@@ -479,7 +479,8 @@ bool Pass::testPassConstraint(Machine & m) const
 
 bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
-    if (!*r.constraint) return true;
+    if (r.sort > m.slotMap().size())    return false;
+    if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());
 
 #ifdef ENABLE_DEEP_TRACING

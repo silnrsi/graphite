@@ -216,11 +216,10 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
             uint32 name = read32(pLSet);
             uint16 val = read16(pLSet);
             pLSet += 2;
-	    const FeatureRef
-* pRef = m_FeatureMap.findFeatureRef(name);
-	    if (pRef)
-		pRef->applyValToFeature(val, feats);
- 	}
+            const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
+            if (pRef)
+                pRef->applyValToFeature(val, feats);
+        }
         //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         //m_langMap.insert(kvalue);
         m_langFeats[i].m_lang = langid;
