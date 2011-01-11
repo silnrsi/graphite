@@ -2,7 +2,7 @@
 
 from subprocess import call
 from optparse import OptionParser
-from random import uniform
+from random import uniform, seed
 import sys, os, resource
 
 def excluded(loc, *ranges) :
@@ -20,8 +20,11 @@ parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
 parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
 parser.add_option("-c","--count",type='int',help='Flag every count iterations')
+parser.add_option("-r","--random",help="Seed the random number generator with the given string")
 
 (opts, args) = parser.parse_args()
+
+if opts.random : seed(opts.random)
 
 fontlen = os.path.getsize(opts.font)
 if opts.logfile :
@@ -56,8 +59,6 @@ while (1) :
         print count / opts.count,
         sys.stdout.flush()
     subfile = open("templog.txt", "w")
-#    retval = call(["xetex", "-interaction=batchmode", "-no-pdf", "test.tex"], stdout = subfile, stderr = subfile)
-#    retval = call(["comparerenderer/comparerenderer", "-f", opts.font, "-t", "../../tests/texts/my_HeadwordSyllables.txt", "-s", "12", "-n"], stdout=subfile, stderr=subfile, preexec_fn=rlimit)
     retval = call(args, stdout=subfile, stderr=subfile, preexec_fn=rlimit)
     if retval < 0 :
         print >>log, "%d,0x%x,%d" % (retval, loc, val)
