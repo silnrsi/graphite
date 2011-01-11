@@ -119,7 +119,7 @@ bool Face::readGraphite()
 #endif
             return false;
         }
-        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, m_pGlyphFaceCache->m_nGlyphs, version))
+        if (!m_silfs[i].readGraphite((void *)((char *)pSilf + offset), next - offset, *this, version))
         {
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())

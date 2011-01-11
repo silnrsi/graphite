@@ -4,6 +4,8 @@
 #include <time.h>
 #include "Code.h"
 #include "Rule.h"
+#include "Silf.h"
+#include "Face.h"
 
 using namespace graphite2;
 using namespace vm;
@@ -18,11 +20,6 @@ const byte simple_prog[] =
         COND,
 //        COND,                                 // Uncomment to cause an underflow
 //    POP_RET
-};
-
-class graphite2::Segment 
-{
-    byte x;
 };
 
 #define _msg(m) #m
@@ -45,17 +42,26 @@ const char * run_error_msg[] = {
     _msg(slot_offset_out_bounds)
 };
 
+struct graphite2::Segment {};
+
 //std::vector<byte> fuzzer(int);
+
 
 int main(int argc, char *argv[])
 {
+    const char * font_path = argv[1];
     size_t repeats = 1,
            copies  = ((1 << 20)*4 + sizeof(simple_prog)-1) / sizeof(simple_prog);
     
-    if (argc > 1)
-        repeats = atoi(argv[1]);
+    if (argc < 2)
+    {
+        std::cerr << argv[0] << ": GRAPHITE-FONT [repeats] [copies]" << std::endl;
+        exit(1);
+    }
     if (argc > 2)
-        copies  = atoi(argv[2]);
+        repeats = atoi(argv[2]);
+    if (argc > 3)
+        copies  = atoi(argv[3]);
     
     std::cout << "simple program size:    " << sizeof(simple_prog)+1 << " bytes" << std::endl;
     // Replicate the code copies times.
@@ -68,7 +74,14 @@ int main(int argc, char *argv[])
     std::cout << "amplified program size: " << big_prog.size() << " bytes" << std::endl;
     
     // Load the code.
-    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size());
+    Silf silf;
+    gr_face *face = gr_make_file_face(font_path, gr_face_default);
+    if (!face)
+    {
+        std::cerr << argv[0] << ": failed to load graphite tables for font: " << font_path << std::endl;
+        exit(1);
+    }
+    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(), silf, *face);
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.
         std::cerr << "program failed to load due to: " 
@@ -112,6 +125,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+    
+    gr_face_destroy(face);
     
     std::cout << "result of program: " << ret << std::endl
               << "--------" << std::endl

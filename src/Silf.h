@@ -46,7 +46,7 @@ public:
     Silf() throw();
     ~Silf() throw();
     
-    bool readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version);
+    bool readGraphite(void *pSilf, size_t lSilf, const Face &face, uint32 version);
     void runGraphite(Segment *seg, uint8 firstPass=0, uint8 lastPass=0) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, int index) const;
@@ -59,6 +59,8 @@ public:
     uint8 justificationPass() const { return m_jPass; }
     uint8 bidiPass() const { return m_bPass; }
     uint8 numPasses() const { return m_numPasses; }
+    uint8 maxCompPerLig() const { return m_iMaxComp; }
+    uint16 numClasses() const { return m_nClass; }
 
     CLASS_NEW_DELETE
 

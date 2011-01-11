@@ -44,8 +44,8 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
         delete res;
         return 0;
     }
-    valid &= res->readGraphite();
     valid &= res->readFeatures();
+    valid &= res->readGraphite();
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().closeElement(ElementFace);
 #endif
@@ -70,8 +70,8 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
         delete res;
         return 0;
     }
-    valid &= res->readGraphite();
     valid &= res->readFeatures();
+    valid &= res->readGraphite();
     valid &= res->setupCache(cacheSize);
 
 #ifndef DISABLE_TRACING

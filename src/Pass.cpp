@@ -57,7 +57,7 @@ Pass::~Pass()
     free(m_rules);
 }
 
-bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
+bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const Face & face)
 {
     const byte *                p = reinterpret_cast<const byte *>(pass),
                                     * const pass_start = p,
@@ -144,12 +144,12 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
     // Load the pass constraint if there is one.
     if (pass_constraint_len)
     {
-        m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len);
+        m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len, *m_silf, face);
         if (!m_cPConstraint) return false;
     }
     if (!readRanges(ranges, numRanges)) return false;
     if (!readRules(rule_map, numEntries,  precontext, sort_keys,
-                   o_constraint, rcCode, o_actions, aCode)) return false;
+                   o_constraint, rcCode, o_actions, aCode, face)) return false;
     return readStates(start_states, states, o_rule_map);
 }
 
@@ -157,7 +157,8 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base)
 bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *rc_data,
-                     const uint16 * o_action,     const byte * ac_data)
+                     const uint16 * o_action,     const byte * ac_data,
+                     const Face & face)
 {
     const byte * const ac_data_end = ac_data + o_action[m_numRules];
     const byte * const rc_data_end = rc_data + o_constraint[m_numRules];
@@ -185,8 +186,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin >= ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin >= rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new vm::Code(false, ac_begin, ac_end);
-        r->constraint = new vm::Code(true,  rc_begin, rc_end);
+        r->action     = new vm::Code(false, ac_begin, ac_end, *m_silf, face);
+        r->constraint = new vm::Code(true,  rc_begin, rc_end, *m_silf, face);
 
         if (!r->action || !r->constraint
                 || r->action->status() != Code::loaded

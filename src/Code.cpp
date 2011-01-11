@@ -28,8 +28,11 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string.h>
+#include "graphite2/Segment.h"
 #include "Code.h"
 #include "Machine.h"
+#include "Silf.h"
+#include "Face.h"
 #include "Rule.h"
 #include "XmlTraceLog.h"
 
@@ -54,17 +57,49 @@ inline bool is_return(const opcode opc) {
 void emit_trace_message(opcode, const byte *const, const opcode_t &);
 void fixup_cntxt_item_target(const byte*, byte * &);
 
+struct context
+{
+    context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
+    struct { 
+        uint8   changed:1,
+                referenced:1,
+                inserted:1;
+    } flags;
+    uint8       codeRef;
+};
+
 } // end namespace
 
+
+
+struct Code::limits 
+{
+  const byte * const bytecode;
+  const uint16       classes,
+                     glyf_attrs,
+                     features;
+  const byte attrid[gr_slatMax];
+};
+
+
+
+struct Code::analysis_context
+{
+    int       slotref;
+    context   contexts[256];
+    
+    analysis_context();
+};
+    
 
 Code::analysis_context::analysis_context()
 : slotref(0)
 {
-//   contexts[0] = Context();
 }
 
 
-Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end)
+
+Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, const Silf & silf, const Face & face)
  :  _code(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0), _status(loaded),
     _constrained(constrained), _modify(false), _delete(false), _own(true)
 {
@@ -93,6 +128,20 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     instr * ip = _code;
     byte  * dp = _data;
     opcode  opc;
+    const limits lims = {
+        bytecode_end, 
+        silf.numClasses(),
+        face.getGlyphFaceCache()->numAttrs(),
+        face.numFeatures(), 
+        {1,1,1,1,1,1,1,1, 
+         1,1,1,1,1,1,1,-1, 
+         1,1,1,1,1,1,1,1, 
+         1,1,1,1,1,1,0,0, 
+         0,0,0,0,0,0,0,0, 
+         0,0,0,0,0,0,0,0, 
+         0,0,0,0,0,0,0, silf.numUser()}
+    };
+    
     analysis_context ac;
     do {
         opc = opcode(*cd_ptr++);
@@ -100,22 +149,12 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
         // Filter out the NOPs
         if (opc == NOP) continue;
           
-        // Do some basic sanity checks based on what we know about the opcodes.
-        if (!check_opcode(opc, cd_ptr, bytecode_end))
+        // Do some basic sanity checks based on what we know about the opcode
+        // and return it's implementation and space requirements.
+        opcode_t op;
+        size_t   param_sz;
+        if (!decode_opcode(opc, cd_ptr, lims, op, param_sz))
             return;
-
-        const opcode_t & op = op_to_fn[opc];
-        if (op.impl[constrained] == 0) {      // Is it implemented?
-            failure(unimplemented_opcode_used);
-            return;
-        }
-        
-        const size_t param_sz = op.param_sz == VARARGS ? *cd_ptr + 1 : op.param_sz;
-        if (cd_ptr + param_sz > bytecode_end) { // Is the requested size possible
-            failure(arguments_exhausted);
-            return;
-        }
-        
         // Analyise the opcode.
         analyse_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), ac);
         
@@ -157,7 +196,7 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
     if (!constrained)
     {
-      for (const Context * c = ac.contexts, * const ce = c + ac.slotref; c != ce; ++c)
+      for (const context * c = ac.contexts, * const ce = c + ac.slotref; c != ce; ++c)
       {
         if (!c->flags.referenced || !c->flags.changed) continue;
         
@@ -198,24 +237,143 @@ Code::~Code() throw ()
 
 // Validation check and fixups.
 //
-bool Code::check_opcode(const opcode opc, 
-                        const byte *cd_ptr, 
-                        const byte *const cd_end) 
+
+bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max, 
+                         opcode_t & op, size_t & param_sz) 
 {
-    if (opc >= MAX_OPCODE) {   // Is this even a valid opcode?
-        failure(invalid_opcode);
+    switch (opc)
+    {
+        case NOP :
+        case PUSH_BYTE :
+        case PUSH_BYTEU :
+        case PUSH_SHORT :
+        case PUSH_SHORTU :
+        case PUSH_LONG :
+        case ADD :
+        case SUB :
+        case MUL :
+        case DIV :
+        case MIN_ :
+        case MAX_ :
+        case NEG :
+        case TRUNC8 :
+        case TRUNC16 :
+        case COND :
+        case AND :
+        case OR :
+        case NOT :
+        case EQUAL :
+        case NOT_EQ :
+        case LESS :
+        case GTR :
+        case LESS_EQ :
+        case GTR_EQ :
+        case NEXT :
+        case NEXT_N :           // runtime checked
+        case COPY_NEXT :
+            break;
+        case PUT_GLYPH_8BIT_OBS :
+            valid_upto(max.classes, dp[0]);
+            break;
+        case PUT_SUBS_8BIT_OBS :
+            // slot: dp[0] runtime checked
+            valid_upto(max.classes, dp[1]);
+            valid_upto(max.classes, dp[2]);
+            break;
+        case PUT_COPY :         // slot: dp[0] runtime checked
+        case INSERT :
+        case DELETE :
+        case ASSOC :            // argn, [arg*]: dp[0].. checked later
+            break;
+        case CNTXT_ITEM :
+            // slot: dp[0] runtime checked
+            if (dp + 2 + dp[1] >= max.bytecode)  failure(jump_past_end);
+            break;
+        case ATTR_SET :
+        case ATTR_ADD :
+        case ATTR_SUB :
+        case ATTR_SET_SLOT :
+            valid_upto(gr_slatMax, dp[0]);
+            break;
+        case IATTR_SET_SLOT :
+            valid_upto(gr_slatMax, dp[0]);
+            valid_upto(max.attrid[dp[0]], dp[1]);
+            break;
+        case PUSH_SLOT_ATTR :
+            valid_upto(gr_slatMax, dp[0]);
+            // slot: dp[1] runtime checked
+            break;
+        case PUSH_GLYPH_ATTR_OBS :
+            valid_upto(max.glyf_attrs, dp[0]);
+            // slot: dp[1] runtime checked
+            break;
+        case PUSH_GLYPH_METRIC :
+            valid_upto(kgmetDescent, dp[0]);
+            // slot: dp[1] runtime checked
+            // level: dp[2] no check necessary
+            break;
+        case PUSH_FEAT :
+            valid_upto(max.features, dp[0]);
+            // slot: dp[1] runtime checked
+            break;
+        case PUSH_ATT_TO_GATTR_OBS :
+            valid_upto(max.glyf_attrs, dp[0]);
+            // slot: dp[1] runtime checked
+            break;
+        case PUSH_ATT_TO_GLYPH_METRIC :
+            valid_upto(kgmetDescent, dp[0]);
+            // slot: dp[1] runtime checked
+            // level: dp[2] no check necessary
+            break;
+        case PUSH_ISLOT_ATTR :
+            valid_upto(gr_slatMax, dp[0]);
+            // slot: dp[1] runtime checked
+            valid_upto(max.attrid[dp[0]], dp[2]);
+            break;
+        case PUSH_IGLYPH_ATTR :// not implemented
+        case POP_RET :
+        case RET_ZERO :
+        case RET_TRUE :
+            break;
+        case IATTR_SET :
+        case IATTR_ADD :
+        case IATTR_SUB :
+            valid_upto(gr_slatMax, dp[0]);
+            valid_upto(max.attrid[dp[0]], dp[1]);
+            break;
+        case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
+        case PUSH_VERSION :
+            break;
+        case PUT_SUBS :
+            // slot: dp[0] runtime checked
+            valid_upto(max.classes, uint16(dp[1]<< 8) | dp[2]);
+            valid_upto(max.classes, uint16(dp[3]<< 8) | dp[4]);
+            break;
+        case PUT_SUBS2 :        // not implemented
+        case PUT_SUBS3 :        // not implemented
+            break;
+        case PUT_GLYPH :
+            valid_upto(max.classes, uint16(dp[0]<< 8) | dp[1]);
+            break;
+        case PUSH_GLYPH_ATTR :
+        case PUSH_ATT_TO_GLYPH_ATTR :
+            valid_upto(max.glyf_attrs, uint16(dp[0]<< 8) | dp[1]);
+            // slot: dp[2] runtime checked
+            break;
+        default:
+            failure(invalid_opcode);
+    }
+
+    if (_status != loaded)
         return false;
-    }
     
-    if (opc == CNTXT_ITEM)  // This is a really conditional forward jump,
-    {                       // check it doesn't jump outside the program.
-        const size_t skip = cd_ptr[1];
-        if (cd_ptr + 2 + skip >= cd_end) {
-            failure(jump_past_end);
-            return false;
-        }
-    }
-    return true;
+    const opcode_t * op_to_fn = Machine::getOpcodeTable();
+    op       = op_to_fn[opc];
+    param_sz = op.param_sz == VARARGS ? dp[0] + 1 : op.param_sz;;
+    if (op.impl[_constrained] == 0)     failure(unimplemented_opcode_used);
+    if (dp + param_sz > max.bytecode)   failure(arguments_exhausted);
+
+    return _status == loaded;
 }
 
 namespace {
@@ -320,7 +478,7 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
     case COPY_NEXT :
       if (!ab.contexts[ab.slotref].flags.inserted)
         ++ab.slotref;
-      ab.contexts[ab.slotref] = Context(op_idx);
+      ab.contexts[ab.slotref] = context(op_idx);
       break;
       
     case INSERT :
@@ -336,7 +494,7 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
     {
       update_slot_limits(ab.slotref + dp[0]);
 
-      Context & ctxt = ab.contexts[ab.slotref];
+      context & ctxt = ab.contexts[ab.slotref];
       if (dp[0] != 0) { ctxt.flags.changed = true; _modify = true; }
       if (dp[0] <= 0 && -dp[0] <= ab.slotref)
         ab.contexts[ab.slotref + dp[0] - ctxt.flags.inserted].flags.referenced = true;
@@ -367,6 +525,13 @@ void Code::analyse_opcode(const opcode opc, size_t op_idx,
   }
 }
 
+
+inline 
+void Code::valid_upto(const uint16 limit, const uint16 x) throw()
+{
+    if (x >= limit)
+        failure(out_of_range_data);
+}
 
 inline
 void Code::update_slot_limits(int slotref) throw() {

@@ -31,7 +31,7 @@
 //      output_class - 0 .. silf.m_nClass
 //      input_class - 0 .. silf.m_nClass
 //      sattrnum - 0 .. 29 (gr_slatJWidth) , 55 (gr_slatUserDefn)
-//      attrid - 0 if (sattrnum != 55) else 0 .. silf.numUser()
+//      attrid - 0 .. silf.numUser() where sattrnum == 55; 0..silf.m_iMaxComp where sattrnum == 15 otherwise 0
 //      gattrnum - 0 .. face->getGlyphFaceCache->numAttrs()
 //      gmetric - 0 .. 11 (kgmetDescent)
 //      featidx - 0 .. face.numFeatures()
@@ -76,7 +76,7 @@ static const opcode_t opcode_table[] =
     {{do_(insert), NILOP},                          0,  0, "INSERT"},
     {{do_(delete_), NILOP},                         0,  0, "DELETE"},   // 0x20
     {{do_(assoc), NILOP},                     VARARGS,  0, "ASSOC"},
-    {{NILOP ,do_(cntxt_item)},                      2,  1, "CNTXT_ITEM"},
+    {{NILOP ,do_(cntxt_item)},                      2,  1, "CNTXT_ITEM"},               // slot offset
 
     {{do_(attr_set), NILOP},                        1, -1, "ATTR_SET"},                 // sattrnum
     {{do_(attr_add), NILOP},                        1, -1, "ATTR_ADD"},                 // sattrnum

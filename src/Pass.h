@@ -40,7 +40,7 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(void* pPass, size_t pass_length, size_t subtable_base);
+    bool readPass(void* pPass, size_t pass_length, size_t subtable_base, const Face & face);
     void runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
 
@@ -54,7 +54,8 @@ private:
     bool   readRules(const uint16 * rule_map, const size_t num_entries, 
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
-                     const uint16 * o_action, const byte * action_data);
+                     const uint16 * o_action, const byte * action_data,
+                     const Face &);
     void   logRule(const Rule * r, const uint16 * sort_key) const;
     bool   readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
     void   logStates() const;

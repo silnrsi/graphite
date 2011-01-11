@@ -55,7 +55,7 @@ void Silf::releaseBuffers() throw()
 }
 
 
-bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version)
+bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 version)
 {
     byte *p = (byte *)pSilf;
     byte *eSilf = p + lSilf;
@@ -197,7 +197,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), numGlyphs + m_numPseudo);
+    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), face.getGlyphFaceCache()->numGlyphs() + m_numPseudo);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -214,7 +214,7 @@ bool Silf::readGraphite(void *pSilf, size_t lSilf, int numGlyphs, uint32 version
             XmlTraceLog::get().addAttribute(AttrPassId, i);
         }
 #endif
-        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), swap32(pPasses[i])))
+        if (!m_passes[i].readPass((char *)pSilf + swap32(pPasses[i]), swap32(pPasses[i + 1]) - swap32(pPasses[i]), swap32(pPasses[i]), face))
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);

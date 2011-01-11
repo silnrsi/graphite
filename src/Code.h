@@ -32,6 +32,10 @@
 #include "Machine.h"
 
 namespace graphite2 {
+
+class Silf;
+class Face;
+
 namespace vm {
 
 class Code 
@@ -43,31 +47,16 @@ public:
         alloc_failed, 
         invalid_opcode, 
         unimplemented_opcode_used,
+        out_of_range_data,
         jump_past_end,
         arguments_exhausted,
         missing_return
     };
 
 private:
-    struct Context
-    {
-        Context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
-        struct { 
-          uint8 changed:1,
-                referenced:1,
-                inserted:1;
-        } flags;
-        uint8       codeRef;
-    };
+    struct limits;
+    struct analysis_context;
 
-    struct analysis_context
-    {
-      int       slotref;
-      Context   contexts[256];
-      
-      analysis_context();
-    };
-    
     instr *     _code;
     byte  *     _data;
     size_t      _data_size,
@@ -82,12 +71,13 @@ private:
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
-    bool check_opcode(const opcode, const byte *, const byte *const);
+    bool decode_opcode(const opcode opc, const byte * dp, const limits & max, opcode_t & op, size_t & param_sz);
     void analyse_opcode(const opcode, size_t cp, const int8  * dp, analysis_context &) throw();
+    void valid_upto(const uint16 limit, const uint16 x) throw();
     void update_slot_limits(int slotref) throw ();
 public:
     Code() throw();
-    Code(bool constrained, const byte* bytecode_begin, const byte* const bytecode_end);
+    Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, const Silf &, const Face &);
     Code(const Code &) throw();
     ~Code() throw();
     

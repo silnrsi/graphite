@@ -15,6 +15,8 @@ endif(DISABLE_TRACING)
 # models rather than linking against the library from source.
 add_library(vm-test-common  STATIC
                 basic_test.cpp
+                ${SRC}/gr_face.cpp
+                ${SRC}/CachedFace.cpp
                 ${SRC}/Code.cpp
                 ${SRC}/CmapCache.cpp
                 ${SRC}/Face.cpp
@@ -24,6 +26,9 @@ add_library(vm-test-common  STATIC
                 ${SRC}/NameTable.cpp
                 ${SRC}/Pass.cpp
                 ${SRC}/Segment.cpp
+                ${SRC}/SegCache.cpp
+                ${SRC}/SegCacheEntry.cpp
+                ${SRC}/SegCacheStore.cpp
                 ${SRC}/Silf.cpp
                 ${SRC}/Slot.cpp
                 ${SRC}/TtfUtil.cpp
@@ -55,13 +60,13 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-add_test(vm-test-call-threading vm-test-call 1)
+add_test(vm-test-call-threading vm-test-call ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf 1)
 set_tests_properties(vm-test-call-threading PROPERTIES
         PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
         FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_test(vm-test-direct-threading vm-test-direct 1)
+	add_test(vm-test-direct-threading vm-test-direct ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
 			FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
