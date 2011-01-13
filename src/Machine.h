@@ -56,15 +56,7 @@ namespace vm
 typedef void * instr;
 typedef Slot * slotref;
 
-enum {VARARGS = size_t(-1), MAX_NAME_LEN=32};
-
-struct opcode_t 
-{ 
-    instr           impl[2];
-    size_t          param_sz;
-    int             stack_delta;
-    char            name[MAX_NAME_LEN];
-};
+enum {VARARGS = 0xff, MAX_NAME_LEN=32};
 
 enum opcode {
     NOP = 0,
@@ -108,6 +100,12 @@ enum opcode {
     TEMP_COPY = MAX_OPCODE
 };
 
+struct opcode_t 
+{
+    instr           impl[2];
+    uint8           param_sz;
+    char            name[MAX_NAME_LEN];
+};
 
 
 class Machine

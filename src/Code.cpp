@@ -55,7 +55,6 @@ inline bool is_return(const opcode opc) {
 }
 
 void emit_trace_message(opcode, const byte *const, const opcode_t &);
-void fixup_cntxt_item_target(const byte*, byte * &);
 
 struct context
 {
@@ -99,7 +98,8 @@ Code::analysis_context::analysis_context()
 
 
 
-Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, const Silf & silf, const Face & face)
+Code::Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, 
+           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
  :  _code(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0), _status(loaded),
     _constrained(constrained), _modify(false), _delete(false), _own(true)
 {
@@ -144,35 +144,8 @@ Code::Code(bool constrained, const byte * bytecode_begin, const byte * const byt
     
     analysis_context ac;
     do {
-        opc = opcode(*cd_ptr++);
-
-        // Filter out the NOPs
-        if (opc == NOP) continue;
-          
-        // Do some basic sanity checks based on what we know about the opcode
-        // and return it's implementation and space requirements.
-        opcode_t op;
-        size_t   param_sz;
-        if (!decode_opcode(opc, cd_ptr, lims, op, param_sz))
+        if (!decode_opcode(opc, cd_ptr, ip, dp, ac, lims))
             return;
-        // Analyise the opcode.
-        analyse_opcode(opc, _instr_count+1, reinterpret_cast<const int8 *>(cd_ptr), ac);
-        
-        // Add this instruction
-        *ip++ = op.impl[constrained]; 
-        ++_instr_count;
-        emit_trace_message(opc, cd_ptr, op);
-
-        // Grab the parameters
-        if (param_sz) {
-            memmove(dp, cd_ptr, param_sz * sizeof(byte));
-            cd_ptr += param_sz;
-            dp     += param_sz;
-        }
-        
-        // Fixups to any argument data that needs it.
-        if (opc == CNTXT_ITEM)
-            fixup_cntxt_item_target(cd_ptr, dp);
     } while (!is_return(opc) && cd_ptr < bytecode_end);
     
     // Is this an empty program?
@@ -238,9 +211,14 @@ Code::~Code() throw ()
 // Validation check and fixups.
 //
 
-bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max, 
-                         opcode_t & op, size_t & param_sz) 
+bool Code::decode_opcode(opcode & opc, 
+                         const byte * & bc, instr * & ip, byte * & dp, 
+                         analysis_context & ac, const limits & max) 
 {
+    opc = opcode(*bc++);
+
+    // Do some basic sanity checks based on what we know about the opcode
+    // and it's arguments.
     switch (opc)
     {
         case NOP :
@@ -273,12 +251,12 @@ bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max,
         case COPY_NEXT :
             break;
         case PUT_GLYPH_8BIT_OBS :
-            valid_upto(max.classes, dp[0]);
+            valid_upto(max.classes, bc[0]);
             break;
         case PUT_SUBS_8BIT_OBS :
             // slot: dp[0] runtime checked
-            valid_upto(max.classes, dp[1]);
-            valid_upto(max.classes, dp[2]);
+            valid_upto(max.classes, bc[1]);
+            valid_upto(max.classes, bc[2]);
             break;
         case PUT_COPY :         // slot: dp[0] runtime checked
         case INSERT :
@@ -287,48 +265,48 @@ bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max,
             break;
         case CNTXT_ITEM :
             // slot: dp[0] runtime checked
-            if (dp + 2 + dp[1] >= max.bytecode)  failure(jump_past_end);
+            if (bc + 2 + bc[1] >= max.bytecode)  failure(jump_past_end);
             break;
         case ATTR_SET :
         case ATTR_ADD :
         case ATTR_SUB :
         case ATTR_SET_SLOT :
-            valid_upto(gr_slatMax, dp[0]);
+            valid_upto(gr_slatMax, bc[0]);
             break;
         case IATTR_SET_SLOT :
-            valid_upto(gr_slatMax, dp[0]);
-            valid_upto(max.attrid[dp[0]], dp[1]);
+            valid_upto(gr_slatMax, bc[0]);
+            valid_upto(max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_SLOT_ATTR :
-            valid_upto(gr_slatMax, dp[0]);
+            valid_upto(gr_slatMax, bc[0]);
             // slot: dp[1] runtime checked
             break;
         case PUSH_GLYPH_ATTR_OBS :
-            valid_upto(max.glyf_attrs, dp[0]);
+            valid_upto(max.glyf_attrs, bc[0]);
             // slot: dp[1] runtime checked
             break;
         case PUSH_GLYPH_METRIC :
-            valid_upto(kgmetDescent, dp[0]);
+            valid_upto(kgmetDescent, bc[0]);
             // slot: dp[1] runtime checked
             // level: dp[2] no check necessary
             break;
         case PUSH_FEAT :
-            valid_upto(max.features, dp[0]);
+            valid_upto(max.features, bc[0]);
             // slot: dp[1] runtime checked
             break;
         case PUSH_ATT_TO_GATTR_OBS :
-            valid_upto(max.glyf_attrs, dp[0]);
+            valid_upto(max.glyf_attrs, bc[0]);
             // slot: dp[1] runtime checked
             break;
         case PUSH_ATT_TO_GLYPH_METRIC :
-            valid_upto(kgmetDescent, dp[0]);
+            valid_upto(kgmetDescent, bc[0]);
             // slot: dp[1] runtime checked
             // level: dp[2] no check necessary
             break;
         case PUSH_ISLOT_ATTR :
-            valid_upto(gr_slatMax, dp[0]);
+            valid_upto(gr_slatMax, bc[0]);
             // slot: dp[1] runtime checked
-            valid_upto(max.attrid[dp[0]], dp[2]);
+            valid_upto(max.attrid[bc[0]], bc[2]);
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
         case POP_RET :
@@ -338,26 +316,26 @@ bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max,
         case IATTR_SET :
         case IATTR_ADD :
         case IATTR_SUB :
-            valid_upto(gr_slatMax, dp[0]);
-            valid_upto(max.attrid[dp[0]], dp[1]);
+            valid_upto(gr_slatMax, bc[0]);
+            valid_upto(max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
         case PUSH_VERSION :
             break;
         case PUT_SUBS :
             // slot: dp[0] runtime checked
-            valid_upto(max.classes, uint16(dp[1]<< 8) | dp[2]);
-            valid_upto(max.classes, uint16(dp[3]<< 8) | dp[4]);
+            valid_upto(max.classes, uint16(bc[1]<< 8) | bc[2]);
+            valid_upto(max.classes, uint16(bc[3]<< 8) | bc[4]);
             break;
         case PUT_SUBS2 :        // not implemented
         case PUT_SUBS3 :        // not implemented
             break;
         case PUT_GLYPH :
-            valid_upto(max.classes, uint16(dp[0]<< 8) | dp[1]);
+            valid_upto(max.classes, uint16(bc[0]<< 8) | bc[1]);
             break;
         case PUSH_GLYPH_ATTR :
         case PUSH_ATT_TO_GLYPH_ATTR :
-            valid_upto(max.glyf_attrs, uint16(dp[0]<< 8) | dp[1]);
+            valid_upto(max.glyf_attrs, uint16(bc[0]<< 8) | bc[1]);
             // slot: dp[2] runtime checked
             break;
         default:
@@ -368,10 +346,38 @@ bool Code::decode_opcode(const opcode opc, const byte *dp, const limits & max,
         return false;
     
     const opcode_t * op_to_fn = Machine::getOpcodeTable();
-    op       = op_to_fn[opc];
-    param_sz = op.param_sz == VARARGS ? dp[0] + 1 : op.param_sz;;
+    const opcode_t & op       = op_to_fn[opc];
+    const size_t     param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;;
     if (op.impl[_constrained] == 0)     failure(unimplemented_opcode_used);
-    if (dp + param_sz > max.bytecode)   failure(arguments_exhausted);
+    if (bc + param_sz > max.bytecode)   failure(arguments_exhausted);
+
+    // Add this instruction
+    *ip++ = op.impl[_constrained]; 
+    ++_instr_count;
+    emit_trace_message(opc, bc, op);
+    analyse_opcode(opc, _instr_count, reinterpret_cast<const int8 *>(bc), ac);
+
+    // Grab the parameters
+    if (param_sz) {
+        memmove(dp, bc, param_sz * sizeof(byte));
+        bc += param_sz;
+        dp += param_sz;
+    }
+    
+    // recursively decode a context item so we can split the skip into 
+    // instruction and data portions.
+    if (opc == CNTXT_ITEM)
+    {
+        byte & instr_skip = dp[-1];
+        byte & data_skip  = *dp++;
+        const size_t ctxt_start = _instr_count;
+        
+        for (const byte * const ctxt_end = bc + instr_skip; bc < ctxt_end;)
+            if (!decode_opcode(opc, bc, ip, dp, ac, max)) return false;
+         
+        data_skip  = instr_skip - (_instr_count - ctxt_start);
+        instr_skip = _instr_count - ctxt_start;
+    }
 
     return _status == loaded;
 }
@@ -396,28 +402,6 @@ inline void emit_trace_message(opcode opc, const byte *const params,
         XmlTraceLog::get().closeElement(ElementAction);
     }
 #endif
-}
-
-
-void fixup_cntxt_item_target(const byte* cdp, 
-                       byte * & dp) {
-    
-    const opcode_t    * oplut = Machine::getOpcodeTable();
-    size_t              data_skip = 0;
-    uint8               count = uint8(dp[-1]); 
-    
-    while (count > 0) {
-        const opcode    opc      = opcode(*cdp++);
-        size_t          param_sz = oplut[opc].param_sz;
-        
-        if (param_sz == VARARGS)    param_sz = *cdp+1;
-        cdp       += param_sz;
-        data_skip += param_sz + (opc == CNTXT_ITEM);
-        count     -= 1 + param_sz;
-    }
-    assert(count == 0);
-    dp[-1] -= data_skip;
-    *dp++   = data_skip;
 }
 
 } // end of namespace

@@ -60,8 +60,8 @@ Pass::~Pass()
 bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const Face & face)
 {
     const byte *                p = reinterpret_cast<const byte *>(pass),
-                                    * const pass_start = p,
-                                                         * const pass_end   = p + pass_length;
+               * const pass_start = p,
+               * const pass_end   = p + pass_length;
     size_t numRanges;
 
     // Read in basic values
@@ -72,8 +72,8 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     m_numRules = read16(p);
     p += sizeof(uint16);   // not sure why we would want this
     const byte * const pcCode = pass_start + read32(p) - subtable_base,
-                                * const rcCode = pass_start + read32(p) - subtable_base,
-                                                 * const aCode  = pass_start + read32(p) - subtable_base;
+               * const rcCode = pass_start + read32(p) - subtable_base,
+               * const aCode  = pass_start + read32(p) - subtable_base;
     p += sizeof(uint32);
     m_sRows = read16(p);
     m_sTransition = read16(p);
@@ -144,7 +144,8 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     // Load the pass constraint if there is one.
     if (pass_constraint_len)
     {
-        m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len, *m_silf, face);
+        m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len, 
+                                  precontext[0], swap16(sort_keys[0]), *m_silf, face);
         if (!m_cPConstraint) return false;
     }
     if (!readRanges(ranges, numRanges)) return false;
@@ -171,8 +172,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
     // Load rules.
     const byte * ac_begin = 0, * rc_begin = 0,
-                                            * ac_end = ac_data + swap16(*o_action),
-                                                       * rc_end = rc_data + swap16(*o_constraint);
+               * ac_end = ac_data + swap16(*o_action),
+               * rc_end = rc_data + swap16(*o_constraint);
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
@@ -186,8 +187,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin >= ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin >= rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new vm::Code(false, ac_begin, ac_end, *m_silf, face);
-        r->constraint = new vm::Code(true,  rc_begin, rc_end, *m_silf, face);
+        r->action     = new vm::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
+        r->constraint = new vm::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
 
         if (!r->action || !r->constraint
                 || r->action->status() != Code::loaded
@@ -334,8 +335,8 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
     for (size_t n = num_ranges; n; --n)
     {
         const uint16 first = swap16(*ranges++),
-                             last  = swap16(*ranges++),
-                                     col   = swap16(*ranges++);
+                     last  = swap16(*ranges++),
+                     col   = swap16(*ranges++);
         uint16 *p;
 
         if (first > last || last >= m_numGlyphs || col >= m_sColumns)
@@ -429,7 +430,7 @@ int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
     {
         // Search for the first rule which passes the constraint
         const RuleEntry *        r = fsm.rules.begin(),
-                                     * const re = fsm.rules.end();
+                        * const re = fsm.rules.end();
         for (; r != re && !testConstraint(*r->rule, m); ++r);
 
         if (r != re)
@@ -568,4 +569,3 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
 
     return count;
 }
-

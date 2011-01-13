@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         std::cerr << argv[0] << ": failed to load graphite tables for font: " << font_path << std::endl;
         exit(1);
     }
-    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(), silf, *face);
+    Code prog(false, &big_prog[0], &big_prog[0] + big_prog.size(), 0, 0, silf, *face);
     if (!prog) {    // Find out why it did't work
         // For now just dump an error message.
         std::cerr << "program failed to load due to: " 
