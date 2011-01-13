@@ -161,8 +161,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
                      const uint16 * o_action,     const byte * ac_data,
                      const Face & face)
 {
-    const byte * const ac_data_end = ac_data + o_action[m_numRules];
-    const byte * const rc_data_end = rc_data + o_constraint[m_numRules];
+    const byte * const ac_data_end = ac_data + swap16(o_action[m_numRules]);
+    const byte * const rc_data_end = rc_data + swap16(o_constraint[m_numRules]);
 
     m_rules = gralloc<Rule>(m_numRules);
     precontext += m_numRules;
@@ -184,8 +184,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
         ac_begin      = ac_data + swap16(*--o_action);
         rc_begin      = *--o_constraint ? rc_data + swap16(*o_constraint) : rc_end;
 
-        if (ac_begin > ac_end || ac_begin >= ac_data_end || ac_end > ac_data_end
-                || rc_begin > rc_end || rc_begin >= rc_data_end || rc_end > rc_data_end)
+        if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
+                || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
             return false;
         r->action     = new vm::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
         r->constraint = new vm::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
