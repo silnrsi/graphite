@@ -61,7 +61,7 @@
 #define NOT_IMPLEMENTED     assert(false)
 
 #ifdef ENABLE_DEEP_TRACING
-#define TRACEPARAM(n)       XmlTraceLog::get().addArrayElement(ElementParams, param, n)
+#define TRACEPARAM(n)       XmlTraceLog::get().addArrayElement(ElementParams, dp-n, n)
 #define TRACEPUSH(n)        XmlTraceLog::get().addSingleElement(ElementPush, n)
 #else
 #define TRACEPARAM(n)
