@@ -295,7 +295,11 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case ASSOC :
         {
             uint8 num = bc[0];
-            if (bc + 1 + num >= _max.bytecode) break;
+            if (bc + 1 + num >= _max.bytecode)
+            {
+                failure(arguments_exhausted);
+                break;
+            }
             while (num) 
                 valid_upto(_rule_length, _pre_context + int8(bc[num--]));
             break;
