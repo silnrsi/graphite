@@ -53,7 +53,7 @@
                                 return (sp - sb)/Machine::STACK_MAX==0; \
                             }
 
-#define EXIT(status)        push(status); ENDTRACE; return false
+#define EXIT(status)        { push(status); ENDTRACE; return false; }
 
 // This is required by opcode_table.h
 #define do_(name)           instr(name)

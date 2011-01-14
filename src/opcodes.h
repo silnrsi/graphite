@@ -197,7 +197,10 @@ ENDOP
 
 STARTOP(next)
     if (map - &smap[0] >= int(smap.size()))
-    { EXIT(1); }
+    {
+        is = seg.last();
+        EXIT(1); 
+    }
     if (is) is = is->next();
     ++map;
 ENDOP
