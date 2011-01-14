@@ -48,7 +48,7 @@ int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, 
     if (!pDest)
     return false;
     
-    return pfeatureref->applyValToFeature(val, pDest);
+    return pfeatureref->applyValToFeature(val, *pDest);
 }
 
 
@@ -128,7 +128,7 @@ void gr_label_destroy(void * label)
 
 gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures/*may be NULL*/)
 {                      //When finished with the Features, call features_destroy    
-    return static_cast<gr_feature_val*>(pfeatures ? pfeatures->clone() : new Features);
+    return static_cast<gr_feature_val*>(pfeatures ? new Features(*pfeatures) : new Features);
 }
 
 

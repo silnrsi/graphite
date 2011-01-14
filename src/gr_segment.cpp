@@ -103,7 +103,7 @@ size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, con
 }
 
 
-gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, gr_uint32 script, const gr_feature_val* pFeats/*must not be IsNull*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, gr_uint32 script, const gr_feature_val* pFeats, gr_encform enc, const void* pStart, size_t nChars, int dir)
 {
     if (pFeats == NULL)
         pFeats = static_cast<const gr_feature_val*>(face->theSill().cloneFeatures(0));

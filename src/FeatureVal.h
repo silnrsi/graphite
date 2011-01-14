@@ -24,79 +24,42 @@
 #include <algorithm>
 #include <cassert>
 #include "Main.h"
+#include "List.h"
 
 namespace graphite2 {
 
 class FeatureRef;
 class FeatureMap;
 
-class FeatureVal
+class FeatureVal : public Vector<uint32>
 {
 public:
     uint32 maskedOr(const FeatureVal &other, const FeatureVal &mask) {
-	uint32 len = m_length ;
-	if (other.m_length<len) len = other.m_length;		//defensive
-	if (mask.m_length<len) len = mask.m_length;		//defensive
+        uint32 len = size() ;
+        if (other.size()<len) len = other.size();		//defensive
+        if (mask.size()<len) len = mask.size();		//defensive
         for (uint32 i = 0; i < len; i++)
-            if ((mask.m_vec)[i]) m_vec[i] = (m_vec[i] & ~mask.m_vec[i]) | (other.m_vec[i] & mask.m_vec[i]);
-	return len;
+            if (mask[i]) operator[](i) = (operator[](i) & ~mask[i]) | (other[i] & mask[i]);
+        return len;
     }
 
-    explicit FeatureVal(int num, const FeatureMap* pMap/*not NULL*/)
-      : m_length(num), m_vec(gralloc<uint32>(num)), m_pMap(pMap) {}
-    FeatureVal() : m_length(0), m_vec(NULL), m_pMap(NULL) { }
-    FeatureVal(const FeatureVal & o) : m_length(0), m_vec(0), m_pMap(NULL) { *this = o; }
-    ~FeatureVal() { if (m_vec) free(m_vec); }
-    FeatureVal & operator=(const FeatureVal & rhs) {
-        m_pMap = rhs.m_pMap;
-        if (m_length != rhs.m_length) {
-            if (m_vec) free(m_vec);
-            m_vec = gralloc<uint32>(rhs.m_length);
-            m_length = m_vec ? rhs.m_length : 0;
-        }
-        memmove(m_vec, rhs.m_vec, m_length * sizeof(uint32));
-        return *this;
-    }
+    FeatureVal() : m_pMap(0) { }
+    FeatureVal(int num, const FeatureMap & pMap) : Vector<uint32>(num), m_pMap(&pMap) {}
+    FeatureVal(const FeatureVal & rhs) : Vector<uint32>(rhs), m_pMap(rhs.m_pMap) {}
+
     bool operator ==(const FeatureVal & b) const
     {
-        size_t i = 0;
-        assert(m_length);
-        assert(m_length == b.m_length);
-        while (m_vec[i] == b.m_vec[i])
-        {
-            if (++i == m_length) return true;
-        }
-        return false;
+        size_t n = size();
+        if (n != b.size())      return false;
+        
+        for(const_iterator l = begin(), r = b.begin(); n && *l == *r; --n, ++l, ++r);
+        
+        return n == 0;
     }
 
-    void grow(byte reqIndex ) {
-        if (reqIndex<m_length) {
-          return;
-        }
-        uint32 * vec = gralloc<uint32>(reqIndex+1);
-        memmove(vec, m_vec, m_length * sizeof(uint32));
-        memset(vec+m_length, 0, (reqIndex+1-m_length)*sizeof(uint32));
-        if (m_vec) free(m_vec);
-        m_vec = vec;
-        m_length = reqIndex+1;
-    }
-
-    FeatureVal* clone() const { return new FeatureVal(*this); }
-    
-//    void setSize(uint32 length) { m_length = length; }		//unsafe since should also keep m_vec in step
-
-//    void *operator new(size_t dummy, int num) {
-//        void *res = malloc(offsetof(Features, m_vec) + num* sizeof(uint32));
-//        return res;
-//    }
-//    void operator delete(void * res, int num) {
-//        free(res);
-//    }
     CLASS_NEW_DELETE
 private:
     friend class FeatureRef;		//so that FeatureRefs can manipulate m_vec directly
-    uint32 m_length;
-    uint32 * m_vec;
     const FeatureMap* m_pMap;
 };
 

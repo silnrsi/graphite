@@ -43,32 +43,9 @@
 
 namespace graphite2 {
 
-#if 0
-#ifdef __GNUC__
-#ifdef STLPORT_VERSION
-// standard allocator for other platforms
-typedef std::vector<Features> FeatureList;
-typedef std::vector<GrSlot *> SlotRope;
-typedef std::vector<uint16 *> AttributeRope;
-#else
-// use the GNU CXX extension malloc_allocator to avoid new/delete
-#include <ext/malloc_allocator.h>
-typedef std::vector<Features, __gnu_cxx::malloc_allocator<Features> > FeatureList;
-typedef std::vector<GrSlot*, __gnu_cxx::malloc_allocator<GrSlot*> > SlotRope;
-typedef std::vector<uint16 *, __gnu_cxx::malloc_allocator<uint16 *> > AttributeRope;
-#endif
-#else
-// standard allocator for other platforms
-typedef std::vector<Features> FeatureList;
-typedef std::vector<GrSlot *> SlotRope;
-typedef std::vector<uint16 *> AttributeRope;
-#endif
-
-#else
-typedef List<Features> FeatureList;
-typedef List<Slot *> SlotRope;
-typedef List<uint16 *> AttributeRope;
-#endif
+typedef Vector<Features>        FeatureList;
+typedef Vector<Slot *>          SlotRope;
+typedef Vector<uint16 *>        AttributeRope;
 
 class SegmentScopeState;
 class Segment;

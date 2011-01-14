@@ -76,10 +76,10 @@ public:
         if (m_nameValues) free(m_nameValues);
         m_nameValues = NULL;
     }
-    bool applyValToFeature(uint16 val, Features* pDest) const; //defined in GrFaceImp.h
-    void maskFeature(Features* pDest) const {
-	if (m_index < pDest->m_length) 				//defensive
-	    pDest->m_vec[m_index] |= m_mask; 
+    bool applyValToFeature(uint16 val, Features& pDest) const; //defined in GrFaceImp.h
+    void maskFeature(Features & pDest) const {
+	if (m_index < pDest.size()) 				//defensive
+	    pDest[m_index] |= m_mask; 
     }
 
     uint16 getFeatureVal(const Features& feats) const; //defined in GrFaceImp.h

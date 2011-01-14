@@ -160,10 +160,10 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     XmlTraceLog::get().closeElement(ElementFeature);
 #endif
     }
-    m_defaultFeatures = new Features(currIndex + 1, this);
+    m_defaultFeatures = new Features(currIndex + 1, *this);
     for (int i = 0; i < m_numFeats; i++)
     {
-	m_feats[i].applyValToFeature(defVals[i], m_defaultFeatures);
+	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
     m_pNamedFeats[i] = m_feats+i;
     }
     
@@ -208,7 +208,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
         uint16 numSettings = read16(pSill);
         uint16 offset = read16(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
-        Features* feats = m_FeatureMap.m_defaultFeatures->clone();
+        Features* feats = new Features(*m_FeatureMap.m_defaultFeatures);
         const byte *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
@@ -218,7 +218,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
             pLSet += 2;
             const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
             if (pRef)
-                pRef->applyValToFeature(val, feats);
+                pRef->applyValToFeature(val, *feats);
         }
         //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
         //m_langMap.insert(kvalue);
@@ -238,10 +238,10 @@ Features* SillMap::cloneFeatures(uint32 langname/*0 means default*/) const
         for (uint16 i = 0; i < m_numLanguages; i++)
         {
             if (m_langFeats[i].m_lang == langname)
-                return m_langFeats[i].m_pFeatures->clone();
+                return new Features(*m_langFeats[i].m_pFeatures);
         }
     }
-    return m_FeatureMap.m_defaultFeatures->clone();
+    return new Features (*m_FeatureMap.m_defaultFeatures);
 }
 
 
@@ -256,27 +256,25 @@ const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
     return NULL;
 }
 
-bool FeatureRef::applyValToFeature(uint16 val, Features* pDest) const 
+bool FeatureRef::applyValToFeature(uint16 val, Features & pDest) const 
 { 
     if (val>m_max || !m_pFace)
       return false;
-    if (pDest->m_pMap==NULL)
-      pDest->m_pMap = &m_pFace->theSill().theFeatureMap();
+    if (pDest.m_pMap==NULL)
+      pDest.m_pMap = &m_pFace->theSill().theFeatureMap();
     else
-      if (pDest->m_pMap!=&m_pFace->theSill().theFeatureMap())
+      if (pDest.m_pMap!=&m_pFace->theSill().theFeatureMap())
         return false;       //incompatible
-    pDest->grow(m_index);
-    {
-        pDest->m_vec[m_index] &= ~m_mask;
-        pDest->m_vec[m_index] |= (uint32(val) << m_bits);
-    }
+    pDest.reserve(m_index);
+    pDest[m_index] &= ~m_mask;
+    pDest[m_index] |= (uint32(val) << m_bits);
     return true;
 }
 
 uint16 FeatureRef::getFeatureVal(const Features& feats) const
 { 
-  if (m_index < feats.m_length && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
-    return (feats.m_vec[m_index] & m_mask) >> m_bits; 
+  if (m_index < feats.size() && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
+    return (feats[m_index] & m_mask) >> m_bits; 
   else
     return 0;
 }

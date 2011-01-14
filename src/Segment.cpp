@@ -95,12 +95,9 @@ void Segment::removeScope(SegmentScopeState & state)
 
 Segment::~Segment()
 {
-    SlotRope::iterator i = m_slots.begin();
-    AttributeRope::iterator j = m_userAttrs.begin();
-    
-    for (i = m_slots.begin(); i != m_slots.end(); ++i)
+    for (SlotRope::iterator i = m_slots.begin(); i != m_slots.end(); ++i)
         free(*i);
-    for (j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
+    for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
         free(*j);
     delete[] m_charinfo;
 }
