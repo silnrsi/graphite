@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <utility>
 #include <graphite2/Types.h>
 #include "Main.h"
@@ -60,24 +61,18 @@ private:
     byte  *     _data;
     size_t      _data_size,
                 _instr_count;
-    int         _min_slotref,
-                _max_slotref;
     mutable status_t _status;
-    bool        _constrained,
+    bool        _constraint,
                 _modify,
                 _delete;
     mutable bool _own;
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
-//     bool decode_opcode(opcode & opc, const byte * & bc, instr * & ip, byte * & dp, 
-//                          analysis_context & ac, const limits & max);
-//    void analyse_opcode(const opcode, size_t cp, const int8  * dp, analysis_context &) throw();
-//    void valid_upto(const uint16 limit, const uint16 x) throw();
-//    void update_slot_limits(int slotref) throw ();
+
 public:
     Code() throw();
-    Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, 
+    Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end, 
          uint8 pre_context, uint16 rule_length, const Silf &, const Face &);
     Code(const Code &) throw();
     ~Code() throw();
@@ -96,7 +91,7 @@ public:
 };
 
 inline Code::Code() throw()
-: _code(0), _data(0), _data_size(0), _instr_count(0), _min_slotref(0), _max_slotref(0),
+: _code(0), _data(0), _data_size(0), _instr_count(0),
   _status(loaded), _own(false) {
 }
 
@@ -105,10 +100,8 @@ inline Code::Code(const Code &obj) throw ()
     _data(obj._data), 
     _data_size(obj._data_size), 
     _instr_count(obj._instr_count),
-    _min_slotref(obj._min_slotref),
-    _max_slotref(obj._max_slotref),
     _status(obj._status), 
-    _constrained(obj._constrained),
+    _constraint(obj._constraint),
     _modify(obj._modify),
     _delete(obj._delete),
     _own(obj._own) 
@@ -123,10 +116,8 @@ inline Code & Code::operator=(const Code &rhs) throw() {
     _data        = rhs._data;
     _data_size   = rhs._data_size; 
     _instr_count = rhs._instr_count;
-    _min_slotref = rhs._min_slotref;
-    _max_slotref = rhs._max_slotref;
     _status      = rhs._status; 
-    _constrained = rhs._constrained;
+    _constraint = rhs._constraint;
     _modify      = rhs._modify;
     _delete      = rhs._delete;
     _own         = rhs._own; 
@@ -143,7 +134,7 @@ inline Code::status_t Code::status() const throw() {
 }
 
 inline bool Code::constraint() const throw() {
-    return _constrained;
+    return _constraint;
 }
 
 inline size_t Code::dataSize() const throw() {
@@ -162,6 +153,14 @@ inline bool Code::immutable() const throw()
 inline bool Code::deletes() const throw()
 {
   return _delete;
+}
+
+inline int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_out) const
+{
+    assert(_own);
+    assert(*this);          // Check we are actually runnable
+    
+    return  m.run(_code, _data, map, status_out);
 }
 
 } // namespace vm
