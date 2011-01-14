@@ -54,8 +54,7 @@ public:
     };
 
 private:
-    struct limits;
-    struct analysis_context;
+    struct decoder;
 
     instr *     _code;
     byte  *     _data;
@@ -71,11 +70,11 @@ private:
 
     void release_buffers() throw ();
     void failure(const status_t) throw();
-    bool decode_opcode(opcode & opc, const byte * & bc, instr * & ip, byte * & dp, 
-                         analysis_context & ac, const limits & max);
-    void analyse_opcode(const opcode, size_t cp, const int8  * dp, analysis_context &) throw();
-    void valid_upto(const uint16 limit, const uint16 x) throw();
-    void update_slot_limits(int slotref) throw ();
+//     bool decode_opcode(opcode & opc, const byte * & bc, instr * & ip, byte * & dp, 
+//                          analysis_context & ac, const limits & max);
+//    void analyse_opcode(const opcode, size_t cp, const int8  * dp, analysis_context &) throw();
+//    void valid_upto(const uint16 limit, const uint16 x) throw();
+//    void update_slot_limits(int slotref) throw ();
 public:
     Code() throw();
     Code(bool constrained, const byte * bytecode_begin, const byte * const bytecode_end, 
