@@ -493,7 +493,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 #endif
     vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
     Machine::status_t status = Machine::finished;
-    for (int n = r.sort; n; --n, ++map)
+    for (int n = r.sort; n && *map; --n, ++map)
     {
         const int32 ret = r.constraint->run(m, map, status);
         if (!ret || status != Machine::finished)
