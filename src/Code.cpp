@@ -522,6 +522,7 @@ inline void emit_trace_message(opcode opc, const byte *const params,
 void Code::decoder::apply_analysis(instr * const code, instr * code_end)
 {
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
+    int tempcount = 0;
     if (_code._constraint) return;
 
     const instr temp_copy = Machine::getOpcodeTable()[TEMP_COPY].impl[0];
@@ -529,10 +530,11 @@ void Code::decoder::apply_analysis(instr * const code, instr * code_end)
     {
         if (!c->flags.referenced || !c->flags.changed) continue;
         
-        instr * const tip = code + c->codeRef;        
+        instr * const tip = code + c->codeRef + tempcount;        
         memmove(tip+1, tip, (code_end - tip) * sizeof(instr));
         *tip = temp_copy;
-        ++code_end;    
+        ++code_end;
+        ++tempcount;
     }
     
     _code._instr_count = code_end - code;
