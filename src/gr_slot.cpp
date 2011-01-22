@@ -64,7 +64,7 @@ const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p/*not NULL*/)    
 unsigned short gr_slot_gid(const gr_slot* p/*not NULL*/)
 {
     assert(p);
-    return p->gid();
+    return p->glyph();
 }
 
 

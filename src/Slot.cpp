@@ -390,6 +390,8 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
         }
     }
     m_realglyphid = theGlyph->getAttr(seg->silf()->aPseudo());
+    if (m_realglyphid)
+        theGlyph = seg->getFace()->getGlyphFaceCache()->glyphSafe(m_realglyphid);
     m_advance = Position(theGlyph->theAdvance().x, 0.);
 }
 
