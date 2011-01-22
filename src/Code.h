@@ -55,7 +55,7 @@ public:
     };
 
 private:
-    struct decoder;
+    class decoder;
 
     instr *     _code;
     byte  *     _data;

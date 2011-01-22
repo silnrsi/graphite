@@ -42,7 +42,7 @@ const char * run_error_msg[] = {
     _msg(slot_offset_out_bounds)
 };
 
-struct graphite2::Segment {};
+class graphite2::Segment {};
 
 //std::vector<byte> fuzzer(int);
 
