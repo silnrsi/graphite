@@ -225,7 +225,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
             * * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
     {
         *s = m_states + swap16(*starts++);
-        if (*s < m_states || *s >= m_states + m_sRows) return true;
+        if (*s < m_states || *s >= m_states + m_sRows) return false; // true;
     }
 
     // load state transition table.
