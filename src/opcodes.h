@@ -77,6 +77,7 @@
 #define push(n)             *++sp = n; TRACEPUSH(n)
 #define pop()               (*sp--)
 #define slotat(x)           (map[(x)])
+#define DIE                 { is=seg.last(); EXIT(1); }
 #define POSITIONED          1
 
 STARTOP(nop)
@@ -196,11 +197,7 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-    if (map - &smap[0] >= int(smap.size()))
-    {
-        is = seg.last();
-        EXIT(1); 
-    }
+    if (map - &smap[0] >= int(smap.size())) DIE
     if (is) is = is->next();
     ++map;
 ENDOP
@@ -228,7 +225,9 @@ STARTOP(put_subs_8bit_obs)
     const unsigned int  input_class  = uint8(param[1]),
                         output_class = uint8(param[2]);
     uint16 index;
-    index = seg.findClassIndex(input_class, slotat(slot_ref)->gid());
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    index = seg.findClassIndex(input_class, slot->gid());
     is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
@@ -409,7 +408,9 @@ STARTOP(push_slot_attr)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = slotat(slot_ref)->getAttr(&seg, slat, 0);
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    int res = slot->getAttr(&seg, slat, 0);
     push(res);
 ENDOP
 
@@ -417,7 +418,9 @@ STARTOP(push_glyph_attr_obs)
     declare_params(2);
     const unsigned int  glyph_attr = uint8(param[0]);
     const int           slot_ref   = int8(param[1]);
-    push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    push(seg.glyphAttr(slot->gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_glyph_metric)
@@ -425,14 +428,18 @@ STARTOP(push_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    push(seg.getGlyphMetric(slotat(slot_ref), glyph_attr, attr_level));
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
 ENDOP
 
 STARTOP(push_feat)
     declare_params(2);
     const unsigned int  feat        = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    uint8 fid = seg.charinfo(slotat(slot_ref)->original())->fid();
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    uint8 fid = seg.charinfo(slot->original())->fid();
     push(seg.getFeature(fid, feat));
 ENDOP
 
@@ -440,9 +447,13 @@ STARTOP(push_att_to_gattr_obs)
     declare_params(2);
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.glyphAttr(slot->gid(), glyph_attr));
+    slotref slot = slotat(slot_ref);
+    if (slot)
+    {
+        slotref att = slot->attachTo();
+        if (att) slot = att;
+        push(seg.glyphAttr(slot->gid(), glyph_attr));
+    }
 ENDOP
 
 STARTOP(push_att_to_glyph_metric)
@@ -450,9 +461,13 @@ STARTOP(push_att_to_glyph_metric)
     const unsigned int  glyph_attr  = uint8(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
+    slotref slot = slotat(slot_ref);
+    if (slot)
+    {
+        slotref att = slot->attachTo();
+        if (att) slot = att;
+        push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
+    }
 ENDOP
 
 STARTOP(push_islot_attr)
@@ -465,7 +480,9 @@ STARTOP(push_islot_attr)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = slotat(slot_ref)->getAttr(&seg, slat, idx);
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    int res = slot->getAttr(&seg, slat, idx);
     push(res);
 ENDOP
 
@@ -544,7 +561,8 @@ STARTOP(put_subs)
                                      | uint8(param[2]);
     const unsigned int  output_class = uint8(param[3]) << 8
                                      | uint8(param[4]);
-    int index = seg.findClassIndex(input_class, slotat(slot_ref)->gid());
+    slotref slot = slotat(slot_ref);
+    int index = seg.findClassIndex(input_class, slot->gid());
     is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
@@ -570,7 +588,9 @@ STARTOP(push_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    push(seg.glyphAttr(slotat(slot_ref)->gid(), glyph_attr));
+    slotref slot = slotat(slot_ref);
+    if (!slot) DIE
+    push(seg.glyphAttr(slot->gid(), glyph_attr));
 ENDOP
 
 STARTOP(push_att_to_glyph_attr)
@@ -578,12 +598,17 @@ STARTOP(push_att_to_glyph_attr)
     const unsigned int  glyph_attr  = uint8(param[0]) << 8
                                     | uint8(param[1]);
     const int           slot_ref    = int8(param[2]);
-    slotref slot = slotat(slot_ref)->attachTo();
-    if (!slot) slot = slotat(slot_ref);
-    push(seg.glyphAttr(slot->gid(), glyph_attr));
+    slotref slot = slotat(slot_ref);
+    if (slot)
+    {
+        slotref att = slot->attachTo();
+        if (att) slot = att;
+        push(seg.glyphAttr(slot->gid(), glyph_attr));
+    }
 ENDOP
 
 STARTOP(temp_copy)
+    if (!is) DIE
     slotref newSlot = seg.newSlot();
     uint16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
