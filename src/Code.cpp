@@ -480,13 +480,15 @@ bool Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         byte & data_skip  = *_data++;
         ++_code._data_size;
 
-        load(bc, bc + instr_skip);
-        bc += instr_skip;
-        data_skip  = instr_skip - (_code._instr_count - ctxt_start);
-        instr_skip = _code._instr_count - ctxt_start;
+        if (load(bc, bc + instr_skip))
+        {
+            bc += instr_skip;
+            data_skip  = instr_skip - (_code._instr_count - ctxt_start);
+            instr_skip = _code._instr_count - ctxt_start;
 
-        _rule_length = 1;
-        _pre_context = 0;
+            _rule_length = 1;
+            _pre_context = 0;
+        }
     }
     
     return _code._status == loaded;
