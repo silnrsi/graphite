@@ -53,6 +53,7 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
     m_bufSize = numchars + 10;
     freeSlot(newSlot());
     for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
+    if (!i) i = 1;
     m_bufSize = i;                  // log2(numchars)
 }
 
@@ -435,12 +436,14 @@ public:
       {
           size_t cmapSize = 0;
           const void * table = face2->getTable(tagCmap, &cmapSize);
+          if (!table) return;
           m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
           m_stable = TtfUtil::FindCmapSubtable(table, 3, 10, cmapSize);
       }
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
+          if (!m_ctable) return false;
           uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
           if (!gid)
               gid = m_face->findPseudo(cid);
@@ -475,6 +478,7 @@ public:
 
     bool processChar(uint32 cid/*unicode character*/)     //return value indicates if should stop processing
     {
+        if (!m_cmap) return false;
         uint16 gid = m_cmap->lookup(cid);
         if (!gid)
             gid = m_face->findPseudo(cid);

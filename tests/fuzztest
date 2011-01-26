@@ -10,12 +10,34 @@ def excluded(loc, *ranges) :
         if loc >= r[0] and loc <= r[1] : return True
     return False
 
+def valpos(fontlen, opts) :
+    if opts.input :
+        gen = []
+        ifh = file(opts.input)
+        for l in ifh.readlines() :
+            f = l.split(',')
+            gen.append((int(f[1], 0), int(f[2], 0)))
+        ifh.close()
+    elif opts.position :
+        if opts.value :
+            return [(int(opts.position, 0), int(opts.value, 0))]
+        else :
+            def gen() :
+                yield(int(opts.position), int(uniform(0, 256)))
+    elif opts.value :
+        def gen() :
+            yield(int(uniform(0, fontlen)), int(opts.value, 0))
+    else :
+        def gen() :
+            yield(int(uniform(0, fontlen)), int(uniform(0, 256)))
+    return gen
+
 parser = OptionParser(usage="usage: %prog -f font [options] -- command")
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
-parser.add_option("-s", "--single", action="store_true", help="Only one iteration")
 parser.add_option("-p", "--position", help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", help="Specifies value to use (dec)")
+parser.add_option("-i", "--input", help=".log file to read test values from")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
 parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
@@ -41,11 +63,9 @@ def rlimit() :
 
 font = None
 count = 0
-while (1) :
+for loc, val in valpos(fontlen, opts) :
     if font == None :
         font = open(opts.font, "r+b")
-    loc = int(opts.position, 16) if opts.position else int(uniform(0, fontlen))
-    val = int(opts.value) if opts.value else int(uniform(0, 256))
     font.seek(loc, 0)
     oldval = font.read(1)
     font.seek(loc, 0)
@@ -69,8 +89,6 @@ while (1) :
     font = open(opts.font, "r+b")
     font.seek(loc, 0)
     font.write(oldval)
-    if opts.single :
-        break
 
 if font != None :
     font.close()

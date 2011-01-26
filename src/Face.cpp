@@ -316,7 +316,11 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
         if (!TtfUtil::GetTableInfo(name, ttfFaceHandle->m_pHeader, ttfFaceHandle->m_pTableDir, lOffset, tlen)) return NULL;
         if (fseek(ttfFaceHandle->m_pfile, lOffset, SEEK_SET)) return NULL;
         tptr = gralloc<char>(tlen);
-        if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) return NULL;
+        if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) 
+        {
+            free(tptr);
+            return NULL;
+        }
         res->set(tptr, tlen);
     }
     if (len) *len = res->size();

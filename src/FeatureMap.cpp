@@ -59,9 +59,9 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     if (m_numFeats)
     {
-    m_feats = new FeatureRef[m_numFeats];
-    m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
-    defVals = gralloc<uint16>(m_numFeats);
+        m_feats = new FeatureRef[m_numFeats];
+        m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
+        defVals = gralloc<uint16>(m_numFeats);
     }
     byte currIndex = 0;
     byte currBits = 0;     //to cause overflow on first Feature
@@ -164,7 +164,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     for (int i = 0; i < m_numFeats; i++)
     {
 	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
-    m_pNamedFeats[i] = m_feats+i;
+        m_pNamedFeats[i] = m_feats+i;
     }
     
     free(defVals);
@@ -197,7 +197,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
     if (read32(pSill) != 0x00010000UL) return false;
     m_numLanguages = read16(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
-    if (!m_langFeats) { m_numLanguages = 0; return NULL; }        //defensive
+    if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return NULL; }        //defensive
 
     pSill += 6;     // skip the fast search
     if (lSill < m_numLanguages * 8U + 12) return false;

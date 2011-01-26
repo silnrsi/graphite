@@ -278,7 +278,7 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int16 value, co
     case gr_slatAttTo :
     {
         const uint16 idx = uint16(value);
-        if (idx < map.size())
+        if (idx < map.size() && map[idx])
         {
             Slot *other = map[idx];
             attachTo(other);
