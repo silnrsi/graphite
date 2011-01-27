@@ -18,19 +18,35 @@ def valpos(fontlen, opts) :
             f = l.split(',')
             gen.append((int(f[1], 0), int(f[2], 0)))
         ifh.close()
+        def dogen() :
+            for g in gen :
+                yield (g)
+        return dogen
     elif opts.position :
         if opts.value :
-            return [(int(opts.position, 0), int(opts.value, 0))]
+            def gen() :
+                yield (int(opts.position, 0), int(opts.value, 0))
+            return gen
         else :
             def gen() :
-                yield(int(opts.position), int(uniform(0, 256)))
+                while (1) :
+                    yield(int(opts.position), int(uniform(0, 256)))
+            return gen
     elif opts.value :
         def gen() :
-            yield(int(uniform(0, fontlen)), int(opts.value, 0))
+            while (1) :
+                yield(int(uniform(0, fontlen)), int(opts.value, 0))
+        return gen
+    elif opts.linear :
+        def gen() :
+            for c in xrange(0, fontlen) :
+                yield (c, int(uniform(0, 256)))
+        return gen
     else :
         def gen() :
-            yield(int(uniform(0, fontlen)), int(uniform(0, 256)))
-    return gen
+            while (1) :
+                yield(int(uniform(0, fontlen)), int(uniform(0, 256)))
+        return gen
 
 parser = OptionParser(usage="usage: %prog -f font [options] -- command")
 parser.add_option("-l", "--logfile", help="Log results to this file")
@@ -63,7 +79,7 @@ def rlimit() :
 
 font = None
 count = 0
-for loc, val in valpos(fontlen, opts) :
+for loc, val in valpos(fontlen, opts)() :
     if font == None :
         font = open(opts.font, "r+b")
     font.seek(loc, 0)

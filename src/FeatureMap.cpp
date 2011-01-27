@@ -197,7 +197,7 @@ bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn ge
     if (read32(pSill) != 0x00010000UL) return false;
     m_numLanguages = read16(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
-    if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return NULL; }        //defensive
+    if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return true; }        //defensive
 
     pSill += 6;     // skip the fast search
     if (lSill < m_numLanguages * 8U + 12) return false;

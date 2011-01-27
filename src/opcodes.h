@@ -130,7 +130,7 @@ STARTOP(mul)
 ENDOP
 
 STARTOP(div_)
-    binop(/);
+    if (int32(sp[-1])) { binop(/); }
 ENDOP
 
 STARTOP(min)
@@ -216,7 +216,7 @@ ENDOP
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
+    if (is) is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -228,13 +228,13 @@ STARTOP(put_subs_8bit_obs)
     slotref slot = slotat(slot_ref);
     if (!slot) DIE
     index = seg.findClassIndex(input_class, slot->gid());
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+    if (is) is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (slot_ref != 0)
+    if (is && slot_ref != 0)
     {
         uint16 *tempUserAttrs = is->userAttrs();
         slotref ref = slotat(slot_ref);
@@ -326,7 +326,8 @@ STARTOP(assoc)
     use_params(num);
     int max = -1;
     int min = -1;
-    
+    if (!is) DIE
+
     while (num-- > 0)
     {
         int sr = *assocs++;
@@ -356,7 +357,7 @@ STARTOP(attr_set)
     declare_params(1);
     const attrCode  	slat = attrCode(uint8(*param));
     const          int  val  = int(pop());
-    is->setAttr(&seg, slat, 0, val, smap);
+    if (is) is->setAttr(&seg, slat, 0, val, smap);
 ENDOP
 
 STARTOP(attr_add)
@@ -368,8 +369,11 @@ STARTOP(attr_add)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = is->getAttr(&seg, slat, 0);
-    is->setAttr(&seg, slat, 0, val + res, smap);
+    if (is)
+    {
+        int res = is->getAttr(&seg, slat, 0);
+        is->setAttr(&seg, slat, 0, val + res, smap);
+    }
 ENDOP
 
 STARTOP(attr_sub)
@@ -381,8 +385,11 @@ STARTOP(attr_sub)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = is->getAttr(&seg, slat, 0);
-    is->setAttr(&seg, slat, 0, val - res, smap);
+    if (is)
+    {
+        int res = is->getAttr(&seg, slat, 0);
+        is->setAttr(&seg, slat, 0, val - res, smap);
+    }
 ENDOP
 
 STARTOP(attr_set_slot)
@@ -511,7 +518,7 @@ STARTOP(iattr_set)
     const attrCode  	slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
     const          int  val  = int(pop());
-    is->setAttr(&seg, slat, idx, val, smap);
+    if (is) is->setAttr(&seg, slat, idx, val, smap);
 ENDOP
 
 STARTOP(iattr_add)
@@ -524,8 +531,11 @@ STARTOP(iattr_add)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = is->getAttr(&seg, slat, idx);
-    is->setAttr(&seg, slat, idx, val + res, smap);
+    if (is)
+    {
+        int res = is->getAttr(&seg, slat, idx);
+        is->setAttr(&seg, slat, idx, val + res, smap);
+    }
 ENDOP
 
 STARTOP(iattr_sub)
@@ -538,8 +548,11 @@ STARTOP(iattr_sub)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1));
         flags |= POSITIONED;
     }
-    int res = is->getAttr(&seg, slat, idx);
-    is->setAttr(&seg, slat, idx, val - res, smap);
+    if (is)
+    {
+        int res = is->getAttr(&seg, slat, idx);
+        is->setAttr(&seg, slat, idx, val - res, smap);
+    }
 ENDOP
 
 STARTOP(push_proc_state)
@@ -564,7 +577,7 @@ STARTOP(put_subs)
                                      | uint8(param[4]);
     slotref slot = slotat(slot_ref);
     int index = seg.findClassIndex(input_class, slot->gid());
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+    if (is) is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
 ENDOP
 
 #if 0
@@ -581,7 +594,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
+    if (is) is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)

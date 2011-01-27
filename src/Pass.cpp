@@ -538,13 +538,14 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
         }
     }
 
-    const int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
+    int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
     slot_out = *map;
     if (ret < 0)
     {
         if (!slot_out)
         {
             slot_out = seg.last();
+            --count;
             ++ret;
         }
         while (++ret <= 0 && slot_out)
@@ -558,6 +559,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
         if (!slot_out)
         {
             slot_out = seg.first();
+            ++count;
             --ret;
         }
         while (--ret >= 0 && slot_out)
