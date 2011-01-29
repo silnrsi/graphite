@@ -507,7 +507,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
                 XmlTraceLog::get().closeElement(ElementTestRule);
             }
 #endif
-            return (ret > 0);
+            return false;
         }
     }
 
@@ -570,7 +570,7 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
             slot_out = slot_out->next();
         }
     }
-    if (status != Machine::finished && slot_out) slot_out = slot_out->next();
+    if (status != Machine::finished && slot_out) slot_out = NULL;
 
     return count;
 }

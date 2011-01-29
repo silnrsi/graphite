@@ -157,18 +157,5 @@ inline bool Code::deletes() const throw()
   return _delete;
 }
 
-inline int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_out) const
-{
-    assert(_own);
-    assert(*this);          // Check we are actually runnable
-
-    if (!m.bounds_check(_max_ref))
-    {
-        status_out = Machine::slot_offset_out_bounds;
-        return 1;
-    }
-    return  m.run(_code, _data, map, status_out);
-}
-
 } // namespace vm
 } // namespace graphite2
