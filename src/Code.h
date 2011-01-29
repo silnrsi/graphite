@@ -61,6 +61,7 @@ private:
     byte  *     _data;
     size_t      _data_size,
                 _instr_count;
+    byte        _max_ref;
     mutable status_t _status;
     bool        _constraint,
                 _modify,
@@ -91,7 +92,7 @@ public:
 };
 
 inline Code::Code() throw()
-: _code(0), _data(0), _data_size(0), _instr_count(0),
+: _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0),
   _status(loaded), _own(false) {
 }
 
@@ -100,6 +101,7 @@ inline Code::Code(const Code &obj) throw ()
     _data(obj._data), 
     _data_size(obj._data_size), 
     _instr_count(obj._instr_count),
+    _max_ref(obj._max_ref),
     _status(obj._status), 
     _constraint(obj._constraint),
     _modify(obj._modify),
@@ -159,7 +161,12 @@ inline int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
-    
+
+    if (!m.bounds_check(_max_ref))
+    {
+        status_out = Machine::slot_offset_out_bounds;
+        return 1;
+    }
     return  m.run(_code, _data, map, status_out);
 }
 

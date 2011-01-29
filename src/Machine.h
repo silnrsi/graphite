@@ -129,6 +129,7 @@ public:
     stack_t                   run(const instr * program, const byte * data,
                                   slotref * & map,
                                   status_t &status) HOT;
+    bool bounds_check(unsigned int max_ref);
     CLASS_NEW_DELETE
 
     SlotMap   & slotMap() const throw();

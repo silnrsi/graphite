@@ -179,6 +179,9 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     {
         r->preContext = *--precontext;
         r->sort       = swap16(*--sort_key);
+#ifndef NDEBUG
+        r->rule_idx   = n;
+#endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
         ac_begin      = ac_data + swap16(*--o_action);

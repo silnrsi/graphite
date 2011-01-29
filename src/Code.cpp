@@ -1,4 +1,4 @@
-/*  GRAPHITE2 LICENSING
+/*  GRAPHITE2 LICENSIN_analysis.contexts[_analysis.slotref_analysis.contexts[_analysis.slotref]]G
 
     Copyright 2010, SIL International
     All rights reserved.
@@ -82,8 +82,11 @@ public:
     {
         int       slotref;
         context   contexts[256];
+        byte      max_ref;
         
-        analysis() : slotref(0) {};
+        analysis() : slotref(0), max_ref(0) {};
+        void set_ref(int index) throw();
+        void set_changed(int index) throw();
 
     };
     
@@ -91,6 +94,8 @@ public:
     
     bool        load(const byte * bc_begin, const byte * bc_end);
     void        apply_analysis(instr * const code, instr * code_end);
+    byte        max_ref() { return _analysis.max_ref; }
+    int         pre_context() const { return _pre_context; }
     
 private:
     opcode      fetch_opcode(const byte * bc);
@@ -124,7 +129,7 @@ inline Code::decoder::decoder(const limits & lims, Code &code) throw()
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
-  _instr(code._code), _data(code._data), _max(lims) 
+  _instr(code._code), _data(code._data), _max(lims)
 {}
     
 
@@ -191,6 +196,7 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
 
     assert((_constraint && immutable()) || !_constraint);
     dec.apply_analysis(_code, _code + _instr_count);
+    _max_ref = dec.max_ref();
     
     // Now we know exactly how much code and data the program really needs
     // realloc the buffers to exactly the right size so we don't waste any 
@@ -399,12 +405,14 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     case PUT_GLYPH_8BIT_OBS :
     case PUT_GLYPH :
       _code._modify = true;
+      _analysis.set_changed(_analysis.slotref);
       break;
     case NEXT :
     case COPY_NEXT :
       if (!_analysis.contexts[_analysis.slotref].flags.inserted)
         ++_analysis.slotref;
       _analysis.contexts[_analysis.slotref] = context(_code._instr_count+1);
+      if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
       break;
     case INSERT :
       _analysis.contexts[_analysis.slotref].flags.inserted = true;
@@ -413,13 +421,13 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
     case PUT_SUBS : 
       _code._modify = true;
-      _analysis.contexts[_analysis.slotref].flags.changed = true;
+      _analysis.set_changed(_analysis.slotref);
     case PUT_COPY :
     {
-      context & ctxt = _analysis.contexts[_analysis.slotref];
-      if (arg[0] != 0) { ctxt.flags.changed = true; _code._modify = true; }
+      if (arg[0] != 0) { _analysis.set_changed(_analysis.slotref); _code._modify = true; }
       if (arg[0] <= 0 && -arg[0] <= _analysis.slotref)
-        _analysis.contexts[_analysis.slotref + arg[0] - ctxt.flags.inserted].flags.referenced = true;
+        _analysis.set_ref(_analysis.slotref + arg[0] - _analysis.contexts[_analysis.slotref].flags.inserted);
+      else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
       break;
     }
     case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
@@ -427,7 +435,8 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     case PUSH_GLYPH_ATTR :
     case PUSH_ISLOT_ATTR :
       if (arg[1] <= 0 && -arg[1] <= _analysis.slotref)
-        _analysis.contexts[_analysis.slotref + arg[1] - _analysis.contexts[_analysis.slotref].flags.inserted].flags.referenced = true;
+        _analysis.set_ref(_analysis.slotref + arg[1] - _analysis.contexts[_analysis.slotref].flags.inserted);
+      else if (_analysis.slotref + arg[1] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[1];
       break;
     case PUSH_GLYPH_METRIC :
     case PUSH_FEAT :
@@ -542,6 +551,7 @@ void Code::decoder::apply_analysis(instr * const code, instr * code_end)
     _code._instr_count = code_end - code;
 }
 
+
 inline 
 void Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
 {
@@ -553,6 +563,18 @@ inline
 void Code::failure(const status_t s) throw() {
     release_buffers();
     _status = s;
+}
+
+inline
+void Code::decoder::analysis::set_ref(const int index) throw() {
+    contexts[index].flags.referenced = true;
+    if (index > max_ref) max_ref = index;
+}
+
+inline
+void Code::decoder::analysis::set_changed(const int index) throw() {
+    contexts[index].flags.changed = true;
+    if (index > max_ref) max_ref = index;
 }
 
 void Code::release_buffers() throw() 

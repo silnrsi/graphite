@@ -26,6 +26,9 @@ struct Rule {
                  * action;
   unsigned short   sort;
   byte             preContext;
+#ifndef NDEBUG
+  uint16           rule_idx;
+#endif
 };
 
 inline Rule::~Rule()
@@ -242,6 +245,14 @@ inline Slot * const & SlotMap::operator[](int n) const
 inline Slot * & SlotMap::operator[](int n)
 {
   return m_slot_map[n + 1];
+}
+
+// dependency chaining of .h means this needs to go here atm.
+namespace vm {
+inline bool Machine::bounds_check(unsigned int max_ref)
+{
+    return (_map.size() > max_ref + _map.context() || (_map.end()[-1] && _map.size() >= max_ref + _map.context()));
+}
 }
 
 } // namespace graphite2
