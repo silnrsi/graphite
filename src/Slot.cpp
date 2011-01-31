@@ -281,9 +281,11 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int16 value, co
         if (idx < map.size() && map[idx])
         {
             Slot *other = map[idx];
-            attachTo(other);
-            other->child(this);
-            m_attach = Position(seg->glyphAdvance(other->gid()), 0);
+            if (other != this && other->child(this))
+            {
+                attachTo(other);
+                m_attach = Position(seg->glyphAdvance(other->gid()), 0);
+            }
         }
         else
         {
@@ -360,22 +362,24 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int16 value, co
     }
 }
 
-void Slot::child(Slot *ap)
+bool Slot::child(Slot *ap)
 {
-    if (ap == m_child) {}
+    if (ap == m_child) return false;
     else if (!m_child)
         m_child = ap;
     else
-        m_child->sibling(ap);
+        return m_child->sibling(ap);
+    return true;
 }
 
-void Slot::sibling(Slot *ap)
+bool Slot::sibling(Slot *ap)
 {
-    if (ap == m_sibling) {}
+    if (ap == m_sibling) return false;
     else if (!m_sibling)
         m_sibling = ap;
     else
-        m_sibling->sibling(ap);
+        return m_sibling->sibling(ap);
+    return true;
 }
 
 void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)

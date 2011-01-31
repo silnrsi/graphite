@@ -80,7 +80,7 @@ public:
     struct limits;
     struct analysis
     {
-        int       slotref;
+        uint8     slotref;
         context   contexts[256];
         byte      max_ref;
         
@@ -130,7 +130,7 @@ inline Code::decoder::decoder(const limits & lims, Code &code) throw()
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
   _instr(code._code), _data(code._data), _max(lims)
-{}
+{ }
     
 
 
@@ -420,12 +420,13 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       break;
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
     case PUT_SUBS : 
-      _code._modify = true;
-      _analysis.set_changed(_analysis.slotref);
+      //_code._modify = true;
+      //_analysis.set_changed(_analysis.slotref);
+      // no break here;
     case PUT_COPY :
     {
       if (arg[0] != 0) { _analysis.set_changed(_analysis.slotref); _code._modify = true; }
-      if (arg[0] <= 0 && -arg[0] <= _analysis.slotref)
+      if (arg[0] <= 0 && -arg[0] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(_analysis.slotref + arg[0] - _analysis.contexts[_analysis.slotref].flags.inserted);
       else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
       break;
@@ -434,7 +435,7 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_GLYPH_ATTR :
     case PUSH_ISLOT_ATTR :
-      if (arg[1] <= 0 && -arg[1] <= _analysis.slotref)
+      if (arg[1] <= 0 && -arg[1] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(_analysis.slotref + arg[1] - _analysis.contexts[_analysis.slotref].flags.inserted);
       else if (_analysis.slotref + arg[1] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[1];
       break;

@@ -438,7 +438,13 @@ public:
           const void * table = face2->getTable(tagCmap, &cmapSize);
           if (!table) return;
           m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
+          if (!TtfUtil::CheckCmap31Subtable(m_ctable))
+          {
+              m_ctable = NULL;
+              return;
+          }
           m_stable = TtfUtil::FindCmapSubtable(table, 3, 10, cmapSize);
+          if (m_stable && !TtfUtil::CheckCmap310Subtable(m_stable)) m_stable = NULL;
       }
 
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing

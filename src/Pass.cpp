@@ -64,6 +64,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
                * const pass_end   = p + pass_length;
     size_t numRanges;
 
+    if (pass_length < 40) return false; 
     // Read in basic values
     m_immutable = (*p++) & 0x1U;
     m_iMaxLoop = *p++;
@@ -99,6 +100,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
             || m_sSuccess > m_sRows)
         return false;
 
+    if (p + numRanges * 6 - 4 > pass_end) return false;
     m_numGlyphs = swap16(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
     // Caculate the start of vairous arrays.
     const uint16 * const ranges = reinterpret_cast<const uint16 *>(p);
@@ -487,7 +489,7 @@ bool Pass::testPassConstraint(Machine & m) const
 
 bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
-    if (r.sort > m.slotMap().size())    return false;
+    if (r.sort - r.preContext > (int)m.slotMap().size() - m.slotMap().context())    return false;
     if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());
 
@@ -528,7 +530,8 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 
 void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
-    assert(codeptr && *codeptr);
+    assert(codeptr);
+    if (!*codeptr) return;
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
 
