@@ -199,6 +199,8 @@ ENDOP
 STARTOP(next)
     if (map - &smap[0] >= int(smap.size())) DIE
     if (is) is = is->next();
+    if (is == smap.highwater() && is)
+        smap.highwater(is->next());
     ++map;
 ENDOP
 
@@ -299,6 +301,7 @@ STARTOP(insert)
 ENDOP
 
 STARTOP(delete_)
+    if (!is) DIE
     is->markDeleted(true);
     if (is->prev())
         is->prev()->next(is->next());

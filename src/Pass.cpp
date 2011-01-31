@@ -180,7 +180,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
         r->preContext = *--precontext;
         r->sort       = swap16(*--sort_key);
 #ifndef NDEBUG
-        r->rule_idx   = n;
+        r->rule_idx   = n - 1;
 #endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
@@ -365,23 +365,26 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
-
-    int hurdle=0, pos = 0, lc = m_iMaxLoop;
+    Slot *currHigh = s->next();
+    
+    m.slotMap().highwater(currHigh);
+    int lc = m_iMaxLoop;
     do
     {
-        pos += findNDoRule(s, m, fsm);
-        if (pos > hurdle) {
+        findNDoRule(s, m, fsm);
+        if (currHigh != m.slotMap().highwater() && currHigh) {
             lc = m_iMaxLoop;
-            hurdle = pos;
+            currHigh = m.slotMap().highwater();
         }
         else if (--lc == 0)
         {
-            while (pos <= hurdle && s) {
-                s = s->next();
-                ++pos;
-            }
-            hurdle = pos;
             lc = m_iMaxLoop;
+            s = currHigh;
+            if (s)
+            {
+                currHigh = s->next();
+                m.slotMap().highwater(currHigh);
+            }
         }
     } while (s);
 }
@@ -404,7 +407,7 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
     {
         fsm.slots.pushSlot(slot);
         const uint16 col = glyphToCol(slot->gid());
-        if (col == 0xffffU) return true;
+        if (col == 0xffffU || !state->is_transition()) return true;
 
         state = state->transitions[col];
         if (state->is_success())
@@ -419,13 +422,13 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
 #endif
 
         slot = slot->next();
-    } while (state->is_transition() && state != m_states && slot);
+    } while (state != m_states && slot);
 
     fsm.slots.pushSlot(slot);
     return true;
 }
 
-int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
+void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
 {
     assert(slot);
 
@@ -446,7 +449,7 @@ int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
                 XmlTraceLog::get().addAttribute(AttrIndex, int(slot - fsm.slots.segment.first()));
             }
 #endif
-            const int res = doAction(r->rule->action, slot, m);
+            doAction(r->rule->action, slot, m);
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
             {
@@ -456,12 +459,13 @@ int Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
                 XmlTraceLog::get().closeElement(ElementDoRule);
             }
 #endif
-            return res;
+            return;
         }
     }
 
     slot = slot->next();
-    return 1;
+    if (m.slotMap().highwater() == slot && slot)
+        m.slotMap().highwater(slot->next());
 }
 
 
@@ -522,7 +526,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 }
 
 
-int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
+void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
     assert(codeptr && *codeptr);
     SlotMap   & smap = m.slotMap();
@@ -542,14 +546,12 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
         }
     }
 
-    int count   = map - smap.begin() - smap.context() + glyph_diff + ret;
     slot_out = *map;
     if (ret < 0)
     {
         if (!slot_out)
         {
             slot_out = seg.last();
-            --count;
             ++ret;
         }
         while (++ret <= 0 && slot_out)
@@ -563,15 +565,14 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
         if (!slot_out)
         {
             slot_out = seg.first();
-            ++count;
             --ret;
         }
         while (--ret >= 0 && slot_out)
         {
             slot_out = slot_out->next();
+            if (slot_out == smap.highwater() && slot_out)
+                smap.highwater(slot_out->next());
         }
     }
     if (status != Machine::finished && slot_out) slot_out = NULL;
-
-    return count;
 }

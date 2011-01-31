@@ -97,12 +97,15 @@ public:
   Slot * const & operator[](int n) const;
   Slot       * & operator [] (int);
   void           pushSlot(Slot * const slot);
+  Slot         * highwater() { return m_highwater; }
+  void           highwater(Slot *s) { m_highwater = s; }
 
   Segment &    segment;
 private:
   Slot         * m_slot_map[MAX_SLOTS+1];
   unsigned short m_size;
   unsigned short m_precontext;
+  Slot         * m_highwater;
 };
 
 
@@ -265,7 +268,7 @@ inline int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_
 
 inline bool Machine::bounds_check(unsigned int max_ref)
 {
-    return (_map.size() > max_ref + _map.context() || (_map.end()[-1] && _map.size() >= max_ref + _map.context()));
+    return _map.size() > max_ref + _map.context();
 }
 }
 
