@@ -851,13 +851,12 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 	size_t cLongHorMetrics = read(phhea->num_long_hor_metrics);
 	if (nGlyphId < cLongHorMetrics) 
 	{	// glyph id is acceptable
+                if (nGlyphId * sizeof(Sfnt::HorizontalMetric) > lHmtxSize) return false;
 		nAdvWid = read(phmtx[nGlyphId].advance_width);
 		nLsb = read(phmtx[nGlyphId].left_side_bearing);
 	}
 	else
 	{
-		nAdvWid = read(phmtx[cLongHorMetrics - 1].advance_width);
-
 		// guard against bad glyph id
 		size_t lLsbOffset = sizeof(Sfnt::HorizontalMetric) * cLongHorMetrics +
 			sizeof(int16) * (nGlyphId - cLongHorMetrics); // offset in bytes
@@ -866,6 +865,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 			nLsb = 0;
 			return false;
 		}
+                nAdvWid = read(phmtx[cLongHorMetrics - 1].advance_width);
 		const int16 * pLsb = reinterpret_cast<const int16 *>(phmtx) + 
 			lLsbOffset / sizeof(int16);
 		nLsb = read(*pLsb);

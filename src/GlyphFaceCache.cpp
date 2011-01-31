@@ -28,23 +28,23 @@ using namespace graphite2;
 
 /*virtual*/ bool GlyphFaceCacheHeader::initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)    //return result indicates success. Do not use if failed.
 {
-    if ((m_pLoca = (*getTable)(appFaceHandle, tagLoca, &m_lLoca)) == NULL) return false;
+    if ((m_pLoca = (*getTable)(appFaceHandle, tagLoca, &m_lLoca)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagLoca, m_pLoca, m_lLoca)) return false;
     size_t lHead;
-    if ((m_pHead = (*getTable)(appFaceHandle, tagHead, &lHead)) == NULL) return false;
-    if ((m_pGlyf = (*getTable)(appFaceHandle, tagGlyf, &m_lGlyf)) == NULL) return false;
-    if ((m_pHmtx = (*getTable)(appFaceHandle, tagHmtx, &m_lHmtx)) == NULL) return false;
+    if ((m_pHead = (*getTable)(appFaceHandle, tagHead, &lHead)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHead, m_pHead, lHead)) return false;
+    if ((m_pGlyf = (*getTable)(appFaceHandle, tagGlyf, &m_lGlyf)) == NULL  || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGlyf, m_pGlyf, m_lGlyf)) return false;
+    if ((m_pHmtx = (*getTable)(appFaceHandle, tagHmtx, &m_lHmtx)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHmtx, m_pHmtx, m_lHmtx)) return false;
     size_t lHHea;
-    if ((m_pHHea = (*getTable)(appFaceHandle, tagHhea, &lHHea)) == NULL) return false;
+    if ((m_pHHea = (*getTable)(appFaceHandle, tagHhea, &lHHea)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHhea, m_pHHea, lHHea)) return false;
     size_t lGlat;
-    if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &lGlat)) == NULL) return false;
+    if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &lGlat)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGlat, m_pGlat, lGlat)) return false;
 
     size_t lMaxp;
     const void* pMaxp = (*getTable)(appFaceHandle, tagMaxp, &lMaxp);
-    if (pMaxp==NULL) return false;
+    if (pMaxp == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagMaxp, pMaxp, lMaxp)) return false;
     m_nGlyphsWithGraphics = (unsigned short)TtfUtil::GlyphCount(pMaxp);
     
     size_t lGloc;
-    if ((m_pGloc = (*getTable)(appFaceHandle, tagGloc, &lGloc)) == NULL) return false;
+    if ((m_pGloc = (*getTable)(appFaceHandle, tagGloc, &lGloc)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGloc, m_pGloc, lGloc)) return false;
     if (lGloc < 6) return false;
     int version = swap32(*((uint32 *)m_pGloc));
     if (version != 0x00010000) return false;

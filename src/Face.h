@@ -102,6 +102,7 @@ public:
     CLASS_NEW_DELETE
 public:     //for local convenience    
     FILE* m_pfile;
+    unsigned int m_lfile;
     mutable TableCacheItem m_tables[TtfUtil::ktiLast];
     TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
     TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables

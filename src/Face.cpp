@@ -56,6 +56,7 @@ bool Face::readGlyphs(unsigned int faceOptions)
     {
         size_t length = 0;
         const void * table = getTable(tagCmap, &length);
+        if (!table || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagCmap, table, length)) return false;
         m_cmapCache = new CmapCache(table, length);
     }
     if (faceOptions & gr_face_preloadGlyphs)
@@ -180,7 +181,7 @@ NameTable * Face::nameTable() const
     if (m_pNames) return m_pNames;
     size_t tableLength = 0;
     const void * table = getTable(tagName, &tableLength);
-    if (table)
+    if (table && TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagName, table, tableLength))
         m_pNames = new NameTable(table, tableLength);
     return m_pNames;
 }
@@ -201,6 +202,9 @@ FileFace::FileFace(const char *filename) :
     m_pTableDir(NULL)
 {
     if (!(m_pfile = fopen(filename, "rb"))) return;
+    if (fseek(m_pfile, 0, SEEK_END)) return;
+    m_lfile = ftell(m_pfile);
+    if (fseek(m_pfile, 0, SEEK_SET)) return;
     size_t lOffset, lSize;
     if (!TtfUtil::GetHeaderInfo(lOffset, lSize)) return;
     m_pHeader = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(lSize);
@@ -315,6 +319,7 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
         size_t tlen, lOffset;
         if (!TtfUtil::GetTableInfo(name, ttfFaceHandle->m_pHeader, ttfFaceHandle->m_pTableDir, lOffset, tlen)) return NULL;
         if (fseek(ttfFaceHandle->m_pfile, lOffset, SEEK_SET)) return NULL;
+        if (lOffset + tlen > ttfFaceHandle->m_lfile) return NULL;
         tptr = gralloc<char>(tlen);
         if (fread(tptr, 1, tlen, ttfFaceHandle->m_pfile) != tlen) 
         {

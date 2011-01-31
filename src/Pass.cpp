@@ -517,6 +517,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
         XmlTraceLog::get().closeElement(ElementTestRule);
     }
 #endif
+
     return true;
 }
 
