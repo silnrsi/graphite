@@ -35,8 +35,7 @@ using namespace graphite2;
     if ((m_pHmtx = (*getTable)(appFaceHandle, tagHmtx, &m_lHmtx)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHmtx, m_pHmtx, m_lHmtx)) return false;
     size_t lHHea;
     if ((m_pHHea = (*getTable)(appFaceHandle, tagHhea, &lHHea)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHhea, m_pHHea, lHHea)) return false;
-    size_t lGlat;
-    if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &lGlat)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGlat, m_pGlat, lGlat)) return false;
+    if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &m_lGlat)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGlat, m_pGlat, m_lGlat)) return false;
 
     size_t lMaxp;
     const void* pMaxp = (*getTable)(appFaceHandle, tagMaxp, &lMaxp);
@@ -50,9 +49,10 @@ using namespace graphite2;
     if (version != 0x00010000) return false;
 
     m_numAttrs = swap16(((uint16 *)m_pGloc)[3]);
+    if (m_numAttrs > 0x1000) return false;                  // is this hard limit appropriate?
 
     unsigned short locFlags = swap16(((uint16 *)m_pGloc)[2]);
-    if (locFlags&1)
+    if (locFlags & 1)
     {
         m_locFlagsUse32Bit = true;
         m_nGlyphsWithAttributes = (unsigned short)((lGloc - 12) / 4);

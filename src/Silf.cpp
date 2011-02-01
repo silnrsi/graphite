@@ -207,7 +207,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     for (size_t i = 0; i < m_numPasses; ++i)
     {
         uint32 pOffset = swap32(pPasses[i]);
-        if ((uint8 *)pSilf + pOffset > eSilf)
+        if ((uint8 *)pSilf + pOffset > eSilf || swap32(pPasses[i + 1]) < pOffset)
         {
             releaseBuffers();
             return false;

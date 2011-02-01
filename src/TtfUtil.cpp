@@ -879,24 +879,19 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 	subtable. Pass nEncoding as -1 to find first table that matches only nPlatformId.
 	Return NULL if the subtable cannot be found.
 ----------------------------------------------------------------------------------------------*/
-const void * FindCmapSubtable(const void * pCmap, 
-								 int nPlatformId, /* =3 */
-								 int nEncodingId, /* = 1 */
-                                 size_t length)
+const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int nEncodingId, /* = 1 */ size_t length)
 {
-	const Sfnt::CharacterCodeMap * pTable = 
-		reinterpret_cast<const Sfnt::CharacterCodeMap *>(pCmap);
-	
-	uint16 csuPlatforms = read(pTable->num_subtables);
+    const Sfnt::CharacterCodeMap * pTable = reinterpret_cast<const Sfnt::CharacterCodeMap *>(pCmap);
+    uint16 csuPlatforms = read(pTable->num_subtables);
     if (length && (sizeof(Sfnt::CharacterCodeMap) + 8 * (csuPlatforms - 1) > length))
         return NULL;
-	for (int i = 0; i < csuPlatforms; i++)
-	{
-		if (read(pTable->encoding[i].platform_id) == nPlatformId &&
-			(nEncodingId == -1 || read(pTable->encoding[i].platform_specific_id) == nEncodingId))
-		{
+    for (int i = 0; i < csuPlatforms; i++)
+    {
+        if (read(pTable->encoding[i].platform_id) == nPlatformId &&
+                (nEncodingId == -1 || read(pTable->encoding[i].platform_specific_id) == nEncodingId))
+        {
             uint32 offset = read(pTable->encoding[i].offset);
-			const uint8 * pRtn = reinterpret_cast<const uint8 *>(pCmap) + offset;
+            const uint8 * pRtn = reinterpret_cast<const uint8 *>(pCmap) + offset;
             if (length)
             {
                 if (offset > length) return NULL;
@@ -924,11 +919,11 @@ const void * FindCmapSubtable(const void * pCmap,
                         return NULL;
                 }
             }
-			return const_cast<void *>(reinterpret_cast<const void *>(pRtn));
-		}
-	}
+            return const_cast<void *>(reinterpret_cast<const void *>(pRtn));
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1000,30 +995,30 @@ gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId, int rangeKey)
         return 0;
     }
 
-	// Ok, we're down to one segment and pMid points to the endCode element
-	// Either this is it or none is.
+    // Ok, we're down to one segment and pMid points to the endCode element
+    // Either this is it or none is.
 
-	chStart = read(*(pMid += nSeg + 1));
-	if (chEnd >= nUnicodeId && nUnicodeId >= chStart)
-	{
-		// Found correct segment. Find Glyph Id
-		int16 idDelta = read(*(pMid += nSeg));
-		uint16 idRangeOffset = read(*(pMid += nSeg));
+    chStart = read(*(pMid += nSeg + 1));
+    if (chEnd >= nUnicodeId && nUnicodeId >= chStart)
+    {
+        // Found correct segment. Find Glyph Id
+        int16 idDelta = read(*(pMid += nSeg));
+        uint16 idRangeOffset = read(*(pMid += nSeg));
 
-		if (idRangeOffset == 0)
-			return (uint16)(idDelta + nUnicodeId); // must use modulus 2^16
+        if (idRangeOffset == 0)
+            return (uint16)(idDelta + nUnicodeId); // must use modulus 2^16
 
-		// Look up value in glyphIdArray
+        // Look up value in glyphIdArray
         size_t offset = (nUnicodeId - chStart) + (idRangeOffset >> 1) +
-            (reinterpret_cast<const uint8 *>(pMid) - reinterpret_cast<const uint8*>(pTable));
+                (reinterpret_cast<const uint8 *>(pMid) - reinterpret_cast<const uint8*>(pTable));
         if (offset >= pTable->length)
             return 0;
-		gid16 nGlyphId = read(*(pMid + (nUnicodeId - chStart) + (idRangeOffset >> 1)));
-		// If this value is 0, return 0. Else add the idDelta
-		return nGlyphId ? nGlyphId + idDelta : 0;
-	}
+        gid16 nGlyphId = read(*(pMid + (nUnicodeId - chStart) + (idRangeOffset >> 1)));
+        // If this value is 0, return 0. Else add the idDelta
+        return nGlyphId ? nGlyphId + idDelta : 0;
+    }
 
-	return 0;
+    return 0;
 }
 
 /*----------------------------------------------------------------------------------------------

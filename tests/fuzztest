@@ -39,8 +39,9 @@ def valpos(fontlen, opts) :
         return gen
     elif opts.linear :
         def gen() :
-            for c in xrange(0, fontlen) :
-                yield (c, int(uniform(0, 256)))
+            while (1) :
+                for c in xrange(0, fontlen) :
+                    yield (c, int(uniform(0, 256)))
         return gen
     else :
         def gen() :
@@ -59,6 +60,7 @@ parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in 
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
 parser.add_option("-c","--count",type='int',help='Flag every count iterations')
 parser.add_option("-r","--random",help="Seed the random number generator with the given string")
+parser.add_option("-L","--linear",action="store_true",help="Linearly process every location in the source font")
 
 (opts, args) = parser.parse_args()
 

@@ -438,7 +438,7 @@ public:
           const void * table = face2->getTable(tagCmap, &cmapSize);
           if (!table) return;
           m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
-          if (!TtfUtil::CheckCmap31Subtable(m_ctable))
+          if (!m_ctable || !TtfUtil::CheckCmap31Subtable(m_ctable))
           {
               m_ctable = NULL;
               return;
@@ -450,7 +450,7 @@ public:
       bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
       {
           if (!m_ctable) return false;
-          uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : TtfUtil::Cmap31Lookup(m_ctable, cid);
+          uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : (m_ctable ? TtfUtil::Cmap31Lookup(m_ctable, cid) : 0);
           if (!gid)
               gid = m_face->findPseudo(cid);
           m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);

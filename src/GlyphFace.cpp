@@ -62,7 +62,7 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 #endif
     if (glyphid < hdr.m_nGlyphsWithAttributes)
     {
-        int glocs, gloce;
+        size_t glocs, gloce;
         if (hdr.m_locFlagsUse32Bit)
         {
             glocs = swap32(((uint32 *)hdr.m_pGloc)[2+glyphid]);
@@ -73,7 +73,10 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
             glocs = swap16(((uint16 *)hdr.m_pGloc)[4+glyphid]);
             gloce = swap16(((uint16 *)hdr.m_pGloc)[5+glyphid]);
         }
-        readAttrs(hdr.m_pGlat, glocs, gloce, hdr.m_numAttrs);
+        if (glocs >= hdr.m_lGlat || gloce > hdr.m_lGlat)
+            m_attrs = NULL;
+        else
+            readAttrs(hdr.m_pGlat, glocs, gloce, hdr.m_numAttrs);
     }
     else
         m_attrs = NULL;

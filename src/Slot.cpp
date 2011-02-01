@@ -121,13 +121,13 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
 
     if (m_parent && m_position.x < *cMin) *cMin = m_position.x;
 
-    if (m_child)
+    if (m_child && m_child != this)
     {
         Position tRes = m_child->finalise(seg, font, &m_position, bbox, cMin, attrLevel, clusterMin);
         if (tRes.x > res.x) res = tRes;
     }
 
-    if (m_parent && m_sibling)
+    if (m_parent && m_sibling && m_sibling != this)
     {
         Position tRes = m_sibling->finalise(seg, font, base, bbox, cMin, attrLevel, clusterMin);
         if (tRes.x > res.x) res = tRes;
@@ -364,7 +364,8 @@ void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int16 value, co
 
 bool Slot::child(Slot *ap)
 {
-    if (ap == m_child) return false;
+    if (this == ap) return false;
+    else if (ap == m_child) return true;
     else if (!m_child)
         m_child = ap;
     else
@@ -374,7 +375,8 @@ bool Slot::child(Slot *ap)
 
 bool Slot::sibling(Slot *ap)
 {
-    if (ap == m_sibling) return false;
+    if (this == ap) return false;
+    else if (ap == m_sibling) return true;
     else if (!m_sibling)
         m_sibling = ap;
     else
