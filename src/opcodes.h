@@ -58,7 +58,8 @@
 //        endPos    = Position of advance of last cluster
      
 
-#define NOT_IMPLEMENTED     assert(false)
+// #define NOT_IMPLEMENTED     assert(false)
+#define NOT_IMPLEMENTED
 
 #ifdef ENABLE_DEEP_TRACING
 #define TRACEPARAM(n)       XmlTraceLog::get().addArrayElement(ElementParams, dp-n, n)
@@ -130,7 +131,7 @@ STARTOP(mul)
 ENDOP
 
 STARTOP(div_)
-    if (int32(sp[-1])) { binop(/); }
+    if (*sp) { binop(/); }
 ENDOP
 
 STARTOP(min)
@@ -238,7 +239,7 @@ ENDOP
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (slot_ref)
+    if (is && slot_ref)
     {
         uint16 *tempUserAttrs = is->userAttrs();
         slotref ref = slotat(slot_ref);
@@ -251,6 +252,7 @@ STARTOP(put_copy)
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
+            is->sibling(NULL);
         }
         is->markCopied(false);
         is->markDeleted(false);

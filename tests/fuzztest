@@ -87,6 +87,7 @@ for loc, val in valpos(fontlen, opts)() :
     font.seek(loc, 0)
     oldval = font.read(1)
     font.seek(loc, 0)
+    while val == oldval : val = int(uniform(0, 256))
     font.write(chr(val))
     font.close()
 

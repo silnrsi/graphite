@@ -97,7 +97,8 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     assert(p - pass_start == 40);
     // Perform some sanity checks.
     if (   m_sTransition > m_sRows
-            || m_sSuccess > m_sRows)
+            || m_sSuccess > m_sRows
+            || m_sSuccess + m_sTransition < m_sRows)
         return false;
 
     if (p + numRanges * 6 - 4 > pass_end) return false;
@@ -166,7 +167,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     const byte * const ac_data_end = ac_data + swap16(o_action[m_numRules]);
     const byte * const rc_data_end = rc_data + swap16(o_constraint[m_numRules]);
 
-    m_rules = gralloc<Rule>(m_numRules);
+    if (!(m_rules = gralloc<Rule>(m_numRules))) return false;
     precontext += m_numRules;
     sort_key   += m_numRules;
     o_constraint += m_numRules;
@@ -225,6 +226,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     m_states      = gralloc<State>(m_sRows);
     m_sTable      = gralloc<State *>(m_sTransition * m_sColumns);
 
+    if (!m_startStates || !m_states || !m_sTable) return false;
     // load start states
     for (State * * s = m_startStates,
             * * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
@@ -408,6 +410,7 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
     do
     {
         fsm.slots.pushSlot(slot);
+        if (fsm.slots.size() >= SlotMap::MAX_SLOTS) return false;
         const uint16 col = glyphToCol(slot->gid());
         if (col == 0xffffU || !state->is_transition()) return true;
 
