@@ -206,7 +206,7 @@ STARTOP(next)
 ENDOP
 
 STARTOP(next_n)
-//    declare_params(1);
+    declare_params(1);
 //    const size_t    num = uint8(*param);
     NOT_IMPLEMENTED;
 ENDOP

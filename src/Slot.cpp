@@ -127,7 +127,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
         if (tRes.x > res.x) res = tRes;
     }
 
-    if (m_parent && m_sibling && m_sibling != this)
+    if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
         Position tRes = m_sibling->finalise(seg, font, base, bbox, cMin, attrLevel, clusterMin);
         if (tRes.x > res.x) res = tRes;

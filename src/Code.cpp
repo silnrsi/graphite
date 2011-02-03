@@ -431,6 +431,8 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
       break;
     }
+    case PUSH_ATT_TO_GATTR_OBS :
+        if (_code._constraint) return;
     case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_GLYPH_ATTR :
@@ -441,7 +443,6 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       break;
     case PUSH_GLYPH_METRIC :
     case PUSH_FEAT :
-    case PUSH_ATT_TO_GATTR_OBS :
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ATT_TO_GLYPH_ATTR :
     case ASSOC :                // slotrefs in varargs

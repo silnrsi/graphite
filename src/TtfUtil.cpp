@@ -1010,8 +1010,8 @@ gid16 Cmap31Lookup(const void * pCmap31, int nUnicodeId, int rangeKey)
 
         // Look up value in glyphIdArray
         size_t offset = (nUnicodeId - chStart) + (idRangeOffset >> 1) +
-                (reinterpret_cast<const uint8 *>(pMid) - reinterpret_cast<const uint8*>(pTable));
-        if (offset >= pTable->length)
+                (reinterpret_cast<const uint16 *>(pMid) - reinterpret_cast<const uint16 *>(pTable));
+        if (offset * 2 >= pTable->length)
             return 0;
         gid16 nGlyphId = read(*(pMid + (nUnicodeId - chStart) + (idRangeOffset >> 1)));
         // If this value is 0, return 0. Else add the idDelta
