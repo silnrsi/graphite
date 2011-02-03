@@ -250,7 +250,8 @@ public:
     CLASS_NEW_DELETE
 private:
     void freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level);
-    void purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level, unsigned long long minAccessCount);
+    void purgeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, size_t level,
+                    unsigned long long minAccessCount, unsigned long long oldAccessTime);
 
     uint16 m_prefixLength;
     uint16 m_maxCachedSegLength;
@@ -259,6 +260,7 @@ private:
     Features m_features;
     mutable unsigned long long m_totalAccessCount;
     mutable unsigned long long m_totalMisses;
+    float m_purgeFactor;
 };
 
 inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t length) const
