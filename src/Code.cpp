@@ -1,4 +1,4 @@
-/*  GRAPHITE2 LICENSIN_analysis.contexts[_analysis.slotref_analysis.contexts[_analysis.slotref]]G
+/*  GRAPHITE2 LICENSING
 
     Copyright 2010, SIL International
     All rights reserved.
