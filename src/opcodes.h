@@ -261,7 +261,9 @@ ENDOP
 
 STARTOP(insert)
     Slot *newSlot = seg.newSlot();
-    if (!is)
+    Slot *iss = is;
+    while (iss && iss->isDeleted()) iss = iss->next();
+    if (!iss)
     {
         if (seg.last())
         {
@@ -275,21 +277,21 @@ STARTOP(insert)
             seg.last(newSlot);
         }
     }
-    else if (is->prev())
+    else if (iss->prev())
     {
-        is->prev()->next(newSlot);
-        newSlot->prev(is->prev());
+        iss->prev()->next(newSlot);
+        newSlot->prev(iss->prev());
     }
     else
     {
         newSlot->prev(NULL);
         seg.first(newSlot);
     }
-    newSlot->next(is);
-    if (is)
+    newSlot->next(iss);
+    if (iss)
     {
-        is->prev(newSlot);
-        newSlot->originate(is->original());
+        iss->prev(newSlot);
+        newSlot->originate(iss->original());
     }
     else if (newSlot->prev())
     {
