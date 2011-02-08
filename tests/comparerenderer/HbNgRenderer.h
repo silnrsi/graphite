@@ -32,8 +32,8 @@
 #include <hb-ot-layout.h>
 #include <glib/gunicode.h>
 
-
 #include "Renderer.h"
+#include "FeatureParser.h"
 
 void hbngFtDestroy(void *user_data)
 {
@@ -43,9 +43,9 @@ void hbngFtDestroy(void *user_data)
 class HbNgRenderer : public Renderer
 {
 public:
-    HbNgRenderer(const char * fileName, int fontSize, int textDir)
+    HbNgRenderer(const char * fileName, int fontSize, int textDir, FeatureParser * features)
         : m_ftLibrary(NULL), m_ftFace(NULL),
-        m_face(NULL), m_font(NULL), m_bufferLength(1024)
+        m_face(NULL), m_font(NULL), m_feats(NULL), m_bufferLength(1024), m_featCount(0)
     {
         if ((FT_Init_FreeType(&m_ftLibrary) == 0) &&
             (FT_New_Face(m_ftLibrary, fileName, 0, &m_ftFace) == 0))
@@ -70,6 +70,29 @@ public:
             }
         }
         m_buffer = hb_buffer_create(m_bufferLength);
+        if (features)
+        {
+            m_featCount = features->featureCount() + 1;
+            m_feats = new hb_feature_t[m_featCount];
+            if (m_feats)
+            {
+                m_feats[0].tag = HB_TAG(' ', 'R', 'N', 'D');
+                m_feats[0].value = 0;
+                m_feats[0].start = 0;
+                m_feats[0].end = -1;
+                for (size_t i = 1; i < m_featCount; i++)
+                {
+                    m_feats[i].tag = features->featureId(i-1);
+                    m_feats[i].value = features->featureUValue(i-1);
+                    m_feats[i].start = 0;
+                    m_feats[i].end = -1;
+                }
+            }
+            else
+            {
+                m_featCount = 0;
+            }
+        }
     }
     virtual ~HbNgRenderer()
     {
@@ -78,6 +101,7 @@ public:
         if (m_face) hb_face_destroy(m_face);
         if (m_ftFace) FT_Done_Face(m_ftFace);
         if (m_ftLibrary) FT_Done_FreeType(m_ftLibrary);
+        delete m_feats;
     }
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
@@ -94,8 +118,8 @@ public:
         hb_buffer_set_script(m_buffer, script);
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
-        hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
-        hb_shape(m_font, m_face, m_buffer, &feats, 1);
+        //hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
+        hb_shape(m_font, m_face, m_buffer, m_feats, m_featCount);
         hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer);
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);
@@ -119,5 +143,7 @@ private:
     hb_face_t * m_face;
     hb_font_t * m_font;
     hb_buffer_t * m_buffer;
+    hb_feature_t* m_feats;
     size_t m_bufferLength;
+    size_t m_featCount;
 };

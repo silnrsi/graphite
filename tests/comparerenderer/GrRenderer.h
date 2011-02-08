@@ -20,6 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "Renderer.h"
+#include "FeatureParser.h"
 
 #include <graphite/GrClient.h>
 #include <graphite/Segment.h>
@@ -31,8 +32,8 @@
 class GrRenderer : public Renderer
 {
 public:
-    GrRenderer(const char * fontFile, int fontSize, int direction)
-        : m_fileFont(fontFile, static_cast<float>(fontSize), 72, 72)
+    GrRenderer(const char * fontFile, int fontSize, int direction, FeatureParser * features)
+        : m_fileFont(fontFile, static_cast<float>(fontSize), 72, 72), m_features(features)
         
     {  
         m_layout.setStartOfLine(false);
@@ -46,6 +47,7 @@ public:
         if ((length == 0) || !m_fileFont.isValid())
             new(result) RenderedLine();
         GrUtfTextSrc textSrc;
+        textSrc.setFeatures(m_features);
         textSrc.setText(reinterpret_cast<gr::utf8 *>(const_cast<char*>(utf8)), length);
         try
         {
@@ -73,5 +75,6 @@ public:
 private:
     gr::FileFont m_fileFont;
     gr::LayoutEnvironment m_layout;
+    FeatureParser * m_features;
 };
 

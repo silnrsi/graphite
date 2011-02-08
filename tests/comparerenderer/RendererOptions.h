@@ -79,7 +79,8 @@ typedef enum {
     OptSegCache,
     OptTrace,
     OptLogMask,
-    OptFeatures
+    OptFeatures,
+    OptAltFeatures
 } OptionId;
 
 static Option rendererOptions[] = {
@@ -103,8 +104,8 @@ static Option rendererOptions[] = {
     Option("", "--seg-cache", "Enable Segment Cache of given size", Option::OPTION_INT),
     Option("", "--trace", "XML trace log file", Option::OPTION_STRING),
     Option("", "--log-mask", "XML trace log mask (only used with --trace)", Option::OPTION_INT),
-    //Option("", "--features", "Feature list", Option::OPTION_STRING),
-    
+    Option("", "--features", "Feature list", Option::OPTION_STRING),
+    Option("", "--alt-features", "Feature list for alternative font (if different)", Option::OPTION_STRING),
 };
 
 const int NUM_RENDERER_OPTIONS = sizeof(rendererOptions) / sizeof(Option);

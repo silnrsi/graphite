@@ -43,7 +43,7 @@
 
 #include <vector>
 #include <assert.h>
-
+#include "FeatureParser.h"
 #include <graphite/GrAppData.h>
 #include <graphite/GrStructs.h>
 #include <graphite/ITextSource.h>
@@ -70,7 +70,7 @@ public:
   void setFont(gr::Font * font) { mFont = font; };
   void setPointSize(float & pointSize) { mPointSize = pointSize; };
   void setRtl(bool rtl) { mRtl = rtl; };
-//  void setFeatures(grutils::GrFeatureParser * parser) { mpFeatureParser = parser; }
+  void setFeatures(FeatureParser * parser) { mpFeatureParser = parser; }
   // --------------------------------------------------------------------------
   // New V2 interface:
   
@@ -124,7 +124,7 @@ private:
   gr::Font * mFont;
   bool mRtl;
   float mPointSize;
-//  grutils::GrFeatureParser* mpFeatureParser;
+  FeatureParser* mpFeatureParser;
 
 public: // methods that will go
   // Temporary--eventually these will be of interest only to SegmentPainter.

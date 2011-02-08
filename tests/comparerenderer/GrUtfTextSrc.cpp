@@ -254,8 +254,15 @@ std::pair<gr::toffset, gr::toffset> GrUtfTextSrc::propertyRange(gr::toffset ich)
 	
 size_t GrUtfTextSrc::getFontFeatures(gr::toffset ich, gr::FeatureSetting * prgfset)
 {
-//        if (mpFeatureParser)
-//            return mpFeatureParser->getFontFeatures(prgfset);
+        if (mpFeatureParser)
+        {
+            for (size_t i = 0; i < mpFeatureParser->featureCount() && i < 64; i++)
+            {
+                prgfset[i].id = mpFeatureParser->featureId(i);
+                prgfset[i].value = mpFeatureParser->featureSValue(i);
+            }
+            return mpFeatureParser->featureCount();
+        }
 	return 0;
 }
 

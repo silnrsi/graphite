@@ -37,6 +37,7 @@
 #include "RendererOptions.h"
 #include "Renderer.h"
 #include "RenderedLine.h"
+#include "FeatureParser.h"
 
 #ifdef HAVE_GRAPHITE
 #include "GrRenderer.h"
@@ -308,6 +309,8 @@ int main(int argc, char ** argv)
     // TODO features
 
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL, NULL, NULL};
+    FeatureParser * featureSettings = NULL;
+    FeatureParser * altFeatureSettings = NULL;
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     if (rendererOptions[OptTrace].exists())
@@ -318,26 +321,39 @@ int main(int argc, char ** argv)
         graphite_start_logging(traceFile, static_cast<GrLogMask>(logMask));
     }
 
+    if (rendererOptions[OptFeatures].exists())
+    {
+        featureSettings = new FeatureParser(rendererOptions[OptFeatures].get(argv));
+    }
+
     if (rendererOptions[OptAlternativeFont].exists())
     {
+        if (rendererOptions[OptAltFeatures].exists())
+        {
+            altFeatureSettings = new FeatureParser(rendererOptions[OptAltFeatures].get(argv));
+        }
+        else
+        {
+            altFeatureSettings = featureSettings;
+        }
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
         if (rendererOptions[OptGraphite2].exists())
         {
-            renderers[0] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize));
-            renderers[1] = (new Gr2Renderer(altFontFile, fontSize, direction, segCacheSize));
+            renderers[0] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
+            renderers[1] = (new Gr2Renderer(altFontFile, fontSize, direction, segCacheSize, altFeatureSettings));
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
         {
-            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction));
+            renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
+            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction, altFeatureSettings));
         }
 #endif
 #ifdef HAVE_HARFBUZZNG
         else if (rendererOptions[OptHarfbuzzNg].exists())
         {
-            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction));
+            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
+            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction, altFeatureSettings));
         }
 #endif
 #ifdef HAVE_ICU
@@ -359,13 +375,13 @@ int main(int argc, char ** argv)
     {
 #ifdef HAVE_GRAPHITE
         if (rendererOptions[OptGraphite].exists())
-            renderers[0] = (new GrRenderer(fontFile, fontSize, direction));
+            renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
         if (rendererOptions[OptGraphite2].exists())
-            renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize));
+            renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
-            renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction));
+            renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
@@ -388,7 +404,7 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
         return -3;
-    }   
+    }
 
     CompareRenderer compareRenderers(textFile, renderers, rendererOptions[OptVerbose].exists());
     if (rendererOptions[OptRepeat].exists())
@@ -413,6 +429,9 @@ int main(int argc, char ** argv)
             renderers[i] = NULL;
         }
     }
+    if (altFeatureSettings != featureSettings)
+        delete altFeatureSettings;
+    delete featureSettings;
     if (rendererOptions[OptLogFile].exists()) fclose(log);
     if (rendererOptions[OptTrace].exists()) graphite_stop_logging();
 
