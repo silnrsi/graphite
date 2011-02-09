@@ -33,7 +33,7 @@ Slot::Slot() :
     m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
     m_attach(0, 0), m_with(0, 0),
-    m_flags(0)
+    m_flags(0), m_attLevel(0)
     // Do not set m_userAttr since it is set *before* new is called since this
     // is used as a positional new to reset the GrSlot
 {
