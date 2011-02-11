@@ -239,7 +239,7 @@ ENDOP
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (is && slot_ref)
+    if (is && (slot_ref ||is != *map))
     {
         uint16 *tempUserAttrs = is->userAttrs();
         slotref ref = slotat(slot_ref);
