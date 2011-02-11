@@ -431,7 +431,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         if (!useCodes && pText != NULL)
         {
 #ifdef HAVE_ICONV
-            charLength = convertUtf("utf8","utf32",pText, pText32);
+            charLength = convertUtf("utf-8","utf-32",pText, pText32);
             fprintf(log, "String has %d characters\n", (int)charLength);
             size_t ci;
             for (ci = 0; ci < 10 && ci < charLength; ci++)

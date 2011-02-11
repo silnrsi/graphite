@@ -219,7 +219,8 @@ protected:
                 ++i;
             }
         }
-#ifdef __GNUC__
+        float elapsed = 0.;
+#ifdef __linux__
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
         long deltaSeconds = endTime.tv_sec - startTime.tv_sec;
         long deltaNs = endTime.tv_nsec - startTime.tv_nsec;
@@ -228,11 +229,11 @@ protected:
             deltaSeconds -= 1;
             deltaNs += 1000000000;
         }
-        float elapsed = deltaSeconds + deltaNs / 1000000000.0f;
+        elapsed = deltaSeconds + deltaNs / 1000000000.0f;
 #endif
 #ifdef WIN32
         QueryPerformanceCounter(&endCounter);
-        float elapsed = (endCounter.QuadPart - startCounter.QuadPart) / static_cast<float>(counterFreq.QuadPart);
+        elapsed = (endCounter.QuadPart - startCounter.QuadPart) / static_cast<float>(counterFreq.QuadPart);
 #endif
         return elapsed;
     }
