@@ -148,11 +148,10 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
                     currBits = 0;
                     mask = 2;
                 }
-                currBits += bits;
-                ::new (m_feats + i) FeatureRef
-(currBits, currIndex,
+                ::new (m_feats + i) FeatureRef (currBits, currIndex,
                                                (mask - 1) << currBits, flags,
                                                name, uiName, numSet, uiSet, pFace);
+                currBits += bits;
                 break;
             }
         }
