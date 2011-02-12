@@ -29,7 +29,11 @@
 
 #ifdef __GNUC__
 #include <unistd.h>
+#ifndef __linux__
+#include <sys/time.h>
 #endif
+#endif
+
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -178,11 +182,11 @@ protected:
         glyphCount = 0;
         unsigned int i = 0;
         const char * pLine = m_fileBuffer;
-#ifdef __GNUC__
+#ifdef __linux__
         struct timespec startTime;
         struct timespec endTime;
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
-#endif
+#else
 #ifdef WIN32
         LARGE_INTEGER counterFreq;
         LARGE_INTEGER startCounter;
@@ -190,6 +194,11 @@ protected:
         if (!QueryPerformanceFrequency(&counterFreq))
             fprintf(stderr, "Warning no high performance counter available\n");
         QueryPerformanceCounter(&startCounter);
+#else
+        struct timeval startTime;
+        struct timeval endTime;
+        gettimeofday(&startTime,0);
+#endif
 #endif
         // check for CRLF
         int lfLength = 1;
@@ -230,10 +239,21 @@ protected:
             deltaNs += 1000000000;
         }
         elapsed = deltaSeconds + deltaNs / 1000000000.0f;
-#endif
+#else
 #ifdef WIN32
         QueryPerformanceCounter(&endCounter);
         elapsed = (endCounter.QuadPart - startCounter.QuadPart) / static_cast<float>(counterFreq.QuadPart);
+#else
+        gettimeofday(&endTime,0);
+        long deltaSeconds = endTime.tv_sec - startTime.tv_sec;
+        long deltaUs = endTime.tv_usec - startTime.tv_usec;
+        if (deltaUs < 0)
+        {
+            deltaSeconds -= 1;
+            deltaUs += 1000000;
+        }
+        elapsed = deltaSeconds + deltaUs / 1000000.0f;
+#endif
 #endif
         return elapsed;
     }
