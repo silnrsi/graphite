@@ -50,6 +50,8 @@ fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')
 fonttest(charis4 charis_r_gr.ttf 006b 0361 070)
 fonttest(magyar1 MagyarLinLibertineG.ttf 0031 0035 -feat 210=36)
+fonttest(magyar2 MagyarLinLibertineG.ttf 0031 0030 -feat 210=200)
+fonttest(magyar3 MagyarLinLibertineG.ttf 0066 0069 0066 0074 0079 002d 0066 0069 0076 0065 -feat 209=3)
 
 macro(feattest TESTNAME FONTFILE)
     if (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.log)
