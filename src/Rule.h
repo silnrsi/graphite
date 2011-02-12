@@ -64,6 +64,9 @@ struct State
   size_t size() const;
   bool   is_success() const;
   bool   is_transition() const;
+#ifndef NDEBUG
+    uint32 index;
+#endif
 };
 
 inline size_t State::size() const 
@@ -112,7 +115,7 @@ private:
 class FiniteStateMachine
 {
 public:
-  enum {MAX_RULES=64};
+  enum {MAX_RULES=128};
 
 private:
   class Rules

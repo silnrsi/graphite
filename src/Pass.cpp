@@ -255,9 +255,12 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
 
         if (begin >= rule_map_end || end > rule_map_end || begin > end)
             return false;
-
+#ifndef NDEBUG
+        s->index = (s - m_states);
+#endif
         s->rules = begin;
-        s->rules_end = end;
+        s->rules_end = (end - begin <= FiniteStateMachine::MAX_RULES)? end :
+            begin + FiniteStateMachine::MAX_RULES;
         qsort(begin, end - begin, sizeof(RuleEntry), &cmpRuleEntry);
     }
 
@@ -460,6 +463,18 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
             {
                 XmlTraceLog::get().openElement(ElementPassResult);
                 XmlTraceLog::get().addAttribute(AttrResult, int(slot - fsm.slots.segment.first()));
+                const Slot * s = fsm.slots.segment.first();
+                while (s)
+                {
+                    XmlTraceLog::get().openElement(ElementSlot);
+                    XmlTraceLog::get().addAttribute(AttrGlyphId, s->gid());
+                    XmlTraceLog::get().addAttribute(AttrX, s->origin().x);
+                    XmlTraceLog::get().addAttribute(AttrY, s->origin().y);
+                    XmlTraceLog::get().addAttribute(AttrBefore, s->before());
+                    XmlTraceLog::get().addAttribute(AttrAfter, s->after());
+                    XmlTraceLog::get().closeElement(ElementSlot);
+                    s = s->next();
+                }
                 XmlTraceLog::get().closeElement(ElementPassResult);
                 XmlTraceLog::get().closeElement(ElementDoRule);
             }
