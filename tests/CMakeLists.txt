@@ -49,6 +49,7 @@ fonttest(scher2 Scheherazadegr.ttf 0627 0644 0625 0639 0644 0627 0646 -rtl)
 fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')
 fonttest(charis4 charis_r_gr.ttf 006b 0361 070)
+fonttest(magyar1 MagyarLinLibertineG.ttf 0031 0035 -feat 210=36)
 
 macro(feattest TESTNAME FONTFILE)
     if (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.log)
