@@ -179,7 +179,7 @@ uint16 *face_name(const gr_face * pFace, uint16 nameid, uint16 lid)
 }
 #endif
 
-unsigned short face_n_glyphs(const gr_face* pFace)
+unsigned short gr_face_n_glyphs(const gr_face* pFace)
 {
     return pFace->getGlyphFaceCache()->numGlyphs();
 }
