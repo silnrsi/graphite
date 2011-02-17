@@ -758,13 +758,11 @@ int Parameters::testFileFont() const
         float advanceWidth = gr_seg_advance_X(pSeg);
         fprintf(log, "Advance width = %6.1f\n", advanceWidth);
         unsigned int numchar = gr_seg_n_cinfo(pSeg);
-        gr_uint32 *firsts = (gr_uint32 *)malloc(numchar * sizeof(gr_uint32));
-        gr_uint32 *lasts = (gr_uint32 *)malloc(numchar * sizeof(gr_uint32));
-        gr_seg_char_slots(pSeg, firsts, lasts, 0, 0);
         fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
         for (unsigned int j = 0; j < numchar; j++)
         {
-            fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(gr_seg_cinfo(pSeg, j)), firsts[j], lasts[j]);
+            const gr_char_info *c = gr_seg_cinfo(pSeg, j);
+            fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
         }
         free(map);
         gr_seg_destroy(pSeg);

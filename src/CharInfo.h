@@ -29,16 +29,23 @@ class CharInfo
 {
 
 public:
+    CharInfo() : m_before(-1), m_after(0) {}
     void init(int cid) { m_char = cid; }
     unsigned int unicodeChar() const { return m_char; }
     void feats(int offset) { m_featureid = offset; }
     int fid() const { return m_featureid; }
     int breakWeight() const { return m_break; }
     void breakWeight(int val) { m_break = val; }
+    int after() const { return m_after; }
+    void after(int val) { m_after = val; }
+    int before() const { return m_before; }
+    void before(int val) { m_before = val; }
 
     CLASS_NEW_DELETE
 private:
     int m_char;     // Unicode character from character stream
+    int m_before;   // slot index before us, comes before
+    int m_after;    // slot index after us, comes after
     uint8 m_featureid;	// index into features list in the segment
     int8 m_break;	// breakweight coming from lb table
 };

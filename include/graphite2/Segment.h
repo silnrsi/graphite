@@ -135,6 +135,20 @@ GR2_API unsigned int gr_cinfo_unicode_char(const gr_char_info* p/*not NULL*/);
   */
 GR2_API int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/);
 
+/** Returns the slot index that after this character is after in the slot stream
+  *
+  * @return after slot index between 0 and gr_seg_n_slots()
+  * @param p Pointer to charinfo to return information on.
+  */
+GR2_API int gr_cinfo_after(const gr_char_info* p/*not NULL*/);
+
+/** Returns the slot index that before this character is before in the slot stream
+  *
+  * @return before slot index between 0 and gr_seg_n_slots()
+  * @param p Pointer to charinfo to return information on.
+  */
+GR2_API int gr_cinfo_before(const gr_char_info* p/*not NULL*/);
+
 /** Returns the number of unicode characters in a string.
   *
   * @return number of characters in the string
@@ -204,22 +218,6 @@ GR2_API const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/);    //may
   * The last slot in a segment has a gr_slot_next_in_segment() of NULL
   */
 GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
-
-/** Calculates the underlying character to glyph associations.
-  *
-  * @param pSeg  Pointer to the segment we want information on.
-  * @param begins An array of gr_seg_n_cinfo integers giving slot index for each
-  *               charinfo. The value corresponds to which slot a cursor would be before
-  *               if an underlying cursor were before the charinfo at this index.
-  * @param ends  An array of gr_seg_n_cinfo integers giving the slot index for each
-  *              charinfo. The value at an index corresponds to which slot a cursor would
-  *              be after if an underlying cursor were after the charinfo at the index.
-  * @param sbegins   An array of gr_seg_n_cinfo gr_slot * corresponding to the gr_slot at
-  *                  index given by begins. The pointer to the array may be NULL.
-  * @param sends An array of gr_seg_n_cinfo gr_slot * corresponding to the gr_slot at the
-  *              index given by ends. The pointer to the array may be NULL.
-  */
-GR2_API void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends);
 
 /** Returns the next slot along in the segment.
   *

@@ -39,4 +39,16 @@ int gr_cinfo_break_weight(const gr_char_info* p/*not NULL*/)
     return p->breakWeight();
 }
 
+int gr_cinfo_after(const gr_char_info *p/*not NULL*/)
+{
+    assert(p);
+    return p->after();
+}
+
+int gr_cinfo_before(const gr_char_info *p/*not NULL*/)
+{
+    assert(p);
+    return p->before();
+}
+
 } // extern "C"

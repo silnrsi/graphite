@@ -162,11 +162,5 @@ const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
     return static_cast<const gr_slot*>(pSeg->last());
 }
 
-void gr_seg_char_slots(const gr_segment *pSeg, gr_uint32 *begins, gr_uint32 *ends, gr_slot **sbegins, gr_slot **sends)
-{
-    assert(pSeg && begins && ends);
-    pSeg->getCharSlots(begins, ends, reinterpret_cast<Slot**>(sbegins), reinterpret_cast<Slot**>(sends));
-}
-
 
 } // extern "C"

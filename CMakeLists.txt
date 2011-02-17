@@ -61,7 +61,7 @@ add_subdirectory(src)
 add_subdirectory(gr2fonttest)
 add_subdirectory(tests)
 add_subdirectory(doc)
-set(version 0.0.0)
+set(version 2.0.0)
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 

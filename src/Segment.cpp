@@ -283,6 +283,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
 {
     Position currpos;
     Slot *s, *ls = NULL;
+    int iSlot = 0;
     float cMin = 0.;
     float clusterMin = 0.;
     Rect bbox;
@@ -292,8 +293,15 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
     
     if (m_dir & 1)
     {
-        for (s = iEnd; s && s != iStart->prev(); s = s->prev())
+        for (s = iEnd, iSlot = m_numGlyphs - 1; s && s != iStart->prev(); s = s->prev(), --iSlot)
         {
+            for (int j = s->before(); j <= s->after(); j++)
+            {
+                CharInfo *c = charinfo(j);
+                if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
+                if (c->after() < iSlot) c->after(iSlot);
+            }
+
             if (s->isBase())
             {
                 clusterMin = currpos.x;
@@ -306,8 +314,15 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
     }
     else
     {
-        for (s = iStart; s && s != iEnd->next(); s = s->next())
+        for (s = iStart, iSlot = 0; s && s != iEnd->next(); s = s->next(), ++iSlot)
         {
+            for (int j = s->before(); j <= s->after(); j++)
+            {
+                CharInfo *c = charinfo(j);
+                if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
+                if (c->after() < iSlot) c->after(iSlot);
+            }
+
             if (s->isBase())
             {
                 clusterMin = currpos.x;
@@ -319,35 +334,6 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
         }
     }
     if (iStart == m_first && iEnd == m_last) m_advance = currpos;
-}
-
-
-void Segment::getCharSlots(uint32 *begins, uint32 *ends, Slot **sbegins, Slot **sends) const
-{
-    Slot *s;
-    uint32 i;
-    if (!begins || !ends) return;
-    memset(begins, 0xFF, m_numCharinfo * sizeof(uint32));
-    memset(ends, 0, m_numCharinfo * sizeof(uint32));
-    
-    for (s = m_first, i = 0; s; s = s->next(), i++)
-    {
-        for (int j = s->before(); j <= s->after(); j++)
-        {
-            assert(j >= 0);
-            assert(j < static_cast<int>(m_numCharinfo));
-            if (i < begins[j])
-            {
-                begins[j] = i;
-                if (sbegins) sbegins[j] = s;
-            }
-            if (i > ends[j])
-            {
-                ends[j] = i;
-                if (sends) sends[j] = s;
-            }
-        }
-    }
 }
 
 #ifndef DISABLE_TRACING
