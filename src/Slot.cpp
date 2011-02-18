@@ -188,15 +188,15 @@ uint32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     }
 }
 
-int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex) const
+int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
     if (!this) return 0;
-    if (index == gr_slatUserDefnV1)
+    if (ind == gr_slatUserDefnV1)
     {
-        index = gr_slatUserDefn;
+        ind = gr_slatUserDefn;
         subindex = 0;
     }
-    switch (index)
+    switch (ind)
     {
     case gr_slatAdvX :
         return static_cast<int>(m_advance.x);
@@ -259,15 +259,15 @@ int Slot::getAttr(const Segment *seg, attrCode index, uint8 subindex) const
     }
 }
 
-void Slot::setAttr(Segment *seg, attrCode index, uint8 subindex, int16 value, const SlotMap & map)
+void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
 {
     if (!this) return;
-    if (index == gr_slatUserDefnV1)
+    if (ind == gr_slatUserDefnV1)
     {
-        index = gr_slatUserDefn;
+        ind = gr_slatUserDefn;
         subindex = 0;
     }
-    switch (index)
+    switch (ind)
     {
     case gr_slatAdvX :
         m_advance = Position(value, m_advance.y);

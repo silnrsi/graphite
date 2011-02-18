@@ -301,6 +301,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
                 if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
                 if (c->after() < iSlot) c->after(iSlot);
             }
+            s->index(iSlot);
 
             if (s->isBase())
             {
@@ -322,6 +323,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
                 if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
                 if (c->after() < iSlot) c->after(iSlot);
             }
+            s->index(iSlot);
 
             if (s->isBase())
             {

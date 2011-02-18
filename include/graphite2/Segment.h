@@ -304,6 +304,13 @@ GR2_API int gr_slot_before(const gr_slot* p/*not NULL*/);
   */
 GR2_API int gr_slot_after(const gr_slot* p/*not NULL*/);
 
+/** Returns the index of this slot in the segment
+  *
+  * Returns the index given to this slot during final positioning. This corresponds to the value returned br gr_cinfo_before()
+  * and gr_cinfo_after()
+  */
+GR2_API unsigned int gr_slot_index(const gr_slot* p/*not NULL*/);
+
 /** Return a slot attribute value
   *
   * Given a slot and an attribute along with a possible subattribute, return the

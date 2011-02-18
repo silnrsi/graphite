@@ -121,6 +121,12 @@ int gr_slot_after(const gr_slot* p/*not NULL*/)
     return p->after();
 }
 
+unsigned int gr_slot_index(const gr_slot *p/*not NULL*/)
+{
+    assert(p);
+    return p->index();
+}
+
 int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, gr_attrCode index, gr_uint8 subindex)
 {
     assert(p);

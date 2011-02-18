@@ -47,6 +47,8 @@ public:
     Position advancePos() const { return m_advance; }
     int before() const { return m_before; }
     int after() const { return m_after; }
+    uint32 index() const { return m_index; }
+    void index(uint32 val) { m_index = val; }
 
     Slot();
     void set(const Slot & slot, int charOffset, uint8 numUserAttr);
@@ -58,10 +60,10 @@ public:
     void setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
-    void originate(int index) { m_original = index; }
+    void originate(int ind) { m_original = ind; }
     int original() const { return m_original; }
-    void before(int index) { m_before = index; }
-    void after(int index) { m_after = index; }
+    void before(int ind) { m_before = ind; }
+    void after(int ind) { m_after = ind; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment* seg, const Font* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel, float *clusterMin);
@@ -75,8 +77,8 @@ public:
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
-    void setAttr(Segment* seg, attrCode index, uint8 subindex, int16 val, const SlotMap & map);
-    int getAttr(const Segment *seg, attrCode index, uint8 subindex) const;
+    void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
+    int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     Slot* firstChild() const { return m_child; }
@@ -96,8 +98,9 @@ private:
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     uint32 m_original;	    // charinfo that originated this slot (e.g. for feature values)
-    uint32 m_before;           // charinfo index of before association
-    uint32 m_after;            // charinfo index of after association
+    uint32 m_before;        // charinfo index of before association
+    uint32 m_after;         // charinfo index of after association
+    uint32 m_index;         // slot index given to this slot during finalising
     Slot *m_parent;         // index to parent we are attached to
     Slot *m_child;          // index to first child slot that attaches to us
     Slot *m_sibling;        // index to next child that attaches to our parent
