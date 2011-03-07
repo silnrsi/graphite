@@ -36,6 +36,7 @@ using namespace graphite2;
     size_t lHHea;
     if ((m_pHHea = (*getTable)(appFaceHandle, tagHhea, &lHHea)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagHhea, m_pHHea, lHHea)) return false;
     if ((m_pGlat = (*getTable)(appFaceHandle, tagGlat, &m_lGlat)) == NULL || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagGlat, m_pGlat, m_lGlat)) return false;
+    m_fGlat = swap32(*(uint32 *)m_pGlat);
 
     size_t lMaxp;
     const void* pMaxp = (*getTable)(appFaceHandle, tagMaxp, &lMaxp);

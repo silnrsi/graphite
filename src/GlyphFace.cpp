@@ -76,7 +76,7 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
         if (glocs >= hdr.m_lGlat || gloce > hdr.m_lGlat)
             m_attrs = NULL;
         else
-            readAttrs(hdr.m_pGlat, glocs, gloce, hdr.m_numAttrs);
+            readAttrs(hdr.m_pGlat, glocs, gloce, hdr.m_numAttrs, hdr.m_fGlat);
     }
     else
         m_attrs = NULL;
@@ -84,18 +84,25 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
     XmlTraceLog::get().closeElement(ElementGlyphFace);
 #endif
 }
- 
 
 
-
-
-void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num) 
+void GlyphFace::readAttrs(const void *pGlat, int start, int end, size_t num, uint32 format) 
 {
     m_attrs = grzeroalloc<uint16>(num);
     while (start < end)
     {
-        unsigned int attr = ((uint8 *)pGlat)[start];
-        unsigned int count = ((uint8 *)pGlat)[start + 1];
+        unsigned int attr;
+        unsigned int count;
+        if (format < 0x00020000)
+        {
+            attr = ((uint8 *)pGlat)[start];
+            count = ((uint8 *)pGlat)[start + 1];
+        }
+        else
+        {
+            attr = swap16(*(uint16 *)((uint8 *)pGlat + start));
+            count = swap16(*(uint16 *)((uint8 *)pGlat + start + 2));
+        }
         if (attr + count > num)
         {
 #ifndef DISABLE_TRACING

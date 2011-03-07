@@ -46,7 +46,7 @@ friend class GlyphFace;
     size_t m_lGlyf; const void* m_pGlyf;
     size_t m_lHmtx; const void* m_pHmtx;
     const void* m_pHHea;
-    size_t m_lGlat; const void* m_pGlat;
+    size_t m_lGlat; const void* m_pGlat; uint32 m_fGlat;
 
     unsigned short m_numAttrs;      // number of glyph attributes per glyph
     bool m_locFlagsUse32Bit;

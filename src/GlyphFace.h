@@ -83,7 +83,7 @@ public:
     uint16  getMetric(uint8 metric) const;
 
 private:
-    void    readAttrs(const void *pGlat, int start, int end, size_t num);       //only called from constructor
+    void    readAttrs(const void *pGlat, int start, int end, size_t num, uint32 format);       //only called from constructor
 
 private:
     Rect     m_bbox;        // bounding box metrics in design units
