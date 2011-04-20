@@ -154,6 +154,13 @@ GR2_API int gr_cinfo_after(const gr_char_info* p/*not NULL*/);
   */
 GR2_API int gr_cinfo_before(const gr_char_info* p/*not NULL*/);
 
+/** Returns the code unit index of this character in the input string
+  *
+  * @return code unit index between 0 and the end of the string
+  * @param p Pointer to charinfo to return information on.
+  */
+GR2_API size_t gr_cinfo_base(const gr_char_info* p/*not NULL*/);
+
 /** Returns the number of unicode characters in a string.
   *
   * @return number of characters in the string

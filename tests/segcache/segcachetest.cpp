@@ -41,7 +41,7 @@ public:
     CmapProcessor(Face * face, uint16 * buffer) :
         m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1)),
         m_buffer(buffer), m_pos(0) {};
-    bool processChar(uint32 cid)      //return value indicates if should stop processing
+    bool processChar(uint32 cid, size_t /*offset*/)      //return value indicates if should stop processing
     {
         assert(cid < 0xFFFF); // only lower plane supported for this test
         m_buffer[m_pos++] = TtfUtil::Cmap31Lookup(m_cmapTable, cid);

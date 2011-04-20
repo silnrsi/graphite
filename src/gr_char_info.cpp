@@ -56,4 +56,10 @@ int gr_cinfo_before(const gr_char_info *p/*not NULL*/)
     return p->before();
 }
 
+size_t gr_cinfo_base(const gr_char_info *p/*not NULL*/)
+{
+    assert(p);
+    return p->base();
+}
+
 } // extern "C"

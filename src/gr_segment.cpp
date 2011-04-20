@@ -52,7 +52,7 @@ namespace
         {
         }	  
 
-        bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
+        bool processChar(uint32 cid/*unicode character*/, size_t /*offset*/)		//return value indicates if should stop processing
         {
             if (cid==0)
                 return false;

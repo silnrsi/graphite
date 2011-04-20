@@ -339,34 +339,39 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
      uint32             cid;
      switch (limit.enc()) {
        case gr_utf8 : {
-	    Utf8Consumer consumer(static_cast<const uint8 *>(limit.pStart()));
-            for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid, pErrHandler))
-		    break;
-		if (!pProcessor->processChar(cid))
-		    break;
-            }
-            break;
+        const uint8 *pInit = static_cast<const uint8 *>(limit.pStart());
+	    Utf8Consumer consumer(pInit);
+        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
+            const uint8 *pCur = static_cast<const uint8 *>(limit.pStart());
+		    if (!consumer.consumeChar(limit, &cid, pErrHandler))
+		        break;
+		    if (!pProcessor->processChar(cid, pCur - pInit))
+		        break;
         }
+        break; }
        case gr_utf16: {
-            Utf16Consumer consumer(static_cast<const uint16 *>(limit.pStart()));
-            for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid, pErrHandler))
-		    break;
-		if (!pProcessor->processChar(cid))
-		    break;
+        const uint16* pInit = static_cast<const uint16 *>(limit.pStart());
+        Utf16Consumer consumer(pInit);
+        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
+            const uint16 *pCur = static_cast<const uint16 *>(limit.pStart());
+    		if (!consumer.consumeChar(limit, &cid, pErrHandler))
+	    	    break;
+		    if (!pProcessor->processChar(cid, pCur - pInit))
+		        break;
             }
 	    break;
         }
        case gr_utf32 : default: {
-	    Utf32Consumer consumer(static_cast<const uint32 *>(limit.pStart()));
-            for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-		if (!consumer.consumeChar(limit, &cid, pErrHandler))
-		    break;
-		if (!pProcessor->processChar(cid))
-		    break;
+        const uint32 *pInit = static_cast<const uint32 *>(limit.pStart());
+	    Utf32Consumer consumer(pInit);
+        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
+            const uint32 *pCur = static_cast<const uint32 *>(limit.pStart());
+		    if (!consumer.consumeChar(limit, &cid, pErrHandler))
+		        break;
+		    if (!pProcessor->processChar(cid, pCur - pInit))
+		        break;
             }
-            break;
+        break;
         }
     }
 }
@@ -379,7 +384,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
         ToUtf8Processor(uint8 * buffer, size_t maxLength) :
             m_count(0), m_byteLength(0), m_maxLength(maxLength), m_buffer(buffer)
         {}
-        bool processChar(uint32 cid)
+        bool processChar(uint32 cid, size_t /*offset*/)
         {
             // taken from Unicode Book ch3.9
             if (cid <= 0x7F)
@@ -434,7 +439,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
         ToUtf16Processor(uint16 * buffer, size_t maxLength) :
             m_count(0), m_uint16Length(0), m_maxLength(maxLength), m_buffer(buffer)
         {}
-        bool processChar(uint32 cid)
+        bool processChar(uint32 cid, size_t /*offset*/)
         {
             // taken from Unicode Book ch3.9
             if (cid <= 0xD800)
@@ -475,7 +480,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
     public:
         ToUtf32Processor(uint32 * buffer, size_t maxLength) :
             m_count(0), m_maxLength(maxLength), m_buffer(buffer) {}
-        bool processChar(uint32 cid)
+        bool processChar(uint32 cid, size_t /*offset*/)
         {
             m_buffer[m_count++] = cid;
             if (m_count == m_maxLength)

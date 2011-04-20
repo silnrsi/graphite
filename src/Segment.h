@@ -94,7 +94,7 @@ public:
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
     void last(Slot *p) { m_last = p; }
-    void appendSlot(int i, int cid, int gid, int fid);
+    void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     Slot *newSlot();
     void freeSlot(Slot *);
     void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);

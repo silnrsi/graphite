@@ -132,12 +132,13 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
 }
 
-void Segment::appendSlot(int id, int cid, int gid, int iFeats)
+void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
     Slot *aSlot = newSlot();
     
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
+    m_charinfo[id].base(coffset);
     const GlyphFace * theGlyph = m_face->getGlyphFaceCache()->glyphSafe(gid);
     if (theGlyph)
     {
@@ -440,13 +441,13 @@ public:
           if (m_stable && !TtfUtil::CheckCmap310Subtable(m_stable)) m_stable = NULL;
       }
 
-      bool processChar(uint32 cid/*unicode character*/)		//return value indicates if should stop processing
+      bool processChar(uint32 cid/*unicode character*/, size_t coffset)		//return value indicates if should stop processing
       {
           if (!m_ctable) return false;
           uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : (m_ctable ? TtfUtil::Cmap31Lookup(m_ctable, cid) : 0);
           if (!gid)
               gid = m_face->findPseudo(cid);
-          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);
+          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
           ++m_nCharsProcessed;
           return true;
       }
@@ -475,14 +476,14 @@ public:
     {
     }
 
-    bool processChar(uint32 cid/*unicode character*/)     //return value indicates if should stop processing
+    bool processChar(uint32 cid/*unicode character*/, size_t coffset)     //return value indicates if should stop processing
     {
         if (!m_cmap) return false;
         uint16 gid = m_cmap->lookup(cid);
         if (!gid)
             gid = m_face->findPseudo(cid);
         //int16 bw = m_face->glyphAttr(gid, m_breakAttr);
-        m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid);
+        m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
         ++m_nCharsProcessed;
         return true;
     }

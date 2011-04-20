@@ -45,12 +45,15 @@ public:
     void after(int val) { m_after = val; }
     int before() const { return m_before; }
     void before(int val) { m_before = val; }
+    size_t base() const { return m_base; }
+    void base(size_t offset) { m_base = offset; }
 
     CLASS_NEW_DELETE
 private:
     int m_char;     // Unicode character from character stream
     int m_before;   // slot index before us, comes before
     int m_after;    // slot index after us, comes after
+    size_t  m_base; // offset into input string corresponding to this charinfo
     uint8 m_featureid;	// index into features list in the segment
     int8 m_break;	// breakweight coming from lb table
 };
