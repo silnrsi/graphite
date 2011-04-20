@@ -183,7 +183,9 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
   * @param pStart Start of the string
   * @param nChars Number of unicode characters to process in the string. The string will
   *               be processed either up to the first NULL or until nChars have been
-  *               processed.
+  *               processed. nChars is also used to initialise the internal memory
+  *               allocations of the segment. So it is wise not to make nChars too much
+  *               greater than the actual number of characters being processed.
   * @param dir Specifies whether the segment is processed right to left (1) or left to
   *            right (0)
   */
