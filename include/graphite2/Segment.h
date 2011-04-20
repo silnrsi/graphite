@@ -18,6 +18,11 @@
     If not, write to the Free Software Foundation, Inc., 59 Temple Place,
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
+
+    Alternatively, the contents of this file may be used under the terms
+    of the Mozilla Public License (http://mozilla.org/MPL) or the GNU
+    General Public License, as published by the Free Software Foundation,
+    either version 2 of the License or (at your option) any later version.
 */
 #pragma once
 
@@ -176,7 +181,9 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
   *               for the font will be used.
   * @param enc Specifies what encoding form the string is in (utf8, utf16, utf32)
   * @param pStart Start of the string
-  * @param nChars Number of unicode characters to process in the string
+  * @param nChars Number of unicode characters to process in the string. The string will
+  *               be processed either up to the first NULL or until nChars have been
+  *               processed.
   * @param dir Specifies whether the segment is processed right to left (1) or left to
   *            right (0)
   */
