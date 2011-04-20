@@ -54,6 +54,10 @@
 #include "HbNgRenderer.h"
 #endif
 
+#ifdef HAVE_HARFBUZZ
+#include "HbRenderer.h"
+#endif
+
 #ifdef HAVE_USP10
 #include "UniscribeRenderer.h"
 #endif
@@ -375,6 +379,13 @@ int main(int argc, char ** argv)
         {
             renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
             renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction, altFeatureSettings));
+        }
+#endif
+#ifdef HAVE_HARFBUZZ
+        else if (rendererOptions[OptHarfbuzz].exists())
+        {
+            renderers[0] = (new HbRenderer(fontFile, fontSize, direction));
+            renderers[1] = (new HbRenderer(altFontFile, fontSize, direction));
         }
 #endif
 #ifdef HAVE_ICU

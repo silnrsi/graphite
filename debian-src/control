@@ -5,7 +5,7 @@ Maintainer: Martin Hosken <martin_hosken@sil.org>
 Build-Depends: debhelper (>= 8.0), cmake, libfreetype6-dev, libgraphite-dev, libicu-dev, asciidoc, dblatex, libxml2-utils, doxygen, docbook-xsl
 Standards-Version: 3.9.1
 
-Package: libgraphite2
+Package: libgraphite2-2.0.0
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}
@@ -53,7 +53,7 @@ Description: Development libraries for libgraphite2
  .
  This package contains the development libraries for libgraphite2 
 
-Package: libgraphite2-dbg
+Package: libgraphite2-2.0.0-dbg
 Priority: extra
 Section: debug
 Architecture: any

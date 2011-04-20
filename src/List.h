@@ -18,6 +18,11 @@
     If not, write to the Free Software Foundation, Inc., 59 Temple Place, 
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
 */
 
 // designed to have a limited subset of the std::vector api
@@ -50,7 +55,7 @@ public:
     Vector(const Vector<T> &rhs)                : m_first(0), m_last(0), m_end(0) { insert(begin(), rhs.begin(), rhs.end()); }
     template <typename I> 
     Vector(I first, const I last)               : m_first(0), m_last(0), m_end(0) { insert(begin(), first, last); }
-    ~Vector() { free(m_first); }
+    ~Vector() { clear(); free(m_first); }
     
     iterator            begin()         { return m_first; }
     const_iterator      begin() const   { return m_first; }

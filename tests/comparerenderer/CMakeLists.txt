@@ -30,6 +30,14 @@ else (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
     endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif (${ICU_INCLUDE} STREQUAL "ICU_INCLUDE-NOTFOUND")
 
+#find_path(HB1_INCLUDE NAMES "harfbuzz-shaper.h"
+#        PATHS /usr/local/include/harfbuzz-1 /usr/include/harfbuzz-1
+#        DOC "Include directory for harfbuzz")
+#if (NOT ${HB1_INCLUDE} STREQUAL "")
+#    add_definitions(-DHAVE_HARFBUZZ)
+#    set(HB1_LDFLAGS "-L${HB1_INCLUDE}/../../lib -lharfbuzz-1")
+#endif (${HB1_INCLUDE})
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_package(Freetype)
     find_package(PkgConfig)
@@ -65,7 +73,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     endif (NOT GR_INCLUDE STREQUAL GR_INCLUDE-NOTFOUND)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS})
+include_directories(../common ${PROJECT_SOURCE_DIR}/../../src ${FREETYPE_INCLUDE_DIRS} ${HB_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${GR_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS} ${HB1_INCLUDE})
 
 file(GLOB PRIVATE_HEADERS *.h) 
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
@@ -79,7 +87,7 @@ add_executable(comparerenderer
     )
 
 # rt is for timing
-target_link_libraries(comparerenderer graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
+target_link_libraries(comparerenderer graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	find_file(USP10_H NAMES Usp10.h)

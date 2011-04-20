@@ -18,6 +18,11 @@
     If not, write to the Free Software Foundation, Inc., 59 Temple Place, 
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
 */
 #pragma once 
 
@@ -33,8 +38,8 @@ public:
     gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
-    static bool inBuffer(const void* /*pCharLastSurrogatePart*/) { return true; }
-    static bool needMoreChars(const void* /*pCharStart*/, size_t /*nProcessed*/) { return true; }
+    bool inBuffer(const void* /*pCharLastSurrogatePart*/, uint32 /*val*/) const { return true; }
+    bool needMoreChars(const void* /*pCharStart*/, size_t /*nProcessed*/) const { return true; }
     
 private:
     gr_encform m_enc;
@@ -49,8 +54,8 @@ public:
     gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
 
-    static bool inBuffer(const void* /*pCharLastSurrogatePart*/) { return true; }
-    bool needMoreChars(const void* /*pCharStart*/, size_t nProcessed) const { return nProcessed<m_numchars; }
+    bool inBuffer (const void* /*pCharLastSurrogatePart*/, uint32 val) const { return (val != 0); }
+    bool needMoreChars (const void* /*pCharStart*/, size_t nProcessed) const { return nProcessed<m_numchars; }
     
 private:
     size_t m_numchars;
@@ -69,9 +74,9 @@ public:
     gr_encform enc() const { return m_enc; }
     const void* pStart() const { return m_pStart; }
   
-    bool inBuffer(const void* pCharLastSurrogatePart) const { return pCharLastSurrogatePart<m_pEnd; }	//also called on charstart by needMoreChars()
+    bool inBuffer (const void* pCharLastSurrogatePart, uint32 /*val*/) const { return pCharLastSurrogatePart<m_pEnd; }	//also called on charstart by needMoreChars()
 
-    bool needMoreChars(const void* pCharStart, size_t /*nProcessed*/) const { return inBuffer(pCharStart); }
+    bool needMoreChars (const void* pCharStart, size_t /*nProcessed*/) const { return inBuffer(pCharStart, 1); }
      
 private:
     const void* m_pEnd;
@@ -145,7 +150,7 @@ public:
     template <class LIMIT, class ERRORHANDLER>
     inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
         const unsigned int seq_extra = utf8_extrabytes(*m_pCharStart >> 4);        //length of sequence including *m_pCharStart is 1+seq_extra
-        if (!limit.inBuffer(m_pCharStart+(seq_extra))) {
+        if (!limit.inBuffer(m_pCharStart+(seq_extra), *m_pCharStart)) {
             return false;
         }
     
@@ -228,7 +233,7 @@ public:
       }
 
       ++m_pCharStart;
-	  if (!limit.inBuffer(m_pCharStart)) {
+	  if (!limit.inBuffer(m_pCharStart, *pRes)) {
 	      return false;
 	  }
 
@@ -266,12 +271,14 @@ private:
 
 public:
       template <class LIMIT, class ERRORHANDLER>
-      inline bool consumeChar(const LIMIT& /*limit*/, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
+      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *m_pCharStart;
       if (pErrHandler->ignoreUnicodeOutOfRangeErrors(!(*pRes<0xD800 || (*pRes>=0xE000 && *pRes<0x110000)))) {
-          ++m_pCharStart;
-          return true;
+          if (!limit.inBuffer(++m_pCharStart, *pRes))
+            return false;
+          else
+            return true;
       }
       
       return respondToError(pRes, pErrHandler);

@@ -18,6 +18,11 @@
     If not, write to the Free Software Foundation, Inc., 59 Temple Place, 
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
 */
 // This class represents loaded graphite stack machine code.  It performs 
 // basic sanity checks, on the incoming code to prevent more obvious problems
@@ -168,7 +173,7 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
         face.getGlyphFaceCache()->numAttrs(),
         face.numFeatures(), 
         {1,1,1,1,1,1,1,1, 
-         1,1,1,1,1,1,1,-1, 
+         1,1,1,1,1,1,1,(uint8)-1, 
          1,1,1,1,1,1,1,1, 
          1,1,1,1,1,1,0,0, 
          0,0,0,0,0,0,0,0, 

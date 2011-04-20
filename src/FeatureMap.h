@@ -18,6 +18,11 @@
     If not, write to the Free Software Foundation, Inc., 59 Temple Place, 
     Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
 */
 #pragma once
 // #include <cstring>
@@ -54,7 +59,7 @@ public:
     FeatureRef(byte bits, byte index, uint32 mask, uint16 flags,
                uint32 name, uint16 uiName, uint16 numSet,
                FeatureSetting *uiNames, const Face* pFace/*not NULL*/) throw()
-      : m_mask(mask), m_id(name), m_max(mask >> bits), m_bits(bits), m_index(index),
+      : m_mask(mask), m_id(name), m_max((uint16)(mask >> bits)), m_bits(bits), m_index(index),
       m_nameid(uiName), m_nameValues(uiNames), m_pFace(pFace), m_flags(flags),
       m_numSet(numSet)
       {}
