@@ -23,6 +23,14 @@ include::../tests/examples/simple.c[]
     characters in the input string (the second parameter to the program). Very often
     applications already know this. If there is an error in the utf-8, the pError variable
     will point to it and we just exit. But it is possible to render up to that point.
++
+If your string is null terminated, then you don't necessarily have to calculate a
+precise number of characters. You can use a value that is greater than the number
+in the string and rely on graphite to stop at the terminating null. It is necessary
+to pass some value for the number of characters so that graphite can initialise
+its internal memory structures appropriately and not waste time updating them.
+Thus for UTF-16 and UTF-32 strings, one could simply pass the number of code units
+in the string. For UTF-8 it may be preferable to call gr_count_unicode_characters.
 
 <4> Here we create a segment. A segment is the results of processing a string of text with
     graphite. It contains all the information necessary for final rendering including all
@@ -82,7 +90,10 @@ This information is accessible via `gr_slot_can_insert_before()`.
 
 === CharInfo ===
 
-Describe charinfos here.
+For each unicode character in the input, there is a CharInfo structure that can
+be queried for such information as the code unit position in the input string,
+the before slot index (if we are before this character, which is the earliest
+slot we are before) and the corresponding after slot index.
 
 === Caching ===
 
@@ -103,4 +114,33 @@ In the example above, point 1 becomes:
 ----
     gr_face *face = make_file_face_with_seg_cache(argv[1]);
 ----
+
+=== Clustering ===
+
+It is common for applications to work with simplified clusters, these are
+sequences of glyphs associated with a sequence of characters, such that
+these simplified clusters are as small as possible and are never reordered
+or split in relation to each other. In addition, a cursor may occur between
+simplified clusters.
+
+The following code gives an example algorithm for calculating such clusters:
+
+[source, c]
+----
+include::../tests/examples/cluster.c[]
+----
+
+<1> Create a segment as per the example in the introduction.
+
+<2> If this slot starts before the start of this cluster, then merge this cluster
+    with the previous one and try again until this slot is within the current
+    cluster.
+
+<3> If this slot starts after the end of the current cluster, then create a new
+    cluster for it.
+
+<4> If this slot ends after the end of this cluster then extend this cluster to
+    include it.
+
+<5> Output a line break between each cluster.
 

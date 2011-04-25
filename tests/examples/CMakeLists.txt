@@ -28,3 +28,4 @@ endmacro(test_example)
 
 test_example(simple simple.c ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf "Hello World!")
 test_example(features features.c ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf)
+test_example(clusters cluster.c ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf "စက္ခုန္ဒြေ")

@@ -81,6 +81,7 @@ public:
                 m_feats[0].start = 0;
                 m_feats[0].end = -1;
                 for (size_t i = 1; i < m_featCount; i++)
+                for (size_t i = 0; i < m_featCount; i++)
                 {
                     m_feats[i].tag = features->featureId(i-1);
                     m_feats[i].value = features->featureUValue(i-1);
@@ -111,7 +112,7 @@ public:
             m_bufferLength = length;
             hb_buffer_create(m_bufferLength);
         }
-        hb_buffer_clear(m_buffer);
+        hb_buffer_reset(m_buffer);
         hb_buffer_add_utf8(m_buffer, utf8, length, 0, length);
         hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
         hb_script_t script = hb_unicode_get_script(unicodeFuncs, g_utf8_get_char(utf8));
@@ -120,8 +121,8 @@ public:
         hb_buffer_set_language(m_buffer, lang);
         //hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
         hb_shape(m_font, m_face, m_buffer, m_feats, m_featCount);
-        hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer);
-        hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer);
+        hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer, NULL);
+        hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer, NULL);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);
         RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs);
         float dx = 0., dy = 0.;
