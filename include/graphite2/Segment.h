@@ -235,6 +235,14 @@ GR2_API const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/);    //may
   */
 GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may give a base slot or a slot which is attached to another
 
+/** Justifies a linked list of slots for a line to a given width
+  *
+  * Passed a pointer to the start of a linked list of slots corresponding to a line, as
+  * set up by gr_slot_linebreak_before, this function will position the glyphs in the line
+  * to take up the given width
+  */
+GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, float width);
+
 /** Returns the next slot along in the segment.
   *
   * Slots are held in a linked list. This returns the next in the linked list. The slot
@@ -343,7 +351,14 @@ GR2_API int gr_slot_can_insert_before(const gr_slot* p);
   * information is useful for testing.
   */
 GR2_API int gr_slot_original(const gr_slot* p/*not NULL*/);
-  
+
+/** Breaks a segment into lines.
+  *
+  * Breaks the slot linked list at the given point in the linked list. It is up
+  * to the application to keep track of the first slot on each line.
+  */
+GR2_API void gr_slot_linebreak_before(gr_slot *p/*not NULL*/);
+
 #ifdef __cplusplus
 }
 #endif

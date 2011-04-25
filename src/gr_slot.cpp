@@ -152,6 +152,13 @@ int gr_slot_original(const gr_slot* p/*not NULL*/)
     return p->original();
 }
 
+void gr_slot_linebreak_before(gr_slot* p/*not NULL*/)
+{
+    assert(p);
+    gr_slot *prev = (gr_slot *)p->prev();
+    prev->next(NULL);
+    p->prev(NULL);
+}
 
 #if 0       //what should this be
 size_t id(const gr_slot* p/*not NULL*/)

@@ -287,7 +287,7 @@ void Segment::splice(size_t offset, size_t length, Slot * startSlot,
         
 void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
 {
-    Position currpos;
+    Position currpos(0., 0.);
     Slot *s, *ls = NULL;
     int iSlot = 0;
     float cMin = 0.;
@@ -524,5 +524,19 @@ void Segment::prepare_pos(const Font * /*font*/)
 void Segment::finalise(const Font *font)
 {
     positionSlots(font);
+}
+
+void Segment::justify(Slot *pSlot, const Font *font, float width)
+{
+    Slot *pEnd = pSlot;
+    Slot *s;
+    for (s = pSlot; s; s=s->next())
+    { pEnd = s; }
+    // add line end contextuals to linked list
+    // set up segment to work on this line (set start and end)
+    // allocate space
+    // do substitutions and positionings
+    positionSlots(font, pSlot, pEnd);
+    // put back segment first and last markers and dump line end contextual markers
 }
 

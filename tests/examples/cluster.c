@@ -11,7 +11,7 @@ typedef struct cluster_t {
     unsigned int num_glyphs;
 } cluster_t;
 
-/* usage: ./simple fontfile.ttf string */
+/* usage: ./cluster fontfile.ttf string */
 int main(int argc, char **argv)
 {
     int rtl = 0;                /* are we rendering right to left? probably not */

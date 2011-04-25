@@ -144,3 +144,44 @@ include::../tests/examples/cluster.c[]
 
 <5> Output a line break between each cluster.
 
+=== Line Breaking and Justification ===
+
+Whilst most applications will convert glyphs and positions out of the gr_slot structure
+into some internal structure, if graphite is to be used for justification, then it is
+necessary to line break the text and justify it within graphite's data structures.
+Graphite provides two functions to help with this. The first is gr_slot_linebreak_before()
+which will chop the slot linked list before a given slot. The application needs to keep
+track of the start of each of the subsequent linked lists itself, since graphite does
+not do that. After line breaking, the application may call gr_seg_justify() on each
+line linked list. The following example shows how this might be done in an application.
+
+Notice that this example does not take into considering whitespace hanging outside the
+right margin.
+
+[source, c]
+----
+include::../tests/examples/linebreak.c[]
+----
+
+<1> Create a segment as per the example in the introduction
+
+<2> Create an area to store line starts. There won't be more line starts than characters
+    in the text. The first line starts at the start of the segment.
+
+<3> Scan through the slots, if we are past the end of the line then find somewhere to chop.
+
+<4> Scan backwards for a valid linebreak location.
+
+<5> We use 15 (syllable break) as an appropriate break value. A negative value means the
+    break constraint is before the slot, so we test that. Likewise for after we test for
+    a positive value.
+
+<6> Break the line here.
+
+<7> Update the line width for the new line based on the start of the new line.
+
+<8> Justify each line to be width wide.
+
+<9> Each line is a complete linked list that we can iterate over. We can no longer iterate
+    over the whole segment. We have to do it line by line now.
+
