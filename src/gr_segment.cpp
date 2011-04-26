@@ -167,10 +167,11 @@ const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
     return static_cast<const gr_slot*>(pSeg->last());
 }
 
-void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont, float width)
+void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width)
 {
     assert(pSeg);
     assert(pSlot);
+    printf("[%f]", width);
     pSeg->justify(pSlot, pFont, width);
 }
 

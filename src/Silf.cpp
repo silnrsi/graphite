@@ -131,7 +131,14 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumJustLevels, *p);
 #endif
-    p += uint8(*p) * 8 + 1;     // ignore justification for now
+    m_numJusts = uint8(*p++);
+    m_justs = gralloc<Justinfo>(m_numJusts);
+    for (uint8 i = 0; i < m_numJusts; i++)
+    {
+        ::new(m_justs + i) Justinfo(p[0], p[1], p[2], p[3]);
+        p += 8;
+    }
+//    p += uint8(*p) * 8 + 1;     // ignore justification for now
     if (p + 9 >= eSilf) { releaseBuffers(); return false; }
     m_aLig = read16(p);
 #ifndef DISABLE_TRACING

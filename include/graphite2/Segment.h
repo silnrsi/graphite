@@ -241,7 +241,7 @@ GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may 
   * set up by gr_slot_linebreak_before, this function will position the glyphs in the line
   * to take up the given width
   */
-GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, float width);
+GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, double width);
 
 /** Returns the next slot along in the segment.
   *

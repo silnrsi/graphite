@@ -45,6 +45,19 @@ public:
     CLASS_NEW_DELETE
 };
 
+class Justinfo
+{
+public:
+    Justinfo(uint8 stretch, uint8 shrink, uint8 step, uint8 weight) :
+        m_astretch(stretch), m_ashrink(shrink), m_astep(step),
+        m_aweight(weight) {};
+private:
+    uint8   m_astretch;
+    uint8   m_ashrink;
+    uint8   m_astep;
+    uint8   m_aweight;
+};
+
 class Silf
 {
 public:
@@ -76,7 +89,9 @@ private:
     Pseudo        * m_pseudos;
     uint16        * m_classOffsets, 
                   * m_classData;
+    Justinfo      * m_justs;
     uint8           m_numPasses;
+    uint8           m_numJusts;
     uint8           m_sPass, m_pPass, m_jPass, m_bPass,
                     m_flags;
 

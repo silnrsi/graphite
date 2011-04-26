@@ -157,6 +157,7 @@ void gr_slot_linebreak_before(gr_slot* p/*not NULL*/)
     assert(p);
     gr_slot *prev = (gr_slot *)p->prev();
     prev->next(NULL);
+    prev->sibling(NULL);
     p->prev(NULL);
 }
 

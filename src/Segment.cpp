@@ -530,13 +530,37 @@ void Segment::justify(Slot *pSlot, const Font *font, float width)
 {
     Slot *pEnd = pSlot;
     Slot *s;
+    int numBase = 0;
+    float currWidth = 0.;
+    float scale = font ? font->scale() : 1.0;
+    float base = pSlot->origin().x / scale;
+    width = width / scale;
+
     for (s = pSlot; s; s=s->next())
-    { pEnd = s; }
+    {
+        float w = s->origin().x / scale + s->advance() - base;
+        if (w > currWidth) currWidth = w;
+        pEnd = s;
+        if (!s->attachedTo())       // what about trailing whitespace?
+            numBase++;
+    }
+    if (!numBase) return;
+
+    Slot *oldFirst = m_first;
+    Slot *oldLast = m_last;
     // add line end contextuals to linked list
-    // set up segment to work on this line (set start and end)
-    // allocate space
-    // do substitutions and positionings
+    m_first = pSlot;
+    m_last = pEnd;
+    // process the various silf justification stuff returning updated currwidth
+
+    // now fallback to spreading the remaining space among all the bases
+    float nShift = (width - currWidth) / (numBase - 1);
+    for (s = pSlot->nextSibling(); s; s = s->nextSibling())
+        s->just(nShift + s->just());
     positionSlots(font, pSlot, pEnd);
-    // put back segment first and last markers and dump line end contextual markers
+
+    m_first = oldFirst;
+    m_last = oldLast;
+    // dump line end contextual markers
 }
 

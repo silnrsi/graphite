@@ -25,7 +25,8 @@ include::../tests/examples/features.c[]
     hence we make a char[5].
 
 <2> Query the face for the default featureVal of the given lang or 0 for the
-    default. The lang is a uint32 which has been converted from the string.
+    default. The lang is a uint32 which has been converted from the string and
+    is 0 padded (as opposed to space padded).
 
 <3> Iterate over all the features in a font querying for the featureRef.
 

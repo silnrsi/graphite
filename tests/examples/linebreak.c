@@ -54,11 +54,12 @@ int main(int argc, char **argv)
     }
 
     int i;
+    printf("%d:", width);
     for (i = 0; i < numlines; i++)
     {
-        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, (float)width);       /*<8>*/
+        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, width * 1.);       /*<8>*/
         for (s = lineslots[i]; s; s = gr_slot_next_in_segment(s))               /*<9>*/
-            printf("%d(%f,%f) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s));
+            printf("%d(%.2f,%.2f@%d) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s), gr_slot_attr(s, seg, gr_slatJWidth, 0));
         printf("\n");
     }
     free(lineslots);

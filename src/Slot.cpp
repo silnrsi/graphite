@@ -37,7 +37,7 @@ Slot::Slot() :
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
-    m_attach(0, 0), m_with(0, 0),
+    m_attach(0, 0), m_with(0, 0), m_just(0.),
     m_flags(0), m_attLevel(0)
     // Do not set m_userAttr since it is set *before* new is called since this
     // is used as a positional new to reset the GrSlot
@@ -81,8 +81,8 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
-    Position shift = m_shift;
-    float tAdvance = m_advance.x;
+    Position shift = m_shift + Position(m_just, 0);
+    float tAdvance = m_advance.x + m_just;
     const GlyphFace * glyphFace = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyph());
     if (font)
     {
@@ -256,7 +256,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatJWeight :
         return 0;
     case gr_slatJWidth :
-        return 0;
+        return m_just;
     case gr_slatUserDefn :
         return m_userAttr[subindex];
     default :
@@ -358,6 +358,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJWeight :
         break;
     case gr_slatJWidth :
+        m_just = value;
         break;
     case gr_slatUserDefn :
         m_userAttr[subindex] = value;

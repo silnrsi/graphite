@@ -64,6 +64,7 @@ public:
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
+    void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int ind) { m_original = ind; }
     int original() const { return m_original; }
@@ -94,6 +95,8 @@ public:
     uint32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj);
+    float just() { return m_just; }
+    void just(float j) { m_just = j; }
 
     CLASS_NEW_DELETE
 
@@ -114,6 +117,7 @@ private:
     Position m_advance;     // .advance slot attribute
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
+    float    m_just;        // justification adjustment
     byte m_flags;           // holds bit flags
     byte m_attLevel;        // attachment level
     uint16 *m_userAttr;     // pointer to user attributes
