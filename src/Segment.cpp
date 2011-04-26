@@ -526,7 +526,7 @@ void Segment::finalise(const Font *font)
     positionSlots(font);
 }
 
-void Segment::justify(Slot *pSlot, const Font *font, float width)
+void Segment::justify(Slot *pSlot, const Font *font, float width, enum justFlags flags)
 {
     Slot *pEnd = pSlot;
     Slot *s;

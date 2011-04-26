@@ -50,11 +50,22 @@ enum gr_break_weight {
     gr_breakBeforeClip = -40
 };
 
+enum gr_justFlags {
+    /// Indicates that the start of the slot list is not at the start of a line
+    gr_justStartInline = 1,
+    /// Indicates that the end of the slot list is not at the end of a line
+    gr_justEndInline = 2,
+    /// Indicates that slot list initial whitespace is to be ignored (rare)
+    gr_justSkipStartWs = 4,
+    /// Indicates that slot list final whitespace is to be ignored (common)
+    gr_justSkipEndWs = 8
+};
+
 /** Used for looking up slot attributes. Most are already available in other functions **/
 enum gr_attrCode {
-    /// adjusted glyph advance in x direction
+    /// adjusted glyph advance in x direction in design units
     gr_slatAdvX = 0,        
-    /// adjusted glyph advance in y direction (usually 0)
+    /// adjusted glyph advance in y direction (usually 0) in design units
     gr_slatAdvY,            
     /// returns 0. Deprecated.
     gr_slatAttTo,           
@@ -110,7 +121,7 @@ enum gr_attrCode {
     gr_slatJStep,           
     /// Justification weight for this glyph (not implemented)
     gr_slatJWeight,         
-    /// Amount this slot mush shrink or stretch (not implemented)
+    /// Amount this slot mush shrink or stretch in design units
     gr_slatJWidth,          
     /// User defined attribute, see subattr for user attr number
     gr_slatUserDefn = gr_slatJStretch + 30,
@@ -241,7 +252,7 @@ GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may 
   * set up by gr_slot_linebreak_before, this function will position the glyphs in the line
   * to take up the given width
   */
-GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, double width);
+GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, double width, enum gr_justFlags flags);
 
 /** Returns the next slot along in the segment.
   *
