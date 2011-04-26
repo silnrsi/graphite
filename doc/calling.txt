@@ -180,7 +180,7 @@ include::../tests/examples/linebreak.c[]
 
 <7> Update the line width for the new line based on the start of the new line.
 
-<8> Justify each line to be width wide.
+<8> Justify each line to be width wide. And tell it to skip final whitespace (as if that whitespace were outside the width).
 
 <9> Each line is a complete linked list that we can iterate over. We can no longer iterate
     over the whole segment. We have to do it line by line now.
