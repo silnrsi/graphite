@@ -62,6 +62,16 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
     m_bufSize = i;                  // log2(numchars)
 }
 
+Segment::~Segment()
+{
+    for (SlotRope::iterator i = m_slots.begin(); i != m_slots.end(); ++i)
+        free(*i);
+    for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
+        free(*j);
+    delete[] m_charinfo;
+}
+
+#ifndef NSEG_CACHE
 SegmentScopeState Segment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
 {
     SegmentScopeState state;
@@ -99,15 +109,6 @@ void Segment::removeScope(SegmentScopeState & state)
 }
 
 
-Segment::~Segment()
-{
-    for (SlotRope::iterator i = m_slots.begin(); i != m_slots.end(); ++i)
-        free(*i);
-    for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
-        free(*j);
-    delete[] m_charinfo;
-}
-
 void Segment::append(const Segment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
@@ -131,6 +132,7 @@ void Segment::append(const Segment &other)
     m_advance = m_advance + other.m_advance;
     m_bbox = m_bbox.widen(bbox);
 }
+#endif // NSEG_CACHE
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
@@ -201,6 +203,7 @@ void Segment::freeSlot(Slot *aSlot)
     m_freeSlots = aSlot;
 }
 
+#ifndef NSEG_CACHE
 void Segment::splice(size_t offset, size_t length, Slot * startSlot,
                        Slot * endSlot, const Slot * firstSpliceSlot,
                        size_t numGlyphs)
@@ -283,7 +286,7 @@ void Segment::splice(size_t offset, size_t length, Slot * startSlot,
         replacement = replacement->next();
     }
 }
-
+#endif // NSEG_CACHE
         
 void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
 {
@@ -526,17 +529,21 @@ void Segment::finalise(const Font *font)
     positionSlots(font);
 }
 
-void Segment::justify(Slot *pSlot, const Font *font, float width, enum justFlags flags)
+void Segment::justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast)
 {
     Slot *pEnd = pSlot;
-    Slot *s;
+    Slot *s, *end;
     int numBase = 0;
     float currWidth = 0.;
     float scale = font ? font->scale() : 1.0;
-    float base = pSlot->origin().x / scale;
-    width = width / scale;
+    float base;
 
-    for (s = pSlot; s; s=s->next())
+    if (!pFirst) pFirst = pSlot;
+    base = pFirst->origin().x / scale;
+    width = width / scale;
+    end = pLast ? pLast->next() : NULL;
+
+    for (s = pFirst; s != end; s=s->next())
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
@@ -544,6 +551,15 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, enum justFlags
         if (!s->attachedTo())       // what about trailing whitespace?
             numBase++;
     }
+    if (pLast)
+        while (s)
+        {
+            pEnd = s;
+            s = s->next();
+        }
+    else
+        pLast = pEnd;
+        
     if (!numBase) return;
 
     Slot *oldFirst = m_first;
@@ -555,7 +571,7 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, enum justFlags
 
     // now fallback to spreading the remaining space among all the bases
     float nShift = (width - currWidth) / (numBase - 1);
-    for (s = pSlot->nextSibling(); s; s = s->nextSibling())
+    for (s = pFirst->nextSibling(); s != end; s = s->nextSibling())
         s->just(nShift + s->just());
     positionSlots(font, pSlot, pEnd);
 

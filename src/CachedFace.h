@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#ifndef NSEG_CACHE
+
 #include "Face.h"
 
 namespace graphite2 {
@@ -45,3 +47,6 @@ private:
 };
 
 } // namespace graphite2
+
+#endif
+

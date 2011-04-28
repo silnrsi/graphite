@@ -62,6 +62,8 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
     return static_cast<gr_face *>(res);
 }
 
+#ifndef NSEG_CACHE
+
 gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
 {
@@ -89,6 +91,8 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
     }
     return static_cast<gr_face *>(static_cast<Face *>(res));
 }
+
+#endif
 
 gr_uint32 gr_str_to_tag(const char *str)
 {
@@ -210,7 +214,7 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     return NULL;
 }
 
-
+#ifndef NSEG_CACHE
 gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
                   //when finished with, call destroy_face
 {
@@ -230,7 +234,7 @@ gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int seg
     delete pFileFace;
     return NULL;
 }
-
+#endif
 #endif      //!DISABLE_FILE_FACE
 
 

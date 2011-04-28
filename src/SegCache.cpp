@@ -36,6 +36,8 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+#ifndef NSEG_CACHE
+
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     :
     m_prefixLength(ePrefixLength),
@@ -235,3 +237,4 @@ uint32 SegCachePrefixEntry::purge(unsigned long long minAccessCount,
     return totalPurged;
 }
 
+#endif

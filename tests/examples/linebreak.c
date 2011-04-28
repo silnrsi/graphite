@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     printf("%d:", width);
     for (i = 0; i < numlines; i++)
     {                                                                           
-        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, width, gr_justSkipEndWs); /*<8>*/
+        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, width, 0, NULL, NULL); /*<8>*/
         for (s = lineslots[i]; s; s = gr_slot_next_in_segment(s))               /*<9>*/
             printf("%d(%.2f,%.2f@%d) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s), gr_slot_attr(s, seg, gr_slatJWidth, 0));
         printf("\n");

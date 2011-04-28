@@ -16,8 +16,9 @@ function(nolib_test LIBNAME OBJECTFILE)
 endfunction(nolib_test)
 
 option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
-
 option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
+option(DISABLE_SEGCACHE "Don't build the segment cache support code")
+option(DISABLE_FILEFACE "Don't build with fileface support")
 
 set(VM_MACHINE_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.   Auto -- depends upon configuration type; Direct -- usually fastest but only on GCC. default for Release configuration with GCC; Call -- slower but universal. defualt for Debug configuration")
 

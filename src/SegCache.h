@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#ifndef NSEG_CACHE
+
 #include <graphite2/Segment.h>
 #include "Main.h"
 #include "Slot.h"
@@ -307,3 +309,6 @@ inline const SegCacheEntry * SegCache::find(const uint16 * cmapGlyphs, size_t le
 }
     
 } // namespace graphite2
+
+#endif
+

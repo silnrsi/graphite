@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#ifndef NSEG_CACHE
+
 #include "Main.h"
 #include "CmapCache.h"
 #include "SegCache.h"
@@ -114,3 +116,6 @@ private:
 };
 
 } // namespace graphite2
+
+#endif
+

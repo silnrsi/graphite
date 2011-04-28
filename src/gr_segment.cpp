@@ -167,12 +167,12 @@ const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
     return static_cast<const gr_slot*>(pSeg->last());
 }
 
-void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags)
+void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags, gr_slot *pFirst, gr_slot *pLast)
 {
     assert(pSeg);
     assert(pSlot);
     printf("[%f]", width);
-    pSeg->justify(pSlot, pFont, width, (enum justFlags)flags);
+    pSeg->justify(pSlot, pFont, width, (enum justFlags)flags, pFirst, pLast);
 }
 
 } // extern "C"

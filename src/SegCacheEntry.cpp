@@ -24,6 +24,9 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+
+#ifndef NSEG_CACHE
+
 #include "Main.h"
 #include "Slot.h"
 #include "Segment.h"
@@ -164,4 +167,5 @@ void SegCacheEntry::clear()
     m_attr = NULL;
 }
 
+#endif
 

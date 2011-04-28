@@ -52,7 +52,9 @@ typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
 typedef Vector<uint16 *>        AttributeRope;
 
+#ifndef NSEG_CACHE
 class SegmentScopeState;
+#endif
 class Segment;
 
 typedef enum {
@@ -63,9 +65,7 @@ typedef enum {
 
 enum justFlags {
     gr_justStartInline = 1,
-    gr_justEndInline = 2,
-    gr_justSkipStartWs = 4,
-    gr_justSkipEndWs = 8
+    gr_justEndInline = 2
 };
 
 class SegmentScopeState
@@ -95,8 +95,13 @@ public:
 
     Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
     ~Segment();
+#ifndef NSEG_CACHE
     SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
     void removeScope(SegmentScopeState & state);
+    void append(const Segment &other);
+    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, 
+                const Slot * firstSpliceSlot, size_t numGlyphs);
+#endif
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
@@ -105,7 +110,6 @@ public:
     Slot *newSlot();
     void freeSlot(Slot *);
     void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);
-    void append(const Segment &other);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
@@ -125,8 +129,6 @@ public:
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
     int numAttrs() { return m_silf->numUser(); }
-    void splice(size_t offset, size_t length, Slot * startSlot, Slot * endSlot, 
-                const Slot * firstSpliceSlot, size_t numGlyphs);
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
@@ -142,7 +144,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     void read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const Font *font);
     void finalise(const Font *font);
-    void justify(Slot *pSlot, const Font *font, float width, enum justFlags flags);
+    void justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
   
 private:
     SlotRope m_slots;           // std::vector of slot buffers

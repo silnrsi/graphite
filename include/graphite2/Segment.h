@@ -54,11 +54,7 @@ enum gr_justFlags {
     /// Indicates that the start of the slot list is not at the start of a line
     gr_justStartInline = 1,
     /// Indicates that the end of the slot list is not at the end of a line
-    gr_justEndInline = 2,
-    /// Indicates that slot list initial whitespace is to be ignored (rare)
-    gr_justSkipStartWs = 4,
-    /// Indicates that slot list final whitespace is to be ignored (common)
-    gr_justSkipEndWs = 8
+    gr_justEndInline = 2
 };
 
 /** Used for looking up slot attributes. Most are already available in other functions **/
@@ -250,9 +246,19 @@ GR2_API const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/);    //may 
   *
   * Passed a pointer to the start of a linked list of slots corresponding to a line, as
   * set up by gr_slot_linebreak_before, this function will position the glyphs in the line
-  * to take up the given width
+  * to take up the given width. It is possible to specify a subrange within the line to process.
+  * This allows skipping of line initial or final whitespace, for example. While this will ensure
+  * that the subrange fits width, the line will still be positioned with the first glyph of the
+  * line at 0. So the resulting positions may be beyond width.
+  * @param pSeg     Pointer to the segment
+  * @param pStart   Pointer to the start of the line linked list (including skipped characters)
+  * @param pFont    Font to use for positioning
+  * @param width    Width in pixels in which to fit the line
+  * @param flags    Indicates line ending types. Default is linked list is a full line
+  * @param pFirst   If not NULL, the first slot in the list to be considered part of the line (so can skip)
+  * @param pLast    If not NULL, the last slot to process in the line (allow say trailing whitespace to be skipped)
   */
-GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont /*not NULL*/, double width, enum gr_justFlags flags);
+GR2_API void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pStart/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags, gr_slot* pFirst, gr_slot* pLast);
 
 /** Returns the next slot along in the segment.
   *

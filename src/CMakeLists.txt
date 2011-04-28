@@ -104,6 +104,14 @@ if (NOT DISABLE_TRACING)
     endif (ENABLE_DEEP_TRACING)
 endif (NOT DISABLE_TRACING)
 
+if (DISABLE_SEGCACHE)
+    add_definitions(-DNSEG_CACHE)
+endif (DISABLE_SEGCACHE)
+
+if (DISABLE_FILEFACE)
+    add_definitions(-DDISABLE_FILE_FACE)
+endif (DISABLE_FILEFACE)
+
 set(GRAPHITE_HEADERS 
     ../include/graphite2/Font.h
     ../include/graphite2/Segment.h

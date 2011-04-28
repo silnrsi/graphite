@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#ifndef NSEG_CACHE
+
 #include "Main.h"
 
 namespace graphite2 {
@@ -45,7 +47,7 @@ typedef enum {
     ePurgeFactor = 5,
     /** Maximum number of Segments to store which have the same
      * prefix. Needed to prevent unique identifiers flooding the cache */
-    eMaxSuffixCount = 15,
+    eMaxSuffixCount = 15
 
 } SegCacheParameters;
 
@@ -110,3 +112,5 @@ private:
 };
 
 } // namespace graphite2
+
+#endif
