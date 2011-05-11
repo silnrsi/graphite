@@ -75,7 +75,7 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_before += numCharInfo;
     m_after += numCharInfo;
     m_position = m_position + relpos;
-};
+}
 
 Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel, float * clusterMin)
 {
