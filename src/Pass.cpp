@@ -513,6 +513,7 @@ bool Pass::testPassConstraint(Machine & m) const
 bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
     if (r.sort - r.preContext > (int)m.slotMap().size() - m.slotMap().context())    return false;
+    if (m.slotMap().context() - r.preContext < 0) return false;
     if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());
 
@@ -527,6 +528,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
     Machine::status_t status = Machine::finished;
     for (int n = r.sort; n && map; --n, ++map)
     {
+	if (!*map) continue;
         const int32 ret = r.constraint->run(m, map, status);
         if (!ret || status != Machine::finished)
         {

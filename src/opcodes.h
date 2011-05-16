@@ -274,6 +274,7 @@ STARTOP(insert)
         {
             seg.last()->next(newSlot);
             newSlot->prev(seg.last());
+	    newSlot->before(seg.last()->before());
             seg.last(newSlot);
         }
         else
@@ -286,10 +287,12 @@ STARTOP(insert)
     {
         iss->prev()->next(newSlot);
         newSlot->prev(iss->prev());
+	newSlot->before(iss->prev()->after());
     }
     else
     {
         newSlot->prev(NULL);
+	newSlot->before(iss->before());
         seg.first(newSlot);
     }
     newSlot->next(iss);
@@ -297,10 +300,12 @@ STARTOP(insert)
     {
         iss->prev(newSlot);
         newSlot->originate(iss->original());
+	newSlot->after(iss->before());
     }
     else if (newSlot->prev())
     {
         newSlot->originate(newSlot->prev()->original());
+	newSlot->after(newSlot->prev()->after());
     }
     else
     {

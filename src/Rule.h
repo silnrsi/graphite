@@ -187,8 +187,9 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
   // Merge the new sorted rules list into the current sorted result set.
   const RuleEntry * lre = begin(), * rre = state.rules;
   RuleEntry * out = m_rules + (m_begin == m_rules)*MAX_RULES;    
+  const RuleEntry * lrend = out + MAX_RULES;
   m_begin = out; 
-  while (lre != end())
+  while (lre != end() && out != lrend)
   {
     if (*lre < *rre)      *out++ = *lre++;
     else if (*rre < *lre) { *out++ = *rre++; }
@@ -196,12 +197,12 @@ inline void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 
     if (rre == state.rules_end) 
     { 
-      while (lre != end()) { *out++ = *lre++; }
+      while (lre != end() && out != lrend) { *out++ = *lre++; }
       m_end = out;
       return;
     }
   }
-  while (rre != state.rules_end) { *out++ = *rre++; }
+  while (rre != state.rules_end && out != lrend) { *out++ = *rre++; }
   m_end = out;
 }
 
