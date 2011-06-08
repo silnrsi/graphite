@@ -22,9 +22,9 @@
 #pragma once
 
 #include <new>
-#include <Windows.h>
-#include <Usp10.h>
-#include <Wingdi.h>
+#include <windows.h>
+#include <usp10.h>
+#include <wingdi.h>
 #include <cstring>
 #include <cwchar>
 

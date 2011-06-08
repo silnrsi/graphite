@@ -1,9 +1,3 @@
-Universal Declaration of Human Rights - Nepali
-© 1996 – 2009 The Office of the High Commissioner for Human Rights
-This plain text version prepared by the “UDHR in Unicode”
-project, http://www.unicode.org/udhr.
----
-
 मानव अधिकारको विश्वव्यापी घोषणा
      प्रस्तावना
      मानव परिवारका सबै सदस्यहरूको अन्तर्निहित मान तथा सम्मान र अवछिन्न अधिकारहरूको मान्यता नै स्वतन्त्रता, न्याय, र शान्तिको आधार भएकोले,

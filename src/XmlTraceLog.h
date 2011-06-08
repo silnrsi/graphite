@@ -55,7 +55,7 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned long long value);
-#if SIZEOF_SIZE_T == 8
+#if SIZEOF_SIZE_T == 8 && !defined(_WIN32)
     void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
 #endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);

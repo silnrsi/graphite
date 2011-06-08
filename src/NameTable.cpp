@@ -82,8 +82,6 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
 {
     uint16 anyLang = 0;
     uint16 enUSLang = 0;
-    uint16 similarLang = 0;
-    uint16 actualLang = 0;
     uint16 bestLang = 0;
     if (!m_table)
     {
@@ -98,14 +96,12 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
             uint16 langId = swap16(m_table->name_record[i].language_id);
             if (langId == languageId)
             {
-                actualLang = i;
                 bestLang = i;
                 break;
             }
             // MS language tags have the language in the lower byte, region in the higher
             else if ((langId & 0xFF) == (languageId & 0xFF))
             {
-                similarLang = i;
                 bestLang = i;
             }
             else if (langId == 0x409)

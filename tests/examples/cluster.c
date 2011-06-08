@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     size_t numCodePoints = 0;
     gr_segment * seg = NULL;
     cluster_t *clusters;
-    int ci, ic;
+    int ic, ci = 0;
     const gr_slot *s, *is;
     gr_face *face = gr_make_file_face(argv[1], 0);
     if (!face) return 1;

@@ -81,13 +81,17 @@ bool Face::readGraphite()
     size_t lSilf;
     if ((pSilf = (char *)getTable(tagSilf, &lSilf)) == NULL) return false;
     uint32 version;
+#ifndef DISABLE_TRACING
     uint32 compilerVersion = 0; // wasn't set before GTF version 3
+#endif
     uint32 offset32Pos = 2;
     version = swap32(*(uint32 *)pSilf);
     if (version < 0x00020000) return false;
     if (version >= 0x00030000)
     {
+#ifndef DISABLE_TRACING
         compilerVersion = swap32(((uint32 *)pSilf)[1]);
+#endif
         m_numSilf = swap16(((uint16 *)pSilf)[4]);
         offset32Pos = 3;
     }
