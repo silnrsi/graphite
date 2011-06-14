@@ -32,6 +32,12 @@ using namespace graphite2;
 
 extern "C" {
 
+void gr_engine_version(int *nMajor, int *nMinor, int *nBugFix)
+{
+    if (nMajor) *nMajor = GR2_VERSION_MAJOR;
+    if (nMinor) *nMinor = GR2_VERSION_MINOR;
+    if (nBugFix) *nBugFix = GR2_VERSION_BUGFIX;
+}
 
 gr_font* gr_make_font(float ppm/*pixels per em*/, const gr_face *face)
 {

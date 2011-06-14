@@ -28,6 +28,10 @@
 
 #include "graphite2/Types.h"
 
+#define GR2_VERSION_MAJOR   0
+#define GR2_VERSION_MINOR   9
+#define GR2_VERSION_BUGFIX  5
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -37,6 +41,11 @@ typedef struct gr_face          gr_face;
 typedef struct gr_font          gr_font;
 typedef struct gr_feature_ref   gr_feature_ref;
 typedef struct gr_feature_val   gr_feature_val;
+
+/**
+* Returns version information on this engine
+*/
+GR2_API void gr_engine_version(int *nMajor, int *nMinor, int *nBugFix);
 
 /**
 * The Face Options allow the application to require that certain tables are
