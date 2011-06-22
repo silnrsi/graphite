@@ -39,7 +39,13 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
                   //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
 {
     Face *res = new Face(appFaceHandle, getTable);
+    size_t dummy;
 
+    if (!(faceOptions & gr_face_dumbRendering) && !res->getTable(tagSilf, &dummy))
+    {
+        delete res;
+        return 0;
+    }
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif

@@ -46,6 +46,15 @@
 #include "SkDevice.h"
 #include "SkBitmap.h"
 #include "SkTypeface.h"
+#include <cutils/properties.h>
+
+static int apilevel = 0;
+int getapilevel()
+{
+    char buf[PROPERTY_VALUE_MAX + 1];
+    property_get("ro.build.version.sdk", buf, "1");
+    return strtoul(buf, NULL, 10);
+}
 
 class SkFaceRec;
 
@@ -135,8 +144,6 @@ static void handle_aftertext(const SkDraw* draw, const SkPaint& paint,
 unsigned char SkToU8(unsigned int x)
 { return 32; }
 
-class SkBitmap;
-
 class mySkCanvas : public SkCanvas
 {
 public:
@@ -168,12 +175,11 @@ SkDevice* mySkCanvas::setBitmapDevice(const SkBitmap& bitmap)
     return setDevice(SkCanvas::setBitmapDevice(bitmap));
 }
 
-class mySkDevice : public SkDevice
-{
-public:
-    mySkDevice(const SkBitmap& b) : SkDevice(b) {};
-    virtual void drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint);
-};
+#define LEVEL 8
+#include "SkDevice_h.h"
+
+#define LEVEL 9
+#include "SkDevice_h.h"
 
 typedef struct rec_ft_table {
     unsigned long tag;
@@ -240,17 +246,16 @@ public:
     void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
 };
 
-void mySkDevice::drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint)
-{
-    ((mySkDraw *)(&d))->drawText((const char *)text, len, x, y, paint);
-}
-
 SkDevice *mySkCanvas::setDevice(SkDevice* device)
 {
     if (device)
     {
-        mySkDevice *myDevice = new mySkDevice(device->accessBitmap(0));
-        return SkCanvas::setDevice(myDevice);
+        if (!apilevel) apilevel = getapilevel();
+        if (apilevel > 8)
+            mySkDevice9 *myDevice = new mySkDevice9(device->accessBitmap(0));
+        else
+            mySkDevice8 *myDevice = new mySkDevice8(device->accessBitmap(0));
+        return SkCanvas::setDevice((SkDevice *)myDevice);
     }
     else
         return device;
@@ -259,9 +264,13 @@ SkDevice *mySkCanvas::setDevice(SkDevice* device)
 SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer)
 {
     SkDevice *temp = SkCanvas::createDevice(config, width, height, isOpaque, isForLayer);
-    mySkDevice *res = new mySkDevice(temp->accessBitmap(0));
+    if (!apilevel) apilevel = getapilevel();
+    if (apilevel > 8)
+        mySkDevice9 *res = new mySkDevice9(temp->accessBitmap(0));
+    else
+        mySkDevice8 *res = new mySkDevice8(temp->accessBitmap(0));
     delete temp;
-    return res;
+    return (SkDevice *)res;
 }
 
 gr_face* getface_from_paint(const SkPaint &paint)
@@ -467,8 +476,6 @@ int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar w
     return numchar;
 }
 
-
-    
 
 extern myfontmap *myfonts;
 
