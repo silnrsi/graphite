@@ -144,6 +144,25 @@ static void handle_aftertext(const SkDraw* draw, const SkPaint& paint,
 unsigned char SkToU8(unsigned int x)
 { return 32; }
 
+void hookvtbl(void *dest, void *base, void *sub, int num)
+{
+    ptrdiff_t *d = *(ptrdiff_t **)dest;
+    ptrdiff_t *b = *(ptrdiff_t **)base;
+    ptrdiff_t *s = *(ptrdiff_t **)sub;
+    ptrdiff_t *newv = (ptrdiff_t *)malloc(num * sizeof(ptrdiff_t));
+    int j = 0;
+
+    for (int i = 0; i < num; i++)
+    {
+        if (b[i] == d[j])
+        {
+            newv[j] = s[i];
+            ++j;
+        }
+    }
+    *(ptrdiff_t **)dest = newv;
+}
+
 class mySkCanvas : public SkCanvas
 {
 public:
@@ -154,19 +173,22 @@ public:
     virtual SkDevice* createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer);
 };
 
+class newSkCanvas : public SkCanvas { };
+
 static mySkCanvas mySkCanvasDummy;
+static newSkCanvas newSkCanvasDummy;
 
 mySkCanvas::mySkCanvas(const SkBitmap& bitmap) :
     SkCanvas(bitmap)
 {
-    memcpy(this, &mySkCanvasDummy, sizeof(void *));
+    hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);    // 38 + 1 rtti? + 2 destructor + spare
     setDevice(getDevice());
 }
 
 mySkCanvas::mySkCanvas(SkDevice *device) :
     SkCanvas(device)
 {
-    memcpy(this, &mySkCanvasDummy, sizeof(void *));
+    hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);
     setDevice(device);
 }
 
@@ -175,11 +197,11 @@ SkDevice* mySkCanvas::setBitmapDevice(const SkBitmap& bitmap)
     return setDevice(SkCanvas::setBitmapDevice(bitmap));
 }
 
-#define LEVEL 8
-#include "SkDevice_h.h"
-
-#define LEVEL 9
-#include "SkDevice_h.h"
+class mySkDraw : public SkDraw
+{
+public:
+    void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
+};
 
 typedef struct rec_ft_table {
     unsigned long tag;
@@ -240,37 +262,34 @@ gr_face *getface(FT_Face ftface)
     return r->face;
 }
 
-class mySkDraw : public SkDraw
+class mySkDevice : public SkDevice
 {
 public:
-    void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
+    virtual void drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint);
 };
+
+void mySkDevice::drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint)
+{
+    ((mySkDraw *)(&d))->drawText((const char *)text, len, x, y, paint);
+}
+
+class newSkDevice : public SkDevice { };
+
+static mySkDevice mySkDeviceDummy;
+static newSkDevice newSkDeviceDummy;
 
 SkDevice *mySkCanvas::setDevice(SkDevice* device)
 {
     if (device)
-    {
-        if (!apilevel) apilevel = getapilevel();
-        if (apilevel > 8)
-            mySkDevice9 *myDevice = new mySkDevice9(device->accessBitmap(0));
-        else
-            mySkDevice8 *myDevice = new mySkDevice8(device->accessBitmap(0));
-        return SkCanvas::setDevice((SkDevice *)myDevice);
-    }
-    else
-        return device;
+        hookvtbl(device, &mySkDeviceDummy, &newSkDeviceDummy, 21);    // 17 + spares
+    return SkCanvas::setDevice(device);
 }
 
 SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer)
 {
-    SkDevice *temp = SkCanvas::createDevice(config, width, height, isOpaque, isForLayer);
-    if (!apilevel) apilevel = getapilevel();
-    if (apilevel > 8)
-        mySkDevice9 *res = new mySkDevice9(temp->accessBitmap(0));
-    else
-        mySkDevice8 *res = new mySkDevice8(temp->accessBitmap(0));
-    delete temp;
-    return (SkDevice *)res;
+    SkDevice *res = SkCanvas::createDevice(config, width, height, isOpaque, isForLayer);
+    hookvtbl(res, &mySkDeviceDummy, &newSkDeviceDummy, 21);    // 17 + spares
+    return res;
 }
 
 gr_face* getface_from_paint(const SkPaint &paint)

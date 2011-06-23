@@ -27,7 +27,10 @@
 LOCAL_PATH := $(call my-dir)
 
 MY_ANDROID_SRC := $(HOME)/Work/android/android-src
-MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
+#MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
+MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-9/symbols/system/lib
+#MY_SKIA := $(MY_ANDROID_SRC)/external/skia
+MY_SKIA := $(HOME)/Work/android/skia/9
 # MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-9/symbols/system/lib
 
 include $(CLEAR_VARS)
@@ -54,9 +57,9 @@ LOCAL_SHARED_LIBRARIES := graphite2
 LOCAL_LDLIBS := -L $(MY_ANDROID_LIBS) -lskia -lcutils -landroid_runtime -lutils
 LOCAL_CPPFLAGS += -fno-rtti -mapcs
 LOCAL_SRC_FILES := inject_jni.cpp inject.cpp graphite_layer.cpp
-LOCAL_C_INCLUDES := $(MY_ANDROID_SRC)/external/skia/include/core \
-                    $(MY_ANDROID_SRC)/external/skia/include/utils \
-                    $(MY_ANDROID_SRC)/external/skia/src/core \
+LOCAL_C_INCLUDES := $(MY_SKIA)/include/core \
+                    $(MY_SKIA)/include/utils \
+                    $(MY_SKIA)/src/core \
                     $(MY_ANDROID_SRC)/external/freetype/include \
                     $(MY_ANDROID_SRC)/frameworks/base/include \
                     $(MY_ANDROID_SRC)/system/core/include
