@@ -25,7 +25,7 @@
     2 of the license or (at your option) any later version.
 */
 
-package com.sil.mjph.helloworld;
+package com.sil.mjph.helloworld1;
 
 import android.app.Activity;
 import android.graphics.Typeface;
@@ -37,7 +37,7 @@ import android.content.res.AssetManager;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 
-public class HelloWorld extends Activity {
+public class HelloWorld1 extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {

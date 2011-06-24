@@ -96,14 +96,14 @@ private:
 };
 
 
-extern "C" void Java_com_sil_mjph_helloworld_HelloWorld_injectJNI( JNIEnv* env, jobject thiz )
+extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_injectJNI( JNIEnv* env, jobject thiz )
 {
     inject_fns("libinject-graphite.so", "libskia.so", &thismap, 12);
 }
 
 myfontmap *myfonts = NULL;
 
-extern "C" int Java_com_sil_mjph_helloworld_HelloWorld_addFontResourceJNI( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
+extern "C" int Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;

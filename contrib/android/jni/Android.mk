@@ -27,11 +27,10 @@
 LOCAL_PATH := $(call my-dir)
 
 MY_ANDROID_SRC := $(HOME)/Work/android/android-src
-#MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
-MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-9/symbols/system/lib
-#MY_SKIA := $(MY_ANDROID_SRC)/external/skia
-MY_SKIA := $(HOME)/Work/android/skia/9
-# MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-9/symbols/system/lib
+MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
+# MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-8/symbols/system/lib
+MY_SKIA := $(MY_ANDROID_SRC)/external/skia
+# MY_SKIA := $(HOME)/Work/android/skia/8
 
 include $(CLEAR_VARS)
 
@@ -55,7 +54,7 @@ LOCAL_CFLAGS += -mapcs
 LOCAL_MODULE := inject-graphite
 LOCAL_SHARED_LIBRARIES := graphite2
 LOCAL_LDLIBS := -L $(MY_ANDROID_LIBS) -lskia -lcutils -landroid_runtime -lutils
-LOCAL_CPPFLAGS += -fno-rtti -mapcs
+LOCAL_CPPFLAGS += -fno-rtti -mapcs -fno-inline
 LOCAL_SRC_FILES := inject_jni.cpp inject.cpp graphite_layer.cpp
 LOCAL_C_INCLUDES := $(MY_SKIA)/include/core \
                     $(MY_SKIA)/include/utils \
@@ -65,9 +64,9 @@ LOCAL_C_INCLUDES := $(MY_SKIA)/include/core \
                     $(MY_ANDROID_SRC)/system/core/include
 include $(BUILD_SHARED_LIBRARY)
 
-NDK_APP_GDBSETUP := ../gdb.setup
+NDK_APP_GDBSETUP := gdb.setup
 
-# ifeq ($(DUMP_VAR),)
+ifeq ($(DUMP_VAR),)
 include $(APP_PROJECT_PATH)/jni/graphite/Android.mk
-# endif
+endif
 
