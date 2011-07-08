@@ -304,11 +304,15 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
     {
         for (s = iEnd, iSlot = m_numGlyphs - 1; s && s != iStart->prev(); s = s->prev(), --iSlot)
         {
-            for (int j = s->before(); j <= s->after(); j++)
+            int j = s->before();
+            if (j >= 0)
             {
-                CharInfo *c = charinfo(j);
-                if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                if (c->after() < iSlot) c->after(iSlot);
+                for ( ; j <= s->after(); j++)
+                {
+                    CharInfo *c = charinfo(j);
+                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
+                    if (c->after() < iSlot) c->after(iSlot);
+                }
             }
             s->index(iSlot);
 
@@ -326,11 +330,15 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
     {
         for (s = iStart, iSlot = 0; s && s != iEnd->next(); s = s->next(), ++iSlot)
         {
-            for (int j = s->before(); j <= s->after(); j++)
+            int j = s->before();
+            if (j >= 0)
             {
-                CharInfo *c = charinfo(j);
-                if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                if (c->after() < iSlot) c->after(iSlot);
+                for ( ; j <= s->after(); j++)
+                {
+                    CharInfo *c = charinfo(j);
+                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
+                    if (c->after() < iSlot) c->after(iSlot);
+                }
             }
             s->index(iSlot);
 

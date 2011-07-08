@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/python
 import optparse, os, shutil, sys
 
 def revert(path):
@@ -13,7 +13,7 @@ def corrupt(path, offset, value):
         shutil.copy2(path, path + os.path.extsep + options.backup_suffix)
     with open(path,'r+b',buffering=0) as f:
         f.seek(offset)
-        f.write(bytes([value]))
+        f.write(bytes(chr(value)))
 
 
 parser = optparse.OptionParser(usage='usage: %prog file byte-offset replacment-value')
@@ -39,7 +39,7 @@ path   = args[0]
 revert(path)
 
 if not options.revert:
-    offset = eval(args[1])
-    value  = eval(args[2])
+    offset = int(eval(args[1]))
+    value  = int(eval(args[2]))
     corrupt(path, offset, value)
 
