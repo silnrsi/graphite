@@ -148,7 +148,7 @@ void hookvtbl(void *dest, void *base, void *sub, int num)
 
     // handle destructors
     for (i = 0; i < 2; i++)
-    	newv[i] = s[i];
+    	newv[i] = d[i];
 
     for (i = 2; i < num; i++)
     {
@@ -166,6 +166,7 @@ void hookvtbl(void *dest, void *base, void *sub, int num)
            		j++;
             }
         }
+        if (!d[i]) break;
     }
     *(ptrdiff_t **)dest = newv;
 }
@@ -186,8 +187,8 @@ public:
 	newSkCanvas(SkDevice *device = NULL) {};
 };
 
-static mySkCanvas mySkCanvasDummy((SkDevice *)NULL);
-static newSkCanvas newSkCanvasDummy((SkDevice *)NULL);
+static mySkCanvas mySkCanvasDummy((SkDevice *)1);
+static newSkCanvas newSkCanvasDummy((SkDevice *)1);
 
 mySkCanvas::mySkCanvas(const SkBitmap& bitmap) :
     SkCanvas(bitmap)
@@ -197,10 +198,12 @@ mySkCanvas::mySkCanvas(const SkBitmap& bitmap) :
 }
 
 mySkCanvas::mySkCanvas(SkDevice *device) :
-    SkCanvas(device)
+    SkCanvas(device == (SkDevice *)1 ? NULL : device)
 {
-	if (device)
-		hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);
+    if (device != (SkDevice *)1)
+        hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);
+    else
+        device = NULL;
     setDevice(device);
 }
 
