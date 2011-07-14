@@ -27,9 +27,6 @@
 
 #include "SkDraw.h"
 #include "inject.h"
-#include "ft2build.h"
-#include FT_FREETYPE_H
-#include FT_TRUETYPE_TABLES_H
 #include "graphite2/Font.h"
 #include "graphite2/Segment.h"
 #include <stdlib.h>
@@ -50,42 +47,6 @@
 #include <dlfcn.h>
 
 class SkFaceRec;
-
-// copy code from Skia, sigh. This from src/ports/SkFontHost_FreeType.cpp
-class SkScalerContext_FreeType : public SkScalerContext {
-public:
-    SkScalerContext_FreeType(const SkDescriptor* desc);
-    virtual ~SkScalerContext_FreeType();
-
-    bool success() const {
-        return fFaceRec != NULL &&
-               fFTSize != NULL &&
-               fFace != NULL;
-    }
-
-protected:
-    virtual unsigned generateGlyphCount() const;
-    virtual uint16_t generateCharToGlyph(SkUnichar uni);
-    virtual void generateAdvance(SkGlyph* glyph);
-    virtual void generateMetrics(SkGlyph* glyph);
-    virtual void generateImage(const SkGlyph& glyph);
-    virtual void generatePath(const SkGlyph& glyph, SkPath* path);
-    virtual void generateFontMetrics(SkPaint::FontMetrics* mx,
-                                     SkPaint::FontMetrics* my);
-    virtual SkUnichar generateGlyphToChar(uint16_t glyph);
-
-public:
-    SkFaceRec*  fFaceRec;
-    FT_Face     fFace;              // reference to shared face in gFaceRecHead
-    FT_Size     fFTSize;            // our own copy
-private:
-    SkFixed     fScaleX, fScaleY;
-    FT_Matrix   fMatrix22;
-    uint32_t    fLoadGlyphFlags;
-
-    FT_Error setupSize();
-    void emboldenOutline(FT_Outline* outline);
-};
 
 // copied from skia/src/core/SkDraw.cpp
 #define kStdStrikeThru_Offset       (-SK_Scalar1 * 6 / 21)
@@ -143,14 +104,13 @@ void hookvtbl(void *dest, void *base, void *sub, int num)
     ptrdiff_t *b = *(ptrdiff_t **)base;		// short
     ptrdiff_t *s = *(ptrdiff_t **)sub;		// short
     ptrdiff_t *newv = (ptrdiff_t *)malloc(num * sizeof(ptrdiff_t));
-    Dl_info bd, dd;
-    int j = 2, i;
+    int j = 2, i, k, l;
 
     // handle destructors
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < 2; ++i)
     	newv[i] = d[i];
 
-    for (i = 2; i < num; i++)
+    for (i = 2; i < num; ++i)
     {
         if (d[i] == b[j])
         {
@@ -160,10 +120,18 @@ void hookvtbl(void *dest, void *base, void *sub, int num)
         else
         {
             newv[i] = d[i];
-            if (i < num - 1 && d[i+1] == b[j+1])	// single lookahead
+            for (k = i + 1, l = j + 1; k < num; ++k, ++l)
             {
-            	newv[i] = s[j];
-           		j++;
+                if (d[k] == b[l])
+                {
+                    newv[i] = s[j];
+                    i = k - 1;
+                    j = l;
+                    break;
+                }
+                else
+                    newv[k] = s[l];
+                if (!d[k] || !b[l]) break;
             }
         }
         if (!d[i]) break;
@@ -187,6 +155,7 @@ public:
 	newSkCanvas(SkDevice *device = NULL) {};
 };
 
+extern myfontmap *myfonts;
 static mySkCanvas mySkCanvasDummy((SkDevice *)1);
 static newSkCanvas newSkCanvasDummy((SkDevice *)1);
 
@@ -217,65 +186,6 @@ class mySkDraw : public SkDraw
 public:
     void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
 };
-
-typedef struct rec_ft_table {
-    unsigned long tag;
-    void *buffer;
-    struct rec_ft_table *next;
-} rec_ft_table;
-
-typedef struct rec_gr_face {
-    FT_Face ftface;
-    gr_face *face;
-    rec_ft_table *tables;
-    struct rec_gr_face *next;
-} rec_gr_face;
-
-static rec_gr_face *rec_base = NULL;
-
-void *gettable(const void *recp, unsigned int tag, size_t *len)
-{
-    rec_gr_face *rec = (rec_gr_face *)recp;
-    rec_ft_table *r, *rlast;
-    for (r = rec->tables, rlast = NULL; r; rlast = r, r = r->next)
-    {
-        if (r->tag == tag)
-            return r->buffer;
-    }
-
-    r = new rec_ft_table;
-    if (rlast)
-        rlast->next = r;
-    else
-        rec->tables = r;
-    r->next = NULL;
-    r->tag = tag;
-
-    unsigned long length = 0;
-    FT_Load_Sfnt_Table(rec->ftface, tag, 0, NULL, &length);
-    r->buffer = malloc(length);
-    FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
-    *len = length;
-    return r->buffer;
-}
-
-gr_face *getface(FT_Face ftface)
-{
-    rec_gr_face *r, *rlast;
-    for (r = rec_base, rlast = NULL; r; rlast = r, r = r->next)
-        if (r->ftface == ftface) return r->face;
-
-    r = new rec_gr_face;
-    r->ftface = ftface;
-    r->tables = NULL;
-    r->next = NULL;
-    r->face = gr_make_face(r, (gr_get_table_fn)&gettable, 0);
-    if (rlast)
-        rlast->next = r;
-    else
-        rec_base = r;
-    return r->face;
-}
 
 class mySkDevice : public SkDevice
 {
@@ -309,21 +219,13 @@ SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int heigh
 
 gr_face* getface_from_paint(const SkPaint &paint)
 {
-    SkScalerContext::Rec rec;
-    memset(&rec, 0, sizeof(rec));
-    rec.fFontID = SkTypeface::UniqueID(paint.getTypeface());
-    rec.fTextSize = paint.getTextSize();
-    rec.fPreScaleX = paint.getTextScaleX();
-    rec.fPreSkewX = paint.getTextSkewX();
-    SkAutoDescriptor    ad(sizeof(rec) + SkDescriptor::ComputeOverhead(1));
-    SkDescriptor *      desc = ad.getDesc();
-    desc->init();
-    desc->addEntry(kRec_SkDescriptorTag, sizeof(rec), &rec);
-    SkScalerContext_FreeType    *context = static_cast<SkScalerContext_FreeType *>(SkScalerContext::Create(desc));
-    
-//    FT_Face *ftface = *((char *)context + offset(SkScalerContext_FreeType::fFace));     // we are so evil ;)
-    FT_Face ftface = context->fFace;
-    return getface(ftface);
+    myfontmap *m;
+    for (m = myfonts; m; m = m->next)
+    {
+        if (m->tf == paint.getTypeface())
+            return m->grface;
+    }
+    return 0;
 }
 
 // mangled name: _ZNK8mySkDraw8drawTextEPKcjffRK7SkPaint 

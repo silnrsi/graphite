@@ -32,23 +32,19 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.webkit.WebView;
 import android.widget.TextView;
-import android.content.Context;
-import android.content.res.AssetManager;
-import java.io.InputStream;
-import java.io.FileOutputStream;
 
 public class HelloWorld1 extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	addFontResourceJNI(getAssets(), "Padauk.ttf", "padauk");
+    	Typeface tf = (Typeface)addFontResourceJNI(getAssets(), "Padauk.ttf", "padauk");
     	injectJNI();
     	
     	TextView tv;
     	WebView wv;
     	String s = "မဂင်္ဂလာ|မဘ္ဘာ၊ ဤကဲ့|သို့|ရာ|ဇ|ဝင်|တင်|မည့် ကြေ|ညာ|ချက်|ကို ပြု|လုပ်|ပြီး|နောက် ဤညီ|လာ|ခံ|အ|စည်း|အ|ဝေး|ကြီး|က ကမ္ဘာ့|ကု|လ|သ|မဂ္ဂ|အ|ဖွဲ့|ဝင် နိုင်|ငံ အား|လုံး|အား ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး၏ စာ|သား|ကို|အ|များ|ပြည်|သူ|တို့ ကြား|သိ|စေ|ရန် ကြေ|ညာ|ပါ|မည့် အ|ကြောင်း|ကို|လည်း|ကောင်း၊ ထို့|ပြင်|နိုင်|ငံ|များ၊ သို့|တည်း|မ|ဟုတ် နယ်|မြေ|များ၏ နိုင်|ငံ|ရေး အ|ဆင့်|အ|တ|န်း|ကို လိုက်၍ ခွဲ|ခြား|ခြင်း မ|ပြု|ဘဲ|အ|ဓိ|က|အား|ဖြင့် စာ|သင်|ကျောင်း|များ|နှင့် အ|ခြား|ပ|ညာ|ရေး အ|ဖွဲ့|အ|စည်း|များ|တွင် ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး|ကို ဖြန့်|ချိ ဝေ|ငှ စေ|ရန်၊ မြင်|သာ|အောင် ပြ|သ|ထား|စေ|ရန်၊|ဖတ်|ကြား|စေ|ရန်|နှင့် အ|ဓိပ္ပါယ်|ရှင်း|လင်း ဖော်|ပြ|စေ|ရန် ဆောင်|ရွက်|ပါ|မည့် အ|ကြောင်း|ဖြင့် လည်း|ကောင်း ဆင့်|ဆို လိုက်|သည်။".replace("|", "\u200B");
     	String w = "\uFEFF<html><body style=\"font-family: padauk\">Test: " + s + "</body></html>";
-    	Typeface tf = Typeface.createFromAsset(getAssets(), "Padauk.ttf");
+//    	Typeface tf = Typeface.createFromAsset(getAssets(), "Padauk.ttf");
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -60,7 +56,7 @@ public class HelloWorld1 extends Activity {
     }
 
     public native void injectJNI();
-    public native int addFontResourceJNI(Object assets, String asset_name, String font_name);
+    public native Object addFontResourceJNI(Object assets, String asset_name, String font_name);
 
     static {
     	System.loadLibrary("graphite2");

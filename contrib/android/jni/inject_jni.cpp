@@ -102,8 +102,35 @@ extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_injectJNI( JNIEnv* env
 }
 
 myfontmap *myfonts = NULL;
+static FT_Library gFTLibrary = NULL;
 
-extern "C" int Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
+void *gettable(const void *recp, unsigned int tag, size_t *len)
+{
+    myfontmap *rec = (myfontmap *)recp;
+    rec_ft_table *r, *rlast;
+    for (r = rec->tables, rlast = NULL; r; rlast = r, r = r->next)
+    {
+        if (r->tag == tag)
+            return r->buffer;
+    }
+
+    r = new rec_ft_table;
+    if (rlast)
+        rlast->next = r;
+    else
+        rec->tables = r;
+    r->next = NULL;
+    r->tag = tag;
+
+    unsigned long length = 0;
+    FT_Load_Sfnt_Table(rec->ftface, tag, 0, NULL, &length);
+    r->buffer = malloc(length);
+    FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
+    *len = length;
+    return r->buffer;
+}
+
+extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;
@@ -116,15 +143,38 @@ extern "C" int Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI( JNI
     AssetStream *aStream = new AssetStream(asset, true);
     SkTypeface * tf = SkTypeface::CreateFromStream(aStream);
     if (NULL == tf) return 0;
-    aStream->unref();     // let go of the stream which the Typeface now owns
+    jclass c = env->FindClass("android/graphics/Typeface");
+    jmethodID cid = env->GetMethodID(c, "<init>", "(I)V");
+    jobject res = env->NewObject(c, cid, (int)(void *)(tf));
 
     const char * name = env->GetStringUTFChars(jname, NULL);     // leaky
     myfontmap *f = new myfontmap;
     f->next = myfonts;
     f->tf = tf;
     f->name = name;
+    if (!gFTLibrary && FT_Init_FreeType(&gFTLibrary))
+    {
+        delete f->tf;
+        delete f;
+        return 0;
+    }
+    FT_Open_Args    args;
+    args.flags = FT_OPEN_MEMORY;
+    args.memory_base = (FT_Byte *)(aStream->getMemoryBase());
+    args.memory_size = aStream->read(NULL, 0);
+    FT_Error err = FT_Open_Face(gFTLibrary, &args, 0, &f->ftface);
+    aStream->unref();
+    if (err)
+    {
+        delete f->tf;
+        delete f;
+        return 0;
+    }
+    f->tables = NULL;
+    f->grface = gr_make_face(f, (gr_get_table_fn)&gettable, 0);
     myfonts = f;
-    return (int)(void *)(f->tf);
+//    return (int)(void *)(f->tf);
+    return res;
 }
 
 

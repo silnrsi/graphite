@@ -98,17 +98,23 @@ void inject_fns(const char *srcname, const char *targetname, func_map *map, int 
         }
     }
 
+// The following code doesn't work and causes crashes in some situations
+// Also we regain control of the JNI calls again.
+#if 0
+    Elf32_Sym *symSrc;
     // move our library to the front and swap names
+    goto notdone;
     sitlast->next = soSrc;
     si = soSrc->next;  // as temp var
     soSrc->next = soTarget->next;
     sislast->next = soTarget;
     soTarget->next = si;
+    notdone:
     strncpy((char *)soSrc->name, soTarget->name, 128);
     strncpy((char *)soTarget->name, srcname, 128);
 
     // copy and modify the target's symbol table
-    Elf32_Sym *symSrc = (Elf32_Sym *)malloc(soTarget->nchain * 16);
+    symSrc = (Elf32_Sym *)malloc(soTarget->nchain * 16);
     memcpy(symSrc, soTarget->symtab, soTarget->nchain * 16);
     for (i = 0; i < soTarget->nchain; i++)
     {
@@ -133,6 +139,8 @@ void inject_fns(const char *srcname, const char *targetname, func_map *map, int 
     soSrc->chain = soTarget->chain;
     pthread_mutex_unlock(&dl_lock);
     // all done
+    done:
+#endif
     dlclose(soHead);
     dlclose(soTarget);
     dlclose(soSrc);
