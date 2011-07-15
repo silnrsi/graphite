@@ -25,26 +25,20 @@
     2 of the license or (at your option) any later version.
 */
 
+#include "load.h"
+#include "load_gr.h"
 #include "SkDraw.h"
-#include "inject.h"
 #include "graphite2/Font.h"
 #include "graphite2/Segment.h"
 #include <stdlib.h>
 #include <string.h>
-#include "SkDescriptor.h"
 #include "SkGlyphCache.h"
 #include "SkBitmapProcShader.h"
 #include "SkBlitter.h"
-#include "SkBounder.h"
 #include "SkDrawProcs.h"
-#include "SkDrawFilter.h"
-#include "SkScalerContext.h"
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkBitmap.h"
-#include "SkTypeface.h"
-#include <cutils/properties.h>
-#include <dlfcn.h>
 
 class SkFaceRec;
 
@@ -98,6 +92,49 @@ static void handle_aftertext(const SkDraw* draw, const SkPaint& paint,
 unsigned char SkToU8(unsigned int x)
 { return 32; }
 
+// local classes
+class mySkCanvas : public SkCanvas
+{
+public:
+    explicit mySkCanvas(const SkBitmap& bitmap);
+    explicit mySkCanvas(SkDevice *device = NULL);
+    SkDevice* setDevice(SkDevice* device);
+    virtual SkDevice* setBitmapDevice(const SkBitmap& bitmap);
+    virtual SkDevice* createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer);
+};
+
+class newSkCanvas : public SkCanvas
+{
+public:
+	newSkCanvas(SkDevice *device = NULL) {};
+};
+
+class mySkDraw : public SkDraw
+{
+public:
+    void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
+};
+
+class mySkDevice : public SkDevice
+{
+public:
+    virtual void drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint);
+};
+
+class newSkDevice : public SkDevice {};
+
+class mySkTypeface : public SkTypeface
+{
+public:
+    static SkTypeface *CreateFromName(const char name[], SkTypeface::Style style);
+};
+
+static mySkCanvas mySkCanvasDummy((SkDevice *)1);
+static newSkCanvas newSkCanvasDummy((SkDevice *)1);
+static mySkDevice mySkDeviceDummy;
+static newSkDevice newSkDeviceDummy;
+
+// functions
 void hookvtbl(void *dest, void *base, void *sub, int num)
 {
     ptrdiff_t *d = *(ptrdiff_t **)dest;		// long
@@ -139,30 +176,10 @@ void hookvtbl(void *dest, void *base, void *sub, int num)
     *(ptrdiff_t **)dest = newv;
 }
 
-class mySkCanvas : public SkCanvas
-{
-public:
-    explicit mySkCanvas(const SkBitmap& bitmap);
-    explicit mySkCanvas(SkDevice *device = NULL);
-    SkDevice* setDevice(SkDevice* device);
-    virtual SkDevice* setBitmapDevice(const SkBitmap& bitmap);
-    virtual SkDevice* createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer);
-};
-
-class newSkCanvas : public SkCanvas
-{
-public:
-	newSkCanvas(SkDevice *device = NULL) {};
-};
-
-extern myfontmap *myfonts;
-static mySkCanvas mySkCanvasDummy((SkDevice *)1);
-static newSkCanvas newSkCanvasDummy((SkDevice *)1);
-
 mySkCanvas::mySkCanvas(const SkBitmap& bitmap) :
     SkCanvas(bitmap)
 {
-    hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);    // 38 + 1 rtti? + 2 destructor + spare
+    hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 62);    // 38 + 1 rtti? + 2 destructor + spare
     setDevice(getDevice());
 }
 
@@ -170,7 +187,7 @@ mySkCanvas::mySkCanvas(SkDevice *device) :
     SkCanvas(device == (SkDevice *)1 ? NULL : device)
 {
     if (device != (SkDevice *)1)
-        hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 42);
+        hookvtbl(this, &newSkCanvasDummy, &mySkCanvasDummy, 62);
     else
         device = NULL;
     setDevice(device);
@@ -181,60 +198,29 @@ SkDevice* mySkCanvas::setBitmapDevice(const SkBitmap& bitmap)
     return setDevice(SkCanvas::setBitmapDevice(bitmap));
 }
 
-class mySkDraw : public SkDraw
-{
-public:
-    void drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const;
-};
-
-class mySkDevice : public SkDevice
-{
-public:
-    virtual void drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint);
-};
-
 void mySkDevice::drawText(const SkDraw& d, const void *text, size_t len, SkScalar x, SkScalar y, const SkPaint &paint)
 {
     ((mySkDraw *)(&d))->drawText((const char *)text, len, x, y, paint);
 }
 
-class newSkDevice : public SkDevice {};
-
-static mySkDevice mySkDeviceDummy;
-static newSkDevice newSkDeviceDummy;
-
 SkDevice *mySkCanvas::setDevice(SkDevice* device)
 {
     if (device)
-        hookvtbl(device, &newSkDeviceDummy, &mySkDeviceDummy, 21);    // 17 + spares
+        hookvtbl(device, &newSkDeviceDummy, &mySkDeviceDummy, 41);    // 17 + spares
     return SkCanvas::setDevice(device);
 }
 
 SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int height, bool isOpaque, bool isForLayer)
 {
     SkDevice *res = SkCanvas::createDevice(config, width, height, isOpaque, isForLayer);
-    hookvtbl(res, &newSkDeviceDummy, &mySkDeviceDummy, 21);    // 17 + spares
+    hookvtbl(res, &newSkDeviceDummy, &mySkDeviceDummy, 41);    // 17 + spares
     return res;
-}
-
-gr_face* getface_from_paint(const SkPaint &paint)
-{
-    myfontmap *m;
-    for (m = myfonts; m; m = m->next)
-    {
-        if (m->tf == paint.getTypeface())
-            return m->grface;
-    }
-    return 0;
 }
 
 // mangled name: _ZNK8mySkDraw8drawTextEPKcjffRK7SkPaint 
 void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const
 {
-    // encapsulation is evil!!
-    // we have to create a SkDescriptor so that we can create a SkScalerContext_FreeType
-    // so that we can break its encapsulation to get at the FT_Face
-    gr_face *face = getface_from_paint(paint);
+    gr_face *face = gr_face_from_tf(paint.getTypeface());
     gr_encform enctype = gr_encform(paint.getTextEncoding() + 1);
     if (fMatrix->getType() & SkMatrix::kPerspective_Mask || enctype > 2 || !face)
     {
@@ -246,8 +232,6 @@ void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y
             (paint.getAlpha() == 0 && paint.getXfermode() == NULL))
         return;
 
-    // we don't recalculate this because the values may be set by a call to SkScalarContext_FreeType::setupSize()
-//    FT_Size ftsize = *((char *)context + offset(SkScalerContext_FreeType::fFTSize));    // we are so evil ;)
     gr_font *font = gr_make_font(paint.getTextSize(), face); // textsize in pixels
     if (!font) return;
 
@@ -332,7 +316,7 @@ SkScalar mySkPaint::measureText(const void *text, size_t length) const
 SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bounds, SkScalar zoom) const
 {
     const char* text = (const char *)textData;
-    gr_face *face = getface_from_paint(*this);
+    gr_face *face = gr_face_from_tf(getTypeface());
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
     if (enctype > 2 || !face)
         return SkPaint::measureText(text, length, bounds, zoom);
@@ -362,7 +346,7 @@ SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bou
 int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar widths[], SkRect bounds[]) const
 {
     const char* text = (const char *)textData;
-    gr_face *face = getface_from_paint(*this);
+    gr_face *face = gr_face_from_tf(getTypeface());
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
     if (enctype > 2 || !face)
         return SkPaint::getTextWidths(textData, byteLength, widths, bounds);
@@ -412,29 +396,14 @@ int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar w
     return numchar;
 }
 
-
-extern myfontmap *myfonts;
-
-class mySkTypeface : public SkTypeface
-{
-public:
-    static SkTypeface *CreateFromName(const char name[], SkTypeface::Style style);
-};
-
 SkTypeface *mySkTypeface::CreateFromName(const char name[], SkTypeface::Style style)
 {
-    myfontmap *f;
-    for (f = myfonts; f; f = f->next)
-    {
-        if (!strcmp(name, f->name))
-        {
-            f->tf->safeRef();
-            return f->tf;
-        }
-    }
-    return SkTypeface::CreateFromName(name, style);
+    SkTypeface *res = tf_from_name(name);
+    if (res)
+        return res;
+    else
+        return SkTypeface::CreateFromName(name, style);
 }
-
 
 func_map thismap[] = {
     // SkDraw::DrawText,                            mySkDraw::DrawText

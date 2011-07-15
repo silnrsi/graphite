@@ -25,16 +25,36 @@
     2 of the license or (at your option) any later version.
 */
 
-#include "inject.h"
+#include "load.h"
+#include "load_gr.h"
 #include <jni.h>
 #include <stdio.h>
-#include "SkTypeface.h"
 #include "SkStream.h"
 #include <utils/AssetManager.h>
 #include <android_runtime/android_util_AssetManager.h>
+#include "ft2build.h"
+#include FT_FREETYPE_H
+#include FT_TRUETYPE_TABLES_H
 
+typedef struct fnmap func_map;
 extern func_map thismap;
 
+typedef struct rec_ft_table {
+    unsigned long tag;
+    void *buffer;
+    struct rec_ft_table *next;
+} rec_ft_table;
+
+typedef struct fontmap {
+    struct fontmap *next;
+    const char *name;
+    SkTypeface *tf;
+    FT_Face ftface;
+    rec_ft_table *tables;
+    gr_face *grface;
+} fontmap;
+
+fontmap *myfonts = NULL;
 
 class AssetStream : public SkStream {
 public:
@@ -96,17 +116,16 @@ private:
 };
 
 
-extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_injectJNI( JNIEnv* env, jobject thiz )
+extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_loadGraphite( JNIEnv* env, jobject thiz )
 {
-    inject_fns("libinject-graphite.so", "libskia.so", &thismap, 12);
+    load_fns("libload-graphite.so", "libskia.so", &thismap, 12);
 }
 
-myfontmap *myfonts = NULL;
 static FT_Library gFTLibrary = NULL;
 
 void *gettable(const void *recp, unsigned int tag, size_t *len)
 {
-    myfontmap *rec = (myfontmap *)recp;
+    fontmap *rec = (fontmap *)recp;
     rec_ft_table *r, *rlast;
     for (r = rec->tables, rlast = NULL; r; rlast = r, r = r->next)
     {
@@ -130,7 +149,7 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     return r->buffer;
 }
 
-extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
+extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;
@@ -148,7 +167,7 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI(
     jobject res = env->NewObject(c, cid, (int)(void *)(tf));
 
     const char * name = env->GetStringUTFChars(jname, NULL);     // leaky
-    myfontmap *f = new myfontmap;
+    fontmap *f = new fontmap;
     f->next = myfonts;
     f->tf = tf;
     f->name = name;
@@ -177,4 +196,19 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResourceJNI(
     return res;
 }
 
+extern "C" gr_face *gr_face_from_tf(SkTypeface *tf)
+{
+    fontmap *f;
+    for (f = myfonts; f; f = f->next)
+        if (f->tf == tf) return f->grface;
+    return 0;
+}
+
+extern "C" SkTypeface *tf_from_name(const char *name)
+{
+    fontmap *f;
+    for (f = myfonts; f; f = f->next)
+        if (!strcmp(f->name, name)) return f->tf;
+    return 0;
+}
 

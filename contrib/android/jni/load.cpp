@@ -31,7 +31,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
-#include "inject.h"
+#include "load.h"
 
 //typedef void (SkDraw::*drawTextFn)(const char *, size_t, SkScalar, SkScalar, const SkPaint&) const;
 
@@ -43,7 +43,7 @@ void reloc_fns(soinfo *si, Elf32_Rel *rel, unsigned count, func_map *map, unsign
 void reloca_fns(soinfo *si, Elf32_Rela *rela, unsigned count, func_map *map, unsigned num_map);
 #endif
 
-void inject_fns(const char *srcname, const char *targetname, func_map *map, int num_map)
+void load_fns(const char *srcname, const char *targetname, func_map *map, int num_map)
 {
     soinfo *soHead = (soinfo *)dlopen("libdl.so", 0);
     soinfo *soTarget = (soinfo *)dlopen(targetname, 0);
@@ -146,7 +146,7 @@ void inject_fns(const char *srcname, const char *targetname, func_map *map, int 
     dlclose(soSrc);
 }
 
-void unload_injected(char *srcname, char *tgtname, func_map *map, int num_map)
+void unload_loaded(char *srcname, char *tgtname, func_map *map, int num_map)
 {
     soinfo *soSrc = (soinfo *)dlopen(srcname, 0);
     soinfo *soTgt = (soinfo *)dlopen(tgtname, 0);

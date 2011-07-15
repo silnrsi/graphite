@@ -25,43 +25,20 @@
     2 of the license or (at your option) any later version.
 */
 
-#include "SkTypeface.h"
-#include "ft2build.h"
-#include FT_FREETYPE_H
-#include FT_TRUETYPE_TABLES_H
-#include "graphite2/Font.h"
-
-struct fnmap {
+typedef struct fnmap {
     const char *starget;
     const char *ssrc;
     void *ptarget;
     void *psrc;
-};
-
-typedef struct fnmap func_map;
-
-typedef struct rec_ft_table {
-    unsigned long tag;
-    void *buffer;
-    struct rec_ft_table *next;
-} rec_ft_table;
-
-typedef struct myfontmap {
-    struct myfontmap *next;
-    const char *name;
-    SkTypeface *tf;
-    FT_Face ftface;
-    rec_ft_table *tables;
-    gr_face *grface;
-} myfontmap;
+} func_map;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void inject_fns(const char *srcname, const char *targetname, func_map *map, int num_map);
-void unload_injected(const char *srcname, const char *tgtname, func_map *map, int num_map);
+void load_fns(const char *srcname, const char *targetname, func_map *map, int num_map);
+void unload_loaded(const char *srcname, const char *tgtname, func_map *map, int num_map);
 
 #ifdef __cplusplus
 }

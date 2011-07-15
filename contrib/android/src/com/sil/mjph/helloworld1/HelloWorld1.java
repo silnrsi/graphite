@@ -37,8 +37,8 @@ public class HelloWorld1 extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	Typeface tf = (Typeface)addFontResourceJNI(getAssets(), "Padauk.ttf", "padauk");
-    	injectJNI();
+    	Typeface tf = (Typeface)addFontResource(getAssets(), "Padauk.ttf", "padauk");
+    	loadGraphite();
     	
     	TextView tv;
     	WebView wv;
@@ -55,11 +55,11 @@ public class HelloWorld1 extends Activity {
         wv.loadData(w, "text/html", "UTF-8");
     }
 
-    public native void injectJNI();
-    public native Object addFontResourceJNI(Object assets, String asset_name, String font_name);
+    public native void loadGraphite();
+    public native Object addFontResource(Object assets, String asset_name, String font_name);
 
     static {
     	System.loadLibrary("graphite2");
-    	System.loadLibrary("inject-graphite");
+    	System.loadLibrary("load-graphite");
     }
 }
