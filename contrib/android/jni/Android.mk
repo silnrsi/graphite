@@ -51,11 +51,11 @@ endif
 # set arm for debug purposes so we can set breakpoints
 LOCAL_ARM_MODE := arm
 LOCAL_CFLAGS += -mapcs
-LOCAL_MODULE := inject-graphite
+LOCAL_MODULE := load-graphite
 LOCAL_SHARED_LIBRARIES := graphite2
 LOCAL_LDLIBS := -L $(MY_ANDROID_LIBS) -lskia -lcutils -landroid_runtime -lutils
 LOCAL_CPPFLAGS += -fno-rtti -mapcs -fno-inline
-LOCAL_SRC_FILES := inject_jni.cpp inject.cpp graphite_layer.cpp
+LOCAL_SRC_FILES := loadgr_jni.cpp load.cpp graphite_layer.cpp
 LOCAL_C_INCLUDES := $(MY_SKIA)/include/core \
                     $(MY_SKIA)/include/utils \
                     $(MY_SKIA)/src/core \
