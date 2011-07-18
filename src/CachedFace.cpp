@@ -25,7 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 
-#ifndef NSEG_CACHE
+#ifndef DISABLE_SEGCACHE
 
 #include <graphite2/Segment.h>
 #include "CachedFace.h"

@@ -85,7 +85,7 @@ typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int n
   */
 GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
 
-#ifndef NSEG_CACHE
+#ifndef DISABLE_SEGCACHE
 /** Create a gr_face object given application information, with subsegmental caching support
   *
   * @return gr_face or NULL if the font fails to load.
@@ -159,7 +159,7 @@ GR2_API unsigned short gr_face_n_glyphs(const gr_face* pFace);
   */
 GR2_API gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions);
 
-#ifndef NSEG_CACHE
+#ifndef DISABLE_SEGCACHE
 /** Create gr_face from a font file, with subsegment caching support.
   *
   * @return gr_face that accesses a font file directly. Returns NULL on failure.
