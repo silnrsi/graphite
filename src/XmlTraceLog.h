@@ -54,10 +54,9 @@ public:
     void addAttribute(XmlTraceLogAttribute aId, float value);
     void addAttribute(XmlTraceLogAttribute aId, int value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned int value);
+    void addAttribute(XmlTraceLogAttribute aId, long value);
+    void addAttribute(XmlTraceLogAttribute aId, unsigned long value);
     void addAttribute(XmlTraceLogAttribute aId, unsigned long long value);
-#if SIZEOF_SIZE_T == 8 && !defined(_WIN32)
-    void addAttribute(XmlTraceLogAttribute aId, size_t value) { addAttribute(aId, (uint32)value); }
-#endif
     void addAttributeFixed(XmlTraceLogAttribute aId, uint32 value);
     void writeText(const char * utf8);
     void writeUnicode(const uint32 code);
@@ -187,6 +186,26 @@ inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned int val
     if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
     {
         fprintf(m_file, " %s=\"%u\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, long value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%ld\"", xmlTraceLogAttributes[aId], value);
+    }
+}
+
+inline void XmlTraceLog::addAttribute(XmlTraceLogAttribute aId, unsigned long value)
+{
+    if (!m_file) return;
+    assert(m_inElement);
+    if (xmlTraceLogElements[m_elementStack[m_depth-1]].mFlags & m_mask)
+    {
+        fprintf(m_file, " %s=\"%lu\"", xmlTraceLogAttributes[aId], value);
     }
 }
 

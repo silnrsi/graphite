@@ -80,20 +80,6 @@ set(GRAPHITE_API_MINOR 0)
 set(GRAPHITE_API_AGE 0)
 set(GRAPHITE_SO_VERSION ${GRAPHITE_API_MAJOR}.${GRAPHITE_API_MINOR}.${GRAPHITE_API_AGE})
 
-# check for fabsf definition
-set(FABSF_TEST_SRC "#include <cmath>\nint main() { fabsf(1.2); }")
-CHECK_CXX_SOURCE_COMPILES("${FABSF_TEST_SRC}" HAVE_FABSF)
-if (HAVE_FABSF)
-add_definitions(-DHAVE_FABSF)
-endif (HAVE_FABSF)
-
-#check sizeof wchar_t
-CHECK_TYPE_SIZE(wchar_t SIZEOF_WCHAR_T)
-add_definitions(-DSIZEOF_WCHAR_T=${SIZEOF_WCHAR_T})
-CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
-add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
-
-
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
 
 if (NOT DISABLE_TRACING)
