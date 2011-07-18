@@ -52,6 +52,7 @@ typedef struct fontmap {
     FT_Face ftface;
     rec_ft_table *tables;
     gr_face *grface;
+    bool rtl;
 } fontmap;
 
 fontmap *myfonts = NULL;
@@ -149,7 +150,7 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     return r->buffer;
 }
 
-extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname )
+extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname, jint rtl )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;
@@ -171,6 +172,7 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
     f->next = myfonts;
     f->tf = tf;
     f->name = name;
+    f->rtl = rtl;
     if (!gFTLibrary && FT_Init_FreeType(&gFTLibrary))
     {
         delete f->tf;
@@ -196,11 +198,15 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
     return res;
 }
 
-extern "C" gr_face *gr_face_from_tf(SkTypeface *tf)
+extern "C" gr_face *gr_face_from_tf(SkTypeface *tf, bool *rtl)
 {
     fontmap *f;
     for (f = myfonts; f; f = f->next)
-        if (f->tf == tf) return f->grface;
+        if (f->tf == tf)
+        {
+            if (rtl) *rtl = f->rtl;
+            return f->grface;
+        }
     return 0;
 }
 

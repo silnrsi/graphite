@@ -37,26 +37,29 @@ public class HelloWorld1 extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	Typeface tf = (Typeface)addFontResource(getAssets(), "Padauk.ttf", "padauk");
+    	Typeface tfp = (Typeface)addFontResource(getAssets(), "Padauk.ttf", "padauk", 0);
+    	Typeface tfa = (Typeface)addFontResource(getAssets(), "Scheherazadegr.ttf", "Scheh", 1);
     	loadGraphite();
     	
     	TextView tv;
     	WebView wv;
-    	String s = "မဂင်္ဂလာ|မဘ္ဘာ၊ ဤကဲ့|သို့|ရာ|ဇ|ဝင်|တင်|မည့် ကြေ|ညာ|ချက်|ကို ပြု|လုပ်|ပြီး|နောက် ဤညီ|လာ|ခံ|အ|စည်း|အ|ဝေး|ကြီး|က ကမ္ဘာ့|ကု|လ|သ|မဂ္ဂ|အ|ဖွဲ့|ဝင် နိုင်|ငံ အား|လုံး|အား ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး၏ စာ|သား|ကို|အ|များ|ပြည်|သူ|တို့ ကြား|သိ|စေ|ရန် ကြေ|ညာ|ပါ|မည့် အ|ကြောင်း|ကို|လည်း|ကောင်း၊ ထို့|ပြင်|နိုင်|ငံ|များ၊ သို့|တည်း|မ|ဟုတ် နယ်|မြေ|များ၏ နိုင်|ငံ|ရေး အ|ဆင့်|အ|တ|န်း|ကို လိုက်၍ ခွဲ|ခြား|ခြင်း မ|ပြု|ဘဲ|အ|ဓိ|က|အား|ဖြင့် စာ|သင်|ကျောင်း|များ|နှင့် အ|ခြား|ပ|ညာ|ရေး အ|ဖွဲ့|အ|စည်း|များ|တွင် ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး|ကို ဖြန့်|ချိ ဝေ|ငှ စေ|ရန်၊ မြင်|သာ|အောင် ပြ|သ|ထား|စေ|ရန်၊|ဖတ်|ကြား|စေ|ရန်|နှင့် အ|ဓိပ္ပါယ်|ရှင်း|လင်း ဖော်|ပြ|စေ|ရန် ဆောင်|ရွက်|ပါ|မည့် အ|ကြောင်း|ဖြင့် လည်း|ကောင်း ဆင့်|ဆို လိုက်|သည်။".replace("|", "\u200B");
-    	String w = "\uFEFF<html><body style=\"font-family: padauk\">Test: " + s + "</body></html>";
+//    	String s = "မဂင်္ဂလာ|မဘ္ဘာ၊ ဤကဲ့|သို့|ရာ|ဇ|ဝင်|တင်|မည့် ကြေ|ညာ|ချက်|ကို ပြု|လုပ်|ပြီး|နောက် ဤညီ|လာ|ခံ|အ|စည်း|အ|ဝေး|ကြီး|က ကမ္ဘာ့|ကု|လ|သ|မဂ္ဂ|အ|ဖွဲ့|ဝင် နိုင်|ငံ အား|လုံး|အား ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး၏ စာ|သား|ကို|အ|များ|ပြည်|သူ|တို့ ကြား|သိ|စေ|ရန် ကြေ|ညာ|ပါ|မည့် အ|ကြောင်း|ကို|လည်း|ကောင်း၊ ထို့|ပြင်|နိုင်|ငံ|များ၊ သို့|တည်း|မ|ဟုတ် နယ်|မြေ|များ၏ နိုင်|ငံ|ရေး အ|ဆင့်|အ|တ|န်း|ကို လိုက်၍ ခွဲ|ခြား|ခြင်း မ|ပြု|ဘဲ|အ|ဓိ|က|အား|ဖြင့် စာ|သင်|ကျောင်း|များ|နှင့် အ|ခြား|ပ|ညာ|ရေး အ|ဖွဲ့|အ|စည်း|များ|တွင် ထို|ကြေ|ညာ|စာ|တမ်း|ကြီး|ကို ဖြန့်|ချိ ဝေ|ငှ စေ|ရန်၊ မြင်|သာ|အောင် ပြ|သ|ထား|စေ|ရန်၊|ဖတ်|ကြား|စေ|ရန်|နှင့် အ|ဓိပ္ပါယ်|ရှင်း|လင်း ဖော်|ပြ|စေ|ရန် ဆောင်|ရွက်|ပါ|မည့် အ|ကြောင်း|ဖြင့် လည်း|ကောင်း ဆင့်|ဆို လိုက်|သည်။".replace("|", "\u200B");
+    	String s = "لمّا كان الاعتراف بالكرامة المتأصلة في جميع أعضاء الأسرة البشرية وبحقوقهم المتساوية الثابتة هو أساس الحرية والعدل123  والسلام في العالم.";
+    	String w = "\uFEFF<html><body style=\"font-family: Scheh\">Test: " + s + "</body></html>";
 //    	Typeface tf = Typeface.createFromAsset(getAssets(), "Padauk.ttf");
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         tv = (TextView) findViewById(R.id.tv);
         tv.setText(s);
-        tv.setTypeface(tf, 0);
+        tv.setTypeface(tfa, 0);
+        tv.setTextSize(tv.getTextSize() * 2);
         wv = (WebView) findViewById(R.id.wv);
         wv.loadData(w, "text/html", "UTF-8");
     }
 
     public native void loadGraphite();
-    public native Object addFontResource(Object assets, String asset_name, String font_name);
+    public native Object addFontResource(Object assets, String asset_name, String font_name, int rtl);
 
     static {
     	System.loadLibrary("graphite2");
