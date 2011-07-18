@@ -211,9 +211,10 @@ STARTOP(next)
 ENDOP
 
 STARTOP(next_n)
-    declare_params(1);
-//    const size_t    num = uint8(*param);
+    use_params(1);
     NOT_IMPLEMENTED;
+    //declare_params(1);
+    //const size_t num = uint8(*param);
 ENDOP
 
 //STARTOP(copy_next)
@@ -567,11 +568,12 @@ STARTOP(iattr_sub)
 ENDOP
 
 STARTOP(push_proc_state)
-    declare_params(1);
+//    declare_params(1);
 //    unsigned int  pstate = uint8(*param);
 //    pstate = 0;     // This is here to stop the compiler bleating about unused 
                     // variables.
     // TODO; Implement body
+    use_params(1);
     push(1);
 ENDOP
 
