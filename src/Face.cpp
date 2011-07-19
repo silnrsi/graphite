@@ -67,6 +67,7 @@ bool Face::readGlyphs(unsigned int faceOptions)
     if (faceOptions & gr_face_preloadGlyphs)
     {
         m_pGlyphFaceCache->loadAllGlyphs();
+        nameTable();        // preload the name table along with the glyphs, heh.
     }
     m_upem = TtfUtil::DesignUnits(m_pGlyphFaceCache->m_pHead);
     if (!m_upem) return false;

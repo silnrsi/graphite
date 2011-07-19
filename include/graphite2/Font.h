@@ -61,7 +61,9 @@ enum gr_face_options {
     /** preload glyphs at construction time */
     gr_face_preloadGlyphs = 2,
     /** Cache the lookup from code point to glyph ID at construction time */
-    gr_face_cacheCmap = 4
+    gr_face_cacheCmap = 4,
+    /** Preload everything */
+    gr_face_preloadAll = 6
 };
 
 /** type describing function to retrieve font table information

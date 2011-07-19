@@ -43,6 +43,8 @@ typedef struct rec_ft_table {
     unsigned long tag;
     void *buffer;
     struct rec_ft_table *next;
+
+    ~rec_ft_table() { if (buffer) free(buffer); if (next) delete next; }
 } rec_ft_table;
 
 typedef struct fontmap {
@@ -192,7 +194,8 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
         return 0;
     }
     f->tables = NULL;
-    f->grface = gr_make_face(f, (gr_get_table_fn)&gettable, 0);
+    f->grface = gr_make_face(f, (gr_get_table_fn)&gettable, gr_face_preloadGlyphs | gr_face_cacheCmap);
+    delete f->tables;
     myfonts = f;
 //    return (int)(void *)(f->tf);
     return res;

@@ -36,20 +36,25 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
     :
     m_platformId(0), m_encodingId(0), m_languageCount(0),
     m_platformOffset(0), m_platformLastRecord(0), m_nameDataLength(0),
-    m_table(reinterpret_cast<const TtfUtil::Sfnt::FontNames*>(data)),
     m_nameData(NULL)
 {
+    void *pdata = malloc(length);
+    if (!pdata) return;
+    memcpy(pdata, data, length);
+    m_table = reinterpret_cast<const TtfUtil::Sfnt::FontNames*>(pdata);
+
     if ((length > sizeof(TtfUtil::Sfnt::FontNames)) &&
         (length > sizeof(TtfUtil::Sfnt::FontNames) +
          sizeof(TtfUtil::Sfnt::NameRecord) * ( swap16(m_table->count) - 1)))
     {
         uint16 offset = swap16(m_table->string_offset);
-        m_nameData = reinterpret_cast<const uint8*>(data) + offset;
+        m_nameData = reinterpret_cast<const uint8*>(pdata) + offset;
         setPlatformEncoding(platformId, encodingID);
         m_nameDataLength = length - offset;
     }
     else
     {
+        free(const_cast<TtfUtil::Sfnt::FontNames*>(m_table));
         m_table = NULL;
     }
 }
@@ -58,7 +63,8 @@ uint16 NameTable::setPlatformEncoding(uint16 platformId, uint16 encodingID)
 {
     if (!m_nameData) return 0;
     uint16 i = 0;
-    for (; i < m_table->count; i++)
+    uint16 count = swap16(m_table->count);
+    for (; i < count; i++)
     {
         if (swap16(m_table->name_record[i].platform_id) == platformId &&
             swap16(m_table->name_record[i].platform_specific_id) == encodingID)
@@ -67,7 +73,7 @@ uint16 NameTable::setPlatformEncoding(uint16 platformId, uint16 encodingID)
             break;
         }
     }
-    while ((++i < m_table->count) &&
+    while ((++i < count) &&
            (swap16(m_table->name_record[i].platform_id) == platformId) &&
            (swap16(m_table->name_record[i].platform_specific_id) == encodingID))
     {

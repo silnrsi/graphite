@@ -95,6 +95,20 @@ be queried for such information as the code unit position in the input string,
 the before slot index (if we are before this character, which is the earliest
 slot we are before) and the corresponding after slot index.
 
+=== Face ===
+
+The `gr_face` type is the memory correspondance of a font. It holds the data
+structures corresponding to those in a font file as required to process text
+using that font. In creating a `gr_face` it is necessary to pass a function by
+which graphite can get hold of font tables. The tables that graphite queries for
+must be available for the lifetime of the `gr_face`, except when a `gr_face` is
+created with the faceOptions of `gr_face_preloadAll`. This then loads
+everything from the font at `gr_face` construction time, leaving nothing further
+to be read from the font when the `gr_face` is used. This reduces the required
+lifetime of the in memory font tables to the `gr_make_face` call. In situations
+where the tables are only stored for the purposes of creating a `gr_face`, it
+can save memory to preload everything and delete the tables.
+
 === Caching ===
 
 Graphite2 has the capability to make use of a subsegmental cache. What this

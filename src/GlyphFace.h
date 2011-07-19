@@ -95,7 +95,7 @@ private:
     Position m_advance;     // Advance width and height in design units
 //    short  * m_attribs;     // array of glyph attributes, fontface knows how many
 //    short  * m_columns;     // array of fsm column values
-    int      m_gloc;        // glat offset
+//    int      m_gloc;        // glat offset
     unsigned short *m_attrs;
 };
 
