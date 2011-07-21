@@ -53,15 +53,15 @@ Face::~Face()
 bool Face::readGlyphs(unsigned int faceOptions)
 {
     GlyphFaceCacheHeader hdr;
-    if (!hdr.initialize(m_appFaceHandle, m_getTable)) return false;
+    if (!hdr.initialize(*this)) return false;
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr);
     if (!m_pGlyphFaceCache) return false;
     if (faceOptions & gr_face_cacheCmap)
     {
         size_t length = 0;
-        const void * table = getTable(tagCmap, &length);
-        if (!table || !TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagCmap, table, length)) return false;
+        const byte * table = getTable(tagCmap, &length);
+        if (!table) return false;
         m_cmapCache = new CmapCache(table, length);
     }
     if (faceOptions & gr_face_preloadGlyphs)
@@ -78,9 +78,9 @@ bool Face::readGlyphs(unsigned int faceOptions)
 
 bool Face::readGraphite()
 {
-    char *pSilf;
+    const byte *pSilf;
     size_t lSilf;
-    if ((pSilf = (char *)getTable(tagSilf, &lSilf)) == NULL) return false;
+    if ((pSilf = getTable(tagSilf, &lSilf)) == NULL) return false;
     uint32 version;
 #ifndef DISABLE_TRACING
     uint32 compilerVersion = 0; // wasn't set before GTF version 3
@@ -190,8 +190,8 @@ NameTable * Face::nameTable() const
 {
     if (m_pNames) return m_pNames;
     size_t tableLength = 0;
-    const void * table = getTable(tagName, &tableLength);
-    if (table && TtfUtil::CheckTable(static_cast<TtfUtil::TableId>tagName, table, tableLength))
+    const byte * table = getTable(tagName, &tableLength);
+    if (table)
         m_pNames = new NameTable(table, tableLength);
     return m_pNames;
 }

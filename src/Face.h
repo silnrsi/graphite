@@ -121,7 +121,12 @@ private:        //defensive
 class Face
 {
 public:
-    const void *getTable(unsigned int name, size_t *len) const { return (*m_getTable)(m_appFaceHandle, name, len); }
+    const byte *getTable(unsigned int name, size_t  * len = 0) const {
+    	size_t tbl_len=0;
+    	const byte * const tbl = reinterpret_cast<const byte *>((*m_getTable)(m_appFaceHandle, name, &tbl_len));
+    	if (len) *len = tbl_len;
+    	return TtfUtil::CheckTable(TtfUtil::TableId(name), tbl, tbl_len) ? tbl : 0;
+    }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
     virtual void runGraphite(Segment *seg, const Silf *silf) const;

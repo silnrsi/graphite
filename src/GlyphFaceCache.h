@@ -32,26 +32,27 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 class Segment;
+class Face;
 class FeatureVal;
 
 
 class GlyphFaceCacheHeader
 {
 public:
-    bool initialize(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);    //return result indicates success. Do not use if failed.
+    bool initialize(const Face & face);    //return result indicates success. Do not use if failed.
     unsigned short numGlyphs() const { return m_nGlyphs; }
     unsigned short numAttrs() const { return m_numAttrs; }
 
 private:
 friend class Face;
 friend class GlyphFace;
-    const void* m_pGloc;
-    size_t m_lLoca; const void* m_pLoca;
-    const void* m_pHead;
-    size_t m_lGlyf; const void* m_pGlyf;
-    size_t m_lHmtx; const void* m_pHmtx;
-    const void* m_pHHea;
-    size_t m_lGlat; const void* m_pGlat; uint32 m_fGlat;
+    const byte* m_pGloc;
+    size_t m_lLoca; const byte* m_pLoca;
+    const byte* m_pHead;
+    size_t m_lGlyf; const byte* m_pGlyf;
+    size_t m_lHmtx; const byte* m_pHmtx;
+    const byte* m_pHHea;
+    size_t m_lGlat; const byte* m_pGlat; uint32 m_fGlat;
 
     unsigned short m_numAttrs;      // number of glyph attributes per glyph
     bool m_locFlagsUse32Bit;
