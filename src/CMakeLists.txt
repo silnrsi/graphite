@@ -132,6 +132,7 @@ add_library(graphite2 SHARED
     Segment.cpp
     Silf.cpp
     Slot.cpp
+    Sparse.cpp
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
