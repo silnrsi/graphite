@@ -320,6 +320,7 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
             break;
         default:
             res = NULL;
+            break;
     }
     assert(res); // don't expect any other table types
     if (!res) return NULL;

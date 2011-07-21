@@ -423,6 +423,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 argError = true;
                 fprintf(stderr,"too many arguments %s\n",argv[a]);
             }
+            break;
         }
     }
     if (mainArgOffset < 1) argError = true;
@@ -594,6 +595,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
                         featId.uChar[nameLength++] = features[i];
                     }
                 }
+                break;
         }
         if (ref)
         {

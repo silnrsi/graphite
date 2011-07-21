@@ -364,7 +364,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         m_userAttr[subindex] = value;
         break;
     default :
-        break;
+    	break;
     }
 }
 
