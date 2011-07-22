@@ -80,6 +80,10 @@ public:
     bool isPositioned() const { return (m_flags & SLOT_POSITIONED) ? true : false; }
     void markPositioned(bool state) { if (state) m_flags |= SLOT_POSITIONED; else m_flags &= ~SLOT_POSITIONED; }
     bool isInsertBefore() const { return !(m_flags & SLOT_INSERT); }
+    uint8 getBidiLevel() const { return m_bidiLevel; }
+    void setBidiLevel(uint8 level) { m_bidiLevel = level; }
+    uint8 getBidiClass() const { return m_bidiCls; }
+    void setBidiClass(uint8 cls) { m_bidiCls = cls; }
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
@@ -118,8 +122,10 @@ private:
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
     float    m_just;        // justification adjustment
-    byte m_flags;           // holds bit flags
-    byte m_attLevel;        // attachment level
+    uint8    m_flags;       // holds bit flags
+    byte     m_attLevel;    // attachment level
+    byte     m_bidiCls;     // bidirectional class
+    byte     m_bidiLevel;   // bidirectional level
     uint16 *m_userAttr;     // pointer to user attributes
 };
 

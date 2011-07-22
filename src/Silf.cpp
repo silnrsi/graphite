@@ -126,7 +126,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     XmlTraceLog::get().addAttribute(AttrBreakWeight, m_aBreak);
     XmlTraceLog::get().addAttribute(AttrDirectionality, *p);
 #endif
-    p++;        // we don't do bidi
+    m_aBidi = uint8(*p++);
     p += 2;     // skip reserved stuff
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumJustLevels, *p);
@@ -466,6 +466,8 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 	        XmlTraceLog::get().addAttribute(AttrNum, i);
         }
 #endif
+        if (i == m_bPass && seg->dir() & 2)
+            seg->bidiPass(m_aBidi, seg->dir() & 1);
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(m, fsm);
 #ifndef DISABLE_TRACING

@@ -27,10 +27,10 @@
 LOCAL_PATH := $(call my-dir)
 
 MY_ANDROID_SRC := $(HOME)/Work/android/android-src
-MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
-#MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-8/symbols/system/lib
-MY_SKIA := $(MY_ANDROID_SRC)/external/skia
-#MY_SKIA := $(HOME)/Work/android/skia/8
+#MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib
+MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-8/symbols/system/lib
+#MY_SKIA := $(MY_ANDROID_SRC)/external/skia
+MY_SKIA := $(HOME)/Work/android/skia/8
 
 include $(CLEAR_VARS)
 

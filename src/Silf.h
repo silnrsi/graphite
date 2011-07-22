@@ -95,7 +95,7 @@ private:
     uint8           m_sPass, m_pPass, m_jPass, m_bPass,
                     m_flags;
 
-    uint8   m_aPseudo, m_aBreak, m_aUser, 
+    uint8   m_aPseudo, m_aBreak, m_aUser, m_aBidi,
             m_iMaxComp;
     uint16  m_aLig,
             m_numPseudo,

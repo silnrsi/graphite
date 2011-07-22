@@ -128,6 +128,12 @@ enum gr_attrCode {
     gr_slatNoEffect = gr_slatMax + 1    
 };
 
+enum gr_bidirtl {
+    /// Underlying paragraph direction is RTL
+    gr_rtl = 1,
+    /// Run the internal bidi pass, if specified by the font
+    gr_bidi = 2
+};
 
 typedef struct gr_char_info     gr_char_info;
 typedef struct gr_segment       gr_segment;
@@ -201,7 +207,8 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
   *               allocations of the segment. So it is wise not to make nChars too much
   *               greater than the actual number of characters being processed.
   * @param dir Specifies whether the segment is processed right to left (1) or left to
-  *            right (0)
+  *            right (0) and whether to run the internal bidi pass, if a font requests it.
+  *            See enum gr_bidirtl for details.
   */
 GR2_API gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, gr_uint32 script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 

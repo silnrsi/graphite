@@ -12,6 +12,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
+    ../../src/Bidi.cpp
     ../../src/call_machine.cpp
     ../../src/CachedFace.cpp
     ../../src/CmapCache.cpp

@@ -16,6 +16,7 @@ endif(DISABLE_TRACING)
 add_library(vm-test-common  STATIC
                 basic_test.cpp
                 ${SRC}/gr_face.cpp
+                ${SRC}/Bidi.cpp
                 ${SRC}/CachedFace.cpp
                 ${SRC}/Code.cpp
                 ${SRC}/CmapCache.cpp

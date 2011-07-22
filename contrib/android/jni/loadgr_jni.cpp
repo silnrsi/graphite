@@ -42,6 +42,7 @@ extern func_map thismap;
 typedef struct rec_ft_table {
     unsigned long tag;
     void *buffer;
+    unsigned long len;
     struct rec_ft_table *next;
 
     ~rec_ft_table() { if (buffer) free(buffer); if (next) delete next; }
@@ -54,7 +55,7 @@ typedef struct fontmap {
     FT_Face ftface;
     rec_ft_table *tables;
     gr_face *grface;
-    bool rtl;
+    int rtl;
 } fontmap;
 
 fontmap *myfonts = NULL;
@@ -133,7 +134,10 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     for (r = rec->tables, rlast = NULL; r; rlast = r, r = r->next)
     {
         if (r->tag == tag)
+        {
+            if (len) *len = r->len;
             return r->buffer;
+        }
     }
 
     r = new rec_ft_table;
@@ -148,7 +152,8 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     FT_Load_Sfnt_Table(rec->ftface, tag, 0, NULL, &length);
     r->buffer = malloc(length);
     FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
-    *len = length;
+    if (len) *len = length;
+    r->len = length;
     return r->buffer;
 }
 
@@ -173,8 +178,8 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
     fontmap *f = new fontmap;
     f->next = myfonts;
     f->tf = tf;
-    f->name = name;
-    f->rtl = rtl;
+    f->name = rtl ? "" : name;
+    f->rtl = rtl ? 3 : 0;
     if (!gFTLibrary && FT_Init_FreeType(&gFTLibrary))
     {
         delete f->tf;
@@ -194,14 +199,30 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
         return 0;
     }
     f->tables = NULL;
-    f->grface = gr_make_face(f, (gr_get_table_fn)&gettable, gr_face_preloadGlyphs | gr_face_cacheCmap);
+    f->grface = gr_make_face(f, (gr_get_table_fn)&gettable, gr_face_preloadAll);
     delete f->tables;
     myfonts = f;
+    if (rtl)
+    {
+        SkTypeface *tfw = SkTypeface::CreateFromStream(aStream);
+        if (tfw)
+        {
+            fontmap *fw = new fontmap;
+            fw->next = myfonts;
+            fw->tf = tfw;
+            fw->name = name;
+            fw->rtl = 1;
+            fw->ftface = f->ftface;
+            fw->tables = NULL;
+            fw->grface = f->grface;
+            myfonts = fw;
+        }
+    }
 //    return (int)(void *)(f->tf);
     return res;
 }
 
-extern "C" gr_face *gr_face_from_tf(SkTypeface *tf, bool *rtl)
+extern "C" gr_face *gr_face_from_tf(SkTypeface *tf, int *rtl)
 {
     fontmap *f;
     for (f = myfonts; f; f = f->next)

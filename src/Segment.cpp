@@ -588,3 +588,30 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSE
     // dump line end contextual markers
 }
 
+Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0);
+void resolveWeak(int baseLevel, Slot *s);
+void resolveNeutrals(int baseLevel, Slot *s);
+void resolveImplicit(Slot *s);
+void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
+Slot *resolveOrder(Slot **first, Slot **last, Slot *s, int level, int baseLevel);
+
+void Segment::bidiPass(uint8 aBidi, int paradir)
+{
+    Slot *s;
+    Slot *pfirst = NULL;
+    Slot *plast = NULL;
+    int baseLevel = paradir ? 1 : 0;
+    for (s = first(); s; s = s->next())
+    {
+        s->setBidiClass(glyphAttr(s->gid(), aBidi));
+    }
+    resolveExplicit(baseLevel, 0, first(), 0);
+    resolveWeak(baseLevel, first());
+    resolveNeutrals(baseLevel, first());
+    resolveImplicit(first());
+    resolveWhitespace(baseLevel, this, aBidi, last());
+    resolveOrder(&pfirst, &plast, first(), baseLevel, baseLevel);
+    first(pfirst);
+    last(plast);
+}
+

@@ -1,12 +1,27 @@
 /*-----------------------------------------------------------------------------
-Copyright (C) 2005 www.thanlwinsoft.org
+Copyright (C) 2005 www.thanlwinsoft.org, SIL International
+Responsibility: Keith Stribley, Martin Hosken
 
-Distributable under the terms of either the Common Public License or the
-GNU Lesser General Public License, as specified in the LICENSING.txt file.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation; either version 2.1 of License, or
+    (at your option) any later version.
 
-File: 
-Responsibility: Keith Stribley
-Last reviewed: Not yet.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should also have received a copy of the GNU Lesser General Public
+    License along with this library in the file named "LICENSE".
+    If not, write to the Free Software Foundation, Inc., 59 Temple Place, 
+    Suite 330, Boston, MA 02111-1307, USA or visit their web page on the 
+    internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
 
 Description:
 A simple console app that creates a segment using FileFont and dumps a 
@@ -694,12 +709,12 @@ int Parameters::testFileFont() const
             featureList = parseFeatures(face);
             pSeg = gr_make_seg(sizedFont,
                 face, 0, featureList, textSrc.utfEncodingForm(),
-                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 3 : 0);
         }
         else
         {
             pSeg = gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
-                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl);
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 3 : 0);
         }
         int i = 0;
 #ifndef NDEBUG

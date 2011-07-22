@@ -217,10 +217,26 @@ SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int heigh
     return res;
 }
 
+const char *preproctext(const char *text, size_t bytelen, gr_encform enctype, int rtl)
+{
+    const char *ptext = text;
+    if (rtl == 3)
+    {
+        ptext = (const char *)malloc(bytelen);
+        if (!ptext) ptext = text;
+        else
+        {
+            for (const char *p = text, *q = ptext + bytelen; q > ptext; p += enctype, q -= enctype)
+            { memmove((void *)(q - enctype), (void *)p, enctype); }
+        }
+    }
+    return ptext;
+}
+
 // mangled name: _ZNK8mySkDraw8drawTextEPKcjffRK7SkPaint 
 void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     gr_face *face = gr_face_from_tf(paint.getTypeface(), &rtl);
     gr_encform enctype = gr_encform(paint.getTextEncoding() + 1);
     if (fMatrix->getType() & SkMatrix::kPerspective_Mask || enctype > 2 || !face)
@@ -236,8 +252,9 @@ void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y
     gr_font *font = gr_make_font(paint.getTextSize(), face); // textsize in pixels
     if (!font) return;
 
-    size_t numchar = gr_count_unicode_characters(enctype, text, text + bytelen, NULL);
-    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, text, numchar, rtl);
+    const char *ptext = preproctext(text, bytelen, enctype, rtl);
+    size_t numchar = gr_count_unicode_characters(enctype, ptext, ptext + bytelen, NULL);
+    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, ptext, numchar, rtl > 0 ? 3 : 0);
     if (!seg)
     {
         gr_font_destroy(font);
@@ -316,7 +333,7 @@ SkScalar mySkPaint::measureText(const void *text, size_t length) const
 
 SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bounds, SkScalar zoom) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     const char* text = (const char *)textData;
     gr_face *face = gr_face_from_tf(getTypeface(), &rtl);
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
@@ -325,8 +342,9 @@ SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bou
     gr_font *font = gr_make_font(zoom ? SkScalarMul(getTextSize(), zoom) : getTextSize(), face);
     if (!font) return 0;
 
+//    const char *ptext = preproctext(text, length, enctype, rtl);
     size_t numchar = gr_count_unicode_characters(enctype, text, text + length, NULL);
-    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, text, numchar, rtl);
+    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, text, numchar, rtl ? 3 : 0);
     if (!seg)
     {
         gr_font_destroy(font);
@@ -347,7 +365,7 @@ SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bou
 
 int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar widths[], SkRect bounds[]) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     const char* text = (const char *)textData;
     gr_face *face = gr_face_from_tf(getTypeface(), &rtl);
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
@@ -356,14 +374,16 @@ int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar w
     gr_font *font = gr_make_font(getTextSize(), face);
     if (!font) return 0;
 
+//    const char *ptext = preproctext(text, byteLength, enctype, rtl);
     size_t numchar = gr_count_unicode_characters(enctype, text, text + byteLength, NULL);
-    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, text, numchar, rtl);
+    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, text, numchar, rtl > 0 ? 3 : 0);
     if (!seg)
     {
         gr_font_destroy(font);
         return 0;
     }
     float width = 0;
+    if (rtl) width = gr_seg_advance_X(seg);
     for (int i = 0; i < numchar; ++i)
     {
         const gr_char_info *c = gr_seg_cinfo(seg, i);
@@ -384,16 +404,19 @@ int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar w
                 if (as) break;
             }
         }
-        *widths = (as ? gr_slot_origin_X(as) : gr_seg_advance_X(seg)) - width;
+        *widths = (rtl ? -1 : 1) * ((as ? gr_slot_origin_X(as) : (rtl ? 0 : gr_seg_advance_X(seg))) - width);
         if (bounds)
         {
-            bounds->fLeft = width;
-            bounds->fRight = *widths + width;
+            bounds->fLeft = rtl ? *widths + width : width;
+            bounds->fRight = rtl ? width : *widths + width;
             bounds->fBottom = 0;
             bounds->fTop = 0;
             ++bounds;
         }
-        width += *widths;
+        if (rtl)
+            width -= *widths;
+        else
+            width += *widths;
         ++widths;
     }
     return numchar;

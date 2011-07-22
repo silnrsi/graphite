@@ -56,13 +56,18 @@ public:
             int numGlyphs = glyphs.second - glyphs.first;
             RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs, seg.advanceWidth());
             int i = 0;
+//            if (m_layout.rightToLeft())
+//                i = numGlyphs - 1;
             gr::GlyphIterator iGlyph = glyphs.first;
             while (iGlyph != glyphs.second)
             {
                 gr::GlyphInfo & gi = *iGlyph;
                 (*renderedLine)[i].set(gi.glyphID(), gi.origin(), gi.yOffset(), gi.firstChar(), gi.lastChar());
                 ++iGlyph;
-                ++i;
+//                if (m_layout.rightToLeft())
+//                    --i;
+//                else
+                    ++i;
             }
         }
         catch (...)
