@@ -37,7 +37,6 @@ class sparse
 	typedef unsigned long	mask_t;
 
 	static const unsigned char  SIZEOF_CHUNK = 48;
-	static const mask_t         CHUNK_BITS   = mask_t(1UL << (SIZEOF_CHUNK - 1)) | mask_t((1UL << (SIZEOF_CHUNK - 1)) - 1);
 
 	struct chunk
 	{
@@ -107,7 +106,7 @@ sparse::sparse(I attr, const I last)
 			ci->offset = vi - m_array.values;
 		}
 
-		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));
+		ci->mask |= 1UL << ((v.id - base) % SIZEOF_CHUNK);
 		*vi = v.value;
 	}
 }

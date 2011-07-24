@@ -31,43 +31,13 @@ using namespace graphite2;
 
 namespace
 {
-
 	template<typename T>
 	inline unsigned int bit_set_count(T v)
 	{
-		v = v - ((v >> 1) & (T)~(T)0/3);                           // temp
-		v = (v & (T)~(T)0/15*3) + ((v >> 2) & (T)~(T)0/15*3);      // temp
-		v = (v + (v >> 4)) & (T)~(T)0/255*15;                      // temp
-		const unsigned int c = (T)(v * ((T)~(T)0/255)) >> (sizeof(T)-1)*8; // count
-		return c;
-	}
-
-	inline unsigned int zero_trailing_count(uint32 v)
-	{
-		static const unsigned int MultiplyDeBruijnBitPosition[32] =
-		{
-		  0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
-		  31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-		};
-
-		return MultiplyDeBruijnBitPosition[(uint32((v & -v) * 0x077CB531U)) >> 27];
-	}
-
-	inline unsigned int log2(uint32 v)
-	{
-		static const unsigned int MultiplyDeBruijnBitPosition[32] =
-		{
-		  0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
-		  8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31
-		};
-
-		v |= v >> 1; // first round down to one less than a power of 2
-		v |= v >> 2;
-		v |= v >> 4;
-		v |= v >> 8;
-		v |= v >> 16;
-
-		return MultiplyDeBruijnBitPosition[uint32((v * 0x07C4ACDDU) >> 27)];
+		v = v - ((v >> 1) & T(~T(0)/3));                           // temp
+		v = (v & T(~T(0)/15*3)) + ((v >> 2) & T(~T(0)/15*3));      // temp
+		v = (v + (v >> 4)) & T(~T(0)/255*15);                      // temp
+		return (T)(v * T(~T(0)/255)) >> (sizeof(T)-1)*8; // count
 	}
 }
 
@@ -83,10 +53,9 @@ sparse::value sparse::operator [] (int k) const
 	const key			i = k/SIZEOF_CHUNK;
 	const unsigned int	o = k % SIZEOF_CHUNK;
 	const chunk & 		c = m_array.map[i];
-	const mask_t 		b = 1UL << (SIZEOF_CHUNK-1 - o);
-	const unsigned int  bs = bit_set_count((c.mask | ((b << 1) - 1)) ^ CHUNK_BITS);
+	const mask_t 		b = 1UL << o;
 
-	return bool((c.mask & b)*(i < m_nchunks))*m_array.values[c.offset + o - bs];
+	return bool((c.mask & b)*(i < m_nchunks))*m_array.values[c.offset + o - bit_set_count(~c.mask & (b-1))];
 }
 
 
