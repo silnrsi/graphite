@@ -196,7 +196,7 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 
 
 inline
-void GlyphFace::logAttr(const uint16 attrs[], const uint16 * attr)
+void GlyphFace::logAttr(GR_MAYBE_UNUSED const uint16 attrs[], GR_MAYBE_UNUSED const uint16 * attr)
 {
 #ifndef DISABLE_TRACING
 	if (XmlTraceLog::get().active())
