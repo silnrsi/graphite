@@ -288,7 +288,9 @@ public:
     };
     ~Locale2Lang()
     {
-        // todo free
+        for (int i = 0; i != 26; ++i)
+        	for (int j = 0; j != 26; ++j)
+        		free(mLangLookup[i][j]);
     }
     unsigned short getMsId(const char * locale) const
     {

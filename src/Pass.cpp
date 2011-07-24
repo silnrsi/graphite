@@ -59,7 +59,8 @@ Pass::~Pass()
     free(m_sTable);
     free(m_states);
     free(m_ruleMap);
-    free(m_rules);
+
+    delete [] m_rules;
 }
 
 bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const Face & face)
@@ -172,7 +173,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     const byte * const ac_data_end = ac_data + swap16(o_action[m_numRules]);
     const byte * const rc_data_end = rc_data + swap16(o_constraint[m_numRules]);
 
-    if (!(m_rules = gralloc<Rule>(m_numRules))) return false;
+    if (!(m_rules = new Rule [m_numRules])) return false;
     precontext += m_numRules;
     sort_key   += m_numRules;
     o_constraint += m_numRules;

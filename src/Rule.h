@@ -29,6 +29,8 @@ struct Rule {
 #ifndef NDEBUG
   uint16           rule_idx;
 #endif
+
+  CLASS_NEW_DELETE;
 };
 
 inline Rule::~Rule()

@@ -66,7 +66,7 @@ namespace
         size_t m_nCharsProcessed ;
   };
 
-  static gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+  gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
@@ -84,7 +84,7 @@ namespace
       return static_cast<gr_segment*>(pRes);
   }
 
-  
+
 }
 
 
