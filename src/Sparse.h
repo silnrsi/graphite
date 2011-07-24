@@ -49,53 +49,52 @@ public:
 	typedef	uint16	key;
 	typedef uint16	value;
 
-	sparse() : m_limit(0), m_map(0), m_values(0) {}
+	sparse() : m_nchunks(0) { m_array.map = 0; }
 	~sparse() throw();
 
 	template<typename I>
 	sparse(I first, const I last);
 
 	value 	operator [] (int k) const;
-	operator bool () const { return m_map && m_values; }
+	operator bool () const { return m_array.map; }
 
-	size_t capacity() const { return m_limit; }
+	size_t capacity() const { return m_nchunks; }
 	size_t size()     const;
 
-//	size_t _sizeof() const { return sizeof(sparse) + size()*sizeof(value) + (m_limit + SIZEOF_CHUNK-1)/SIZEOF_CHUNK*sizeof(chunk); }
+	size_t _sizeof() const { return sizeof(sparse) + size()*sizeof(value) + m_nchunks*sizeof(chunk); }
 private:
-	chunk & get_chunk(key & k);
-	const chunk & get_chunk(key & k) const { return const_cast<sparse *>(this)->get_chunk(k); }
-
-	key		m_limit;
-	chunk *	m_map;
-	value *	m_values;
+	union {
+		chunk * map;
+		value * values;
+	}           m_array;
+	key         m_nchunks;
 };
 
 
 template <typename I>
 sparse::sparse(I attr, const I last)
-: m_limit(0), m_map(0), m_values(0)
+: m_nchunks(0)
 {
 	// Find the maximum extent of the key space.
 	size_t n_values=0;
 	for (I i = attr; i != last; ++i, ++n_values)
 	{
-		const key k = i->id;
-		if (k >= m_limit) m_limit = k+1;
+		const key k = i->id / SIZEOF_CHUNK;
+		if (k >= m_nchunks) m_nchunks = k+1;
 	}
 
-	m_map    = grzeroalloc<chunk>((m_limit + SIZEOF_CHUNK-1)/SIZEOF_CHUNK);
-	m_values = gralloc<value>(n_values);
+	m_array.values = gralloc<value>((m_nchunks*sizeof(chunk) + sizeof(value)/2)/sizeof(value) + n_values*sizeof(value));
 
 	if (!*this)
 	{
-		free(m_map); free(m_values);
-		m_map = 0; m_values = 0;
+		free(m_array.values); m_array.map=0;
 		return;
 	}
 
-	chunk * ci = m_map;
-	value * vi = m_values;
+	chunk * ci = m_array.map;
+	ci->mask   = 0;
+	ci->offset = (m_nchunks*sizeof(chunk) + sizeof(value)-1)/sizeof(value);
+	value * vi = m_array.values + ci->offset;
 	for (key base = 0; attr != last; ++attr, ++vi)
 	{
 		const typename I::value_type v = *attr;
@@ -105,7 +104,7 @@ sparse::sparse(I attr, const I last)
 		{
 			ci   += chunks_diff;
 			base += chunks_diff * SIZEOF_CHUNK;
-			ci->offset = vi - m_values;
+			ci->offset = vi - m_array.values;
 		}
 
 		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));

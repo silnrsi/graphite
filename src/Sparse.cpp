@@ -74,28 +74,28 @@ namespace
 
 sparse::~sparse() throw()
 {
-	free(m_map);
-	free(m_values);
+	free(m_array.values);
 }
 
 
 sparse::value sparse::operator [] (int k) const
 {
-	const chunk & 		c = m_map[k/SIZEOF_CHUNK];
+	const key			i = k/SIZEOF_CHUNK;
 	const unsigned int	o = k % SIZEOF_CHUNK;
+	const chunk & 		c = m_array.map[i];
 	const mask_t 		b = 1UL << (SIZEOF_CHUNK-1 - o);
 	const unsigned int  bs = bit_set_count((c.mask | ((b << 1) - 1)) ^ CHUNK_BITS);
 
-	return bool((c.mask & b)*(k < m_limit))*m_values[c.offset + o - bs];
+	return bool((c.mask & b)*(i < m_nchunks))*m_array.values[c.offset + o - bs];
 }
 
 
 size_t sparse::size() const
 {
-	size_t n = (m_limit + SIZEOF_CHUNK-1)/SIZEOF_CHUNK,
+	size_t n = m_nchunks,
 		   s = 0;
 
-	for (const chunk *ci=m_map; n; --n, ++ci)
+	for (const chunk *ci=m_array.map; n; --n, ++ci)
 		s += bit_set_count(ci->mask);
 
 	return s;
