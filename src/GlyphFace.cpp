@@ -212,7 +212,7 @@ void GlyphFace::logAttr(const uint16 attrs[], const uint16 * attr)
 
 uint16 GlyphFace::getMetric(uint8 metric) const
 {
-    switch ((enum metrics)metric)
+    switch (metrics(metric))
     {
         case kgmetLsb : return static_cast<uint16>(m_bbox.bl.x);
         case kgmetRsb : return static_cast<uint16>(m_advance.x - m_bbox.tr.x);

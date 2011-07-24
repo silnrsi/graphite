@@ -32,14 +32,13 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
-
 class Font
 {
+	static const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 public:
     Font(float ppm, const Face *face/*needed for scaling*/);
-public:
     virtual ~Font();
+
     float advance(unsigned short glyphid) const {
         if (m_advances[glyphid] == INVALID_ADVANCE)
             m_advances[glyphid] = computeAdvance(glyphid);

@@ -29,16 +29,12 @@ of the License or (at your option) any later version.
 #include <graphite2/Types.h>
 #include <graphite2/XmlLog.h>
 
-#ifdef ENABLE_DEEP_TRACING
-#undef DISABLE_TRACING
-#endif
-
 namespace graphite2 {
 
 #ifndef DISABLE_TRACING
 
 // start this at same line number as in XmlTraceLogTags.cpp
-typedef enum {
+enum XmlTraceLogElement {
     ElementTopLevel,
     ElementFace,
     ElementGlyphs,
@@ -83,12 +79,12 @@ typedef enum {
     ElementError,
     ElementWarning,
     NumElements // Last
-} XmlTraceLogElement;
+};
 
 
 
 // start this at same line number as in XmlTraceLogTags.cpp
-typedef enum {
+enum XmlTraceLogAttribute {
     AttrIndex,
     AttrVersion,
     AttrMajor,
@@ -170,7 +166,7 @@ typedef enum {
     AttrMisses,
 
     NumAttributes // Last
-} XmlTraceLogAttribute;
+};
 
 struct XmlTraceLogTag
 {
