@@ -31,11 +31,14 @@ using namespace graphite2;
 
 namespace
 {
-	inline unsigned int bit_set_count(unsigned int v)
+
+	template<typename T>
+	inline unsigned int bit_set_count(T v)
 	{
-		v = v - ((v >> 1) & 0x55555555);                    // reuse input as temporary
-		v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
-		const unsigned int c = (((v + (v >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24; // count
+		v = v - ((v >> 1) & (T)~(T)0/3);                           // temp
+		v = (v & (T)~(T)0/15*3) + ((v >> 2) & (T)~(T)0/15*3);      // temp
+		v = (v + (v >> 4)) & (T)~(T)0/255*15;                      // temp
+		const unsigned int c = (T)(v * ((T)~(T)0/255)) >> (sizeof(T)-1)*8; // count
 		return c;
 	}
 
@@ -80,9 +83,20 @@ sparse::value sparse::operator [] (int k) const
 {
 	const chunk & 		c = m_map[k/SIZEOF_CHUNK];
 	const unsigned int	o = k % SIZEOF_CHUNK;
-	const unsigned long b = 1 << (SIZEOF_CHUNK-1 - o);
-	const size_t		bs = bit_set_count(~(c.mask | ((b << 1) - 1)));
+	const mask_t 		b = 1UL << (SIZEOF_CHUNK-1 - o);
+	const unsigned int  bs = bit_set_count((c.mask | ((b << 1) - 1)) ^ CHUNK_BITS);
 
 	return bool((c.mask & b)*(k < m_limit))*m_values[c.offset + o - bs];
 }
 
+
+size_t sparse::size() const
+{
+	size_t n = (m_limit + SIZEOF_CHUNK-1)/SIZEOF_CHUNK,
+		   s = 0;
+
+	for (const chunk *ci=m_map; n; --n, ++ci)
+		s += bit_set_count(ci->mask);
+
+	return s;
+}

@@ -32,12 +32,16 @@ namespace graphite2 {
 
 
 
-#define SIZEOF_CHUNK	32
 class sparse
 {
+	typedef unsigned long	mask_t;
+
+	static const unsigned char  SIZEOF_CHUNK = 48;
+	static const mask_t         CHUNK_BITS   = mask_t(1UL << (SIZEOF_CHUNK - 1)) | mask_t((1UL << (SIZEOF_CHUNK - 1)) - 1);
+
 	struct chunk
 	{
-		unsigned long	mask:SIZEOF_CHUNK;
+		mask_t			mask:SIZEOF_CHUNK;
 		uint16			offset;
 	};
 
@@ -55,7 +59,7 @@ public:
 	operator bool () const { return m_map && m_values; }
 
 	size_t capacity() const { return m_limit; }
-	size_t size()     const { return m_limit; }
+	size_t size()     const;
 
 private:
 	chunk & get_chunk(key & k);
@@ -103,7 +107,7 @@ sparse::sparse(I attr, const I last)
 			ci->offset = vi - m_values;
 		}
 
-		ci->mask |= 1 << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));
+		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));
 		*vi = v.value;
 	}
 }
