@@ -61,6 +61,7 @@ public:
 	size_t capacity() const { return m_limit; }
 	size_t size()     const;
 
+//	size_t _sizeof() const { return sizeof(sparse) + size()*sizeof(value) + (m_limit + SIZEOF_CHUNK-1)/SIZEOF_CHUNK*sizeof(chunk); }
 private:
 	chunk & get_chunk(key & k);
 	const chunk & get_chunk(key & k) const { return const_cast<sparse *>(this)->get_chunk(k); }

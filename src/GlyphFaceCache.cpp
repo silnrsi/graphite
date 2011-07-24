@@ -122,13 +122,17 @@ GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
 void GlyphFaceCache::loadAllGlyphs()
 {
     unsigned int nGlyphs = numGlyphs();
+//    size_t sparse_size = 0;
     GlyphFace * glyphs = gralloc<GlyphFace>(nGlyphs);
     for (unsigned short glyphid = 0; glyphid < nGlyphs; glyphid++)
     {
         GlyphFace **p = glyphPtrDirect(glyphid);
         *p = &(glyphs[glyphid]);
         new(*p) GlyphFace(*this, glyphid);
+//        sparse_size += (*p)->m_attrs._sizeof();
     }
+//    const size_t flat_size = nGlyphs*(sizeof(uint16*) + sizeof(uint16)*numAttrs());
+//    assert(sparse_size <= flat_size);
 }
 
 /*virtual*/ const GlyphFace *GlyphFaceCache::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
