@@ -36,7 +36,7 @@ class sparse
 {
 	typedef unsigned long	mask_t;
 
-	static const unsigned char  SIZEOF_CHUNK = 48;
+	static const unsigned char  SIZEOF_CHUNK = sizeof(mask_t) - sizeof(uint16);
 
 	struct chunk
 	{
@@ -48,19 +48,18 @@ public:
 	typedef	uint16	key;
 	typedef uint16	value;
 
-	sparse() : m_nchunks(0) { m_array.map = 0; }
-	~sparse() throw();
-
 	template<typename I>
 	sparse(I first, const I last);
+	sparse() throw();
+	~sparse() throw();
 
-	value 	operator [] (int k) const;
-	operator bool () const { return m_array.map; }
+	value 	operator [] (int k) const throw();
+	operator bool () const throw();
 
-	size_t capacity() const { return m_nchunks; }
-	size_t size()     const;
+	size_t capacity() const throw();
+	size_t size()     const throw();
 
-	size_t _sizeof() const { return sizeof(sparse) + size()*sizeof(value) + m_nchunks*sizeof(chunk); }
+	size_t _sizeof() const throw();
 private:
 	union {
 		chunk * map;
@@ -68,6 +67,13 @@ private:
 	}           m_array;
 	key         m_nchunks;
 };
+
+
+inline
+sparse::sparse() throw() : m_nchunks(0)
+{
+	m_array.map = 0;
+}
 
 
 template <typename I>
@@ -82,7 +88,7 @@ sparse::sparse(I attr, const I last)
 		if (k >= m_nchunks) m_nchunks = k+1;
 	}
 
-	m_array.values = gralloc<value>((m_nchunks*sizeof(chunk) + sizeof(value)/2)/sizeof(value) + n_values*sizeof(value));
+	m_array.values = grzeroalloc<value>((m_nchunks*sizeof(chunk) + sizeof(value)/2)/sizeof(value) + n_values*sizeof(value));
 
 	if (!*this)
 	{
@@ -91,7 +97,6 @@ sparse::sparse(I attr, const I last)
 	}
 
 	chunk * ci = m_array.map;
-	ci->mask   = 0;
 	ci->offset = (m_nchunks*sizeof(chunk) + sizeof(value)-1)/sizeof(value);
 	value * vi = m_array.values + ci->offset;
 	for (key base = 0; attr != last; ++attr, ++vi)
@@ -106,9 +111,30 @@ sparse::sparse(I attr, const I last)
 			ci->offset = vi - m_array.values;
 		}
 
-		ci->mask |= 1UL << ((v.id - base) % SIZEOF_CHUNK);
+		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));
 		*vi = v.value;
 	}
+}
+
+
+inline
+sparse::operator bool () const throw()
+{
+	return m_array.map;
+}
+
+
+inline
+size_t sparse::capacity() const throw()
+{
+	return m_nchunks;
+}
+
+
+inline
+size_t sparse::_sizeof() const throw()
+{
+	return sizeof(sparse) + size()*sizeof(value) + m_nchunks*sizeof(chunk);
 }
 
 } // namespace graphite2

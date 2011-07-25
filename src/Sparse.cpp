@@ -37,7 +37,7 @@ namespace
 		v = v - ((v >> 1) & T(~T(0)/3));                           // temp
 		v = (v & T(~T(0)/15*3)) + ((v >> 2) & T(~T(0)/15*3));      // temp
 		v = (v + (v >> 4)) & T(~T(0)/255*15);                      // temp
-		return (T)(v * T(~T(0)/255)) >> (sizeof(T)-1)*8; // count
+		return (T)(v * T(~T(0)/255)) >> (sizeof(T)-1)*8;           // count
 	}
 }
 
@@ -48,18 +48,17 @@ sparse::~sparse() throw()
 }
 
 
-sparse::value sparse::operator [] (int k) const
+sparse::value sparse::operator [] (int k) const throw()
 {
-	const key			i = k/SIZEOF_CHUNK;
-	const unsigned int	o = k % SIZEOF_CHUNK;
+	const key			i = k/SIZEOF_CHUNK; k %= SIZEOF_CHUNK;
 	const chunk & 		c = m_array.map[i];
-	const mask_t 		b = 1UL << o;
+	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - k);
 
-	return bool((c.mask & b)*(i < m_nchunks))*m_array.values[c.offset + o - bit_set_count(~c.mask & (b-1))];
+	return bool((m & 1)*(i < m_nchunks))*m_array.values[c.offset + bit_set_count(m >> 1)];
 }
 
 
-size_t sparse::size() const
+size_t sparse::size() const throw()
 {
 	size_t n = m_nchunks,
 		   s = 0;
