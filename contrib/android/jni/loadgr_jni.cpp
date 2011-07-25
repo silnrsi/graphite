@@ -41,6 +41,7 @@ extern func_map thismap;
 
 typedef struct rec_ft_table {
     unsigned long tag;
+    size_t len;
     void *buffer;
     struct rec_ft_table *next;
 
@@ -54,7 +55,7 @@ typedef struct fontmap {
     FT_Face ftface;
     rec_ft_table *tables;
     gr_face *grface;
-    bool rtl;
+    int rtl;
 } fontmap;
 
 fontmap *myfonts = NULL;
@@ -119,7 +120,7 @@ private:
 };
 
 
-extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_loadGraphite( JNIEnv* env, jobject thiz )
+extern "C" void Java_org_sil_palaso_Graphite_loadGraphite( JNIEnv* env, jobject thiz )
 {
     load_fns("libload-graphite.so", "libskia.so", &thismap, 12);
 }
@@ -133,7 +134,10 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     for (r = rec->tables, rlast = NULL; r; rlast = r, r = r->next)
     {
         if (r->tag == tag)
+        {
+            if (len) *len = r->len;
             return r->buffer;
+        }
     }
 
     r = new rec_ft_table;
@@ -148,11 +152,12 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     FT_Load_Sfnt_Table(rec->ftface, tag, 0, NULL, &length);
     r->buffer = malloc(length);
     FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
-    *len = length;
+    if (len) *len = length;
+    r->len = length;
     return r->buffer;
 }
 
-extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname, jint rtl )
+extern "C" jobject Java_org_sil_palaso_Graphite_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname, jint rtl )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;
@@ -201,7 +206,7 @@ extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JN
     return res;
 }
 
-extern "C" gr_face *gr_face_from_tf(SkTypeface *tf, bool *rtl)
+extern "C" gr_face *gr_face_from_tf(SkTypeface *tf, int *rtl)
 {
     fontmap *f;
     for (f = myfonts; f; f = f->next)

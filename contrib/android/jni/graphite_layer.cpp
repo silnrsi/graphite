@@ -220,7 +220,7 @@ SkDevice* mySkCanvas::createDevice(SkBitmap::Config config, int width, int heigh
 // mangled name: _ZNK8mySkDraw8drawTextEPKcjffRK7SkPaint 
 void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y, const SkPaint& paint) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     gr_face *face = gr_face_from_tf(paint.getTypeface(), &rtl);
     gr_encform enctype = gr_encform(paint.getTextEncoding() + 1);
     if (fMatrix->getType() & SkMatrix::kPerspective_Mask || enctype > 2 || !face)
@@ -316,7 +316,7 @@ SkScalar mySkPaint::measureText(const void *text, size_t length) const
 
 SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bounds, SkScalar zoom) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     const char* text = (const char *)textData;
     gr_face *face = gr_face_from_tf(getTypeface(), &rtl);
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
@@ -347,7 +347,7 @@ SkScalar mySkPaint::measureText(const void* textData, size_t length, SkRect *bou
 
 int mySkPaint::getTextWidths(const void* textData, size_t byteLength, SkScalar widths[], SkRect bounds[]) const
 {
-    bool rtl = 0;
+    int rtl = 0;
     const char* text = (const char *)textData;
     gr_face *face = gr_face_from_tf(getTypeface(), &rtl);
     gr_encform enctype = gr_encform(getTextEncoding() + 1);
