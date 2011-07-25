@@ -30,6 +30,7 @@ of the License or (at your option) any later version.
 #include "XmlTraceLog.h"
 #include "Main.h"
 #include "Position.h"
+#include "Sparse.h"
 
 namespace graphite2 {
 
@@ -88,7 +89,8 @@ public:
     uint16  getMetric(uint8 metric) const;
 
 private:
-    void    readAttrs(const void *pGlat, int start, int end, size_t num, uint32 format);       //only called from constructor
+//    static void readAttrs(const byte *glat, const byte * const glat_end, uint16 * attrs, size_t num, uint32 format);       //only called from constructor
+    static void logAttr(const uint16 attrs[], const uint16 * attr);
 
 private:
     Rect     m_bbox;        // bounding box metrics in design units
@@ -96,7 +98,8 @@ private:
 //    short  * m_attribs;     // array of glyph attributes, fontface knows how many
 //    short  * m_columns;     // array of fsm column values
 //    int      m_gloc;        // glat offset
-    unsigned short *m_attrs;
+    sparse   m_attrs;
+//    uint16 * m_attrs;
 };
 
 
@@ -109,7 +112,6 @@ inline GlyphFace::GlyphFace(Position pos, Rect box) throw()
 #endif
 
 inline GlyphFace::~GlyphFace() throw() {
-    if (m_attrs) free(m_attrs);
 }
 
 inline const Position & GlyphFace::theAdvance() const { 

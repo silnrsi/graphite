@@ -34,6 +34,7 @@ add_executable(grsegcachetest segcachetest.cpp ../../src/TtfUtil.cpp
     ../../src/Segment.cpp
     ../../src/Silf.cpp
     ../../src/Slot.cpp
+    ../../src/Sparse.cpp
     ../../src/XmlTraceLog.cpp
     ../../src/XmlTraceLogTags.cpp)
 

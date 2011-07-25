@@ -166,7 +166,7 @@ uint32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     float clusterMin = 0.;
     Position res = finalise(seg, NULL, &base, &bbox, &cMin, attrLevel, &clusterMin);
 
-    switch ((enum metrics)metric)
+    switch (metrics(metric))
     {
     case kgmetLsb :
         return static_cast<uint32>(bbox.bl.x);
