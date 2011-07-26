@@ -1,0 +1,26 @@
+== Android ==
+
+Included in the contribs section of the Graphite2 source code is a way of
+integrating the Graphite2 library into an android application. It is known to
+work for Android 2.2 - Android 2.3.1 (API levels 8-10).
+
+The sample application shows how it might be used.
+[source, java]
+----
+include::../contrib/android/src/org/sil/palaso/helloworld/HelloWorld.java[]
+----
+
+<1> This sets up the graphite redirection for the core graphics layer.
+
+<2> The graphite integration needs to be informed of the fonts we intend to use
+    The fonts are included in the assets/ directory and we give the filename,
+    then an identifier to use for the font within web styling, followed by
+    whether the font is presumed to be rendering right to left or left to right
+    text.
+
+<3> Here we package the simple text as HTML and set the font. Notice how the
+    font-family: parameter corresponds to the font identifier in <2>.
+
+<4> Registering a font also returns a Typeface for the font and this can be used
+    to set the typeface for a widget.
+

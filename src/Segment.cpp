@@ -602,17 +602,25 @@ void Segment::bidiPass(uint8 aBidi, int paradir)
 
     Slot *s;
     int baseLevel = paradir ? 1 : 0;
+    unsigned int bmask = 0;
     for (s = first(); s; s = s->next())
     {
         s->setBidiClass(glyphAttr(s->gid(), aBidi));
+        bmask |= (1 << s->getBidiClass());
     }
-    resolveExplicit(baseLevel, 0, first(), 0);
-    resolveWeak(baseLevel, first());
-    resolveNeutrals(baseLevel, first());
-    resolveImplicit(first());
-    resolveWhitespace(baseLevel, this, aBidi, last());
-    s = resolveOrder(s = first(), baseLevel);
-    first(s); last(s->prev());
-    s->prev()->next(0); s->prev(0);
+    if (bmask & (paradir ? 0x92 : 0x9C))
+    {
+        if (bmask & 0xF800)
+            resolveExplicit(baseLevel, 0, first(), 0);
+        if (bmask & 0x10178)
+            resolveWeak(baseLevel, first());
+        if (bmask & 0x161)
+            resolveNeutrals(baseLevel, first());
+        resolveImplicit(first());
+        resolveWhitespace(baseLevel, this, aBidi, last());
+        s = resolveOrder(s = first(), baseLevel);
+        first(s); last(s->prev());
+        s->prev()->next(0); s->prev(0);
+    }
 }
 

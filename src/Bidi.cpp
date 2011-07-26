@@ -66,6 +66,11 @@ enum DirMask {
     CSmask = 0x100,
     WSmask = 0x200,
     BNmask = 0x400,
+    LROmask = 0x800,
+    RLOmask = 0x1000,
+    LREmask = 0x2000,
+    RLEmask = 0x4000,
+    PDFmask = 0x8000,
     NSMmask = 0x10000
 };
 
