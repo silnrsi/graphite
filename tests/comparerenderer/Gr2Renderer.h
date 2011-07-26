@@ -77,7 +77,7 @@ public:
             reinterpret_cast<const void*>(utf8), reinterpret_cast<const void*>(utf8 + length), &pError);
         if (pError)
             fprintf(stderr, "Invalid Unicode pos %d\n", static_cast<int>(reinterpret_cast<const char*>(pError) - utf8));
-        gr_segment* pSeg = gr_make_seg(m_grFont, m_grFace, 0u, m_grFeatures, gr_utf8, utf8, numCodePoints, m_rtl ? 3 : 0);
+        gr_segment* pSeg = gr_make_seg(m_grFont, m_grFace, 0u, m_grFeatures, gr_utf8, utf8, numCodePoints, m_rtl ? 1 : 0);
         if (!pSeg)
         {
             fprintf(stderr, "Failed to create segment\n");

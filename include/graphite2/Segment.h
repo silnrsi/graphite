@@ -132,7 +132,7 @@ enum gr_bidirtl {
     /// Underlying paragraph direction is RTL
     gr_rtl = 1,
     /// Run the internal bidi pass, if specified by the font
-    gr_bidi = 2
+    gr_nobidi = 2
 };
 
 typedef struct gr_char_info     gr_char_info;

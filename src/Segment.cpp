@@ -607,6 +607,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir)
     {
         s->setBidiClass(glyphAttr(s->gid(), aBidi));
         bmask |= (1 << s->getBidiClass());
+        s->setBidiLevel(baseLevel);
     }
     if (bmask & (paradir ? 0x92 : 0x9C))
     {

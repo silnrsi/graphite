@@ -709,12 +709,12 @@ int Parameters::testFileFont() const
             featureList = parseFeatures(face);
             pSeg = gr_make_seg(sizedFont,
                 face, 0, featureList, textSrc.utfEncodingForm(),
-                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 3 : 0);
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
         }
         else
         {
             pSeg = gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
-                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 3 : 0);
+                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
         }
         int i = 0;
 #ifndef NDEBUG

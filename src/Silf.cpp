@@ -468,7 +468,7 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 	        XmlTraceLog::get().addAttribute(AttrNum, i);
         }
 #endif
-        if (i == m_bPass && seg->dir() & 2)
+        if (i == m_bPass && !(seg->dir() & 2))
             seg->bidiPass(m_aBidi, seg->dir() & 1);
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(m, fsm);
