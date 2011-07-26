@@ -597,6 +597,9 @@ Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
 void Segment::bidiPass(uint8 aBidi, int paradir)
 {
+	if (slotCount() == 0)
+		return;
+
     Slot *s;
     int baseLevel = paradir ? 1 : 0;
     for (s = first(); s; s = s->next())
