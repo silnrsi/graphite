@@ -254,7 +254,7 @@ void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y
 
     const char *ptext = preproctext(text, bytelen, enctype, rtl);
     size_t numchar = gr_count_unicode_characters(enctype, ptext, ptext + bytelen, NULL);
-    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, ptext, numchar, rtl > 0 ? 3 : 0);
+    gr_segment *seg = gr_make_seg(font, face, 0, 0, enctype, ptext, numchar, rtl == 3 ? 1 : (rtl > 0 ? 3 : 0));
     if (!seg)
     {
         gr_font_destroy(font);

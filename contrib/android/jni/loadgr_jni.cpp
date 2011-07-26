@@ -43,7 +43,6 @@ typedef struct rec_ft_table {
     unsigned long tag;
     size_t len;
     void *buffer;
-    unsigned long len;
     struct rec_ft_table *next;
 
     ~rec_ft_table() { if (buffer) free(buffer); if (next) delete next; }
