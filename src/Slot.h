@@ -126,7 +126,7 @@ private:
     byte     m_attLevel;    // attachment level
     byte     m_bidiCls;     // bidirectional class
     byte     m_bidiLevel;   // bidirectional level
-    uint16 *m_userAttr;     // pointer to user attributes
+    uint16  *m_userAttr;     // pointer to user attributes
 };
 
 } // namespace graphite2

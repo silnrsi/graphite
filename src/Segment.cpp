@@ -593,13 +593,11 @@ void resolveWeak(int baseLevel, Slot *s);
 void resolveNeutrals(int baseLevel, Slot *s);
 void resolveImplicit(Slot *s);
 void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
-Slot *resolveOrder(Slot **first, Slot **last, Slot *s, int level, int baseLevel);
+Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
 void Segment::bidiPass(uint8 aBidi, int paradir)
 {
     Slot *s;
-    Slot *pfirst = NULL;
-    Slot *plast = NULL;
     int baseLevel = paradir ? 1 : 0;
     for (s = first(); s; s = s->next())
     {
@@ -610,8 +608,8 @@ void Segment::bidiPass(uint8 aBidi, int paradir)
     resolveNeutrals(baseLevel, first());
     resolveImplicit(first());
     resolveWhitespace(baseLevel, this, aBidi, last());
-    resolveOrder(&pfirst, &plast, first(), baseLevel, baseLevel);
-    first(pfirst);
-    last(plast);
+    s = resolveOrder(s = first(), baseLevel);
+    first(s); last(s->prev());
+    s->prev()->next(0); s->prev(0);
 }
 

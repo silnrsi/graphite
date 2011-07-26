@@ -197,7 +197,7 @@ enum bidi_state_mask
     letmask = 0x80000
 };
 
-const int stateWeak[][10] =
+const bidi_state stateWeak[][10] =
 {
     	//	N,  L,  R,  AN, EN, AL,NSM, CS, ES, ET,
 { /*xa*/	ao, xl, xr, cn, cn, xa, xa, ao, ao, ao, /* arabic letter		  */ },
@@ -257,7 +257,7 @@ enum bidi_action // possible actions
 };
 
 
-const int actionWeak[][10] =
+const bidi_action actionWeak[][10] =
 {
 	  //   N,.. L,   R,  AN,  EN,  AL, NSM,  CS,..ES,  ET,
 { /*xa*/ xxx, xxx, xxx, xxx, xxA, xxR, xxR, xxN, xxN, xxN, /* arabic letter			*/ },
@@ -287,11 +287,11 @@ const int actionWeak[][10] =
 { /*let*/xxx, xxx, xxx, xxx, xxL, xxR, xxL, xxN, xxN, xxL, /* ET following le			*/ },
 };
 
-#define GetDeferredType(a) ((a >> 4) & 0xF)
-#define GetResolvedType(a) (a & 0xF)
-#define EmbeddingDirection(a)   (a & 1 ? R : L)
-#define IsDeferredState(a) ((1 << a) & (rtmask | ltmask | acmask | rcmask | rsmask | lcmask | lsmask))
-#define IsModifiedClass(s) ((1 << a) & (ALmask | NSMmask | ESmask | CSmask | ETmask | ENmask))
+inline uint8 	GetDeferredType(bidi_action a)		{ return (a >> 4) & 0xF; }
+inline uint8 	GetResolvedType(bidi_action a) 		{ return a & 0xF; }
+inline DirCode 	EmbeddingDirection(int l)   		{ return l & 1 ? R : L; }
+inline bool		IsDeferredState(bidi_state a) 		{ return (1 << a) & (rtmask | ltmask | acmask | rcmask | rsmask | lcmask | lsmask); }
+inline bool		IsModifiedClass(DirCode a) 			{ return (1 << a) & (ALmask | NSMmask | ESmask | CSmask | ETmask | ENmask); }
 
 void SetDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
@@ -330,7 +330,7 @@ void resolveWeak(int baseLevel, Slot *s)
                 continue;
         }
 
-        int action = actionWeak[state][cls];
+        bidi_action action = actionWeak[state][cls];
         int clsRun = GetDeferredType(action);
         if (clsRun != XX)
         {
@@ -499,53 +499,38 @@ void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s)
     }
 }
 
-Slot *resolveOrder(Slot **first, Slot **last, Slot *s, int level, int baseLevel)
+
+inline Slot * join(int level, Slot * a, Slot * b)
 {
-    Slot *myfirst = *first;
-    Slot *mylast = *last;
+	if (!a)	return b;
+	if (level & 1)	{ Slot * const t = a; a = b; b = t; }
+	Slot * const t = b->prev();
+	a->prev()->next(b);	b->prev(a->prev()); // splice middle
+	t->next(a); a->prev(t);			// splice ends
+	return a;
+}
 
-    while (s)
-    {
-        int l = s->getBidiLevel();
-        if (l > level)
-	{
-            s = resolveOrder(&myfirst, &mylast, s, level + 1, baseLevel);
-	    *first = myfirst;
-	    *last = mylast;
-	}
-        else if (l < level)
-            return s;
-	else if ((level ^ baseLevel) & 1)
-	{
-	    Slot *lasts;
-            for (myfirst = s, lasts = s; s && s->getBidiLevel() == level; s = s->prev())
-            {
-		Slot *t = s->next();
-		s->next(s->prev());
-		s->prev(t);
-                lasts = s;
-            }
-	    mylast = myfirst;
-	    myfirst = lasts;
-	    (*first)->prev(mylast);
-	    mylast->next(*first);
-	    *first = myfirst;
-	}
-        else
-        {
-            for (myfirst = s; s && s->getBidiLevel() == level; s = s->next())
-                mylast = s;
-	    if (*last)
-	    {
-		(*last)->next(myfirst);
-		myfirst->prev(*last);
-	    }
-	    *last = mylast;
-	    if (!*first)
-		*first = myfirst;
-        }
+inline Slot * pop_slot(Slot * & cs)
+{
+	Slot * const r = cs;
+	cs = cs->next();
+	if (cs)	cs->prev(0);			// Sever cs from r
+	r->next(r); r->prev(r);			// make r circular
+	return r;
+}
 
-    }
-    return s;
+Slot *resolveOrder(Slot * & cs, const bool reordered, const int level)
+{
+	Slot * r = 0;
+	while (cs)
+	{
+		const int ls = cs->getBidiLevel() - reordered;
+		Slot * s = level >= ls ? pop_slot(cs) : resolveOrder(cs, reordered, level+1);
+		r = join(level, r, s);
+
+		const int ln = cs ? cs->getBidiLevel() - reordered : -1;
+		if (level > ln) break;
+	}
+	return r;
 }
 
