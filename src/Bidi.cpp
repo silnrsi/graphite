@@ -505,7 +505,8 @@ void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s)
 }
 
 
-inline Slot * join(int level, Slot * a, Slot * b)
+inline
+Slot * join(int level, Slot * a, Slot * b)
 {
 	if (!a)	return b;
 	if (level & 1)	{ Slot * const t = a; a = b; b = t; }
@@ -515,26 +516,43 @@ inline Slot * join(int level, Slot * a, Slot * b)
 	return a;
 }
 
-inline Slot * pop_slot(Slot * & cs)
+
+Slot * span(Slot * & cs, const bool rtl)
 {
-	Slot * const r = cs;
-	cs = cs->next();
-	if (cs)	cs->prev(0);			// Sever cs from r
-	r->next(r); r->prev(r);			// make r circular
+	Slot * r = cs, * re = cs; cs = cs->next();
+	if (rtl)
+	{
+		Slot * t = r->next(); r->next(r->prev()); r->prev(t);
+		for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->prev())
+		{
+			re = cs;
+			t = cs->next(); cs->next(cs->prev()); cs->prev(t);
+		}
+		r->next(re);
+		re->prev(r);
+		r = re;
+	}
+	else
+	{
+		for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->next())
+			re = cs;
+		r->prev(re);
+		re->next(r);
+	}
+	if (cs)		cs->prev(0);
 	return r;
 }
+
 
 Slot *resolveOrder(Slot * & cs, const bool reordered, const int level)
 {
 	Slot * r = 0;
-	while (cs)
+	int ls;
+	while (cs && level <= (ls = cs->getBidiLevel() - reordered))
 	{
-		const int ls = cs->getBidiLevel() - reordered;
-		Slot * s = level >= ls ? pop_slot(cs) : resolveOrder(cs, reordered, level+1);
-		r = join(level, r, s);
-
-		const int ln = cs ? cs->getBidiLevel() - reordered : -1;
-		if (level > ln) break;
+		r = join(level, r, level >= ls
+								? span(cs, level & 1)
+								: resolveOrder(cs, reordered, level+1));
 	}
 	return r;
 }
