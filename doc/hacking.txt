@@ -17,14 +17,12 @@ types that are not classes we use malloc() or the type safe version gralloc().++
 There are various facilities that silgraphite provides that graphite2 as yet does not. The primary motivation in developing graphite2 is that it be use case driven. Thus only those facilities that have a proven use case in the target applications into which graphite is to be integrated will be implemented.
 
 Bidi::
-    Graphite2 expects each text segment to be at the same bidi level with the direction passed
-    as a parameter. Silgraphite does a full bidi processing pass as part of the
-    processing. This has the advantage of allowing per glyph bidi attribution,
-    for example for PUA characters. But since most applications run the bidi
-    processing algorithm before they pass runs to graphite, that facility of
-    silgraphite was rarely available. Graphite2 does not preclude adding a bidi
-    pass should a clear use case become evident and we can find a way to use the
-    per glyph directionality knowledge.
+    Graphite2 follows Silgraphite in running a bidi pass if the font calls for it.
+    And this allows integration of PUA characters into the bidi reordering. But in many
+    contexts in which Graphite2 is used, the bidi algorithm has been run at the Unicode
+    text level and so the running of a bidi pass within the segment creation process is
+    redundant and a waste of time. It is possible to call make_seg() with a bit set in the
+    rtl parameter to disable the bidi pass.
 
 Justification::
     Silgraphite has the ability to handle complex justification. This is not

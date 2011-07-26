@@ -131,7 +131,8 @@ enum gr_attrCode {
 enum gr_bidirtl {
     /// Underlying paragraph direction is RTL
     gr_rtl = 1,
-    /// Run the internal bidi pass, if specified by the font
+    /// Set this to not run the bidi pass internally, even if the font asks for it.
+    /// This presumes that the segment is in a single direction.
     gr_nobidi = 2
 };
 
