@@ -37,7 +37,7 @@ class Slot;
 class SegCacheEntry;
 class SegCachePrefixEntry;
 
-typedef enum {
+enum SegCacheParameters {
     /** number of characters used in initial prefix tree */
     ePrefixLength = 2,
     /** Segments more recent than maxSegmentCount() / eAgeFactor are kept */
@@ -49,7 +49,7 @@ typedef enum {
      * prefix. Needed to prevent unique identifiers flooding the cache */
     eMaxSuffixCount = 15
 
-} SegCacheParameters;
+};
 
 class SegCacheCharInfo
 {

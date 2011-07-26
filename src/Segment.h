@@ -57,11 +57,11 @@ class SegmentScopeState;
 #endif
 class Segment;
 
-typedef enum {
+enum SpliceParam {
 /** sub-Segments longer than this are not cached
  * (in Unicode code points) */
     eMaxSpliceSize = 16
-} SpliceParam;
+};
 
 enum justFlags {
     gr_justStartInline = 1,

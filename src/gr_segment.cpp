@@ -66,7 +66,7 @@ namespace
         size_t m_nCharsProcessed ;
   };
 
-  static gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+  gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
@@ -84,7 +84,7 @@ namespace
       return static_cast<gr_segment*>(pRes);
   }
 
-  
+
 }
 
 
@@ -172,7 +172,7 @@ void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, co
     assert(pSeg);
     assert(pSlot);
     printf("[%f]", width);
-    pSeg->justify(pSlot, pFont, width, (enum justFlags)flags, pFirst, pLast);
+    pSeg->justify(pSlot, pFont, width, justFlags(flags), pFirst, pLast);
 }
 
 } // extern "C"

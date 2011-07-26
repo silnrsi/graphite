@@ -35,7 +35,7 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 Silf::Silf() throw()
-: m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0),
+: m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
   m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0)
@@ -53,10 +53,12 @@ void Silf::releaseBuffers() throw()
     delete [] m_pseudos;
     free(m_classOffsets);
     free(m_classData);
+    free(m_justs);
     m_passes= 0;
     m_pseudos = 0;
     m_classOffsets = 0;
     m_classData = 0;
+    m_justs = 0;
 }
 
 

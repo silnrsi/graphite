@@ -41,6 +41,7 @@ extern func_map thismap;
 
 typedef struct rec_ft_table {
     unsigned long tag;
+    size_t len;
     void *buffer;
     unsigned long len;
     struct rec_ft_table *next;
@@ -120,7 +121,7 @@ private:
 };
 
 
-extern "C" void Java_com_sil_mjph_helloworld1_HelloWorld1_loadGraphite( JNIEnv* env, jobject thiz )
+extern "C" void Java_org_sil_palaso_Graphite_loadGraphite( JNIEnv* env, jobject thiz )
 {
     load_fns("libload-graphite.so", "libskia.so", &thismap, 12);
 }
@@ -157,7 +158,7 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     return r->buffer;
 }
 
-extern "C" jobject Java_com_sil_mjph_helloworld1_HelloWorld1_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname, jint rtl )
+extern "C" jobject Java_org_sil_palaso_Graphite_addFontResource( JNIEnv *env, jobject thiz, jobject jassetMgr, jstring jpath, jstring jname, jint rtl )
 {
     android::AssetManager* mgr = android::assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) return 0;

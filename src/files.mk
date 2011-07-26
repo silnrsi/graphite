@@ -62,6 +62,7 @@ $(_NS)_SOURCES = \
     $($(_NS)_BASE)/src/Segment.cpp \
     $($(_NS)_BASE)/src/Silf.cpp \
     $($(_NS)_BASE)/src/Slot.cpp \
+    $($(_NS)_BASE)/src/Sparse.cpp \
     $($(_NS)_BASE)/src/TtfUtil.cpp
 
 $(_NS)_PRIVATE_HEADERS = \
@@ -92,6 +93,7 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/Segment.h \
     $($(_NS)_BASE)/src/Silf.h \
     $($(_NS)_BASE)/src/Slot.h \
+    $($(_NS)_BASE)/src/Sparse.h \
     $($(_NS)_BASE)/src/TtfTypes.h \
     $($(_NS)_BASE)/src/TtfUtil.h \
     $($(_NS)_BASE)/src/XmlTraceLog.h \

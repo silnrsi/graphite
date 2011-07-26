@@ -24,39 +24,47 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#pragma once
 
-#include <graphite2/Segment.h>
-#include "TtfTypes.h"
-#include "locale2lcid.h"
+#include "Sparse.h"
 
-namespace graphite2 {
+using namespace graphite2;
 
-class NameTable
+namespace
 {
-public:
-    NameTable(const void * data, size_t length, uint16 platfromId=3, uint16 encodingID = 1);
-    ~NameTable() { if (m_table) free(const_cast<TtfUtil::Sfnt::FontNames *>(m_table)); }
-    enum eNameFallback {
-        eNoFallback = 0,
-        eEnUSFallbackOnly = 1,
-        eEnOrAnyFallback = 2
-    };
-    uint16 setPlatformEncoding(uint16 platfromId=3, uint16 encodingID = 1);
-    void * getName(uint16 & languageId, uint16 nameId, gr_encform enc, uint32 & length);
-    uint16 getLanguageId(const char * bcp47Locale);
+	template<typename T>
+	inline unsigned int bit_set_count(T v)
+	{
+		v = v - ((v >> 1) & T(~T(0)/3));                           // temp
+		v = (v & T(~T(0)/15*3)) + ((v >> 2) & T(~T(0)/15*3));      // temp
+		v = (v + (v >> 4)) & T(~T(0)/255*15);                      // temp
+		return (T)(v * T(~T(0)/255)) >> (sizeof(T)-1)*8;           // count
+	}
+}
 
-    CLASS_NEW_DELETE
-private:
-    uint16 m_platformId;
-    uint16 m_encodingId;
-    uint16 m_languageCount;
-    uint16 m_platformOffset; // offset of first NameRecord with for platform 3, encoding 1
-    uint16 m_platformLastRecord;
-    uint16 m_nameDataLength;
-    const TtfUtil::Sfnt::FontNames * m_table;
-    const uint8 * m_nameData;
-    Locale2Lang m_locale2Lang;
-};
 
-} // namespace graphite2
+sparse::~sparse() throw()
+{
+	free(m_array.values);
+}
+
+
+sparse::value sparse::operator [] (int k) const throw()
+{
+	const key			i = k/SIZEOF_CHUNK; k %= SIZEOF_CHUNK;
+	const chunk & 		c = m_array.map[i];
+	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - k);
+
+	return bool((m & 1)*(i < m_nchunks))*m_array.values[c.offset + bit_set_count(m >> 1)];
+}
+
+
+size_t sparse::size() const throw()
+{
+	size_t n = m_nchunks,
+		   s = 0;
+
+	for (const chunk *ci=m_array.map; n; --n, ++ci)
+		s += bit_set_count(ci->mask);
+
+	return s;
+}

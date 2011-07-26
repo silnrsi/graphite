@@ -127,7 +127,7 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * 
     }
 }
 
-void SegCacheEntry::log(size_t unicodeLength) const
+void SegCacheEntry::log(GR_MAYBE_UNUSED size_t unicodeLength) const
 {
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())

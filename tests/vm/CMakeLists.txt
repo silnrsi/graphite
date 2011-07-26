@@ -32,6 +32,7 @@ add_library(vm-test-common  STATIC
                 ${SRC}/SegCacheStore.cpp
                 ${SRC}/Silf.cpp
                 ${SRC}/Slot.cpp
+                ${SRC}/Sparse.cpp
                 ${SRC}/TtfUtil.cpp
                 ${TRACESUPPORT})
 

@@ -133,6 +133,7 @@ add_library(graphite2 SHARED
     Segment.cpp
     Silf.cpp
     Slot.cpp
+    Sparse.cpp
     TtfUtil.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp
@@ -161,7 +162,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
     endif (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-    CREATE_LIBTOOL_FILE(graphite2 "/lib")
+    CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -169,6 +170,6 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 
-install(TARGETS graphite2 EXPORT graphite2 LIBRARY DESTINATION lib ARCHIVE DESTINATION lib PUBLIC_HEADER DESTINATION include/graphite2 RUNTIME DESTINATION bin)
+install(TARGETS graphite2 EXPORT graphite2 LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX} PUBLIC_HEADER DESTINATION include/graphite2 RUNTIME DESTINATION bin)
 install(EXPORT graphite2 DESTINATION share/graphite2 NAMESPACE gr2_)
 

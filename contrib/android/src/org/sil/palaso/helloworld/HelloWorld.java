@@ -25,21 +25,22 @@
     2 of the license or (at your option) any later version.
 */
 
-package com.sil.mjph.helloworld1;
+package org.sil.palaso.helloworld;
 
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.webkit.WebView;
 import android.widget.TextView;
+import org.sil.palaso.Graphite;
 
-public class HelloWorld1 extends Activity {
+public class HelloWorld extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	loadGraphite();
-    	Typeface tfp = (Typeface)addFontResource(getAssets(), "Padauk.ttf", "padauk", 0);
-    	Typeface tfa = (Typeface)addFontResource(getAssets(), "Scheherazadegr.ttf", "Scheh", 1);
+    	Typeface tfp = (Typeface)Graphite.addFontResource(getAssets(), "Padauk.ttf", "padauk", 0);
+    	Typeface tfa = (Typeface)Graphite.addFontResource(getAssets(), "Scheherazadegr.ttf", "Scheh", 1);
+    	Graphite.loadGraphite();
     	
     	TextView tv;
     	WebView wv;
@@ -53,16 +54,8 @@ public class HelloWorld1 extends Activity {
         tv = (TextView) findViewById(R.id.tv);
         tv.setText(s);
         tv.setTypeface(tfa, 0);
-        tv.setTextSize(tv.getTextSize() * (float)1.2);
+        tv.setTextSize(tv.getTextSize() * 2);
         wv = (WebView) findViewById(R.id.wv);
         wv.loadData(w, "text/html", "UTF-8");
-    }
-
-    public native void loadGraphite();
-    public native Object addFontResource(Object assets, String asset_name, String font_name, int rtl);
-
-    static {
-    	System.loadLibrary("graphite2");
-    	System.loadLibrary("load-graphite");
     }
 }
