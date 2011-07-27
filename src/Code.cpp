@@ -425,8 +425,8 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       break;
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
     case PUT_SUBS : 
-      //_code._modify = true;
-      //_analysis.set_changed(_analysis.slotref);
+      _code._modify = true;
+      _analysis.set_changed(_analysis.slotref);
       // no break here;
     case PUT_COPY :
     {

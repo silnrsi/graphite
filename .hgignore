@@ -20,10 +20,13 @@ nmake*
 *.swp
 *.la
 *.kdev4
+.cproject
+.project
 
 syntax:regexp
 \.libs/
 \.deps/
+\.externalToolBuilders
 build*/
 release/
 debug/
