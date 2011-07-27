@@ -2,6 +2,42 @@
 
 In this section we look at coding conventions and some of the design models used in coding graphiteng.
 
+=== Compiling and Integrating ===
+
+To compile the graphite2 library for integration into another application framework, there are some
+useful utilities and also various definitions that need to be defined. The file src/files.mk will create
+three make variables containing lists of files that someone will want to build in order to build
+graphite2 from source as part of an application build. The variable names are controlled by setting
+_NS to a prefix that is then applied to the variable names _SOURCES, _PRIVATE_HEADERS and _PUBLIC_HEADERS.
+All files are listed relative to the variable _BASE (with its _NS expansion prefix). The _MACHINE variable
+with its _NS expansion prefix, must be set to 'call' or 'direct' depending on which kind of virtual
+machine to use inside the engine. gcc supports direct call, while all other compilers without a computed
+goto should use the call style virtual machine. See src/direct_machine.cpp and src/call_machine.cpp for details.
+
+Various C preprocessor definitions are also used as part of compiling graphite2:
+
+WORDS_BIG_ENDIAN::
+    This is defined if the target compilation platform is big endian, otherwise it is left undefined
+    for little endian architectures.
+
+DISABLE_SEGCACHE::
+    If set, the segment caching code is not compiled into the library. This can be used to save space
+    if the engine is under space constraints both for code and memory. The default is that this is not
+    defined.
+
+DISABLE_TRACING::
+    If set, no tracing code is compiled into the library, to save code space and increase speed. By default
+    this is not set.
+
+ENABLE_DEEP_TRACING::
+    Only used if DISABLE_TRACING is undefined. It enables extra tracing code that will give considerable
+    output at considerable time cost. By default this is not set.
+
+DISABLE_FILEFACE::
+    If set, the code to support creating a face directly from a font file is not included in the library.
+    By default this is not set.
+
+
 === Memory Allocation ===
 
 +++While GraphiteNG is written in C++, it is targetted at environments where

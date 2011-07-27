@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 
 #include <cstdlib>
 #include "graphite2/Types.h"
+#include "config.h"
 
 #define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
 

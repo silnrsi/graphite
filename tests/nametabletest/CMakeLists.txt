@@ -1,7 +1,7 @@
 
 project(featuremaptest)
 
-include_directories(../../src)
+include_directories(../../src ${PROJECT_BINARY_DIR}/../../src)
 INCLUDE(CheckTypeSize)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)

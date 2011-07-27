@@ -80,7 +80,12 @@ set(GRAPHITE_API_MINOR 0)
 set(GRAPHITE_API_AGE 0)
 set(GRAPHITE_SO_VERSION ${GRAPHITE_API_MAJOR}.${GRAPHITE_API_MINOR}.${GRAPHITE_API_AGE})
 
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common )
+include(TestBigEndian)
+TEST_BIG_ENDIAN(WORDS_BIGENDIAN)
+
+configure_file("${PROJECT_SOURCE_DIR}/config.h.in" "${PROJECT_BINARY_DIR}/config.h")
+
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common ${PROJECT_BINARY_DIR} )
 
 if (NOT DISABLE_TRACING)
     message(STATUS "Tracing enabled")
