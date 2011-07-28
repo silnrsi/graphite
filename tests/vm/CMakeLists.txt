@@ -3,7 +3,7 @@ project(vm-testing)
 enable_testing()
 
 set(SRC ${PROJECT_SOURCE_DIR}/../../src)
-include_directories(${PROJECT_SOURCE_DIR} ${SRC} ${PROJECT_BINARY_DIR}/../../src)
+include_directories(${PROJECT_SOURCE_DIR} ${SRC})
 
 if(DISABLE_TRACING)
     set(TRACESUPPORT "")

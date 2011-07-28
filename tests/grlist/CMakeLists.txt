@@ -1,6 +1,6 @@
 project(grlisttest)
 
-include_directories(../../src ${PROJECT_BINARY_DIR}/../../src)
+include_directories(../../src)
 
 add_executable(grlisttest grlisttest.cpp)
 

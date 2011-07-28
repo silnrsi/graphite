@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 project(grsegcachetest)
 
-include_directories(../../src ${PROJECT_BINARY_DIR}/../../src)
+include_directories(../../src)
 INCLUDE(CheckTypeSize)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
