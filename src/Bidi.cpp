@@ -517,14 +517,25 @@ Slot * join(int level, Slot * a, Slot * b)
 }
 
 
-Slot * span(Slot * & cs, const bool rtl)
+Slot * span(Segment *seg, Slot * & cs, const bool rtl, uint8 aMirror)
 {
 	Slot * r = cs, * re = cs; cs = cs->next();
+    if (aMirror && r->getBidiLevel() & 1)
+    {
+        unsigned short g = seg->glyphAttr(r->gid(), aMirror);
+        if (g) r->setGlyph(seg, g);
+    }
+        
 	if (rtl)
 	{
 		Slot * t = r->next(); r->next(r->prev()); r->prev(t);
 		for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->prev())
 		{
+            if (aMirror && (l & 1))
+            {
+                unsigned short g = seg->glyphAttr(cs->gid(), aMirror);
+                if (g) cs->setGlyph(seg, g);
+            }
 			re = cs;
 			t = cs->next(); cs->next(cs->prev()); cs->prev(t);
 		}
@@ -535,7 +546,14 @@ Slot * span(Slot * & cs, const bool rtl)
 	else
 	{
 		for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->next())
+        {
+            if (aMirror && (l & 1))
+            {
+                unsigned short g = seg->glyphAttr(cs->gid(), aMirror);
+                if (g) cs->setGlyph(seg, g);
+            }
 			re = cs;
+        }
 		r->prev(re);
 		re->next(r);
 	}
@@ -544,15 +562,15 @@ Slot * span(Slot * & cs, const bool rtl)
 }
 
 
-Slot *resolveOrder(Slot * & cs, const bool reordered, const int level)
+Slot *resolveOrder(Segment *seg, Slot * & cs, const bool reordered, uint8 aMirror, const int level)
 {
 	Slot * r = 0;
 	int ls;
 	while (cs && level <= (ls = cs->getBidiLevel() - reordered))
 	{
 		r = join(level, r, level >= ls
-								? span(cs, level & 1)
-								: resolveOrder(cs, reordered, level+1));
+								? span(seg, cs, level & 1, aMirror)
+								: resolveOrder(seg, cs, reordered, aMirror, level+1));
 	}
 	return r;
 }

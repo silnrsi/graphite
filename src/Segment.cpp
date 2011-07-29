@@ -593,9 +593,9 @@ void resolveWeak(int baseLevel, Slot *s);
 void resolveNeutrals(int baseLevel, Slot *s);
 void resolveImplicit(Slot *s);
 void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
-Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
+Slot *resolveOrder(Segment *seg, Slot * & s, const bool reordered, uint8 aMirror, const int level = 0);
 
-void Segment::bidiPass(uint8 aBidi, int paradir)
+void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
 {
 	if (slotCount() == 0)
 		return;
@@ -619,9 +619,17 @@ void Segment::bidiPass(uint8 aBidi, int paradir)
             resolveNeutrals(baseLevel, first());
         resolveImplicit(first());
         resolveWhitespace(baseLevel, this, aBidi, last());
-        s = resolveOrder(s = first(), baseLevel);
+        s = resolveOrder(this, s = first(), baseLevel, (dir() & 4) ? aMirror : 0);
         first(s); last(s->prev());
         s->prev()->next(0); s->prev(0);
+    }
+    else if (!(dir() & 4) && baseLevel && aMirror)
+    {
+        for (s = first(); s; s = s->next())
+        {
+            unsigned short g = glyphAttr(s->gid(), aMirror);
+            if (g) s->setGlyph(this, g);
+        }
     }
 }
 

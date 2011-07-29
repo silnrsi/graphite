@@ -133,7 +133,9 @@ enum gr_bidirtl {
     gr_rtl = 1,
     /// Set this to not run the bidi pass internally, even if the font asks for it.
     /// This presumes that the segment is in a single direction.
-    gr_nobidi = 2
+    gr_nobidi = 2,
+    /// Disable auto mirroring for rtl text
+    gr_nomirror = 4
 };
 
 typedef struct gr_char_info     gr_char_info;
