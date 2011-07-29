@@ -35,7 +35,11 @@ def valpos(fontlen, opts) :
     elif opts.value :
         def gen() :
             while (1) :
-                yield(int(uniform(0, fontlen)), int(opts.value, 0))
+                for c in xrange(0, fontlen) :
+                    if opts.linear :
+                        yield (c, int(opts.value, 0))
+                    else :
+                        yield(int(uniform(0, fontlen)), int(opts.value, 0))
         return gen
     elif opts.linear :
         def gen() :
