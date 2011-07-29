@@ -36,7 +36,7 @@ class sparse
 {
 	typedef unsigned long	mask_t;
 
-	static const unsigned char  SIZEOF_CHUNK = sizeof(mask_t) - sizeof(uint16);
+	static const unsigned char  SIZEOF_CHUNK = (sizeof(mask_t) - sizeof(uint16))*8;
 
 	struct chunk
 	{
