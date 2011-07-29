@@ -50,11 +50,13 @@ sparse::~sparse() throw()
 
 sparse::value sparse::operator [] (int k) const throw()
 {
-	const key			i = k/SIZEOF_CHUNK; k %= SIZEOF_CHUNK;
-	const chunk & 		c = m_array.map[i];
-	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - k);
+	bool g = k < m_nchunks*SIZEOF_CHUNK;	// This will be 0 is were out of bounds
+	k *= g;									// Force k to 0 if out of bounds making the map look up safe
+	const chunk & 		c = m_array.map[k/SIZEOF_CHUNK];
+	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - (k%SIZEOF_CHUNK));
+	g *= m & 1;			// Extend the guard value to consider the residency bit
 
-	return bool((m & 1)*(i < m_nchunks))*m_array.values[c.offset + bit_set_count(m >> 1)];
+	return g*m_array.values[c.offset + g*bit_set_count(m >> 1)];
 }
 
 
