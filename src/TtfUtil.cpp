@@ -352,6 +352,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 		}
 		else
 			return false;
+		break;
 	}
 
 	case Tag::name:

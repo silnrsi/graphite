@@ -77,7 +77,7 @@ bool FeatureMap::readFeats(const Face & face)
         XmlTraceLog::get().addAttribute(AttrNum, m_numFeats);
     }
 #endif
-    for (int i = 0; i < m_numFeats; i++)
+    for (int i = 0, ie = m_numFeats; i != ie; i++)
     {
         uint32 name;
         if (version < 0x00020000)
@@ -85,6 +85,7 @@ bool FeatureMap::readFeats(const Face & face)
         else
             name = read32(pFeat);
         uint16 numSet = read16(pFeat);
+
         uint32 offset;
         if (version < 0x00020000)
             offset = read32(pFeat);
@@ -108,6 +109,16 @@ bool FeatureMap::readFeats(const Face & face)
             XmlTraceLog::get().addAttribute(AttrLabel, uiName);
         }
 #endif
+
+        if (numSet == 0)
+        {
+            --m_numFeats;
+#ifndef DISABLE_TRACING
+            XmlTraceLog::get().closeElement(ElementFeature);
+#endif
+            continue;
+        }
+
         if (offset + numSet * 4 > lFeat) return false;
         FeatureSetting *uiSet = gralloc<FeatureSetting>(numSet);
         for (int j = 0; j < numSet; j++)
@@ -131,15 +142,6 @@ bool FeatureMap::readFeats(const Face & face)
         }
         uint32 mask = 1;
         byte bits = 0;
-        // check for an empty legacy lang feature at the end with ID=1 and ignore
-        if ((version <= 0x20000) && (name == 1) && (numSet == 0) && (i + 1 == m_numFeats))
-        {
-            --m_numFeats;
-#ifndef DISABLE_TRACING
-            XmlTraceLog::get().closeElement(ElementFeature);
-#endif
-            break;
-        }
         for (bits = 0; bits < 32; bits++, mask <<= 1)
         {
             if (mask > maxVal)
@@ -164,7 +166,7 @@ bool FeatureMap::readFeats(const Face & face)
     m_defaultFeatures = new Features(currIndex + 1, *this);
     for (int i = 0; i < m_numFeats; i++)
     {
-	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
+    	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
         m_pNamedFeats[i] = m_feats+i;
     }
     
