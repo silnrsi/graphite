@@ -239,7 +239,7 @@ void mySkDraw::drawText(const char *text, size_t bytelen, SkScalar x, SkScalar y
     int rtl = 0;
     gr_face *face = gr_face_from_tf(paint.getTypeface(), &rtl);
     gr_encform enctype = gr_encform(paint.getTextEncoding() + 1);
-    if (fMatrix->getType() & SkMatrix::kPerspective_Mask || enctype > 2 || !face)
+    if ((fMatrix->getType() & SkMatrix::kPerspective_Mask) || enctype > 2 || !face)
     {
         SkDraw::drawText(text, bytelen, x, y, paint);
         return;

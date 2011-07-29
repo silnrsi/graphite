@@ -40,33 +40,41 @@ namespace
 	class glat_iterator : public std::iterator<std::input_iterator_tag, glyph_attr>
 	{
 	public:
-		glat_iterator() : _p(0), _n(0) {}
-		glat_iterator(const void * glat) : _p(reinterpret_cast<const byte *>(glat)), _n(0) {
-			operator++();
-		}
+		glat_iterator(const void * glat=0) : _p(reinterpret_cast<const byte *>(glat)), _n(0) {}
 
-		glat_iterator & operator ++ () 		{ ++_v.id; if (_n==0) { _v.id = *_p++; _n = *_p++; } --_n; _v.value = read16(_p); return *this; }
+		glat_iterator & operator ++ () 		{ ++_v.id; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= 2; _v.id = *_p++; _n = *_p++; } return *this; }
 		glat_iterator   operator ++ (int) 	{ glat_iterator tmp(*this); operator++(); return tmp; }
 
 		bool operator == (const glat_iterator & rhs) { return _p == rhs._p; }
 		bool operator != (const glat_iterator & rhs) { return !operator==(rhs); }
 
-		value_type 			operator * () const { return _v; }
-		const value_type *	operator ->() const { return &_v; }
+		value_type 			operator * () const {
+			if (_n==0) { _v.id = *_p++; _n = *_p++; }
+			_v.value = swap16(*reinterpret_cast<const uint16 *>(_p));
+			return _v;
+		}
+		const value_type *	operator ->() const { operator * (); return &_v; }
 
 	protected:
-		const byte * _p;
-		value_type  _v;
-		unsigned int _n;
+		mutable const byte * _p;
+		mutable value_type  _v;
+		mutable int 		_n;
 	};
 
 	class glat2_iterator : public glat_iterator
 	{
 	public:
-		glat2_iterator(const void * glat) { _p = reinterpret_cast<const byte *>(glat); _n = 0; operator++(); }
+		glat2_iterator(const void * glat) : glat_iterator(glat) {}
 
-		glat_iterator & operator ++ () 		{ ++_v.id; if (!_n) { _v.id = read16(_p); _n = read16(_p); } --_n; _v.value = read16(_p); return *this; }
+		glat_iterator & operator ++ () 		{ ++_v.id; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.id = read16(_p); _n = read16(_p); } return *this; }
 		glat_iterator   operator ++ (int) 	{ glat_iterator tmp(*this); operator++(); return tmp; }
+
+		value_type 			operator * () const {
+			if (_n==0) { _v.id = read16(_p); _n = read16(_p); }
+			_v.value = swap16(*reinterpret_cast<const uint16 *>(_p));
+			return _v;
+		}
+		const value_type *	operator ->() const { operator * (); return &_v; }
 	};
 }
 

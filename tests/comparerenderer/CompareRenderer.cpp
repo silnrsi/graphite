@@ -123,14 +123,14 @@ public:
     
     ~CompareRenderer()
     {
-        delete m_fileBuffer;
+        delete [] m_fileBuffer;
         m_fileBuffer = NULL;
         for (size_t i = 0; i < NUM_RENDERERS; i++)
         {
             if (m_lineResults[i]) delete [] m_lineResults[i];
             m_lineResults[i] = NULL;
         }
-        if (m_lineOffsets) delete m_lineOffsets;
+        if (m_lineOffsets) delete [] m_lineOffsets;
         m_lineOffsets = NULL;
     }
 
