@@ -438,18 +438,23 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     }
     case PUSH_ATT_TO_GATTR_OBS :
         if (_code._constraint) return;
-    case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
     case PUSH_GLYPH_ATTR_OBS :
-    case PUSH_GLYPH_ATTR :
+    case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
+    case PUSH_GLYPH_METRIC :
+    case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :
+    case PUSH_FEAT :
       if (arg[1] <= 0 && -arg[1] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(_analysis.slotref + arg[1] - _analysis.contexts[_analysis.slotref].flags.inserted);
       else if (_analysis.slotref + arg[1] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[1];
       break;
-    case PUSH_GLYPH_METRIC :
-    case PUSH_FEAT :
-    case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ATT_TO_GLYPH_ATTR :
+        if (_code._constraint) return;
+    case PUSH_GLYPH_ATTR :
+      if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
+        _analysis.set_ref(_analysis.slotref + arg[2] - _analysis.contexts[_analysis.slotref].flags.inserted);
+      else if (_analysis.slotref + arg[2] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[2];
+      break;
     case ASSOC :                // slotrefs in varargs
       break;
     default:
