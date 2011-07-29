@@ -440,7 +440,7 @@ public:
 	  m_nCharsProcessed(0) 
       {
           size_t cmapSize = 0;
-          const void * table = face2->getTable(tagCmap, &cmapSize);
+          const void * table = face2->getTable(Tag::cmap, &cmapSize);
           if (!table) return;
           m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
           if (!m_ctable || !TtfUtil::CheckCmap31Subtable(m_ctable))

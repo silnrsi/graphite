@@ -33,20 +33,20 @@ using namespace graphite2;
 
 /*virtual*/ bool GlyphFaceCacheHeader::initialize(const Face & face)    //return result indicates success. Do not use if failed.
 {
-    if ((m_pLoca = face.getTable(tagLoca, &m_lLoca)) == NULL) return false;
-    if ((m_pHead = face.getTable(tagHead)) == NULL) return false;
-    if ((m_pGlyf = face.getTable(tagGlyf, &m_lGlyf)) == NULL) return false;
-    if ((m_pHmtx = face.getTable(tagHmtx, &m_lHmtx)) == NULL) return false;
-    if ((m_pHHea = face.getTable(tagHhea)) == NULL) return false;
-    if ((m_pGlat = face.getTable(tagGlat, &m_lGlat)) == NULL) return false;
+    if ((m_pLoca = face.getTable(Tag::loca, &m_lLoca)) == NULL) return false;
+    if ((m_pHead = face.getTable(Tag::head)) == NULL) return false;
+    if ((m_pGlyf = face.getTable(Tag::glyf, &m_lGlyf)) == NULL) return false;
+    if ((m_pHmtx = face.getTable(Tag::hmtx, &m_lHmtx)) == NULL) return false;
+    if ((m_pHHea = face.getTable(Tag::hhea)) == NULL) return false;
+    if ((m_pGlat = face.getTable(Tag::Glat, &m_lGlat)) == NULL) return false;
     m_fGlat = swap32(*reinterpret_cast<const uint32 *>(m_pGlat));
 
-    const void* pMaxp = face.getTable(tagMaxp);
+    const void* pMaxp = face.getTable(Tag::maxp);
     if (pMaxp == NULL) return false;
     m_nGlyphsWithGraphics = (unsigned short)TtfUtil::GlyphCount(pMaxp);
     
     size_t lGloc;
-    if ((m_pGloc = face.getTable(tagGloc, &lGloc)) == NULL) return false;
+    if ((m_pGloc = face.getTable(Tag::Gloc, &lGloc)) == NULL) return false;
     if (lGloc < 6) return false;
     int version = swap32(*((uint32 *)m_pGloc));
     if (version != 0x00010000) return false;

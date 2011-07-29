@@ -29,8 +29,6 @@ of the License or (at your option) any later version.
 #include <cstdlib>
 #include "graphite2/Types.h"
 
-#define MAKE_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
-
 #if !defined WORDS_BIGENDIAN || defined PC_OS
 
 namespace graphite2 {

@@ -42,22 +42,56 @@ Description:
 
 #include <cstddef>
 //#include <stdexcept>
+
 namespace graphite2
 {
 namespace TtfUtil
 {
-// Enumeration used to specify a table in a TTF file
-enum TableId
-{
-	ktiCmap, ktiCvt, ktiCryp, ktiHead, ktiFpgm, ktiGdir, ktiGlyf, 
-	ktiHdmx, ktiHhea, ktiHmtx, ktiLoca, ktiKern, ktiLtsh, ktiMaxp, 
-	ktiName, ktiOs2, ktiPost, ktiPrep, ktiFeat, ktiGlat, ktiGloc,
-	ktiSilf, ktiSile, ktiSill,
-	ktiLast /*This gives the enum length - it is not a real table*/
-};
 
 typedef long fontTableId32;
 typedef unsigned short gid16;
+
+#define TTF_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
+
+// Enumeration used to specify a table in a TTF file
+class Tag
+{
+	unsigned long _v;
+public:
+	Tag(const char n[5]) throw()			: _v(TTF_TAG(n[0],n[1],n[2],n[3])) {}
+	Tag(const unsigned long tag) throw()	: _v(tag) {}
+
+	operator unsigned long () const throw () { return _v; }
+
+	enum
+	{
+		Feat = TTF_TAG('F','e','a','t'),
+		Glat = TTF_TAG('G','l','a','t'),
+		Gloc = TTF_TAG('G','l','o','c'),
+		Sile = TTF_TAG('S','i','l','e'),
+		Silf = TTF_TAG('S','i','l','f'),
+		Sill = TTF_TAG('S','i','l','l'),
+		cmap = TTF_TAG('c','m','a','p'),
+		cvt  = TTF_TAG('c','v','t',' '),
+		cryp = TTF_TAG('c','r','y','p'),
+		head = TTF_TAG('h','e','a','d'),
+		fpgm = TTF_TAG('f','p','g','m'),
+		gdir = TTF_TAG('g','d','i','r'),
+		glyf = TTF_TAG('g','l','y','f'),
+		hdmx = TTF_TAG('h','d','m','x'),
+		hhea = TTF_TAG('h','h','e','a'),
+		hmtx = TTF_TAG('h','m','t','x'),
+		loca = TTF_TAG('l','o','c','a'),
+		kern = TTF_TAG('k','e','r','n'),
+		LTSH = TTF_TAG('L','T','S','H'),
+		maxp = TTF_TAG('m','a','x','p'),
+		name = TTF_TAG('n','a','m','e'),
+		OS_2 = TTF_TAG('O','S','/','2'),
+		post = TTF_TAG('p','o','s','t'),
+		prep = TTF_TAG('p','r','e','p')
+	};
+};
+
 /*----------------------------------------------------------------------------------------------
 	Class providing utility methods to parse a TrueType font file (TTF).
 	Callling application handles all file input and memory allocation.
@@ -67,9 +101,9 @@ typedef unsigned short gid16;
 	bool GetHeaderInfo(size_t & lOffset, size_t & lSize);
 	bool CheckHeader(const void * pHdr);
 	bool GetTableDirInfo(const void * pHdr, size_t & lOffset, size_t & lSize);
-	bool GetTableInfo(unsigned int lTableTag, const void * pHdr, const void * pTableDir, 
+	bool GetTableInfo(const Tag TableTag, const void * pHdr, const void * pTableDir,
 		size_t & lOffset, size_t & lSize);
-	bool CheckTable(TableId ktiTableId, const void * pTable, size_t lTableSize);
+	bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize);
 
 	////////////////////////////////// simple font wide info 
 	size_t  GlyphCount(const void * pMaxp); 
@@ -114,9 +148,6 @@ typedef unsigned short gid16;
 	///////////////////////////////// horizontal metric data for a glyph
 	bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, 
 		const void * pHhea, int & nLsb, unsigned int & nAdvWid);
-
-	///////////////////////////////// convert our TableId enum to standard TTF tags
-	fontTableId32 TableIdTag(const TableId);
 
 	////////////////////////////////// primitives for loca and glyf lookup 
 	size_t LocaLookup(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, 

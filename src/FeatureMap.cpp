@@ -36,9 +36,6 @@ of the License or (at your option) any later version.
 #include <stdlib.h>
 #include "Face.h"
 
-#define ktiFeat MAKE_TAG('F','e','a','t')
-#define ktiSill MAKE_TAG('S','i','l','l')
-
 
 using namespace graphite2;
 
@@ -46,10 +43,10 @@ static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndF
                                                                         ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
                                                                                     ? 1 : 0)); }
 
-bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
+bool FeatureMap::readFeats(const Face & face)
 {
     size_t lFeat;
-    const byte *pFeat = reinterpret_cast<const byte *>((*getTable)(appFaceHandle, ktiFeat, &lFeat));
+    const byte *pFeat = face.getTable(TtfUtil::Tag::Feat, &lFeat);
     const byte *pOrig = pFeat;
     uint16 *defVals=0;
     uint32 version;
@@ -155,7 +152,7 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
                 }
                 ::new (m_feats + i) FeatureRef (currBits, currIndex,
                                                (mask - 1) << currBits, flags,
-                                               name, uiName, numSet, uiSet, pFace);
+                                               name, uiName, numSet, uiSet, &face);
                 currBits += bits;
                 break;
             }
@@ -182,18 +179,18 @@ bool FeatureMap::readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_f
     return true;
 }
 
-bool SillMap::readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace)
+bool SillMap::readFace(const Face & face)
 {
-    if (!m_FeatureMap.readFeats(appFaceHandle, getTable, pFace)) return false;
-    if (!readSill(appFaceHandle, getTable)) return false;
+    if (!m_FeatureMap.readFeats(face)) return false;
+    if (!readSill(face)) return false;
     return true;
 }
 
 
-bool SillMap::readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable)
+bool SillMap::readSill(const Face & face)
 {
     size_t lSill;
-    const byte *pSill = reinterpret_cast<const byte *>(((*getTable)(appFaceHandle, ktiSill, &lSill)));
+    const byte *pSill = face.getTable(TtfUtil::Tag::Sill, &lSill);
     const byte *pBase = pSill;
 
     if (!pSill) return true;

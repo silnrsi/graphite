@@ -1,7 +1,9 @@
 
 project(featuremaptest)
 
-include_directories(../../src)
+set(SRC ${PROJECT_SOURCE_DIR}/../../src)
+include_directories(${PROJECT_SOURCE_DIR} ${SRC})
+
 INCLUDE(CheckTypeSize)
 
 CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
@@ -12,8 +14,22 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(featuremaptest featuremaptest.cpp
-    ../../src/FeatureMap.cpp
-    ../../src/XmlTraceLog.cpp
-    ../../src/XmlTraceLogTags.cpp)
+				${SRC}/Bidi.cpp
+				${SRC}/call_machine.cpp
+                ${SRC}/Code.cpp
+                ${SRC}/CmapCache.cpp
+                ${SRC}/Face.cpp
+                ${SRC}/FeatureMap.cpp
+                ${SRC}/GlyphFace.cpp
+                ${SRC}/GlyphFaceCache.cpp
+                ${SRC}/NameTable.cpp
+                ${SRC}/Pass.cpp
+                ${SRC}/Segment.cpp
+                ${SRC}/Silf.cpp
+                ${SRC}/Slot.cpp
+                ${SRC}/Sparse.cpp
+                ${SRC}/TtfUtil.cpp
+     			${SRC}/XmlTraceLog.cpp
+    			${SRC}/XmlTraceLogTags.cpp)
 
 add_test(NAME featuremaptest COMMAND $<TARGET_FILE:featuremaptest>)

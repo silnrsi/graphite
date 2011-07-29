@@ -40,7 +40,7 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
 {
     Face *res = new Face(appFaceHandle, getTable);
 
-    if (!(faceOptions & gr_face_dumbRendering) && !res->getTable(tagSilf))
+    if (!(faceOptions & gr_face_dumbRendering) && !res->getTable(Tag::Silf))
     {
         delete res;
         return 0;

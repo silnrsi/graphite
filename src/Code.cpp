@@ -392,6 +392,7 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
             break;
         default:
             failure(invalid_opcode);
+            break;
     }
 
     return _code._status == loaded ? opc : MAX_OPCODE;

@@ -48,28 +48,9 @@ class FeatureVal;
 class NameTable;
 class CmapCache;
 
+using TtfUtil::Tag;
+
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
-
-#define tagGlat MAKE_TAG('G','l','a','t')
-#define tagGloc MAKE_TAG('G','l','o','c')
-#define tagGlyf MAKE_TAG('g','l','y','f')
-#define tagHead MAKE_TAG('h','e','a','d')
-#define tagHhea MAKE_TAG('h','h','e','a')
-#define tagHmtx MAKE_TAG('h','m','t','x')
-#define tagLoca MAKE_TAG('l','o','c','a')
-#define tagMaxp MAKE_TAG('m','a','x','p')
-
-
-#define tagCmap MAKE_TAG('c','m','a','p')
-#define tagHdmx MAKE_TAG('h','d','m','x')
-#define tagKern MAKE_TAG('k','e','r','n')
-#define tagName MAKE_TAG('n','a','m','e')
-#define tagOs2  MAKE_TAG('O','S','/','2')
-#define tagPost MAKE_TAG('p','o','s','t')
-#define tagFeat MAKE_TAG('F','e','a','t')
-#define tagSilf MAKE_TAG('S','i','l','f')
-#define tagSile MAKE_TAG('S','i','l','e')
-#define tagSill MAKE_TAG('S','i','l','l')
 
 #ifndef DISABLE_FILE_FACE
 class TableCacheItem
@@ -108,7 +89,7 @@ public:
 public:     //for local convenience    
     FILE* m_pfile;
     unsigned int m_lfile;
-    mutable TableCacheItem m_tables[TtfUtil::ktiLast];
+    mutable TableCacheItem m_tables[18];
     TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
     TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
 #endif      //!DISABLE_FILE_FACE
@@ -121,11 +102,11 @@ private:        //defensive
 class Face
 {
 public:
-    const byte *getTable(unsigned int name, size_t  * len = 0) const {
+    const byte *getTable(const Tag name, size_t  * len = 0) const {
     	size_t tbl_len=0;
     	const byte * const tbl = reinterpret_cast<const byte *>((*m_getTable)(m_appFaceHandle, name, &tbl_len));
     	if (len) *len = tbl_len;
-    	return TtfUtil::CheckTable(TtfUtil::TableId(name), tbl, tbl_len) ? tbl : 0;
+    	return TtfUtil::CheckTable(name, tbl, tbl_len) ? tbl : 0;
     }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
@@ -151,7 +132,7 @@ private:
 public:
     bool readGlyphs(unsigned int faceOptions);
     bool readGraphite();
-    bool readFeatures() { return m_Sill.readFace(m_appFaceHandle/*non-NULL*/, m_getTable, this); }
+    bool readFeatures() { return m_Sill.readFace(*this); }
     const Silf *chooseSilf(uint32 script) const;
     const SillMap& theSill() const { return m_Sill; }
     uint16 numFeatures() const { return m_Sill.m_FeatureMap.numFeats(); }

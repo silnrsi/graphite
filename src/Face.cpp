@@ -60,7 +60,7 @@ bool Face::readGlyphs(unsigned int faceOptions)
     if (faceOptions & gr_face_cacheCmap)
     {
         size_t length = 0;
-        const byte * table = getTable(tagCmap, &length);
+        const byte * table = getTable(Tag::cmap, &length);
         if (!table) return false;
         m_cmapCache = new CmapCache(table, length);
     }
@@ -80,7 +80,7 @@ bool Face::readGraphite()
 {
     const byte *pSilf;
     size_t lSilf;
-    if ((pSilf = getTable(tagSilf, &lSilf)) == NULL) return false;
+    if ((pSilf = getTable(Tag::Silf, &lSilf)) == NULL) return false;
     uint32 version;
 #ifndef DISABLE_TRACING
     uint32 compilerVersion = 0; // wasn't set before GTF version 3
@@ -190,7 +190,7 @@ NameTable * Face::nameTable() const
 {
     if (m_pNames) return m_pNames;
     size_t tableLength = 0;
-    const byte * table = getTable(tagName, &tableLength);
+    const byte * table = getTable(Tag::name, &tableLength);
     if (table)
         m_pNames = new NameTable(table, tableLength);
     return m_pNames;
@@ -240,91 +240,38 @@ FileFace::~FileFace()
     m_pHeader = NULL;
 }
 
+
 const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, size_t *len)
 {
     const FileFace* ttfFaceHandle = (const FileFace*)appFaceHandle;
-    TableCacheItem * res;
+    TableCacheItem * tci = ttfFaceHandle->m_tables;
+
     switch (name)
     {
-        case tagCmap:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiCmap];
-            break;
-//        case tagCvt:
-//            res = &m_tables[TtfUtil::ktiCvt];
-//            break;
-//        case tagCryp:FileFace
-//            res = &m_tables[TtfUtil::ktiCryp];
-//            break;
-        case tagHead:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHead];
-            break;
-//        case tagFpgm:
-//            res = &m_tables[TtfUtil::ktiFpgm];
-//            break;
-//        case tagGdir:
-//            res = &m_tables[TtfUtil::ktiGdir];
-//            break;
-        case tagGlyf:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlyf];
-            break;
-        case tagHdmx:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHdmx];
-            break;
-        case tagHhea:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHhea];
-            break;
-        case tagHmtx:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiHmtx];
-            break;
-        case tagLoca:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiLoca];
-            break;
-        case tagKern:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiKern];
-            break;
-//        case tagLtsh:
-//            res = &m_tables[TtfUtil::ktiLtsh];
-//            break;
-        case tagMaxp:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiMaxp];
-            break;
-        case tagName:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiName];
-            break;
-        case tagOs2:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiOs2];
-            break;
-        case tagPost:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiPost];
-            break;
-//        case tagPrep:
-//            res = &m_tables[TtfUtil::ktiPrep];
-//            break;
-        case tagFeat:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiFeat];
-            break;
-        case tagGlat:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGlat];
-            break;
-        case tagGloc:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiGloc];
-            break;
-        case tagSilf:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSilf];
-            break;
-        case tagSile:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSile];
-            break;
-        case tagSill:
-            res = &ttfFaceHandle->m_tables[TtfUtil::ktiSill];
-            break;
-        default:
-            res = NULL;
-            break;
+		case Tag::Feat:	tci += 0; break;
+		case Tag::Glat:	tci += 1; break;
+		case Tag::Gloc:	tci += 2; break;
+		case Tag::OS_2:	tci += 3; break;
+		case Tag::Sile:	tci += 4; break;
+		case Tag::Silf:	tci += 5; break;
+		case Tag::Sill:	tci += 6; break;
+    	case Tag::cmap:	tci += 7; break;
+    	case Tag::glyf:	tci += 8; break;
+    	case Tag::hdmx:	tci += 9; break;
+    	case Tag::head:	tci += 10; break;
+    	case Tag::hhea:	tci += 11; break;
+    	case Tag::hmtx:	tci += 12; break;
+    	case Tag::kern:	tci += 13; break;
+    	case Tag::loca:	tci += 14; break;
+    	case Tag::maxp:	tci += 15; break;
+    	case Tag::name:	tci += 16; break;
+    	case Tag::post:	tci += 17; break;
+    	default:					tci = 0; break;
     }
-    assert(res); // don't expect any other table types
-    if (!res) return NULL;
-    if (res->data() == NULL)
+
+    assert(tci); // don't expect any other table types
+    if (!tci) return NULL;
+    if (tci->data() == NULL)
     {
         char *tptr;
         size_t tlen, lOffset;
@@ -337,9 +284,9 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
             free(tptr);
             return NULL;
         }
-        res->set(tptr, tlen);
+        tci->set(tptr, tlen);
     }
-    if (len) *len = res->size();
-    return res->data();
+    if (len) *len = tci->size();
+    return tci->data();
 }
 #endif                  //!DISABLE_FILE_FACE

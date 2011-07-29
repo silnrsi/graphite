@@ -39,7 +39,7 @@ class CmapProcessor
 {
 public:
     CmapProcessor(Face * face, uint16 * buffer) :
-        m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable(tagCmap, NULL), 3, 1)),
+        m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable("cmap", NULL), 3, 1)),
         m_buffer(buffer), m_pos(0) {};
     bool processChar(uint32 cid, size_t /*offset*/)      //return value indicates if should stop processing
     {

@@ -48,7 +48,7 @@ SegCacheStore::SegCacheStore(const Face *face, unsigned int numSilf, size_t maxS
     else
     {
         size_t cmapSize = 0;
-        const void * cmapTable = face->getTable(tagCmap, &cmapSize);
+        const void * cmapTable = face->getTable(Tag::cmap, &cmapSize);
         const void * bmpTable = TtfUtil::FindCmapSubtable(cmapTable, 3, 1, cmapSize);
         //const void * supplementaryTable = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, cmapSize);
 

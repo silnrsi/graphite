@@ -144,7 +144,7 @@ public:
         m_defaultFeatures(NULL) {}
     ~FeatureMap() { delete[] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
-    bool readFeats(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace);
+    bool readFeats(const Face & face);
     const FeatureRef *findFeatureRef(uint32 name) const;
     FeatureRef *feature(uint16 index) const { return m_feats + index; }
     //GrFeatureRef *featureRef(byte index) { return index < m_numFeats ? m_feats + index : NULL; }
@@ -182,8 +182,8 @@ private:
 public:
     SillMap() : m_langFeats(NULL), m_numLanguages(0) {}
     ~SillMap() { delete[] m_langFeats; }
-    bool readFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, const Face* pFace);
-    bool readSill(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable);
+    bool readFace(const Face & face);
+    bool readSill(const Face & face);
     FeatureVal* cloneFeatures(uint32 langname/*0 means default*/) const;      //call destroy_Features when done.
     uint16 numLanguages() const { return m_numLanguages; };
     uint32 getLangName(uint16 index) const { return (index < m_numLanguages)? m_langFeats[index].m_lang : 0; };

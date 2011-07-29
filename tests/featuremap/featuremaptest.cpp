@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "Main.h"
+#include "Face.h"
 #include "FeatureMap.h"
 #include "TtfTypes.h"
 #include "TtfUtil.h"
@@ -222,8 +223,8 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<T>(table);
-    const Face* npFace=NULL;
-    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
+    const Face face(&dummyFace, getTestFeat);
+    bool readStatus = testFeatureMap.readFeats(face);
     testAssert("readFeats", readStatus);
     fprintf(stderr, testName, NULL);
     testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
@@ -257,8 +258,8 @@ int main(int /*argc*/, char ** /*argv*/)
     FeatureMap testFeatureMap;
     DummyFaceHandle dummyFace;
     dummyFace.init<FeatTableTestE>(testBadOffset);
-    const Face* npFace=NULL;
-    bool readStatus = testFeatureMap.readFeats(&dummyFace, getTestFeat, npFace);
+    const Face face(&dummyFace, getTestFeat);
+    bool readStatus = testFeatureMap.readFeats(face);
     testAssert("fail gracefully on bad table", !readStatus);
 
     return 0;
