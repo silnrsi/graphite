@@ -99,19 +99,18 @@ sparse::sparse(I attr, const I last)
 	chunk * ci = m_array.map;
 	ci->offset = (m_nchunks*sizeof(chunk) + sizeof(value)-1)/sizeof(value);
 	value * vi = m_array.values + ci->offset;
-	for (key base = 0; attr != last; ++attr, ++vi)
+	for (; attr != last; ++attr, ++vi)
 	{
 		const typename I::value_type v = *attr;
-		const key chunks_diff = (v.id - base) / SIZEOF_CHUNK;
+		chunk * const ci_ = m_array.map + v.id/SIZEOF_CHUNK;
 
-		if (chunks_diff)
+		if (ci != ci_)
 		{
-			ci   += chunks_diff;
-			base += chunks_diff * SIZEOF_CHUNK;
+			ci = ci_;
 			ci->offset = vi - m_array.values;
 		}
 
-		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - ((v.id - base) % SIZEOF_CHUNK));
+		ci->mask |= 1UL << (SIZEOF_CHUNK - 1 - (v.id % SIZEOF_CHUNK));
 		*vi = v.value;
 	}
 }
