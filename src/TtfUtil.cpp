@@ -238,7 +238,6 @@ bool GetTableInfo(const Tag TableTag, const void * pHdr, const void * pTableDir,
 			pTableDir),
 		* const  dir_end = entry_itr + read(pOffsetTable->num_tables);
 
-	assert(read(pOffsetTable->num_tables) < 40);
 	if (read(pOffsetTable->num_tables) > 40)
 		return false;
 
@@ -269,7 +268,6 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 	{
 		const Sfnt::CharacterCodeMap * const pCmap 
 			= reinterpret_cast<const Sfnt::CharacterCodeMap *>(pTable);
-		assert(read(pCmap->version) == 0);
 		return read(pCmap->version) == 0;
 	}
 
@@ -286,7 +284,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 				|| read(pHead->index_to_loc_format) 
 					== FontHeader::LongIndexLocFormat) 
 			&& sizeof(FontHeader) <= lTableSize;
-		assert(r); return r;
+		return r;
 	}
 
 	case Tag::post: // post
@@ -298,7 +296,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 			|| format == PostScriptGlyphName::Format2 
 			|| format == PostScriptGlyphName::Format3 
 			|| format == PostScriptGlyphName::Format25;
-		assert(r); return r;
+		return r;
 	}
 
 	case Tag::hhea: // hhea
@@ -308,7 +306,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 		bool r = read(pHhea->version) == OneFix 
 			&& read(pHhea->metric_data_format) == 0
 			&& sizeof (Sfnt::HorizontalHeader) <= lTableSize;
-		assert(r); return r;
+		return r;
 	}
 
 	case Tag::maxp: // maxp
@@ -317,7 +315,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 			reinterpret_cast<const Sfnt::MaximumProfile *>(pTable);
 		bool r = read(pMaxp->version) == OneFix 
 			&& sizeof(Sfnt::MaximumProfile) <= lTableSize;
-		assert(r); return r;
+		return r;
 	}
 
 	case Tag::OS_2: // OS/2
@@ -359,7 +357,6 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 	{
 		const Sfnt::FontNames * pName 
 			= reinterpret_cast<const Sfnt::FontNames *>(pTable);
-		assert(read(pName->format) == 0);
 		return read(pName->format) == 0;
 	}
 
@@ -795,7 +792,6 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_arg
 {
 	if (pWStr == 0)
 	{
-	    assert(pWStr);
 //		throw std::invalid_argument("null pointer given");
         return;
 	}
