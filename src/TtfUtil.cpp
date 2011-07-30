@@ -262,6 +262,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 {
 	using namespace Sfnt;
 	
+	if (pTable == 0) return false;
+
 	switch(TableId)
 	{
 	case Tag::cmap: // cmap
