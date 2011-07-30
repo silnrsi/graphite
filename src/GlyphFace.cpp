@@ -45,7 +45,7 @@ namespace
 		glat_iterator & operator ++ () 		{ ++_v.id; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= 2; _v.id = *_p++; _n = *_p++; } return *this; }
 		glat_iterator   operator ++ (int) 	{ glat_iterator tmp(*this); operator++(); return tmp; }
 
-		bool operator == (const glat_iterator & rhs) { return _p == rhs._p; }
+		bool operator == (const glat_iterator & rhs) { return _p >= rhs._p || _p + _n*sizeof(uint16) > rhs._p; }
 		bool operator != (const glat_iterator & rhs) { return !operator==(rhs); }
 
 		value_type 			operator * () const {
@@ -129,10 +129,25 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 //            m_attrs = grzeroalloc<uint16>(hdr.m_numAttrs);
 //            readAttrs(hdr.m_pGlat + glocs, hdr.m_pGlat + gloce, m_attrs, hdr.m_numAttrs, hdr.m_fGlat);
         	if (hdr.m_fGlat < 0x00020000)
-        		new (&m_attrs) sparse(glat_iterator(hdr.m_pGlat + glocs), glat_iterator(hdr.m_pGlat + gloce));
-        	else
-        		new (&m_attrs) sparse(glat2_iterator(hdr.m_pGlat + glocs), glat2_iterator(hdr.m_pGlat + gloce));
+        	{
+        		if (gloce - glocs > hdr.m_numAttrs*2*sizeof(byte)*sizeof(uint16))
+        			return;
 
+        		new (&m_attrs) sparse(glat_iterator(hdr.m_pGlat + glocs), glat_iterator(hdr.m_pGlat + gloce));
+        	}
+        	else
+        	{
+        		if (gloce - glocs > hdr.m_numAttrs*3*sizeof(uint16))
+        			return;
+
+        		new (&m_attrs) sparse(glat2_iterator(hdr.m_pGlat + glocs), glat2_iterator(hdr.m_pGlat + gloce));
+        	}
+
+        	if (m_attrs.size() > hdr.m_numAttrs)
+        	{
+        		m_attrs.~sparse();
+        		new (&m_attrs) sparse();
+        	}
         }
     }
 #ifndef DISABLE_TRACING
