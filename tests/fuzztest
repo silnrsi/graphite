@@ -30,7 +30,7 @@ def valpos(fontlen, opts) :
         else :
             def gen() :
                 while (1) :
-                    yield(int(opts.position), int(uniform(0, 256)))
+                    yield(int(opts.position, 0), int(uniform(0, 256)))
             return gen
     elif opts.value :
         def gen() :
