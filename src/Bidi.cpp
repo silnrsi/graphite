@@ -74,7 +74,7 @@ enum DirMask {
     NSMmask = 0x10000
 };
 
-
+char bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6 };
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
 #define MAX_LEVEL 61
 
@@ -315,7 +315,7 @@ void resolveWeak(int baseLevel, Slot *s)
 
     for ( ; s; s = s->next())
     {
-	sLast = s;
+        sLast = s;
         cls = s->getBidiClass();
         if (cls == BN)
         {
@@ -335,7 +335,7 @@ void resolveWeak(int baseLevel, Slot *s)
                 continue;
         }
 
-        bidi_action action = actionWeak[state][cls];
+        bidi_action action = actionWeak[state][bidi_class_map[cls]];
         int clsRun = GetDeferredType(action);
         if (clsRun != XX)
         {
@@ -351,7 +351,7 @@ void resolveWeak(int baseLevel, Slot *s)
     }
 
     cls = EmbeddingDirection(level);
-    int clsRun = GetDeferredType(actionWeak[state][cls]);
+    int clsRun = GetDeferredType(actionWeak[state][bidi_class_map[cls]]);
     if (clsRun != XX)
         SetDeferredRunClass(sLast, sRun, clsRun);
 }

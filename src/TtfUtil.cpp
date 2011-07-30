@@ -34,7 +34,7 @@ File: TtfUtil.cpp
 Responsibility: Alan Ward
 Last reviewed: Not yet.
 
-Description:
+Description
     Implements the methods for TtfUtil class. This file should remain portable to any C++ 
 	environment by only using standard C++ and the TTF structurs defined in Tt.h.
 -------------------------------------------------------------------------------*//*:End Ignore*/
