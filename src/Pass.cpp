@@ -590,7 +590,6 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
     }
     else if (ret > 0)
     {
-        assert(slot_out);
         if (!slot_out)
         {
             slot_out = seg.first();
