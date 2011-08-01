@@ -3,7 +3,7 @@
 from subprocess import call
 from optparse import OptionParser
 from random import uniform, seed
-import sys, os, resource
+import operator, os, resource, sys
 
 def excluded(loc, *ranges) :
     for r in ranges :
@@ -25,7 +25,7 @@ def valpos(fontlen, opts) :
     elif opts.linear :
         def gen() :
             while (1) :
-                for c in xrange(opts.position, fontlen) :
+                for c in xrange(int(opts.position,0), fontlen) :
                     yield (c, int(uniform(0, 256)))
                 opts.position = 0;
         return gen
@@ -54,10 +54,25 @@ def valpos(fontlen, opts) :
                 yield(int(uniform(0, fontlen)), int(uniform(0, 256)))
         return gen
 
+def num(d): 
+	return reduce(lambda n, b: n << 8 | ord(b), d, 0)
+
+def tag(d):
+	s = ''
+	while d != 0:
+		s = chr(d & 0xff)+s
+		d >>= 8
+	return s
+
+def table_from_offset(o,tables):
+	for (t,s,e) in tables:
+		if o >= s and o < e: return (t,s,e)
+	return None
+
 parser = OptionParser(usage="usage: %prog -f font [options] -- command")
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
-parser.add_option("-p", "--position", type="int", default=0, help="Specifies position to corrupt (hex)")
+parser.add_option("-p", "--position", default=0, help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", help="Specifies value to use (dec)")
 parser.add_option("-i", "--input", help=".log file to read test values from")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
@@ -84,11 +99,23 @@ def rlimit() :
         mem = opts.memory * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
 
-font = None
+def read_tabledir(font):
+	def read_entry(): 
+		t = num(font.read(4)); font.seek(4, 1); o = num(font.read(4)); l = num(font.read(4))
+		return (t,o,o+l)
+	
+	font.seek(4,0)
+	num_tables = num(font.read(2))
+	font.seek(2*3,1)
+	
+	return [(0,0,4+4*2 + 4*4*num_tables)] + [read_entry() for i in range(num_tables)]
+
+font = open(opts.font, "r+b")
+tables = read_tabledir(font)
+tables.sort(key=operator.itemgetter(1))
 count = 0
+
 for loc, val in valpos(fontlen, opts)() :
-    if font == None :
-        font = open(opts.font, "r+b")
     font.seek(loc, 0)
     oldval = font.read(1)
     font.seek(loc, 0)
@@ -105,7 +132,8 @@ for loc, val in valpos(fontlen, opts)() :
     subfile = open("templog.txt", "w")
     retval = call(args, stdout=subfile, stderr=subfile, preexec_fn=rlimit, close_fds = True)
     if retval < 0 :
-        print >>log, "%d,0x%x,%d" % (retval, loc, val)
+    	(t,s,_) = table_from_offset(loc, tables) or (0,0,fontlen)
+        print >>log, "%d,0x%x,%d,%s0x%x" % (retval, loc, val, tag(t) + '+' if t else '', loc-s)
     elif opts.verbose :
         print >>log, ",0x%x,%d" % (loc, val)
     log.flush()
