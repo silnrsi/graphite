@@ -146,6 +146,8 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
 	    if (s->getBidiClass() != BN)
 		s->setBidiClass(cls);
 	}
+	else
+	    break;
     }
     return res;
 }
@@ -350,7 +352,7 @@ void resolveWeak(int baseLevel, Slot *s)
             s->setBidiClass(clsNew);
         if (!sRun && (IX & action))
             sRun = s->prev();
-        state = stateWeak[state][cls];
+        state = stateWeak[state][bidi_class_map[cls]];
     }
 
     cls = EmbeddingDirection(level);
