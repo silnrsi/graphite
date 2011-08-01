@@ -28,9 +28,9 @@
 
 #include "graphite2/Types.h"
 
-#define GR2_VERSION_MAJOR   0
-#define GR2_VERSION_MINOR   9
-#define GR2_VERSION_BUGFIX  5
+#define GR2_VERSION_MAJOR   1
+#define GR2_VERSION_MINOR   0
+#define GR2_VERSION_BUGFIX  0
 
 #ifdef __cplusplus
 extern "C"
