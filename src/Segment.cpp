@@ -605,7 +605,8 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     unsigned int bmask = 0;
     for (s = first(); s; s = s->next())
     {
-        s->setBidiClass(glyphAttr(s->gid(), aBidi));
+        unsigned int bAttr = glyphAttr(s->gid(), aBidi);
+        s->setBidiClass((bAttr <= 16) * bAttr);
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
     }

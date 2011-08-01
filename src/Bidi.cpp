@@ -74,7 +74,7 @@ enum DirMask {
     NSMmask = 0x10000
 };
 
-char bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6 };
+unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6 };
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
 #define MAX_LEVEL 61
 
@@ -100,7 +100,7 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
             {
                 s = resolveExplicit(s->getBidiLevel(), (cls == LRE ? N : L), s->next(), nNest);
                 nNest--;
-                continue;
+                if (s) continue; else break;
             }
             cls = BN;
             s->setBidiClass(cls);
@@ -119,7 +119,7 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
             {
                 s = resolveExplicit(s->getBidiLevel(), (cls == RLE ? N : R), s->next(), nNest);
                 nNest--;
-                continue;
+                if (s) continue; else break;
             }
             cls = BN;
             s->setBidiClass(cls);
@@ -140,9 +140,12 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
 
         if (dir != N)
             cls = dir;
-        s->setBidiLevel(level);
-        if (s->getBidiClass() != BN)
-            s->setBidiClass(cls);
+	if (s)
+	{
+	    s->setBidiLevel(level);
+	    if (s->getBidiClass() != BN)
+		s->setBidiClass(cls);
+	}
     }
     return res;
 }
@@ -311,7 +314,7 @@ void resolveWeak(int baseLevel, Slot *s)
     int cls;
     int level = baseLevel;
     Slot *sRun = NULL;
-    Slot *sLast;
+    Slot *sLast = s;
 
     for ( ; s; s = s->next())
     {
@@ -398,6 +401,8 @@ enum neutral_state
 	na, // N preceeded by a
 } ;
 
+const uint8 neutral_class_map[] = { 0, 1, 2, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 const int actionNeutrals[][5] =
 {
 //	N,	L,	R, AN, EN, = cls
@@ -445,9 +450,7 @@ void resolveNeutrals(int baseLevel, Slot *s)
             continue;
         }
 
-        if (cls == AN)
-            cls = AL;       // adjust the indices
-        int action = actionNeutrals[state][cls];
+        int action = actionNeutrals[state][neutral_class_map[cls]];
         int clsRun = GetDeferredNeutrals(action, level);
         if (clsRun != N)
         {
@@ -457,11 +460,11 @@ void resolveNeutrals(int baseLevel, Slot *s)
         int clsNew = GetResolvedNeutrals(action);
         if (clsNew != N)
             s->setBidiClass(clsNew);
-        state = stateNeutrals[state][cls];
+        state = stateNeutrals[state][neutral_class_map[cls]];
         level = s->getBidiLevel();
     }
     cls = EmbeddingDirection(level);
-    int clsRun = GetDeferredNeutrals(actionNeutrals[state][cls], level);
+    int clsRun = GetDeferredNeutrals(actionNeutrals[state][neutral_class_map[cls]], level);
     if (clsRun != N)
         SetDeferredRunClass(sLast, sRun, clsRun);
 }
