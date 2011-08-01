@@ -276,8 +276,6 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatAttWithXOff :
     case gr_slatAttWithYOff :	break;
     case gr_slatAttLevel :
-        assert(value < 128);
-        assert(value > -128);
         m_attLevel = byte(value);
         break;
     case gr_slatBreak :
