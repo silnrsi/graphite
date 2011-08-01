@@ -598,3 +598,18 @@ void Code::release_buffers() throw()
     _data = 0;
     _own  = false;
 }
+
+int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_out) const
+{
+    assert(_own);
+    assert(*this);          // Check we are actually runnable
+
+    if (m.slotMap().size() <= _max_ref + m.slotMap().context())
+    {
+        status_out = Machine::slot_offset_out_bounds;
+//        return (m.slotMap().end() - map);
+        return 1;
+    }
+    return  m.run(_code, _data, map, status_out);
+}
+

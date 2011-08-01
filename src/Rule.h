@@ -256,26 +256,4 @@ inline Slot * & SlotMap::operator[](int n)
   return m_slot_map[n + 1];
 }
 
-// dependency chaining of .h means this needs to go here atm.
-namespace vm {
-inline int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_out) const
-{
-    assert(_own);
-    assert(*this);          // Check we are actually runnable
-
-    if (!m.bounds_check(_max_ref))
-    {
-        status_out = Machine::slot_offset_out_bounds;
-//        return (m.slotMap().end() - map);
-        return 1;
-    }
-    return  m.run(_code, _data, map, status_out);
-}
-
-inline bool Machine::bounds_check(unsigned int max_ref)
-{
-    return _map.size() > max_ref + _map.context();
-}
-}
-
 } // namespace graphite2

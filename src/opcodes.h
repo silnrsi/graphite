@@ -136,7 +136,8 @@ STARTOP(mul)
 ENDOP
 
 STARTOP(div_)
-    if (*sp) { binop(/); }
+    if (*sp == 0) DIE;
+    binop(/);
 ENDOP
 
 STARTOP(min)
