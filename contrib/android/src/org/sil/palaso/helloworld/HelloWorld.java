@@ -56,7 +56,7 @@ public class HelloWorld extends Activity {
         tv = (TextView) findViewById(R.id.tv);
         tv.setText(s);
         tv.setTypeface(tfa, 0);                                                 // <4>
-        tv.setTextSize(tv.getTextSize() * 1.2);
+        tv.setTextSize((float)(tv.getTextSize() * 1.2));
         wv = (WebView) findViewById(R.id.wv);
         wv.loadData(w, "text/html", "UTF-8");
     }
