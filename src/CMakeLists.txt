@@ -158,9 +158,9 @@ set_target_properties(graphite2 PROPERTIES LT_VERSION_AGE ${GRAPHITE_API_AGE})
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
      -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
-     -fno-rtti -fno-exceptions -nodefaultlibs -nostdlibs
+     -fno-rtti -fno-exceptions -nodefaultlibs
      -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
-    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nostdlibs -nodefaultlibs" LINKER_LANGUAGE C)
+    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
     if (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
         target_link_libraries(graphite2 "-lkernel32 -lmsvcr90 -lmingw32 -lgcc -luser32")
     else (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
