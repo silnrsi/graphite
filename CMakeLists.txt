@@ -1,26 +1,21 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
+
 project(graphite2)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+
 enable_language(CXX C)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
 
-function(nolib_test LIBNAME OBJECTFILE)
-    string(REGEX REPLACE "[][^$.*+?|()-]" "\\\\\\0" LIBNAME_REGEX ${LIBNAME})
-    add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
-            COMMAND readelf --dynamic ${OBJECTFILE})
-    set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
-            FAIL_REGULAR_EXPRESSION "0x[0-9a-f]+ \\(NEEDED\\)[ \\t]+Shared library: \\[${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}${CMAKE_SHARED_LIBRARY_SUFFIX}.*\\]")
-endfunction(nolib_test)
-
 option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
-option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 option(DISABLE_SEGCACHE "Don't build the segment cache support code")
 option(DISABLE_FILEFACE "Don't build with fileface support")
+option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
 
-set(VM_MACHINE_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.   Auto -- depends upon configuration type; Direct -- usually fastest but only on GCC. default for Release configuration with GCC; Call -- slower but universal. defualt for Debug configuration")
+set(VM_MACHINE_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.")
 
 set(DOXYGEN_CONFIG public CACHE STRING "Specifies the base configuration file for doxygen. Current values: public, all")
 

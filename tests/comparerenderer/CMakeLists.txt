@@ -80,7 +80,7 @@ set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 add_executable(comparerenderer
     CompareRenderer.cpp
-    ${PROJECT_SOURCE_DIR}/../../src/TtfUtil.cpp
+    ${graphite2_core_SOURCE_DIR}/TtfUtil.cpp
     ${GR_EXTRA_SOURCE}
     ${ICULE}
     ${PRIVATE_HEADERS}

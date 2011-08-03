@@ -1,51 +1,52 @@
 project(vm-testing)
+include(Graphite)
 
 enable_testing()
 
-set(SRC ${PROJECT_SOURCE_DIR}/../../src)
-include_directories(${PROJECT_SOURCE_DIR} ${SRC})
+include_directories(../../src)
 
 if(DISABLE_TRACING)
     set(TRACESUPPORT "")
 else(DISABLE_TRACING)
-    set(TRACESUPPORT ${SRC}/XmlTraceLog.cpp ${SRC}/XmlTraceLogTags.cpp)
+    set(TRACESUPPORT XmlTraceLog.cpp XmlTraceLogTags.cpp)
 endif(DISABLE_TRACING)
 
 # I build the vm code here since it needs to be built for both code threading
 # models rather than linking against the library from source.
-add_library(vm-test-common  STATIC
-                basic_test.cpp
-                ${SRC}/gr_face.cpp
-                ${SRC}/Bidi.cpp
-                ${SRC}/CachedFace.cpp
-                ${SRC}/Code.cpp
-                ${SRC}/CmapCache.cpp
-                ${SRC}/Face.cpp
-                ${SRC}/FeatureMap.cpp
-                ${SRC}/GlyphFace.cpp
-                ${SRC}/GlyphFaceCache.cpp
-                ${SRC}/NameTable.cpp
-                ${SRC}/Pass.cpp
-                ${SRC}/Segment.cpp
-                ${SRC}/SegCache.cpp
-                ${SRC}/SegCacheEntry.cpp
-                ${SRC}/SegCacheStore.cpp
-                ${SRC}/Silf.cpp
-                ${SRC}/Slot.cpp
-                ${SRC}/Sparse.cpp
-                ${SRC}/TtfUtil.cpp
-                ${TRACESUPPORT})
+target_objects(OBJS graphite2 
+    gr_face.cpp 
+    Bidi.cpp 
+    CachedFace.cpp 
+    Code.cpp 
+    CmapCache.cpp 
+    Face.cpp 
+    FeatureMap.cpp 
+    GlyphFace.cpp 
+    GlyphFaceCache.cpp
+    NameTable.cpp
+    Pass.cpp
+    Segment.cpp
+    SegCache.cpp
+    SegCacheEntry.cpp
+    SegCacheStore.cpp
+    Silf.cpp
+    Slot.cpp
+    Sparse.cpp
+    TtfUtil.cpp
+    ${TRACESUPPORT})
+add_library(vm-test-common STATIC basic_test.cpp ${OBJS})
+add_dependencies(vm-test-common graphite2)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
-add_executable(vm-test-call     ${SRC}/call_machine.cpp)
+add_executable(vm-test-call ${graphite2_core_SOURCE_DIR}/call_machine.cpp)
 target_link_libraries(vm-test-call vm-test-common)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_executable(vm-test-direct   ${SRC}/direct_machine.cpp)
+	add_executable(vm-test-direct ${graphite2_core_SOURCE_DIR}/direct_machine.cpp)
 	target_link_libraries(vm-test-direct vm-test-common)
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 

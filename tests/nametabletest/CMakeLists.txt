@@ -1,13 +1,8 @@
-
-project(featuremaptest)
-
+project(nametabletest)
 include_directories(../../src)
-INCLUDE(CheckTypeSize)
 
-CHECK_TYPE_SIZE(size_t SIZEOF_SIZE_T)
-add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
-
-add_executable(nametabletest nametabletest.cpp
-    ../../src/NameTable.cpp)
+target_objects(OBJS graphite2 NameTable.cpp)
+add_executable(nametabletest nametabletest.cpp ${OBJS})
+add_dependencies(nametabletest graphite2)
 
 add_test(NAME nametabletest COMMAND $<TARGET_FILE:nametabletest>)
