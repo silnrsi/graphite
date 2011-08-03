@@ -1,8 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
+include(CMakeDependentOption)
 
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 
 enable_language(CXX C)
 
@@ -10,21 +12,31 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
 
-option(DISABLE_TRACING "Disable code required for using the XML Trace logging")
-option(DISABLE_SEGCACHE "Don't build the segment cache support code")
-option(DISABLE_FILEFACE "Don't build with fileface support")
-option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging")
-
+option(DISABLE_TRACING "Disable code required for using the XML Trace logging" ON)
+option(DISABLE_SEGCACHE "Don't build the segment cache support code" OFF)
+option(DISABLE_FILEFACE "Don't build with fileface support" OFF)
+cmake_dependent_option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging" OFF
+                        "NOT DISABLE_TRACING" OFF)
 set(VM_MACHINE_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.")
-
 set(DOXYGEN_CONFIG public CACHE STRING "Specifies the base configuration file for doxygen. Current values: public, all")
 
-string(TOLOWER ${VM_MACHINE_TYPE} VM_MACHINE_TYPE)
 
+message(STATUS "Build is " ${CMAKE_BUILD_TYPE})
+string(REPLACE "ON" "off" _tracing ${DISABLE_TRACING})
+string(REPLACE "OFF" "on" _tracing ${_tracing})
+message(STATUS "Tracing is " ${_tracing})
+string(TOLOWER ${ENABLE_DEEP_TRACING} _deep_tracing)
+message(STATUS "Deep tracing is " ${_deep_tracing})
+
+if (DISABLE_TRACING)
+    add_definitions(-DDISABLE_TRACING)
+endif (DISABLE_TRACING)
+
+
+string(TOLOWER ${VM_MACHINE_TYPE} VM_MACHINE_TYPE)
 if (NOT VM_MACHINE_TYPE MATCHES "auto|direct|call")
     message(SEND_ERROR "unrecognised vm machine type: ${VM_MACHINE_TYPE}. Only Auto, Direct or Call are available")
 endif (NOT VM_MACHINE_TYPE MATCHES "auto|direct|call")
-
 if (VM_MACHINE_TYPE STREQUAL "auto")
     if (CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
         set(VM_MACHINE_TYPE "direct")
@@ -32,26 +44,11 @@ if (VM_MACHINE_TYPE STREQUAL "auto")
         set(VM_MACHINE_TYPE "call")
     endif(CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
 endif (VM_MACHINE_TYPE STREQUAL "auto")
-
 if (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
     message(WARNING "vm machine type direct can only be built using GCC")
     set(VM_MACHINE_TYPE "call")
 endif (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
-
 message(STATUS "Using vm machine type: ${VM_MACHINE_TYPE}")
-
-if (DISABLE_TRACING)
-    add_definitions(-DDISABLE_TRACING)
-    message(STATUS "Tracing disabled")
-	if (ENABLE_DEEP_TRACING)
-		message(STATUS "Deep tracing request ignored!")
-	endif (ENABLE_DEEP_TRACING)
-else(DISABLE_TRACING)
-	if (ENABLE_DEEP_TRACING)
-		message(STATUS "Deep tracing enabled")
-		# The actual define is now set only in the projects which want it
-	endif (ENABLE_DEEP_TRACING)
-endif (DISABLE_TRACING)
 
 add_subdirectory(src)
 add_subdirectory(gr2fonttest)

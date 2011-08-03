@@ -46,7 +46,6 @@ if (DISABLE_FILEFACE)
 endif (DISABLE_FILEFACE)
 
 if (NOT DISABLE_TRACING)
-    message(STATUS "Tracing enabled")
     set(TRACE_HEADERS ../include/graphite2/XmlLog.h)
     if (ENABLE_DEEP_TRACING)
         add_definitions(-DENABLE_DEEP_TRACING)
