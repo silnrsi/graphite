@@ -26,7 +26,7 @@ FontObject::FontObject(char *fileName)
 
     SFNTDirectory tempDir;
 
-    fread(&tempDir, sizeof tempDir, 1, file);
+    if (!fread(&tempDir, sizeof tempDir, 1, file)) return;
 
     numTables       = SWAPW(tempDir.numTables);
     searchRange     = SWAPW(tempDir.searchRange) >> 4;
@@ -38,7 +38,7 @@ FontObject::FontObject(char *fileName)
     directory = (SFNTDirectory *) new char[dirSize];
 
     fseek(file, 0L, SEEK_SET);
-    fread(directory, sizeof(char), dirSize, file);
+    if (!fread(directory, sizeof(char), dirSize, file)) return;
 
     initUnicodeCMAP();
 }
@@ -95,7 +95,11 @@ void *FontObject::readTable(LETag tag, le_uint32 *length)
     void *table = new char[*length];
 
     fseek(file, SWAPL(entry->offset), SEEK_SET);
-    fread(table, sizeof(char), *length, file);
+    if (!fread(table, sizeof(char), *length, file))
+    {
+        delete [] (char *)table;
+        return NULL;
+    }
 
     return table;
 }

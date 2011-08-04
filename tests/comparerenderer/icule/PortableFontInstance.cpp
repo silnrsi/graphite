@@ -82,16 +82,20 @@ PortableFontInstance::PortableFontInstance(const char *fileName, float pointSize
 
     // read in the directory
     SFNTDirectory tempDir;
-
-    fread(&tempDir, sizeof tempDir, 1, fFile);
-
-    le_int32 dirSize = sizeof tempDir + ((SWAPW(tempDir.numTables) - ANY_NUMBER) * sizeof(DirectoryEntry));
+    le_int32 dirSize;
     const LETag headTag = LE_HEAD_TABLE_TAG;
     const LETag hheaTag = LE_HHEA_TABLE_TAG;
     const HEADTable *headTable = NULL;
     const HHEATable *hheaTable = NULL;
 //  const NAMETable *nameTable = NULL;
     le_uint16 numTables = 0;
+
+    if (!fread(&tempDir, sizeof tempDir, 1, fFile)) {
+        status = LE_INTERNAL_ERROR;
+        goto error_exit;
+    }
+
+    dirSize = sizeof tempDir + ((SWAPW(tempDir.numTables) - ANY_NUMBER) * sizeof(DirectoryEntry));
 
     fDirectory = (const SFNTDirectory *) NEW_ARRAY(char, dirSize);
 
@@ -101,7 +105,11 @@ PortableFontInstance::PortableFontInstance(const char *fileName, float pointSize
     }
 
     fseek(fFile, 0L, SEEK_SET);
-    fread((void *) fDirectory, sizeof(char), dirSize, fFile);
+    if (!fread((void *) fDirectory, sizeof(char), dirSize, fFile)) {
+        status = LE_INTERNAL_ERROR;
+        goto error_exit;
+    }
+
 
     //
     // We calculate these numbers 'cause some fonts
@@ -224,7 +232,10 @@ const void *PortableFontInstance::readTable(LETag tag, le_uint32 *length) const
 
     if (table != NULL) {
         fseek(fFile, SWAPL(entry->offset), SEEK_SET);
-        fread(table, sizeof(char), *length, fFile);
+        if (!fread(table, sizeof(char), *length, fFile)) {
+            free((char *)table);
+            return NULL;
+        }
     }
 
     return table;
