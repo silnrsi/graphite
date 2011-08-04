@@ -1,0 +1,11 @@
+1.0.1
+    . Release is the default build in cmake now.
+    . Refactor cmake build to not rebuild things so much.
+    . Include a missing file
+    . Remove -nostdlibs, making gcc happy everywhere
+    . Update comparerenderer to latest hbng interface
+    . Add changelog
+
+1.0.0
+    . First major release of perfect code!
+
