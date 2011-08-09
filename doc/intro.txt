@@ -27,8 +27,15 @@ as shaping. This process takes an input Unicode text string and returns a
 sequence of positioned glyphids from the font. There are other similar 'smart
 font' technologies including AAT and OpenType. While OpenType implementations
 are more prevalently integrated into applications than Graphite, Graphite still
-has a place. There are a number of reasons why someone might want to add
-Graphite smarts to their font:
+has a place. Graphite was developed primarily to address the generic shaping
+problem where current OpenType shaping engines do not address the specific needs
+of a font developer and the lead time on any changes to address those needs
+become prohibitive. This is a particular issue when creating solutions for some
+minority languages. In effect OpenType addresses the 80% problem and Graphite
+the 20% problem (or is that the 98% problem and the 2% problem?)
+
+There are a number of reasons why someone might want to add Graphite smarts to
+their font:
 
 - There is no consistent shaping across OpenType engines for the script and
   writing system that a font designer wants their font to support. Not all
