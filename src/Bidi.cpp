@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, Inc., 51 Franklin St., 
-    Fifth Floor, Boston, MA 02110-1301, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the

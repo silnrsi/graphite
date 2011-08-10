@@ -5,7 +5,7 @@ All rights reserved
 Copyright:
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
+    modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
 
@@ -14,8 +14,9 @@ Copyright:
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
 
-    On Debian systems you should have a local copy of the GNU Library
-    General Public License in /usr/share/common-licenses/LGPL-2. If you
-    downloaded the source you will find it in the file LICENSE; if not,
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+    On Debian systems you should have a local copy of the GNU Lesser
+    General Public License in /usr/share/common-licenses/LGPL. If you
+    downloaded the source you will find it in the file LICENSE; 
+    If not, write to the Free Software Foundation, 51 Franklin Street, 
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    internet at http://www.fsf.org/licenses/lgpl.html.
