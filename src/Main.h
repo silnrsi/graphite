@@ -29,7 +29,6 @@ of the License or (at your option) any later version.
 #include <cstdlib>
 #include "graphite2/Types.h"
 
-#if !defined WORDS_BIGENDIAN || defined PC_OS
 
 namespace graphite2 {
 
@@ -42,6 +41,7 @@ typedef gr_int16        int16;
 typedef gr_int32        int32;
 typedef size_t          uintptr;
 
+#if !defined WORDS_BIGENDIAN || defined PC_OS
 inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
 inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }
 inline uint32 swap32(uint32 x) { return (uint32(swap16(uint16(x))) << 16) | swap16(uint16(x >> 16)); }
