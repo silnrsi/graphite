@@ -45,7 +45,7 @@ typedef size_t          uintptr;
 inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
 inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }
 inline uint32 swap32(uint32 x) { return (uint32(swap16(uint16(x))) << 16) | swap16(uint16(x >> 16)); }
-inline  int32 swap32(int32 x)  { return int16(swap16(uint16(x))); }
+inline  int32 swap32(int32 x)  { return int32(swap32(uint32(x))); }
 #else
 #define swap16(x) (x)
 #define swap32(x) (x)

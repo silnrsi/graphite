@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
 include(CMakeDependentOption)
+include(TestBigEndian)
 
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
@@ -49,6 +50,12 @@ if (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
     set(VM_MACHINE_TYPE "call")
 endif (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
 message(STATUS "Using vm machine type: ${VM_MACHINE_TYPE}")
+
+TEST_BIG_ENDIAN(WORDS_BIGENDIAN)
+if (WORDS_BIGENDIAN)
+    add_definitions(-DWORDS_BIGENDIAN)
+endif (WORDS_BIGENDIAN)
+
 
 add_subdirectory(src)
 add_subdirectory(gr2fonttest)
