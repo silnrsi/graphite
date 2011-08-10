@@ -539,7 +539,8 @@ Slot * span(Segment *seg, Slot * & cs, const bool rtl, uint8 aMirror)
             if (aMirror && (l & 1))
             {
                 unsigned short g = seg->glyphAttr(cs->gid(), aMirror);
-                if (g) cs->setGlyph(seg, g);
+                if (g && (!(seg->dir() & 4) || !seg->glyphAttr(cs->gid(), aMirror + 1)))
+                    cs->setGlyph(seg, g);
             }
 			re = cs;
 			t = cs->next(); cs->next(cs->prev()); cs->prev(t);
@@ -555,7 +556,8 @@ Slot * span(Segment *seg, Slot * & cs, const bool rtl, uint8 aMirror)
             if (aMirror && (l & 1))
             {
                 unsigned short g = seg->glyphAttr(cs->gid(), aMirror);
-                if (g) cs->setGlyph(seg, g);
+                if (g && (!(seg->dir() & 4) || !seg->glyphAttr(cs->gid(), aMirror + 1)))
+                    cs->setGlyph(seg, g);
             }
 			re = cs;
         }
