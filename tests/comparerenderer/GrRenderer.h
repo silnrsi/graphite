@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, Inc., 59 Temple Place,
-    Suite 330, Boston, MA 02111-1307, USA or visit their web page on the
+    If not, write to the Free Software Foundation, Inc., 51 Franklin St.,
+    Fifth Floor, Boston, MA 02110-1301, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include "Renderer.h"
