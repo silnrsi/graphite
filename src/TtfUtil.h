@@ -103,10 +103,13 @@ public:
 
 	////////////////////////////////// simple font wide info 
 	size_t  GlyphCount(const void * pMaxp); 
+#ifdef ALL_TTFUTILS
 	size_t  MaxCompositeComponentCount(const void * pMaxp);
 	size_t  MaxCompositeLevelCount(const void * pMaxp);
 	size_t  LocaGlyphCount(size_t lLocaSize, const void * pHead); // throw (std::domain_error); 
+#endif
 	int DesignUnits(const void * pHead);
+#ifdef ALL_TTFUTILS
 	int HeadTableCheckSum(const void * pHead);
 	void HeadTableCreateTime(const void * pHead, unsigned int * pnDateBC, unsigned int * pnDateAD);
 	void HeadTableModifyTime(const void * pHead, unsigned int * pnDateBC, unsigned int * pnDateAD);
@@ -120,14 +123,17 @@ public:
 	bool Get30EngFullFontInfo(const void * pName, size_t & lOffset, size_t & lSize);
 	int PostLookup(const void * pPost, size_t lPostSize, const void * pMaxp, 
 		const char * pPostName);
+#endif
 
 	////////////////////////////////// utility methods helpful for name table
 	bool GetNameInfo(const void * pName, int nPlatformId, int nEncodingId,
 		int nLangId, int nNameId, size_t & lOffset, size_t & lSize);
 	//size_t NameTableLength(const byte * pTable);
+#ifdef ALL_TTFUTILS
 	int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
 		int *nameIdList, int cNameIds, short *langIdList);
 	void SwapWString(void * pWStr, size_t nSize = 0); // throw (std::invalid_argument);
+#endif
 
 	////////////////////////////////// cmap lookup tools 
 	const void * FindCmapSubtable(const void * pCmap, int nPlatformId = 3, 
@@ -154,6 +160,7 @@ public:
 	bool GlyfBox(const void * pSimpleGlyf, int & xMin, int & yMin, 
 		int & xMax, int & yMax);
 
+#ifdef ALL_TTFUTILS
 	int GlyfContourCount(const void * pSimpleGlyf); 
 	bool GlyfContourEndPoints(const void * pSimpleGlyf, int * prgnContourEndPoint, 
 		int cnPointsTotal, size_t & cnPoints);
@@ -169,11 +176,13 @@ public:
 	// primitive to find the transform data for a component in a composite glyph
 	bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
 		float & flt11, float & flt12, float & flt21, float & flt22, bool & fTransOffset);
+#endif
 
 	////////////////////////////////// operate on composite or simple glyph (auto glyf lookup)
 	void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
 		size_t lGlyfSize, size_t lLocaSize, const void * pHead); // primitive used by below methods
 
+#ifdef ALL_TTFUTILS
 	// below are primary user methods for handling glyf data
 	bool IsSpace(gid16 nGlyphId, const void * pLoca, size_t lLocaSize, const void * pHead);
 	bool IsDeepComposite(gid16 nGlyphId, const void * pGlyf, const void * pLoca, 
@@ -192,6 +201,7 @@ public:
 	// utitily method used by high-level GlyfPoints 
 	bool SimplifyFlags(char * prgbFlags, int cnPoints);
 	bool CalcAbsolutePoints(int * prgnX, int * prgnY, int cnPoints);
+#endif
 
 } // end of namespace TtfUtil
 } // end of namespace graphite2

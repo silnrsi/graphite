@@ -107,6 +107,7 @@ namespace
 /*----------------------------------------------------------------------------------------------
 	Table of standard Postscript glyph names. From Martin Hosken. Disagress with ttfdump.exe
 ---------------------------------------------------------------------------------------------*/
+#ifdef ALL_TTFUTILS
 	const int kcPostNames = 258;
 
 	const char * rgPostName[kcPostNames] = {
@@ -150,6 +151,7 @@ namespace
 		"threequarters", "franc", "Gbreve", "gbreve", "Idotaccent", "Scedilla", 
 		"scedilla", "Cacute", "cacute", "Ccaron", "ccaron", 
 		"dcroat" };
+#endif
 
 } // end of namespace
 
@@ -377,6 +379,7 @@ size_t GlyphCount(const void * pMaxp)
 	return read(pTable->num_glyphs);
 }
 
+#ifdef ALL_TTFUTILS
 /*----------------------------------------------------------------------------------------------
 	Return the maximum number of components for any composite glyph in the font.
 
@@ -428,6 +431,7 @@ size_t LocaGlyphCount(size_t lLocaSize, const void * pHead) //throw(std::domain_
 	return -1;
 	//throw std::domain_error("head table in inconsistent state. The font may be corrupted");
 }
+#endif
 
 /*----------------------------------------------------------------------------------------------
 	Return the design units the font is designed with
@@ -440,6 +444,7 @@ int DesignUnits(const void * pHead)
 	return read(pTable->units_per_em);
 }
 
+#ifdef ALL_TTFUTILS
 /*----------------------------------------------------------------------------------------------
 	Return the checksum from the head table, which serves as a unique identifer for the font.
 ----------------------------------------------------------------------------------------------*/
@@ -530,6 +535,7 @@ bool FontOs2Style(const void *pOs2, bool & fBold, bool & fItalic)
 	
 	return true;
 }
+#endif
 
 /*----------------------------------------------------------------------------------------------
 	Method for searching name table.
@@ -562,6 +568,7 @@ bool GetNameInfo(const void * pName, int nPlatformId, int nEncodingId,
 	return false;
 }
 
+#ifdef ALL_TTFUTILS
 /*----------------------------------------------------------------------------------------------
 	Return all the lang-IDs that have data for the given name-IDs. Assume that there is room
 	in the return array (langIdList) for 128 items. The purpose of this method is to return
@@ -806,6 +813,7 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_arg
 //			pStr[i] = utf16(read(uint16(pStr[i])));
 //		}
 }
+#endif
 
 /*----------------------------------------------------------------------------------------------
 	Get the left-side bearing and and advance width based on the given tables and Glyph ID
@@ -1226,6 +1234,7 @@ bool GlyfBox(const void * pSimpleGlyf, int & xMin, int & yMin,
 	return true;
 }
 
+#ifdef ALL_TTFUTILS
 /*----------------------------------------------------------------------------------------------
 	Return the number of contours for a simple glyf entry (non-composite)
 	Returning -1 means this is a composite glyph
@@ -1588,6 +1597,7 @@ bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
 	flt22 = 1;
 	return false;
 }
+#endif
 
 /*----------------------------------------------------------------------------------------------
 	Return a pointer into the glyf table based on the given tables and Glyph ID
@@ -1625,6 +1635,7 @@ void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
 	return pSimpleGlyf;
 }
 
+#ifdef ALL_TTFUTILS
 /*----------------------------------------------------------------------------------------------
 	Determine if a particular Glyph ID has any data in the glyf table. If it is white space,
 	there will be no glyf data, though there will be metric data in hmtx, etc.
@@ -1971,7 +1982,7 @@ bool CalcAbsolutePoints(int * prgnX, int * prgnY, int cnPoints)
 
 	return true;
 }
-
+#endif
 
 /*----------------------------------------------------------------------------------------------
 	Return the length of the 'name' table in bytes.
