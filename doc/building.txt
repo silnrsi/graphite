@@ -7,7 +7,7 @@ GraphiteNG uses cmake for its build system. The basic build procedure is to crea
 ----
 mkdir build
 cd build
-cmake -G "Unix Makefiles" ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -G "Unix Makefiles" ..
 make
 make test
 ----
