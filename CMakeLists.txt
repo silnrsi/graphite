@@ -5,7 +5,9 @@ include(TestBigEndian)
 
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
+if (NOT CMAKE_BUILD_TYPE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
+endif (NOT CMAKE_BUILD_TYPE)
 
 enable_language(CXX C)
 
