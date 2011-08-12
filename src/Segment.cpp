@@ -591,9 +591,9 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSE
 Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0);
 void resolveWeak(int baseLevel, Slot *s);
 void resolveNeutrals(int baseLevel, Slot *s);
-void resolveImplicit(Slot *s);
+void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
-Slot *resolveOrder(Segment *seg, Slot * & s, const bool reordered, uint8 aMirror, const int level = 0);
+Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
 void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
 {
@@ -618,9 +618,9 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
             resolveWeak(baseLevel, first());
         if (bmask & 0x161)
             resolveNeutrals(baseLevel, first());
-        resolveImplicit(first());
+        resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());
-        s = resolveOrder(this, s = first(), baseLevel, (dir() & 4) ? aMirror : 0);
+        s = resolveOrder(s = first(), baseLevel);
         first(s); last(s->prev());
         s->prev()->next(0); s->prev(0);
     }

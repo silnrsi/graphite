@@ -473,7 +473,7 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         // bidi and mirroring
         if (i == m_bPass && !(seg->dir() & 2))
             seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
-        else if (i == m_bPass && (seg->dir() & 1) && m_aMirror)
+        else if (i == m_bPass && m_aMirror)
         {
             Slot * s;
             for (s = seg->first(); s; s = s->next())
