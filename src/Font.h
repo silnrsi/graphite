@@ -32,9 +32,10 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
+#define INVALID_ADVANCE -1e38f		// can't be a static const because non-integral
+
 class Font
 {
-	static const float INVALID_ADVANCE = -1e38f;		//because this is in the header it can be optimized out.
 public:
     Font(float ppm, const Face *face/*needed for scaling*/);
     virtual ~Font();
