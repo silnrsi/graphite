@@ -199,3 +199,38 @@ include::../tests/examples/linebreak.c[]
 <9> Each line is a complete linked list that we can iterate over. We can no longer iterate
     over the whole segment. We have to do it line by line now.
 
+=== Bidi ===
+
+Bidirectional processing is complex not so much because of any algorithms
+involved, but because of the tendency for applications to address bidi text
+processing differently. Some try to do everything themselves, inverting the text
+order, etc. While others do nothing, expecting the shaper to resolve all the
+orders. In addition, there is the question of mirroring characters and where
+that is done. Graphite2 adds the complexity that it tries to enable extensions
+to the bidi algorithm by giving PUA characters directionality. To facilitate all
+these different ways of working, Graphite2 uses the `rtl` attribute to pass
+various bits to control bidi processing within the Graphite engine.
+
+[width="100%",cols="^2,^3,<15",options="header"]
+|=======================================================
+|gr_nobidi  |gr_nomirror  |Description
+
+|0          |0            |
+Runs the bidi algorithm and does all mirroring
+
+|0          |1            |
+Runs the bidi algorithm and mirrors those chars that don't have char
+replacements. It also un/remirrors anything that ends up in the opposite direction
+to the stated text direction on input.
+
+|1          |0            |
+Doesn't run the bidi algorithm but does do mirroring of all characters if
+direction is rtl.
+
+|1          |1            |
+Doesn't run the bidi algorithm and only mirrors those glyphs for which there is
+no corresponding mirroring character.
+
+|=======================================================
+
+
