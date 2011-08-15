@@ -499,7 +499,7 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
             {
                 int hasChar = seg->glyphAttr(s->gid(), aMirror + 1);
                 if ( ((level & 1) && (!(seg->dir() & 4) || !hasChar)) 
-                  || ((rtl ^ !(level & 1)) && (seg->dir() & 4) && hasChar) )
+                  || ((rtl ^ (level & 1)) && (seg->dir() & 4) && hasChar) )
                 {
                     unsigned short g = seg->glyphAttr(s->gid(), aMirror);
                     if (g) s->setGlyph(seg, g);
