@@ -1,3 +1,12 @@
+1.0.2
+    . Fix Windows build
+    . Comparerenderer uses hbng enforcing ot rendering
+    . Add Bidi .hasChar support and refactor mirroring code
+    . Make cmake default Release rather than debug
+    . Don't compile in a boat load of TtfUtil that isn't used, saving 15% of binary
+    . Chase the FSF around its latest office moves
+    . WORDS_BIGENDIAN is set at the top so tests now pass on ppc, etc.
+    . More words in the manual
 1.0.1
     . Release is the default build in cmake now.
     . Refactor cmake build to not rebuild things so much.
