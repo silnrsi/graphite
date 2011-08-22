@@ -110,12 +110,12 @@ public:
     }
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
-        if (length > m_bufferLength)
-        {
-            hb_buffer_destroy(m_buffer);
-            m_bufferLength = length;
-            hb_buffer_create(m_bufferLength);
-        }
+//        if (length > m_bufferLength)
+//        {
+//            hb_buffer_destroy(m_buffer);
+//            m_bufferLength = length;
+//            hb_buffer_create(m_bufferLength);
+//        }
         hb_buffer_reset(m_buffer);
         hb_buffer_add_utf8(m_buffer, utf8, length, 0, length);
         hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
