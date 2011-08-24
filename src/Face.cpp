@@ -24,14 +24,15 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+#include <cstring>
+#include "graphite2/Segment.h"
 #include "Face.h"
-#include <string.h>
+#include "Endian.h"
 #include "Segment.h"
 #include "CmapCache.h"
 #include "NameTable.h"
 #include "SegCacheStore.h"
 #include "XmlTraceLog.h"
-#include <graphite2/Segment.h>
 
 
 using namespace graphite2;
@@ -86,18 +87,18 @@ bool Face::readGraphite()
     uint32 compilerVersion = 0; // wasn't set before GTF version 3
 #endif
     uint32 offset32Pos = 2;
-    version = swap32(*(uint32 *)pSilf);
+    version = be::peek<uint32>(pSilf);
     if (version < 0x00020000) return false;
     if (version >= 0x00030000)
     {
 #ifndef DISABLE_TRACING
-        compilerVersion = swap32(((uint32 *)pSilf)[1]);
+        compilerVersion = be::swap<uint32>(((uint32 *)pSilf)[1]);
 #endif
-        m_numSilf = swap16(((uint16 *)pSilf)[4]);
+        m_numSilf = be::swap<uint16>(((uint16 *)pSilf)[4]);
         offset32Pos = 3;
     }
     else
-        m_numSilf = swap16(((uint16 *)pSilf)[2]);
+        m_numSilf = be::swap<uint16>(((uint16 *)pSilf)[2]);
 
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
@@ -116,12 +117,12 @@ bool Face::readGraphite()
     m_silfs = new Silf[m_numSilf];
     for (int i = 0; i < m_numSilf; i++)
     {
-        const uint32 offset = swap32(((uint32 *)pSilf)[offset32Pos + i]);
+        const uint32 offset = be::swap<uint32>(((uint32 *)pSilf)[offset32Pos + i]);
         uint32 next;
         if (i == m_numSilf - 1)
             next = lSilf;
         else
-            next = swap32(((uint32 *)pSilf)[offset32Pos + 1 + i]);
+            next = be::swap<uint32>(((uint32 *)pSilf)[offset32Pos + 1 + i]);
         if (offset > lSilf || next > lSilf)
         {
 #ifndef DISABLE_TRACING

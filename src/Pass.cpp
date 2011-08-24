@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "Main.h"
+#include "Endian.h"
 #include "Pass.h"
 #include <string.h>
 #include <stdlib.h>
@@ -76,17 +77,17 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     m_iMaxLoop = *p++;
     p++; // skip maxContext
     p += sizeof(byte);     // skip maxBackup
-    m_numRules = read16(p);
+    m_numRules = be::read<uint16>(p);
     p += sizeof(uint16);   // not sure why we would want this
-    const byte * const pcCode = pass_start + read32(p) - subtable_base,
-               * const rcCode = pass_start + read32(p) - subtable_base,
-               * const aCode  = pass_start + read32(p) - subtable_base;
+    const byte * const pcCode = pass_start + be::read<uint32>(p) - subtable_base,
+               * const rcCode = pass_start + be::read<uint32>(p) - subtable_base,
+               * const aCode  = pass_start + be::read<uint32>(p) - subtable_base;
     p += sizeof(uint32);
-    m_sRows = read16(p);
-    m_sTransition = read16(p);
-    m_sSuccess = read16(p);
-    m_sColumns = read16(p);
-    numRanges = read16(p);
+    m_sRows = be::read<uint16>(p);
+    m_sTransition = be::read<uint16>(p);
+    m_sSuccess = be::read<uint16>(p);
+    m_sColumns = be::read<uint16>(p);
+    numRanges = be::read<uint16>(p);
     p += sizeof(uint16)   // skip searchRange
          +  sizeof(uint16)   // skip entrySelector
          +  sizeof(uint16);  // skip rangeShift
@@ -108,7 +109,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
         return false;
 
     if (p + numRanges * 6 - 4 > pass_end) return false;
-    m_numGlyphs = swap16(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
+    m_numGlyphs = be::swap<uint16>(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
     // Caculate the start of vairous arrays.
     const uint16 * const ranges = reinterpret_cast<const uint16 *>(p);
     p += numRanges*sizeof(uint16)*3;
@@ -119,7 +120,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     if (   reinterpret_cast<const byte *>(o_rule_map) > pass_end
             || p > pass_end)
         return false;
-    const size_t numEntries = swap16(o_rule_map[m_sSuccess]);
+    const size_t numEntries = be::swap<uint16>(o_rule_map[m_sSuccess]);
     const uint16 * const   rule_map = reinterpret_cast<const uint16 *>(p);
     p += numEntries*sizeof(uint16);
 
@@ -135,7 +136,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     p += sizeof(byte);     // skip reserved byte
 
     if (p > pass_end) return false;
-    const size_t pass_constraint_len = read16(p);
+    const size_t pass_constraint_len = be::read<uint16>(p);
     const uint16 * const o_constraint = reinterpret_cast<const uint16 *>(p);
     p += (m_numRules + 1)*sizeof(uint16);
     const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);
@@ -146,7 +147,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     if (p != pcCode || p >= pass_end) return false;
     p += pass_constraint_len;
     if (p != rcCode || p >= pass_end) return false;
-    p += swap16(o_constraint[m_numRules]);
+    p += be::swap<uint16>(o_constraint[m_numRules]);
     if (p != aCode || p >= pass_end) return false;
     if (size_t(rcCode - pcCode) != pass_constraint_len) return false;
 
@@ -154,7 +155,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     if (pass_constraint_len)
     {
         m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len, 
-                                  precontext[0], swap16(sort_keys[0]), *m_silf, face);
+                                  precontext[0], be::swap<uint16>(sort_keys[0]), *m_silf, face);
         if (!m_cPConstraint) return false;
     }
     if (!readRanges(ranges, numRanges)) return false;
@@ -170,8 +171,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
                      const uint16 * o_action,     const byte * ac_data,
                      const Face & face)
 {
-    const byte * const ac_data_end = ac_data + swap16(o_action[m_numRules]);
-    const byte * const rc_data_end = rc_data + swap16(o_constraint[m_numRules]);
+    const byte * const ac_data_end = ac_data + be::swap<uint16>(o_action[m_numRules]);
+    const byte * const rc_data_end = rc_data + be::swap<uint16>(o_constraint[m_numRules]);
 
     if (!(m_rules = new Rule [m_numRules])) return false;
     precontext += m_numRules;
@@ -181,20 +182,20 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
     // Load rules.
     const byte * ac_begin = 0, * rc_begin = 0,
-               * ac_end = ac_data + swap16(*o_action),
-               * rc_end = rc_data + swap16(*o_constraint);
+               * ac_end = ac_data + be::swap<uint16>(*o_action),
+               * rc_end = rc_data + be::swap<uint16>(*o_constraint);
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
         r->preContext = *--precontext;
-        r->sort       = swap16(*--sort_key);
+        r->sort       = be::swap<uint16>(*--sort_key);
 #ifndef NDEBUG
         r->rule_idx   = n - 1;
 #endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
-        ac_begin      = ac_data + swap16(*--o_action);
-        rc_begin      = *--o_constraint ? rc_data + swap16(*o_constraint) : rc_end;
+        ac_begin      = ac_data + be::swap<uint16>(*--o_action);
+        rc_begin      = *--o_constraint ? rc_data + be::swap<uint16>(*o_constraint) : rc_end;
 
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
@@ -215,7 +216,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
     for (size_t n = num_entries; n; --n, ++re)
     {
-        const ptrdiff_t rn = swap16(*rule_map++);
+        const ptrdiff_t rn = be::swap<uint16>(*rule_map++);
         if (rn >= m_numRules)  return false;
         re->rule = m_rules + rn;
     }
@@ -237,7 +238,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     for (State * * s = m_startStates,
             * * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
     {
-        *s = m_states + swap16(*starts++);
+        *s = m_states + be::swap<uint16>(*starts++);
         if (*s < m_states || *s >= m_states + m_sRows) return false; // true;
     }
 
@@ -245,19 +246,19 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     for (State * * t = m_sTable,
                * * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
     {
-        *t = m_states + swap16(*states++);
+        *t = m_states + be::swap<uint16>(*states++);
         if (*t < m_states || *t >= m_states + m_sRows) return false;
     }
 
     State * s = m_states,
           * const transitions_end = m_states + m_sTransition,
           * const success_begin = m_states + m_sRows - m_sSuccess;
-    const RuleEntry * rule_map_end = m_ruleMap + swap16(o_rule_map[m_sSuccess]);
+    const RuleEntry * rule_map_end = m_ruleMap + be::swap<uint16>(o_rule_map[m_sSuccess]);
     for (size_t n = m_sRows; n; --n, ++s)
     {
         s->transitions = s < transitions_end ? m_sTable + (s-m_states)*m_sColumns : 0;
-        RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map++),
-                  * const end   = s < success_begin ? 0 : m_ruleMap + swap16(*o_rule_map);
+        RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + be::swap<uint16>(*o_rule_map++),
+                  * const end   = s < success_begin ? 0 : m_ruleMap + be::swap<uint16>(*o_rule_map);
 
         if (begin >= rule_map_end || end > rule_map_end || begin > end)
             return false;
@@ -291,7 +292,7 @@ void Pass::logRule(GR_MAYBE_UNUSED const Rule * r, GR_MAYBE_UNUSED const uint16 
     {
         XmlTraceLog::get().openElement(ElementRule);
         XmlTraceLog::get().addAttribute(AttrIndex, lid);
-        XmlTraceLog::get().addAttribute(AttrSortKey, swap16(sort_key[lid]));
+        XmlTraceLog::get().addAttribute(AttrSortKey, be::swap<uint16>(sort_key[lid]));
         XmlTraceLog::get().addAttribute(AttrPrecontext, r->preContext);
         XmlTraceLog::get().closeElement(ElementRule);
     }
@@ -350,9 +351,9 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
     memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
     for (size_t n = num_ranges; n; --n)
     {
-        const uint16 first = swap16(*ranges++),
-                     last  = swap16(*ranges++),
-                     col   = swap16(*ranges++);
+        const uint16 first = be::swap<uint16>(*ranges++),
+                     last  = be::swap<uint16>(*ranges++),
+                     col   = be::swap<uint16>(*ranges++);
         uint16 *p;
 
         if (first > last || last >= m_numGlyphs || col >= m_sColumns)

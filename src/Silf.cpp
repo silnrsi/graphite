@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include <cstdlib>
 #include "graphite2/Segment.h"
+#include "Endian.h"
 #include "Silf.h"
 #include "XmlTraceLog.h"
 #include "Segment.h"
@@ -64,8 +65,8 @@ void Silf::releaseBuffers() throw()
 
 bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 version)
 {
-    byte *p = (byte *)pSilf;
-    byte *eSilf = p + lSilf;
+    const byte *p = (byte *)pSilf;
+    const byte * const eSilf = p + lSilf;
     uint32 *pPasses;
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementSilfSub);
@@ -75,8 +76,8 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
 #ifndef DISABLE_TRACING
         if (XmlTraceLog::get().active())
         {
-            XmlTraceLog::get().addAttribute(AttrMajor, swap16(((uint16*) p)[0]));
-            XmlTraceLog::get().addAttribute(AttrMinor, swap16(((uint16*) p)[1]));
+            XmlTraceLog::get().addAttribute(AttrMajor, be::peek<uint16>(p));
+            XmlTraceLog::get().addAttribute(AttrMinor, be::peek<uint16>(p+sizeof(uint16)));
         }
 #endif
         if (lSilf < 27) { releaseBuffers(); return false; }
@@ -143,7 +144,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     }
 //    p += uint8(*p) * 8 + 1;     // ignore justification for now
     if (p + 9 >= eSilf) { releaseBuffers(); return false; }
-    m_aLig = read16(p);
+    m_aLig = be::read<uint16>(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrLigComp, *p);
 #endif
@@ -183,7 +184,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     }
     pPasses = (uint32 *)p;
     p += 4 * (m_numPasses + 1);
-    m_numPseudo = read16(p);
+    m_numPseudo = be::read<uint16>(p);
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().addAttribute(AttrNumPseudo, m_numPseudo);
 #endif
@@ -196,8 +197,8 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     m_pseudos = new Pseudo[m_numPseudo];
     for (int i = 0; i < m_numPseudo; i++)
     {
-        m_pseudos[i].uid = read32(p);
-        m_pseudos[i].gid = read16(p);
+        m_pseudos[i].uid = be::read<uint32>(p);
+        m_pseudos[i].gid = be::read<uint16>(p);
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().openElement(ElementPseudo);
         XmlTraceLog::get().addAttribute(AttrIndex, i);
@@ -212,7 +213,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
         return false;
     }
 
-    int clen = readClassMap((void *)p, swap32(*pPasses) - (p - (byte *)pSilf), face.getGlyphFaceCache()->numGlyphs() + m_numPseudo);
+    int clen = readClassMap((void *)p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf), face.getGlyphFaceCache()->numGlyphs() + m_numPseudo);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -221,8 +222,8 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
 
     for (size_t i = 0; i < m_numPasses; ++i)
     {
-        uint32 pOffset = swap32(pPasses[i]);
-        if ((uint8 *)pSilf + pOffset > eSilf || swap32(pPasses[i + 1]) < pOffset)
+        uint32 pOffset = be::swap<uint32>(pPasses[i]);
+        if ((uint8 *)pSilf + pOffset > eSilf || be::swap<uint32>(pPasses[i + 1]) < pOffset)
         {
             releaseBuffers();
             return false;
@@ -235,7 +236,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
             XmlTraceLog::get().addAttribute(AttrPassId, i);
         }
 #endif
-        if (!m_passes[i].readPass((char *)pSilf + pOffset, swap32(pPasses[i + 1]) - pOffset, pOffset, face))
+        if (!m_passes[i].readPass((char *)pSilf + pOffset, be::swap<uint32>(pPasses[i + 1]) - pOffset, pOffset, face))
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);
@@ -258,8 +259,8 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
 size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGlyphs)
 {
     const byte *p = reinterpret_cast<const byte *>(pClass);
-    m_nClass = read16(p);
-    m_nLinear = read16(p);
+    m_nClass = be::read<uint16>(p);
+    m_nLinear = be::read<uint16>(p);
     m_classOffsets = gralloc<uint16>(m_nClass + 1);
 #ifndef DISABLE_TRACING
     if (XmlTraceLog::get().active())
@@ -272,7 +273,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGl
 
     for (int i = 0; i <= m_nClass; i++)
     {
-        m_classOffsets[i] = read16(p) / 2 - (2 + m_nClass + 1);     // uint16[] index
+        m_classOffsets[i] = be::read<uint16>(p) / 2 - (2 + m_nClass + 1);     // uint16[] index
     }
 
     if (m_classOffsets[0] != 0)
@@ -301,7 +302,7 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGl
     }
     m_classData = gralloc<uint16>(m_classOffsets[m_nClass]);
     for (int i = 0; i < m_classOffsets[m_nClass]; i++)
-        m_classData[i] = read16(p);
+        m_classData[i] = be::read<uint16>(p);
 #ifndef DISABLE_TRACING
     // TODO this includes extra checking which shouldn't be
     // disabled when tracing is inactive unless it is duplicated elsewhere

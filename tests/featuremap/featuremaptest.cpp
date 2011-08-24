@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "Main.h"
+#include "Endian.h"
 #include "Face.h"
 #include "FeatureMap.h"
 #include "TtfTypes.h"
@@ -170,22 +171,22 @@ public:
         memcpy(m_table, &data, sizeof(T));
         // convert to big endian if needed
         T * bigEndian = reinterpret_cast<T*>(m_table);
-        bigEndian->m_header.m_major = swap16(data.m_header.m_major);
-        bigEndian->m_header.m_minor = swap16(data.m_header.m_minor);
-        bigEndian->m_header.m_numFeat = swap16(data.m_header.m_numFeat);
+        bigEndian->m_header.m_major = be::swap<uint16>(data.m_header.m_major);
+        bigEndian->m_header.m_minor = be::swap<uint16>(data.m_header.m_minor);
+        bigEndian->m_header.m_numFeat = be::swap<uint16>(data.m_header.m_numFeat);
         m_tableLen = sizeof(T);
         for (size_t i = 0; i < sizeof(data.m_defs)/sizeof(FeatDefn); i++)
         {
-            bigEndian->m_defs[i].m_featId = swap32(data.m_defs[i].m_featId);
-            bigEndian->m_defs[i].m_numFeatSettings = swap16(data.m_defs[i].m_numFeatSettings);
-            bigEndian->m_defs[i].m_settingsOffset = swap32(data.m_defs[i].m_settingsOffset);
-            bigEndian->m_defs[i].m_flags = swap16(data.m_defs[i].m_flags);
-            bigEndian->m_defs[i].m_label = swap16(data.m_defs[i].m_label);
+            bigEndian->m_defs[i].m_featId = be::swap<uint32>(data.m_defs[i].m_featId);
+            bigEndian->m_defs[i].m_numFeatSettings = be::swap<uint16>(data.m_defs[i].m_numFeatSettings);
+            bigEndian->m_defs[i].m_settingsOffset = be::swap<uint32>(data.m_defs[i].m_settingsOffset);
+            bigEndian->m_defs[i].m_flags = be::swap<uint16>(data.m_defs[i].m_flags);
+            bigEndian->m_defs[i].m_label = be::swap<uint16>(data.m_defs[i].m_label);
         }
         for (size_t i = 0; i < sizeof(data.m_settings)/sizeof(FeatSetting); i++)
         {
-            bigEndian->m_settings[i].m_value = swap16(data.m_settings[i].m_value);
-            bigEndian->m_settings[i].m_label = swap16(data.m_settings[i].m_label);
+            bigEndian->m_settings[i].m_value = be::swap<uint16>(data.m_settings[i].m_value);
+            bigEndian->m_settings[i].m_label = be::swap<uint16>(data.m_settings[i].m_label);
         }
     }
     void * m_table;

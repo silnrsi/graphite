@@ -41,29 +41,6 @@ typedef gr_int16        int16;
 typedef gr_int32        int32;
 typedef size_t          uintptr;
 
-#if !defined WORDS_BIGENDIAN || defined PC_OS
-inline uint16 swap16(uint16 x) { return (x << 8) | (x >> 8); }
-inline  int16 swap16(int16 x)  { return int16(swap16(uint16(x))); }
-inline uint32 swap32(uint32 x) { return (uint32(swap16(uint16(x))) << 16) | swap16(uint16(x >> 16)); }
-inline  int32 swap32(int32 x)  { return int32(swap32(uint32(x))); }
-#else
-#define swap16(x) (x)
-#define swap32(x) (x)
-#endif
-
-inline uint16 read16(const byte *&x) { 
-  const uint16 r = swap16(*reinterpret_cast<const uint16 *&>(x));
-  x += sizeof(uint16);
-  return r;
-}
-inline uint16 read16(byte *&x) { return read16(const_cast<const byte * &>(x)); }
-inline uint32 read32(const byte *&x) { 
-  const uint32 r = swap32(*reinterpret_cast<const uint32 *&>(x));
-  x += sizeof(uint32);
-  return r;
-}
-inline uint32 read32(byte *&x) { return read32(const_cast<const byte * &>(x)); }
-
 // typesafe wrapper around malloc for simple types
 // use free(pointer) to deallocate
 template <typename T> T * gralloc(size_t n)

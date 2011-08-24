@@ -27,6 +27,7 @@ of the License or (at your option) any later version.
 #include <string.h>
 
 #include "Main.h"
+#include "Endian.h"
 #include "FeatureMap.h"
 #include "FeatureVal.h"
 #include "graphite2/Font.h"
@@ -53,11 +54,11 @@ bool FeatureMap::readFeats(const Face & face)
     if (!pFeat) return true;
     if (lFeat < 12) return false;
 
-    version = read32(pFeat);
+    version = be::read<uint32>(pFeat);
     if (version < 0x00010000) return false;
-    m_numFeats = read16(pFeat);
-    read16(pFeat);
-    read32(pFeat);
+    m_numFeats = be::read<uint16>(pFeat);
+    be::skip<uint16>(pFeat);
+    be::skip<uint32>(pFeat);
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
     if (m_numFeats)
     {
@@ -81,21 +82,21 @@ bool FeatureMap::readFeats(const Face & face)
     {
         uint32 name;
         if (version < 0x00020000)
-            name = read16(pFeat);
+            name = be::read<uint16>(pFeat);
         else
-            name = read32(pFeat);
-        uint16 numSet = read16(pFeat);
+            name = be::read<uint32>(pFeat);
+        uint16 numSet = be::read<uint16>(pFeat);
 
         uint32 offset;
         if (version < 0x00020000)
-            offset = read32(pFeat);
+            offset = be::read<uint32>(pFeat);
         else
         {
-            read16(pFeat);
-            offset = read32(pFeat);
+            be::skip<uint16>(pFeat);
+            offset = be::read<uint32>(pFeat);
         }
-        uint16 flags = read16(pFeat);
-        uint16 uiName = read16(pFeat);
+        uint16 flags = be::read<uint16>(pFeat);
+        uint16 uiName = be::read<uint16>(pFeat);
         const byte *pSet = pOrig + offset;
         uint16 maxVal = 0;
 
@@ -123,10 +124,10 @@ bool FeatureMap::readFeats(const Face & face)
         FeatureSetting *uiSet = gralloc<FeatureSetting>(numSet);
         for (int j = 0; j < numSet; j++)
         {
-            int16 val = read16(pSet);
+            int16 val = be::read<int16>(pSet);
             if (val > maxVal) maxVal = val;
             if (j == 0) defVals[i] = val;
-            uint16 label = read16(pSet);
+            uint16 label = be::read<uint16>(pSet);
             ::new(uiSet + j) FeatureSetting(label, val);
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())
@@ -197,8 +198,8 @@ bool SillMap::readSill(const Face & face)
 
     if (!pSill) return true;
     if (lSill < 12) return false;
-    if (read32(pSill) != 0x00010000UL) return false;
-    m_numLanguages = read16(pSill);
+    if (be::read<uint32>(pSill) != 0x00010000UL) return false;
+    m_numLanguages = be::read<uint16>(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
     if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return true; }        //defensive
 
@@ -207,17 +208,17 @@ bool SillMap::readSill(const Face & face)
 
     for (int i = 0; i < m_numLanguages; i++)
     {
-        uint32 langid = read32(pSill);
-        uint16 numSettings = read16(pSill);
-        uint16 offset = read16(pSill);
+        uint32 langid = be::read<uint32>(pSill);
+        uint16 numSettings = be::read<uint16>(pSill);
+        uint16 offset = be::read<uint16>(pSill);
         if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
         Features* feats = new Features(*m_FeatureMap.m_defaultFeatures);
         const byte *pLSet = pBase + offset;
 
         for (int j = 0; j < numSettings; j++)
         {
-            uint32 name = read32(pLSet);
-            uint16 val = read16(pLSet);
+            uint32 name = be::read<uint32>(pLSet);
+            uint16 val = be::read<uint16>(pLSet);
             pLSet += 2;
             const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
             if (pRef)

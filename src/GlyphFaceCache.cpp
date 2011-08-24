@@ -27,7 +27,7 @@ of the License or (at your option) any later version.
 #include "GlyphFaceCache.h"
 #include "graphite2/Font.h"
 #include "Face.h"     //for the tags
-
+#include "Endian.h"
 
 using namespace graphite2;
 
@@ -39,7 +39,7 @@ using namespace graphite2;
     if ((m_pHmtx = face.getTable(Tag::hmtx, &m_lHmtx)) == NULL) return false;
     if ((m_pHHea = face.getTable(Tag::hhea)) == NULL) return false;
     if ((m_pGlat = face.getTable(Tag::Glat, &m_lGlat)) == NULL) return false;
-    m_fGlat = swap32(*reinterpret_cast<const uint32 *>(m_pGlat));
+    m_fGlat = be::peek<uint32>(m_pGlat);
 
     const void* pMaxp = face.getTable(Tag::maxp);
     if (pMaxp == NULL) return false;
@@ -48,13 +48,13 @@ using namespace graphite2;
     size_t lGloc;
     if ((m_pGloc = face.getTable(Tag::Gloc, &lGloc)) == NULL) return false;
     if (lGloc < 6) return false;
-    int version = swap32(*((uint32 *)m_pGloc));
+    int version = be::peek<uint32>(m_pGloc);
     if (version != 0x00010000) return false;
 
-    m_numAttrs = swap16(((uint16 *)m_pGloc)[3]);
+    m_numAttrs = be::swap<uint16>(((uint16 *)m_pGloc)[3]);
     if (m_numAttrs > 0x1000) return false;                  // is this hard limit appropriate?
 
-    unsigned short locFlags = swap16(((uint16 *)m_pGloc)[2]);
+    unsigned short locFlags = be::swap<uint16>(((uint16 *)m_pGloc)[2]);
     if (locFlags & 1)
     {
         m_locFlagsUse32Bit = true;

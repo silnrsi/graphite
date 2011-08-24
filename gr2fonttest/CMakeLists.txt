@@ -4,7 +4,7 @@ project(gr2fonttest)
 
 enable_testing()
 
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common ${PROJECT_SOURCE_DIR}/../src)
+include_directories(${PROJECT_SOURCE_DIR})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	# Checkout from http://win-iconv.googlecode.com/svn/trunk

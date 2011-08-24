@@ -53,11 +53,6 @@ if (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif (VM_MACHINE_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
 message(STATUS "Using vm machine type: ${VM_MACHINE_TYPE}")
 
-TEST_BIG_ENDIAN(WORDS_BIGENDIAN)
-if (WORDS_BIGENDIAN)
-    add_definitions(-DWORDS_BIGENDIAN)
-endif (WORDS_BIGENDIAN)
-
 
 add_subdirectory(src)
 add_subdirectory(gr2fonttest)

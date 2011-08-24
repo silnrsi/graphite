@@ -12,10 +12,8 @@ add_subdirectory(segcache)
 add_subdirectory(featuremap)
 add_subdirectory(nametabletest)
 add_subdirectory(examples)
-
-if (EXISTS ${PROJECT_SOURCE_DIR}/grlist)
 add_subdirectory(grlist)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/grlist)
+add_subdirectory(endian)
 
 enable_testing()
 

@@ -16,10 +16,6 @@ goto should use the call style virtual machine. See src/direct_machine.cpp and s
 
 Various C preprocessor definitions are also used as part of compiling graphite2:
 
-WORDS_BIG_ENDIAN::
-    This is defined if the target compilation platform is big endian, otherwise it is left undefined
-    for little endian architectures.
-
 DISABLE_SEGCACHE::
     If set, the segment caching code is not compiled into the library. This can be used to save space
     if the engine is under space constraints both for code and memory. The default is that this is not

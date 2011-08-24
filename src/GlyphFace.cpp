@@ -30,6 +30,7 @@ of the License or (at your option) any later version.
 #include "XmlTraceLog.h"
 #include "GlyphFaceCache.h"
 #include "TtfUtil.h"
+#include "Endian.h"
 
 
 using namespace graphite2;
@@ -51,7 +52,7 @@ namespace
 
 		value_type 			operator * () const {
 			if (_n==0) { _v.id = *_p++; _n = *_p++; }
-			_v.value = swap16(*reinterpret_cast<const uint16 *>(_p));
+			_v.value = be::peek<uint16>(_p);
 			return _v;
 		}
 		const value_type *	operator ->() const { operator * (); return &_v; }
@@ -67,12 +68,12 @@ namespace
 	public:
 		glat2_iterator(const void * glat) : glat_iterator(glat) {}
 
-		glat_iterator & operator ++ () 		{ ++_v.id; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.id = read16(_p); _n = read16(_p); } return *this; }
+		glat_iterator & operator ++ () 		{ ++_v.id; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.id = be::read<uint16>(_p); _n = be::read<uint16>(_p); } return *this; }
 		glat_iterator   operator ++ (int) 	{ glat_iterator tmp(*this); operator++(); return tmp; }
 
 		value_type 			operator * () const {
-			if (_n==0) { _v.id = read16(_p); _n = read16(_p); }
-			_v.value = swap16(*reinterpret_cast<const uint16 *>(_p));
+			if (_n==0) { _v.id = be::read<uint16>(_p); _n = be::read<uint16>(_p); }
+			_v.value = be::peek<uint16>(_p);
 			return _v;
 		}
 		const value_type *	operator ->() const { operator * (); return &_v; }
@@ -117,13 +118,13 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
         size_t glocs, gloce;
         if (hdr.m_locFlagsUse32Bit)
         {
-            glocs = swap32(((uint32 *)hdr.m_pGloc)[2+glyphid]);
-            gloce = swap32(((uint32 *)hdr.m_pGloc)[3+glyphid]);
+            glocs = be::swap<uint32>(((uint32 *)hdr.m_pGloc)[2+glyphid]);
+            gloce = be::swap<uint32>(((uint32 *)hdr.m_pGloc)[3+glyphid]);
         }
         else
         {
-            glocs = swap16(((uint16 *)hdr.m_pGloc)[4+glyphid]);
-            gloce = swap16(((uint16 *)hdr.m_pGloc)[5+glyphid]);
+            glocs = be::swap<uint16>(((uint16 *)hdr.m_pGloc)[4+glyphid]);
+            gloce = be::swap<uint16>(((uint16 *)hdr.m_pGloc)[5+glyphid]);
         }
         if (glocs < hdr.m_lGlat && gloce <= hdr.m_lGlat)
         {
@@ -200,7 +201,7 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 //		}
 //		else
 //		{
-//			attr = attrs + read16(glat); attr_end = attr + read16(glat);
+//			attr = attrs + be::read<uint16>(glat); attr_end = attr + be::read<uint16>(glat);
 //		}
 //
 //		if (attr_end > attrs + num)
@@ -212,7 +213,7 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 //		}
 //		while (attr != attr_end)
 //		{
-//			*attr++ = read16(glat);
+//			*attr++ = be::read<uint16>(glat);
 //			logAttr(attrs, attr-1);
 //		}
 //	}
