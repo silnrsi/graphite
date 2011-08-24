@@ -119,7 +119,7 @@ sparse::sparse(I attr, const I last)
 inline
 sparse::operator bool () const throw()
 {
-	return m_array.map;
+	return m_array.map != 0;
 }
 
 
