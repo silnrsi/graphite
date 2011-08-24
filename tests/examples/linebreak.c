@@ -16,6 +16,7 @@ int main(int argc, char **argv)
     size_t numCodePoints = 0;
     gr_segment * seg = NULL;
     const gr_slot *s, *sprev;
+    int i;
     gr_face *face = gr_make_file_face(argv[1], 0);
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);
@@ -53,7 +54,6 @@ int main(int argc, char **argv)
         }
     }
 
-    int i;
     printf("%d:", width);
     for (i = 0; i < numlines; i++)
     {                                                                           
