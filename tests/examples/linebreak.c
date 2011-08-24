@@ -17,6 +17,9 @@ int main(int argc, char **argv)
     gr_segment * seg = NULL;
     const gr_slot *s, *sprev;
     int i;
+    int lineend = width;
+    int numlines = 0;
+    const gr_slot **lineslots;
     gr_face *face = gr_make_file_face(argv[1], 0);
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);
@@ -27,10 +30,7 @@ int main(int argc, char **argv)
     seg = gr_make_seg(font, face, 0, 0, gr_utf8, argv[3], numCodePoints, rtl);  /*<1>*/
     if (!seg) return 3;
 
-    int lineend = width;
-    int numlines = 0;
-    const gr_slot **lineslots = (const gr_slot **)malloc(numCodePoints 
-                                                        * sizeof(gr_slot *));
+    lineslots = (const gr_slot **)malloc(numCodePoints * sizeof(gr_slot *));
     lineslots[numlines++] = gr_seg_first_slot(seg);                             /*<2>*/
     for (s = lineslots[0]; s; s = gr_slot_next_in_segment(s))
     {
