@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include <iterator>
+#include <new>
 #include "GlyphFace.h"
 #include "XmlTraceLog.h"
 #include "GlyphFaceCache.h"
