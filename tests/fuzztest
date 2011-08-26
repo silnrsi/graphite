@@ -81,10 +81,14 @@ parser.add_option("--memory", type="int", help="limit subprocess address space i
 parser.add_option("-c","--count",type='int',help='Flag every count iterations')
 parser.add_option("-r","--random",help="Seed the random number generator with the given string")
 parser.add_option("-L","--linear",action="store_true",help="Linearly process every location in the source font")
+parser.add_option("--valgrind",action="store_true",help="Run tests with valgrind and report errors")
 
 (opts, args) = parser.parse_args()
 
 if opts.random : seed(opts.random)
+if opts.valgrind : 
+    args.insert(0, "-q")
+    args.insert(0, "valgrind")
 
 fontlen = os.path.getsize(opts.font)
 if opts.logfile :
@@ -130,14 +134,21 @@ for loc, val in valpos(fontlen, opts)() :
         print count / opts.count,
         sys.stdout.flush()
     subfile = open("templog.txt", "w")
-    retval = call(args, stdout=subfile, stderr=subfile, preexec_fn=rlimit, close_fds = True)
+    errfile = open("errlog.txt", "w")
+    retval = call(args, stdout=subfile, stderr=errfile, preexec_fn=rlimit, close_fds = True)
+    subfile.close()
+    errfile.close()
+    lenerr = os.stat("errlog.txt").st_size
     if retval < 0 :
     	(t,s,_) = table_from_offset(loc, tables) or (0,0,fontlen)
         print >>log, "%d,0x%x,%d,%s0x%x" % (retval, loc, val, tag(t) + '+' if t else '', loc-s)
-    elif opts.verbose :
+    elif opts.verbose or lenerr :
         print >>log, ",0x%x,%d" % (loc, val)
+        if lenerr :
+            errfile = open("errlog.txt", "r")
+            for l in errfile.readlines() : print >>log, l.rstrip()
+            errfile.close()
     log.flush()
-    subfile.close()
     font = open(opts.font, "r+b")
     font.seek(loc, 0)
     font.write(oldval)

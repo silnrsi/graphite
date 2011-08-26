@@ -121,7 +121,9 @@ GR2_API void gr_tag_to_str(gr_uint32 tag, char *str);
   *          gr_featureval_destroy() to free this object when done.
   * @param pFace The font face to get feature values from
   * @param langname The language tag to get feature values for. If there is no such language or
-  *                  langname is 0, the default feature values for the font are returned
+  *                  langname is 0, the default feature values for the font are returned.
+  *                  langname is right 0 padded and assumes lowercase. Thus the en langauge
+  *                  would be 0x656E0000.
   */
 GR2_API gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname);
 

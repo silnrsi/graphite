@@ -49,7 +49,7 @@ class HbNgRenderer : public Renderer
 public:
     HbNgRenderer(const char * fileName, int fontSize, int textDir, FeatureParser * features)
         : m_ftLibrary(NULL), m_ftFace(NULL),
-        m_face(NULL), m_font(NULL), m_feats(NULL), m_bufferLength(1024), m_featCount(0)
+        m_face(NULL), m_font(NULL), m_feats(NULL), m_featCount(0)
     {
         if ((FT_Init_FreeType(&m_ftLibrary) == 0) &&
             (FT_New_Face(m_ftLibrary, fileName, 0, &m_ftFace) == 0))
@@ -73,7 +73,7 @@ public:
                 fprintf(stderr, "FT_Request_Size %d failed\n", fontSize);
             }
         }
-        m_buffer = hb_buffer_create(m_bufferLength);
+        m_buffer = hb_buffer_create();
         if (features)
         {
             m_featCount = features->featureCount() + 1;
@@ -149,6 +149,5 @@ private:
     hb_font_t * m_font;
     hb_buffer_t * m_buffer;
     hb_feature_t* m_feats;
-    size_t m_bufferLength;
     size_t m_featCount;
 };
