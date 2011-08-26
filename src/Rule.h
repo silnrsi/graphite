@@ -32,7 +32,6 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 struct Rule {
-  ~Rule();
   const vm::Code * constraint, 
                  * action;
   unsigned short   sort;
@@ -40,6 +39,9 @@ struct Rule {
 #ifndef NDEBUG
   uint16           rule_idx;
 #endif
+
+  Rule() : constraint(0), action(0) {}
+  ~Rule();
 
   CLASS_NEW_DELETE;
 };

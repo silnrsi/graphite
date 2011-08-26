@@ -96,10 +96,7 @@ CmapCache::~CmapCache()
 {
     unsigned int numBlocks = (m_isBmpOnly)? 0x100 : 0x1100;
     for (unsigned int i = 0; i < numBlocks; i++)
-    {
-        if (m_blocks[i])
-            free(m_blocks[i]);
-    }
+    	free(m_blocks[i]);
     free(m_blocks);
     m_blocks = NULL;
 }

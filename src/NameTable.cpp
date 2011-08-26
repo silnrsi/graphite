@@ -37,7 +37,7 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
     :
     m_platformId(0), m_encodingId(0), m_languageCount(0),
     m_platformOffset(0), m_platformLastRecord(0), m_nameDataLength(0),
-    m_nameData(NULL)
+    m_table(0), m_nameData(NULL)
 {
     void *pdata = malloc(length);
     if (!pdata) return;

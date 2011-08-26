@@ -304,8 +304,6 @@ size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGl
     for (int i = 0; i < m_classOffsets[m_nClass]; i++)
         m_classData[i] = be::read<uint16>(p);
 #ifndef DISABLE_TRACING
-    // TODO this includes extra checking which shouldn't be
-    // disabled when tracing is inactive unless it is duplicated elsewhere
     if (XmlTraceLog::get().active())
     {
         bool glyphsOk = true;

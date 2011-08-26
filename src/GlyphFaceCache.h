@@ -79,7 +79,7 @@ public:
     // delete in case an exception is thrown in constructor
     void operator delete(void* p, const GlyphFaceCacheHeader& )
     {
-        if (p) free(p);
+        free(p);
     }
 
     const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid

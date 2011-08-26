@@ -45,8 +45,7 @@ Font::Font(float ppm, const Face *face/*needed for scaling*/) :
 
 /*virtual*/ Font::~Font()
 {
-    if (m_advances)
-        free(m_advances);
+	free(m_advances);
 }
 
 

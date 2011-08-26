@@ -57,9 +57,9 @@ template <typename T> T * grzeroalloc(size_t n)
 
 #define CLASS_NEW_DELETE \
     void * operator new[](size_t size) {return malloc(size);} \
-    void operator delete[] (void * p)throw() { if (p) free(p); } \
+    void operator delete[] (void * p)throw() { free(p); } \
     void * operator new(size_t size){ return malloc(size);} \
-    void operator delete (void * p) throw() {if (p) free(p);}
+    void operator delete (void * p) throw() { free(p);}
 
 #ifdef __GNUC__
 #define GR_MAYBE_UNUSED __attribute__((unused))

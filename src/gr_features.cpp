@@ -127,31 +127,13 @@ void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
 
 void gr_label_destroy(void * label)
 {
-    if (label)
-        free(label);
+	free(label);
 }
 
 gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures/*may be NULL*/)
 {                      //When finished with the Features, call features_destroy    
     return static_cast<gr_feature_val*>(pfeatures ? new Features(*pfeatures) : new Features);
 }
-
-
-#if 0
-//not public since there is no public way of making the mask
-int gr_featureval_masked_or(gr_feature_val* pSrc, const gr_feature_val* pOther, const gr_feature_val* pMask)    //returns false iff any of the Features* are NULL
-{
-    if (!pSrc)
-    return false;
-    if (!pOther)
-    return false;
-    if (!pMask)
-    return false;
-    
-    pSrc->maskedOr(*pOther, *pMask);
-    return true;
-}
-#endif 
   
 void gr_featureval_destroy(gr_feature_val *p)
 {

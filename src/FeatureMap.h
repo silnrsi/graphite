@@ -78,7 +78,7 @@ public:
         }
     }
     ~FeatureRef() {
-        if (m_nameValues) free(m_nameValues);
+        free(m_nameValues);
         m_nameValues = NULL;
     }
     bool applyValToFeature(uint16 val, Features& pDest) const; //defined in GrFaceImp.h

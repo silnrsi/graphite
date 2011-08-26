@@ -45,7 +45,7 @@ typedef struct rec_ft_table {
     void *buffer;
     struct rec_ft_table *next;
 
-    ~rec_ft_table() { if (buffer) free(buffer); if (next) delete next; }
+    ~rec_ft_table() { free(buffer); delete next; }
 } rec_ft_table;
 
 typedef struct fontmap {
@@ -151,7 +151,8 @@ void *gettable(const void *recp, unsigned int tag, size_t *len)
     unsigned long length = 0;
     FT_Load_Sfnt_Table(rec->ftface, tag, 0, NULL, &length);
     r->buffer = malloc(length);
-    FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
+    if (r->buffer)
+    	FT_Load_Sfnt_Table(rec->ftface, tag, 0, (FT_Byte *)(r->buffer), &length);
     if (len) *len = length;
     r->len = length;
     return r->buffer;

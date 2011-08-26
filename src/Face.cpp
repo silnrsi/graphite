@@ -230,10 +230,8 @@ FileFace::FileFace(const char *filename) :
 
 FileFace::~FileFace()
 {
-    if (m_pTableDir)
-        free(m_pTableDir);
-    if (m_pHeader)
-        free(m_pHeader);
+    free(m_pTableDir);
+    free(m_pHeader);
     if (m_pfile)
         fclose(m_pfile);
     m_pTableDir = NULL;

@@ -36,7 +36,7 @@ class NameTable
 {
 public:
     NameTable(const void * data, size_t length, uint16 platfromId=3, uint16 encodingID = 1);
-    ~NameTable() { if (m_table) free(const_cast<TtfUtil::Sfnt::FontNames *>(m_table)); }
+    ~NameTable() { free(const_cast<TtfUtil::Sfnt::FontNames *>(m_table)); }
     enum eNameFallback {
         eNoFallback = 0,
         eEnUSFallbackOnly = 1,

@@ -32,11 +32,12 @@ class Gr2Renderer : public Renderer
 public:
     Gr2Renderer(const char * fontFile, int fontSize, int textDir, int cache, FeatureParser * features)
         : m_rtl(textDir),
-        m_grFace((cache == 0)?
+          m_grFace((cache == 0)?
             gr_make_file_face(fontFile, gr_face_preloadGlyphs):
             gr_make_file_face_with_seg_cache(fontFile, cache,
                 gr_face_cacheCmap | gr_face_preloadGlyphs)),
-        m_grFont(0)
+        m_grFont(0),
+        m_grFeatures(0)
     {
         if (m_grFace)
         {

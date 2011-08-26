@@ -52,7 +52,7 @@ public:
             m_caches[i]->clear(cacheStore);
             delete m_caches[i];
         }
-        if (m_caches) free(m_caches);
+        free(m_caches);
         m_caches = NULL;
         m_cacheCount = 0;
     }

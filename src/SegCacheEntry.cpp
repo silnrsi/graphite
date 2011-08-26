@@ -158,8 +158,8 @@ void SegCacheEntry::log(GR_MAYBE_UNUSED size_t unicodeLength) const
 
 void SegCacheEntry::clear()
 {
-    if (m_unicode) free(m_unicode);
-    if (m_attr) free(m_attr);
+    free(m_unicode);
+    free(m_attr);
     delete [] m_glyph;
     m_unicode = NULL;
     m_glyph = NULL;
