@@ -124,7 +124,7 @@ private:        //unimplemented
 class NameAndFeatureRef
 {
   public:
-    NameAndFeatureRef() {}
+    NameAndFeatureRef() : m_pFRef(NULL) {}
     NameAndFeatureRef(uint32 name) : m_name(name) {}
     NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
 

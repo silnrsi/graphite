@@ -60,12 +60,9 @@ bool FeatureMap::readFeats(const Face & face)
     be::skip<uint16>(pFeat);
     be::skip<uint32>(pFeat);
     if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
-    if (m_numFeats)
-    {
-        m_feats = new FeatureRef[m_numFeats];
-        m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
-        defVals = gralloc<uint16>(m_numFeats);
-    }
+    if (!m_numFeats) return true;
+    m_feats = new FeatureRef[m_numFeats];
+    defVals = gralloc<uint16>(m_numFeats);
     byte currIndex = 0;
     byte currBits = 0;     //to cause overflow on first Feature
 
@@ -94,6 +91,11 @@ bool FeatureMap::readFeats(const Face & face)
         {
             be::skip<uint16>(pFeat);
             offset = be::read<uint32>(pFeat);
+        }
+        if (offset > lFeat)
+        {
+            free(defVals);
+            return false;
         }
         uint16 flags = be::read<uint16>(pFeat);
         uint16 uiName = be::read<uint16>(pFeat);
@@ -165,6 +167,7 @@ bool FeatureMap::readFeats(const Face & face)
 #endif
     }
     m_defaultFeatures = new Features(currIndex + 1, *this);
+    m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
     for (int i = 0; i < m_numFeats; i++)
     {
     	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);

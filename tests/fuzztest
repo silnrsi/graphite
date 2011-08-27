@@ -72,7 +72,7 @@ def table_from_offset(o,tables):
 parser = OptionParser(usage="usage: %prog -f font [options] -- command")
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
-parser.add_option("-p", "--position", default=0, help="Specifies position to corrupt (hex)")
+parser.add_option("-p", "--position", default="0", help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", help="Specifies value to use (dec)")
 parser.add_option("-i", "--input", help=".log file to read test values from")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
