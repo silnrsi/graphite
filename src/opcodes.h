@@ -276,7 +276,7 @@ STARTOP(insert)
         {
             seg.last()->next(newSlot);
             newSlot->prev(seg.last());
-	    newSlot->before(seg.last()->before());
+            newSlot->before(seg.last()->before());
             seg.last(newSlot);
         }
         else
@@ -294,7 +294,7 @@ STARTOP(insert)
     else
     {
         newSlot->prev(NULL);
-	newSlot->before(iss->before());
+        newSlot->before(iss->before());
         seg.first(newSlot);
     }
     newSlot->next(iss);
@@ -333,9 +333,7 @@ STARTOP(delete_)
         seg.last(is->prev());
     
     if (is->prev())
-    {
         is = is->prev();
-    }
     seg.extendLength(-1);
 ENDOP
 
@@ -354,8 +352,11 @@ STARTOP(assoc)
         if (ts && (min == -1 || ts->before() < min)) min = ts->before();
         if (ts && ts->after() > max) max = ts->after();
     }
-    is->before(min);
-    is->after(max);
+    if (min > -1)   // implies max > -1
+    {
+        is->before(min);
+        is->after(max);
+    }
 ENDOP
 
 STARTOP(cntxt_item)
@@ -365,7 +366,8 @@ STARTOP(cntxt_item)
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
-    if (mapb + is_arg != map) {
+    if (mapb + is_arg != map)
+    {
         ip += iskip;
         dp += dskip;
         push(true);
