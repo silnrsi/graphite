@@ -438,7 +438,7 @@ void resolveNeutrals(int baseLevel, Slot *s)
     int state = baseLevel ? r : l;
     int cls;
     Slot *sRun = NULL;
-    Slot *sLast;
+    Slot *sLast = s;
     int level = baseLevel;
 
     for ( ; s; s = s->next())

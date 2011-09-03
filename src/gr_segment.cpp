@@ -68,6 +68,10 @@ namespace
 
   gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
+      if (script == 0x20202020) script = 0;
+      else if ((script & 0x00FFFFFF) == 0x00202020) script = script & 0xFF000000;
+      else if ((script & 0x0000FFFF) == 0x00002020) script = script & 0xFFFF0000;
+      else if ((script & 0x000000FF) == 0x00000020) script = script & 0xFFFFFF00;
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
 

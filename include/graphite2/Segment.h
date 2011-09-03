@@ -198,7 +198,8 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
   *             of the face.
   * @param face The face containing all the non-size dependent information.
   * @param script This is a tag containing a script identifier that is used to choose
-  *               which graphite table within the font to use. Maybe 0.
+  *               which graphite table within the font to use. Maybe 0. Tag may be 4 chars
+  *               NULL padded in LSBs or space padded in LSBs.
   * @param pFeats Pointer to a feature values to be used for the segment. Only one
   *               feature values may be used for a segment. If NULL the default features
   *               for the font will be used.
