@@ -106,7 +106,8 @@ private:
     opcode      fetch_opcode(const byte * bc);
     void        analyse_opcode(const opcode, const int8 * const dp) throw();
     bool        emit_opcode(opcode opc, const byte * & bc);
-    void        valid_upto(const uint16 limit, const uint16 x) const throw();
+    bool 		validate_opcode(const opcode opc, const byte * const bc);
+    bool        valid_upto(const uint16 limit, const uint16 x) const throw();
     void        failure(const status_t s) const throw() { _code.failure(s); }
     
     Code              & _code;
@@ -173,7 +174,7 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
         face.getGlyphFaceCache()->numAttrs(),
         face.numFeatures(), 
         {1,1,1,1,1,1,1,1, 
-         1,1,1,1,1,1,1,(uint8)-1, 
+         1,1,1,1,1,1,1,255,
          1,1,1,1,1,1,1,1, 
          1,1,1,1,1,1,0,0, 
          0,0,0,0,0,0,0,0, 
@@ -239,10 +240,7 @@ bool Code::decoder::load(const byte * bc, const byte * bc_end)
             return false;
     }
     
-    if (bc > bc_end)
-        failure(arguments_exhausted);
-
-    return _code.status() == loaded;
+    return bool(_code);
 }
 
 // Validation check and fixups.
@@ -250,10 +248,12 @@ bool Code::decoder::load(const byte * bc, const byte * bc_end)
 
 opcode Code::decoder::fetch_opcode(const byte * bc)
 {
-    opcode opc = opcode(*bc++);
+    const opcode opc = opcode(*bc++);
 
     // Do some basic sanity checks based on what we know about the opcode
-    // and it's arguments.
+    if (!validate_opcode(opc, bc))	return MAX_OPCODE;
+
+    // And check it's arguments as far as possible
     switch (opc)
     {
         case NOP :
@@ -304,17 +304,9 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case DELETE :
             break;
         case ASSOC :
-        {
-            uint8 num = bc[0];
-            if (bc + 1 + num >= _max.bytecode)
-            {
-                failure(arguments_exhausted);
-                break;
-            }
-            while (num) 
-                valid_upto(_rule_length, _pre_context + int8(bc[num--]));
+            for (uint8 num = bc[0]; num; --num)
+                valid_upto(_rule_length, _pre_context + int8(bc[num]));
             break;
-        }
         case CNTXT_ITEM :
             valid_upto(_max.rule_length, _max.pre_context + int8(bc[0]));
             if (bc + 2 + bc[1] >= _max.bytecode)  failure(jump_past_end);
@@ -323,11 +315,11 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case ATTR_ADD :
         case ATTR_SUB :
         case ATTR_SET_SLOT :
-            valid_upto(gr_slatMax, bc[0]);
+        	valid_upto(gr_slatMax, bc[0]);
             break;
         case IATTR_SET_SLOT :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_max.attrid[bc[0]], bc[1]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            	valid_upto(_max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_SLOT_ATTR :
             valid_upto(gr_slatMax, bc[0]);
@@ -356,9 +348,11 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
             // level: dp[2] no check necessary
             break;
         case PUSH_ISLOT_ATTR :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_rule_length, _pre_context + int8(bc[1]));
-            valid_upto(_max.attrid[bc[0]], bc[2]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            {
+            	valid_upto(_rule_length, _pre_context + int8(bc[1]));
+            	valid_upto(_max.attrid[bc[0]], bc[2]);
+            }
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
         case POP_RET :
@@ -368,8 +362,8 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case IATTR_SET :
         case IATTR_ADD :
         case IATTR_SUB :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_max.attrid[bc[0]], bc[1]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            	valid_upto(_max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
         case PUSH_VERSION :
@@ -395,7 +389,7 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
             break;
     }
 
-    return _code._status == loaded ? opc : MAX_OPCODE;
+    return bool(_code) ? opc : MAX_OPCODE;
 }
 
 
@@ -513,7 +507,7 @@ bool Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         }
     }
     
-    return _code._status == loaded;
+    return bool(_code);
 }
 
 
@@ -565,11 +559,30 @@ void Code::decoder::apply_analysis(instr * const code, instr * code_end)
 }
 
 
-inline 
-void Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
+inline
+bool Code::decoder::validate_opcode(const opcode opc, const byte * const bc)
 {
-    if (x >= limit)
-        failure(out_of_range_data);
+	if (opc >= MAX_OPCODE)
+	{
+		failure(invalid_opcode);
+		return false;
+	}
+	const opcode_t & op = Machine::getOpcodeTable()[opc];
+	const size_t param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;
+	if (bc + param_sz > _max.bytecode)
+	{
+		failure(arguments_exhausted);
+		return false;
+	}
+	return true;
+}
+
+
+bool Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
+{
+	const bool t = x < limit;
+    if (!t)	failure(out_of_range_data);
+    return t;
 }
 
 inline 
