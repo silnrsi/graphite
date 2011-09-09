@@ -213,7 +213,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
         return false;
     }
 
-    int clen = readClassMap((void *)p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf), face.getGlyphFaceCache()->numGlyphs() + m_numPseudo);
+    int clen = readClassMap(p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf));
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -256,110 +256,55 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     return true;
 }
 
-size_t Silf::readClassMap(void *pClass, size_t lClass, GR_MAYBE_UNUSED int numGlyphs)
+size_t Silf::readClassMap(const byte *p, size_t data_len)
 {
-    const byte *p = reinterpret_cast<const byte *>(pClass);
-    m_nClass = be::read<uint16>(p);
-    m_nLinear = be::read<uint16>(p);
-    m_classOffsets = gralloc<uint16>(m_nClass + 1);
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementClassMap);
-        XmlTraceLog::get().addAttribute(AttrNumClasses, m_nClass);
-        XmlTraceLog::get().addAttribute(AttrNumLinear, m_nLinear);
-    }
-#endif
+	if (data_len < sizeof(uint16)*2)	return -1;
 
-    for (int i = 0; i <= m_nClass; i++)
-    {
-        m_classOffsets[i] = be::read<uint16>(p) / 2 - (2 + m_nClass + 1);     // uint16[] index
-    }
+	m_nClass  = be::read<uint16>(p);
+	m_nLinear = be::read<uint16>(p);
 
-    if (m_classOffsets[0] != 0)
-    {
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().error("Invalid first Class Offset %d expected %d",
-                m_classOffsets[0], m_nLinear);
-            XmlTraceLog::get().closeElement(ElementClassMap);
-        }
-#endif
-        return -1;
-    }
-    if (m_classOffsets[m_nClass] + (2u + m_nClass + 1u) * 2 > lClass)
-    {
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().error("Invalid Class Offset %d max size %d",
-                m_classOffsets[m_nClass], lClass);
-            XmlTraceLog::get().closeElement(ElementClassMap);
-        }
-#endif
-        return -1;
-    }
-    m_classData = gralloc<uint16>(m_classOffsets[m_nClass]);
-    for (int i = 0; i < m_classOffsets[m_nClass]; i++)
-        m_classData[i] = be::read<uint16>(p);
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        bool glyphsOk = true;
-        for (int i = 0; i < m_nClass; i++)
-        {
-            XmlTraceLog::get().openElement(ElementLookupClass);
-            XmlTraceLog::get().addAttribute(AttrIndex, i);
-            if (i < m_nLinear)
-            {
-                for (int j = m_classOffsets[i]; j < m_classOffsets[i+1]; j++)
-                {
-                    XmlTraceLog::get().openElement(ElementLookup);
-                    XmlTraceLog::get().addAttribute(AttrGlyphId, m_classData[j]);
-		    // out of range glyphids are allowed as place holders
-                    // if (m_classData[j] >= numGlyphs)
-                    // {
-                    //     XmlTraceLog::get().warning("GlyphId out of range %d",
-                    //         m_classData[j]);
-                    //         glyphsOk = false;
-                    // }
-                    XmlTraceLog::get().closeElement(ElementLookup);
-                }
-            }
-            else
-            {
-                int offset = m_classOffsets[i];
-                uint16 numIds = m_classData[offset];
-                XmlTraceLog::get().addAttribute(AttrNum, numIds);
-                for (int j = offset + 4; j < m_classOffsets[i+1]; j += 2)
-                {
-                    XmlTraceLog::get().openElement(ElementLookup);
-                    XmlTraceLog::get().addAttribute(AttrGlyphId, m_classData[j]);
-                    XmlTraceLog::get().addAttribute(AttrIndex, m_classData[j+1]);
-                    if (m_classData[j] >= numGlyphs)
-                    {
-                        XmlTraceLog::get().warning("GlyphId out of range %d",
-                            m_classData[j]);
-                    //         glyphsOk = false;
-                    }
-                    if (m_classData[j+1] >= numIds)
-                    {
-                       XmlTraceLog::get().warning("Index out of range %d",
-                           m_classData[j+1]);
-                           glyphsOk = false;
-                    }
-                    XmlTraceLog::get().closeElement(ElementLookup);
-                }
-            }
-            XmlTraceLog::get().closeElement(ElementLookupClass);
-        }
-        XmlTraceLog::get().closeElement(ElementClassMap);
-        if (!glyphsOk)
-            return -1;
-    }
-#endif
-    return (p - reinterpret_cast<const byte*>(pClass));
+	// Check that numLinear < numClass,
+	// that there is at least enough data for numClasses offsets.
+	if (m_nLinear > m_nClass
+	 || (m_nClass + 1) > (data_len/sizeof(uint16)-2))
+		return -1;
+
+	const uint16 cls_off = sizeof(uint16)*(2 + m_nClass+1);
+	const uint16 max_off = (be::peek<uint16>(p + sizeof(uint16)*m_nClass) - cls_off)/sizeof(uint16);
+	// Check that the last+1 offset is less than or equal to the class map length.
+	if (be::peek<uint16>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
+		return -1;
+
+	// Read in all the offsets.
+	m_classOffsets = gralloc<uint16>(m_nClass+1);
+	for (uint16 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
+	{
+		*o = (be::read<uint16>(p) - cls_off)/sizeof(uint16);
+		if (*o > max_off)
+			return -1;
+	}
+
+	// Check the linear offsets are sane, these must be monotonically increasing.
+	for (const uint16 *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
+		if (o[0] > o[1])
+			return -1;
+
+	// Fortunately the class data is all uint16s so we can decode these now
+    m_classData = gralloc<uint16>(max_off);
+    for (uint16 *d = m_classData, * const d_end = d + max_off; d != d_end; ++d)
+        *d = be::read<uint16>(p);
+
+	// Check the lookup class invariants for each non-linear class
+	for (const uint16 *o = m_classOffsets + m_nLinear, * const o_end = m_classOffsets + m_nClass; o != o_end; ++o)
+	{
+		const uint16 * lookup = m_classData + *o;
+		if (lookup[0] == 0							// A LookupClass with no looks is a suspicious thing ...
+		 || lookup[0] > (max_off - *o - 4)/2  	    // numIDs lookup pairs fits within (start of LookupClass' lookups array, max_off]
+		 || lookup[3] != lookup[0] - lookup[1])		// rangeShift:	 numIDs  - searchRange
+			return -1;
+	}
+
+	return cls_off;
 }
 
 uint16 Silf::findPseudo(uint32 uid) const
@@ -373,60 +318,26 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
 {
     if (cid > m_nClass) return -1;
 
-#ifdef ENABLE_DEEP_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementLookupClass);
-        XmlTraceLog::get().addAttribute(AttrNum, cid);
-        XmlTraceLog::get().addAttribute(AttrGlyphId, gid);
-    }
-#endif
-
-    uint16 loc = m_classOffsets[cid];
+    const uint16 * cls = m_classData + m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
     {
-        for (int i = loc; i < m_classOffsets[cid + 1]; i++)
-            if (m_classData[i] == gid) return i - loc;
+        for (int i = 0, n = m_classOffsets[cid + 1]; i < n; ++i, ++cls)
+            if (*cls == gid) return i;
+        return -1;
     }
     else
     {
-//        uint16 num = m_classData[loc];
-        uint16 search = m_classData[loc + 1] << 1;
-//        uint16 selector = m_classData[loc + 2];
-        uint16 range = m_classData[loc + 3];
-
-        uint16 curr = loc + 4 + range * 2;
-
-        while (search > 1)
+    	const uint16 *	min = cls + 4,		// lookups array
+    				 * 	max = min + cls[0]*2; // lookups aray is numIDs (cls[0]) uint16 pairs long
+    	do
         {
-            int test;
-            if (curr < loc + 4)
-                test = -1;
-            else
-                test = m_classData[curr] - gid;
-
-            if (test == 0)
-            {
-                uint16 res = m_classData[curr + 1];
-#ifdef ENABLE_DEEP_TRACING
-                XmlTraceLog::get().addAttribute(AttrIndex, res);
-                XmlTraceLog::get().closeElement(ElementLookupClass);
-#endif
-                return res;
-            }
-            
-            search >>= 1;
-            if (test < 0)
-                curr += search;
-            else
-                curr -= search;
+        	const uint16 * p = min + (-2U & ((max-min)/2));
+        	if 	(p[0] > gid)	max = p;
+        	else 				min = p;
         }
+        while (max - min > 2);
+        return min[0] == gid ? min[1] : -1;
     }
-#ifdef ENABLE_DEEP_TRACING
-    XmlTraceLog::get().addAttribute(AttrIndex, -1);
-    XmlTraceLog::get().closeElement(ElementLookupClass);
-#endif
-    return -1;
 }
 
 uint16 Silf::getClassGlyph(uint16 cid, int index) const

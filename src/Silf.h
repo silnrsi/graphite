@@ -84,7 +84,7 @@ public:
     CLASS_NEW_DELETE
 
 private:
-    size_t readClassMap(void *pClass, size_t lClass, int numGlyphs);
+    size_t readClassMap(const byte *p, size_t data_len);
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;
