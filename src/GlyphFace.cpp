@@ -132,14 +132,16 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
 //            readAttrs(hdr.m_pGlat + glocs, hdr.m_pGlat + gloce, m_attrs, hdr.m_numAttrs, hdr.m_fGlat);
         	if (hdr.m_fGlat < 0x00020000)
         	{
-        		if (gloce - glocs > hdr.m_numAttrs*2*sizeof(byte)*sizeof(uint16))
+        		if (gloce - glocs < 2*sizeof(byte)+sizeof(uint16)
+        		 || gloce - glocs > hdr.m_numAttrs*(2*sizeof(byte)+sizeof(uint16)))
         			return;
 
         		new (&m_attrs) sparse(glat_iterator(hdr.m_pGlat + glocs), glat_iterator(hdr.m_pGlat + gloce));
         	}
         	else
         	{
-        		if (gloce - glocs > hdr.m_numAttrs*3*sizeof(uint16))
+        		if (gloce - glocs < 3*sizeof(uint16)
+        		 || gloce - glocs > hdr.m_numAttrs*3*sizeof(uint16))
         			return;
 
         		new (&m_attrs) sparse(glat2_iterator(hdr.m_pGlat + glocs), glat2_iterator(hdr.m_pGlat + gloce));
