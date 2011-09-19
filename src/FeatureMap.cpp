@@ -33,7 +33,6 @@ of the License or (at your option) any later version.
 #include "graphite2/Font.h"
 #include "XmlTraceLog.h"
 #include "TtfUtil.h"
-//#include <algorithm>
 #include <stdlib.h>
 #include "Face.h"
 
@@ -130,7 +129,7 @@ bool FeatureMap::readFeats(const Face & face)
             if (val > maxVal) maxVal = val;
             if (j == 0) defVals[i] = val;
             uint16 label = be::read<uint16>(pSet);
-            ::new(uiSet + j) FeatureSetting(label, val);
+            new (uiSet + j) FeatureSetting(label, val);
 #ifndef DISABLE_TRACING
             if (XmlTraceLog::get().active())
             {

@@ -84,7 +84,7 @@ public:
     void                insert(iterator p, size_t n, const T & x);
     void                insert(iterator p, const_iterator first, const_iterator last);
     void                pop_back()              { assert(size() > 0); --m_last; }
-    void                push_back(const T &v)   { if (m_last == m_end) reserve(size()+1); ::new (m_last++) T(v); }
+    void                push_back(const T &v)   { if (m_last == m_end) reserve(size()+1); new (m_last++) T(v); }
 
     void                clear()                 { erase(begin(), end()); }
     iterator            erase(iterator p)       { return erase(p, p+1); }
@@ -128,7 +128,7 @@ void Vector<T>::insert(iterator p, size_t n, const T & x)
 {
     p = _insert_default(p, n);
     // Copy in elements
-    for (; n; --n, ++p) { ::new (p) T(x); }
+    for (; n; --n, ++p) { new (p) T(x); }
 }
 
 template<typename T>
@@ -137,7 +137,7 @@ void Vector<T>::insert(iterator p, const_iterator first, const_iterator last)
 {
     p = _insert_default(p, distance(first, last));
     // Copy in elements
-    for (;first != last; ++first, ++p) { ::new (p) T(*first); }
+    for (;first != last; ++first, ++p) { new (p) T(*first); }
 }
 
 template<typename T>

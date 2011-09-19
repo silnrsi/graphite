@@ -93,7 +93,8 @@ public:
     bool          deletes() const throw();
 
     int32 run(Machine &m, slotref * & map, Machine::status_t & status) const;
-    CLASS_NEW_DELETE
+    
+    CLASS_NEW_DELETE;
 };
 
 inline Code::Code() throw()

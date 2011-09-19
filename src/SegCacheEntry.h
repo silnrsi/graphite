@@ -97,7 +97,7 @@ public:
     }
     unsigned long long lastAccess() const { return m_lastAccess; };
 
-    CLASS_NEW_DELETE
+    CLASS_NEW_DELETE;
 private:
 
     size_t m_glyphLength;

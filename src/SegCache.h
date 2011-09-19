@@ -131,7 +131,7 @@ public:
             m_entries[length-1] = newEntries;
         }
         m_entryCounts[length-1] += 1;
-        ::new (m_entries[length-1] + insertPos)
+        new (m_entries[length-1] + insertPos)
             SegCacheEntry(cmapGlyphs, length, seg, charOffset, totalAccessCount);
         return m_entries[length-1]  + insertPos;
     }

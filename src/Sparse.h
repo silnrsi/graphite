@@ -60,6 +60,8 @@ public:
 	size_t size()     const throw();
 
 	size_t _sizeof() const throw();
+	
+	CLASS_NEW_DELETE;
 private:
 	union {
 		chunk * map;

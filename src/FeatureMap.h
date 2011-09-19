@@ -45,6 +45,8 @@ public:
     FeatureSetting(const FeatureSetting & fs) : m_label(fs.m_label), m_value(fs.m_value) {};
     uint16 label() const { return m_label; }
     int16 value() const { return m_value; }
+    
+    CLASS_NEW_DELETE;
 private:
     uint16 m_label;
     int16 m_value;
@@ -98,7 +100,7 @@ public:
     const Face* getFace() const { return m_pFace;}
     const FeatureMap* getFeatureMap() const;// { return m_pFace;}
 
-    CLASS_NEW_DELETE
+    CLASS_NEW_DELETE;
 private:
     uint32 m_mask;              // bit mask to get the value from the vector
     uint32 m_id;                // feature identifier/name
