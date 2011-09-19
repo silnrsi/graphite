@@ -1,3 +1,14 @@
+1.0.3
+    . Fix UTF16 surrogate support
+    . script and lang tags may be space padded or null padded
+    . Remove need for WORDS_BIGENDIAN, do it all automatically
+    . Remove all #include <new>. Use CLASS_NEW_DELETE instead.
+    . Fix comparerenderer to work with current hbng
+    . Add valgrind to fuzztest to ensure good memory use at all times
+    . Fix new fuzztest exposed bugs.
+    . Fix bugs exposed by Mozilla security review
+    . Add continuous integration build on Windows support
+
 1.0.2
     . Fix Windows build
     . Comparerenderer uses hbng enforcing ot rendering
@@ -7,6 +18,7 @@
     . Chase the FSF around its latest office moves
     . WORDS_BIGENDIAN is set at the top so tests now pass on ppc, etc.
     . More words in the manual
+
 1.0.1
     . Release is the default build in cmake now.
     . Refactor cmake build to not rebuild things so much.
