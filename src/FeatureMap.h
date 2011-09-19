@@ -98,11 +98,6 @@ public:
     const Face* getFace() const { return m_pFace;}
     const FeatureMap* getFeatureMap() const;// { return m_pFace;}
 
-//     void * operator new (size_t s, GrFeatureRef * p)
-//     {
-//         return p;
-//     }
-
     CLASS_NEW_DELETE
 private:
     uint32 m_mask;              // bit mask to get the value from the vector

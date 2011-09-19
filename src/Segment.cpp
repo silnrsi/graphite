@@ -27,7 +27,6 @@ of the License or (at your option) any later version.
 #include "processUTF.h"
 #include <string.h>
 #include <stdlib.h>
-#include <new>
 
 #include "Segment.h"
 #include "graphite2/Font.h"

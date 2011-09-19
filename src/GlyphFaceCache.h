@@ -77,7 +77,7 @@ public:
         return malloc(s + sizeof(GlyphFace*)*hdr.numGlyphs());
     }
     // delete in case an exception is thrown in constructor
-    void operator delete(void* p, const GlyphFaceCacheHeader& )
+    void operator delete(void* p, const GlyphFaceCacheHeader& ) throw()
     {
         free(p);
     }

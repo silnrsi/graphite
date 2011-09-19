@@ -74,9 +74,9 @@ using namespace graphite2;
     return true;
 }
 
-/*static*/ GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr)
+GlyphFaceCache* GlyphFaceCache::makeCache(const GlyphFaceCacheHeader& hdr)
 {
-    return new(hdr) GlyphFaceCache(hdr);
+    return new (hdr) GlyphFaceCache(hdr);
 }
 
 GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
@@ -90,9 +90,8 @@ GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
     }
 }
 
-/*virtual*/ GlyphFaceCache::~GlyphFaceCache()
+GlyphFaceCache::~GlyphFaceCache()
 {
-//    delete[] m_glyphs;        //can't do this since not allocated by new[] and so does not know array size.
     unsigned int nGlyphs = numGlyphs();
     int deltaPointers = (*glyphPtrDirect(nGlyphs-1u) - *glyphPtrDirect(0u));
     if ((nGlyphs > 0u) && (deltaPointers == static_cast<int>(nGlyphs - 1)))
@@ -101,7 +100,7 @@ GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
         {
             GlyphFace *p = *glyphPtrDirect(i);
             assert (p);
-            delete p;      //invokes d'tor. Does not release the memory.
+            p->~GlyphFace();
         }
         free (*glyphPtrDirect(0));
     }
@@ -112,7 +111,7 @@ GlyphFaceCache::GlyphFaceCache(const GlyphFaceCacheHeader& hdr)
             GlyphFace *p = *glyphPtrDirect(i);
             if (p)
             {
-                delete p;      //invokes d'tor. Does not release the memory.
+                p->~GlyphFace();
                 free(p);
             }
         }

@@ -64,19 +64,10 @@ private:
 friend class GlyphFaceCache;
     GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid);
     ~GlyphFace() throw();
-    void * operator new (size_t /*s*/, GlyphFace * p)
-    {
-        return p;
-    }
-    // delete in case an exception is thrown in constructor
-    void operator delete(void*, GlyphFace*) {}
-    void operator delete (void *) {}
 
 public:
 
     const Position    & theAdvance() const;
-//    void                setAdvance(const Position& a);
-//    void    setBBox(const Rect& a);
     const Rect &theBBox() const { return m_bbox; }
     uint16  getAttr(uint8 index) const { 
         if (m_attrs)
@@ -95,21 +86,9 @@ private:
 private:
     Rect     m_bbox;        // bounding box metrics in design units
     Position m_advance;     // Advance width and height in design units
-//    short  * m_attribs;     // array of glyph attributes, fontface knows how many
-//    short  * m_columns;     // array of fsm column values
-//    int      m_gloc;        // glat offset
     sparse   m_attrs;
-//    uint16 * m_attrs;
 };
 
-
-#if 0
-inline GlyphFace::GlyphFace(Position pos, Rect box) throw()
-  : m_bbox(box), m_advance(pos), m_gloc(0),
-//    m_attribs(0), m_columns(0), 
-    m_attrs(0) {
-}
-#endif
 
 inline GlyphFace::~GlyphFace() throw() {
 }
@@ -117,15 +96,5 @@ inline GlyphFace::~GlyphFace() throw() {
 inline const Position & GlyphFace::theAdvance() const { 
     return m_advance;
 }
-
-#if 0
-inline void GlyphFace::setAdvance(const Position& a) { 
-    m_advance = a;
-}
-
-inline void GlyphFace::setBBox(const Rect& a) {
-    m_bbox = a;
-}
-#endif
 
 } // namespace graphite2

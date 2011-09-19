@@ -56,10 +56,14 @@ template <typename T> T * grzeroalloc(size_t n)
 } // namespace graphite2
 
 #define CLASS_NEW_DELETE \
-    void * operator new[](size_t size) {return malloc(size);} \
+    void * operator new   (size_t size){ return malloc(size);} \
+    void * operator new   (size_t, void * p) throw() { return p; } \
+    void * operator new[] (size_t size) {return malloc(size);} \
+    void * operator new[] (size_t, void * p) throw() { return p; } \
+    void operator delete   (void * p) throw() { free(p);} \
+    void operator delete   (void *, void *) throw() {} \
     void operator delete[] (void * p)throw() { free(p); } \
-    void * operator new(size_t size){ return malloc(size);} \
-    void operator delete (void * p) throw() { free(p);}
+    void operator delete[] (void *, void *) throw() {} \
 
 #ifdef __GNUC__
 #define GR_MAYBE_UNUSED __attribute__((unused))
