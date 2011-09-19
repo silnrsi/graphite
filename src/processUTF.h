@@ -199,9 +199,6 @@ private:
 
 class Utf16Consumer
 {
-private:
-    static const unsigned int SURROGATE_OFFSET = 0x10000 - 0xDC00;
-
 public:
       Utf16Consumer(const uint16* pCharStart2) : m_pCharStart(pCharStart2) {}
       
@@ -223,7 +220,7 @@ public:
       inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
       {
 	  *pRes = *m_pCharStart;
-      if (0xD800 > *pRes || pErrHandler->ignoreUnicodeOutOfRangeErrors(*pRes >= 0xE000)) {
+      if (0xD800 > *pRes || !pErrHandler->ignoreUnicodeOutOfRangeErrors(*pRes >= 0xE000)) {
           ++m_pCharStart;
           return true;
       }
@@ -242,7 +239,7 @@ public:
           return respondToError(pRes, pErrHandler);
 	  }
 	  ++m_pCharStart;
-	  *pRes =  (*pRes<<10) + ul + SURROGATE_OFFSET;
+	  *pRes =  ((*pRes - 0xD800)<<10) + ul - 0xDC00;
 	  return true;
       }
 
