@@ -63,7 +63,7 @@ template <typename utf_iter>
 inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
 {
 	size_t n_chars = 0;
-	uint32 usv;
+	uint32 usv = 0;
 
 	if (last)
 	{
