@@ -40,10 +40,10 @@ using namespace graphite2;
 Face::~Face()
 {
     delete m_pGlyphFaceCache;
-    delete m_cmapCache;
+    delete m_cmap;
     delete[] m_silfs;
     m_pGlyphFaceCache = NULL;
-    m_cmapCache = NULL;
+    m_cmap = NULL;
     m_silfs = NULL;
     delete m_pFileFace;
     delete m_pNames;
@@ -58,13 +58,18 @@ bool Face::readGlyphs(unsigned int faceOptions)
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr);
     if (!m_pGlyphFaceCache) return false;
+
+    size_t length = 0;
+    const byte * table = getTable(Tag::cmap, &length);
+    if (!table) return false;
+
     if (faceOptions & gr_face_cacheCmap)
-    {
-        size_t length = 0;
-        const byte * table = getTable(Tag::cmap, &length);
-        if (!table) return false;
-        m_cmapCache = new CmapCache(table, length);
-    }
+    	m_cmap = new CmapCache(table, length);
+    else
+    	m_cmap = new DirectCmap(table, length);
+
+    if (!m_cmap || !*m_cmap) return false;
+
     if (faceOptions & gr_face_preloadGlyphs)
     {
         m_pGlyphFaceCache->loadAllGlyphs();

@@ -425,105 +425,33 @@ void Segment::logSegment() const
 
 #endif
 
-
-
-class SlotBuilder
+template <typename utf_iter>
+inline void process_utf_data(Segment & seg, const Face & face, const int fid, utf_iter c, size_t n_chars)
 {
-public:
-      SlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
-      :	  m_face(face2), 
-	  m_pDest(pDest2), 
-	  m_ctable(NULL),
-	  m_stable(NULL),
-	  m_fid(pDest2->addFeatures(*pFeats)),
-	  m_nCharsProcessed(0) 
-      {
-          size_t cmapSize = 0;
-          const void * table = face2->getTable(Tag::cmap, &cmapSize);
-          if (!table) return;
-          m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
-          if (!m_ctable || !TtfUtil::CheckCmap31Subtable(m_ctable))
-          {
-              m_ctable = NULL;
-              return;
-          }
-          m_stable = TtfUtil::FindCmapSubtable(table, 3, 10, cmapSize);
-          if (m_stable && !TtfUtil::CheckCmap310Subtable(m_stable)) m_stable = NULL;
-      }
+	const Cmap    & cmap = face.cmap();
+	int slotid = 0;
 
-      bool processChar(uint32 cid/*unicode character*/, size_t coffset)		//return value indicates if should stop processing
-      {
-          if (!m_ctable) return false;
-          uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : (m_ctable ? TtfUtil::Cmap31Lookup(m_ctable, cid) : 0);
-          if (!gid)
-              gid = m_face->findPseudo(cid);
-          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
-          ++m_nCharsProcessed;
-          return true;
-      }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      const Face *m_face;
-      Segment *m_pDest;
-      const void *   m_ctable;
-      const void *   m_stable;
-      const unsigned int m_fid;
-      size_t m_nCharsProcessed ;
-};
-
-class CachedSlotBuilder
-{
-public:
-    CachedSlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
-    :  m_face(face2),
-    m_cmap(face2->getCmapCache()),
-    m_pDest(pDest2),
-    m_breakAttr(pDest2->silf()->aBreak()),
-    m_fid(pDest2->addFeatures(*pFeats)),
-    m_nCharsProcessed(0)
-    {
-    }
-
-    bool processChar(uint32 cid/*unicode character*/, size_t coffset)     //return value indicates if should stop processing
-    {
-        if (!m_cmap) return false;
-        uint16 gid = m_cmap->lookup(cid);
-        if (!gid)
-            gid = m_face->findPseudo(cid);
-        //int16 bw = m_face->glyphAttr(gid, m_breakAttr);
-        m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
-        ++m_nCharsProcessed;
-        return true;
-    }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      const Face *m_face;
-      const CmapCache *m_cmap;
-      Segment *m_pDest;
-      uint8 m_breakAttr;
-      const unsigned int m_fid;
-      size_t m_nCharsProcessed ;
-};
+	const typename utf_iter::codepoint_type * const base = c;
+	for (; n_chars; --n_chars, ++c, ++slotid)
+	{
+		const uint32 usv = *c;
+		uint16 gid = cmap[usv];
+		if (!gid)	gid = face.findPseudo(usv);
+		seg.appendSlot(slotid, usv, gid, fid, c - base);
+	}
+}
 
 void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
-    assert(pFeats);
-    CharacterCountLimit limit(enc, pStart, nChars);
-    IgnoreErrors ignoreErrors;
-    if (face->getCmapCache())
-    {
-        CachedSlotBuilder slotBuilder(face, pFeats, this);
-        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
-    }
-    else
-    {
-        SlotBuilder slotBuilder(face, pFeats, this);
-        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
-    }
+	assert(face);
+	assert(pFeats);
+
+	switch (enc)
+	{
+	case gr_utf8:	process_utf_data(*this, *face, addFeatures(*pFeats), utf8_iterator(pStart), nChars); break;
+	case gr_utf16:	process_utf_data(*this, *face, addFeatures(*pFeats), utf16_iterator(pStart), nChars); break;
+	case gr_utf32:	process_utf_data(*this, *face, addFeatures(*pFeats), utf32_iterator(pStart), nChars); break;
+	}
 }
 
 void Segment::prepare_pos(const Font * /*font*/)

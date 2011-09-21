@@ -35,24 +35,18 @@ using namespace graphite2;
 
 inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_cast<Face*>(p)); }
 
-class CmapProcessor
+template <typename utf_itr>
+void resolve_unicode_to_glyphs(const Face & face, utf_itr first, size_t n_chars, uint16 * glyphs)
 {
-public:
-    CmapProcessor(Face * face, uint16 * buffer) :
-        m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable("cmap", NULL), 3, 1)),
-        m_buffer(buffer), m_pos(0) {};
-    bool processChar(uint32 cid, size_t /*offset*/)      //return value indicates if should stop processing
-    {
-        assert(cid < 0xFFFF); // only lower plane supported for this test
-        m_buffer[m_pos++] = TtfUtil::Cmap31Lookup(m_cmapTable, cid);
-        return true;
-    }
-    size_t charsProcessed() const { return m_pos; } //number of characters processed. Usually starts from 0 and incremented by processChar(). Passed in to LIMIT::needMoreChars
-private:
-    const void * m_cmapTable;
-    uint16 * m_buffer;
-    size_t m_pos;
-};
+	const void * cmap = TtfUtil::FindCmapSubtable(face.getTable("cmap", NULL), 3, 1);
+
+	for (; n_chars; --n_chars, ++first)
+	{
+		const uint32 usv = *first;
+		assert(usv < 0xFFFF); 	// only lower plane supported for this test
+		*glyphs++ = TtfUtil::Cmap31Lookup(cmap, usv);
+	}
+}
 
 bool checkEntries(CachedFace
  * face, const char * testString, uint16 * glyphString, size_t testLength)
@@ -120,10 +114,7 @@ bool testSeg(CachedFace
                                                     testString + strlen(testString),
                                                     &badUtf8);
     *testGlyphString = gralloc<uint16>(*testLength + 1);
-    CharacterCountLimit limit(gr_utf8, testString, *testLength);
-    CmapProcessor cmapProcessor(face, *testGlyphString);
-    IgnoreErrors ignoreErrors;
-    processUTF(limit, &cmapProcessor, &ignoreErrors);
+    resolve_unicode_to_glyphs(*face, utf8_iterator(testString), *testLength, *testGlyphString);
 
     gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);
@@ -149,11 +140,8 @@ int main(int argc, char ** argv)
     }
     FILE * log = fopen("grsegcache.xml", "w");
     graphite_start_logging(log, GRLOG_SEGMENT);
-    CachedFace
- *face = static_cast<CachedFace
-*>(static_cast<Face
-*>(
-        (gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default))));
+    CachedFace *face = static_cast<CachedFace *>(static_cast<Face *>(
+        gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default)));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");

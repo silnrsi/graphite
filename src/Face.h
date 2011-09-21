@@ -46,7 +46,7 @@ namespace graphite2 {
 class Segment;
 class FeatureVal;
 class NameTable;
-class CmapCache;
+class Cmap;
 
 using TtfUtil::Tag;
 
@@ -116,7 +116,7 @@ public:
 public:
     Face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2) : 
         m_appFaceHandle(appFaceHandle), m_getTable(getTable2), m_pGlyphFaceCache(NULL),
-        m_cmapCache(NULL), m_numSilf(0), m_silfs(NULL), m_pFileFace(NULL),
+        m_cmap(NULL), m_numSilf(0), m_silfs(NULL), m_pFileFace(NULL),
         m_pNames(NULL) {}
     virtual ~Face();
 public:
@@ -142,7 +142,7 @@ public:
 
     const GlyphFaceCache* getGlyphFaceCache() const { return m_pGlyphFaceCache; }      //never NULL
     void takeFileFace(FileFace* pFileFace/*takes ownership*/);
-    CmapCache * getCmapCache() const { return m_cmapCache; };
+    Cmap & cmap() const { return *m_cmap; };
     NameTable * nameTable() const;
     uint16 languageForLocale(const char * locale) const;
 
@@ -156,7 +156,7 @@ private:
     // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
     // unsigned short m_capacity;      // how big is m_glyphs
     mutable GlyphFaceCache* m_pGlyphFaceCache;      //owned - never NULL
-    mutable CmapCache* m_cmapCache; // cmap cache if available
+    mutable Cmap * m_cmap; // cmap cache if available
     unsigned short m_upem;          // design units per em
 protected:
     unsigned short m_numSilf;       // number of silf subtables in the silf table

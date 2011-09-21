@@ -39,9 +39,9 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
     const void * table310 = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, length);
     m_isBmpOnly = (!table310);
     int rangeKey = 0;
-    unsigned int codePoint = 0;
-    unsigned int prevCodePoint = 0;
-    if (table310 && TtfUtil::CheckCmap310Subtable(table310))
+    uint32 	codePoint = 0,
+    		prevCodePoint = 0;
+    if (!table310 || TtfUtil::CheckCmap310Subtable(table310))
     {
         m_blocks = grzeroalloc<uint16*>(0x1100);
         if (!m_blocks) return;
@@ -98,6 +98,44 @@ CmapCache::~CmapCache()
     for (unsigned int i = 0; i < numBlocks; i++)
     	free(m_blocks[i]);
     free(m_blocks);
-    m_blocks = NULL;
+}
+
+uint16 CmapCache::operator [] (const uint32 usv) const throw()
+{
+    if ((m_isBmpOnly && usv > 0xFFFF) || (usv > 0x10FFFF))
+        return 0;
+    const uint32 block = 0xFFFF & (usv >> 8);
+    if (m_blocks[block])
+        return m_blocks[block][usv & 0xFF];
+    return 0;
+};
+
+CmapCache::operator bool() const throw()
+{
+	return m_blocks;
+}
+
+
+DirectCmap::DirectCmap(const void* cmap, size_t length)
+{
+    _ctable = TtfUtil::FindCmapSubtable(cmap, 3, 1, length);
+    if (!_ctable || !TtfUtil::CheckCmap31Subtable(_ctable))
+    {
+        _ctable =  0;
+        return;
+    }
+    _stable = TtfUtil::FindCmapSubtable(cmap, 3, 10, length);
+    if (_stable && !TtfUtil::CheckCmap310Subtable(_stable))
+    	_stable = 0;
+}
+
+uint16 DirectCmap::operator [] (const uint32 usv) const throw()
+{
+    return usv > 0xFFFF ? (_stable ? TtfUtil::Cmap310Lookup(_stable, usv) : 0) : TtfUtil::Cmap31Lookup(_ctable, usv);
+}
+
+DirectCmap::operator bool () const throw()
+{
+	return _ctable;
 }
 

@@ -32,39 +32,6 @@ using namespace graphite2;
 
 namespace 
 {
-  template <class LIMIT, class CHARPROCESSOR>
-  size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
-  {
-      BreakOnError breakOnError;
-      
-      processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
-      if (pError) {
-          *pError = breakOnError.m_pErrorPos;
-      }
-      return pProcessor->charsProcessed();
-  }
-
-  class CharCounterToNul
-  {
-  public:
-        CharCounterToNul()
-        :	  m_nCharsProcessed(0) 
-        {
-        }	  
-
-        bool processChar(uint32 cid/*unicode character*/, size_t /*offset*/)		//return value indicates if should stop processing
-        {
-            if (cid==0)
-                return false;
-            ++m_nCharsProcessed;
-            return true;
-        }
-
-        size_t charsProcessed() const { return m_nCharsProcessed; }
-
-  private:
-        size_t m_nCharsProcessed ;
-  };
 
   gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
@@ -92,23 +59,40 @@ namespace
 }
 
 
-extern "C" {
+template <typename utf_iter>
+inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
+{
+	size_t n_chars = 0;
+	uint32 usv;
 
+	if (last)
+	{
+		for (;first != last; ++first, ++n_chars)
+			if ((usv = *first) == 0xFFFD) break;
+	}
+	else
+	{
+		for (; (usv = *first) != 0; ++first, ++n_chars)
+			if (usv == 0xFFFD) break;
+	}
+
+	if (error)	*error = usv == 0xFFFD ? first : 0;
+	return n_chars;
+}
+
+extern "C" {
 
 size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
-  if (buffer_end)
-  {
-    BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-  }
-  else
-  {
-    NoLimit limit(enc, buffer_begin);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-  }
+	assert(buffer_begin);
+
+	switch (enc)
+	{
+	case gr_utf8:	return count_unicode_chars<utf8_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf16:	return count_unicode_chars<utf16_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf32:	return count_unicode_chars<utf32_iterator>(buffer_begin, buffer_end, pError); break;
+	default:		return 0;
+	}
 }
 
 

@@ -26,24 +26,45 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include <graphite2/Types.h>
+#include <Main.h>
 
 namespace graphite2 {
 
-class CmapCache
+class Face;
+
+class Cmap
 {
 public:
-    CmapCache(const void * cmapTable, size_t length);
-    ~CmapCache();
-    uint16 lookup(unsigned int unicode) const {
-        if ((m_isBmpOnly && unicode > 0xFFFF) || (unicode > 0x10FFFF))
-            return 0;
-        unsigned int block = (0xFFFFFF & unicode) >> 8;
-        if (m_blocks && m_blocks[block])
-            return m_blocks[block][unicode & 0xFF];
-        return 0;
-    };
-    CLASS_NEW_DELETE
+	virtual ~Cmap() throw() {}
+
+	virtual uint16 operator [] (const uint32) const throw() { return 0; }
+
+	virtual operator bool () const throw() { return false; }
+
+	CLASS_NEW_DELETE;
+};
+
+class DirectCmap : public Cmap
+{
+public:
+	DirectCmap(const void* cmap, size_t length);
+	virtual uint16 operator [] (const uint32 usv) const throw();
+	virtual operator bool () const throw();
+
+    CLASS_NEW_DELETE;
+private:
+    const void *_stable,
+    		   *_ctable;
+};
+
+class CmapCache : public Cmap
+{
+public:
+	CmapCache(const void * cmapTable, size_t length);
+	virtual ~CmapCache() throw();
+	virtual uint16 operator [] (const uint32 usv) const throw();
+	virtual operator bool () const throw();
+    CLASS_NEW_DELETE;
 private:
     bool m_isBmpOnly;
     uint16 ** m_blocks;
