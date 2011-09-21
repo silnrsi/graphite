@@ -421,7 +421,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
 	class utf16_iterator : public std::iterator<std::input_iterator_tag, uint32>
 	{
 		static const uint32	replacement_char = 0xFFFD;
-		static const int	surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
+		static const int32	surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
 	public:
 		typedef uint16	codepoint_type;
 
@@ -439,7 +439,7 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
 			if (0xD800 > uh || uh > 0xDBFF)	{ _v = uh; return _v; }
 			const uint32 ul = *++_p;
 			if (0xDC00 > ul || ul > 0xDFFF) { --_p; _v = replacement_char; return _v; }
-			_v = (uh<<10) + ul - surrogate_offset;
+			_v = (uh<<10) + ul + surrogate_offset;
 			return _v;
 		}
 
