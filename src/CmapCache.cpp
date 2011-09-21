@@ -92,7 +92,7 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
     }
 }
 
-CmapCache::~CmapCache()
+CmapCache::~CmapCache() throw()
 {
     unsigned int numBlocks = (m_isBmpOnly)? 0x100 : 0x1100;
     for (unsigned int i = 0; i < numBlocks; i++)
