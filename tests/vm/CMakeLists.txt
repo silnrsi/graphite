@@ -33,6 +33,7 @@ target_objects(OBJS graphite2
     Slot.cpp
     Sparse.cpp
     TtfUtil.cpp
+    UtfCodec.cpp
     ${TRACESUPPORT})
 add_library(vm-test-common STATIC basic_test.cpp ${OBJS})
 add_dependencies(vm-test-common graphite2)

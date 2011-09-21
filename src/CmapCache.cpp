@@ -41,7 +41,7 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
     int rangeKey = 0;
     uint32 	codePoint = 0,
     		prevCodePoint = 0;
-    if (!table310 || TtfUtil::CheckCmap310Subtable(table310))
+    if (table310 || TtfUtil::CheckCmap310Subtable(table310))
     {
         m_blocks = grzeroalloc<uint16*>(0x1100);
         if (!m_blocks) return;

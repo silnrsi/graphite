@@ -27,7 +27,7 @@
 #include "Segment.h"
 #include "SegCache.h"
 #include "SegCacheStore.h"
-#include "processUTF.h"
+#include "UtfCodec.h"
 #include "TtfTypes.h"
 #include "TtfUtil.h"
 

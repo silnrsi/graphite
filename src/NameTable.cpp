@@ -28,7 +28,7 @@ of the License or (at your option) any later version.
 #include "Endian.h"
 
 #include "NameTable.h"
-#include "processUTF.h"
+#include "UtfCodec.h"
 
 
 using namespace graphite2;

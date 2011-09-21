@@ -85,6 +85,7 @@ add_library(graphite2 SHARED
     Slot.cpp
     Sparse.cpp
     TtfUtil.cpp
+    UtfCodec.cpp
     XmlTraceLog.cpp
     XmlTraceLogTags.cpp)
 

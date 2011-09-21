@@ -63,7 +63,8 @@ $(_NS)_SOURCES = \
     $($(_NS)_BASE)/src/Silf.cpp \
     $($(_NS)_BASE)/src/Slot.cpp \
     $($(_NS)_BASE)/src/Sparse.cpp \
-    $($(_NS)_BASE)/src/TtfUtil.cpp
+    $($(_NS)_BASE)/src/TtfUtil.cpp \
+    $($(_NS)_BASE)/src/UtfCodec.cpp
 
 $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/CachedFace.h \
@@ -96,6 +97,7 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/Sparse.h \
     $($(_NS)_BASE)/src/TtfTypes.h \
     $($(_NS)_BASE)/src/TtfUtil.h \
+    $($(_NS)_BASE)/src/UtfCodec.h \
     $($(_NS)_BASE)/src/XmlTraceLog.h \
     $($(_NS)_BASE)/src/XmlTraceLogTags.h 
 

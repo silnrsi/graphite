@@ -390,109 +390,102 @@ void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pP
     };
 
 
+template <typename C, class T = const uint32>
+class utf_iter
+{
+protected:
+	static const uint32 limit = 0x110000;
 
-	class utf32_iterator : public std::iterator<std::input_iterator_tag, uint32>
-	{
-		static const uint32 limit = 0x110000;
+	mutable C * _p;
+public:
+	typedef C 	codepoint_type;
+	typedef T 	value_type;
+	typedef T & reference;
+	typedef T * pointer;
 
-	public:
-		typedef uint32	codepoint_type;
+	utf_iter(C * us) : _p(reinterpret_cast<C *>(us)) {}
 
-		utf32_iterator(const void * us=0) : _p(reinterpret_cast<const uint32 *>(us)) {}
+	utf_iter<C,T> & operator ++ () 		{ ++_p; return *this; }
+	utf_iter<C,T> 	operator ++ (int) 	{ utf_iter<C,T> tmp(*this); operator++(); return tmp; }
 
-		utf32_iterator & operator ++ () 		{ ++_p; return *this; }
-		utf32_iterator   operator ++ (int) 	{ utf32_iterator tmp(*this); operator++(); return tmp; }
+	bool operator == (const utf_iter<C,T> & rhs) const { return _p >= rhs._p; }
+	bool operator != (const utf_iter<C,T> & rhs) const { return !operator==(rhs); }
 
-		bool operator == (const utf32_iterator & rhs) { return _p == rhs._p; }
-		bool operator != (const utf32_iterator & rhs) { return !operator==(rhs); }
+	reference	operator * () const;
+	pointer		operator ->() const;
 
-		value_type 			operator * () const { return *operator->(); }
-		const value_type  * operator ->() const {
-			static const uint32	replacement_char = 0xFFFD;
-			return *_p < limit ? _p : &replacement_char;
+	operator codepoint_type * () const { return _p; }
+};
+
+class utf32_iterator : public utf_iter<const uint32>
+{
+	static const uint32	replacement_char;
+public:
+	utf32_iterator(const void * us=0) : utf_iter<const uint32>(reinterpret_cast<const uint32 *>(us)) {}
+
+	reference 	operator * () const { return *operator->(); }
+	pointer		operator ->() const {
+		return *_p < limit ? _p : &replacement_char;
+	}
+};
+
+
+class utf16_iterator : public utf_iter<const uint16>
+{
+	static const int32	surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
+public:
+	utf16_iterator(const void * us=0) : utf_iter<const uint16>(reinterpret_cast<const uint16 *>(us)) {}
+
+	reference	operator * () const {
+		const uint32	uh = *_p;
+
+		if (0xD800 > uh || uh > 0xDFFF)	{ _v = uh; return _v; }
+		const uint32 ul = *++_p;
+		if (uh > 0xDBFF || 0xDC00 > ul || ul > 0xDFFF) { --_p; _v = 0xFFFD; return _v; }
+		_v = (uh<<10) + ul + surrogate_offset;
+		return _v;
+	}
+
+	pointer operator ->() const { operator * (); return &_v; }
+
+protected:
+	mutable	uint32 _v;
+};
+
+
+class utf8_iterator : public utf_iter<const uint8>
+{
+	static const int8 sz_lut[16];
+	static const byte mask_lut[5];
+
+public:
+	utf8_iterator(const void * us=0) : utf_iter<const uint8>(reinterpret_cast<const uint8 *>(us)) {}
+
+	reference	operator * () const {
+		const int8    	seq_sz = sz_lut[*_p >> 4];
+		_v = *_p & mask_lut[seq_sz];
+		uint8	bad = _v & 0x80;
+
+		switch(seq_sz) {
+			case 4:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40;
+			case 3:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40;
+			case 2:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40; break;
+			case 1:		break;
+			case 0:     _v = 0xFFFD; return _v;
 		}
 
-		operator const uint32 * () const { return _p; }
-	protected:
-		const codepoint_type * _p;
-	};
-
-
-	class utf16_iterator : public std::iterator<std::input_iterator_tag, uint32>
-	{
-		static const uint32	replacement_char = 0xFFFD;
-		static const int32	surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
-	public:
-		typedef uint16	codepoint_type;
-
-		utf16_iterator(const void * us=0) : _p(reinterpret_cast<const codepoint_type *>(us)) {}
-
-		utf16_iterator & operator ++ () 		{ ++_p; return *this; }
-		utf16_iterator   operator ++ (int) 		{ utf16_iterator tmp(*this); operator++(); return tmp; }
-
-		bool operator == (const utf16_iterator & rhs) { return _p >= rhs._p; }
-		bool operator != (const utf16_iterator & rhs) { return !operator==(rhs); }
-
-		value_type 			operator * () const {
-			const uint32	uh = *_p;
-
-			if (0xD800 > uh || uh > 0xDBFF)	{ _v = uh; return _v; }
-			const uint32 ul = *++_p;
-			if (0xDC00 > ul || ul > 0xDFFF) { --_p; _v = replacement_char; return _v; }
-			_v = (uh<<10) + ul + surrogate_offset;
-			return _v;
+		if (bad)
+		{
+			_p -= seq_sz - 1;
+			_v  = 0xFFFD;
 		}
+		return _v;
+	}
 
-		const value_type *	operator ->() const { operator * (); return &_v; }
+	pointer	operator ->() const { operator * (); return &_v; }
 
-		operator const codepoint_type * () const { return _p; }
-	protected:
-		mutable const 	codepoint_type  *_p;
-		mutable 		value_type 		 _v;
-	};
-
-
-	class utf8_iterator : public std::iterator<std::input_iterator_tag, uint32>
-	{
-		static const uint32	replacement_char = 0xFFFD;
-	public:
-		typedef uint8	codepoint_type;
-
-		utf8_iterator(const void * us=0) : _p(reinterpret_cast<const codepoint_type *>(us)) {}
-
-		utf8_iterator & operator ++ () 		{ ++_p; return *this; }
-		utf8_iterator   operator ++ (int) 	{ utf8_iterator tmp(*this); operator++(); return tmp; }
-
-		bool operator == (const utf8_iterator & rhs) { return _p >= rhs._p; }
-		bool operator != (const utf8_iterator & rhs) { return !operator==(rhs); }
-
-		value_type 			operator * () const {
-			static const int8 utf8_sz_lut[16] = {1,1,1,1,1,1,1,1,	// 1 byte
-											   	 0,0,0,0,  			// trailing byte
-											   	 2,2,				// 2 bytes
-											   	 3,					// 3 bytes
-											   	 4};				// 4 bytes
-			static const byte utf8_mask_lut[5] = {0x80,0x00,0xC0,0xE0,0xF0};
-
-			const int8    	seq_sz = utf8_sz_lut[*_p >> 4];
-		    _v = *_p ^ utf8_mask_lut[seq_sz];
-
-		    switch(seq_sz) {
-		        case 4:     _v <<= 6; _v |= *++_p & 0x7F;
-		        case 3:     _v <<= 6; _v |= *++_p & 0x7F;
-		        case 2:     _v <<= 6; _v |= *++_p & 0x7F; break;
-		        case 1:     break;
-		        case 0:     _v = replacement_char; break;
-		    }
-		    return _v;
-		}
-
-		const value_type *	operator ->() const { operator * (); return &_v; }
-
-		operator const codepoint_type * () const { return _p; }
-	protected:
-		mutable const 	codepoint_type  *_p;
-		mutable 		value_type 		 _v;
-	};
+protected:
+	mutable uint32	_v;
+};
 
 } // namespace graphite2
