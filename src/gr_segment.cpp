@@ -68,15 +68,18 @@ inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const voi
 	if (last)
 	{
 		for (;first != last; ++first, ++n_chars)
-			if ((usv = *first) == 0xFFFD) break;
+			if ((usv = *first) == 0 || first.error()) break;
 	}
 	else
 	{
-		for (; (usv = *first) != 0; ++first, ++n_chars)
-			if (usv == 0xFFFD) break;
+		while ((usv = *first) != 0 && !first.error())
+		{
+			++first;
+			++n_chars;
+		}
 	}
 
-	if (error)	*error = usv == 0xFFFD ? first : 0;
+	if (error)	*error = first.error() ? first : 0;
 	return n_chars;
 }
 
@@ -88,9 +91,9 @@ size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, con
 
 	switch (enc)
 	{
-	case gr_utf8:	return count_unicode_chars<utf8_iterator>(buffer_begin, buffer_end, pError); break;
-	case gr_utf16:	return count_unicode_chars<utf16_iterator>(buffer_begin, buffer_end, pError); break;
-	case gr_utf32:	return count_unicode_chars<utf32_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf8:	return count_unicode_chars<utf8::const_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf16:	return count_unicode_chars<utf16::const_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf32:	return count_unicode_chars<utf32::const_iterator>(buffer_begin, buffer_end, pError); break;
 	default:		return 0;
 	}
 }

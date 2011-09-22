@@ -114,7 +114,7 @@ bool testSeg(CachedFace
                                                     testString + strlen(testString),
                                                     &badUtf8);
     *testGlyphString = gralloc<uint16>(*testLength + 1);
-    resolve_unicode_to_glyphs(*face, utf8_iterator(testString), *testLength, *testGlyphString);
+    resolve_unicode_to_glyphs(*face, utf8::iterator(testString), *testLength, *testGlyphString);
 
     gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);

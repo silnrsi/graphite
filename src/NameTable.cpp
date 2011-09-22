@@ -30,7 +30,6 @@ of the License or (at your option) any later version.
 #include "NameTable.h"
 #include "UtfCodec.h"
 
-
 using namespace graphite2;
 
 NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 encodingID)
@@ -146,42 +145,37 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
         return NULL;
     }
     utf16Length >>= 1; // in utf16 units
-    uint16 * utf16Name = gralloc<uint16>(utf16Length + 1);
+    utf16::codeunit_t * utf16Name = gralloc<utf16::codeunit_t>(utf16Length);
     const uint8* pName = m_nameData + offset;
     for (size_t i = 0; i < utf16Length; i++)
     {
         utf16Name[i] = be::read<uint16>(pName);
     }
-    utf16Name[utf16Length] = 0;
-    if (enc == gr_utf16)
+    switch (enc)
     {
-        length = utf16Length;
-        return utf16Name;
-    }
-    else if (enc == gr_utf8)
+    case gr_utf8:
     {
-        uint8* uniBuffer = gralloc<uint8>(3 * utf16Length + 1);
-        ToUtf8Processor processor(uniBuffer, 3 * utf16Length + 1);
-        IgnoreErrors ignore;
-        BufferLimit bufferLimit(gr_utf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
-        processUTF<BufferLimit, ToUtf8Processor, IgnoreErrors>(bufferLimit, &processor, &ignore);
-        length = processor.bytesProcessed();
-        uniBuffer[processor.bytesProcessed()] = 0;
-        free(utf16Name);
-        return uniBuffer;
-    }
-    else if (enc == gr_utf32)
-    {
-        uint32 * uniBuffer = gralloc<uint32>(utf16Length  + 1);
-        IgnoreErrors ignore;
-        BufferLimit bufferLimit(gr_utf16, reinterpret_cast<void*>(utf16Name), reinterpret_cast<void*>(utf16Name + utf16Length));
-
-        ToUtf32Processor processor(uniBuffer, utf16Length);
-        processUTF(bufferLimit, &processor, &ignore);
-        length = processor.charsProcessed();
+    	utf8::codeunit_t* uniBuffer = gralloc<utf8::codeunit_t>(3 * utf16Length + 1);
+        utf8::iterator d = uniBuffer;
+        for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
+        	*d = *s;
+        length = d - uniBuffer;
         uniBuffer[length] = 0;
-        free(utf16Name);
         return uniBuffer;
+    }
+    case gr_utf16:
+    	length = utf16Length;
+    	return utf16Name;
+    case gr_utf32:
+    {
+    	utf32::codeunit_t * uniBuffer = gralloc<utf32::codeunit_t>(utf16Length  + 1);
+		utf32::iterator d = uniBuffer;
+		for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
+			*d = *s;
+		length = d - uniBuffer;
+		uniBuffer[length] = 0;
+		return uniBuffer;
+    }
     }
     length = 0;
     return NULL;

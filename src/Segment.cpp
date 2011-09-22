@@ -431,7 +431,7 @@ inline void process_utf_data(Segment & seg, const Face & face, const int fid, ut
 	const Cmap    & cmap = face.cmap();
 	int slotid = 0;
 
-	const typename utf_iter::codepoint_type * const base = c;
+	const typename utf_iter::codeunit_type * const base = c;
 	for (; n_chars; --n_chars, ++c, ++slotid)
 	{
 		const uint32 usv = *c;
@@ -448,9 +448,9 @@ void Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
 
 	switch (enc)
 	{
-	case gr_utf8:	process_utf_data(*this, *face, addFeatures(*pFeats), utf8_iterator(pStart), nChars); break;
-	case gr_utf16:	process_utf_data(*this, *face, addFeatures(*pFeats), utf16_iterator(pStart), nChars); break;
-	case gr_utf32:	process_utf_data(*this, *face, addFeatures(*pFeats), utf32_iterator(pStart), nChars); break;
+	case gr_utf8:	process_utf_data(*this, *face, addFeatures(*pFeats), utf8::const_iterator(pStart), nChars); break;
+	case gr_utf16:	process_utf_data(*this, *face, addFeatures(*pFeats), utf16::const_iterator(pStart), nChars); break;
+	case gr_utf32:	process_utf_data(*this, *face, addFeatures(*pFeats), utf32::const_iterator(pStart), nChars); break;
 	}
 }
 

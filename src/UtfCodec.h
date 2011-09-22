@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -24,7 +24,7 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#pragma once 
+#pragma once
 
 #include <iterator>
 #include "Main.h"
@@ -32,460 +32,177 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-class BufferLimit
+typedef uint32 	uchar_t;
+
+template <int N>
+struct _utf_codec
 {
-public:
-    BufferLimit(gr_encform enc2, const void* pStart2, const void* pEnd/*as in stl i.e. don't use end*/) : m_enc(enc2), m_pStart(pStart2) {
-	size_t nFullTokens = (static_cast<const char*>(pEnd)-static_cast<const char *>(m_pStart))/int(m_enc); //rounds off partial tokens
-	m_pEnd = static_cast<const char *>(m_pStart) + (nFullTokens*int(m_enc));
-    }
-    gr_encform enc() const { return m_enc; }
-    const void* pStart() const { return m_pStart; }
+	typedef	uchar_t	codeunit_t;
 
-    bool inBuffer (const void* pCharLastSurrogatePart, uint32 /*val*/) const { return pCharLastSurrogatePart<m_pEnd; }	//also called on charstart by needMoreChars()
-
-    bool needMoreChars (const void* pCharStart, size_t /*nProcessed*/) const { return inBuffer(pCharStart, 1); }
-
-private:
-    const void* m_pEnd;
-    gr_encform m_enc;
-    const void* m_pStart;
+	static void 	put(codeunit_t * cp, const uchar_t , int8 & len) throw();
+	static uchar_t	get(const codeunit_t * cp, int8 & len) throw();
 };
 
 
-class IgnoreErrors
+template <>
+struct _utf_codec<32>
 {
-public:
-    //for all of the ignore* methods is the parameter is false, the return result must be true
-    static bool ignoreUnicodeOutOfRangeErrors(bool /*isBad*/) { return true; }
-    static bool ignoreBadSurrogatesErrors(bool /*isBad*/) { return true; }
-
-    static bool handleError(const void* /*pPositionOfError*/) { return true;}
-};
-
-inline unsigned int utf8_extrabytes(const unsigned int topNibble) { return (0xE5FF0000>>(2*topNibble))&0x3; }
-
-inline unsigned int utf8_mask(const unsigned int seq_extra) { return ((0xFEC0>>(4*seq_extra))&0xF)<<4; }
-
-class Utf8Consumer
-{
-public:
-    Utf8Consumer(const uint8* pCharStart2) : m_pCharStart(pCharStart2) {}
-
-    const uint8* pCharStart() const { return m_pCharStart; }
-
 private:
-    template <class ERRORHANDLER>
-    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
-        *pRes = 0xFFFD;
-        if (!pErrHandler->handleError(m_pCharStart)) {
-            return false;
-        }
-        ++m_pCharStart;
-        return true;
-    }
-
+	static const uchar_t	limit = 0x110000;
 public:
-    template <class LIMIT, class ERRORHANDLER>
-    inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler) {			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
-        const unsigned int seq_extra = utf8_extrabytes(*m_pCharStart >> 4);        //length of sequence including *m_pCharStart is 1+seq_extra
-        if (!limit.inBuffer(m_pCharStart+(seq_extra), *m_pCharStart)) {
-            return false;
-        }
+	typedef	uint32	codeunit_t;
 
-        *pRes = *m_pCharStart ^ utf8_mask(seq_extra);
+	inline
+	static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+	{
+		*cp = usv; l = 1;
+	}
 
-        if (seq_extra) {
-            switch(seq_extra) {    //hopefully the optimizer will implement this as a jump table. If not the above if should cover the majority case.
-                case 3: {
-                    if (pErrHandler->ignoreUnicodeOutOfRangeErrors(*m_pCharStart>=0xF8)) {		//the good case
-                        ++m_pCharStart;
-                        if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
-                            return respondToError(pRes, pErrHandler);
-                        }
-
-                        *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;		//drop through
-                    }
-                    else {
-                        return respondToError(pRes, pErrHandler);
-                    }
-                }
-                case 2: {
-                    ++m_pCharStart;
-                    if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
-                        return respondToError(pRes, pErrHandler);
-                    }
-                }
-                *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;       //drop through
-                case 1: {
-                    ++m_pCharStart;
-                    if (!pErrHandler->ignoreBadSurrogatesErrors((*m_pCharStart&0xC0)!=0x80)) {
-                        return respondToError(pRes, pErrHandler);
-                    }
-                }
-                *pRes <<= 6; *pRes |= *m_pCharStart & 0x3F;
-             }
-        }
-        ++m_pCharStart;
-        return true;
-    }
-
-private:
-    const uint8 *m_pCharStart;
-};
-
-
-
-class Utf16Consumer
-{
-public:
-      Utf16Consumer(const uint16* pCharStart2) : m_pCharStart(pCharStart2) {}
-
-      const uint16* pCharStart() const { return m_pCharStart; }
-
-private:
-    template <class ERRORHANDLER>
-    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
-        *pRes = 0xFFFD;
-        if (!pErrHandler->handleError(m_pCharStart)) {
-            return false;
-        }
-        ++m_pCharStart;
-        return true;
-    }
-
-public:
-      template <class LIMIT, class ERRORHANDLER>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
-      {
-	  *pRes = *m_pCharStart;
-      if (0xD800 > *pRes || !pErrHandler->ignoreUnicodeOutOfRangeErrors(*pRes >= 0xE000)) {
-          ++m_pCharStart;
-          return true;
-      }
-
-      if (!pErrHandler->ignoreBadSurrogatesErrors(*pRes >= 0xDC00)) {        //second surrogate is incorrectly coming first
-          return respondToError(pRes, pErrHandler);
-      }
-
-      ++m_pCharStart;
-	  if (!limit.inBuffer(m_pCharStart, *pRes)) {
-	      return false;
-	  }
-
-	  uint32 ul = *(m_pCharStart);
-	  if (!pErrHandler->ignoreBadSurrogatesErrors(0xDC00 > ul || ul > 0xDFFF)) {
-          return respondToError(pRes, pErrHandler);
-	  }
-	  ++m_pCharStart;
-	  *pRes =  ((*pRes - 0xD800)<<10) + ul - 0xDC00;
-	  return true;
-      }
-
-private:
-      const uint16 *m_pCharStart;
-};
-
-
-class Utf32Consumer
-{
-public:
-      Utf32Consumer(const uint32* pCharStart2) : m_pCharStart(pCharStart2) {}
-
-      const uint32* pCharStart() const { return m_pCharStart; }
-
-private:
-    template <class ERRORHANDLER>
-    bool respondToError(uint32* pRes, ERRORHANDLER* pErrHandler) {       //return value is if should stop parsing
-        *pRes = 0xFFFD;
-        if (!pErrHandler->handleError(m_pCharStart)) {
-            return false;
-        }
-        ++m_pCharStart;
-        return true;
-    }
-
-public:
-      template <class LIMIT, class ERRORHANDLER>
-      inline bool consumeChar(const LIMIT& limit, uint32* pRes, ERRORHANDLER* pErrHandler)			//At start, limit.inBuffer(m_pCharStart) is true. return value is iff character contents does not go past limit
-      {
-	  *pRes = *m_pCharStart;
-      if (pErrHandler->ignoreUnicodeOutOfRangeErrors(!(*pRes<0xD800 || (*pRes>=0xE000 && *pRes<0x110000)))) {
-          if (!limit.inBuffer(++m_pCharStart, *pRes))
-            return false;
-          else
-            return true;
-      }
-
-      return respondToError(pRes, pErrHandler);
-      }
-
-private:
-      const uint32 *m_pCharStart;
-};
-
-
-
-
-
-template <class LIMIT, class CHARPROCESSOR, class ERRORHANDLER>
-void processUTF(const LIMIT& limit/*when to stop processing*/, CHARPROCESSOR* pProcessor, ERRORHANDLER* pErrHandler)
-{
-     uint32             cid;
-     switch (limit.enc()) {
-       case gr_utf8 : {
-        const uint8 *pInit = static_cast<const uint8 *>(limit.pStart());
-	    Utf8Consumer consumer(pInit);
-        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-            const uint8 *pCur = consumer.pCharStart();
-		    if (!consumer.consumeChar(limit, &cid, pErrHandler))
-		        break;
-		    if (!pProcessor->processChar(cid, pCur - pInit))
-		        break;
-        }
-        break; }
-       case gr_utf16: {
-        const uint16* pInit = static_cast<const uint16 *>(limit.pStart());
-        Utf16Consumer consumer(pInit);
-        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-            const uint16 *pCur = consumer.pCharStart();
-    		if (!consumer.consumeChar(limit, &cid, pErrHandler))
-	    	    break;
-		    if (!pProcessor->processChar(cid, pCur - pInit))
-		        break;
-            }
-	    break;
-        }
-       case gr_utf32 : default: {
-        const uint32 *pInit = static_cast<const uint32 *>(limit.pStart());
-	    Utf32Consumer consumer(pInit);
-        for (;limit.needMoreChars(consumer.pCharStart(), pProcessor->charsProcessed());) {
-            const uint32 *pCur = consumer.pCharStart();
-		    if (!consumer.consumeChar(limit, &cid, pErrHandler))
-		        break;
-		    if (!pProcessor->processChar(cid, pCur - pInit))
-		        break;
-            }
-        break;
-        }
-    }
-}
-
-    class ToUtf8Processor
-    {
-    public:
-        // buffer length should be three times the utf16 length or
-        // four times the utf32 length to cover the worst case
-        ToUtf8Processor(uint8 * buffer, size_t maxLength) :
-            m_count(0), m_byteLength(0), m_maxLength(maxLength), m_buffer(buffer)
-        {}
-        bool processChar(uint32 cid, size_t /*offset*/)
-        {
-            // taken from Unicode Book ch3.9
-            if (cid <= 0x7F)
-                m_buffer[m_byteLength++] = cid;
-            else if (cid <= 0x07FF)
-            {
-                if (m_byteLength + 2 >= m_maxLength)
-                    return false;
-                m_buffer[m_byteLength++] = 0xC0 + (cid >> 6);
-                m_buffer[m_byteLength++] = 0x80 + (cid & 0x3F);
-            }
-            else if (cid <= 0xFFFF)
-            {
-                if (m_byteLength + 3 >= m_maxLength)
-                    return false;
-                m_buffer[m_byteLength++] = 0xE0 + (cid >> 12);
-                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x0FC0) >> 6);
-                m_buffer[m_byteLength++] = 0x80 +  (cid & 0x003F);
-            }
-            else if (cid <= 0x10FFFF)
-            {
-                if (m_byteLength + 4 >= m_maxLength)
-                    return false;
-                m_buffer[m_byteLength++] = 0xF0 + (cid >> 18);
-                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x3F000) >> 12);
-                m_buffer[m_byteLength++] = 0x80 + ((cid & 0x00FC0) >> 6);
-                m_buffer[m_byteLength++] = 0x80 +  (cid & 0x0003F);
-            }
-            else
-            {
-                // ignore
-            }
-            m_count++;
-            if (m_byteLength >= m_maxLength)
-                return false;
-            return true;
-        }
-        size_t charsProcessed() const { return m_count; }
-        size_t bytesProcessed() const { return m_byteLength; }
-    private:
-        size_t m_count;
-        size_t m_byteLength;
-        size_t m_maxLength;
-        uint8 * m_buffer;
-    };
-//
-//    class ToUtf16Processor
-//    {
-//    public:
-//        // buffer length should be twice the utf32 length
-//        // to cover the worst case
-//        ToUtf16Processor(uint16 * buffer, size_t maxLength) :
-//            m_count(0), m_uint16Length(0), m_maxLength(maxLength), m_buffer(buffer)
-//        {}
-//        bool processChar(uint32 cid, size_t /*offset*/)
-//        {
-//            // taken from Unicode Book ch3.9
-//            if (cid <= 0xD800)
-//                m_buffer[m_uint16Length++] = cid;
-//            else if (cid < 0xE000)
-//            {
-//                // skip for now
-//            }
-//            else if (cid >= 0xE000 && cid <= 0xFFFF)
-//                m_buffer[m_uint16Length++] = cid;
-//            else if (cid <= 0x10FFFF)
-//            {
-//                if (m_uint16Length + 2 >= m_maxLength)
-//                    return false;
-//                m_buffer[m_uint16Length++] = 0xD800 + ((cid & 0xFC00) >> 10) + ((cid >> 16) - 1);
-//                m_buffer[m_uint16Length++] = 0xDC00 + ((cid & 0x03FF) >> 12);
-//            }
-//            else
-//            {
-//                // ignore
-//            }
-//            m_count++;
-//            if (m_uint16Length == m_maxLength)
-//                return false;
-//            return true;
-//        }
-//        size_t charsProcessed() const { return m_count; }
-//        size_t uint16Processed() const { return m_uint16Length; }
-//    private:
-//        size_t m_count;
-//        size_t m_uint16Length;
-//        size_t m_maxLength;
-//        uint16 * m_buffer;
-//    };
-//
-    class ToUtf32Processor
-    {
-    public:
-        ToUtf32Processor(uint32 * buffer, size_t maxLength) :
-            m_count(0), m_maxLength(maxLength), m_buffer(buffer) {}
-        bool processChar(uint32 cid, size_t /*offset*/)
-        {
-            m_buffer[m_count++] = cid;
-            if (m_count == m_maxLength)
-                return false;
-            return true;
-        }
-        size_t charsProcessed() const { return m_count; }
-    private:
-        size_t m_count;
-        size_t m_maxLength;
-        uint32 * m_buffer;
-    };
-
-
-template <typename C, class T = const uint32>
-class utf_iter
-{
-protected:
-	static const uint32 limit = 0x110000;
-
-	mutable C * _p;
-public:
-	typedef C 	codepoint_type;
-	typedef T 	value_type;
-	typedef T & reference;
-	typedef T * pointer;
-
-	utf_iter(C * us) : _p(reinterpret_cast<C *>(us)) {}
-
-	utf_iter<C,T> & operator ++ () 		{ ++_p; return *this; }
-	utf_iter<C,T> 	operator ++ (int) 	{ utf_iter<C,T> tmp(*this); operator++(); return tmp; }
-
-	bool operator == (const utf_iter<C,T> & rhs) const { return _p >= rhs._p; }
-	bool operator != (const utf_iter<C,T> & rhs) const { return !operator==(rhs); }
-
-	reference	operator * () const;
-	pointer		operator ->() const;
-
-	operator codepoint_type * () const { return _p; }
-};
-
-class utf32_iterator : public utf_iter<const uint32>
-{
-	static const uint32	replacement_char;
-public:
-	utf32_iterator(const void * us=0) : utf_iter<const uint32>(reinterpret_cast<const uint32 *>(us)) {}
-
-	reference 	operator * () const { return *operator->(); }
-	pointer		operator ->() const {
-		return *_p < limit ? _p : &replacement_char;
+	inline
+	static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+	{
+		if (cp[0] < limit)	{ l = 1;  return cp[0]; }
+		else				{ l = -1; return 0xFFFD; }
 	}
 };
 
 
-class utf16_iterator : public utf_iter<const uint16>
+template <>
+struct _utf_codec<16>
 {
+private:
+	static const int32	lead_offset		 = 0xD800 - (0x10000 >> 10);
 	static const int32	surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
 public:
-	utf16_iterator(const void * us=0) : utf_iter<const uint16>(reinterpret_cast<const uint16 *>(us)) {}
+	typedef	uint16	codeunit_t;
 
-	reference	operator * () const {
-		const uint32	uh = *_p;
-
-		if (0xD800 > uh || uh > 0xDFFF)	{ _v = uh; return _v; }
-		const uint32 ul = *++_p;
-		if (uh > 0xDBFF || 0xDC00 > ul || ul > 0xDFFF) { --_p; _v = 0xFFFD; return _v; }
-		_v = (uh<<10) + ul + surrogate_offset;
-		return _v;
+	inline
+	static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+	{
+		if (usv < 0x10000)	{ l = 1; cp[0] = codeunit_t(usv); }
+		else
+		{
+			cp[0] = codeunit_t(lead_offset + (usv >> 10));
+			cp[1] = codeunit_t(0xDC00 + (usv & 0x3FF));
+			l = 2;
+		}
 	}
 
-	pointer operator ->() const { operator * (); return &_v; }
+	inline
+	static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+	{
+		const uint32	uh = cp[0];
+		l = 1;
 
-protected:
-	mutable	uint32 _v;
+		if (0xD800 > uh || uh > 0xDFFF)	{ return uh; }
+		const uint32 ul = cp[1];
+		if (uh > 0xDBFF || 0xDC00 > ul || ul > 0xDFFF) { l = -1; return 0xFFFD; }
+		++l;
+		return (uh<<10) + ul + surrogate_offset;
+	}
 };
 
 
-class utf8_iterator : public utf_iter<const uint8>
+template <>
+struct _utf_codec<8>
 {
+private:
 	static const int8 sz_lut[16];
 	static const byte mask_lut[5];
 
-public:
-	utf8_iterator(const void * us=0) : utf_iter<const uint8>(reinterpret_cast<const uint8 *>(us)) {}
 
-	reference	operator * () const {
-		const int8    	seq_sz = sz_lut[*_p >> 4];
-		_v = *_p & mask_lut[seq_sz];
-		uint8	bad = _v & 0x80;
+public:
+	typedef	uint8	codeunit_t;
+
+	inline
+	static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+	{
+		if (usv < 0x80)		{l = 1; cp[0] = usv; return; }
+        if (usv < 0x0800)	{l = 2; cp[0] = 0xC0 + (usv >> 6);  cp[1] = 0x80 + (usv & 0x3F); return; }
+        if (usv < 0x10000)	{l = 3; cp[0] = 0xE0 + (usv >> 12); cp[1] = 0x80 + ((usv >> 6) & 0x3F);  cp[2] = 0x80 + (usv & 0x3F); return; }
+        else				{l = 4; cp[0] = 0xF0 + (usv >> 18); cp[1] = 0x80 + ((usv >> 12) & 0x3F); cp[2] = 0x80 + ((usv >> 6) & 0x3F); cp[3] = 0x80 + (usv & 0x3F); return; }
+ 	}
+
+	inline
+	static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+	{
+		const int8 seq_sz = sz_lut[*cp >> 4];
+		uchar_t	u = *cp & mask_lut[seq_sz];
+		l = 1;
+		bool toolong = false;
 
 		switch(seq_sz) {
-			case 4:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40;
-			case 3:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40;
-			case 2:     _v <<= 6; _v |= *++_p & 0x7F; bad |= *_p & 0x40; break;
+			case 4:     u <<= 6; u |= *++cp & 0x3F; if (*cp >> 6 != 2) break; ++l; toolong  = (u < 0x10);
+			case 3:     u <<= 6; u |= *++cp & 0x3F; if (*cp >> 6 != 2) break; ++l; toolong |= (u < 0x20);
+			case 2:     u <<= 6; u |= *++cp & 0x3F; if (*cp >> 6 != 2) break; ++l; toolong |= (u < 0x80);
 			case 1:		break;
-			case 0:     _v = 0xFFFD; return _v;
+			case 0:     l = -1; return 0xFFFD;
 		}
 
-		if (bad)
+		if (l != seq_sz || toolong)
 		{
-			_p -= seq_sz - 1;
-			_v  = 0xFFFD;
+			l = -l;
+			return 0xFFFD;
 		}
-		return _v;
+		return u;
 	}
-
-	pointer	operator ->() const { operator * (); return &_v; }
-
-protected:
-	mutable uint32	_v;
 };
+
+
+template <typename C>
+class _utf_iterator
+{
+	typedef _utf_codec<sizeof(C)*8>	codec;
+
+	C 	  		  * cp;
+	mutable int8	sl;
+
+public:
+	typedef C 			codeunit_type;
+	typedef uchar_t		value_type;
+	typedef uchar_t	  * pointer;
+
+	class reference
+	{
+		const _utf_iterator & _i;
+
+		reference(const _utf_iterator & i): _i(i) {}
+	public:
+		operator value_type () const throw () 					{ return codec::get(_i.cp, _i.sl); }
+		reference & operator = (const value_type usv) throw() 	{ codec::put(_i.cp, usv, _i.sl); return *this; }
+
+		friend class _utf_iterator;
+	};
+
+
+	_utf_iterator(const void * us=0)	: cp(reinterpret_cast<C *>(const_cast<void *>(us))), sl(1) { }
+
+	_utf_iterator   & operator ++ () 	{ cp += abs(sl); return *this; }
+	_utf_iterator 	operator ++ (int) 	{ _utf_iterator tmp(*this); operator++(); return tmp; }
+
+	bool operator == (const _utf_iterator & rhs) const throw() { return cp >= rhs.cp; }
+	bool operator != (const _utf_iterator & rhs) const throw() { return !operator==(rhs); }
+
+	reference 	operator * () const throw() { return *this; }
+	pointer		operator ->() const throw() { return &operator *(); }
+
+	operator codeunit_type * () const throw() { return cp; }
+
+	bool error() const throw()	{ return sl < 1; }
+};
+
+template <typename C>
+struct utf
+{
+	typedef	typename _utf_codec<sizeof(C)*8>::codeunit_t codeunit_t;
+
+	typedef _utf_iterator<C>		iterator;
+	typedef _utf_iterator<const C>	const_iterator;
+};
+
+
+typedef utf<uint32>	utf32;
+typedef utf<uint16>	utf16;
+typedef utf<uint8>	utf8;
 
 } // namespace graphite2
