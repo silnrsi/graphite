@@ -1,4 +1,3 @@
-set
 call vcvars32
 rmdir /s /q build
 mkdir build
