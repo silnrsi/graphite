@@ -448,11 +448,11 @@ func_map thismap[] = {
     { "_ZN8SkDevice8drawTextERK6SkDrawPKvjffRK7SkPaint", "_ZN10mySkDevice8drawTextERK6SkDrawPKvjffRK7SkPaint", 0, 0 },
     // SkTypeface::CreateFromName                        mySkTypeface::CreateFromName
     { "_ZN10SkTypeface14CreateFromNameEPKcNS_5StyleE",   "_ZN12mySkTypeface14CreateFromNameEPKcN10SkTypeface5StyleE", 0, 0 },
-    // SkPaint::measureText                         SkPaint::measureText
+    // SkPaint::measureText                         mySkPaint::measureText
     { "_ZNK7SkPaint11measureTextEPKvjP6SkRectf",    "_ZNK9mySkPaint11measureTextEPKvjP6SkRectf", 0, 0 },
-    // SkPaint::measureText                         SkPaint::measureText
+    // SkPaint::measureText                         mySkPaint::measureText
     { "_ZNK7SkPaint11measureTextEPKvj",             "_ZNK9mySkPaint11measureTextEPKvj", 0, 0},
-    // SkPaint::getTextWidths
+    // SkPaint::getTextWidths                       mySkPaint::getTextWidths
     { "_ZNK7SkPaint13getTextWidthsEPKvjPfP6SkRect", "_ZNK9mySkPaint13getTextWidthsEPKvjPfP6SkRect", 0, 0}
 };
 

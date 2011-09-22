@@ -180,7 +180,7 @@ extern "C" jobject Java_org_sil_palaso_Graphite_addFontResource( JNIEnv *env, jo
     f->next = myfonts;
     f->tf = tf;
     f->name = rtl ? "" : name;
-    f->rtl = rtl ? 3 : 0;
+    f->rtl = rtl ? 7 : 0;
     if (!gFTLibrary && FT_Init_FreeType(&gFTLibrary))
     {
         delete f->tf;

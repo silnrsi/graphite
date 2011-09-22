@@ -11,7 +11,7 @@ include ../../src/files.mk
 LOCAL_MODULE := graphite2
 #LOCAL_SRC_FILES := $(foreach v,$(GR2_SOURCES),./$(v))
 LOCAL_SRC_FILES := $(GR2_SOURCES)
-LOCAL_C_INCLUDES := ../../include
+LOCAL_C_INCLUDES := ../../include ../../src
 LOCAL_EXPORT_C_INCLUDES := ../../include
 #LOCAL_C_INCLUDES := /home/mhosken/Work/dev/Graphite/graphiteng/include
 #LOCAL_EXPORT_C_INCLUDES := /home/mhosken/Work/dev/Graphite/graphiteng/include
