@@ -1,0 +1,35 @@
+#include <graphite2/Segment.h>
+#include <stdio.h>
+
+struct test
+{
+    int len;
+    char str[12];
+};
+struct test tests[] = {
+    { 4, {0x7F, 0xDF, 0xBF, 0xEF, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0,    0} },   // U+7F, U+7FF, U+FFFF, U+10FFF
+    { 2, {0x7F, 0xDF, 0xBF, 0xF0, 0x8F, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0} },   // U+7F, U+7FF, long(U+FFFF), U+10FFF
+    { 1, {0x7F, 0xE0, 0x9F, 0xBF, 0xEF, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0} },   // U+7F, long(U+7FF), U+FFFF, U+10FFF
+    { 0, {0xC1, 0xBF, 0xDF, 0xBF, 0xEF, 0xBF, 0xBF, 0xF4, 0xBF, 0xBF, 0xBF, 0} },   // long(U+7F), U+7FF, U+FFFF, U+10FFF
+    { 4, {0x01, 0xC2, 0x80, 0xE0, 0xA0, 0x80, 0xF0, 0x90, 0x80, 0x80, 0,    0} },   // U+01, U+80, U+800, U+10000
+    { 1, {0x65, 0x9F, 0x65, 0x65, 0,    0,    0,    0,    0,    0,    0,    0} }.   // U+65 bad(1) U+65 U+65
+    { 2, {0x65, 0x65, 0xC2, 0xC2, 0x65, 0x65, 0,    0,    0,    0,    0,    0} }.   // U+65 U+65 bad(1) bad(1) U+65 U+65
+    { 2, {0x65, 0x75, 0xE3, 0x84, 0x75, 0x75, 0,    0,    0,    0,    0,    0} }.   // U+65 U+75 bad(2) U+75 U+75
+    { 2, {0x65, 0x75, 0xF3, 0x84, 0xA5, 0x75, 0x75, 0,    0,    0,    0,    0} }.   // U+65 U+75 bad(3) U+75 U+75
+    { 2, {0x65, 0x75, 0xF3, 0x84, 0xA5, 0xF5, 0x75, 0,    0,    0,    0,    0} }.   // U+65 U+75 bad(3) bad(1) U+75
+};
+
+int numtests = 11;
+
+int main() {
+    int i;
+    for (i = 0; i < numtests; ++i)
+    {
+        int res = gr_count_unicode_characters(gr_utf8, tests[i].str, NULL, NULL);
+        if (res != tests[i].len)
+        {
+            fprintf(stderr, "tests %d failed\n", i + 1);
+            return (i+1);
+        }
+    }
+}
