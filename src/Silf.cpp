@@ -403,5 +403,7 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
             XmlTraceLog::get().closeElement(ElementRunPass);
         }
 #endif
+        if (seg->slotCount() > seg->charInfoCount() * 256)
+            return;
     }
 }
