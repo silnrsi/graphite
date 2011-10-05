@@ -192,7 +192,8 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
 
 /** Creates and returns a segment.
   *
-  * @return a segment that needs seg_destroy called on it.
+  * @return a segment that needs seg_destroy called on it. May return NULL if bad problems
+  *     in segment processing.
   * @param font Gives the size of the font in pixels per em for final positioning. If
   *             NULL, positions are returned in design units, i.e. at a ppm of the upem
   *             of the face.

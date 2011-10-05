@@ -110,7 +110,7 @@ public:
     }
     float advance(unsigned short id) const { return m_pGlyphFaceCache->glyph(id)->theAdvance().x; }
     const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
-    virtual void runGraphite(Segment *seg, const Silf *silf) const;
+    virtual bool runGraphite(Segment *seg, const Silf *silf) const;
     uint16 findPseudo(uint32 uid) const { return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0; }
 
 public:

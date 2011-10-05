@@ -40,7 +40,7 @@ public:
     CachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2);
     bool setupCache(unsigned int cacheSize);
     virtual ~CachedFace();
-    virtual void runGraphite(Segment *seg, const Silf *silf) const;
+    virtual bool runGraphite(Segment *seg, const Silf *silf) const;
     SegCacheStore * cacheStore() { return m_cacheStore; }
 private:
     SegCacheStore * m_cacheStore;

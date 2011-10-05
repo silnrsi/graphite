@@ -51,7 +51,7 @@ bool CachedFace::setupCache(unsigned int cacheSize)
 }
 
 
-void CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
+bool CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
 {
     assert(pSilf);
     pSilf->runGraphite(seg, 0, pSilf->substitutionPass());
@@ -153,6 +153,7 @@ void CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
             subSegEndSlot = subSegEndSlot->next();
         }
     }
+    return true;
 }
 
 #endif

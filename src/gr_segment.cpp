@@ -43,7 +43,11 @@ namespace
       Segment* pRes=new Segment(nChars, face, script, dir);
 
       pRes->read_text(face, pFeats, enc, pStart, nChars);
-      pRes->runGraphite();
+      if (!pRes->runGraphite())
+      {
+        delete pRes;
+        return NULL;
+      }
       // run the line break passes
       // run the substitution passes
       pRes->prepare_pos(font);

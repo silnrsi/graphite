@@ -358,7 +358,7 @@ uint16 Silf::getClassGlyph(uint16 cid, int index) const
     return 0;
 }
 
-void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
+bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
     SlotMap map(*seg);
@@ -367,7 +367,7 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     if (lastPass == 0)
     {
         if (firstPass == lastPass)
-            return;
+            return true;
         lastPass = m_numPasses;
     }
     for (size_t i = firstPass; i < lastPass; ++i)
@@ -403,7 +403,10 @@ void Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
             XmlTraceLog::get().closeElement(ElementRunPass);
         }
 #endif
-        if (seg->slotCount() > seg->charInfoCount() * 256)
-            return;
+        // only subsitution passes can change segment length, cached subsegments are short for their text
+        if (i < m_sPass && (seg->slotCount() > seg->charInfoCount() * MAX_SEG_GROWTH_FACTOR
+                            || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < seg->charInfoCount())))
+            return false;
     }
+    return true;
 }

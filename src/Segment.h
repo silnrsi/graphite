@@ -45,6 +45,7 @@ of the License or (at your option) any later version.
 
 #include "List.h"
 
+#define MAX_SEG_GROWTH_FACTOR  256
 
 namespace graphite2 {
 
@@ -85,7 +86,7 @@ public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
-    void runGraphite() { if (m_silf) m_face->runGraphite(this, m_silf); };
+    bool runGraphite() { if (m_silf) return m_face->runGraphite(this, m_silf); else return true;};
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
     unsigned int charInfoCount() const { return m_numCharinfo; }

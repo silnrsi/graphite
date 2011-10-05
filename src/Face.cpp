@@ -158,9 +158,9 @@ bool Face::readGraphite()
     return havePasses;
 }
 
-void Face::runGraphite(Segment *seg, const Silf *aSilf) const
+bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 {
-    aSilf->runGraphite(seg, 0, aSilf->numPasses());
+    return aSilf->runGraphite(seg, 0, aSilf->numPasses());
 }
 
 const Silf *Face::chooseSilf(uint32 script) const
