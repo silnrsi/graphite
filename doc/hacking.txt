@@ -33,6 +33,8 @@ DISABLE_FILEFACE::
     If set, the code to support creating a face directly from a font file is not included in the library.
     By default this is not set.
 
+GR2_CUSTOM_HEADER::
+    If set, then the value of this macro will be included as a header in Main.h (in effect, all source files). See Main.h for details.
 
 === Memory Allocation ===
 
