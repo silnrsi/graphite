@@ -223,7 +223,8 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     for (size_t i = 0; i < m_numPasses; ++i)
     {
         uint32 pOffset = be::swap<uint32>(pPasses[i]);
-        if ((uint8 *)pSilf + pOffset > eSilf || be::swap<uint32>(pPasses[i + 1]) < pOffset)
+        uint32 pEnd = be::swap<uint32>(pPasses[i + 1]);
+        if ((uint8 *)pSilf + pEnd > eSilf || pOffset > pEnd)
         {
             releaseBuffers();
             return false;
@@ -236,7 +237,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
             XmlTraceLog::get().addAttribute(AttrPassId, i);
         }
 #endif
-        if (!m_passes[i].readPass((char *)pSilf + pOffset, be::swap<uint32>(pPasses[i + 1]) - pOffset, pOffset, face))
+        if (!m_passes[i].readPass((char *)pSilf + pOffset, pEnd - pOffset, pOffset, face))
         {
 #ifndef DISABLE_TRACING
             XmlTraceLog::get().closeElement(ElementPass);
