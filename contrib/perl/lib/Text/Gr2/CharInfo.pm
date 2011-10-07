@@ -1,6 +1,6 @@
 =head1 NAME
 
-Text::Graphite2::CharInfo - Character information
+Text::Gr2::CharInfo - Character information
 
 =head1 METHODS
 

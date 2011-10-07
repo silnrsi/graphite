@@ -1,18 +1,18 @@
-package Text::Graphite2;
-use Text::Graphite2::Face;
-use Text::Graphite2::Font;
-use Text::Graphite2::FeatureRef;
-use Text::Graphite2::FeatureVal;
-use Text::Graphite2::CharInfo;
-use Text::Graphite2::Segment;
-use Text::Graphite2::Slot;
+package Text::Gr2;
+use Text::Gr2::Face;
+use Text::Gr2::Font;
+use Text::Gr2::FeatureRef;
+use Text::Gr2::FeatureVal;
+use Text::Gr2::CharInfo;
+use Text::Gr2::Segment;
+use Text::Gr2::Slot;
 
 use warnings;
 use strict;
 
 =head1 NAME
 
-Text::Graphite2 - Interface to SIL's Graphite2 rendering engine
+Text::Gr2 - Interface to SIL's Graphite2 rendering engine
 
 =head1 VERSION
 
@@ -23,14 +23,14 @@ Version 0.01
 our $VERSION = '0.01';
 
 require XSLoader;
-XSLoader::load('Text::Graphite2', $VERSION);
+XSLoader::load('Text::Gr2', $VERSION);
 
 sub _decode { my $c = pack("N*",$_[0]); $c=~/^[[:print:]]+/ ? $c : $_[0] }
 
 =head1 SYNOPSIS
 
-    use Text::Graphite2;
-    my $face = Text::Graphite2::Face->open($fontfile, cache_size => 1000);
+    use Text::Gr2;
+    my $face = Text::Gr2::Face->open($fontfile, cache_size => 1000);
     my $sized_font = $face->make_font($dpi*$pointsize/72);
     my $seg = $sized_font->segment($face, $text);
     my @chars = $seg->cinfos;
@@ -53,12 +53,12 @@ http://graphite.sil.org for more details.
 =head1 FUNCTIONS
 
 For most purposes, the entry point to this API is through
-C<< Text::Graphite2::Face->open >>. The C<Text::Graphite2> module itself
+C<< Text::Gr2::Face->open >>. The C<Text::Gr2> module itself
 only provides two functions, for logging:
 
 =head2 start_logging
 
-    Text::Graphite2->start_logging($fh, $mask);
+    Text::Gr2->start_logging($fh, $mask);
 
 Writes an XML log to the filehandle given. Mask is a bitmask made up of
 the following flags:
@@ -73,7 +73,7 @@ the following flags:
 
 =head2 stop_logging
 
-    END { Text::Graphite2->stop_logging }
+    END { Text::Gr2->stop_logging }
 
 Finishes writing the log.
 
@@ -88,15 +88,15 @@ effectively done with a C<pack("N*")>.
 
 =head1 SEE ALSO
 
-L<Text::Graphite2::Face>, L<Text::Graphite2::FeatureRef>,
-L<Text::Graphite2::FeatureVal>, L<Text::Graphite2::Font>,
-L<Text::Graphite2::Segment>
+L<Text::Gr2::Face>, L<Text::Gr2::FeatureRef>,
+L<Text::Gr2::FeatureVal>, L<Text::Gr2::Font>,
+L<Text::Gr2::Segment>
 
 http://graphite.sil.org/
 
 =cut
 
-1; # End of Text::Graphite2
+1; # End of Text::Gr2
 
 __END__
 

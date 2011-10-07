@@ -1,14 +1,14 @@
-package Text::Graphite2::Face;
+package Text::Gr2::Face;
 
 =head1 NAME
 
-Text::Graphite2::Face - Open and manipulate Graphite font files
+Text::Gr2::Face - Open and manipulate Graphite font files
 
 =head1 METHODS
 
 =head2 open
 
-    Text::Graphite2::Face->open( $font, %options )
+    Text::Gr2::Face->open( $font, %options )
 
 This is the main entry point to Graphite2. It expects the full pathname
 of a Graphite-enabled TrueType font. (Note: only about three or four fonts
@@ -32,7 +32,7 @@ sub open {
 
 =head2 features
 
-Returns a list of L<Graphite2::FeatureRef> objects representing features
+Returns a list of L<Gr2::FeatureRef> objects representing features
 that this font possesses.
 
 =cut
@@ -50,7 +50,7 @@ Returns a list of language codes that the font services.
 
 sub languages {
     my $self = shift;
-    map { Text::Graphite2::_decode($self->lang_by_index($_)) } 0..$self->n_languages-1;
+    map { Text::Gr2::_decode($self->lang_by_index($_)) } 0..$self->n_languages-1;
 }
 
 =head2 make_font

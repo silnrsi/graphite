@@ -1,6 +1,6 @@
 =head1 NAME
 
-Text::Graphite2::Slot - Represents a slot within a segment
+Text::Gr2::Slot - Represents a slot within a segment
 
 =head1 METHODS
 

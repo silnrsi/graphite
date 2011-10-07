@@ -25,6 +25,7 @@
 #   2 of the license or (at your option) any later version.
 
 LOCAL_PATH := $(call my-dir)
+HOME := /home/mhosken
 
 MY_ANDROID_SRC := $(HOME)/Work/android/android-src
 MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/lib

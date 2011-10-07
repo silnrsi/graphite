@@ -1,8 +1,8 @@
-package Text::Graphite2::FeatureRef;
+package Text::Gr2::FeatureRef;
 
 =head1 NAME
 
-Text::Graphite2::FeatureRef - References to font features
+Text::Gr2::FeatureRef - References to font features
 
 =head1 METHODS
 
@@ -21,11 +21,11 @@ sub values {
     map { $self->value($_) } (0..$self->n_values - 1);
 }
 
-sub id { Text::Graphite2::_decode(shift->_id) }
+sub id { Text::Gr2::_decode(shift->_id) }
 
 =head2 label
 
-    $lab = $self->label(Graphite2->str_to_tag($language), $encoding)
+    $lab = $self->label(Gr2->str_to_tag($language), $encoding)
 
 Returns an explanatory string for this font feature, in the given
 language and encoding format. Typically you want the label to be
@@ -36,7 +36,7 @@ returned in UTF-8, which is encoding format 1.
 Returns an explanatory string for a given value of this font feature.
 
     $lab = $self->value_label($setting_no,
-        Graphite2->str_to_tag($language), $encoding)
+        Gr2->str_to_tag($language), $encoding)
 
 Please note that this takes an integer setting number, not a FeatureVal
 object.

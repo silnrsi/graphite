@@ -1,8 +1,8 @@
-package Text::Graphite2::Segment;
+package Text::Gr2::Segment;
 
 =head1 NAME
 
-Text::Graphite2::Segment - Represent a segment of text
+Text::Gr2::Segment - Represent a segment of text
 
 =head1 METHODS
 
@@ -12,12 +12,12 @@ Returns all of the character slots in this segment
 
 =head2 cinfos
 
-Returns C<Text::Graphite2::CharInfo> objects for all character in this
+Returns C<Text::Gr2::CharInfo> objects for all character in this
 segment.
 
 =head2 first_slot
 
-Returns the first C<Text::Graphite2::Slot> object in this segment. 
+Returns the first C<Text::Gr2::Slot> object in this segment. 
 
 =head2 last_slot
 

@@ -23,7 +23,7 @@ typedef const gr_slot        Text_Graphite2_Slot;
 
 #define gr_fref__id gr_fref_id
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2 PREFIX = graphite_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2 PREFIX = graphite_
 
 bool graphite_start_logging(SV* class, FILE* logFile, IV mask)
     C_ARGS:
@@ -32,7 +32,7 @@ bool graphite_start_logging(SV* class, FILE* logFile, IV mask)
 void graphite_stop_logging(SV* class)
     C_ARGS:
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2 PREFIX = gr_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2 PREFIX = gr_
 
 gr_uint32 gr_str_to_tag(SV* class, const char *str)
     C_ARGS: 
@@ -47,7 +47,7 @@ char* gr_tag_to_str(SV* class, gr_uint32 tag)
     OUTPUT:
         RETVAL
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Face PREFIX = gr_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Face PREFIX = gr_
 
 #ifndef DISABLE_FILE_FACE
 Text_Graphite2_Face* gr_make_file_face(char* classname, char* filename, unsigned int options)
@@ -72,7 +72,7 @@ Text_Graphite2_Font* gr_make_font(Text_Graphite2_Face* gr_face, float ppm)
     C_ARGS:
         ppm, gr_face
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Face PREFIX = gr_face_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Face PREFIX = gr_face_
 
 gr_uint16 gr_face_n_fref(Text_Graphite2_Face* pFace)
 
@@ -90,11 +90,11 @@ gr_uint32 gr_face_lang_by_index(Text_Graphite2_Face* pFace, gr_uint32 i)
 
 void gr_face_DESTROY(Text_Graphite2_Face* pFace)
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Font PREFIX=gr_font_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Font PREFIX=gr_font_
 
 void gr_font_DESTROY(Text_Graphite2_Font* pFont)
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::FeatureRef PREFIX=gr_fref_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::FeatureRef PREFIX=gr_fref_
 
 gr_uint16 gr_fref_feature_value(Text_Graphite2_FeatureRef* pfeatureref, Text_Graphite2_FeatureVal* feats)
 
@@ -109,7 +109,7 @@ gr_uint16 gr_fref_n_values(Text_Graphite2_FeatureRef* pfeatureref)
 gr_int16 gr_fref_value(Text_Graphite2_FeatureRef* pfeatureref, gr_uint16 settingno)
 
 char* gr_fref_value_label(Text_Graphite2_FeatureRef* f, gr_int16 j, gr_uint16 langId, IV encoding)
-    INIT:
+    PREINIT:
         gr_uint32 length;
     CODE:
         RETVAL = gr_fref_value_label(f, j, &langId, encoding, &length);
@@ -117,26 +117,26 @@ char* gr_fref_value_label(Text_Graphite2_FeatureRef* f, gr_int16 j, gr_uint16 la
         RETVAL
 
 char* gr_fref_label(Text_Graphite2_FeatureRef* f, gr_uint16 langId, IV encoding)
-    INIT:
+    PREINIT:
         gr_uint32 length;
     CODE:
         RETVAL = gr_fref_label(f, &langId, encoding, &length);
     OUTPUT:
         RETVAL
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::FeatureVal PREFIX=gr_featureval_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::FeatureVal PREFIX=gr_featureval_
 
 Text_Graphite2_FeatureVal* gr_featureval_clone(Text_Graphite2_FeatureVal* pfeatures)
 
 void gr_featureval_DESTROY(Text_Graphite2_FeatureVal* pfeatures)
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::CharInfo PREFIX=gr_cinfo_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::CharInfo PREFIX=gr_cinfo_
 
 unsigned int gr_cinfo_unicode_char(Text_Graphite2_CharInfo* p)
 
 int gr_cinfo_break_weight(Text_Graphite2_CharInfo* p)
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Font PREFIX=gr_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Font PREFIX=gr_
 
 Text_Graphite2_Segment* gr_make_seg(font, face, script, pFeats, enc, string, nChars, dir)
     Text_Graphite2_Font*       font
@@ -152,7 +152,7 @@ Text_Graphite2_Segment* gr_make_seg(font, face, script, pFeats, enc, string, nCh
     OUTPUT:
         RETVAL
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Segment PREFIX=gr_seg_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Segment PREFIX=gr_seg_
 
 void gr_seg_DESTROY(Text_Graphite2_Segment* pSeg)
 
@@ -170,7 +170,7 @@ Text_Graphite2_Slot* gr_seg_last_slot(Text_Graphite2_Segment* pSeg)
 
 # char_slots is tricky
 
-MODULE = Text::Graphite2  PACKAGE = Text::Graphite2::Slot PREFIX=gr_slot_
+MODULE = Text::Gr2  PACKAGE = Text::Gr2::Slot PREFIX=gr_slot_
 
 Text_Graphite2_Slot* gr_slot_next_in_segment(Text_Graphite2_Slot* p)
 

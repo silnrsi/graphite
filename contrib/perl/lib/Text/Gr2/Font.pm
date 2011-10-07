@@ -1,11 +1,11 @@
-package Text::Graphite2::Font;
+package Text::Gr2::Font;
 use strict;
 no bytes;
 use Encode qw/_utf8_on/;
 
 =head1 NAME
 
-Text::Graphite2::Font - Font handling methods
+Text::Gr2::Font - Font handling methods
 
 =head1 METHODS
 
@@ -18,7 +18,7 @@ Text::Graphite2::Font - Font handling methods
             script   => $script_tag
     );
 
-Makes a L<Text::Graphite2::Segment> object from the given text. This is
+Makes a L<Text::Gr2::Segment> object from the given text. This is
 what you'll need to do to set text in this font.
 
 =cut
@@ -31,8 +31,8 @@ sub segment {
     my $enc = $encoding =~ /8/ ? 1 : 
               $encoding =~ /16/ ? 2 :
               $encoding =~ /32/ ? 4 : 1;
-    my $script = $options{script} ? Graphite2->str_to_tag($options{script}) : 0;
-    my $pFeats = $options{features} || (bless \($a=0), "Text::Graphite2::FeatureVal");
+    my $script = $options{script} ? Text::Gr2->str_to_tag($options{script}) : 0;
+    my $pFeats = $options{features} || (bless \($a=0), "Text::Gr2::FeatureVal");
     $self->make_seg($face, $script, $pFeats, $enc, $text, length($text)/$enc, $options{rtl});
 }
 
