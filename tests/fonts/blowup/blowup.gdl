@@ -1,0 +1,18 @@
+table(glyph);
+g_a = unicode(0x0061);
+endtable;
+
+// g_a _ > g_a:1 g_a:1 / ^ _ _ ;
+#define r(n) pass(n);  \
+g_a _ _ > g_a:1 g_a:1 g_a:1 / ^ _ _ _ ; \
+endpass;
+
+table(substitution);
+r(1)
+r(2)
+r(3)
+r(4)
+r(5)
+//r(6)
+endtable;
+
