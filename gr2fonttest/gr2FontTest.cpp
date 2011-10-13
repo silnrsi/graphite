@@ -687,73 +687,76 @@ int Parameters::testFileFont() const
             pSeg = gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
         }
-        int i = 0;
-#ifndef NDEBUG
-        int numSlots = gr_seg_n_slots(pSeg);
-#endif
-//        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
-        for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
-        { map[i] = (size_t)slot; }
-        map[i] = 0;
-        fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
-        fprintf(log, "\n");
-        i = 0;
-        for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+        if (pSeg)
         {
-            // consistency check for last slot
-            assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
-            float orgX = gr_slot_origin_X(slot);
-            float orgY = gr_slot_origin_Y(slot);
-            fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
-                    gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
-                    gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
-                    gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
-           
-            if (pText32 != NULL)
-            {
-                fprintf(log, "%7x\t%7x",
-                    pText32[gr_slot_before(slot) + offset],
-                    pText32[gr_slot_after(slot) + offset]);
-            }
-#if 0
-            if (parameters.justification)
-            {
-                // only level 0 seems to be supported without an assertion
-                for (int level = 0; level < 1; level++)
-                {
-                    printf("\t% 2d %6.1f %6.1f %6.1f %d", level,
-                        info.maxShrink(level),
-                        info.maxStretch(level), info.stretchStep(level),
-                        info.justWeight(level));
-                    if (info.maxShrink(level) == 0.0f &&
-                        info.maxStretch(level) == 0.0f &&
-                        info.stretchStep(level) == 0.0f &&
-                        info.justWeight(level) == 0)
-                        break;
-                }
-            }
-            printf("\n");
-            ++i;
-            ++gi;
-#endif
+            int i = 0;
+    #ifndef NDEBUG
+            int numSlots = gr_seg_n_slots(pSeg);
+    #endif
+    //        size_t *map = new size_t [seg.length() + 1];
+            size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
+            for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+            { map[i] = (size_t)slot; }
+            map[i] = 0;
+            fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
             fprintf(log, "\n");
+            i = 0;
+            for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+            {
+                // consistency check for last slot
+                assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
+                float orgX = gr_slot_origin_X(slot);
+                float orgY = gr_slot_origin_Y(slot);
+                fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
+                        i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
+                        gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
+                        gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
+                        gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
+               
+                if (pText32 != NULL)
+                {
+                    fprintf(log, "%7x\t%7x",
+                        pText32[gr_slot_before(slot) + offset],
+                        pText32[gr_slot_after(slot) + offset]);
+                }
+    #if 0
+                if (parameters.justification)
+                {
+                    // only level 0 seems to be supported without an assertion
+                    for (int level = 0; level < 1; level++)
+                    {
+                        printf("\t% 2d %6.1f %6.1f %6.1f %d", level,
+                            info.maxShrink(level),
+                            info.maxStretch(level), info.stretchStep(level),
+                            info.justWeight(level));
+                        if (info.maxShrink(level) == 0.0f &&
+                            info.maxStretch(level) == 0.0f &&
+                            info.stretchStep(level) == 0.0f &&
+                            info.justWeight(level) == 0)
+                            break;
+                    }
+                }
+                printf("\n");
+                ++i;
+                ++gi;
+    #endif
+                fprintf(log, "\n");
+            }
+            assert(i == numSlots);
+            // assign last point to specify advance of the whole array
+            // position arrays must be one bigger than what countGlyphs() returned
+            float advanceWidth = gr_seg_advance_X(pSeg);
+            fprintf(log, "Advance width = %6.1f\n", advanceWidth);
+            unsigned int numchar = gr_seg_n_cinfo(pSeg);
+            fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
+            for (unsigned int j = 0; j < numchar; j++)
+            {
+                const gr_char_info *c = gr_seg_cinfo(pSeg, j);
+                fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
+            }
+            free(map);
+            gr_seg_destroy(pSeg);
         }
-        assert(i == numSlots);
-        // assign last point to specify advance of the whole array
-        // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = gr_seg_advance_X(pSeg);
-        fprintf(log, "Advance width = %6.1f\n", advanceWidth);
-        unsigned int numchar = gr_seg_n_cinfo(pSeg);
-        fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
-        for (unsigned int j = 0; j < numchar; j++)
-        {
-            const gr_char_info *c = gr_seg_cinfo(pSeg, j);
-            fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
-        }
-        free(map);
-        gr_seg_destroy(pSeg);
        }
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
