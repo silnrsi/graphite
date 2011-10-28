@@ -105,15 +105,15 @@ const opcode_t * Machine::getOpcodeTable() throw()
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               slotref     * & is,
-                               status_t      & status)
+                               slotref     * & is)
 {
     assert(program != 0);
+    assert(_status == finished);
     
     const stack_t *sp = static_cast<const stack_t *>(
                 direct_run(false, program, data, _stack, is, &_map));
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
-    check_final_stack(sp, status);
+    check_final_stack(sp);
     return ret;
 }
 

@@ -52,7 +52,7 @@ public:
     CLASS_NEW_DELETE
 private:
     void   findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    void   doAction(const vm::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
+    void   doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
     bool   testPassConstraint(vm::Machine & m) const;
     bool   testConstraint(const Rule & r, vm::Machine &) const;
     bool   readFSM(const byte* p, const byte*const pass_start, const size_t max_offset);
@@ -86,7 +86,7 @@ private:
     uint16 m_sColumns;
     byte m_minPreCtxt;
     byte m_maxPreCtxt;
-    vm::Code m_cPConstraint;
+    vm::Machine::Code m_cPConstraint;
     
 private:		//defensive
     Pass(const Pass&);

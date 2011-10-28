@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 // interface.
 
 #pragma once
+#include <cstring>
 #include <graphite2/Types.h>
 #include "Main.h"
 
@@ -121,6 +122,8 @@ public:
                         STACK_MAX    = 1 << STACK_ORDER,
                         STACK_GUARD  = 2;
 
+    class Code;
+
     enum status_t {
         finished = 0,
         stack_underflow,
@@ -131,37 +134,47 @@ public:
 
     Machine(SlotMap &) throw();
     static const opcode_t *   getOpcodeTable() throw();
-    stack_t                   run(const instr * program, const byte * data,
-                                  slotref * & map,
-                                  status_t &status) HOT;
-    CLASS_NEW_DELETE
+
+    CLASS_NEW_DELETE;
 
     SlotMap   & slotMap() const throw();
-private:
-    void check_final_stack(const stack_t * const sp, status_t &status);
+    status_t	status() const throw();
+    operator bool () const throw();
 
-    SlotMap      & _map;
-    stack_t             _stack[STACK_MAX + 2*STACK_GUARD];
+private:
+    void    check_final_stack(const stack_t * const sp);
+    stack_t run(const instr * program, const byte * data,
+                slotref * & map) HOT;
+
+    SlotMap       & _map;
+    stack_t         _stack[STACK_MAX + 2*STACK_GUARD];
+    status_t		_status;
 };
 
 inline Machine::Machine(SlotMap & map) throw()
-: _map(map)
+: _map(map), _status(finished)
 {
+	memset(_stack, 0, STACK_GUARD);
 }
 
 inline SlotMap& Machine::slotMap() const throw()
 {
-  return _map;
+    return _map;
 }
 
-inline void Machine::check_final_stack(const int32 * const sp,
-                                       status_t & status) {
+inline Machine::status_t Machine::status() const throw()
+{
+    return _status;
+}
+
+inline void Machine::check_final_stack(const int32 * const sp)
+{
     stack_t const * const base  = _stack + STACK_GUARD,
                   * const limit = base + STACK_MAX;
-    if      (sp <  base)    status = stack_underflow;       // This should be impossible now.
-    else if (sp >= limit)   status = stack_overflow;        // So should this.
-    else if (sp != base)    status = stack_not_empty;
-    else                    status = finished;
+    if      (sp <  base)    _status = stack_underflow;       // This should be impossible now.
+    else if (sp >= limit)   _status = stack_overflow;        // So should this.
+    else if (sp != base)    _status = stack_not_empty;
+    else                    _status = finished;
 }
 
 } // namespace vm

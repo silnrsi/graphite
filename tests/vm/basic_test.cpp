@@ -9,6 +9,7 @@
 
 using namespace graphite2;
 using namespace vm;
+typedef Machine::Code  Code;
 
 const byte simple_prog[] = 
 {
@@ -97,18 +98,17 @@ int main(int argc, char *argv[])
     // run the program
     Segment seg;
     uint32 ret = 0;
-    Machine::status_t status;
     SlotMap smap(seg);
     Machine m(smap);
     smap.pushSlot(0);
     slotref * map = smap.begin();
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, map, status);
-        switch (status) {
+        ret = prog.run(m, map);
+        switch (m.status()) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:
                 std::cerr << "program terminated early: " 
-                          << run_error_msg[status] << std::endl;
+                          << run_error_msg[m.status()] << std::endl;
                 std::cout << "--------" << std::endl
                           << "between " << prog.instructionCount()*(repeats-n) 
                           << " and "    << prog.instructionCount()*(repeats-std::min(n-1,repeats))

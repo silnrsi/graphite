@@ -408,8 +408,9 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         }
 #endif
         // only subsitution passes can change segment length, cached subsegments are short for their text
-        if (i < m_pPass && (seg->slotCount() > initSize * MAX_SEG_GROWTH_FACTOR
-                            || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize)))
+        if (m.status() != vm::Machine::finished
+        	|| (i < m_pPass && (seg->slotCount() > initSize * MAX_SEG_GROWTH_FACTOR
+                               || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize))))
             return false;
     }
     return true;

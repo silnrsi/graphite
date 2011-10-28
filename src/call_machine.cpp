@@ -103,11 +103,12 @@ namespace {
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               slotref     * & map,
-                               status_t      & status)
+                               slotref     * & map)
 
 {
     assert(program != 0);
+    assert(_status == finished);
+
 
     // Declare virtual machine registers
     const instr   * ip = program-1;
@@ -120,7 +121,7 @@ Machine::stack_t  Machine::run(const instr   * program,
     while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
     const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
 
-    check_final_stack(sp, status);
+    check_final_stack(sp);
     map = reg.map;
     *map = reg.is;
     return ret;

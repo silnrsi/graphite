@@ -32,7 +32,7 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 struct Rule {
-  const vm::Code * constraint, 
+  const vm::Machine::Code * constraint, 
                  * action;
   unsigned short   sort;
   byte             preContext;

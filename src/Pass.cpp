@@ -36,9 +36,8 @@ of the License or (at your option) any later version.
 #include "XmlTraceLog.h"
 
 using namespace graphite2;
-
-using vm::Code;
 using vm::Machine;
+typedef Machine::Code  Code;
 
 
 Pass::Pass()
@@ -154,7 +153,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     // Load the pass constraint if there is one.
     if (pass_constraint_len)
     {
-        m_cPConstraint = vm::Code(true, pcCode, pcCode + pass_constraint_len, 
+        m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
                                   precontext[0], be::swap<uint16>(sort_keys[0]), *m_silf, face);
         if (!m_cPConstraint) return false;
     }
@@ -200,8 +199,8 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new vm::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
-        r->constraint = new vm::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
+        r->action     = new vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
+        r->constraint = new vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
 
         if (!r->action || !r->constraint
                 || r->action->status() != Code::loaded
@@ -505,10 +504,9 @@ bool Pass::testPassConstraint(Machine & m) const
 
     vm::slotref * map = m.slotMap().begin();
     *map = m.slotMap().segment.first();
-    Machine::status_t status = Machine::finished;
-    const uint32 ret = m_cPConstraint.run(m, map, status);
+    const uint32 ret = m_cPConstraint.run(m, map);
 
-    return ret || status != Machine::finished;
+    return ret || m.status() != Machine::finished;
 }
 
 
@@ -527,12 +525,11 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
     }
 #endif
     vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
-    Machine::status_t status = Machine::finished;
     for (int n = r.sort; n && map; --n, ++map)
     {
 	if (!*map) continue;
-        const int32 ret = r.constraint->run(m, map, status);
-        if (!ret || status != Machine::finished)
+        const int32 ret = r.constraint->run(m, map);
+        if (!ret || m.status() != Machine::finished)
         {
 #ifdef ENABLE_DEEP_TRACING
             if (XmlTraceLog::get().active())
@@ -564,8 +561,7 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
 
     Segment & seg = smap.segment;
     int glyph_diff = -static_cast<int>(seg.slotCount());
-    Machine::status_t status;
-    int32 ret = codeptr->run(m, map, status);
+    int32 ret = codeptr->run(m, map);
     glyph_diff += seg.slotCount();
     if (codeptr->deletes())
     {
@@ -603,5 +599,9 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
                 smap.highwater(slot_out->next());
         }
     }
-    if (status != Machine::finished && slot_out) slot_out = NULL;
+    if (m.status() != Machine::finished)
+    {
+    	slot_out = NULL;
+    	m.slotMap().highwater(0);
+    }
 }

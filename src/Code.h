@@ -44,7 +44,7 @@ class Face;
 
 namespace vm {
 
-class Code 
+class Machine::Code
 {
 public:
     enum status_t 
@@ -78,9 +78,9 @@ private:
 
 public:
     Code() throw();
-    Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end, 
+    Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
          uint8 pre_context, uint16 rule_length, const Silf &, const Face &);
-    Code(const Code &) throw();
+    Code(const Machine::Code &) throw();
     ~Code() throw();
     
     Code & operator=(const Code &rhs) throw();
@@ -91,18 +91,19 @@ public:
     size_t        instructionCount() const throw();
     bool          immutable() const throw();
     bool          deletes() const throw();
+    size_t        maxRef() const throw();
 
-    int32 run(Machine &m, slotref * & map, Machine::status_t & status) const;
+    int32 run(Machine &m, slotref * & map) const;
     
     CLASS_NEW_DELETE;
 };
 
-inline Code::Code() throw()
+inline Machine::Code::Code() throw()
 : _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0),
   _status(loaded), _own(false) {
 }
 
-inline Code::Code(const Code &obj) throw ()
+inline Machine::Code::Code(const Machine::Code &obj) throw ()
  :  _code(obj._code), 
     _data(obj._data), 
     _data_size(obj._data_size), 
@@ -117,7 +118,7 @@ inline Code::Code(const Code &obj) throw ()
     obj._own = false;
 }
 
-inline Code & Code::operator=(const Code &rhs) throw() {
+inline Machine::Code & Machine::Code::operator=(const Machine::Code &rhs) throw() {
     if (_instr_count > 0)
         release_buffers();
     _code        = rhs._code; 
@@ -133,34 +134,39 @@ inline Code & Code::operator=(const Code &rhs) throw() {
     return *this;
 }
 
-inline Code::operator bool () const throw () {
+inline Machine::Code::operator bool () const throw () {
     return _code && status() == loaded;
 }
 
-inline Code::status_t Code::status() const throw() {
+inline Machine::Code::status_t Machine::Code::status() const throw() {
     return _status;
 }
 
-inline bool Code::constraint() const throw() {
+inline bool Machine::Code::constraint() const throw() {
     return _constraint;
 }
 
-inline size_t Code::dataSize() const throw() {
+inline size_t Machine::Code::dataSize() const throw() {
     return _data_size;
 }
 
-inline size_t Code::instructionCount() const throw() {
+inline size_t Machine::Code::instructionCount() const throw() {
     return _instr_count;
 }
 
-inline bool Code::immutable() const throw()
+inline bool Machine::Code::immutable() const throw()
 {
   return !(_delete || _modify);
 }
 
-inline bool Code::deletes() const throw()
+inline bool Machine::Code::deletes() const throw()
 {
   return _delete;
+}
+
+inline size_t Machine::Code::maxRef() const throw()
+{
+	return _max_ref;
 }
 
 } // namespace vm
