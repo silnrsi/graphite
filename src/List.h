@@ -90,7 +90,7 @@ public:
     iterator            erase(iterator p)       { return erase(p, p+1); }
     iterator            erase(iterator first, iterator last);
 
-    void                swap(Vector<T> vec);
+    void                swap(Vector<T> &vec);
 private:
     iterator            _insert_default(iterator p, size_t n);
 };
@@ -153,7 +153,7 @@ typename Vector<T>::iterator Vector<T>::erase(iterator first, iterator last)
 
 template<typename T>
 inline
-void Vector<T>::swap(Vector<T> vec) 
+void Vector<T>::swap(Vector<T> &vec) 
 { 
     Vector tmp; 
     memcpy(&tmp, this, sizeof(Vector<T>)); 
