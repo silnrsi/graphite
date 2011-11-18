@@ -67,7 +67,7 @@ public:
     bool readGraphite(void *pSilf, size_t lSilf, const Face &face, uint32 version);
     bool runGraphite(Segment *seg, uint8 firstPass=0, uint8 lastPass=0) const;
     uint16 findClassIndex(uint16 cid, uint16 gid) const;
-    uint16 getClassGlyph(uint16 cid, int index) const;
+    uint16 getClassGlyph(uint16 cid, unsigned int index) const;
     uint16 findPseudo(uint32 uid) const;
     uint8 numUser() const { return m_aUser; }
     uint8 aPseudo() const { return m_aPseudo; }
@@ -84,12 +84,13 @@ public:
     CLASS_NEW_DELETE
 
 private:
-    size_t readClassMap(const byte *p, size_t data_len);
+    size_t readClassMap(const byte *p, size_t data_len, uint32 version);
+    template<typename T> inline uint32 readClassOffsets(const byte *&p, size_t data_len);
 
     Pass          * m_passes;
     Pseudo        * m_pseudos;
-    uint16        * m_classOffsets, 
-                  * m_classData;
+    uint32        * m_classOffsets;
+    uint16        * m_classData;
     Justinfo      * m_justs;
     uint8           m_numPasses;
     uint8           m_numJusts;

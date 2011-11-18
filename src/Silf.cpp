@@ -213,7 +213,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
         return false;
     }
 
-    int clen = readClassMap(p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf));
+    int clen = readClassMap(p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf), version);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -245,7 +245,7 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
             {
         releaseBuffers();
         return false;
-    }
+            }
         }
 #ifndef DISABLE_TRACING
         XmlTraceLog::get().closeElement(ElementPass);
@@ -257,7 +257,26 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
     return true;
 }
 
-size_t Silf::readClassMap(const byte *p, size_t data_len)
+template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t data_len)
+{
+	const T cls_off = 2*sizeof(uint16) + sizeof(T)*(m_nClass+1);
+	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(T);
+	// Check that the last+1 offset is less than or equal to the class map length.
+	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(T))
+		return -1;
+
+	// Read in all the offsets.
+	m_classOffsets = gralloc<uint32>(m_nClass+1);
+	for (uint32 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
+	{
+		*o = (be::read<T>(p) - cls_off)/sizeof(T);
+		if (*o > max_off)
+			return 0;
+	}
+    return max_off;
+}
+
+size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
 {
 	if (data_len < sizeof(uint16)*2)	return -1;
 
@@ -270,23 +289,17 @@ size_t Silf::readClassMap(const byte *p, size_t data_len)
 	 || (m_nClass + 1) > (data_len/sizeof(uint16)-2))
 		return -1;
 
-	const uint16 cls_off = sizeof(uint16)*(2 + m_nClass+1);
-	const uint16 max_off = (be::peek<uint16>(p + sizeof(uint16)*m_nClass) - cls_off)/sizeof(uint16);
-	// Check that the last+1 offset is less than or equal to the class map length.
-	if (be::peek<uint16>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
-		return -1;
+    
+    uint32 max_off;
+    if (version >= 0x00040000)
+        max_off = readClassOffsets<uint32>(p, data_len);
+    else
+        max_off = readClassOffsets<uint16>(p, data_len);
 
-	// Read in all the offsets.
-	m_classOffsets = gralloc<uint16>(m_nClass+1);
-	for (uint16 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
-	{
-		*o = (be::read<uint16>(p) - cls_off)/sizeof(uint16);
-		if (*o > max_off)
-			return -1;
-	}
+    if (max_off == 0) return -1;
 
 	// Check the linear offsets are sane, these must be monotonically increasing.
-	for (const uint16 *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
+	for (const uint32 *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
 		if (o[0] > o[1])
 			return -1;
 
@@ -296,7 +309,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len)
         *d = be::read<uint16>(p);
 
 	// Check the lookup class invariants for each non-linear class
-	for (const uint16 *o = m_classOffsets + m_nLinear, * const o_end = m_classOffsets + m_nClass; o != o_end; ++o)
+	for (const uint32 *o = m_classOffsets + m_nLinear, * const o_end = m_classOffsets + m_nClass; o != o_end; ++o)
 	{
 		const uint16 * lookup = m_classData + *o;
 		if (lookup[0] == 0							// A LookupClass with no looks is a suspicious thing ...
@@ -305,7 +318,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len)
 			return -1;
 	}
 
-	return cls_off;
+	return max_off;
 }
 
 uint16 Silf::findPseudo(uint32 uid) const
@@ -322,7 +335,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     const uint16 * cls = m_classData + m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
     {
-        for (int i = 0, n = m_classOffsets[cid + 1]; i < n; ++i, ++cls)
+        for (unsigned int i = 0, n = m_classOffsets[cid + 1]; i < n; ++i, ++cls)
             if (*cls == gid) return i;
         return -1;
     }
@@ -341,19 +354,19 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     }
 }
 
-uint16 Silf::getClassGlyph(uint16 cid, int index) const
+uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
 {
     if (cid > m_nClass) return 0;
 
-    uint16 loc = m_classOffsets[cid];
+    uint32 loc = m_classOffsets[cid];
     if (cid < m_nLinear)
     {
-        if (index >= 0 && index < m_classOffsets[cid + 1] - loc)
+        if (index < m_classOffsets[cid + 1] - loc)
             return m_classData[index + loc];
     }
     else        // input class being used for output. Shouldn't happen
     {
-        for (int i = loc + 4; i < m_classOffsets[cid + 1]; i += 2)
+        for (unsigned int i = loc + 4; i < m_classOffsets[cid + 1]; i += 2)
             if (m_classData[i + 1] == index) return m_classData[i];
     }
     return 0;
