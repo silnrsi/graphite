@@ -90,7 +90,6 @@ public:
     iterator            erase(iterator p)       { return erase(p, p+1); }
     iterator            erase(iterator first, iterator last);
 
-    void                swap(Vector<T> &vec);
 private:
     iterator            _insert_default(iterator p, size_t n);
 };
@@ -149,16 +148,6 @@ typename Vector<T>::iterator Vector<T>::erase(iterator first, iterator last)
     if (m_last != last) memmove(first, last, distance(last,end())*sizeof(T));
     m_last -= sz;
     return first;
-}
-
-template<typename T>
-inline
-void Vector<T>::swap(Vector<T> &vec) 
-{ 
-    Vector tmp; 
-    memcpy(&tmp, this, sizeof(Vector<T>)); 
-    memcpy(this, vec, sizeof(Vector<T>)); 
-    memcpy(&vec, tmp, sizeof(Vector<T>));
 }
 
 } // namespace graphite2
