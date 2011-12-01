@@ -130,7 +130,7 @@ private:
     unsigned short numGlyphs() const { return m_pGlyphFaceCache->m_nGlyphs; }
 
 public:
-    bool readGlyphs(unsigned int faceOptions);
+    bool readGlyphs(uint32 faceOptions);
     bool readGraphite();
     bool readFeatures() { return m_Sill.readFace(*this); }
     const Silf *chooseSilf(uint32 script) const;
