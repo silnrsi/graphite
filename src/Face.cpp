@@ -51,10 +51,10 @@ Face::~Face()
 }
 
 
-bool Face::readGlyphs(unsigned int faceOptions)
+bool Face::readGlyphs(uint32 faceOptions)
 {
     GlyphFaceCacheHeader hdr;
-    if (!hdr.initialize(*this)) return false;
+    if (!hdr.initialize(*this, faceOptions & gr_face_dumbRendering)) return false;
 
     m_pGlyphFaceCache = GlyphFaceCache::makeCache(hdr);
     if (!m_pGlyphFaceCache) return false;

@@ -40,11 +40,17 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
 {
     Face *res = new Face(appFaceHandle, getTable);
 
-    if (!(faceOptions & gr_face_dumbRendering) && !res->getTable(Tag::Silf))
+    if (res->getTable(Tag::Silf) == 0)
     {
-        delete res;
-        return 0;
+		if (!(faceOptions & gr_face_dumbRendering))
+		{
+			delete res;
+			return 0;
+		}
     }
+    else
+    	faceOptions &= ~gr_face_dumbRendering;
+
 #ifndef DISABLE_TRACING
     XmlTraceLog::get().openElement(ElementFace);
 #endif

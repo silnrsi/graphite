@@ -39,26 +39,31 @@ class FeatureVal;
 class GlyphFaceCacheHeader
 {
 public:
-    bool initialize(const Face & face);    //return result indicates success. Do not use if failed.
+    bool initialize(const Face & face, const bool dumb_font);    //return result indicates success. Do not use if failed.
     unsigned short numGlyphs() const { return m_nGlyphs; }
     unsigned short numAttrs() const { return m_numAttrs; }
 
 private:
 friend class Face;
 friend class GlyphFace;
-    const byte* m_pGloc;
-    size_t m_lLoca; const byte* m_pLoca;
-    const byte* m_pHead;
-    size_t m_lGlyf; const byte* m_pGlyf;
-    size_t m_lHmtx; const byte* m_pHmtx;
-    const byte* m_pHHea;
-    size_t m_lGlat; const byte* m_pGlat; uint32 m_fGlat;
+    const byte* m_pHead,
+    		  * m_pHHea,
+    		  * m_pHmtx,
+    		  * m_pGlat,
+    		  * m_pGloc,
+    		  * m_pGlyf,
+    		  * m_pLoca;
+    size_t		m_lHmtx,
+    			m_lGlat,
+    			m_lGlyf,
+    			m_lLoca;
 
-    unsigned short m_numAttrs;      // number of glyph attributes per glyph
-    bool m_locFlagsUse32Bit;
-    unsigned short m_nGlyphsWithGraphics;       //i.e. boundary box and advance
-    unsigned short m_nGlyphsWithAttributes;
-    unsigned short m_nGlyphs;                   // number of glyphs in the font. Max of the above 2.
+    uint32			m_fGlat;
+    unsigned short 	m_numAttrs,					// number of glyph attributes per glyph
+    				m_nGlyphsWithGraphics,		//i.e. boundary box and advance
+    				m_nGlyphsWithAttributes,
+    				m_nGlyphs;					// number of glyphs in the font. Max of the above 2.
+    bool 			m_locFlagsUse32Bit;
 };
 
 class GlyphFaceCache : public GlyphFaceCacheHeader
