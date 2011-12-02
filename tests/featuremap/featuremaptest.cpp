@@ -24,6 +24,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <string>
 #include <graphite2/Font.h>
 #include "Endian.h"
 #include "Face.h"
@@ -213,7 +214,7 @@ private:
 	mutable std::map<const TtfUtil::Tag, table_t> _tables;
 };
 
-const face_handle::table_t	face_handle::no_table = face_handle::table_t(0,0);
+const face_handle::table_t	face_handle::no_table = face_handle::table_t(reinterpret_cast<void *>(0),0);
 
 
 template <typename T> void testAssert(const char * msg, const T b)

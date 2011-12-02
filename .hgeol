@@ -3,7 +3,7 @@
 **.c = native
 **.cpp = native
 **.txt = native
-**.log = native
+**.log = LF
 **.ttf = BIN
 **.log = native
 **.pdf = BIN
