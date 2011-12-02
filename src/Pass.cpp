@@ -385,19 +385,12 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
     do
     {
         findNDoRule(s, m, fsm);
-        if (currHigh != m.slotMap().highwater() && currHigh) {
-            lc = m_iMaxLoop;
-            currHigh = m.slotMap().highwater();
-        }
-        else if (--lc == 0)
-        {
-            lc = m_iMaxLoop;
-            s = currHigh;
+        if (s && (m.slotMap().highpassed() || s == m.slotMap().highwater() || --lc == 0)) {
+        	if (!lc)
+        		s = m.slotMap().highwater();
+        	lc = m_iMaxLoop;
             if (s)
-            {
-                currHigh = s->next();
-                m.slotMap().highwater(currHigh);
-            }
+            	m.slotMap().highwater(s->next());
         }
     } while (s);
 }
@@ -490,8 +483,6 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
     }
 
     slot = slot->next();
-    if (m.slotMap().highwater() == slot && slot)
-        m.slotMap().highwater(slot->next());
 }
 
 
@@ -558,6 +549,7 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
     if (!*codeptr) return;
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
+    smap.highpassed(false);
 
     Segment & seg = smap.segment;
     int glyph_diff = -static_cast<int>(seg.slotCount());
@@ -568,7 +560,12 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
         for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
         {
             Slot * & slot = *s;
-            if (slot->isDeleted() || slot->isCopied()) seg.freeSlot(slot);
+            if (slot->isDeleted() || slot->isCopied())
+            {
+            	if (slot == smap.highwater())
+            		smap.highwater(slot->next());
+            	seg.freeSlot(slot);
+            }
         }
     }
 
@@ -579,10 +576,14 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
         {
             slot_out = seg.last();
             ++ret;
+            if (smap.highpassed() && !smap.highwater())
+            	smap.highpassed(false);
         }
         while (++ret <= 0 && slot_out)
         {
             slot_out = slot_out->prev();
+            if (smap.highpassed() && smap.highwater() == slot_out)
+            	smap.highpassed(false);
         }
     }
     else if (ret > 0)
@@ -596,7 +597,7 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
         {
             slot_out = slot_out->next();
             if (slot_out == smap.highwater() && slot_out)
-                smap.highwater(slot_out->next());
+                smap.highpassed(true);
         }
     }
     if (m.status() != Machine::finished)

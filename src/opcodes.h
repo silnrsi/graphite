@@ -205,9 +205,12 @@ ENDOP
 
 STARTOP(next)
     if (map - &smap[0] >= int(smap.size())) DIE
-    if (is) is = is->next();
-    if (is == smap.highwater() && is)
-        smap.highwater(is->next());
+    if (is)
+    {
+    	if (is == smap.highwater())
+    		smap.highpassed(true);
+    	is = is->next();
+    }
     ++map;
 ENDOP
 

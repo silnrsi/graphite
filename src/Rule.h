@@ -117,6 +117,8 @@ public:
   void           pushSlot(Slot * const slot);
   Slot         * highwater() { return m_highwater; }
   void           highwater(Slot *s) { m_highwater = s; }
+  bool			 highpassed() const { return m_highpassed; }
+  void			 highpassed(bool v) { m_highpassed = v; }
 
   Segment &    segment;
 private:
@@ -124,6 +126,7 @@ private:
   unsigned short m_size;
   unsigned short m_precontext;
   Slot         * m_highwater;
+  bool			 m_highpassed;
 };
 
 
