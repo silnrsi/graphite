@@ -1,8 +1,7 @@
 project(nametabletest)
-include_directories(../../src)
+include_directories(${graphite2_core_SOURCE_DIR})
 
-target_objects(OBJS graphite2 NameTable.cpp)
-add_executable(nametabletest nametabletest.cpp ${OBJS})
-add_dependencies(nametabletest graphite2)
+add_executable(nametabletest nametabletest.cpp)
+target_link_libraries(nametabletest graphite2-base)
 
 add_test(NAME nametabletest COMMAND $<TARGET_FILE:nametabletest>)

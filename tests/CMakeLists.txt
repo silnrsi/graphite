@@ -8,6 +8,23 @@ if (ENABLE_COMPARE_RENDERER)
     add_subdirectory(comparerenderer)
 endif (ENABLE_COMPARE_RENDERER)
 
+include_directories(${graphite2_core_SOURCE_DIR})
+set(S ${graphite2_core_SOURCE_DIR})
+add_library(graphite2-base
+    ${S}/FeatureMap.cpp
+    ${S}/NameTable.cpp
+    ${S}/Sparse.cpp
+    ${S}/TtfUtil.cpp
+    ${S}/UtfCodec.cpp)
+
+add_library(graphite2-segcache
+    ${S}/SegCache.cpp
+    ${S}/SegCacheEntry.cpp
+    ${S}/SegCacheStore.cpp
+    ${S}/Slot.cpp
+    ${S}/GlyphFaceCache.cpp
+    ${S}/GlyphFace.cpp)
+
 add_subdirectory(segcache)
 add_subdirectory(featuremap)
 add_subdirectory(nametabletest)

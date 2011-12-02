@@ -1,6 +1,6 @@
 project(endian)
 
-include_directories(../../src)
+include_directories(${graphite2_core_SOURCE_DIR})
 
 add_executable(endiantest endiantest.cpp)
 

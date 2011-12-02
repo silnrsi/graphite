@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     
     // Load the code.
     Silf silf;
-    gr_face *face = gr_make_file_face(font_path, gr_face_default);
+    gr_face *face = gr_make_file_face(font_path, gr_face_dumbRendering);
     if (!face)
     {
         std::cerr << argv[0] << ": failed to load graphite tables for font: " << font_path << std::endl;

@@ -9,23 +9,6 @@ function(nolib_test LIBNAME OBJECTFILE)
 endfunction(nolib_test)
 
 
-function(target_objects VAR target)
-    if (NOT ARGN)
-        get_target_property(_target_srcs ${target} SOURCES)
-    else(NOT ARGN)
-        set(_target_srcs ${ARGN})
-    endif(NOT ARGN)
-    get_target_property(_target_obj_dir ${target} LOCATION)
-    get_filename_component(_target_obj_dir ${_target_obj_dir} PATH)
-    set(_target_obj_dir ${_target_obj_dir}/CMakeFiles/${target}.dir/)
-    foreach(src ${_target_srcs})
-        list(APPEND OUT ${_target_obj_dir}${src}${CMAKE_CXX_OUTPUT_EXTENSION})
-    endforeach(src)
-    set_source_files_properties(${OUT} PROPERTIES GENERATED 1)
-    set(${VAR} ${OUT} PARENT_SCOPE)
-endfunction(target_objects)
-
-
 MACRO(GET_TARGET_PROPERTY_WITH_DEFAULT _variable _target _property _default_value)
   GET_TARGET_PROPERTY (${_variable} ${_target} ${_property})
   IF (${_variable} MATCHES NOTFOUND)

@@ -3,40 +3,30 @@ include(Graphite)
 
 enable_testing()
 
-include_directories(../../src)
+include_directories(${graphite2_core_SOURCE_DIR})
+
+set(S ${graphite2_core_SOURCE_DIR})
 
 if(DISABLE_TRACING)
     set(TRACESUPPORT "")
 else(DISABLE_TRACING)
     set(TRACESUPPORT XmlTraceLog.cpp XmlTraceLogTags.cpp)
 endif(DISABLE_TRACING)
+        
 
 # I build the vm code here since it needs to be built for both code threading
 # models rather than linking against the library from source.
-target_objects(OBJS graphite2 
-    gr_face.cpp 
-    Bidi.cpp 
-    CachedFace.cpp 
-    Code.cpp 
-    CmapCache.cpp 
-    Face.cpp 
-    FeatureMap.cpp 
-    GlyphFace.cpp 
-    GlyphFaceCache.cpp
-    NameTable.cpp
-    Pass.cpp
-    Segment.cpp
-    SegCache.cpp
-    SegCacheEntry.cpp
-    SegCacheStore.cpp
-    Silf.cpp
-    Slot.cpp
-    Sparse.cpp
-    TtfUtil.cpp
-    UtfCodec.cpp
+add_library(vm-test-common STATIC 
+    basic_test.cpp
+    ${S}/Bidi.cpp 
+    ${S}/Code.cpp 
+    ${S}/CmapCache.cpp 
+    ${S}/Face.cpp 
+    ${S}/Pass.cpp
+    ${S}/Segment.cpp
+    ${S}/Silf.cpp
     ${TRACESUPPORT})
-add_library(vm-test-common STATIC basic_test.cpp ${OBJS})
-add_dependencies(vm-test-common graphite2)
+target_link_libraries(vm-test-common graphite2 graphite2-base graphite2-segcache)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
@@ -64,13 +54,13 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-add_test(vm-test-call-threading vm-test-call ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf 1)
+add_test(vm-test-call-threading vm-test-call ${PROJECT_SOURCE_DIR}/../fonts/tiny.ttf 1)
 set_tests_properties(vm-test-call-threading PROPERTIES
         PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
         FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_test(vm-test-direct-threading vm-test-direct ${PROJECT_SOURCE_DIR}/../fonts/Padauk.ttf 1)
+	add_test(vm-test-direct-threading vm-test-direct ${PROJECT_SOURCE_DIR}/../fonts/tiny.ttf 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
 			FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")

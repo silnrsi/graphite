@@ -19,49 +19,53 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
-#include <cassert>
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include "Main.h"
+#include <stdexcept>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <graphite2/Font.h>
 #include "Endian.h"
 #include "Face.h"
 #include "FeatureMap.h"
-#include "TtfTypes.h"
 #include "TtfUtil.h"
-
 
 #pragma pack(push, 1)
 
 using namespace graphite2;
 
-// TODO fix this for other platforms
+template<typename T> class _be
+{
+	T _v;
+public:
+	_be(const T & t) throw() 				{_v = be::swap<T>(t);}
 
-//#define PACKED __attribute__ ((packed))
+	operator T () const throw()				{return be::swap<T>(_v); }
+};
 
 struct FeatHeader
 {
-    uint16 m_major;
-    uint16 m_minor;
-    uint16 m_numFeat;
-    uint16 m_reserved1;
-    uint32 m_reserved2;
+    _be<gr_uint16> m_major;
+    _be<gr_uint16> m_minor;
+    _be<gr_uint16> m_numFeat;
+    _be<gr_uint16> m_reserved1;
+    _be<gr_uint32> m_reserved2;
 };
 
 struct FeatDefn
 {
-    uint32 m_featId;
-    uint16 m_numFeatSettings;
-    uint16 m_reserved1;
-    uint32 m_settingsOffset;
-    uint16 m_flags;
-    uint16 m_label;
+    _be<gr_uint32> m_featId;
+    _be<gr_uint16> m_numFeatSettings;
+    _be<gr_uint16> m_reserved1;
+    _be<gr_uint32> m_settingsOffset;
+    _be<gr_uint16> m_flags;
+    _be<gr_uint16> m_label;
 };
 
 struct FeatSetting
 {
-    int16 m_value;
-    uint16 m_label;
+    _be<gr_int16>	m_value;
+    _be<gr_uint16>	m_label;
 };
 
 struct FeatTableTestA
@@ -159,49 +163,60 @@ const FeatTableTestE testBadOffset = {
 
 #pragma pack(pop)
 
-class DummyFaceHandle
+class face_handle
 {
 public:
-    DummyFaceHandle() : m_table(NULL), m_tableLen(0) {}
-    ~DummyFaceHandle() { if (m_table) { free(m_table); m_table = NULL; m_tableLen = 0; }}
-    template <class T> void init(const T & data)
-    {
-        if (m_table) free(m_table);
-        m_table = malloc(sizeof(T));
-        memcpy(m_table, &data, sizeof(T));
-        // convert to big endian if needed
-        T * bigEndian = reinterpret_cast<T*>(m_table);
-        bigEndian->m_header.m_major = be::swap<uint16>(data.m_header.m_major);
-        bigEndian->m_header.m_minor = be::swap<uint16>(data.m_header.m_minor);
-        bigEndian->m_header.m_numFeat = be::swap<uint16>(data.m_header.m_numFeat);
-        m_tableLen = sizeof(T);
-        for (size_t i = 0; i < sizeof(data.m_defs)/sizeof(FeatDefn); i++)
-        {
-            bigEndian->m_defs[i].m_featId = be::swap<uint32>(data.m_defs[i].m_featId);
-            bigEndian->m_defs[i].m_numFeatSettings = be::swap<uint16>(data.m_defs[i].m_numFeatSettings);
-            bigEndian->m_defs[i].m_settingsOffset = be::swap<uint32>(data.m_defs[i].m_settingsOffset);
-            bigEndian->m_defs[i].m_flags = be::swap<uint16>(data.m_defs[i].m_flags);
-            bigEndian->m_defs[i].m_label = be::swap<uint16>(data.m_defs[i].m_label);
-        }
-        for (size_t i = 0; i < sizeof(data.m_settings)/sizeof(FeatSetting); i++)
-        {
-            bigEndian->m_settings[i].m_value = be::swap<uint16>(data.m_settings[i].m_value);
-            bigEndian->m_settings[i].m_label = be::swap<uint16>(data.m_settings[i].m_label);
-        }
-    }
-    void * m_table;
-    size_t m_tableLen;
+	typedef std::pair<const void *, size_t>		table_t;
+	static const table_t						no_table;
+
+	static const void * get_table_fn(const void* afh, unsigned int name, size_t *len) {
+		const face_handle & fh = *reinterpret_cast<const face_handle *>(afh);
+		const table_t & t = fh[name];
+		*len = t.second;
+		return t.first;
+	}
+
+	face_handle(const char *backing_font_path = 0)
+	: _header(0), _dir(0)
+	{
+		if (!backing_font_path) return;
+		std::ifstream 	font_file(backing_font_path, std::ifstream::binary);
+		const size_t	font_size = font_file.seekg(0, std::ios::end).tellg();
+		font_file.seekg(0, std::ios::beg);
+		_header = new char [font_size];
+		font_file.read(const_cast<char *>(_header), font_size);
+	    if (!TtfUtil::CheckHeader(_header))
+	    	throw std::runtime_error(std::string(backing_font_path) + ": invalid font");
+	    size_t dir_off, dir_sz;
+	    if (!TtfUtil::GetTableDirInfo(_header, dir_off, dir_sz))
+	    	throw std::runtime_error(std::string(backing_font_path) + ": invalid font");
+	    _dir = _header + dir_off;
+	}
+
+	void replace_table(const TtfUtil::Tag name, const void * const data, size_t len) throw() {
+		_tables[name] = std::make_pair(data, len);
+	}
+
+	const table_t & operator [] (const TtfUtil::Tag name) const throw() {
+		const table_t & table = _tables[name];
+		if (table.first)	return table;
+
+		size_t off, len;
+		if (!TtfUtil::GetTableInfo(name, _header, _dir, off, len))
+			return no_table;
+		return _tables[name] = table_t(_header + off, len);
+	}
+
+private:
+    const char 						  * _header,
+									  * _dir;
+	mutable std::map<const TtfUtil::Tag, table_t> _tables;
 };
 
-const void * getTestFeat(const void* appFaceHandle, unsigned int /*name*/, size_t *len)
-{
-    const DummyFaceHandle * dummyFace = reinterpret_cast<const DummyFaceHandle*>(appFaceHandle);
-    if (len)
-        *len = dummyFace->m_tableLen;
-    return dummyFace->m_table;
-}
+const face_handle::table_t	face_handle::no_table = face_handle::table_t(0,0);
 
-template <class T> void testAssert(const char * msg, T b)
+
+template <typename T> void testAssert(const char * msg, const T b)
 {
     if (!b)
     {
@@ -210,22 +225,24 @@ template <class T> void testAssert(const char * msg, T b)
     }
 }
 
-template <class T> void testAssertEqual(const char * msg, T a, T b)
+template <typename T, typename R> void testAssertEqual(const char * msg, const T a, const R b)
 {
-    if (a != b)
+    if (a != T(b))
     {
         fprintf(stderr, msg, a, b);
         exit(1);
     }
 }
 
+face_handle dummyFace;
+
 template <class T> void testFeatTable(const T & table, const char * testName)
 {
     FeatureMap testFeatureMap;
-    DummyFaceHandle dummyFace;
-    dummyFace.init<T>(table);
-    const Face face(&dummyFace, getTestFeat);
-    bool readStatus = testFeatureMap.readFeats(face);
+    dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
+    const gr_face * face = gr_make_face(&dummyFace, face_handle::get_table_fn, gr_face_dumbRendering);
+    if (!face) throw std::runtime_error("failed to load font");
+    bool readStatus = testFeatureMap.readFeats(*face);
     testAssert("readFeats", readStatus);
     fprintf(stderr, testName, NULL);
     testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
@@ -246,22 +263,32 @@ template <class T> void testFeatTable(const T & table, const char * testName)
     }
 }
 
-int main(int /*argc*/, char ** /*argv*/)
+int main(int argc, char * argv[])
 {
-    testFeatTable<FeatTableTestA>(testDataA, "A\n");
-    testFeatTable<FeatTableTestB>(testDataB, "B\n");
-    testFeatTable<FeatTableTestB>(testDataBunsorted, "Bu\n");
-    testFeatTable<FeatTableTestC>(testDataCunsorted, "C\n");
-    testFeatTable<FeatTableTestD>(testDataDunsorted, "D\n");
-    testFeatTable<FeatTableTestE>(testDataE, "E\n");
+	try
+	{
+		if (argc != 2)	throw std::length_error("not enough arguments: need a backing font");
 
-    // test a bad settings offset stradling the end of the table
-    FeatureMap testFeatureMap;
-    DummyFaceHandle dummyFace;
-    dummyFace.init<FeatTableTestE>(testBadOffset);
-    const Face face(&dummyFace, getTestFeat);
-    bool readStatus = testFeatureMap.readFeats(face);
-    testAssert("fail gracefully on bad table", !readStatus);
+		dummyFace = face_handle(argv[1]);
+		testFeatTable<FeatTableTestA>(testDataA, "A\n");
+		testFeatTable<FeatTableTestB>(testDataB, "B\n");
+		testFeatTable<FeatTableTestB>(testDataBunsorted, "Bu\n");
+		testFeatTable<FeatTableTestC>(testDataCunsorted, "C\n");
+		testFeatTable<FeatTableTestD>(testDataDunsorted, "D\n");
+		testFeatTable<FeatTableTestE>(testDataE, "E\n");
+
+		// test a bad settings offset stradling the end of the table
+		FeatureMap testFeatureMap;
+		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
+		const gr_face * face = gr_make_face(&dummyFace, face_handle::get_table_fn, gr_face_dumbRendering);
+		bool readStatus = testFeatureMap.readFeats(*face);
+		testAssert("fail gracefully on bad table", !readStatus);
+	}
+	catch (std::exception & e)
+	{
+		fprintf(stderr, "%s: %s\n", argv[0], e.what());
+		return 1;
+	}
 
     return 0;
 }
