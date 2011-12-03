@@ -10,7 +10,7 @@ set(S ${graphite2_core_SOURCE_DIR})
 if(DISABLE_TRACING)
     set(TRACESUPPORT "")
 else(DISABLE_TRACING)
-    set(TRACESUPPORT XmlTraceLog.cpp XmlTraceLogTags.cpp)
+    set(TRACESUPPORT ${S}/XmlTraceLog.cpp ${S}/XmlTraceLogTags.cpp)
 endif(DISABLE_TRACING)
         
 
