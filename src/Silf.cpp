@@ -260,16 +260,16 @@ bool Silf::readGraphite(void* pSilf, size_t lSilf, const Face& face, uint32 vers
 template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t data_len)
 {
 	const T cls_off = 2*sizeof(uint16) + sizeof(T)*(m_nClass+1);
-	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(T);
+	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
 	// Check that the last+1 offset is less than or equal to the class map length.
-	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(T))
+	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
 		return -1;
 
 	// Read in all the offsets.
 	m_classOffsets = gralloc<uint32>(m_nClass+1);
 	for (uint32 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
 	{
-		*o = (be::read<T>(p) - cls_off)/sizeof(T);
+		*o = (be::read<T>(p) - cls_off)/sizeof(uint16);
 		if (*o > max_off)
 			return 0;
 	}
@@ -286,7 +286,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
 	// Check that numLinear < numClass,
 	// that there is at least enough data for numClasses offsets.
 	if (m_nLinear > m_nClass
-	 || (m_nClass + 1) > (data_len/sizeof(uint16)-2))
+	 || (m_nClass + 1) * (version >= 0x00040000 ? sizeof(uint32) : sizeof(uint16))> (data_len - 4))
 		return -1;
 
     
