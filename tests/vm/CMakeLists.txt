@@ -25,20 +25,24 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGR2_EXPORTING)
+    add_custom_target(${PROJECT_NAME}_copy_dll ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    add_dependencies(${PROJECT_NAME}_copy_dll graphite2 vm-test-common)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+
 add_executable(vm-test-call ${S}/call_machine.cpp)
 target_link_libraries(vm-test-call vm-test-common)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
 	add_executable(vm-test-direct ${S}/direct_machine.cpp)
 	target_link_libraries(vm-test-direct vm-test-common)
+    if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        add_dependencies(${PROJECT_NAME}_copy_dll vm-test-direct)
+    endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGR2_EXPORTING)
-    add_custom_target(${PROJECT_NAME}_copy_dll ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-    add_dependencies(${PROJECT_NAME}_copy_dll graphite2)
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_definitions(-DDISABLE_TRACING)
 
