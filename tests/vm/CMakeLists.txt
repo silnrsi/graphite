@@ -38,9 +38,6 @@ target_link_libraries(vm-test-call vm-test-common)
 if  (${CMAKE_COMPILER_IS_GNUCXX})
 	add_executable(vm-test-direct ${S}/direct_machine.cpp)
 	target_link_libraries(vm-test-direct vm-test-common)
-    if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-        add_dependencies(${PROJECT_NAME}_copy_dll vm-test-direct)
-    endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
 
