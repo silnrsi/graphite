@@ -50,17 +50,17 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that gr2fonttest can find it
-add_custom_target(copy_dll ALL 
+add_custom_target(${CMAKE_PROJECT_NAME}_copy_dll ALL 
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
-        add_custom_command(TARGET copy_dll POST_BUILD
+        add_custom_command(TARGET ${CMAKE_PROJECT_NAME}_copy_dll POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}iconv${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     endif (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-add_dependencies(copy_dll graphite2 iconv gr2fonttest)
+add_dependencies(${CMAKE_PROJECT_NAME}_copy_dll graphite2 iconv gr2fonttest)
 
 install(TARGETS gr2fonttest EXPORT gr2fonttest RUNTIME DESTINATION bin)
 

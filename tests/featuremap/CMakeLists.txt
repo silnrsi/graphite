@@ -6,9 +6,9 @@ add_definitions(-DGR2_EXPORTING)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
-    add_custom_target(copy_dll ALL
+    add_custom_target(${CMAKE_PROJECT_NAME}_copy_dll ALL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-    add_dependencies(copy_dll graphite2)
+    add_dependencies(${CMAKE_PROJECT_NAME}_copy_dll graphite2)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 set(S ${graphite2_core_SOURCE_DIR})
