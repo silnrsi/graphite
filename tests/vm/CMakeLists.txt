@@ -7,13 +7,6 @@ include_directories(${graphite2_core_SOURCE_DIR})
 
 set(S ${graphite2_core_SOURCE_DIR})
 
-if(DISABLE_TRACING)
-    set(TRACESUPPORT "")
-else(DISABLE_TRACING)
-    set(TRACESUPPORT ${S}/XmlTraceLog.cpp ${S}/XmlTraceLogTags.cpp)
-endif(DISABLE_TRACING)
-        
-
 # I build the vm code here since it needs to be built for both code threading
 # models rather than linking against the library from source.
 add_library(vm-test-common STATIC 
@@ -24,8 +17,7 @@ add_library(vm-test-common STATIC
     ${S}/Face.cpp 
     ${S}/Pass.cpp
     ${S}/Segment.cpp
-    ${S}/Silf.cpp
-    ${TRACESUPPORT})
+    ${S}/Silf.cpp)
 target_link_libraries(vm-test-common graphite2 graphite2-base graphite2-segcache)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
@@ -33,16 +25,19 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
-add_executable(vm-test-call ${graphite2_core_SOURCE_DIR}/call_machine.cpp)
+add_executable(vm-test-call ${S}/call_machine.cpp)
 target_link_libraries(vm-test-call vm-test-common)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_executable(vm-test-direct ${graphite2_core_SOURCE_DIR}/direct_machine.cpp)
+	add_executable(vm-test-direct ${S}/direct_machine.cpp)
 	target_link_libraries(vm-test-direct vm-test-common)
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGR2_EXPORTING)
+    add_custom_target(copy_dll ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    add_dependencies(copy_dll graphite2)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_definitions(-DDISABLE_TRACING)
@@ -54,13 +49,13 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-add_test(vm-test-call-threading vm-test-call ${PROJECT_SOURCE_DIR}/../fonts/tiny.ttf 1)
+add_test(vm-test-call-threading vm-test-call ${testing_SOURCE_DIR}/fonts/tiny.ttf 1)
 set_tests_properties(vm-test-call-threading PROPERTIES
         PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
         FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_test(vm-test-direct-threading vm-test-direct ${PROJECT_SOURCE_DIR}/../fonts/tiny.ttf 1)
+	add_test(vm-test-direct-threading vm-test-direct ${testing_SOURCE_DIR}/fonts/tiny.ttf 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
 			FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")

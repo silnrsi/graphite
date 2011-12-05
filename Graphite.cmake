@@ -68,8 +68,6 @@ function(fonttest TESTNAME FONTFILE)
     add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:gr2fonttest> -log ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
     add_test(NAME ${TESTNAME}Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.log)
     set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
-    add_custom_target(${TESTNAME} COMMAND ${gr2fonttest_BINARY_DIR}/${CMAKE_CFG_INTDIR}/gr2fonttest${CMAKE_EXECUTABLE_SUFFIX} -trace ${TESTNAME}.xml ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE} -codes ${ARGN})
-#    add_custom_target(${TESTNAME} DEPENDS ${TESTNAME}.xml)
 endfunction(fonttest)
 
 
@@ -80,7 +78,5 @@ function(feattest TESTNAME FONTFILE)
     add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:gr2fonttest> -log ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
     add_test(NAME ${TESTNAME}Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.log)
     set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
-    add_custom_target(${TESTNAME} COMMAND ${gr2fonttest_BINARY_DIR}/${CMAKE_CFG_INTDIR}/gr2fonttest${CMAKE_EXECUTABLE_SUFFIX} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
-#    add_custom_target(${TESTNAME} DEPENDS ${TESTNAME}.xml)
 endfunction(feattest)
 

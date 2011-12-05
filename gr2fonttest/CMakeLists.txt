@@ -31,9 +31,7 @@ if (NOT DISABLE_TRACING)
 endif (NOT DISABLE_TRACING)
 
 add_executable(gr2fonttest gr2FontTest.cpp)
-
 target_link_libraries(gr2fonttest graphite2)
-add_dependencies(gr2fonttest graphite2)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${WIN_ICONV_PATH} STREQUAL "WIN_ICONV_PATH-NOTFOUND")

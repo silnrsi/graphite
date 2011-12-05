@@ -95,9 +95,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		add_definitions(-DHAVE_USP10)
 	endif (NOT ${USP10_H} STREQUAL "USP10_H_NOTFOUND")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-    add_custom_target(cr_copy_dll ALL
+    add_custom_target(copy_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-    add_dependencies(cr_copy_dll graphite2 iconv comparerenderer)
+    add_dependencies(copy_dll graphite2 iconv comparerenderer)
     if (${GR_FOUND})
         target_link_libraries(comparerenderer debug ${GR_DEBUG_LIBRARY})
         target_link_libraries(comparerenderer optimized ${GR_RELEASE_LIBRARY})
@@ -105,7 +105,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     if (NOT ${ICU_LIBRARY_PATH} STREQUAL "ICU_LIBRARY_PATH-NOTFOUND")
         file(GLOB ICU_DLLS ${ICU_LIBRARY_PATH}/*.dll)
         foreach(ICU_DLL ${ICU_DLLS})
-	        add_custom_command(TARGET cr_copy_dll POST_BUILD
+	        add_custom_command(TARGET copy_dll POST_BUILD
 		        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ICU_DLL} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})        
 	    endforeach(ICU_DLL ${ICU_DLLS})
     endif (NOT ${ICU_LIBRARY_PATH} STREQUAL "ICU_LIBRARY_PATH-NOTFOUND")
@@ -116,9 +116,9 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
     if (${GR_FOUND})
     # comparision tests between old and new graphite
         add_test(NAME ${TESTNAME}_comparison COMMAND $<TARGET_FILE:comparerenderer>
-        -t ${PROJECT_SOURCE_DIR}/../texts/${TEXTFILE} -f ${PROJECT_SOURCE_DIR}/../fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_comparison.log -c -g -n --tolerance 0.0001 ${ARGN})
+        -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_comparison.log -c -g -n --tolerance 0.0001 ${ARGN})
         add_test(NAME ${TESTNAME}_cached_comparison COMMAND $<TARGET_FILE:comparerenderer>
-        -t ${PROJECT_SOURCE_DIR}/../texts/${TEXTFILE} -f ${PROJECT_SOURCE_DIR}/../fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096 --tolerance 0.0001 ${ARGN})
+        -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096 --tolerance 0.0001 ${ARGN})
     endif (${GR_FOUND})
 endmacro(comparetest)
 
@@ -128,7 +128,7 @@ comparetest(padauk_ulon Padauk.ttf my_HeadwordSyllables.txt --features ulon=1)
 comparetest(charis_yor charis_r_gr.ttf udhr_yor.txt)
 comparetest(piglatin PigLatinBenchmark_v3.ttf udhr_eng.txt)
 # comparerenderer needs a bidi algorithm before it can run this test
-# comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
+comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
 
 # comparerenderer can also be used for font testing
 install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
