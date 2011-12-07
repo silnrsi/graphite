@@ -26,7 +26,7 @@ of the License or (at your option) any later version.
 */
 
 #include <cstring>
-#include <stdarg.h>
+#include <cstdarg>
 #include "Main.h"
 #include "XmlTraceLog.h"
 

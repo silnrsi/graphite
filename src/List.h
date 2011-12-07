@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include <cassert>
 #include <cstring>
 #include <cstdlib>
+#include <new>
 
 
 namespace graphite2 {

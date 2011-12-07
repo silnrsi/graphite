@@ -27,9 +27,9 @@ of the License or (at your option) any later version.
 #include "Main.h"
 #include "Endian.h"
 #include "Pass.h"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
 #include "Segment.h"
 #include "Code.h"
 #include "Rule.h"

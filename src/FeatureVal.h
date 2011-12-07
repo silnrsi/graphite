@@ -26,7 +26,6 @@ of the License or (at your option) any later version.
 */
 #pragma once
 #include <cstring>
-#include <algorithm>
 #include <cassert>
 #include "Main.h"
 #include "List.h"

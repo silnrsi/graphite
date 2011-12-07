@@ -30,13 +30,6 @@ of the License or (at your option) any later version.
 
 #include <cassert>
 
-//#define USE_GRLIST
-#ifdef USE_GRLIST
-#include "GrList.h"
-#else
-#include <vector>
-#endif
-
 #include "Slot.h"
 #include "CharInfo.h"
 #include "FeatureVal.h"

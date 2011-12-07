@@ -31,8 +31,7 @@ of the License or (at your option) any later version.
 
 #include <cassert>
 #include <cstdlib>
-#include <stdexcept>
-#include <string.h>
+#include <cstring>
 #include "graphite2/Segment.h"
 #include "Code.h"
 #include "Machine.h"

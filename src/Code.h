@@ -32,7 +32,6 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include <cassert>
-#include <utility>
 #include <graphite2/Types.h>
 #include "Main.h"
 #include "Machine.h"
