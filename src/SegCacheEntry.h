@@ -78,7 +78,6 @@ public:
     const Slot * first() const { return m_glyph; }
     const Slot * last() const { return m_glyph + (m_glyphLength - 1); }
 
-    void log(size_t unicodeLength) const;
     /** Total number of times this entry has been accessed since creation */
     unsigned long long accessCount() const { return m_accessCount; }
     /** "time" of last access where "time" is measured in accesses to the cache owning this entry */

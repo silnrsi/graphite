@@ -1,6 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
-include(CMakeDependentOption)
 include(TestBigEndian)
 
 project(graphite2)
@@ -15,25 +14,11 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 enable_testing()
 
-option(DISABLE_TRACING "Disable code required for using the XML Trace logging" ON)
-option(DISABLE_SEGCACHE "Don't build the segment cache support code" OFF)
-option(DISABLE_FILEFACE "Don't build with fileface support" OFF)
-cmake_dependent_option(ENABLE_DEEP_TRACING "Enables time consuming deep Trace logging" OFF
-                        "NOT DISABLE_TRACING" OFF)
 set(VM_MACHINE_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.")
 set(DOXYGEN_CONFIG public CACHE STRING "Specifies the base configuration file for doxygen. Current values: public, all")
 
 
 message(STATUS "Build is " ${CMAKE_BUILD_TYPE})
-string(REPLACE "ON" "off" _tracing ${DISABLE_TRACING})
-string(REPLACE "OFF" "on" _tracing ${_tracing})
-message(STATUS "Tracing is " ${_tracing})
-string(TOLOWER ${ENABLE_DEEP_TRACING} _deep_tracing)
-message(STATUS "Deep tracing is " ${_deep_tracing})
-
-if (DISABLE_TRACING)
-    add_definitions(-DDISABLE_TRACING)
-endif (DISABLE_TRACING)
 
 
 string(TOLOWER ${VM_MACHINE_TYPE} VM_MACHINE_TYPE)

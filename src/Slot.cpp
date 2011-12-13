@@ -259,12 +259,6 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
                 m_attach = Position(seg->glyphAdvance(other->gid()), 0);
             }
         }
-        else
-        {
-#ifndef DISABLE_TRACING
-            XmlTraceLog::get().warning("invalid slatAttTo %d", value);
-#endif
-        }
         break;
     }
     case gr_slatAttX :			m_attach.x = value; break;

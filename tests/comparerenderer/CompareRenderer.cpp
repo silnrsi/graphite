@@ -48,7 +48,7 @@
 #endif
 
 #include "Gr2Renderer.h"
-#include "graphite2/XmlLog.h"
+#include "graphite2/Log.h"
 
 #ifdef HAVE_HARFBUZZNG
 #include "HbNgRenderer.h"

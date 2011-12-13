@@ -37,7 +37,6 @@ of the License or (at your option) any later version.
 #include <graphite2/Segment.h>
 #include "Machine.h"
 #include "Segment.h"
-#include "XmlTraceLog.h"
 #include "Slot.h"
 #include "Rule.h"
 
@@ -52,13 +51,11 @@ of the License or (at your option) any later version.
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)	    bool name(registers) REGPARM(4);\
-                            bool name(registers) { \
-                                STARTTRACE(name,is);
-#define ENDOP                   ENDTRACE; \
-                                return (sp - sb)/Machine::STACK_MAX==0; \
+                            bool name(registers) {
+#define ENDOP                   return (sp - sb)/Machine::STACK_MAX==0; \
                             }
 
-#define EXIT(status)        { push(status); ENDTRACE; return false; }
+#define EXIT(status)        { push(status); return false; }
 
 // This is required by opcode_table.h
 #define do_(name)           instr(name)

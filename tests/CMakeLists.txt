@@ -11,19 +11,12 @@ endif (ENABLE_COMPARE_RENDERER)
 include_directories(${graphite2_core_SOURCE_DIR})
 set(S ${graphite2_core_SOURCE_DIR})
 
-if(DISABLE_TRACING)
-    set(TRACESUPPORT "")
-else(DISABLE_TRACING)
-    set(TRACESUPPORT ${S}/XmlTraceLog.cpp ${S}/XmlTraceLogTags.cpp)
-endif(DISABLE_TRACING)
-
 add_library(graphite2-base
     ${S}/FeatureMap.cpp
     ${S}/NameTable.cpp
     ${S}/Sparse.cpp
     ${S}/TtfUtil.cpp
-    ${S}/UtfCodec.cpp
-    ${TRACESUPPORT})
+    ${S}/UtfCodec.cpp)
 
 add_library(graphite2-segcache
     ${S}/SegCache.cpp

@@ -110,14 +110,6 @@ bool CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
                 const SegCacheEntry * entry = (segCache)?
                     segCache->find(cmapGlyphs, i - subSegStart + 1) : NULL;
                 // TODO disable cache for words at start/end of line with contextuals
-#ifndef DISABLE_TRACING
-                if (XmlTraceLog::get().active())
-                {
-                    XmlTraceLog::get().openElement(ElementSubSeg);
-                    XmlTraceLog::get().addAttribute(AttrFirstId, subSegStart);
-                    XmlTraceLog::get().addAttribute(AttrLastId, i);
-                }
-#endif
                 if (!entry)
                 {
                     unsigned int length = i - subSegStart + 1;
@@ -136,12 +128,6 @@ bool CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
                     seg->splice(subSegStart, i - subSegStart + 1, subSegStartSlot, subSegEndSlot,
                         entry->first(), entry->glyphLength());
                 }
-#ifndef DISABLE_TRACING
-                if (XmlTraceLog::get().active())
-                {
-                    XmlTraceLog::get().closeElement(ElementSubSeg);
-                }
-#endif
             }
             subSegEndSlot = nextSlot;
             subSegStartSlot = nextSlot;

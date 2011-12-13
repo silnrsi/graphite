@@ -41,8 +41,6 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
 
-add_definitions(-DDISABLE_TRACING)
-
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	add_definitions(-fno-rtti -fno-exceptions)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")

@@ -42,7 +42,7 @@ diagnostic log of the segment creation in grSegmentLog.txt
 
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
-#include "graphite2/XmlLog.h"
+#include "graphite2/Log.h"
 
 class Gr2TextSrc
 {
@@ -607,9 +607,7 @@ int Parameters::testFileFont() const
 //    try
     {
         // use the -trace option to specify a file
-#ifndef DISABLE_TRACING
-        graphite_start_logging(trace, static_cast<GrLogMask>(mask));
-#endif
+    	if (trace)	graphite_start_logging(trace, static_cast<GrLogMask>(mask));
 
         gr_face *face = NULL;
         if (enableCache)
@@ -771,9 +769,7 @@ int Parameters::testFileFont() const
 //        printf("Exception occurred\n");
 //        returnCode = 5;
 //    }
-#ifndef DISABLE_TRACING
     if (trace) graphite_stop_logging();
-#endif
     return returnCode;
 }
 

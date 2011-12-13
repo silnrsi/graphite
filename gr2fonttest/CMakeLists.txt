@@ -24,12 +24,6 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	endif (NOT ${ICONV_HEADER_PATH} STREQUAL "ICONV_HEADER_PATH-NOTFOUND")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-if (NOT DISABLE_TRACING)
-	if (ENABLE_DEEP_TRACING)
-		add_definitions(-DENABLE_DEEP_TRACING)
-	endif (ENABLE_DEEP_TRACING)
-endif (NOT DISABLE_TRACING)
-
 add_executable(gr2fonttest gr2FontTest.cpp)
 target_link_libraries(gr2fonttest graphite2)
 

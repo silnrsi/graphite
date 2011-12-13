@@ -41,7 +41,6 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include "Machine.h"
 #include "Segment.h"
-#include "XmlTraceLog.h"
 #include "Slot.h"
 #include "Rule.h"
 

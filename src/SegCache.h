@@ -58,10 +58,8 @@ public:
             {
                 assert(m_entries[j]);
                 for (size_t k = 0; k < m_entryCounts[j]; k++)
-                {
-                    m_entries[j][k].log(j);
                     m_entries[j][k].clear();
-                }
+
                 free(m_entries[j]);
             }
         }

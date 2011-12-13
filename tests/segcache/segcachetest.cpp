@@ -20,6 +20,7 @@
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
 #include <graphite2/Segment.h>
+#include <graphite2/Log.h>
 #include "Main.h"
 #include "Silf.h"
 #include "Face.h"

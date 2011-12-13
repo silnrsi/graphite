@@ -33,7 +33,6 @@ of the License or (at your option) any later version.
 #include "Slot.h"
 #include "CharInfo.h"
 #include "FeatureVal.h"
-#include "XmlTraceLog.h"
 #include "Silf.h"
 
 #include "List.h"
@@ -129,11 +128,6 @@ public:
     void bidiPass(uint8 aBidi, int paradir, uint8 aMirror);
 
     CLASS_NEW_DELETE
-
-#ifndef DISABLE_TRACING
-    void logSegment(gr_encform enc, const void* pStart, size_t nChars) const;
-    void logSegment() const;
-#endif
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     void read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);

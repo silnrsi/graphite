@@ -53,9 +53,7 @@ namespace
       pRes->prepare_pos(font);
       // run the positioning passes
       pRes->finalise(font);
-  #ifndef DISABLE_TRACING
-      pRes->logSegment(enc, pStart, nChars);
-  #endif
+
       return static_cast<gr_segment*>(pRes);
   }
 

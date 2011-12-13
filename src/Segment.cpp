@@ -33,7 +33,6 @@ of the License or (at your option) any later version.
 #include "CharInfo.h"
 #include "Slot.h"
 #include "Main.h"
-#include "XmlTraceLog.h"
 #include "CmapCache.h"
 #include "graphite2/Segment.h"
 
@@ -354,76 +353,6 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
     if (iStart == m_first && iEnd == m_last) m_advance = currpos;
 }
 
-#ifndef DISABLE_TRACING
-void Segment::logSegment(gr_encform enc, const void* pStart, size_t nChars) const
-{
-    if (XmlTraceLog::get().active())
-    {
-        if (pStart)
-        {
-            XmlTraceLog::get().openElement(ElementText);
-            XmlTraceLog::get().addAttribute(AttrEncoding, enc);
-            XmlTraceLog::get().addAttribute(AttrLength, nChars);
-            switch (enc)
-            {
-            case gr_utf8:
-                XmlTraceLog::get().writeText(
-                    reinterpret_cast<const char *>(pStart));
-                break;
-            case gr_utf16:
-                for (size_t j = 0; j < nChars; ++j)
-                {
-                    uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
-                    if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
-                    {
-                        j++;
-                        // append low surrogate
-                        code = (code << 16) + reinterpret_cast<const uint16 *>(pStart)[j];
-                    }
-                    else if (code >= 0xDC00 && code <= 0xDFFF)
-                    {
-                        XmlTraceLog::get().warning("Unexpected low surrogate %x at %d", code, j);
-                    }
-                    XmlTraceLog::get().writeUnicode(code);
-                }
-                break;
-            case gr_utf32:
-                for (size_t j = 0; j < nChars; ++j)
-                {
-                    XmlTraceLog::get().writeUnicode(
-                        reinterpret_cast<const uint32 *>(pStart)[j]);
-                }
-                break;
-            }
-            XmlTraceLog::get().closeElement(ElementText);
-        }
-        logSegment();
-    }
-}
-
-void Segment::logSegment() const
-{
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementSegment);
-        XmlTraceLog::get().addAttribute(AttrLength, slotCount());
-        XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
-        XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
-        for (Slot *i = m_first; i; i = i->next())
-        {
-            XmlTraceLog::get().openElement(ElementSlot);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, i->gid());
-            XmlTraceLog::get().addAttribute(AttrX, i->origin().x);
-            XmlTraceLog::get().addAttribute(AttrY, i->origin().y);
-            XmlTraceLog::get().addAttribute(AttrBefore, i->before());
-            XmlTraceLog::get().addAttribute(AttrAfter, i->after());
-            XmlTraceLog::get().closeElement(ElementSlot);
-        }
-        XmlTraceLog::get().closeElement(ElementSegment);
-    }
-}
-
-#endif
 
 template <typename utf_iter>
 inline void process_utf_data(Segment & seg, const Face & face, const int fid, utf_iter c, size_t n_chars)
@@ -440,6 +369,7 @@ inline void process_utf_data(Segment & seg, const Face & face, const int fid, ut
 		seg.appendSlot(slotid, usv, gid, fid, c - base);
 	}
 }
+
 
 void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {

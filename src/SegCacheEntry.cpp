@@ -127,34 +127,6 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * 
     }
 }
 
-void SegCacheEntry::log(GR_MAYBE_UNUSED size_t unicodeLength) const
-{
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementSegCacheEntry);
-        XmlTraceLog::get().addAttribute(AttrAccessCount, m_accessCount);
-        XmlTraceLog::get().addAttribute(AttrLastAccess, m_lastAccess);
-        for (size_t i = 0; i < unicodeLength; i++)
-        {
-            XmlTraceLog::get().openElement(ElementText);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, m_unicode[i]);
-            XmlTraceLog::get().closeElement(ElementText);
-        }
-        for (size_t i = 0; i < m_glyphLength; i++)
-        {
-            XmlTraceLog::get().openElement(ElementGlyph);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, m_glyph[i].gid());
-            XmlTraceLog::get().addAttribute(AttrX, m_glyph[i].origin().x);
-            XmlTraceLog::get().addAttribute(AttrY, m_glyph[i].origin().y);
-            XmlTraceLog::get().addAttribute(AttrBefore, m_glyph[i].before());
-            XmlTraceLog::get().addAttribute(AttrAfter, m_glyph[i].after());
-            XmlTraceLog::get().closeElement(ElementGlyph);
-        }
-        XmlTraceLog::get().closeElement(ElementSegCacheEntry);
-    }
-#endif
-}
 
 void SegCacheEntry::clear()
 {

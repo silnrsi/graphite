@@ -21,14 +21,6 @@ DISABLE_SEGCACHE::
     if the engine is under space constraints both for code and memory. The default is that this is not
     defined.
 
-DISABLE_TRACING::
-    If set, no tracing code is compiled into the library, to save code space and increase speed. By default
-    this is not set.
-
-ENABLE_DEEP_TRACING::
-    Only used if DISABLE_TRACING is undefined. It enables extra tracing code that will give considerable
-    output at considerable time cost. By default this is not set.
-
 DISABLE_FILEFACE::
     If set, the code to support creating a face directly from a font file is not included in the library.
     By default this is not set.

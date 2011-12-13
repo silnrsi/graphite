@@ -61,9 +61,7 @@ private:
                      const uint16 * o_constraint, const byte *constraint_data, 
                      const uint16 * o_action, const byte * action_data,
                      const Face &);
-    void   logRule(const Rule * r, const uint16 * sort_key) const;
     bool   readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
-    void   logStates() const;
     bool   readRanges(const uint16* ranges, size_t num_ranges);
     uint16 glyphToCol(const uint16 gid) const;
     bool   runFSM(FiniteStateMachine & fsm, Slot * slot) const;

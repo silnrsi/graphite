@@ -41,18 +41,11 @@ if (DISABLE_FILEFACE)
     add_definitions(-DDISABLE_FILE_FACE)
 endif (DISABLE_FILEFACE)
 
-if (NOT DISABLE_TRACING)
-    set(TRACE_HEADERS ../include/graphite2/XmlLog.h)
-    if (ENABLE_DEEP_TRACING)
-        add_definitions(-DENABLE_DEEP_TRACING)
-    endif (ENABLE_DEEP_TRACING)
-endif (NOT DISABLE_TRACING)
 
 set(GRAPHITE_HEADERS 
     ../include/graphite2/Font.h
     ../include/graphite2/Segment.h
     ../include/graphite2/Types.h
-    ${TRACE_HEADERS}
     )
 
 file(GLOB PRIVATE_HEADERS *.h) 
@@ -85,9 +78,7 @@ add_library(graphite2 SHARED
     Slot.cpp
     Sparse.cpp
     TtfUtil.cpp
-    UtfCodec.cpp
-    XmlTraceLog.cpp
-    XmlTraceLogTags.cpp)
+    UtfCodec.cpp)
 
 set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             SOVERSION ${GRAPHITE_SO_VERSION}

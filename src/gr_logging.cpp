@@ -24,8 +24,8 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "XmlTraceLog.h"
-// #include "graphite2/XmlLog.h"
+#include "Main.h"
+#include "graphite2/Log.h"
 
 
 using namespace graphite2;
@@ -33,29 +33,13 @@ using namespace graphite2;
 extern "C" {
 
 
-bool graphite_start_logging(GR_MAYBE_UNUSED FILE * logFile, GR_MAYBE_UNUSED GrLogMask mask)
+bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 {
-#ifdef DISABLE_TRACING
-    return false;
-#else	//!DISABLE_TRACING
-    if (XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
-    {
-        delete XmlTraceLog::sLog;
-    }
-    XmlTraceLog::sLog = new XmlTraceLog(logFile, "http://projects.palaso.org/graphite2", mask);
-    return (XmlTraceLog::sLog != NULL);
-#endif		//!DISABLE_TRACING
+	return logFile && mask;
 }
 
 void graphite_stop_logging()
 {
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::sLog && XmlTraceLog::sLog != &XmlTraceLog::sm_NullLog)
-    {
-        delete XmlTraceLog::sLog;
-        XmlTraceLog::sLog = &XmlTraceLog::sm_NullLog;
-    }
-#endif		//!DISABLE_TRACING
 }
 
 

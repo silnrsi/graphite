@@ -180,18 +180,5 @@ inline void Machine::check_final_stack(const int32 * const sp)
 } // namespace vm
 } // namespace graphite2
 
-#ifdef ENABLE_DEEP_TRACING
-#define STARTTRACE(name,is) if (XmlTraceLog::get().active()) { \
-                                XmlTraceLog::get().openElement(ElementOpCode); \
-                                XmlTraceLog::get().addAttribute(AttrName, # name); \
-                                XmlTraceLog::get().addAttribute(AttrIndex, unsigned(map - smap.begin())); \
-                            }
-
-#define ENDTRACE            XmlTraceLog::get().closeElement(ElementOpCode)
-#else // ENABLE_DEEP_TRACING
-#define STARTTRACE(name,is)
-#define ENDTRACE
-#endif // ENABLE_DEEP_TRACING
-
 
 

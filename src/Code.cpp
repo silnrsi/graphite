@@ -38,11 +38,10 @@ of the License or (at your option) any later version.
 #include "Silf.h"
 #include "Face.h"
 #include "Rule.h"
-#include "XmlTraceLog.h"
 
 #include <cstdio>
 
-#ifdef DISABLE_TRACING
+#ifdef NDEBUG
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
@@ -61,8 +60,6 @@ inline bool is_return(const instr i) {
                 ret_true = *opmap[RET_TRUE].impl;
     return i == pop_ret || i == ret_zero || i == ret_true;
 }
-
-void emit_trace_message(opcode, const byte *const, const opcode_t &);
 
 struct context
 {
@@ -472,7 +469,6 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
     // Add this instruction
     *_instr++ = op.impl[_code._constraint]; 
     ++_code._instr_count;
-    emit_trace_message(opc, bc, op);
 
     // Grab the parameters
     if (param_sz) {
@@ -508,32 +504,6 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
     
     return bool(_code);
 }
-
-
-
-namespace {
-
-inline void emit_trace_message(opcode opc, const byte *const params, 
-                        const opcode_t &op)
-{
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementAction);
-        XmlTraceLog::get().addAttribute(AttrActionCode, opc);
-        XmlTraceLog::get().addAttribute(AttrAction, op.name);
-        for (size_t p = 0; p < 8 && p < op.param_sz; ++p)
-        {
-            XmlTraceLog::get().addAttribute(
-                                XmlTraceLogAttribute(Attr0 + p),
-                                params[p]);
-        }
-        XmlTraceLog::get().closeElement(ElementAction);
-    }
-#endif
-}
-
-} // end of namespace
 
 
 void Machine::Code::decoder::apply_analysis(instr * const code, instr * code_end)

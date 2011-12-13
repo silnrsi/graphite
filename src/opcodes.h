@@ -66,21 +66,13 @@ of the License or (at your option) any later version.
 // #define NOT_IMPLEMENTED     assert(false)
 #define NOT_IMPLEMENTED
 
-#ifdef ENABLE_DEEP_TRACING
-#define TRACEPARAM(n)       XmlTraceLog::get().addArrayElement(ElementParams, dp-n, n)
-#define TRACEPUSH(n)        XmlTraceLog::get().addSingleElement(ElementPush, n)
-#else
-#define TRACEPARAM(n)
-#define TRACEPUSH(n)
-#endif
-
-#define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a; TRACEPUSH(*sp)
-#define use_params(n)       dp += n; TRACEPARAM(n)
+#define binop(op)           const int32 a = pop(); *sp = int32(*sp) op a
+#define use_params(n)       dp += n
 
 #define declare_params(n)   const byte * param = dp; \
                             use_params(n);
 
-#define push(n)             { *++sp = n; TRACEPUSH(n); }
+#define push(n)             { *++sp = n; }
 #define pop()               (*sp--)
 #define slotat(x)           (map[(x)])
 #define DIE                 { is=seg.last(); EXIT(1); }

@@ -15,6 +15,6 @@ LOCAL_C_INCLUDES := ../../include ../../src
 LOCAL_EXPORT_C_INCLUDES := ../../include
 #LOCAL_C_INCLUDES := /home/mhosken/Work/dev/Graphite/graphiteng/include
 #LOCAL_EXPORT_C_INCLUDES := /home/mhosken/Work/dev/Graphite/graphiteng/include
-LOCAL_CPPFLAGS := -mapcs -DDISABLE_SEGCACHE -DDISABLE_TRACING -DNDEBUG
+LOCAL_CPPFLAGS := -mapcs -DDISABLE_SEGCACHE -DNDEBUG
 include $(BUILD_SHARED_LIBRARY)
 

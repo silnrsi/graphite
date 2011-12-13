@@ -33,7 +33,6 @@ of the License or (at your option) any later version.
 #include "Segment.h"
 #include "Code.h"
 #include "Rule.h"
-#include "XmlTraceLog.h"
 
 using namespace graphite2;
 using vm::Machine;
@@ -90,16 +89,6 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     p += sizeof(uint16)   // skip searchRange
          +  sizeof(uint16)   // skip entrySelector
          +  sizeof(uint16);  // skip rangeShift
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().addAttribute(AttrFlags,          m_immutable);
-    XmlTraceLog::get().addAttribute(AttrMaxRuleLoop,    m_iMaxLoop);
-    XmlTraceLog::get().addAttribute(AttrNumRules,       m_numRules);
-    XmlTraceLog::get().addAttribute(AttrNumRows,        m_sRows);
-    XmlTraceLog::get().addAttribute(AttrNumTransition,  m_sTransition);
-    XmlTraceLog::get().addAttribute(AttrNumSuccess,     m_sSuccess);
-    XmlTraceLog::get().addAttribute(AttrNumColumns,     m_sColumns);
-    XmlTraceLog::get().addAttribute(AttrNumRanges,      numRanges);
-#endif
     assert(p - pass_start == 40);
     // Perform some sanity checks.
     if (   m_sTransition > m_sRows
@@ -207,8 +196,6 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
                 || r->constraint->status() != Code::loaded
                 || !r->constraint->immutable())
             return false;
-
-        logRule(r, sort_key);
     }
 
     // Load the rule entries map
@@ -270,78 +257,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
         qsort(begin, end - begin, sizeof(RuleEntry), &cmpRuleEntry);
     }
 
-    logStates();
     return true;
-}
-
-
-void Pass::logRule(GR_MAYBE_UNUSED const Rule * r, GR_MAYBE_UNUSED const uint16 * sort_key) const
-{
-#ifndef DISABLE_TRACING
-    if (!XmlTraceLog::get().active()) return;
-
-    const size_t lid = r - m_rules;
-    if (r->constraint)
-    {
-        XmlTraceLog::get().openElement(ElementConstraint);
-        XmlTraceLog::get().addAttribute(AttrIndex, lid);
-        XmlTraceLog::get().closeElement(ElementConstraint);
-    }
-    else
-    {
-        XmlTraceLog::get().openElement(ElementRule);
-        XmlTraceLog::get().addAttribute(AttrIndex, lid);
-        XmlTraceLog::get().addAttribute(AttrSortKey, be::swap<uint16>(sort_key[lid]));
-        XmlTraceLog::get().addAttribute(AttrPrecontext, r->preContext);
-        XmlTraceLog::get().closeElement(ElementRule);
-    }
-#endif
-}
-
-void Pass::logStates() const
-{
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        for (int i = 0; i != (m_maxPreCtxt - m_minPreCtxt + 1); ++i)
-        {
-            XmlTraceLog::get().openElement(ElementStartState);
-            XmlTraceLog::get().addAttribute(AttrContextLen, i + m_minPreCtxt);
-            XmlTraceLog::get().addAttribute(AttrState, size_t(m_startStates[i] - m_states));
-            XmlTraceLog::get().closeElement(ElementStartState);
-        }
-
-        for (uint16 i = 0; i != m_sSuccess; ++i)
-        {
-            XmlTraceLog::get().openElement(ElementRuleMap);
-            XmlTraceLog::get().addAttribute(AttrSuccessId, i);
-            for (const RuleEntry *j = m_states[i].rules, *const j_end = m_states[i].rules_end; j != j_end; ++j)
-            {
-                XmlTraceLog::get().openElement(ElementRule);
-                XmlTraceLog::get().addAttribute(AttrRuleId, size_t(j->rule - m_rules));
-                XmlTraceLog::get().closeElement(ElementRule);
-            }
-            XmlTraceLog::get().closeElement(ElementRuleMap);
-        }
-
-        XmlTraceLog::get().openElement(ElementStateTransitions);
-        for (size_t iRow = 0; iRow < m_sTransition; iRow++)
-        {
-            XmlTraceLog::get().openElement(ElementRow);
-            XmlTraceLog::get().addAttribute(AttrIndex, iRow);
-            const State * const * const row = m_sTable + iRow * m_sColumns;
-            for (int i = 0; i != m_sColumns; ++i)
-            {
-                XmlTraceLog::get().openElement(ElementData);
-                XmlTraceLog::get().addAttribute(AttrIndex, i);
-                XmlTraceLog::get().addAttribute(AttrValue, size_t(row[i] - m_states));
-                XmlTraceLog::get().closeElement(ElementData);
-            }
-            XmlTraceLog::get().closeElement(ElementRow);
-        }
-        XmlTraceLog::get().closeElement(ElementStateTransitions);
-    }
-#endif
 }
 
 bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
@@ -360,16 +276,6 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
 
         for (p = m_cols + first; p <= m_cols + last; )
             *p++ = col;
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementRange);
-            XmlTraceLog::get().addAttribute(AttrFirstId, first);
-            XmlTraceLog::get().addAttribute(AttrLastId, last);
-            XmlTraceLog::get().addAttribute(AttrColId, col);
-            XmlTraceLog::get().closeElement(ElementRange);
-        }
-#endif
     }
     return true;
 }
@@ -420,14 +326,6 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
         if (state->is_success())
             fsm.rules.accumulate_rules(*state);
 
-#ifdef ENABLE_DEEP_TRACING
-        if (col >= m_sColumns && col != 65535)
-        {
-            XmlTraceLog::get().error("Invalid column %d ID %d for slot %d",
-                                     col, slot->gid(), slot);
-        }
-#endif
-
         slot = slot->next();
     } while (state != m_states && slot);
 
@@ -448,36 +346,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 
         if (r != re)
         {
-#ifdef ENABLE_DEEP_TRACING
-            if (XmlTraceLog::get().active())
-            {
-                XmlTraceLog::get().openElement(ElementDoRule);
-                XmlTraceLog::get().addAttribute(AttrNum, size_t(r->rule - m_rules));
-                XmlTraceLog::get().addAttribute(AttrIndex, int(slot - fsm.slots.segment.first()));
-            }
-#endif
             doAction(r->rule->action, slot, m);
-#ifdef ENABLE_DEEP_TRACING
-            if (XmlTraceLog::get().active())
-            {
-                XmlTraceLog::get().openElement(ElementPassResult);
-                XmlTraceLog::get().addAttribute(AttrResult, int(slot - fsm.slots.segment.first()));
-                const Slot * s = fsm.slots.segment.first();
-                while (s)
-                {
-                    XmlTraceLog::get().openElement(ElementSlot);
-                    XmlTraceLog::get().addAttribute(AttrGlyphId, s->gid());
-                    XmlTraceLog::get().addAttribute(AttrX, s->origin().x);
-                    XmlTraceLog::get().addAttribute(AttrY, s->origin().y);
-                    XmlTraceLog::get().addAttribute(AttrBefore, s->before());
-                    XmlTraceLog::get().addAttribute(AttrAfter, s->after());
-                    XmlTraceLog::get().closeElement(ElementSlot);
-                    s = s->next();
-                }
-                XmlTraceLog::get().closeElement(ElementPassResult);
-                XmlTraceLog::get().closeElement(ElementDoRule);
-            }
-#endif
             return;
         }
     }
@@ -508,36 +377,14 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
     if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());
 
-#ifdef ENABLE_DEEP_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementTestRule);
-        XmlTraceLog::get().addAttribute(AttrNum, size_t(&r - m_rules));
-    }
-#endif
     vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
     for (int n = r.sort; n && map; --n, ++map)
     {
 	if (!*map) continue;
         const int32 ret = r.constraint->run(m, map);
         if (!ret || m.status() != Machine::finished)
-        {
-#ifdef ENABLE_DEEP_TRACING
-            if (XmlTraceLog::get().active())
-            {
-                XmlTraceLog::get().closeElement(ElementTestRule);
-            }
-#endif
             return false;
-        }
     }
-
-#ifdef ENABLE_DEEP_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().closeElement(ElementTestRule);
-    }
-#endif
 
     return true;
 }

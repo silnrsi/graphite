@@ -72,22 +72,7 @@ void SegCache::freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, si
 
 void SegCache::clear(SegCacheStore * store)
 {
-    #ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementSegCache);
-        XmlTraceLog::get().addAttribute(AttrNum, m_segmentCount);
-        XmlTraceLog::get().addAttribute(AttrAccessCount, m_totalAccessCount);
-        XmlTraceLog::get().addAttribute(AttrMisses, m_totalMisses);
-    }
-#endif
     freeLevel(store, m_prefixes, 0);
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().closeElement(ElementSegCache);
-    }
-#endif
     m_prefixes.raw = NULL;
 }
 
