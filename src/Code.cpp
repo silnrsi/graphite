@@ -30,6 +30,7 @@ of the License or (at your option) any later version.
 // Author: Tim Eves
 
 #include <cassert>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include "graphite2/Segment.h"
@@ -203,8 +204,8 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     // Now we know exactly how much code and data the program really needs
     // realloc the buffers to exactly the right size so we don't waste any 
     // memory.
-    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_instr_count));
-    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_data_size));
+    assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
+    assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
     _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
     
@@ -472,9 +473,9 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
 
     // Grab the parameters
     if (param_sz) {
-        memmove(_data, bc, param_sz * sizeof(byte));
-        bc         += param_sz;
-        _data         += param_sz;
+        memcpy(_data, bc, param_sz * sizeof(byte));
+        bc               += param_sz;
+        _data            += param_sz;
         _code._data_size += param_sz;
     }
     
@@ -554,11 +555,13 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
     return t;
 }
 
+
 inline 
 void Machine::Code::failure(const status_t s) throw() {
     release_buffers();
     _status = s;
 }
+
 
 inline
 void Machine::Code::decoder::analysis::set_ref(const int index) throw() {
@@ -566,11 +569,13 @@ void Machine::Code::decoder::analysis::set_ref(const int index) throw() {
     if (index > max_ref) max_ref = index;
 }
 
+
 inline
 void Machine::Code::decoder::analysis::set_changed(const int index) throw() {
     contexts[index].flags.changed = true;
     if (index > max_ref) max_ref = index;
 }
+
 
 void Machine::Code::release_buffers() throw()
 {
@@ -580,6 +585,7 @@ void Machine::Code::release_buffers() throw()
     _data = 0;
     _own  = false;
 }
+
 
 int32 Machine::Code::run(Machine & m, slotref * & map) const
 {
