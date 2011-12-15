@@ -31,6 +31,7 @@ add_subdirectory(featuremap)
 add_subdirectory(nametabletest)
 add_subdirectory(examples)
 add_subdirectory(grlist)
+add_subdirectory(json)
 add_subdirectory(endian)
 add_subdirectory(utftest)
 

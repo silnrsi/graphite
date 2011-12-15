@@ -68,6 +68,7 @@ add_library(graphite2 SHARED
     Font.cpp
     GlyphFace.cpp
     GlyphFaceCache.cpp
+    json.cpp
     NameTable.cpp
     Pass.cpp
     SegCache.cpp
