@@ -42,14 +42,13 @@ void json::push_context(const char *opener, const char closer) throw()
 
 void json::pop_context()
 {
-	assert(_context >= _contexts);
 	fprintf(_stream, "\n%*c",  4*int(_context - _contexts)+1, *_context);
 	--_context;
-	_sep = ", ";
+	fflush(_stream);
 }
 
 
-void json::property::operator()(json & j) throw()
+void json::key::operator()(json & j) throw()
 {
 	assert(*j._context == '}');
 	fprintf(j._stream, "%s\n%*s\"%s\" : ", j._sep,  4*int(j._context - j._contexts+1), " ", _name);
@@ -59,18 +58,14 @@ void json::property::operator()(json & j) throw()
 
 json::~json() throw ()
 {
-	while (_context >= _contexts)
-	{
-		fprintf(_stream, "\n%*c", 4*int(_context - _contexts)+1, *_context);
-		--_context;
-}
+	while (_context >= _contexts)	pop_context();
 	fputc('\n',_stream);
 	fflush(_stream);
 }
 
 
-json & json::operator << (json::string s) throw()	{ fprintf(_stream, "%s\"%s\"", _sep, s); _sep = ", "; return *this; }
-json & json::operator << (json::number f) throw()	{ fprintf(_stream, "%s%.f", _sep, f); _sep = ", "; return *this; }
-json & json::operator << (json::integer d) throw()	{ fprintf(_stream, "%s%d", _sep, d); _sep = ", "; return *this; }
+json & json::operator << (json::string s) throw()	{ fprintf(_stream, "%s\"%s\"", _sep, s); 		_sep = ", "; return *this; }
+json & json::operator << (json::number f) throw()	{ fprintf(_stream, "%s%.f", _sep, f); 			_sep = ", "; return *this; }
+json & json::operator << (json::integer d) throw()	{ fprintf(_stream, "%s%d", _sep, d); 			_sep = ", "; return *this; }
 json & json::operator << (json::boolean b) throw()	{ fputs(_sep, _stream); fputs(b ? "true" : "false", _stream); _sep = ", "; return *this; }
-json & json::operator << (json::_null_t) throw()	{ fputs(_sep, _stream); fputs("null",_stream); _sep = ", "; return *this; }
+json & json::operator << (json::_null_t) throw()	{ fputs(_sep, _stream); fputs("null",_stream);	_sep = ", "; return *this; }

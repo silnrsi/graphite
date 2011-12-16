@@ -53,7 +53,7 @@ public:
 	typedef double			number;
 	typedef int				integer;
 	typedef bool			boolean;
-	class property;
+	class key;
 	static const _null_t	null;
 	static void close(json &) throw();
 	static void object(json &) throw();
@@ -68,13 +68,15 @@ public:
 	json & operator << (boolean) throw();
 	json & operator << (_null_t) throw();
 	json & operator << (_context_t) throw();
-	json & operator << (property) throw();
+	json & operator << (key) throw();
 };
 
 inline
 void json::close(json & j) throw()
 {
+	assert(j._context >= j._contexts);
 	j.pop_context();
+	j._sep = ", ";
 }
 
 inline
@@ -91,11 +93,11 @@ void json::array(json & j) throw()
 
 
 
-class json::property
+class json::key
 {
 	const char * const _name;
 public:
-	property(const char * name) throw() : _name(name) {}
+	key(const char * name) throw() : _name(name) {}
 	void operator()(json & j) throw();
 };
 
@@ -116,7 +118,7 @@ json & json::operator << (_context_t ctxt) throw()
 
 
 inline
-json & json::operator << (property prop) throw()
+json & json::operator << (key prop) throw()
 {
 	prop(*this); return *this;
 }

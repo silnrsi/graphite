@@ -34,32 +34,35 @@ int main(int argc, char * argv[])
 {
 	json	jo(argc == 1 ? stdout : fopen(argv[1], "w"));
 
-	jo << json::object <<
-			json::property("empty object") << json::object << json::close;
+	jo << json::object
+			<< json::key("empty object") << json::object << json::close;
 
-	jo << json::property("primitive types") << json::object
-			<< json::property("string") << "a string"
-			<< json::property("number") << 0.54
-			<< json::property("integer") << 123
-			<< json::property("boolean") << false
-			<< json::property("null") << json::null << json::close;
+	jo << json::key("primitive types") << json::object
+			<< json::key("string")	<< "a string"
+			<< json::key("number") 	<< 0.54
+			<< json::key("integer") << 123
+			<< json::key("boolean") << false
+			<< json::key("null") 	<< json::null
+			<< json::close;
 
-	jo << json::property("complex object") << json::object
-			<< json::property("firstName") 	<< "John"
-			<< json::property("lastName") 	<< "Smith"
-			<< json::property("age")		<< 25
-			<< json::property("address")	<< json::object
-				<< json::property("streetAddress") << "21 2nd Street"
-				<< json::property("city")	<< "New York"
-				<< json::property("state")	<< "NY"
-				<< json::property("postalCode") << "10021" << json::close
-			<< json::property("phoneNmuber") << json::array
+	jo << json::key("complex object") << json::object
+			<< json::key("firstName") 	<< "John"
+			<< json::key("lastName") 	<< "Smith"
+			<< json::key("age")			<< 25
+			<< json::key("address")		<< json::object
+				<< json::key("streetAddress") << "21 2nd Street"
+				<< json::key("city")		<< "New York"
+				<< json::key("state")		<< "NY"
+				<< json::key("postalCode") 	<< "10021"
+				<< json::close
+			<< json::key("phoneNmuber") << json::array
 				<< json::object
-					<< json::property("type") 	<< "home"
-					<< json::property("number") << "212 555-1234" << json::close
+					<< json::key("type") 	<< "home"
+					<< json::key("number") 	<< "212 555-1234"
+					<< json::close
 				<< json::object
-					<< json::property("type") 	<< "fax"
-					<< json::property("number")	<< "646 555-4567";
+					<< json::key("type") 	<< "fax"
+					<< json::key("number")	<< "646 555-4567";
 
 	return 0;
 }

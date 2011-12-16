@@ -1,0 +1,186 @@
+{
+    "id" : "Segment"
+    "description" : "A Segment object with extended a passes log containing \
+                     positioned slot arrays"
+    "properties" :
+    {
+        "version" :
+        {
+            "type" : "number",
+            "title" : "Engine version",
+            "description" : "Version number of the engine that generated \
+                             this object",
+            "required" : true
+        },
+
+        "passes" :
+        {
+            "type" : "array",
+            "title" : "Pass log",
+            "description" : "A log of passes run to create this segment",
+            "required" : true,
+            "additionalItems" : false,
+            "items" : 
+            {
+                "type" : "object",
+                "title" : "Pass",
+                "properties" :
+                {
+                    "id" : 
+                    {
+                        "id" : "Index",
+                        "type" : "integer",
+                        "required" : true,
+                        "minimum" : 0
+                    },
+                    
+                    "slots" :
+                    {
+                        "type" : "array",
+                        "title" : "Slot stream",
+                        "description" : "Slot stream at start of the pass.",
+                        "required" : true,
+                        "items" : 
+                        {
+                            "id" : "Slot",
+                            "type" : "object",
+                            "title" : "Slot",
+                            "properties" :
+                            {
+                                "id" : { "type" : "integer", "minimim" : 1 },
+                                
+                                "gid" : 
+                                { 
+                                    "type" : "integer", 
+                                    "minimum" : 0, 
+                                    "maxmimum" : 65535, 
+                                    "required" : true 
+                                },
+                                    
+                                "charinfo" : 
+                                { 
+                                    "type" : "object",
+                                    "title" : "Char info relations",
+                                    "required" : true,
+                                    "properties" : 
+                                    {
+                                        "original" : { "$ref" : "Index" },
+                                        
+                                        "before" : { "$ref" : "Index" },
+                                        
+                                        "after" : { "$ref" : "Index" }
+                                    } 
+                                },
+                                    
+                                "origin" : 
+                                {
+                                    "id" : "Point",
+                                    "type" : "object",
+                                    "required" : true,
+                                    "title" : "position",
+                                    "properties" : 
+                                    {
+                                        "x" : { "type" : "number", "required" : true },
+                                        "y" : { "type" : "number", "required" : true }
+                                    }
+                                },
+                                
+                                "advance" : 
+                                {
+                                    "id" : "Advance",
+                                    "title" : "Horizontal & vertical advances",
+                                    "extends" : "Point" 
+                                },
+                                
+                                "insertBefore" : { "type" : "boolean", "required" : true },
+                                
+                                "parent" : { "$ref" : "Index" },
+                                
+                                "attached" : { "type" : "array", "items" : { "$ref" : "Index" } }              
+                            }
+                        }
+                     },
+                     
+                    "rules" :
+                    {
+                        "type" : "array",
+                        "title" : "Rule log",
+                        "required" : true,
+                        "items" : 
+                        {
+                            "id" : "RuleEvent",
+                            "type" : "object",
+                            "title" : "Rule event",
+                            "properties" : 
+                            {
+                                "trigger" : 
+                                { 
+                                    "enum" : ["match", "nomatch", "maxloop"], 
+                                    "required" : true 
+                                },
+                                
+                                "id" : { "$ref" : "Index" },
+                                
+                                "slots" :
+                                {
+                                    "type" : "array",
+                                    "title" : "Rule output slots",
+                                    "description" : "Sub sequence of the slots stream.",
+                                    "required" : true, 
+                                    "items" : { "$ref" : "Slot" }
+                                }
+                            }
+                        } 
+                    }
+                }
+            }
+        },
+        
+        "advance" : { "$ref" : "Advance" },
+               
+        "chars" :
+        {
+            "type" : "array",
+            "title" : "CharInfo array",
+            "description" : "A array of CharInfo objects referneced by the \
+                             slots"
+            "items" : 
+            {
+                "id" : "CharInfo",
+                "type" : "object"
+                "properties" :
+                {
+                    "base" : { "$ref" : "Index" },
+                    "unicode" : 
+                    { 
+                        "type" : "integer", 
+                        "required" : true, 
+                        "minimum" : 0, 
+                        "maximum" :  0x10FFFF
+                    },
+                    "breakWeight" : 
+                    { 
+                        "enum" : 
+                        [ 
+                            "none", "whitespace", "word", "intra", "letter", "clip",
+                            "beforeWhitespace", "beforeWord", "beforeIntra", 
+                            "beforeLetter", "beforeClip"
+                        ]
+                    },
+                    "slot" : 
+                    {
+                        "type" : "object",
+                        "title" : "Slot relations"
+                        "required" : true
+                        "properties" : 
+                        {
+                            "before" : { "$ref" : "Index" },
+                            "after" : { "$ref" : "Index" },
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
