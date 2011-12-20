@@ -71,35 +71,55 @@
                                         "after" : { "$ref" : "Index" }
                                     } 
                                 },
-                                    
+                                
+                                "bidi" : 
+                                { 
+                                    "type" : "integer", 
+                                    "title" : "Bidirection level"
+                                    "minimum" : 0,
+                                    "maxmimum" : 63,
+                                },
+                                
                                 "origin" : 
                                 {
                                     "id" : "Point",
-                                    "type" : "object",
+                                    "type" : "array",
                                     "required" : true,
                                     "title" : "position",
-                                    "properties" : 
-                                    {
-                                        "x" : { "type" : "number", "required" : true },
-                                        "y" : { "type" : "number", "required" : true }
-                                    }
+                                    "description" : "A 2-tuple ordered x, y"
+                                    "items" : 
+                                    [ 
+                                        { "type" : "number" }, 
+                                        { "type" : "number" }
+                                    ]
                                 },
                                 
-                                "advance" : 
+                                "advance" : { "$ref" : "Point" },
+                                
+                                "insertBefore" : 
+                                { 
+                                    "type" : "boolean", 
+                                    "required" : true 
+                                },
+                                
+                                "parent" : 
                                 {
-                                    "id" : "Advance",
-                                    "title" : "Horizontal & vertical advances",
-                                    "extends" : "Point" 
-                                },
+                                    "type" : "object"
+                                    "description" : "Slot index to this slots \
+                                                     parent and offset from \
+                                                     the parent's origin"
+                                    "id" : { "$ref" : "Index" },
+                                    "offset" : { "$ref" : "Point" }
+                                }
                                 
-                                "insertBefore" : { "type" : "boolean", "required" : true },
-                                
-                                "parent" : { "$ref" : "Index" },
-                                
-                                "attached" : { "type" : "array", "items" : { "$ref" : "Index" } }              
+                                "children" : 
+                                { 
+                                    "type" : "array", 
+                                    "items" : { "$ref" : "Index" } 
+                                }              
                             }
                         }
-                     },
+                    },
                      
                     "rules" :
                     {
@@ -121,11 +141,29 @@
                                 
                                 "id" : { "$ref" : "Index" },
                                 
-                                "slots" :
+                                "input" : 
+                                { 
+                                    "type" : "object",
+                                    "title" : "Input slot range",
+                                    "required" : true,
+                                    "properties" : 
+                                    {
+                                        "offset" : { "$ref" : "Index" },
+                                        "length" : 
+                                        { 
+                                            "type" : "integer", 
+                                            "required" : true, 
+                                            "minimum" : 0 
+                                        },
+                                    }
+                                },
+                                
+                                "output" :
                                 {
                                     "type" : "array",
                                     "title" : "Rule output slots",
-                                    "description" : "Sub sequence of the slots stream.",
+                                    "description" : "Sub sequence of the \
+                                                     output slots stream.",
                                     "required" : true, 
                                     "items" : { "$ref" : "Slot" }
                                 }
@@ -156,16 +194,14 @@
                         "type" : "integer", 
                         "required" : true, 
                         "minimum" : 0, 
-                        "maximum" :  0x10FFFF
+                        "maximum" : 1114111
                     },
                     "breakWeight" : 
                     { 
-                        "enum" : 
-                        [ 
-                            "none", "whitespace", "word", "intra", "letter", "clip",
-                            "beforeWhitespace", "beforeWord", "beforeIntra", 
-                            "beforeLetter", "beforeClip"
-                        ]
+                        "type" : "integer", 
+                        "required" : true, 
+                        "minimum" : -50, 
+                        "maximum" : 50                        
                     },
                     "slot" : 
                     {
