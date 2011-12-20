@@ -33,36 +33,42 @@ using namespace graphite2;
 int main(int argc, char * argv[])
 {
 	json	jo(argc == 1 ? stdout : fopen(argv[1], "w"));
+	jo << json::array << "a string"
+		<< 0.54
+		<< 123
+		<< false
+		<< json::null
+		<< json::close;
 
 	jo << json::object
-			<< json::key("empty object") << json::object << json::close;
+			<< "empty object" << json::object << json::close;
 
-	jo << json::key("primitive types") << json::object
-			<< json::key("string")	<< "a string"
-			<< json::key("number") 	<< 0.54
-			<< json::key("integer") << 123
-			<< json::key("boolean") << false
-			<< json::key("null") 	<< json::null
+	jo << "primitive types" << json::object
+			<< "string"		<< "a string"
+			<< "number" 	<< 0.54
+			<< "integer" 	<< 123
+			<< "boolean" 	<< false
+			<< "null" 		<< json::null
 			<< json::close;
 
-	jo << json::key("complex object") << json::object
-			<< json::key("firstName") 	<< "John"
-			<< json::key("lastName") 	<< "Smith"
-			<< json::key("age")			<< 25
-			<< json::key("address")		<< json::object
-				<< json::key("streetAddress") << "21 2nd Street"
-				<< json::key("city")		<< "New York"
-				<< json::key("state")		<< "NY"
-				<< json::key("postalCode") 	<< "10021"
+	jo << "complex object" << json::object
+			<< "firstName" 	<< "John"
+			<< "lastName" 	<< "Smith"
+			<< "age"		<< 25
+			<< "address"	<< json::object << json::flat
+				<< "streetAddress" 	<< "21 2nd Street"
+				<< "city"			<< "New York"
+				<< "state"			<< "NY"
+				<< "postalCode" 	<< "10021"
 				<< json::close
-			<< json::key("phoneNmuber") << json::array
-				<< json::object
-					<< json::key("type") 	<< "home"
-					<< json::key("number") 	<< "212 555-1234"
+			<< "phoneNmuber" << json::array
+				<< json::object << json::flat
+					<< "type" 	<< "home"
+					<< "number" << "212 555-1234"
 					<< json::close
 				<< json::object
-					<< json::key("type") 	<< "fax"
-					<< json::key("number")	<< "646 555-4567";
+					<< "type" 	<< "fax"
+					<< "number"	<< "646 555-4567";
 
 	return 0;
 }

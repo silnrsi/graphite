@@ -42,19 +42,22 @@ class json
 
 	FILE * const 	_stream;
 	char 			_contexts[128],
-				  * _context;
-	const char	  * _sep;
+				  * _context,
+				  * _flatten;
 
-	void push_context(const char *opener, const char closer) throw();
-	void pop_context();
+	void context(const char current) throw();
+	void indent(const int d=0) throw();
+	void push_context(const char, const char) throw();
+	void pop_context() throw();
 
 public:
 	typedef const char *	string;
 	typedef double			number;
 	typedef int				integer;
 	typedef bool			boolean;
-	class key;
 	static const _null_t	null;
+
+	static void flat(json &) throw();
 	static void close(json &) throw();
 	static void object(json &) throw();
 	static void array(json &) throw();
@@ -68,59 +71,17 @@ public:
 	json & operator << (boolean) throw();
 	json & operator << (_null_t) throw();
 	json & operator << (_context_t) throw();
-	json & operator << (key) throw();
-};
-
-inline
-void json::close(json & j) throw()
-{
-	assert(j._context >= j._contexts);
-	j.pop_context();
-	j._sep = ", ";
-}
-
-inline
-void json::object(json & j) throw()
-{
-	j.push_context("{ ", '}');
-}
-
-inline
-void json::array(json & j) throw()
-{
-	j.push_context("[ ", ']');
-}
-
-
-
-class json::key
-{
-	const char * const _name;
-public:
-	key(const char * name) throw() : _name(name) {}
-	void operator()(json & j) throw();
 };
 
 
 inline
 json::json(FILE * stream) throw()
-: _stream(stream), _context(_contexts-1), _sep("")
+: _stream(stream), _context(_contexts), _flatten(0)
 {
 	assert(stream != 0);
-}
-
-
-inline
-json & json::operator << (_context_t ctxt) throw()
-{
-	ctxt(*this); return *this;
-}
-
-
-inline
-json & json::operator << (key prop) throw()
-{
-	prop(*this); return *this;
+	*_context = '\0';
+	fflush(_stream);
+	setbuf(_stream, 0);
 }
 
 } // namespace graphite2

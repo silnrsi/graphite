@@ -32,40 +32,100 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-void json::push_context(const char *opener, const char closer) throw()
+
+void json::context(const char current) throw()
 {
 	assert(_context - _contexts < std::ptrdiff_t(sizeof _contexts));
-	fprintf(_stream, "%s\n%*s%s", _sep,  4*int(_context - _contexts+1), "", opener);
-	_sep = "";
-	*++_context = closer;
-}
-
-void json::pop_context()
-{
-	fprintf(_stream, "\n%*c",  4*int(_context - _contexts)+1, *_context);
-	--_context;
-	fflush(_stream);
+	fprintf(_stream, "%.1s ", _context);
+	indent();
+	*_context = current;
 }
 
 
-void json::key::operator()(json & j) throw()
+inline
+void json::indent(const int d) throw()
 {
-	assert(*j._context == '}');
-	fprintf(j._stream, "%s\n%*s\"%s\" : ", j._sep,  4*int(j._context - j._contexts+1), " ", _name);
-	j._sep = "";
+	if (_flatten)
+		return;
+	else
+		switch(*_context)
+		{
+		case ',':
+		case '{':
+		case '[':
+		case ']':
+		case '}':
+			fprintf(_stream, "\n%*s",  4*int(_context - _contexts + d), "");
+			break;
+		}
+}
+
+inline
+void json::push_context(const char prefix, const char suffix) throw()
+{
+	context(suffix);
+	*++_context = prefix;
+}
+
+void json::pop_context() throw()
+{
+	assert(_context > _contexts);
+
+	if (*_context != ',')
+		fputc(*_context, _stream);
+	else
+		indent(-1);
+	fputc(*--_context, _stream);
+	*_context = ',';
+
+	if (_flatten >= _context)	_flatten = 0;
+}
+
+
+void json::flat(json & j) throw()
+{
+	j._flatten = j._context;
+}
+
+void json::close(json & j) throw()
+{
+	j.pop_context();
+}
+
+
+void json::object(json & j) throw()
+{
+	j.push_context('{', '}');
+}
+
+
+void json::array(json & j) throw()
+{
+	j.push_context('[', ']');
 }
 
 
 json::~json() throw ()
 {
-	while (_context >= _contexts)	pop_context();
+	while (_context > _contexts)	pop_context();
 	fputc('\n',_stream);
 	fflush(_stream);
 }
 
 
-json & json::operator << (json::string s) throw()	{ fprintf(_stream, "%s\"%s\"", _sep, s); 		_sep = ", "; return *this; }
-json & json::operator << (json::number f) throw()	{ fprintf(_stream, "%s%.f", _sep, f); 			_sep = ", "; return *this; }
-json & json::operator << (json::integer d) throw()	{ fprintf(_stream, "%s%d", _sep, d); 			_sep = ", "; return *this; }
-json & json::operator << (json::boolean b) throw()	{ fputs(_sep, _stream); fputs(b ? "true" : "false", _stream); _sep = ", "; return *this; }
-json & json::operator << (json::_null_t) throw()	{ fputs(_sep, _stream); fputs("null",_stream);	_sep = ", "; return *this; }
+json & json::operator << (json::string s) throw()
+{
+	const char ctxt = _context[-1] == '}' && *_context != ':' ? ':' : ',';
+	context(ctxt);
+	fprintf(_stream, "\"%s\"", s);
+	if (ctxt == ':')	fputc(' ', _stream);
+
+	return *this;
+}
+
+json & json::operator << (json::number f) throw()	{ context(','); fprintf(_stream, "%f", f); return *this; }
+json & json::operator << (json::integer d) throw()	{ context(','); fprintf(_stream, "%d", d); return *this; }
+json & json::operator << (json::boolean b) throw()	{ context(','); fputs(b ? "true" : "false", _stream); return *this; }
+json & json::operator << (json::_null_t) throw()	{ context(','); fputs("null",_stream); return *this; }
+json & json::operator << (_context_t ctxt) throw()	{ ctxt(*this); return *this; }
+

@@ -1,34 +1,26 @@
-
+ [ 
+    "a string", 
+    0.540000, 
+    123, 
+    false, 
+    null
+], 
 { 
-    "empty object" : 
-    { 
-    }, 
-    "primitive types" : 
-    { 
+    "empty object" : {}, 
+    "primitive types" : { 
         "string" : "a string", 
-        "number" : 1, 
+        "number" : 0.540000, 
         "integer" : 123, 
         "boolean" : false, 
         "null" : null
     }, 
-    "complex object" : 
-    { 
+    "complex object" : { 
         "firstName" : "John", 
         "lastName" : "Smith", 
         "age" : 25, 
-        "address" : 
-        { 
-            "streetAddress" : "21 2nd Street", 
-            "city" : "New York", 
-            "state" : "NY", 
-            "postalCode" : "10021"
-        }, 
-        "phoneNmuber" : 
-        [ 
-            { 
-                "type" : "home", 
-                "number" : "212 555-1234"
-            }, 
+        "address" : { "streetAddress" : "21 2nd Street", "city" : "New York", "state" : "NY", "postalCode" : "10021"}, 
+        "phoneNmuber" : [ 
+            { "type" : "home", "number" : "212 555-1234"}, 
             { 
                 "type" : "fax", 
                 "number" : "646 555-4567"
