@@ -41,9 +41,10 @@ class json
 	class _null_t {};
 
 	FILE * const 	_stream;
-	char 			_contexts[128],
-				  * _context,
-				  * _flatten;
+	char 			_contexts[128],	// context stack
+				  * _context,		// current context (top of stack)
+				  * _flatten;		// if !0 points to context above which
+									//  pretty printed output should occur.
 
 	void context(const char current) throw();
 	void indent(const int d=0) throw();
@@ -79,9 +80,21 @@ json::json(FILE * stream) throw()
 : _stream(stream), _context(_contexts), _flatten(0)
 {
 	assert(stream != 0);
-	*_context = '\0';
-	fflush(_stream);
-	setbuf(_stream, 0);
+}
+
+
+inline
+json::~json() throw ()
+{
+	while (_context > _contexts)	pop_context();
+}
+
+
+inline
+json & json::operator << (json::_context_t ctxt) throw()
+{
+	ctxt(*this);
+	return *this;
 }
 
 } // namespace graphite2
