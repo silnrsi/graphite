@@ -95,7 +95,6 @@ public:
     bool child(Slot *ap);
     Slot* nextSibling() const { return m_sibling; }
     bool sibling(Slot *ap);
-    Slot *attachTo() const { return m_parent; }
     uint32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj);

@@ -120,7 +120,7 @@ public:
     }
     float glyphAdvance(uint16 gid) const { return m_face->getAdvance(gid, 1.0); }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
-    Slot *findRoot(Slot *is) const { return is->attachTo() ? findRoot(is->attachTo()) : is; }
+    Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
     int numAttrs() { return m_silf->numUser(); }
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }

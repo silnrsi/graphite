@@ -472,7 +472,7 @@ STARTOP(push_att_to_gattr_obs)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachTo();
+        slotref att = slot->attachedTo();
         if (att) slot = att;
         push(seg.glyphAttr(slot->gid(), glyph_attr));
     }
@@ -486,7 +486,7 @@ STARTOP(push_att_to_glyph_metric)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachTo();
+        slotref att = slot->attachedTo();
         if (att) slot = att;
         push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
     }
@@ -629,7 +629,7 @@ STARTOP(push_att_to_glyph_attr)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachTo();
+        slotref att = slot->attachedTo();
         if (att) slot = att;
         push(seg.glyphAttr(slot->gid(), glyph_attr));
     }

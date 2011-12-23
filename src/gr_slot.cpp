@@ -48,7 +48,7 @@ const gr_slot* gr_slot_prev_in_segment(const gr_slot* p/*not NULL*/)
 const gr_slot* gr_slot_attached_to(const gr_slot* p/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
 {
     assert(p);
-    return static_cast<const gr_slot*>(p->attachTo());
+    return static_cast<const gr_slot*>(p->attachedTo());
 }
 
 
