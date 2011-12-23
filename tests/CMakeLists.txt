@@ -19,12 +19,14 @@ add_library(graphite2-base
     ${S}/UtfCodec.cpp)
 
 add_library(graphite2-segcache
+    ${S}/GlyphFaceCache.cpp
+    ${S}/GlyphFace.cpp
+    ${S}/gr_logging.cpp
+    ${S}/json.cpp
     ${S}/SegCache.cpp
     ${S}/SegCacheEntry.cpp
     ${S}/SegCacheStore.cpp
-    ${S}/Slot.cpp
-    ${S}/GlyphFaceCache.cpp
-    ${S}/GlyphFace.cpp)
+    ${S}/Slot.cpp)
 
 add_subdirectory(segcache)
 add_subdirectory(featuremap)

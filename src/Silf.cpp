@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include <cstdlib>
 #include "graphite2/Segment.h"
+#include "debug.h"
 #include "Endian.h"
 #include "Silf.h"
 #include "Segment.h"
@@ -33,6 +34,7 @@ of the License or (at your option) any later version.
 
 
 using namespace graphite2;
+
 
 Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
@@ -297,6 +299,7 @@ uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
     return 0;
 }
 
+
 bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
@@ -312,19 +315,43 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         lastPass = m_numPasses;
     }
 
+    if (dbgout)
+    {
+    	char version[16];
+    	snprintf(version, sizeof version, "%d.%d.%d",
+    			GR2_VERSION_MAJOR, GR2_VERSION_MINOR, GR2_VERSION_BUGFIX);
+    	*dbgout << json::object
+    				<< "version"	<< version
+    				<< "passes"		<< json::array;
+    }
+
     for (size_t i = firstPass; i < lastPass; ++i)
     {
-        // bidi and mirroring
-        if (i == m_bPass && !(seg->dir() & 2))
-            seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
-        else if (i == m_bPass && m_aMirror)
+    	if (dbgout)
+    	{
+    		Position 	cp;
+    		Rect		bb;
+    		for(Slot *s = seg->first(); s; s = s->next())
+                if (s->isBase())  cp = s->finalise(seg, 0, cp, bb, bb.tr.x, 0, bb.bl.x = cp.x);
+    		*dbgout << json::item << json::object
+    					<< "id"		<< i+1
+    					<< "slots"	<< seg->first();
+    	}
+
+    	// bidi and mirroring
+        if (i == m_bPass)
         {
-            Slot * s;
-            for (s = seg->first(); s; s = s->next())
+        	if (!(seg->dir() & 2))
+            	seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
+        	else if (m_aMirror)
             {
-                unsigned short g = seg->glyphAttr(s->gid(), m_aMirror);
-                if (g && (!(seg->dir() & 4) || !seg->glyphAttr(s->gid(), m_aMirror + 1)))
-                    s->setGlyph(seg, g);
+                Slot * s;
+                for (s = seg->first(); s; s = s->next())
+                {
+                    unsigned short g = seg->glyphAttr(s->gid(), m_aMirror);
+                    if (g && (!(seg->dir() & 4) || !seg->glyphAttr(s->gid(), m_aMirror + 1)))
+                        s->setGlyph(seg, g);
+                }
             }
         }
 
@@ -333,8 +360,23 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         // only subsitution passes can change segment length, cached subsegments are short for their text
         if (m.status() != vm::Machine::finished
         	|| (i < m_pPass && (seg->slotCount() > initSize * MAX_SEG_GROWTH_FACTOR
-                               || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize))))
+            || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize))))
             return false;
     }
+	if (dbgout)
+	{
+		seg->positionSlots(0);
+		*dbgout 	<<json::item << json::object
+						<< "id"		<< lastPass+1
+						<< "slots"  << seg->first()
+						<< "rules"	<< json::null
+						<< json::close	// close the lastPass
+					<< json::close		// close the passes array
+				<< "advance" << seg->advance()
+				<< "chars"	 << json::array;
+		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
+			*dbgout << *seg->charinfo(i);
+	}
+
     return true;
 }

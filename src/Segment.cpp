@@ -317,7 +317,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
             if (s->isBase())
             {
                 clusterMin = currpos.x;
-                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0, &clusterMin);
+                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin);
                 if (ls)
                     ls->sibling(s);
                 ls = s;
@@ -343,7 +343,7 @@ void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
             if (s->isBase())
             {
                 clusterMin = currpos.x;
-                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0, &clusterMin);
+                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin);
                 if (ls)
                     ls->sibling(s);
                 ls = s;

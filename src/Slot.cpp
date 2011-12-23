@@ -77,7 +77,7 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Rect *bbox, float *cMin, uint8 attrLevel, float * clusterMin)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, float & cMin, uint8 attrLevel, float & clusterMin)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
@@ -100,12 +100,12 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
     }    
     Position res;
 
-    m_position = *base + shift;
+    m_position = base + shift;
     if (!m_parent)
     {
-        res = *base + Position(tAdvance, m_advance.y * scale);
-        *cMin = 0.;
-        *clusterMin = base->x;
+        res = base + Position(tAdvance, m_advance.y * scale);
+        cMin = 0.;
+        clusterMin = base.x;
     }
     else
     {
@@ -113,22 +113,22 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
         m_position += (m_attach - m_with) * scale;
         tAdv = tAdvance > 0.f ? m_position.x + tAdvance - shift.x : 0.f;
         res = Position(tAdv, 0);
-        if (m_position.x < *clusterMin) *clusterMin = m_position.x;
+        if (m_position.x < clusterMin) clusterMin = m_position.x;
     }
 
     if (glyphFace)
     {
         Rect ourBbox = glyphFace->theBBox() * scale + m_position;
-        *bbox = bbox->widen(ourBbox);
+        bbox = bbox.widen(ourBbox);
     }
     //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
     //bbox->widen(ourBbox);
 
-    if (m_parent && m_position.x < *cMin) *cMin = m_position.x;
+    if (m_parent && m_position.x < cMin) cMin = m_position.x;
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, &m_position, bbox, cMin, attrLevel, clusterMin);
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, cMin, attrLevel, clusterMin);
         if (tRes.x > res.x) res = tRes;
     }
 
@@ -140,16 +140,16 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position *base, Re
     
     if (!m_parent)
     {
-        if (*cMin < 0)
+        if (cMin < 0)
         {
-            Position adj = Position(-*cMin, 0.);
+            Position adj = Position(-cMin, 0.);
             res += adj;
             m_position += adj;
             if (m_child) m_child->floodShift(adj);
         }
-        else if ((seg->dir() & 1) && (*clusterMin < base->x))
+        else if ((seg->dir() & 1) && (clusterMin < base.x))
         {
-            Position adj = Position(base->x - *clusterMin, 0.);
+            Position adj = Position(base.x - clusterMin, 0.);
             res += adj;
             m_position += adj;
             if (m_child) m_child->floodShift(adj);
@@ -164,7 +164,7 @@ uint32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     Rect bbox = seg->theGlyphBBoxTemporary(gid());
     float cMin = 0.;
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, &base, &bbox, &cMin, attrLevel, &clusterMin);
+    Position res = finalise(seg, NULL, base, bbox, cMin, attrLevel, clusterMin);
 
     switch (metrics(metric))
     {
