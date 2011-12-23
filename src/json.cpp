@@ -46,8 +46,7 @@ namespace
 inline
 void json::context(const char current) throw()
 {
-	assert(_context - _contexts < std::ptrdiff_t(sizeof _contexts));
-	fprintf(_stream, "%c ", *_context);
+	fprintf(_stream, "%c", *_context);
 	indent();
 	*_context = current;
 }
@@ -55,16 +54,18 @@ void json::context(const char current) throw()
 
 void json::indent(const int d) throw()
 {
-	if (_flatten)
+	if (*_context == member)
 		fputc(' ', _stream);
-	else if (*_context != member)
-		fprintf(_stream, "\n%*s",  4*int(_context - _contexts + d), "");
+	else
+		fprintf(_stream, _flatten ? " " : "\n%*s",  4*int(_context - _contexts + d), "");
 }
 
 
 inline
 void json::push_context(const char prefix, const char suffix) throw()
 {
+	assert(_context - _contexts < std::ptrdiff_t(sizeof _contexts));
+
 	if (_context == _contexts)
 		*_context = suffix;
 	else
@@ -85,17 +86,22 @@ void json::pop_context() throw()
 	if (_context == _contexts)	fputc('\n', _stream);
 	fflush(_stream);
 
-	if (_flatten >= _context)	_flatten = 0;
+	if (_flatten > _context)	_flatten = 0;
 	*_context = seq;
 }
 
 
 // These four functions cannot be inlined as pointers to these
 // functions are needed for operator << (_context_t) to work.
-void json::flat(json & j) throw()	{ j._flatten = j._context; }
+void json::flat(json & j) throw()	{ if (!j._flatten)  j._flatten = j._context; }
 void json::close(json & j) throw()	{ j.pop_context(); }
 void json::object(json & j) throw()	{ j.push_context('{', '}'); }
 void json::array(json & j) throw()	{ j.push_context('[', ']'); }
+void json::item(json & j) throw()
+{
+	while (j._context > j._contexts+1 && j._context[-1] != arr)
+		j.pop_context();
+}
 
 
 json & json::operator << (json::string s) throw()
@@ -109,7 +115,8 @@ json & json::operator << (json::string s) throw()
 }
 
 json & json::operator << (json::number f) throw()	{ context(seq); fprintf(_stream, "%f", f); return *this; }
-json & json::operator << (json::integer d) throw()	{ context(seq); fprintf(_stream, "%d", d); return *this; }
+json & json::operator << (json::integer d) throw()	{ context(seq); fprintf(_stream, "%ld", d); return *this; }
+json & json::operator << (long unsigned d) throw()	{ context(seq); fprintf(_stream, "%ld", d); return *this; }
 json & json::operator << (json::boolean b) throw()	{ context(seq); fputs(b ? "true" : "false", _stream); return *this; }
 json & json::operator << (json::_null_t) throw()	{ context(seq); fputs("null",_stream); return *this; }
 

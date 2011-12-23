@@ -72,7 +72,7 @@ public:
     void after(int ind) { m_after = ind; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment* seg, const Font* font, Position* base, Rect* bbox, float* cMin, uint8 attrLevel, float *clusterMin);
+    Position finalise(const Segment* seg, const Font* font, Position & base, Rect & bbox, float & cMin, uint8 attrLevel, float & clusterMin);
     bool isDeleted() const { return (m_flags & SLOT_DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
     bool isCopied() const { return (m_flags & SLOT_COPIED) ? true : false; }
@@ -91,6 +91,7 @@ public:
     int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
+    Position attachOffset() const { return m_attach - m_with; }
     Slot* firstChild() const { return m_child; }
     bool child(Slot *ap);
     Slot* nextSibling() const { return m_sibling; }

@@ -29,7 +29,7 @@ of the License or (at your option) any later version.
 //     Author: Tim Eves
 
 #pragma once
-
+#include "Main.h"
 #include <cassert>
 #include <cstdio>
 
@@ -54,7 +54,7 @@ class json
 public:
 	typedef const char *	string;
 	typedef double			number;
-	typedef int				integer;
+	typedef long signed int	integer;
 	typedef bool			boolean;
 	static const _null_t	null;
 
@@ -62,6 +62,7 @@ public:
 	static void close(json &) throw();
 	static void object(json &) throw();
 	static void array(json &) throw();
+	static void item(json &) throw();
 
 	json(FILE * stream) throw();
 	~json() throw ();
@@ -69,9 +70,12 @@ public:
 	json & operator << (string) throw();
 	json & operator << (number) throw();
 	json & operator << (integer) throw();
+	json & operator << (long unsigned int d) throw();
 	json & operator << (boolean) throw();
 	json & operator << (_null_t) throw();
 	json & operator << (_context_t) throw();
+
+	CLASS_NEW_DELETE;
 };
 
 
@@ -80,6 +84,7 @@ json::json(FILE * stream) throw()
 : _stream(stream), _context(_contexts), _flatten(0)
 {
 	assert(stream != 0);
+	fflush(stream);
 }
 
 
@@ -95,6 +100,31 @@ json & json::operator << (json::_context_t ctxt) throw()
 {
 	ctxt(*this);
 	return *this;
+}
+
+inline
+json & operator << (json & j, signed char d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, short signed int d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, signed int d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, unsigned char d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, short unsigned int d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, unsigned int d) throw() { return j << json::integer(d); }
+
+inline
+json & operator << (json & j, char c) throw ()
+{
+	const char str[2] = {c,0};
+	return j << str;
 }
 
 } // namespace graphite2
