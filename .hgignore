@@ -22,6 +22,7 @@ nmake*
 *.kdev4
 .cproject
 .project
+.pydevproject
 
 syntax:regexp
 \.libs/
@@ -31,4 +32,3 @@ build*/
 release/
 debug/
 dev/
-
