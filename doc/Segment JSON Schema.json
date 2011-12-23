@@ -47,7 +47,14 @@
                             "title" : "Slot",
                             "properties" :
                             {
-                                "id" : { "type" : "integer", "minimim" : 1 },
+                                "id" : 
+                                { 
+                                    "type" : "integer",
+                                    "title" : "Slot uuid"
+                                    "description" : "A unique ID for tracking Slot movement"
+                                    "minimim" : 0, 
+                                    "maximum" : 655353 
+                                },
                                 
                                 "gid" : 
                                 { 
@@ -72,14 +79,6 @@
                                     } 
                                 },
                                 
-                                "bidi" : 
-                                { 
-                                    "type" : "integer", 
-                                    "title" : "Bidirection level"
-                                    "minimum" : 0,
-                                    "maxmimum" : 63,
-                                },
-                                
                                 "origin" : 
                                 {
                                     "id" : "Point",
@@ -102,14 +101,25 @@
                                     "required" : true 
                                 },
                                 
+                                "bidi" : 
+                                { 
+                                    "type" : "integer", 
+                                    "title" : "Bidirection level"
+                                    "minimum" : 0,
+                                    "maxmimum" : 63,
+                                },
+                                
                                 "parent" : 
                                 {
                                     "type" : "object"
                                     "description" : "Slot index to this slots \
                                                      parent and offset from \
                                                      the parent's origin"
-                                    "id" : { "$ref" : "Index" },
-                                    "offset" : { "$ref" : "Point" }
+                                    "properties" :
+                                    {
+                                        "id" : { "$ref" : "Index" },
+                                        "offset" : { "$ref" : "Point" }
+                                    }
                                 }
                                 
                                 "children" : 
