@@ -74,7 +74,6 @@ void json::push_context(const char prefix, const char suffix) throw()
 }
 
 
-inline
 void json::pop_context() throw()
 {
 	assert(_context > _contexts);
