@@ -113,7 +113,7 @@ json & json::operator << (json::string s) throw()
 	return *this;
 }
 
-json & json::operator << (json::number f) throw()	{ context(seq); fprintf(_stream, "%f", f); return *this; }
+json & json::operator << (json::number f) throw()	{ context(seq); fprintf(_stream, "%g", f); return *this; }
 json & json::operator << (json::integer d) throw()	{ context(seq); fprintf(_stream, "%ld", d); return *this; }
 json & json::operator << (long unsigned d) throw()	{ context(seq); fprintf(_stream, "%ld", d); return *this; }
 json & json::operator << (json::boolean b) throw()	{ context(seq); fputs(b ? "true" : "false", _stream); return *this; }

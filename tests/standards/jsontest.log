@@ -1,5 +1,5 @@
 [
-    "a string" : 0.540000,
+    "a string" : 0.54,
     123,
     false,
     null
@@ -8,7 +8,7 @@
     "empty object" : {},
     "primitive types" : {
         "string" : "a string",
-        "number" : 0.540000,
+        "number" : 0.54,
         "integer" : 123,
         "boolean" : false,
         "null" : null
