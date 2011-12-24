@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include "debug.h"
 #include "CharInfo.h"
 #include "Slot.h"
+#include "Segment.h"
 
 using namespace graphite2;
 
@@ -50,18 +51,7 @@ void graphite_stop_logging()
 
 } // extern "C"
 
-
-namespace
-{
-	inline
-	uint32 slotid(const Slot * const p) throw()
-	{
-		size_t s = size_t(p);
-		s ^= s >> (s & 7) & ~size_t(0xffff);
-		s ^= s >> (s & 3) & ~size_t(0xffffff);
-		return uint32(s);
-	}
-}
+void finalise_slot(const Segment & seg, Slot & s) throw();
 
 json *graphite2::dbgout = 0;
 
@@ -69,10 +59,10 @@ json *graphite2::dbgout = 0;
 json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 {
 	return j << json::object
-				<< "base"			<< ci.base()
+				<< "offset"			<< ci.base()
 				<< "unicode"		<< ci.unicodeChar()
-				<< "breakWeight"	<< ci.breakWeight()
-				<< "slot" << json::object << json::flat
+				<< "break"			<< ci.breakWeight()
+				<< "slot" << json::flat << json::object
 					<< "before"	<< ci.before()
 					<< "after"	<< ci.after()
 					<< json::close
@@ -80,42 +70,55 @@ json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 }
 
 
-json & graphite2::operator << (json & j, const Slot & s) throw()
+json & graphite2::operator << (json & j, const dslot & ds) throw()
 {
+	const Segment & seg = ds.first;
+	Slot & s = ds.second;
+
+	finalise_slot(seg, s);
 	j << json::object
 		<< "id"				<< slotid(&s)
 		<< "gid"			<< s.gid()
-		<< "charinfo" << json::object << json::flat
+		<< "charinfo" << json::flat << json::object
 			<< "original"		<< s.original()
 			<< "before"			<< s.before()
 			<< "after" 			<< s.after()
 			<< json::close
 		<< "origin"			<< s.origin()
 		<< "advance"		<< s.advancePos()
-		<< "insertBefore"	<< s.isInsertBefore();
+		<< "insert"			<< s.isInsertBefore()
+		<< "break"			<< s.getAttr(&seg, gr_slatBreak, 0);
+	if (s.just() > 0)
+		j << "justification"	<< s.just();
 	if (s.getBidiLevel() > 0)
-		j 	<< "bidi"		<< s.getBidiLevel();
+		j << "bidi"		<< s.getBidiLevel();
 	if (s.attachedTo())
-		j << "parent" << json::object << json::flat
+		j << "parent" << json::flat << json::object
 			<< "id"				<< s.attachedTo()->index()
+			<< "level"			<< s.getAttr(0, gr_slatAttLevel, 0)
 			<< "offset"			<< s.attachOffset()
 			<< json::close;
+	j << "user" << json::flat << json::array;
+	for (int n = 0; n!= seg.numAttrs(); ++n)
+		j	<< s.userAttrs()[n];
+		j 	<< json::close;
 	if (s.firstChild())
 	{
-		j	<< "children" << json::array << json::flat;
-		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << c->index();
+		j	<< "children" << json::flat << json::array;
+		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << slotid(c);
 		j		<< json::close;
 	}
 	return j << json::close;
 }
 
 
-json & graphite2::operator << (json & j, const slots & r) throw()
+inline
+void finalise_slot(const Segment & seg, Slot & s) throw()
 {
-	const Slot * s = r.first,
-			   * const end = r.second ? r.second->next() : 0;
-	j << json::array;
-	for (; s && s != end; s = s->next()) j << *s;
-	j << json::close;
-	return j;
+	if (!s.isBase()) return;
+
+	Position 	cp;
+	Rect		bb;
+	if (s.prev())  cp = s.prev()->origin() + s.prev()->advancePos();
+	cp = s.finalise(&seg, 0, cp, bb, bb.tr.y, 0, bb.bl.y = cp.x);
 }

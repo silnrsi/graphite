@@ -39,28 +39,34 @@ namespace graphite2
 {
 
 class CharInfo;
+class Segment;
 class Slot;
 
-typedef std::pair<const Slot *, const Slot *>	slots;
+typedef std::pair<const Segment &, Slot &>	dslot;
+
 extern json * dbgout;
 
 json & operator << (json & j, const Position &) throw();
 json & operator << (json & j, const CharInfo &) throw();
-json & operator << (json & j, const Slot &) throw();
-json & operator << (json & j, const Slot *) throw();
-json & operator << (json & j, const slots &) throw();
+json & operator << (json & j, const dslot &) throw();
+
+uint32 slotid(const Slot * const p) throw();
 
 inline
 json & operator << (json & j, const Position & p) throw()
 {
-	return j << json::array << json::flat << p.x << p.y << json::close;
+	return j << json::flat << json::array << p.x << p.y << json::close;
 }
 
 inline
-json & operator << (json & j, const Slot *b) throw()
+uint32 slotid(const Slot * const p) throw()
 {
-	return j << slots(b,0);
+	size_t s = size_t(p);
+	s ^= s >> (s & 7) & ~size_t(0xffff);
+	s ^= s >> (s & 3) & ~size_t(0xffffff);
+	return uint32(s);
 }
+
 
 } // namespace graphite2
 

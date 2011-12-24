@@ -51,21 +51,22 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    void   findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    void   doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
-    bool   testPassConstraint(vm::Machine & m) const;
-    bool   testConstraint(const Rule & r, vm::Machine &) const;
-    bool   readFSM(const byte* p, const byte*const pass_start, const size_t max_offset);
-    bool   readRules(const uint16 * rule_map, const size_t num_entries, 
+    void   	findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    int   	doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
+    bool   	testPassConstraint(vm::Machine & m) const;
+    bool   	testConstraint(const Rule & r, vm::Machine &) const;
+    bool   	readFSM(const byte* p, const byte*const pass_start, const size_t max_offset);
+    bool   	readRules(const uint16 * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
                      const uint16 * o_action, const byte * action_data,
                      const Face &);
-    bool   readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
-    bool   readRanges(const uint16* ranges, size_t num_ranges);
-    uint16 glyphToCol(const uint16 gid) const;
-    bool   runFSM(FiniteStateMachine & fsm, Slot * slot) const;
-    
+    bool   	readStates(const int16 * starts, const int16 * states, const uint16 * o_rule_map);
+    bool   	readRanges(const uint16* ranges, size_t num_ranges);
+    uint16 	glyphToCol(const uint16 gid) const;
+    bool   	runFSM(FiniteStateMachine & fsm, Slot * slot) const;
+    void	dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * os) const;
+    void	adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
     const Silf* m_silf;
     uint16    * m_cols;
     Rule      * m_rules; // rules

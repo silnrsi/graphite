@@ -331,11 +331,12 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     	{
     		Position 	cp;
     		Rect		bb;
-    		for(Slot *s = seg->first(); s; s = s->next())
-                if (s->isBase())  cp = s->finalise(seg, 0, cp, bb, bb.tr.x, 0, bb.bl.x = cp.x);
     		*dbgout << json::item << json::object
     					<< "id"		<< i+1
-    					<< "slots"	<< seg->first();
+    					<< "slots"	<< json::array;
+    		for(Slot * s = seg->first(); s; s = s->next())
+    			*dbgout		<< dslot(*seg, *s);
+    		*dbgout			<< json::close;
     	}
 
     	// bidi and mirroring
@@ -368,14 +369,17 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 		seg->positionSlots(0);
 		*dbgout 	<<json::item << json::object
 						<< "id"		<< lastPass+1
-						<< "slots"  << seg->first()
+						<< "slots"  << json::array;
+		for(Slot * s = seg->first(); s; s = s->next())
+			*dbgout			<< dslot(*seg, *s);
+		*dbgout				<< json::close
 						<< "rules"	<< json::null
 						<< json::close	// close the lastPass
 					<< json::close		// close the passes array
 				<< "advance" << seg->advance()
 				<< "chars"	 << json::array;
 		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-			*dbgout << *seg->charinfo(i);
+			*dbgout << json::flat << *seg->charinfo(i);
 	}
 
     return true;

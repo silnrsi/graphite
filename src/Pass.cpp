@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "Main.h"
+#include "debug.h"
 #include "Endian.h"
 #include "Pass.h"
 #include <cstring>
@@ -280,12 +281,16 @@ bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
     return true;
 }
 
+
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
-    Slot *s = m.slotMap().segment.first();
-    if (!s || !testPassConstraint(m)) return;
+	Slot *s = m.slotMap().segment.first();
+	if (!s || !testPassConstraint(m)) return;
     Slot *currHigh = s->next();
-    
+
+    if (dbgout)  *dbgout << "rules"	<< json::array;
+	json::closer rules_array_closer = dbgout;
+
     m.slotMap().highwater(currHigh);
     int lc = m_iMaxLoop;
     do
@@ -293,7 +298,10 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
         findNDoRule(s, m, fsm);
         if (s && (m.slotMap().highpassed() || s == m.slotMap().highwater() || --lc == 0)) {
         	if (!lc)
+        	{
+//        		if (dbgout)	*dbgout << json::item << json::flat << rule_event(-1, s, 1);
         		s = m.slotMap().highwater();
+        	}
         	lc = m_iMaxLoop;
             if (s)
             	m.slotMap().highwater(s->next());
@@ -346,12 +354,44 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 
         if (r != re)
         {
-            doAction(r->rule->action, slot, m);
+			const int adv = doAction(r->rule->action, slot, m);
+			if (dbgout) dumpRuleEvent(fsm, *r, slot);
+			adjustSlot(adv, slot, fsm.slots);
+
             return;
         }
     }
 
     slot = slot->next();
+}
+
+
+void Pass::dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * os) const
+{
+	os = os ? os->prev() : fsm.slots.segment.last();
+	*dbgout << json::item << json::object
+				<< "considered" << json::array;
+				for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
+	*dbgout 		<< json::flat << json::object
+						<< "id" 	<< r->rule - m_rules
+						<< "input" << json::flat << json::object
+							<< "start" << slotid(fsm.slots[fsm.slots.context() - r->rule->preContext])
+							<< "length" << r->rule->sort
+							<< json::close	// close "input"
+						<< json::close;	// close Rule object
+	*dbgout 		<< json::flat << json::object
+						<< "id" 	<< re.rule - m_rules
+						<< "input" << json::flat << json::object
+							<< "start" << slotid(fsm.slots[fsm.slots.context()])
+							<< "length" << re.rule->sort - re.rule->preContext
+							<< json::close // close "input"
+						<< json::close	// close object
+				<< json::close; // close considered array
+	*dbgout 	<< "output"	<< json::array;
+	for(int n = re.rule->sort - re.rule->preContext; n; --n, os = os->prev())
+		*dbgout 	<< dslot(fsm.slots.segment,*os);
+	*dbgout 		<< json::close // close "output"
+				<< json::close;	// close RuleEvent object
 }
 
 
@@ -366,13 +406,16 @@ bool Pass::testPassConstraint(Machine & m) const
     *map = m.slotMap().segment.first();
     const uint32 ret = m_cPConstraint.run(m, map);
 
+    if (dbgout)
+    	*dbgout << "constraint" << (ret || m.status() != Machine::finished);
+
     return ret || m.status() != Machine::finished;
 }
 
 
 bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
-    if (r.sort - r.preContext > (int)m.slotMap().size() - m.slotMap().context())    return false;
+    if ((r.sort - r.preContext) > (m.slotMap().size() - m.slotMap().context()))    return false;
     if (m.slotMap().context() - r.preContext < 0) return false;
     if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());
@@ -380,7 +423,7 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
     vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
     for (int n = r.sort; n && map; --n, ++map)
     {
-	if (!*map) continue;
+    	if (!*map) continue;
         const int32 ret = r.constraint->run(m, map);
         if (!ret || m.status() != Machine::finished)
             return false;
@@ -390,10 +433,10 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 }
 
 
-void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
+int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
     assert(codeptr);
-    if (!*codeptr) return;
+    if (!*codeptr) return 0;
     SlotMap   & smap = m.slotMap();
     vm::slotref * map = &smap[smap.context()];
     smap.highpassed(false);
@@ -402,6 +445,7 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
     int glyph_diff = -static_cast<int>(seg.slotCount());
     int32 ret = codeptr->run(m, map);
     glyph_diff += seg.slotCount();
+
     if (codeptr->deletes())
     {
         for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
@@ -416,40 +460,48 @@ void Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) con
         }
     }
 
+    if (m.status() != Machine::finished)
+    {
+    	slot_out = NULL;
+    	m.slotMap().highwater(0);
+    	return 0;
+    }
+
     slot_out = *map;
-    if (ret < 0)
+    return ret;
+}
+
+void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
+{
+    if (delta < 0)
     {
         if (!slot_out)
         {
-            slot_out = seg.last();
-            ++ret;
+            slot_out = smap.segment.last();
+            ++delta;
             if (smap.highpassed() && !smap.highwater())
             	smap.highpassed(false);
         }
-        while (++ret <= 0 && slot_out)
+        while (++delta <= 0 && slot_out)
         {
             slot_out = slot_out->prev();
             if (smap.highpassed() && smap.highwater() == slot_out)
             	smap.highpassed(false);
         }
     }
-    else if (ret > 0)
+    else if (delta > 0)
     {
         if (!slot_out)
         {
-            slot_out = seg.first();
-            --ret;
+            slot_out = smap.segment.first();
+            --delta;
         }
-        while (--ret >= 0 && slot_out)
+        while (--delta >= 0 && slot_out)
         {
             slot_out = slot_out->next();
             if (slot_out == smap.highwater() && slot_out)
                 smap.highpassed(true);
         }
     }
-    if (m.status() != Machine::finished)
-    {
-    	slot_out = NULL;
-    	m.slotMap().highwater(0);
-    }
 }
+
