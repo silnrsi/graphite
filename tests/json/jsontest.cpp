@@ -55,14 +55,14 @@ int main(int argc, char * argv[])
 			<< "firstName" 	<< "John"
 			<< "lastName" 	<< "Smith"
 			<< "age"		<< 25
-			<< "address"	<< json::object << json::flat
+			<< "address"	<< json::flat << json::object
 				<< "streetAddress" 	<< "21 2nd Street"
 				<< "city"			<< "New York"
 				<< "state"			<< "NY"
 				<< "postalCode" 	<< "10021"
 				<< json::close
 			<< "phoneNmuber" << json::array
-				<< json::object << json::flat
+				<< json::flat << json::object
 					<< "type" 	<< "home"
 					<< "number" << "212 555-1234"
 					<< json::close

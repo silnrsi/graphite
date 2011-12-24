@@ -57,7 +57,7 @@ void json::indent(const int d) throw()
 	if (*_context == member)
 		fputc(' ', _stream);
 	else
-		fprintf(_stream, _flatten ? " " : "\n%*s",  4*int(_context - _contexts + d), "");
+		fprintf(_stream, _flatten  && _flatten < _context ? " " : "\n%*s",  4*int(_context - _contexts + d), "");
 }
 
 
@@ -85,7 +85,7 @@ void json::pop_context() throw()
 	if (_context == _contexts)	fputc('\n', _stream);
 	fflush(_stream);
 
-	if (_flatten > _context)	_flatten = 0;
+	if (_flatten >= _context)	_flatten = 0;
 	*_context = seq;
 }
 

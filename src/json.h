@@ -52,6 +52,8 @@ class json
 	void pop_context() throw();
 
 public:
+	class closer;
+
 	typedef const char *	string;
 	typedef double			number;
 	typedef long signed int	integer;
@@ -78,6 +80,13 @@ public:
 	CLASS_NEW_DELETE;
 };
 
+class json::closer
+{
+	json * const	_j;
+public:
+	closer(json * const j) : _j(j) {}
+	~closer() throw() { if (_j)  *_j << close; }
+};
 
 inline
 json::json(FILE * stream) throw()
