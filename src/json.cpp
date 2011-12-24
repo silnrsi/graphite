@@ -42,6 +42,7 @@ namespace
 	};
 }
 
+const json::_null_t	json::null = {};
 
 inline
 void json::context(const char current) throw()
