@@ -199,5 +199,7 @@ int main(int, char **)
     testName(testBData, sizeof(NameTestB), 0x8000, 0x8000, 7, "ကၢၤ");
     testName(testBData, sizeof(NameTestB), 0x8001, 0x8001, 7, "ၜ");
     testName(testBData, sizeof(NameTestB), 0x8002, 0x409, 1, "Aa");
+
+    return 0;
 }
 

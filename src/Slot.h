@@ -99,7 +99,7 @@ public:
     uint32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj);
-    float just() { return m_just; }
+    float just() const { return m_just; }
     void just(float j) { m_just = j; }
 
     CLASS_NEW_DELETE
