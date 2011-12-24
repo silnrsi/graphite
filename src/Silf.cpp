@@ -317,8 +317,8 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 
     if (dbgout)
     {
-    	char version[16];
-    	snprintf(version, sizeof version, "%d.%d.%d",
+    	char version[64];
+    	sprintf(version, "%d.%d.%d",
     			GR2_VERSION_MAJOR, GR2_VERSION_MINOR, GR2_VERSION_BUGFIX);
     	*dbgout << json::object
     				<< "version"	<< version
