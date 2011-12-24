@@ -49,11 +49,12 @@
                             {
                                 "id" : 
                                 { 
+                                    "id" : "SlotRef",
                                     "type" : "integer",
                                     "title" : "Slot uuid"
                                     "description" : "A unique ID for tracking Slot movement"
                                     "minimim" : 0, 
-                                    "maximum" : 655353 
+                                    "maximum" : 65535
                                 },
                                 
                                 "gid" : 
@@ -95,10 +96,21 @@
                                 
                                 "advance" : { "$ref" : "Point" },
                                 
-                                "insertBefore" : 
+                                "insert" : 
                                 { 
-                                    "type" : "boolean", 
+                                    "type" : "boolean",
+                                    "title" : "Insert before", 
                                     "required" : true 
+                                },
+                                
+                                "break" : 
+                                { 
+                                    "id" : "BreakWeight",
+                                    "type" : "integer",
+                                    "title" : "Break Weight of associated character", 
+                                    "required" : true, 
+                                    "minimum" : -50, 
+                                    "maximum" : 50                        
                                 },
                                 
                                 "bidi" : 
@@ -109,6 +121,8 @@
                                     "maxmimum" : 63,
                                 },
                                 
+                                "justification" : { "type" : "number", "title" : "Justification width" },
+                                
                                 "parent" : 
                                 {
                                     "type" : "object"
@@ -117,20 +131,36 @@
                                                      the parent's origin"
                                     "properties" :
                                     {
-                                        "id" : { "$ref" : "Index" },
+                                        "id" : { "$ref" : "SlotRef" },
+                                        "level" : { "type" : "integer", "minimum" : 0 },
                                         "offset" : { "$ref" : "Point" }
                                     }
-                                }
+                                },
+                                
+                                "user" :
+                                {
+                                    "type" : "array",
+                                    "title" : "User attributes array",
+                                    "required" : true,
+                                    "items" : 
+                                    { 
+                                        "type" : "integer", 
+                                        "minimim" : 0, 
+                                        "maximum" : 65535
+                                    } 
+                                },
                                 
                                 "children" : 
                                 { 
                                     "type" : "array", 
-                                    "items" : { "$ref" : "Index" } 
+                                    "items" : { "$ref" : "SlotRef" } 
                                 }              
                             }
                         }
                     },
-                     
+                    
+                    "constraint" : { "type" : "boolean", "title" : "Pass constraint result" }, 
+                   
                     "rules" :
                     {
                         "type" : "array",
@@ -143,31 +173,44 @@
                             "title" : "Rule event",
                             "properties" : 
                             {
-                                "trigger" : 
-                                { 
-                                    "enum" : ["match", "nomatch", "maxloop"], 
-                                    "required" : true 
-                                },
-                                
-                                "id" : { "$ref" : "Index" },
-                                
-                                "input" : 
-                                { 
-                                    "type" : "object",
-                                    "title" : "Input slot range",
+                                "considered" :
+                                {
+                                    "type" : "array",
+                                    "title" : "Rules considered",
                                     "required" : true,
-                                    "properties" : 
+                                    "items" :
                                     {
-                                        "offset" : { "$ref" : "Index" },
-                                        "length" : 
-                                        { 
-                                            "type" : "integer", 
-                                            "required" : true, 
-                                            "minimum" : 0 
-                                        },
-                                    }
-                                },
+                                        "id" : "Rule"
+                                        "type" : "object"
+                                        "properties" :
+                                        {
+                                            "id" :
+                                            { 
+                                                "type" : "integer",
+                                                "required" : true,
+                                                "minimum" : -1
+                                            },
                                 
+                                            "input" : 
+                                            { 
+                                                "type" : "object",
+                                                "title" : "Input slot range",
+                                                "required" : true,
+                                                "properties" : 
+                                                {
+                                                    "start" : { "$ref" : "SlotRef" },
+                                                    "length" : 
+                                                    { 
+                                                        "type" : "integer", 
+                                                        "required" : true, 
+                                                        "minimum" : 0 
+                                                    },
+                                                }
+                                            }
+                                        }
+                                   }    
+                                },
+                                                                
                                 "output" :
                                 {
                                     "type" : "array",
@@ -198,7 +241,8 @@
                 "type" : "object"
                 "properties" :
                 {
-                    "base" : { "$ref" : "Index" },
+                    "offset" : { "$ref" : "Index" },
+                    
                     "unicode" : 
                     { 
                         "type" : "integer", 
@@ -206,13 +250,9 @@
                         "minimum" : 0, 
                         "maximum" : 1114111
                     },
-                    "breakWeight" : 
-                    { 
-                        "type" : "integer", 
-                        "required" : true, 
-                        "minimum" : -50, 
-                        "maximum" : 50                        
-                    },
+                    
+                    "break" : { "$ref" : "BreakWeight" },
+                    
                     "slot" : 
                     {
                         "type" : "object",
