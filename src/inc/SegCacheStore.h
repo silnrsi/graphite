@@ -28,9 +28,9 @@ of the License or (at your option) any later version.
 
 #ifndef DISABLE_SEGCACHE
 
-#include "Main.h"
-#include "CmapCache.h"
-#include "SegCache.h"
+#include "inc/Main.h"
+#include "inc/CmapCache.h"
+#include "inc/SegCache.h"
 
 namespace graphite2 {
 

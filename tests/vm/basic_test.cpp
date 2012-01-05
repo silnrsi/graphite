@@ -2,10 +2,10 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
-#include "Code.h"
-#include "Rule.h"
-#include "Silf.h"
-#include "Face.h"
+#include "inc/Code.h"
+#include "inc/Rule.h"
+#include "inc/Silf.h"
+#include "inc/Face.h"
 
 using namespace graphite2;
 using namespace vm;

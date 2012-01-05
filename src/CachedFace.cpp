@@ -28,8 +28,8 @@ of the License or (at your option) any later version.
 #ifndef DISABLE_SEGCACHE
 
 #include <graphite2/Segment.h>
-#include "CachedFace.h"
-#include "SegCacheStore.h"
+#include "inc/CachedFace.h"
+#include "inc/SegCacheStore.h"
 
 
 using namespace graphite2;

@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cassert>
-#include "Main.h"
+#include "inc/Main.h"
 
 #include <vector>
-#include "List.h"
+#include "inc/List.h"
 
 namespace gr2 = graphite2;
 

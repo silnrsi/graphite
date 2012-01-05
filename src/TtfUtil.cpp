@@ -49,9 +49,9 @@ Description
 //#include <stdexcept>
 // Platform headers
 // Module headers
-#include "TtfUtil.h"
-#include "TtfTypes.h"
-#include "Endian.h"
+#include "inc/TtfUtil.h"
+#include "inc/TtfTypes.h"
+#include "inc/Endian.h"
 
 /***********************************************************************************************
 	Forward declarations

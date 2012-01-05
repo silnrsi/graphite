@@ -25,10 +25,10 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include <iterator>
-#include "GlyphFace.h"
-#include "GlyphFaceCache.h"
-#include "TtfUtil.h"
-#include "Endian.h"
+#include "inc/GlyphFace.h"
+#include "inc/GlyphFaceCache.h"
+#include "inc/TtfUtil.h"
+#include "inc/Endian.h"
 
 
 using namespace graphite2;

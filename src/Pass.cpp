@@ -24,16 +24,16 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "Main.h"
-#include "debug.h"
-#include "Endian.h"
-#include "Pass.h"
+#include "inc/Main.h"
+#include "inc/debug.h"
+#include "inc/Endian.h"
+#include "inc/Pass.h"
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-#include "Segment.h"
-#include "Code.h"
-#include "Rule.h"
+#include "inc/Segment.h"
+#include "inc/Code.h"
+#include "inc/Rule.h"
 
 using namespace graphite2;
 using vm::Machine;

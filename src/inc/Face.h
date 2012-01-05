@@ -26,19 +26,19 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include "Main.h"
-#include "GlyphFace.h"
-#include "Silf.h"
-#include "TtfUtil.h"
-#include "Main.h"
+#include "inc/Main.h"
+#include "inc/GlyphFace.h"
+#include "inc/Silf.h"
+#include "inc/TtfUtil.h"
+#include "inc/Main.h"
 #include "graphite2/Font.h"
-#include "FeatureMap.h"
-#include "GlyphFaceCache.h"
+#include "inc/FeatureMap.h"
+#include "inc/GlyphFaceCache.h"
 
 #ifndef DISABLE_FILE_FACE
 #include <cstdio>
 #include <cassert>
-#include "TtfTypes.h"
+#include "inc/TtfTypes.h"
 #endif      //!DISABLE_FILE_FACE
 
 namespace graphite2 {

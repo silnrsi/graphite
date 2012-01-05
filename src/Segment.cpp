@@ -24,16 +24,16 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "UtfCodec.h"
+#include "inc/UtfCodec.h"
 #include <cstring>
 #include <cstdlib>
 
-#include "Segment.h"
+#include "inc/Segment.h"
 #include "graphite2/Font.h"
-#include "CharInfo.h"
-#include "Slot.h"
-#include "Main.h"
-#include "CmapCache.h"
+#include "inc/CharInfo.h"
+#include "inc/Slot.h"
+#include "inc/Main.h"
+#include "inc/CmapCache.h"
 #include "graphite2/Segment.h"
 
 

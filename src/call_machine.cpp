@@ -35,10 +35,10 @@ of the License or (at your option) any later version.
 #include <cassert>
 #include <cstring>
 #include <graphite2/Segment.h>
-#include "Machine.h"
-#include "Segment.h"
-#include "Slot.h"
-#include "Rule.h"
+#include "inc/Machine.h"
+#include "inc/Segment.h"
+#include "inc/Slot.h"
+#include "inc/Rule.h"
 
 // Disable the unused parameter warning as th compiler is mistaken since dp
 // is always updated (even if by 0) on every opcode.
@@ -87,7 +87,7 @@ namespace {
 #define mapb    reg.map_base
 #define flags   reg.flags
 
-#include "opcodes.h"
+#include "inc/opcodes.h"
 
 #undef smap
 #undef seg
@@ -126,7 +126,7 @@ Machine::stack_t  Machine::run(const instr   * program,
 
 // Pull in the opcode table
 namespace {
-#include "opcode_table.h"
+#include "inc/opcode_table.h"
 }
 
 const opcode_t * Machine::getOpcodeTable() throw()

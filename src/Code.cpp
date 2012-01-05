@@ -34,11 +34,11 @@ of the License or (at your option) any later version.
 #include <cstdlib>
 #include <cstring>
 #include "graphite2/Segment.h"
-#include "Code.h"
-#include "Machine.h"
-#include "Silf.h"
-#include "Face.h"
-#include "Rule.h"
+#include "inc/Code.h"
+#include "inc/Machine.h"
+#include "inc/Silf.h"
+#include "inc/Face.h"
+#include "inc/Rule.h"
 
 #include <cstdio>
 

@@ -28,7 +28,7 @@ of the License or (at your option) any later version.
 // Author: Tim Eves
 
 #include <cstdio>
-#include "json.h"
+#include "inc/json.h"
 
 using namespace graphite2;
 

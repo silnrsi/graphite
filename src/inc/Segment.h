@@ -26,16 +26,16 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include "Main.h"
+#include "inc/Main.h"
 
 #include <cassert>
 
-#include "Slot.h"
-#include "CharInfo.h"
-#include "FeatureVal.h"
-#include "Silf.h"
+#include "inc/Slot.h"
+#include "inc/CharInfo.h"
+#include "inc/FeatureVal.h"
+#include "inc/Silf.h"
 
-#include "List.h"
+#include "inc/List.h"
 
 #define MAX_SEG_GROWTH_FACTOR  256
 

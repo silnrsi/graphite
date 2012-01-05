@@ -29,11 +29,11 @@ of the License or (at your option) any later version.
 #ifndef DISABLE_SEGCACHE
 
 #include <graphite2/Segment.h>
-#include "Main.h"
-#include "Slot.h"
-#include "FeatureVal.h"
-#include "SegCacheEntry.h"
-#include "Segment.h"
+#include "inc/Main.h"
+#include "inc/Slot.h"
+#include "inc/FeatureVal.h"
+#include "inc/SegCacheEntry.h"
+#include "inc/Segment.h"
 
 namespace graphite2 {
 

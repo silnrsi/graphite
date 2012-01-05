@@ -26,14 +26,14 @@ of the License or (at your option) any later version.
 */
 #include <cstring>
 
-#include "Main.h"
-#include "Endian.h"
-#include "FeatureMap.h"
-#include "FeatureVal.h"
+#include "inc/Main.h"
+#include "inc/Endian.h"
+#include "inc/FeatureMap.h"
+#include "inc/FeatureVal.h"
 #include "graphite2/Font.h"
-#include "TtfUtil.h"
+#include "inc/TtfUtil.h"
 #include <cstdlib>
-#include "Face.h"
+#include "inc/Face.h"
 
 
 using namespace graphite2;

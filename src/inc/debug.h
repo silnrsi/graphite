@@ -24,39 +24,49 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+//	debug.h
+//
+//  Created on: 22 Dec 2011
+//      Author: tim
+
 #pragma once
 
-#include <graphite2/Segment.h>
-#include "TtfTypes.h"
-#include "locale2lcid.h"
+#include <utility>
+#include "inc/json.h"
+#include "inc/Position.h"
 
-namespace graphite2 {
-
-class NameTable
+namespace graphite2
 {
-public:
-    NameTable(const void * data, size_t length, uint16 platfromId=3, uint16 encodingID = 1);
-    ~NameTable() { free(const_cast<TtfUtil::Sfnt::FontNames *>(m_table)); }
-    enum eNameFallback {
-        eNoFallback = 0,
-        eEnUSFallbackOnly = 1,
-        eEnOrAnyFallback = 2
-    };
-    uint16 setPlatformEncoding(uint16 platfromId=3, uint16 encodingID = 1);
-    void * getName(uint16 & languageId, uint16 nameId, gr_encform enc, uint32 & length);
-    uint16 getLanguageId(const char * bcp47Locale);
 
-    CLASS_NEW_DELETE
-private:
-    uint16 m_platformId;
-    uint16 m_encodingId;
-    uint16 m_languageCount;
-    uint16 m_platformOffset; // offset of first NameRecord with for platform 3, encoding 1
-    uint16 m_platformLastRecord;
-    uint16 m_nameDataLength;
-    const TtfUtil::Sfnt::FontNames * m_table;
-    const uint8 * m_nameData;
-    Locale2Lang m_locale2Lang;
-};
+class CharInfo;
+class Segment;
+class Slot;
+
+typedef std::pair<const Segment &, Slot &>	dslot;
+
+extern json * dbgout;
+
+json & operator << (json & j, const Position &) throw();
+json & operator << (json & j, const CharInfo &) throw();
+json & operator << (json & j, const dslot &) throw();
+
+uint32 slotid(const Slot * const p) throw();
+
+inline
+json & operator << (json & j, const Position & p) throw()
+{
+	return j << json::flat << json::array << p.x << p.y << json::close;
+}
+
+inline
+uint32 slotid(const Slot * const p) throw()
+{
+	size_t s = size_t(p);
+	s ^= s >> (s & 7) & ~size_t(0xffff);
+	s ^= s >> (s & 3) & ~size_t(0xffffff);
+	return uint32(s);
+}
+
 
 } // namespace graphite2
+

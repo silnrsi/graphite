@@ -26,10 +26,10 @@
 #include <map>
 #include <string>
 #include <graphite2/Font.h>
-#include "Endian.h"
-#include "Face.h"
-#include "FeatureMap.h"
-#include "TtfUtil.h"
+#include "inc/Endian.h"
+#include "inc/Face.h"
+#include "inc/FeatureMap.h"
+#include "inc/TtfUtil.h"
 
 #pragma pack(push, 1)
 

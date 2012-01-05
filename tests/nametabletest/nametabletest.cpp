@@ -24,10 +24,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <graphite2/Types.h>
-#include "Main.h"
-#include "Endian.h"
-#include "TtfTypes.h"
-#include "NameTable.h"
+#include "inc/Main.h"
+#include "inc/Endian.h"
+#include "inc/TtfTypes.h"
+#include "inc/NameTable.h"
 
 #pragma pack(push, 1)
 

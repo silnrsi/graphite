@@ -24,10 +24,10 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "GlyphFaceCache.h"
+#include "inc/GlyphFaceCache.h"
 #include "graphite2/Font.h"
-#include "Face.h"     //for the tags
-#include "Endian.h"
+#include "inc/Face.h"     //for the tags
+#include "inc/Endian.h"
 
 using namespace graphite2;
 

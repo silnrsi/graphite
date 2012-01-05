@@ -29,7 +29,7 @@ of the License or (at your option) any later version.
 //     Author: Tim Eves
 
 #pragma once
-#include "Main.h"
+#include "inc/Main.h"
 #include <cassert>
 #include <cstdio>
 

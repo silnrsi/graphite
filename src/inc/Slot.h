@@ -28,8 +28,8 @@ of the License or (at your option) any later version.
 
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
-#include "Main.h"
-#include "Font.h"
+#include "inc/Main.h"
+#include "inc/Font.h"
 
 
 #define SLOT_DELETED    1

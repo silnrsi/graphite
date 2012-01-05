@@ -21,16 +21,16 @@
 */
 #include <graphite2/Segment.h>
 #include <graphite2/Log.h>
-#include "Main.h"
-#include "Silf.h"
-#include "Face.h"
-#include "CachedFace.h"
-#include "Segment.h"
-#include "SegCache.h"
-#include "SegCacheStore.h"
-#include "UtfCodec.h"
-#include "TtfTypes.h"
-#include "TtfUtil.h"
+#include "inc/Main.h"
+#include "inc/Silf.h"
+#include "inc/Face.h"
+#include "inc/CachedFace.h"
+#include "inc/Segment.h"
+#include "inc/SegCache.h"
+#include "inc/SegCacheStore.h"
+#include "inc/UtfCodec.h"
+#include "inc/TtfTypes.h"
+#include "inc/TtfUtil.h"
 
 using namespace graphite2;
 

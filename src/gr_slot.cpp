@@ -25,9 +25,9 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "graphite2/Segment.h"
-#include "Segment.h"
-#include "Slot.h"
-#include "Font.h"
+#include "inc/Segment.h"
+#include "inc/Slot.h"
+#include "inc/Font.h"
 
 
 extern "C" {

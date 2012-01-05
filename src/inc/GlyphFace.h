@@ -26,9 +26,9 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include "Main.h"
-#include "Position.h"
-#include "Sparse.h"
+#include "inc/Main.h"
+#include "inc/Position.h"
+#include "inc/Sparse.h"
 
 namespace graphite2 {
 

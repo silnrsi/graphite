@@ -26,7 +26,7 @@ of the License or (at your option) any later version.
 */
 // JSON debug logging very basic test harness
 // Author: Tim Eves
-#include "json.h"
+#include "inc/json.h"
 
 using namespace graphite2;
 

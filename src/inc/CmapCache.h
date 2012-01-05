@@ -24,49 +24,50 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-//	debug.h
-//
-//  Created on: 22 Dec 2011
-//      Author: tim
-
 #pragma once
 
-#include <utility>
-#include "json.h"
-#include "Position.h"
+#include "inc/Main.h"
 
-namespace graphite2
+namespace graphite2 {
+
+class Face;
+
+class Cmap
 {
+public:
+	virtual ~Cmap() throw() {}
 
-class CharInfo;
-class Segment;
-class Slot;
+	virtual uint16 operator [] (const uint32) const throw() { return 0; }
 
-typedef std::pair<const Segment &, Slot &>	dslot;
+	virtual operator bool () const throw() { return false; }
 
-extern json * dbgout;
+	CLASS_NEW_DELETE;
+};
 
-json & operator << (json & j, const Position &) throw();
-json & operator << (json & j, const CharInfo &) throw();
-json & operator << (json & j, const dslot &) throw();
-
-uint32 slotid(const Slot * const p) throw();
-
-inline
-json & operator << (json & j, const Position & p) throw()
+class DirectCmap : public Cmap
 {
-	return j << json::flat << json::array << p.x << p.y << json::close;
-}
+public:
+	DirectCmap(const void* cmap, size_t length);
+	virtual uint16 operator [] (const uint32 usv) const throw();
+	virtual operator bool () const throw();
 
-inline
-uint32 slotid(const Slot * const p) throw()
+    CLASS_NEW_DELETE;
+private:
+    const void *_stable,
+    		   *_ctable;
+};
+
+class CmapCache : public Cmap
 {
-	size_t s = size_t(p);
-	s ^= s >> (s & 7) & ~size_t(0xffff);
-	s ^= s >> (s & 3) & ~size_t(0xffffff);
-	return uint32(s);
-}
-
+public:
+	CmapCache(const void * cmapTable, size_t length);
+	virtual ~CmapCache() throw();
+	virtual uint16 operator [] (const uint32 usv) const throw();
+	virtual operator bool () const throw();
+    CLASS_NEW_DELETE;
+private:
+    bool m_isBmpOnly;
+    uint16 ** m_blocks;
+};
 
 } // namespace graphite2
-

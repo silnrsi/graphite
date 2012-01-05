@@ -26,11 +26,11 @@ of the License or (at your option) any later version.
 */
 #include <cstdlib>
 #include "graphite2/Segment.h"
-#include "debug.h"
-#include "Endian.h"
-#include "Silf.h"
-#include "Segment.h"
-#include "Rule.h"
+#include "inc/debug.h"
+#include "inc/Endian.h"
+#include "inc/Silf.h"
+#include "inc/Segment.h"
+#include "inc/Rule.h"
 
 
 using namespace graphite2;

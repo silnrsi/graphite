@@ -27,7 +27,7 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include <iterator>
-#include "Main.h"
+#include "inc/Main.h"
 #include "graphite2/Segment.h"
 
 namespace graphite2 {

@@ -26,12 +26,12 @@ of the License or (at your option) any later version.
 */
 #include <cstring>
 #include "graphite2/Segment.h"
-#include "Face.h"
-#include "Endian.h"
-#include "Segment.h"
-#include "CmapCache.h"
-#include "NameTable.h"
-#include "SegCacheStore.h"
+#include "inc/Face.h"
+#include "inc/Endian.h"
+#include "inc/Segment.h"
+#include "inc/CmapCache.h"
+#include "inc/NameTable.h"
+#include "inc/SegCacheStore.h"
 
 
 using namespace graphite2;

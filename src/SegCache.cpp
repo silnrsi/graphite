@@ -25,13 +25,13 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 
-#include "Main.h"
-#include "TtfTypes.h"
-#include "TtfUtil.h"
-#include "SegCache.h"
-#include "SegCacheEntry.h"
-#include "SegCacheStore.h"
-#include "CmapCache.h"
+#include "inc/Main.h"
+#include "inc/TtfTypes.h"
+#include "inc/TtfUtil.h"
+#include "inc/SegCache.h"
+#include "inc/SegCacheEntry.h"
+#include "inc/SegCacheStore.h"
+#include "inc/CmapCache.h"
 
 
 using namespace graphite2;

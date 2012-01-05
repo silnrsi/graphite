@@ -25,10 +25,10 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "graphite2/Log.h"
-#include "debug.h"
-#include "CharInfo.h"
-#include "Slot.h"
-#include "Segment.h"
+#include "inc/debug.h"
+#include "inc/CharInfo.h"
+#include "inc/Slot.h"
+#include "inc/Segment.h"
 
 using namespace graphite2;
 

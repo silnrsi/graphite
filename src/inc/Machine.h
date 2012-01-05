@@ -33,7 +33,7 @@ of the License or (at your option) any later version.
 #pragma once
 #include <cstring>
 #include <graphite2/Types.h>
-#include "Main.h"
+#include "inc/Main.h"
 
 #if defined(__GNUC__)
 #define     HOT             __attribute__((hot))

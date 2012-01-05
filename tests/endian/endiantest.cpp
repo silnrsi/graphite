@@ -33,7 +33,7 @@ integers in addition to 32, 16 and 8 bit.
 -----------------------------------------------------------------------------*/
 #include <cstdlib>
 #include <string>
-#include "Endian.h"
+#include "inc/Endian.h"
 
 typedef unsigned char 		uint8;
 typedef signed char		     int8;
