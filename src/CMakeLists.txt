@@ -31,7 +31,7 @@ set(GRAPHITE_SO_VERSION ${GRAPHITE_API_MAJOR}.${GRAPHITE_API_MINOR}.${GRAPHITE_A
 
 include(TestBigEndian)
 
-include_directories(${PROJECT_SOURCE_DIR})
+# include_directories(${PROJECT_SOURCE_DIR})
 
 if (DISABLE_SEGCACHE)
     add_definitions(-DDISABLE_SEGCACHE)
