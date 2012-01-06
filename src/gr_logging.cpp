@@ -92,7 +92,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		j << "justification"	<< s.just();
 	if (s.getBidiLevel() > 0)
 		j << "bidi"		<< s.getBidiLevel();
-	if (s.attachedTo())
+	if (!s.isBase())
 		j << "parent" << json::flat << json::object
 			<< "id"				<< s.attachedTo()->index()
 			<< "level"			<< s.getAttr(0, gr_slatAttLevel, 0)
@@ -122,3 +122,12 @@ void finalise_slot(const Segment & seg, Slot & s) throw()
 	if (s.prev())  cp = s.prev()->origin() + s.prev()->advancePos();
 	cp = s.finalise(&seg, 0, cp, bb, bb.tr.y, 0, bb.bl.y = cp.x);
 }
+
+
+graphite2::slotid::slotid(const Slot * const p) throw()
+{
+	uint32 s = reinterpret_cast<size_t>(p);
+	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p->index()), uint16(s));
+	name[sizeof name-1] = 0;
+}
+

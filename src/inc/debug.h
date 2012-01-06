@@ -43,14 +43,19 @@ class Segment;
 class Slot;
 
 typedef std::pair<const Segment &, Slot &>	dslot;
+struct slotid
+{
+	char name[16];
+	slotid(const Slot * const p) throw();
+};
 
 extern json * dbgout;
 
 json & operator << (json & j, const Position &) throw();
 json & operator << (json & j, const CharInfo &) throw();
 json & operator << (json & j, const dslot &) throw();
+json & operator << (json & j, const slotid &) throw();
 
-uint32 slotid(const Slot * const p) throw();
 
 inline
 json & operator << (json & j, const Position & p) throw()
@@ -58,13 +63,11 @@ json & operator << (json & j, const Position & p) throw()
 	return j << json::flat << json::array << p.x << p.y << json::close;
 }
 
+
 inline
-uint32 slotid(const Slot * const p) throw()
+json & operator << (json & j, const slotid & sid) throw()
 {
-	size_t s = size_t(p);
-	s ^= s >> (s & 7) & ~size_t(0xffff);
-	s ^= s >> (s & 3) & ~size_t(0xffffff);
-	return uint32(s);
+	return j << sid.name;
 }
 
 

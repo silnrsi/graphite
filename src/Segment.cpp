@@ -193,6 +193,8 @@ void Segment::freeSlot(Slot *aSlot)
     // reset the slot incase it is reused
     ::new (aSlot) Slot;
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(uint16));
+    // Update generation counter for debug
+    aSlot->index(aSlot->index()+1);
     // update next pointer
     if (!m_freeSlots)
         aSlot->next(NULL);

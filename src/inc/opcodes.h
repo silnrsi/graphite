@@ -639,8 +639,8 @@ STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
     uint16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
-    newSlot->userAttrs(tempUserAttrs);
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
+    newSlot->userAttrs(tempUserAttrs);
     newSlot->markCopied(true);
     *map = newSlot;
 ENDOP

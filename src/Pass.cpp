@@ -316,13 +316,11 @@ inline uint16 Pass::glyphToCol(const uint16 gid) const
 
 bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
 {
-    int context = 0;
-    for (; context != m_maxPreCtxt && slot->prev(); ++context, slot = slot->prev());
-    if (context < m_minPreCtxt)
+	fsm.reset(slot, m_maxPreCtxt);
+    if (fsm.slots.context() < m_minPreCtxt)
         return false;
 
-    fsm.setContext(context);
-    const State * state = m_startStates[m_maxPreCtxt - context];
+    const State * state = m_startStates[m_maxPreCtxt - fsm.slots.context()];
     do
     {
         fsm.slots.pushSlot(slot);
@@ -356,6 +354,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
         {
 			const int adv = doAction(r->rule->action, slot, m);
 			if (dbgout) dumpRuleEvent(fsm, *r, slot);
+		    if (r->rule->action->deletes()) fsm.slots.collectGarbage();
 			adjustSlot(adv, slot, fsm.slots);
 
             return;
@@ -366,30 +365,46 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 }
 
 
-void Pass::dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * os) const
+inline
+Slot * input_slot(const SlotMap &  slots, const int n)
 {
-	os = os ? os->prev() : fsm.slots.segment.last();
+	Slot * s = slots[slots.context() + n];
+	if (!s->isCopied()) 	return s;
+
+	return s->prev() ? s->prev()->next() :  s->next()->prev();
+}
+
+inline
+Slot * output_slot(const SlotMap &  slots, const int n)
+{
+	Slot * s = slots[slots.context() + n - 1];
+	return s ? s->next() : slots.segment.first();
+}
+
+
+void Pass::dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * const last_slot) const
+{
 	*dbgout << json::item << json::object
 				<< "considered" << json::array;
 				for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
 	*dbgout 		<< json::flat << json::object
 						<< "id" 	<< r->rule - m_rules
 						<< "input" << json::flat << json::object
-							<< "start" << slotid(fsm.slots[fsm.slots.context() - r->rule->preContext])
+							<< "start" << slotid(output_slot(fsm.slots, -r->rule->preContext))
 							<< "length" << r->rule->sort
 							<< json::close	// close "input"
 						<< json::close;	// close Rule object
 	*dbgout 		<< json::flat << json::object
 						<< "id" 	<< re.rule - m_rules
 						<< "input" << json::flat << json::object
-							<< "start" << slotid(fsm.slots[fsm.slots.context()])
+							<< "start" << slotid(output_slot(fsm.slots, 0))
 							<< "length" << re.rule->sort - re.rule->preContext
 							<< json::close // close "input"
 						<< json::close	// close object
 				<< json::close; // close considered array
 	*dbgout 	<< "output"	<< json::array;
-	for(int n = re.rule->sort - re.rule->preContext; n; --n, os = os->prev())
-		*dbgout 	<< dslot(fsm.slots.segment,*os);
+	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
+		*dbgout 	<< dslot(fsm.slots.segment,*slot);
 	*dbgout 		<< json::close // close "output"
 				<< json::close;	// close RuleEvent object
 }
@@ -433,6 +448,20 @@ bool Pass::testConstraint(const Rule &r, Machine & m) const
 }
 
 
+void SlotMap::collectGarbage()
+{
+    for(Slot **s = begin(), *const *const se = end() - 1; s != se; ++s) {
+        Slot *& slot = *s;
+        if(slot->isDeleted() || slot->isCopied()){
+            if(slot == m_highwater)
+                m_highwater = slot->next();
+            segment.freeSlot(slot);
+        }
+    }
+}
+
+
+
 int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) const
 {
     assert(codeptr);
@@ -441,35 +470,19 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
     vm::slotref * map = &smap[smap.context()];
     smap.highpassed(false);
 
-    Segment & seg = smap.segment;
-    int glyph_diff = -static_cast<int>(seg.slotCount());
     int32 ret = codeptr->run(m, map);
-    glyph_diff += seg.slotCount();
-
-    if (codeptr->deletes())
-    {
-        for (Slot **s = smap.begin(), *const * const se = smap.end()-1; s != se; ++s)
-        {
-            Slot * & slot = *s;
-            if (slot->isDeleted() || slot->isCopied())
-            {
-            	if (slot == smap.highwater())
-            		smap.highwater(slot->next());
-            	seg.freeSlot(slot);
-            }
-        }
-    }
 
     if (m.status() != Machine::finished)
     {
     	slot_out = NULL;
-    	m.slotMap().highwater(0);
+    	smap.highwater(0);
     	return 0;
     }
 
     slot_out = *map;
     return ret;
 }
+
 
 void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
 {
