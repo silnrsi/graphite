@@ -53,9 +53,18 @@ def compare(j1, j2) :
             print "Value difference: left = %s, right = %s at %s" % (str(v1), str(v2), p1)
             return False
     return True
+try:
+    r1 = canonids(readjson(sys.argv[1]))
+except KeyError as ke:
+    sys.stderr.write("unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[1]))
+    sys.exit(2)
+    
+try:
+    r2 = canonids(readjson(sys.argv[2]))
+except KeyError as ke:
+    sys.stderr.write("unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[2]))
+    sys.exit(2)
 
-r1 = canonids(readjson(sys.argv[1]))
-r2 = canonids(readjson(sys.argv[2]))
 res = compare(r1, r2)
 if res :
     sys.exit(0)
