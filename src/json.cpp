@@ -106,7 +106,7 @@ void json::item(json & j) throw()
 
 json & json::operator << (json::string s) throw()
 {
-	const char ctxt = _context[-1] == obj && *_context == member ? seq : member;
+	const char ctxt = _context[-1] == obj ? *_context == member ? seq : member : seq;
 	context(ctxt);
 	fprintf(_stream, "\"%s\"", s);
 	if (ctxt == member)	fputc(' ', _stream);
