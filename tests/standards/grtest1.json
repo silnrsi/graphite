@@ -5,7 +5,7 @@
             "id" : 1,
             "slots" : [
                 {
-                    "id" : "01c4-01-6f80",
+                    "id" : "0198-01-af80",
                     "gid" : 68,
                     "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                     "origin" : [ 0, 0 ],
@@ -15,7 +15,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-6ff8",
+                    "id" : "0198-00-aff8",
                     "gid" : 67,
                     "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                     "origin" : [ 520, 0 ],
@@ -25,7 +25,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-7070",
+                    "id" : "0198-00-b070",
                     "gid" : 67,
                     "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                     "origin" : [ 982, 0 ],
@@ -35,7 +35,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-70e8",
+                    "id" : "0198-00-b0e8",
                     "gid" : 67,
                     "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
                     "origin" : [ 1444, 0 ],
@@ -45,7 +45,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-7160",
+                    "id" : "0198-00-b160",
                     "gid" : 67,
                     "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
                     "origin" : [ 1906, 0 ],
@@ -55,7 +55,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-71d8",
+                    "id" : "0198-00-b1d8",
                     "gid" : 67,
                     "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
                     "origin" : [ 2368, 0 ],
@@ -65,7 +65,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-7250",
+                    "id" : "0198-00-b250",
                     "gid" : 67,
                     "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
                     "origin" : [ 2830, 0 ],
@@ -75,7 +75,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-72c8",
+                    "id" : "0198-00-b2c8",
                     "gid" : 68,
                     "charinfo" : { "original" : 7, "before" : 7, "after" : 7 },
                     "origin" : [ 3292, 0 ],
@@ -85,7 +85,7 @@
                     "user" : []
                 },
                 {
-                    "id" : "01c4-00-7340",
+                    "id" : "0198-00-b340",
                     "gid" : 67,
                     "charinfo" : { "original" : 8, "before" : 8, "after" : 8 },
                     "origin" : [ 3812, 0 ],
@@ -98,11 +98,11 @@
             "rules" : [
                 {
                     "considered" : [
-                        { "id" : 0, "input" : { "start" : "01c4-01-6f80", "length" : 8 } }
+                        { "id" : 0, "failed" : false, "input" : { "start" : "0198-01-af80", "length" : 8 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-01-6f80",
+                            "id" : "0198-01-af80",
                             "gid" : 36,
                             "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                             "origin" : [ 0, 0 ],
@@ -112,7 +112,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-6ff8",
+                            "id" : "0198-00-aff8",
                             "gid" : 67,
                             "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                             "origin" : [ 676, 0 ],
@@ -122,7 +122,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-7070",
+                            "id" : "0198-00-b070",
                             "gid" : 67,
                             "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                             "origin" : [ 1138, 0 ],
@@ -132,7 +132,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-70e8",
+                            "id" : "0198-00-b0e8",
                             "gid" : 67,
                             "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
                             "origin" : [ 1600, 0 ],
@@ -142,7 +142,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-7160",
+                            "id" : "0198-00-b160",
                             "gid" : 67,
                             "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
                             "origin" : [ 2062, 0 ],
@@ -152,7 +152,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-71d8",
+                            "id" : "0198-00-b1d8",
                             "gid" : 67,
                             "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
                             "origin" : [ 2524, 0 ],
@@ -162,7 +162,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-7250",
+                            "id" : "0198-00-b250",
                             "gid" : 67,
                             "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
                             "origin" : [ 2986, 0 ],
@@ -172,7 +172,7 @@
                             "user" : []
                         },
                         {
-                            "id" : "01c4-00-72c8",
+                            "id" : "0198-00-b2c8",
                             "gid" : 36,
                             "charinfo" : { "original" : 7, "before" : 7, "after" : 7 },
                             "origin" : [ 3448, 0 ],
@@ -185,11 +185,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 2, "input" : { "start" : "01c4-00-6ff8", "length" : 1 } }
+                        { "id" : 2, "failed" : false, "input" : { "start" : "0198-00-aff8", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-6ff8",
+                            "id" : "0198-00-aff8",
                             "gid" : 37,
                             "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                             "origin" : [ 676, 0 ],
@@ -202,11 +202,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 1, "input" : { "start" : "01c4-00-7070", "length" : 1 } }
+                        { "id" : 1, "failed" : false, "input" : { "start" : "0198-00-b070", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-7070",
+                            "id" : "0198-00-b070",
                             "gid" : 35,
                             "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                             "origin" : [ 1370, 0 ],
@@ -219,11 +219,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 3, "input" : { "start" : "01c4-00-70e8", "length" : 1 } }
+                        { "id" : 3, "failed" : false, "input" : { "start" : "0198-00-b0e8", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-70e8",
+                            "id" : "0198-00-b0e8",
                             "gid" : 35,
                             "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
                             "origin" : [ 2117, 0 ],
@@ -236,11 +236,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 3, "input" : { "start" : "01c4-00-7160", "length" : 1 } }
+                        { "id" : 3, "failed" : false, "input" : { "start" : "0198-00-b160", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-7160",
+                            "id" : "0198-00-b160",
                             "gid" : 35,
                             "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
                             "origin" : [ 2864, 0 ],
@@ -253,11 +253,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 3, "input" : { "start" : "01c4-00-71d8", "length" : 1 } }
+                        { "id" : 3, "failed" : false, "input" : { "start" : "0198-00-b1d8", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-71d8",
+                            "id" : "0198-00-b1d8",
                             "gid" : 35,
                             "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
                             "origin" : [ 3611, 0 ],
@@ -270,11 +270,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 3, "input" : { "start" : "01c4-00-7250", "length" : 1 } }
+                        { "id" : 3, "failed" : false, "input" : { "start" : "0198-00-b250", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-7250",
+                            "id" : "0198-00-b250",
                             "gid" : 35,
                             "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
                             "origin" : [ 4358, 0 ],
@@ -287,11 +287,11 @@
                 },
                 {
                     "considered" : [
-                        { "id" : 2, "input" : { "start" : "01c4-00-7340", "length" : 1 } }
+                        { "id" : 2, "failed" : false, "input" : { "start" : "0198-00-b340", "length" : 1 } }
                     ],
                     "output" : [
                         {
-                            "id" : "01c4-00-7340",
+                            "id" : "0198-00-b340",
                             "gid" : 37,
                             "charinfo" : { "original" : 8, "before" : 8, "after" : 8 },
                             "origin" : [ 5781, 0 ],
@@ -307,7 +307,7 @@
     ],
     "output" : [
         {
-            "id" : "01c4-01-6f80",
+            "id" : "0198-01-af80",
             "gid" : 36,
             "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
             "origin" : [ 0, 0 ],
@@ -317,7 +317,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-6ff8",
+            "id" : "0198-00-aff8",
             "gid" : 37,
             "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
             "origin" : [ 676, 0 ],
@@ -327,7 +327,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-7070",
+            "id" : "0198-00-b070",
             "gid" : 35,
             "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
             "origin" : [ 1370, 0 ],
@@ -337,7 +337,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-70e8",
+            "id" : "0198-00-b0e8",
             "gid" : 35,
             "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
             "origin" : [ 2117, 0 ],
@@ -347,7 +347,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-7160",
+            "id" : "0198-00-b160",
             "gid" : 35,
             "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
             "origin" : [ 2864, 0 ],
@@ -357,7 +357,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-71d8",
+            "id" : "0198-00-b1d8",
             "gid" : 35,
             "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
             "origin" : [ 3611, 0 ],
@@ -367,7 +367,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-7250",
+            "id" : "0198-00-b250",
             "gid" : 35,
             "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
             "origin" : [ 4358, 0 ],
@@ -377,7 +377,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-72c8",
+            "id" : "0198-00-b2c8",
             "gid" : 36,
             "charinfo" : { "original" : 7, "before" : 7, "after" : 7 },
             "origin" : [ 5105, 0 ],
@@ -387,7 +387,7 @@
             "user" : []
         },
         {
-            "id" : "01c4-00-7340",
+            "id" : "0198-00-b340",
             "gid" : 37,
             "charinfo" : { "original" : 8, "before" : 8, "after" : 8 },
             "origin" : [ 5781, 0 ],
