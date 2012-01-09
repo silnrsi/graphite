@@ -406,15 +406,18 @@ Slot * output_slot(const SlotMap &  slots, const int n)
 void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const
 {
 	*dbgout << "considered" << json::array;
-				for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
-	*dbgout 		<< json::flat << json::object
-						<< "id" 	<< r->rule - m_rules
-						<< "failed"	<< true
-						<< "input" << json::flat << json::object
-							<< "start" << slotid(output_slot(fsm.slots, -r->rule->preContext))
-							<< "length" << r->rule->sort
-							<< json::close	// close "input"
-						<< json::close;	// close Rule object
+	for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
+	{
+		if (r->rule->preContext > fsm.slots.context())	continue;
+	*dbgout 	<< json::flat << json::object
+					<< "id" 	<< r->rule - m_rules
+					<< "failed"	<< true
+					<< "input" << json::flat << json::object
+						<< "start" << slotid(input_slot(fsm.slots, -r->rule->preContext))
+						<< "length" << r->rule->sort
+						<< json::close	// close "input"
+					<< json::close;	// close Rule object
+	}
 }
 
 
@@ -424,7 +427,7 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 						<< "id" 	<< &r - m_rules
 						<< "failed" << false
 						<< "input" << json::flat << json::object
-							<< "start" << slotid(output_slot(fsm.slots, 0))
+							<< "start" << slotid(input_slot(fsm.slots, 0))
 							<< "length" << r.sort - r.preContext
 							<< json::close // close "input"
 						<< json::close	// close Rule object
