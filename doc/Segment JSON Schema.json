@@ -8,8 +8,8 @@
         {
             "type" : "number",
             "title" : "Engine version",
-            "description" : "Version number of the engine that generated \
-                             this object",
+            "description" : "Major.Minor.Bugfix version number of the engine \
+                             that generated this object",
             "required" : true
         },
 
@@ -28,10 +28,13 @@
                 {
                     "id" : 
                     {
-                        "id" : "Index",
                         "type" : "integer",
+                        "title" : "Pass number"
+                        "description" : "The Pass as listed in dbg_engine code.\
+                                         -1 is a synthetic pass representing \
+                                         the bidi pass."
                         "required" : true,
-                        "minimum" : 0
+                        "minimum" : -1
                     },
                     
                     "slots" :
@@ -72,7 +75,12 @@
                                     "required" : true,
                                     "properties" : 
                                     {
-                                        "original" : { "$ref" : "Index" },
+                                        "original" : 
+                                        { 
+                                            "id" : "Index",
+                                            "type" : "integer",
+                                            "required" : true,
+                                        },
                                         
                                         "before" : { "$ref" : "Index" },
                                         
@@ -126,7 +134,7 @@
                                 "parent" : 
                                 {
                                     "type" : "object"
-                                    "description" : "Slot index to this slots \
+                                    "description" : "SlotRef to this slots \
                                                      parent and offset from \
                                                      the parent's origin"
                                     "properties" :
@@ -227,6 +235,15 @@
             }
         },
         
+        "output" :
+        {
+            "type" : "array",
+            "title" : "Final positioned output slots",
+            "description" : "Slot stream after the final pass has run.",
+            "required" : true, 
+            "items" : { "$ref" : "Slot" }
+        }
+
         "advance" : { "$ref" : "Advance" },
                
         "chars" :
