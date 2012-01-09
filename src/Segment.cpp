@@ -317,12 +317,15 @@ void Segment::linkClusters(Slot *s, Slot * end)
 	}
 }
 
-Position Segment::positionSlots(const Font *font, Slot * const iStart, Slot * const iEnd)
+Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 {
     Position currpos(0., 0.);
     Rect bbox;
     float cMin = 0.;
     float clusterMin = 0.;
+
+    if (!iStart)	iStart = m_first;
+    if (!iEnd)		iEnd   = m_last;
 
     if (m_dir & 1)
     {
@@ -383,7 +386,7 @@ void Segment::finalise(const Font *font)
 {
 	if (!m_first) return;
 
-    m_advance = positionSlots(font, m_first, m_last);
+    m_advance = positionSlots(font);
     int i = 0;
     for (Slot * s = m_first; s; s->index(i++), s = s->next())
     {

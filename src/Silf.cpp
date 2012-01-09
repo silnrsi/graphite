@@ -335,7 +335,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         		*dbgout << json::item << json::object
         					<< "id"		<< -1
         					<< "slots"	<< json::array;
-        		seg->positionSlots(0, seg->first(), seg->last());
+        		seg->positionSlots(0);
         		for(Slot * s = seg->first(); s; s = s->next())
         			*dbgout		<< dslot(*seg, *s);
         		*dbgout			<< json::close
@@ -362,7 +362,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     		*dbgout << json::item << json::object
     					<< "id"		<< i+1
     					<< "slots"	<< json::array;
-    		seg->positionSlots(0, seg->first(), seg->last());
+    		seg->positionSlots(0);
     		for(Slot * s = seg->first(); s; s = s->next())
     			*dbgout		<< dslot(*seg, *s);
     		*dbgout			<< json::close;

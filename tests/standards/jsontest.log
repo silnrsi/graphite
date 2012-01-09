@@ -1,5 +1,6 @@
 [
-    "a string" : 0.54,
+    "a string",
+    0.54,
     123,
     false,
     null
