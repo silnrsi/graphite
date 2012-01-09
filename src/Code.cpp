@@ -428,10 +428,10 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
       break;
     }
-    case PUSH_ATT_TO_GATTR_OBS :
+    case PUSH_ATT_TO_GATTR_OBS : // slotref on 2nd parameter
         if (_code._constraint) return;
     case PUSH_GLYPH_ATTR_OBS :
-    case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
+    case PUSH_SLOT_ATTR :
     case PUSH_GLYPH_METRIC :
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :

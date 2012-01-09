@@ -334,6 +334,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     		*dbgout << json::item << json::object
     					<< "id"		<< i+1
     					<< "slots"	<< json::array;
+    		seg->positionSlots(0, seg->first(), seg->last());
     		for(Slot * s = seg->first(); s; s = s->next())
     			*dbgout		<< dslot(*seg, *s);
     		*dbgout			<< json::close;
@@ -366,20 +367,19 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     }
 	if (dbgout)
 	{
-		seg->positionSlots(0);
-		*dbgout 	<<json::item << json::object
-						<< "id"		<< lastPass+1
-						<< "slots"  << json::array;
+		*dbgout 			<< json::item
+							<< json::close // Close up the passes array
+				<< "output" << json::array;
 		for(Slot * s = seg->first(); s; s = s->next())
-			*dbgout			<< dslot(*seg, *s);
-		*dbgout				<< json::close
-						<< "rules"	<< json::null
-						<< json::close	// close the lastPass
-					<< json::close		// close the passes array
+			*dbgout		<< dslot(*seg, *s);
+		seg->finalise(0);					// Call this here to fix up charinfo back indexes.
+		*dbgout			<< json::close
 				<< "advance" << seg->advance()
 				<< "chars"	 << json::array;
 		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-			*dbgout << json::flat << *seg->charinfo(i);
+			*dbgout 	<< json::flat << *seg->charinfo(i);
+		*dbgout			<< json::close	// Close up the chars array
+					<< json::close;		// Clsoe up the segment object
 	}
 
     return true;

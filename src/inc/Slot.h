@@ -32,10 +32,6 @@ of the License or (at your option) any later version.
 #include "inc/Font.h"
 
 
-#define SLOT_DELETED    1
-#define SLOT_INSERT	2
-#define SLOT_COPIED     4
-#define SLOT_POSITIONED 8
 
 namespace graphite2 {
 
@@ -45,7 +41,18 @@ class Segment;
 
 class Slot
 {
+	enum Flag
+	{
+		DELETED 	= 1,
+		INSERTED 	= 2,
+		COPIED		= 4,
+		POSITIONED	= 8,
+		ATTACHED 	= 16
+	};
+
 public:
+	struct iterator;
+
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
     float advance() const { return m_advance.x; }
@@ -73,20 +80,20 @@ public:
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment* seg, const Font* font, Position & base, Rect & bbox, float & cMin, uint8 attrLevel, float & clusterMin);
-    bool isDeleted() const { return (m_flags & SLOT_DELETED) ? true : false; }
-    void markDeleted(bool state) { if (state) m_flags |= SLOT_DELETED; else m_flags &= ~SLOT_DELETED; }
-    bool isCopied() const { return (m_flags & SLOT_COPIED) ? true : false; }
-    void markCopied(bool state) { if (state) m_flags |= SLOT_COPIED; else m_flags &= ~SLOT_COPIED; }
-    bool isPositioned() const { return (m_flags & SLOT_POSITIONED) ? true : false; }
-    void markPositioned(bool state) { if (state) m_flags |= SLOT_POSITIONED; else m_flags &= ~SLOT_POSITIONED; }
-    bool isInsertBefore() const { return !(m_flags & SLOT_INSERT); }
+    bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
+    void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
+    bool isCopied() const { return (m_flags & COPIED) ? true : false; }
+    void markCopied(bool state) { if (state) m_flags |= COPIED; else m_flags &= ~COPIED; }
+    bool isPositioned() const { return (m_flags & POSITIONED) ? true : false; }
+    void markPositioned(bool state) { if (state) m_flags |= POSITIONED; else m_flags &= ~POSITIONED; }
+    bool isInsertBefore() const { return !(m_flags & INSERTED); }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
     uint8 getBidiClass() const { return m_bidiCls; }
     void setBidiClass(uint8 cls) { m_bidiCls = cls; }
     uint16 *userAttrs() { return m_userAttr; }
     void userAttrs(uint16 *p) { m_userAttr = p; }
-    void markInsertBefore(bool state) { if (!state) m_flags |= SLOT_INSERT; else m_flags &= ~SLOT_INSERT; }
+    void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
     void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
     int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
     void attachTo(Slot *ap) { m_parent = ap; }

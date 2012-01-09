@@ -51,8 +51,6 @@ void graphite_stop_logging()
 
 } // extern "C"
 
-void finalise_slot(const Segment & seg, Slot & s) throw();
-
 json *graphite2::dbgout = 0;
 
 
@@ -72,10 +70,9 @@ json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 
 json & graphite2::operator << (json & j, const dslot & ds) throw()
 {
-	const Segment & seg = ds.first;
+	Segment & seg = ds.first;
 	Slot & s = ds.second;
 
-	finalise_slot(seg, s);
 	j << json::object
 		<< "id"				<< slotid(&s)
 		<< "gid"			<< s.gid()
@@ -94,7 +91,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		j << "bidi"		<< s.getBidiLevel();
 	if (!s.isBase())
 		j << "parent" << json::flat << json::object
-			<< "id"				<< s.attachedTo()->index()
+			<< "id"				<< slotid(s.attachedTo())
 			<< "level"			<< s.getAttr(0, gr_slatAttLevel, 0)
 			<< "offset"			<< s.attachOffset()
 			<< json::close;
@@ -109,18 +106,6 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		j		<< json::close;
 	}
 	return j << json::close;
-}
-
-
-inline
-void finalise_slot(const Segment & seg, Slot & s) throw()
-{
-	if (!s.isBase()) return;
-
-	Position 	cp;
-	Rect		bb;
-	if (s.prev())  cp = s.prev()->origin() + s.prev()->advancePos();
-	cp = s.finalise(&seg, 0, cp, bb, bb.tr.y, 0, bb.bl.y = cp.x);
 }
 
 

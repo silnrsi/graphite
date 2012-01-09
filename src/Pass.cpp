@@ -403,6 +403,7 @@ void Pass::dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, S
 						<< json::close	// close object
 				<< json::close; // close considered array
 	*dbgout 	<< "output"	<< json::array;
+	fsm.slots.segment.positionSlots(0, fsm.slots.segment.first(), fsm.slots.segment.last());
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
 		*dbgout 	<< dslot(fsm.slots.segment,*slot);
 	*dbgout 		<< json::close // close "output"

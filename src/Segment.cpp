@@ -287,72 +287,60 @@ void Segment::splice(size_t offset, size_t length, Slot * startSlot,
     }
 }
 #endif // DISABLE_SEGCACHE
-        
-void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
+
+void Segment::linkClusters(Slot *s, Slot * end)
+{
+	end = end->next();
+
+	for (; s != end && !s->isBase(); s = s->next());
+	Slot * ls = s;
+
+	if (m_dir & 1)
+	{
+		for (; s != end; s = s->next())
+		{
+			if (!s->isBase())	continue;
+
+			s->sibling(ls);
+			ls = s;
+		}
+	}
+	else
+	{
+		for (; s != end; s = s->next())
+		{
+			if (!s->isBase())	continue;
+
+			ls->sibling(s);
+			ls = s;
+		}
+	}
+}
+
+Position Segment::positionSlots(const Font *font, Slot * const iStart, Slot * const iEnd)
 {
     Position currpos(0., 0.);
-    Slot *s, *ls = NULL;
-    int iSlot = 0;
+    Rect bbox;
     float cMin = 0.;
     float clusterMin = 0.;
-    Rect bbox;
 
-    if (!iStart) iStart = m_first;
-    if (!iEnd) iEnd = m_last;
-    
     if (m_dir & 1)
     {
-        for (s = iEnd, iSlot = m_numGlyphs - 1; s && s != iStart->prev(); s = s->prev(), --iSlot)
+        for (Slot * s = iEnd, * const end = iStart->prev(); s && s != end; s = s->prev())
         {
-            int j = s->before();
-            if (j >= 0)
-            {
-                for ( ; j <= s->after(); j++)
-                {
-                    CharInfo *c = charinfo(j);
-                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                    if (c->after() < iSlot) c->after(iSlot);
-                }
-            }
-            s->index(iSlot);
-
             if (s->isBase())
-            {
-                clusterMin = currpos.x;
-                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin);
-                if (ls)
-                    ls->sibling(s);
-                ls = s;
-            }
+                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin = currpos.x);
         }
     }
     else
     {
-        for (s = iStart, iSlot = 0; s && s != iEnd->next(); s = s->next(), ++iSlot)
+        for (Slot * s = iStart, * const end = iEnd->next(); s && s != end; s = s->next())
         {
-            int j = s->before();
-            if (j >= 0)
-            {
-                for ( ; j <= s->after(); j++)
-                {
-                    CharInfo *c = charinfo(j);
-                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                    if (c->after() < iSlot) c->after(iSlot);
-                }
-            }
-            s->index(iSlot);
-
             if (s->isBase())
-            {
-                clusterMin = currpos.x;
-                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin);
-                if (ls)
-                    ls->sibling(s);
-                ls = s;
-            }
+                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin = currpos.x);
         }
     }
-    if (iStart == m_first && iEnd == m_last) m_advance = currpos;
+    return currpos;
 }
 
 
@@ -393,7 +381,23 @@ void Segment::prepare_pos(const Font * /*font*/)
 
 void Segment::finalise(const Font *font)
 {
-    positionSlots(font);
+	if (!m_first) return;
+
+    m_advance = positionSlots(font, m_first, m_last);
+    int i = 0;
+    for (Slot * s = m_first; s; s->index(i++), s = s->next())
+    {
+        int j = s->before();
+        if (j < 0)	continue;
+
+        for (const int after = s->after(); j <= after; ++j)
+		{
+			CharInfo & c = *charinfo(j);
+			if (c.before() == -1 || i < c.before()) 	c.before(i);
+			if (c.after() < i) 							c.after(i);
+		}
+    }
+    linkClusters(m_first, m_last);
 }
 
 void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags flags, Slot *pFirst, Slot *pLast)

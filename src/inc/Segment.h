@@ -102,7 +102,8 @@ public:
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     Slot *newSlot();
     void freeSlot(Slot *);
-    void positionSlots(const Font *font, Slot *iStart = NULL, Slot *iEnd = NULL);
+    Position positionSlots(const Font *font, Slot *first, Slot *last);
+    void linkClusters(Slot *first, Slot *last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
