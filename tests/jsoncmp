@@ -1,0 +1,66 @@
+#!/usr/bin/python
+
+import sys, json, re
+
+def walktree(tree, path="", parent=None) :
+    if isinstance(tree, list) :
+        for i in xrange(len(tree)) :
+            for y in walktree(tree[i], path+"/"+str(i), tree) :
+                yield y
+    elif isinstance(tree, dict) :
+        for i in sorted(tree.keys()) :
+            for y in walktree(tree[i], path+"/"+i, tree) :
+                yield y
+    else :
+        yield (tree, path, parent)
+
+def settreeval(parent, path, value) :
+    p = path.split("/")[-1]
+    if p.isdigit() :
+        parent[int(p)] = value
+    else :
+        parent[p] = value
+
+def readjson(fname) :
+    f = file(fname)
+    res = json.load(f)
+    f.close()
+    return res
+
+def canonids(j) :
+    slotmap = {}
+    initcount = 0
+    for (v, p, h) in walktree(j) :
+        if re.search(r"slots/\d+/id$", p) or re.search(r"output/\d+/id", p) :
+            if v not in slotmap :
+                slotmap[v] = initcount
+                initcount += 1
+            settreeval(h, p, slotmap[v])
+    for (v, p, h) in walktree(j) :
+        if p.endswith("parent/id") or p.endswith("input/start") or re.search("children/items/\d+$", p) or re.search(r"children/\d+$", p) :
+            settreeval(h, p, slotmap[v])
+    return j
+
+def compare(j1, j2) :
+    i1 = walktree(j1)
+    i2 = walktree(j2)
+    for (v1, p1, h1) in i1 :
+        (v2, p2, h2) = i2.next()
+        if p1 != p2 :
+            print "Structural difference: left = %s, right = %s" % (p1, p2)
+            return False
+        elif v1 != v2 :
+            print "Value difference: left = %s, right = %s at %s" % (str(v1), str(v2), p1)
+            return False
+    return True
+
+r1 = canonids(readjson(sys.argv[1]))
+r2 = canonids(readjson(sys.argv[2]))
+res = compare(r1, r2)
+if res :
+    sys.exit(0)
+sys.exit(1)
+
+
+        
+            

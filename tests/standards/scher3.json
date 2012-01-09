@@ -1,0 +1,875 @@
+{
+    "version" : "1.0.1",
+    "passes" : [
+        {
+            "id" : 1,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 2,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 3,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 4,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 5,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 6,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : -1,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 7,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 8,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        },
+        {
+            "id" : 9,
+            "slots" : [
+                {
+                    "id" : "0164-01-33b0",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                    "origin" : [ 3899, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-34a0",
+                    "gid" : 22,
+                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                    "origin" : [ 3127, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3428",
+                    "gid" : 21,
+                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                    "origin" : [ 2355, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3518",
+                    "gid" : 17,
+                    "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                    "origin" : [ 1841, 0 ],
+                    "advance" : [ 514, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3608",
+                    "gid" : 25,
+                    "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+                    "origin" : [ 1069, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3590",
+                    "gid" : 24,
+                    "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                    "origin" : [ 297, 0 ],
+                    "advance" : [ 772, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 2,
+                    "user" : [ 0 ]
+                },
+                {
+                    "id" : "0164-00-3680",
+                    "gid" : 257,
+                    "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+                    "origin" : [ 0, 0 ],
+                    "advance" : [ 297, 0 ],
+                    "insert" : true,
+                    "break" : 30,
+                    "bidi" : 1,
+                    "user" : [ 0 ]
+                }
+            ],
+            "rules" : []
+        }
+    ],
+    "output" : [
+        {
+            "id" : "0164-01-33b0",
+            "gid" : 257,
+            "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+            "origin" : [ 3899, 0 ],
+            "advance" : [ 297, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 1,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-34a0",
+            "gid" : 22,
+            "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+            "origin" : [ 3127, 0 ],
+            "advance" : [ 772, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 2,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-3428",
+            "gid" : 21,
+            "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+            "origin" : [ 2355, 0 ],
+            "advance" : [ 772, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 2,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-3518",
+            "gid" : 17,
+            "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+            "origin" : [ 1841, 0 ],
+            "advance" : [ 514, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 1,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-3608",
+            "gid" : 25,
+            "charinfo" : { "original" : 5, "before" : 5, "after" : 5 },
+            "origin" : [ 1069, 0 ],
+            "advance" : [ 772, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 2,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-3590",
+            "gid" : 24,
+            "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+            "origin" : [ 297, 0 ],
+            "advance" : [ 772, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 2,
+            "user" : [ 0 ]
+        },
+        {
+            "id" : "0164-00-3680",
+            "gid" : 257,
+            "charinfo" : { "original" : 6, "before" : 6, "after" : 6 },
+            "origin" : [ 0, 0 ],
+            "advance" : [ 297, 0 ],
+            "insert" : true,
+            "break" : 30,
+            "bidi" : 1,
+            "user" : [ 0 ]
+        }
+    ],
+    "advance" : [ 4196, 0 ],
+    "chars" : [
+        { "offset" : 0, "unicode" : 1575, "break" : 30, "slot" : { "before" : 0, "after" : 0 } },
+        { "offset" : 1, "unicode" : 49, "break" : 30, "slot" : { "before" : 2, "after" : 2 } },
+        { "offset" : 2, "unicode" : 50, "break" : 30, "slot" : { "before" : 1, "after" : 1 } },
+        { "offset" : 3, "unicode" : 45, "break" : 30, "slot" : { "before" : 3, "after" : 3 } },
+        { "offset" : 4, "unicode" : 52, "break" : 30, "slot" : { "before" : 5, "after" : 5 } },
+        { "offset" : 5, "unicode" : 53, "break" : 30, "slot" : { "before" : 4, "after" : 4 } },
+        { "offset" : 6, "unicode" : 1575, "break" : 30, "slot" : { "before" : 6, "after" : 6 } }
+    ]
+}
