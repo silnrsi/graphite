@@ -65,7 +65,8 @@ private:
     bool   	readRanges(const uint16* ranges, size_t num_ranges);
     uint16 	glyphToCol(const uint16 gid) const;
     bool   	runFSM(FiniteStateMachine & fsm, Slot * slot) const;
-    void	dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * os) const;
+    void	dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
+    void	dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void	adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
     const Silf* m_silf;
     uint16    * m_cols;

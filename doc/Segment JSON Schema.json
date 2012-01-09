@@ -198,6 +198,8 @@
                                                 "required" : true,
                                                 "minimum" : -1
                                             },
+                                            
+                                            "failed" : { "type" : "boolean", "required" : true },
                                 
                                             "input" : 
                                             { 

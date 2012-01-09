@@ -350,14 +350,35 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
                         * const re = fsm.rules.end();
         for (; r != re && !testConstraint(*r->rule, m); ++r);
 
-        if (r != re)
+        if (dbgout)
         {
-			const int adv = doAction(r->rule->action, slot, m);
-			if (dbgout) dumpRuleEvent(fsm, *r, slot);
-		    if (r->rule->action->deletes()) fsm.slots.collectGarbage();
-			adjustSlot(adv, slot, fsm.slots);
-
-            return;
+        	if (fsm.rules.size() != 0)
+        	{
+				*dbgout << json::item << json::object;
+				dumpRuleEventConsidered(fsm, *r);
+				if (r != re)
+				{
+					const int adv = doAction(r->rule->action, slot, m);
+					dumpRuleEventOutput(fsm, *r->rule, slot);
+					if (r->rule->action->deletes()) fsm.slots.collectGarbage();
+					adjustSlot(adv, slot, fsm.slots);
+					return;
+				}
+				else
+					*dbgout 	<< json::close
+							<< "output" << json::array << json::close
+							<< json::close;
+        	}
+        }
+        else
+        {
+   	        if (r != re)
+			{
+				const int adv = doAction(r->rule->action, slot, m);
+				if (r->rule->action->deletes()) fsm.slots.collectGarbage();
+				adjustSlot(adv, slot, fsm.slots);
+				return;
+			}
         }
     }
 
@@ -382,27 +403,33 @@ Slot * output_slot(const SlotMap &  slots, const int n)
 }
 
 
-void Pass::dumpRuleEvent(const FiniteStateMachine & fsm, const RuleEntry & re, Slot * const last_slot) const
+void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const
 {
-	*dbgout << json::item << json::object
-				<< "considered" << json::array;
+	*dbgout << "considered" << json::array;
 				for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
 	*dbgout 		<< json::flat << json::object
 						<< "id" 	<< r->rule - m_rules
+						<< "failed"	<< true
 						<< "input" << json::flat << json::object
 							<< "start" << slotid(output_slot(fsm.slots, -r->rule->preContext))
 							<< "length" << r->rule->sort
 							<< json::close	// close "input"
 						<< json::close;	// close Rule object
-	*dbgout 		<< json::flat << json::object
-						<< "id" 	<< re.rule - m_rules
+}
+
+
+void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * const last_slot) const
+{
+	*dbgout 		<< json::item << json::flat << json::object
+						<< "id" 	<< &r - m_rules
+						<< "failed" << false
 						<< "input" << json::flat << json::object
 							<< "start" << slotid(output_slot(fsm.slots, 0))
-							<< "length" << re.rule->sort - re.rule->preContext
+							<< "length" << r.sort - r.preContext
 							<< json::close // close "input"
-						<< json::close	// close object
-				<< json::close; // close considered array
-	*dbgout 	<< "output"	<< json::array;
+						<< json::close	// close Rule object
+				<< json::close // close considered array
+				<< "output"	<< json::array;
 	fsm.slots.segment.positionSlots(0);
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
 		*dbgout 	<< dslot(fsm.slots.segment,*slot);
