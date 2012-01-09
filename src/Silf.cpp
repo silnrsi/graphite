@@ -327,22 +327,22 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 
     for (size_t i = firstPass; i < lastPass; ++i)
     {
-    	if (dbgout)
-    	{
-    		Position 	cp;
-    		Rect		bb;
-    		*dbgout << json::item << json::object
-    					<< "id"		<< i+1
-    					<< "slots"	<< json::array;
-    		seg->positionSlots(0, seg->first(), seg->last());
-    		for(Slot * s = seg->first(); s; s = s->next())
-    			*dbgout		<< dslot(*seg, *s);
-    		*dbgout			<< json::close;
-    	}
-
     	// bidi and mirroring
         if (i == m_bPass)
         {
+        	if (dbgout)
+        	{
+        		*dbgout << json::item << json::object
+        					<< "id"		<< -1
+        					<< "slots"	<< json::array;
+        		seg->positionSlots(0, seg->first(), seg->last());
+        		for(Slot * s = seg->first(); s; s = s->next())
+        			*dbgout		<< dslot(*seg, *s);
+        		*dbgout			<< json::close
+        					<< "rules"	<< json::array << json::close
+        					<< json::close;
+        	}
+
         	if (!(seg->dir() & 2))
             	seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
         	else if (m_aMirror)
@@ -356,6 +356,18 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
                 }
             }
         }
+
+    	if (dbgout)
+    	{
+    		*dbgout << json::item << json::object
+    					<< "id"		<< i+1
+    					<< "slots"	<< json::array;
+    		seg->positionSlots(0, seg->first(), seg->last());
+    		for(Slot * s = seg->first(); s; s = s->next())
+    			*dbgout		<< dslot(*seg, *s);
+    		*dbgout			<< json::close;
+    	}
+
 
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(m, fsm);
