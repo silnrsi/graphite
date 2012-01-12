@@ -327,6 +327,8 @@ STARTOP(delete_)
     else
         seg.last(is->prev());
     
+    if (is == smap.highwater())
+        	smap.highwater(is->next());
     if (is->prev())
         is = is->prev();
     seg.extendLength(-1);

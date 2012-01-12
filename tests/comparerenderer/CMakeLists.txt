@@ -129,6 +129,7 @@ comparetest(charis_yor charis_r_gr.ttf udhr_yor.txt)
 comparetest(piglatin PigLatinBenchmark_v3.ttf udhr_eng.txt)
 # comparerenderer needs a bidi algorithm before it can run this test
 comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
+comparetest(annapurna_nep Annapurnarc2.ttf udhr_nep.txt)
 
 # comparerenderer can also be used for font testing
 install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)

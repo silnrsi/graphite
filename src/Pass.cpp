@@ -484,8 +484,8 @@ void SlotMap::collectGarbage()
     for(Slot **s = begin(), *const *const se = end() - 1; s != se; ++s) {
         Slot *& slot = *s;
         if(slot->isDeleted() || slot->isCopied()){
-            if(slot == m_highwater)
-                m_highwater = slot->next();
+//            if(slot == m_highwater)
+//                m_highwater = slot->next();
             segment.freeSlot(slot);
         }
     }
