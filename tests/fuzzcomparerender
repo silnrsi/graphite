@@ -4,12 +4,18 @@ TESTSDIR=$(dirname $0)
 FONT=$1
 TEXT=$2
 shift 2
+RTL=$1
+if [ "z$RTL" = "z-r" ] ; then
+    shift ;
+else
+    RTL= ;
+fi
 ${TESTSDIR}/fuzztest \
-    -l fuzzfont-${FONT}-${TEXT}.log \
+    -l fuzzfont-${FONT##**/}-${TEXT##**/}.log \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
     -t 10 -s 60 \
     --memory=200 \
     --exclude=opentype,volt,advtypo \
     $@ -- comparerenderer/comparerenderer \
-        -s 12 -n \
+        -s 12 -n ${RTL} \
         -f {} -t ${TESTSDIR}/texts/${TEXT}.txt
