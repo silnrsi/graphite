@@ -1,5 +1,0 @@
-#!/bin/sh
-
-FONT=charis_r_gr
-ttftable -delete opentype ../../tests/fonts/${FONT}.ttf ${FONT}.ttf
-../../tests/fuzztest -l fuzz${FONT}.log -f ${FONT}.ttf -t 10 -c 1000 --memory=200 $@ -- comparerenderer/comparerenderer -f ${FONT}.ttf -t ../../tests/texts/udhr_yor.txt -s 12 -n 

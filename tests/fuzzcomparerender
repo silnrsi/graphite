@@ -1,0 +1,15 @@
+#!/bin/sh
+
+TESTSDIR=$(dirname $0)
+FONT=$1
+TEXT=$2
+shift 2
+${TESTSDIR}/fuzztest \
+    -l fuzzfont-${FONT}-${TEXT}.log \
+    -f ${TESTSDIR}/fonts/${FONT}.ttf \
+    -t 10 -c 1000 \
+    --memory=200 \
+    --exclude=opentype,volt,advtypo \
+    $@ -- comparerenderer/comparerenderer \
+        -s 12 -n \
+        -f {} -t ${TESTSDIR}/texts/${TEXT}.txt
