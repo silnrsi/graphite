@@ -1,10 +1,10 @@
 #!/usr/bin/python
-
+from __future__ import print_function, unicode_literals
 import sys, json, re
 
 def walktree(tree, path="", parent=None) :
     if isinstance(tree, list) :
-        for i in xrange(len(tree)) :
+        for i in range(len(tree)) :
             for y in walktree(tree[i], path+"/"+str(i), tree) :
                 yield y
     elif isinstance(tree, dict) :
@@ -45,24 +45,24 @@ def compare(j1, j2) :
     i1 = walktree(j1)
     i2 = walktree(j2)
     for (v1, p1, h1) in i1 :
-        (v2, p2, h2) = i2.next()
+        (v2, p2, h2) = next(i2)
         if p1 != p2 :
-            print "Structural difference: left = %s, right = %s" % (p1, p2)
+            print(b"Structural difference: left = {0!s}, right = {1!s}".format(p1, p2))
             return False
         elif v1 != v2 :
-            print "Value difference: left = %s, right = %s at %s" % (str(v1), str(v2), p1)
+            print(b"Value difference: left = {0!s}, right = {1!s} at {2!s}".format(v1, v2, p1))
             return False
     return True
 try:
     r1 = canonids(readjson(sys.argv[1]))
 except KeyError as ke:
-    sys.stderr.write("unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[1]))
+    sys.stderr.write(b"unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[1]))
     sys.exit(2)
     
 try:
     r2 = canonids(readjson(sys.argv[2]))
 except KeyError as ke:
-    sys.stderr.write("unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[2]))
+    sys.stderr.write(b"unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[2]))
     sys.exit(2)
 
 res = compare(r1, r2)
