@@ -122,16 +122,20 @@ class estimator:
         self.__max = float(max)
         self.__m = 0
         self.__t = 1
+        self.__st = self.__base
     
     def sample(self, current):
         ct = time.time()
+        if (ct - self.__st <= opts.status):
+            return None
         x = current / (ct-self.__base)
-        k = current/opts.count+1
+        k = (ct-self.__base)/opts.status+1
         m = self.__m + (x - self.__m)/k
         s = (k-1) and (self.__t + (x - self.__m)*(x - m)) / (k-1)
         m = bayes(x, s, self.__m, self.__t)
         self.__t = s
         self.__m = m
+        self.__st = ct
         return (x, time.ctime(ct + (self.__max - current)/m) if m else 'never')
         
 def bayes(x, s, m, t):
@@ -149,7 +153,7 @@ parser.add_option("-I", "--include", default=[], help="A comma spearated list of
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
 parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
-parser.add_option("-c","--count",type='int',help='Flag every count iterations')
+parser.add_option("-s","--status",type='int',help='update status every STATUS seconds (default: None)')
 parser.add_option("-P","--passes",type='int', default=0, help='Run this many passes (default: forever)')
 parser.add_option("-j","--jobs",type='int', default=None, help='Number of subprocesses to run in parallel (default: cpu count)')
 parser.add_option("-r","--random",help="Seed the random number generator with the given string")
@@ -165,11 +169,15 @@ predefined_tablesets = {
 def tableset(tags):
     return [(t+'   ')[:4] for t in chain.from_iterable(predefined_tablesets.get(n,[n]) for n in tags)]
 
+CHUNK_SIZE=10
+
 if __name__ == '__main__':
     (opts, args) = parser.parse_args()
     
     if opts.random :    seed(opts.random)
-    if opts.valgrind :  args = ["valgrind", "-q"] + args
+    if opts.valgrind :  
+        args = ["valgrind", "-q"] + args
+        opts.verbose = True
     opts.position = int(opts.position,0)
     opts.value    = opts.value and [int(n,0) for n in opts.value.split(',')]
     opts.exclude  = opts.exclude and [''] + tableset(opts.exclude.split(','))
@@ -182,23 +190,24 @@ if __name__ == '__main__':
             elif opts.position: cs = fnt.position(opts.position, opts.value)
             else:               cs = fnt.linear(opts.value, opts.position, opts.passes)
 
-            if opts.count:
+            if opts.status:
                 test_pp = fnt.tests_per_pass()
                 sys.stdout.write("tests per pass: {}\t\tpasses: {}\n".format(test_pp, opts.passes if opts.passes else 'until killed'))
                 sys.stdout.write("% {0}complete\t\ttests per second        estimated time to {0}completion\n".format('' if opts.passes else 'pass '))
                 test_pp *= opts.passes or 1
         
             estimate = estimator(test_pp)
-            for count,(rv,cr,errlog) in enumerate(fnt.pool.imap_unordered(test, cs, 10)):
+            for count,(rv,cr,errlog) in enumerate(fnt.pool.imap_unordered(test, cs, CHUNK_SIZE)):
                 try:
-                    if opts.count and count % 1000 == 0:
-                        rate,eta = estimate.sample(count)
-                        sys.stdout.write("{: 3d}%\t\t\t{: 8.2f}                {}\r".format(100*count // test_pp, round(rate), eta))
-                        sys.stdout.flush()
+                    if opts.status and count % CHUNK_SIZE == 0:
+                        sam = estimate.sample(count)
+                        if sam:
+                            sys.stdout.write("{: 3d}%\t\t\t{: 8.2f}                {}\r".format(100*count // test_pp, sam[0], sam[1]))
+                            sys.stdout.flush()
                     if rv < 0 :
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
                         log.write("{0:d},{1[0]:#08X},{1[1]:02d},{2!s}{3:#08X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
-                    elif opts.verbose or errlog:
+                    elif opts.verbose and errlog:
                         log.write(",{0[0]:#08X},{0[1]:02d}\n".format(cr))
                         log.flush()
                         if errlog :

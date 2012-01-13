@@ -7,7 +7,7 @@ shift 2
 ${TESTSDIR}/fuzztest \
     -l fuzzfont-${FONT}-${TEXT}.log \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
-    -t 10 -c 1000 \
+    -t 10 -s 60 \
     --memory=200 \
     --exclude=opentype,volt,advtypo \
     $@ -- comparerenderer/comparerenderer \
