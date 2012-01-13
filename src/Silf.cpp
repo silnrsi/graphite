@@ -190,7 +190,7 @@ template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t
 	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
 	// Check that the last+1 offset is less than or equal to the class map length.
 	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
-		return -1;
+		return 0;
 
 	// Read in all the offsets.
 	m_classOffsets = gralloc<uint32>(m_nClass+1);
