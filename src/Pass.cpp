@@ -528,9 +528,9 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
         }
         while (++delta <= 0 && slot_out)
         {
-            slot_out = slot_out->prev();
             if (smap.highpassed() && smap.highwater() == slot_out)
             	smap.highpassed(false);
+            slot_out = slot_out->prev();
         }
     }
     else if (delta > 0)

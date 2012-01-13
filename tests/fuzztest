@@ -48,9 +48,9 @@ class font:
     def tests_per_pass(self):
         return sum(tr.end-tr.start for tr in self.__table_dir)
     
-    def input(self):
+    def input(self, path):
         with open(path, "rt") as f:
-            for f in imap(methodcaller('split',','), f):
+            for f in imap(operator.methodcaller('split',','), f):
                 yield (int(f[1],0), int(f[2],0))
 
     def linear(self, value=[], start=0, passes=0):

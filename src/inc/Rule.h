@@ -119,7 +119,7 @@ public:
   void			 collectGarbage();
 
   Slot         * highwater() { return m_highwater; }
-  void           highwater(Slot *s) { m_highwater = s; }
+  void           highwater(Slot *s) { m_highwater = s; m_highpassed = false; }
   bool			 highpassed() const { return m_highpassed; }
   void			 highpassed(bool v) { m_highpassed = v; }
 
