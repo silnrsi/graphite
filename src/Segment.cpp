@@ -166,7 +166,7 @@ Slot *Segment::newSlot()
     {
         int numUser = m_silf->numUser();
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
-        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+        int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
         newSlots[0].userAttrs(newAttrs);
         for (size_t i = 1; i < m_bufSize - 1; i++)
         {
@@ -192,7 +192,7 @@ void Segment::freeSlot(Slot *aSlot)
     if (m_first == aSlot) m_first = aSlot->next();
     // reset the slot incase it is reused
     ::new (aSlot) Slot;
-    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(uint16));
+    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
     // Update generation counter for debug
     aSlot->index(aSlot->index()+1);
     // update next pointer

@@ -91,8 +91,8 @@ public:
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
     uint8 getBidiClass() const { return m_bidiCls; }
     void setBidiClass(uint8 cls) { m_bidiCls = cls; }
-    uint16 *userAttrs() { return m_userAttr; }
-    void userAttrs(uint16 *p) { m_userAttr = p; }
+    int16 *userAttrs() { return m_userAttr; }
+    void userAttrs(int16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
     void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
     int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
@@ -133,7 +133,7 @@ private:
     byte     m_attLevel;    // attachment level
     byte     m_bidiCls;     // bidirectional class
     byte     m_bidiLevel;   // bidirectional level
-    uint16  *m_userAttr;     // pointer to user attributes
+    int16   *m_userAttr;     // pointer to user attributes
 };
 
 } // namespace graphite2

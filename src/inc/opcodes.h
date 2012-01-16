@@ -243,7 +243,7 @@ STARTOP(put_copy)
     const int  slot_ref = int8(*param);
     if (is && (slot_ref ||is != *map))
     {
-        uint16 *tempUserAttrs = is->userAttrs();
+        int16 *tempUserAttrs = is->userAttrs();
         slotref ref = slotat(slot_ref);
         if (ref)
         {
@@ -639,7 +639,7 @@ ENDOP
 
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
-    uint16 *tempUserAttrs = newSlot->userAttrs();
+    int16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->userAttrs(tempUserAttrs);

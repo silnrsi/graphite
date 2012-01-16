@@ -48,7 +48,7 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * 
     size_t glyphCount = seg->slotCount();
     const Slot * slot = seg->first();
     m_glyph = new Slot[glyphCount];
-    m_attr = gralloc<uint16>(glyphCount * seg->numAttrs());
+    m_attr = gralloc<int16>(glyphCount * seg->numAttrs());
     m_glyphLength = glyphCount;
     Slot * slotCopy = m_glyph;
     m_glyph->prev(NULL);

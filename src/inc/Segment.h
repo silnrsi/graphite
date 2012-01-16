@@ -43,7 +43,7 @@ namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
-typedef Vector<uint16 *>        AttributeRope;
+typedef Vector<int16 *>        AttributeRope;
 
 #ifndef DISABLE_SEGCACHE
 class SegmentScopeState;

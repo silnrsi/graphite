@@ -99,13 +99,13 @@ public:
     CLASS_NEW_DELETE;
 private:
 
-    size_t m_glyphLength;
+    size_t   m_glyphLength;
     /** glyph ids resulting from cmap mapping from unicode to glyph before substitution
      * the length of this array is determined by the position in the SegCachePrefixEntry */
     uint16 * m_unicode;
     /** slots after shapping and positioning */
-    Slot * m_glyph;
-    uint16 * m_attr;
+    Slot   * m_glyph;
+    int16  * m_attr;
     mutable unsigned long long m_accessCount;
     mutable unsigned long long m_lastAccess;
 };
