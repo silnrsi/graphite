@@ -1,6 +1,7 @@
 table(glyph);
 g_a = unicode(0x0061);
 g0e01 = pseudo(unicode(0x0062), 0x0E01);
+g_b = unicode(0x0062);
 endtable;
 
 // g_a _ > g_a:1 g_a:1 / ^ _ _ ;
@@ -17,3 +18,8 @@ r(5)
 //r(6)
 endtable;
 
+table(positioning);
+pass(1);
+g_b{shift.x -= 30};
+endpass;
+endtable;

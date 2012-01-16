@@ -401,7 +401,7 @@ STARTOP(attr_sub)
         flags |= POSITIONED;
     }
     int res = is->getAttr(&seg, slat, 0);
-    is->setAttr(&seg, slat, 0, val - res, smap);
+    is->setAttr(&seg, slat, 0, res - val, smap);
 ENDOP
 
 STARTOP(attr_set_slot)
@@ -564,7 +564,7 @@ STARTOP(iattr_sub)
         flags |= POSITIONED;
     }
     int res = is->getAttr(&seg, slat, idx);
-    is->setAttr(&seg, slat, idx, val - res, smap);
+    is->setAttr(&seg, slat, idx, res - val, smap);
 ENDOP
 
 STARTOP(push_proc_state)

@@ -63,6 +63,7 @@ fonttest(magyar1 MagyarLinLibertineG.ttf 0031 0035 -feat 210=36)
 fonttest(magyar2 MagyarLinLibertineG.ttf 0031 0030 -feat 210=200)
 fonttest(magyar3 MagyarLinLibertineG.ttf 0066 0069 0066 0074 0079 002d 0066 0069 0076 0065 -feat 209=3)
 fonttest(grtest1 grtest1gr.ttf 0062 0061 0061 0061 0061 0061 0061 0062 0061)
+fonttest(general1 general.ttf 0063 0062)
 
 feattest(padauk_feat Padauk.ttf)
 feattest(charis_feat charis_r_gr.ttf)
