@@ -16,16 +16,28 @@ goto should use the call style virtual machine. See src/direct_machine.cpp and s
 
 Various C preprocessor definitions are also used as part of compiling graphite2:
 
-DISABLE_SEGCACHE::
+GRAPHITE2_EXPORTING::
+    Needs to be set when building the library source if your are build it as a DLL.
+    When unset the graphite header API will be marked dllimport for use in client code.
+
+GRAPHITE2_STATIC::
+    If set removes all dllimport or dllexport declspecs on the Graphtie2 API functions and makes them 
+    exportable for a clean static library build on Windows. 
+
+GRAPHITE2_NSEGCACHE::
     If set, the segment caching code is not compiled into the library. This can be used to save space
     if the engine is under space constraints both for code and memory. The default is that this is not
     defined.
 
-DISABLE_FILEFACE::
+GRAPHITE2_NFILEFACE::
     If set, the code to support creating a face directly from a font file is not included in the library.
     By default this is not set.
 
-GR2_CUSTOM_HEADER::
+GRAPHITE2_NTRACING::
+    If set, the code to support tracing segment creation and logging to a json output file is not built.
+    However the API remains, it just won't do anything.
+
+GRAPHITE2_CUSTOM_HEADER::
     If set, then the value of this macro will be included as a header in Main.h (in effect, all source files). See Main.h for details.
 
 === Memory Allocation ===

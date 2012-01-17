@@ -49,7 +49,7 @@ char* gr_tag_to_str(SV* class, gr_uint32 tag)
 
 MODULE = Text::Gr2  PACKAGE = Text::Gr2::Face PREFIX = gr_
 
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 Text_Graphite2_Face* gr_make_file_face(char* classname, char* filename, unsigned int options)
     CODE:
         RETVAL = gr_make_file_face(filename, options);

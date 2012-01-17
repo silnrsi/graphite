@@ -167,7 +167,7 @@ uint16 Face::languageForLocale(const char * locale) const
 }
 
 
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 
 FileFace::FileFace(const char *filename) :
     m_pHeader(NULL),
@@ -249,4 +249,4 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
     if (len) *len = tci->size();
     return tci->data();
 }
-#endif                  //!DISABLE_FILE_FACE
+#endif                  //!GRAPHITE2_NFILEFACE

@@ -86,7 +86,7 @@ add_executable(comparerenderer
     )
 
 # rt is for timing
-target_link_libraries(comparerenderer graphite2 graphite2-base ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
+target_link_libraries(comparerenderer graphite2-base graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	find_file(USP10_H NAMES Usp10.h)

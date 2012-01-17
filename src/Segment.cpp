@@ -69,7 +69,7 @@ Segment::~Segment()
     delete[] m_charinfo;
 }
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 SegmentScopeState Segment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
 {
     SegmentScopeState state;
@@ -130,7 +130,7 @@ void Segment::append(const Segment &other)
     m_advance = m_advance + other.m_advance;
     m_bbox = m_bbox.widen(bbox);
 }
-#endif // DISABLE_SEGCACHE
+#endif // GRAPHITE2_NSEGCACHE
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
@@ -203,7 +203,7 @@ void Segment::freeSlot(Slot *aSlot)
     m_freeSlots = aSlot;
 }
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 void Segment::splice(size_t offset, size_t length, Slot * startSlot,
                        Slot * endSlot, const Slot * firstSpliceSlot,
                        size_t numGlyphs)
@@ -286,7 +286,7 @@ void Segment::splice(size_t offset, size_t length, Slot * startSlot,
         replacement = replacement->next();
     }
 }
-#endif // DISABLE_SEGCACHE
+#endif // GRAPHITE2_NSEGCACHE
 
 void Segment::linkClusters(Slot *s, Slot * end)
 {

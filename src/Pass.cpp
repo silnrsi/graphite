@@ -288,8 +288,10 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 	if (!s || !testPassConstraint(m)) return;
     Slot *currHigh = s->next();
 
+#if !defined GRAPHITE2_NTRACING
     if (dbgout)  *dbgout << "rules"	<< json::array;
 	json::closer rules_array_closer = dbgout;
+#endif
 
     m.slotMap().highwater(currHigh);
     int lc = m_iMaxLoop;
@@ -350,6 +352,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
                         * const re = fsm.rules.end();
         for (; r != re && !testConstraint(*r->rule, m); ++r);
 
+#if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
         	if (fsm.rules.size() != 0)
@@ -371,6 +374,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
         	}
         }
         else
+#endif
         {
    	        if (r != re)
 			{
@@ -385,6 +389,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
     slot = slot->next();
 }
 
+#if !defined GRAPHITE2_NTRACING
 
 inline
 Slot * input_slot(const SlotMap &  slots, const int n)
@@ -440,6 +445,8 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 				<< json::close;	// close RuleEvent object
 }
 
+#endif
+
 
 inline
 bool Pass::testPassConstraint(Machine & m) const
@@ -452,8 +459,10 @@ bool Pass::testPassConstraint(Machine & m) const
     *map = m.slotMap().segment.first();
     const uint32 ret = m_cPConstraint.run(m, map);
 
+#if !defined GRAPHITE2_NTRACING
     if (dbgout)
     	*dbgout << "constraint" << (ret || m.status() != Machine::finished);
+#endif
 
     return ret || m.status() != Machine::finished;
 }

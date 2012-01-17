@@ -36,7 +36,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
     :

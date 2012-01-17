@@ -315,6 +315,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         lastPass = m_numPasses;
     }
 
+#if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
     	char version[64];
@@ -324,12 +325,14 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     				<< "version"	<< version
     				<< "passes"		<< json::array;
     }
+#endif
 
     for (size_t i = firstPass; i < lastPass; ++i)
     {
     	// bidi and mirroring
         if (i == m_bPass)
         {
+#if !defined GRAPHITE2_NTRACING
         	if (dbgout)
         	{
         		*dbgout << json::item << json::object
@@ -342,6 +345,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         					<< "rules"	<< json::array << json::close
         					<< json::close;
         	}
+#endif
 
         	if (!(seg->dir() & 2))
             	seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
@@ -357,6 +361,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
             }
         }
 
+#if !defined GRAPHITE2_NTRACING
     	if (dbgout)
     	{
     		*dbgout << json::item << json::object
@@ -367,7 +372,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     			*dbgout		<< dslot(*seg, *s);
     		*dbgout			<< json::close;
     	}
-
+#endif
 
         // test whether to reorder, prepare for positioning
         m_passes[i].runGraphite(m, fsm);
@@ -377,6 +382,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
             || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize))))
             return false;
     }
+#if !defined GRAPHITE2_NTRACING
 	if (dbgout)
 	{
 		*dbgout 			<< json::item
@@ -393,6 +399,6 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 		*dbgout			<< json::close	// Close up the chars array
 					<< json::close;		// Clsoe up the segment object
 	}
-
+#endif
     return true;
 }

@@ -1,3 +1,15 @@
+1.1.0
+    . Renamed VM_MACHINE_TYPE to GRAPHITE2_VM_TYPE
+    . Renamed DISABLE_SEGCACHE to GRAPHITE2_NSEGCACE
+    . Renamed DISBALE_FILE_FACE to GRAPHITE2_NFILEFACE
+    . Renamed ENABLE_COMPARE_RENDERER to GRAPHTIE2_COMPARE_RENDERER
+    . Renamed DOXYGEN_CONFIG to GRAPHITE2_DOXYGEN_CONFIG
+    . Renamed GR2_CUSTOM_HEADER to GRAPHITE2_CUSTOM_HEADER
+    . Renamed GR2_EXPORITING to GRAPHITE2_EXPORTING
+    . Added GRAPHITE2_STATIC for static only builds
+    . Added GRAPHITE2_NTRACING to compile out tracing code
+    . Documented GRAPHITE2_{EXPORTING,STATIC,NTRACING} in hacking.txt
+      
 1.0.3
     . Fix UTF16 surrogate support
     . script and lang tags may be space padded or null padded

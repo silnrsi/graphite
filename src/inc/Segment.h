@@ -45,7 +45,7 @@ typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
 typedef Vector<int16 *>        AttributeRope;
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 class SegmentScopeState;
 #endif
 class Segment;
@@ -88,7 +88,7 @@ public:
 
     Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
     ~Segment();
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
     SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
     void removeScope(SegmentScopeState & state);
     void append(const Segment &other);

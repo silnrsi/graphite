@@ -35,11 +35,11 @@ of the License or (at your option) any later version.
 #include "inc/FeatureMap.h"
 #include "inc/GlyphFaceCache.h"
 
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 #include <cstdio>
 #include <cassert>
 #include "inc/TtfTypes.h"
-#endif      //!DISABLE_FILE_FACE
+#endif      //!GRAPHITE2_NFILEFACE
 
 namespace graphite2 {
 
@@ -52,7 +52,7 @@ using TtfUtil::Tag;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
 
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 class TableCacheItem
 {
 public:
@@ -69,14 +69,14 @@ private:
     char * m_data;
     size_t m_size;
 };
-#endif      //!DISABLE_FILE_FACE
+#endif      //!GRAPHITE2_NFILEFACE
 
 
 
 
 class FileFace
 {
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 public:
     static const void *table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
   
@@ -92,7 +92,7 @@ public:     //for local convenience
     mutable TableCacheItem m_tables[18];
     TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
     TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
-#endif      //!DISABLE_FILE_FACE
+#endif      //!GRAPHITE2_NFILEFACE
    
 private:        //defensive
     FileFace(const FileFace&);

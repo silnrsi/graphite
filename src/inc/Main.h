@@ -29,8 +29,8 @@ of the License or (at your option) any later version.
 #include <cstdlib>
 #include "graphite2/Types.h"
 
-#ifdef GR2_CUSTOM_HEADER
-#include GR2_CUSTOM_HEADER
+#ifdef GRAPHITE2_CUSTOM_HEADER
+#include GRAPHITE2_CUSTOM_HEADER
 #endif
 
 namespace graphite2 {

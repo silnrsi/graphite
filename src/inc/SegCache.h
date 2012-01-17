@@ -26,7 +26,7 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 
 #include <graphite2/Segment.h>
 #include "inc/Main.h"

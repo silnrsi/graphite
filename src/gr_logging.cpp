@@ -39,17 +39,25 @@ bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 {
 	if (!logFile || !mask)	return false;
 
+#if !defined GRAPHITE2_NTRACING
 	dbgout = new json(logFile);
 	return dbgout;
+#else
+	return false;
+#endif
 }
 
 void graphite_stop_logging()
 {
+#if !defined GRAPHITE2_NTRACING
 	delete dbgout;
+#endif
 }
 
 
 } // extern "C"
+
+#if !defined GRAPHITE2_NTRACING
 
 json *graphite2::dbgout = 0;
 
@@ -116,3 +124,4 @@ graphite2::slotid::slotid(const Slot * const p) throw()
 	name[sizeof name-1] = 0;
 }
 
+#endif

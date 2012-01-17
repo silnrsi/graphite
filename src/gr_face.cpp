@@ -66,8 +66,7 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
     return static_cast<gr_face *>(res);
 }
 
-#ifndef DISABLE_SEGCACHE
-
+#ifndef GRAPHITE2_NSEGCACHE
 gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
 {
@@ -100,7 +99,6 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
     }
     return static_cast<gr_face *>(static_cast<Face *>(res));
 }
-
 #endif
 
 gr_uint32 gr_str_to_tag(const char *str)
@@ -207,7 +205,7 @@ unsigned short gr_face_n_glyphs(const gr_face* pFace)
 }
 
 
-#ifndef DISABLE_FILE_FACE
+#ifndef GRAPHITE2_NFILEFACE
 gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
 {
     FileFace* pFileFace = new FileFace(filename);
@@ -227,7 +225,7 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     return NULL;
 }
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
                   //when finished with, call destroy_face
 {
@@ -248,7 +246,7 @@ gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int seg
     return NULL;
 }
 #endif
-#endif      //!DISABLE_FILE_FACE
+#endif      //!GRAPHITE2_NFILEFACE
 
 
 } // extern "C"
