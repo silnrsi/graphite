@@ -50,13 +50,13 @@ using namespace graphite2;
 		size_t lGloc;
 		if ((m_pGloc = face.getTable(Tag::Gloc, &lGloc)) == NULL) return false;
 		if (lGloc < 6) return false;
-		int version = be::peek<uint32>(m_pGloc);
+		int version = be::read<uint32>(m_pGloc);
 		if (version != 0x00010000) return false;
 
-		m_numAttrs = be::swap<uint16>(((uint16 *)m_pGloc)[3]);
+		const uint16 locFlags = be::read<uint16>(m_pGloc);
+		m_numAttrs = be::read<uint16>(m_pGloc);
 		if (m_numAttrs > 0x1000) return false;                  // is this hard limit appropriate?
 
-		unsigned short locFlags = be::swap<uint16>(((uint16 *)m_pGloc)[2]);
 		if (locFlags & 1)
 		{
 			m_locFlagsUse32Bit = true;

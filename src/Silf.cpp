@@ -66,9 +66,8 @@ void Silf::releaseBuffers() throw()
 
 bool Silf::readGraphite(const void* pSilf, size_t lSilf, const Face& face, uint32 version)
 {
-    const byte *p = (byte *)pSilf;
-    const byte * const eSilf = p + lSilf;
-    uint32 *pPasses;
+    const byte * p = (byte *)pSilf,
+    		   * const eSilf = p + lSilf;
 
     if (version >= 0x00030000)
     {
@@ -137,7 +136,7 @@ bool Silf::readGraphite(const void* pSilf, size_t lSilf, const Face& face, uint3
         releaseBuffers(); 
         return false;
     }
-    pPasses = (uint32 *)p;
+    const byte * pPasses = p;
     p += 4 * (m_numPasses + 1);
     m_numPseudo = be::read<uint16>(p);
     p += 6;
@@ -158,7 +157,7 @@ bool Silf::readGraphite(const void* pSilf, size_t lSilf, const Face& face, uint3
         return false;
     }
 
-    int clen = readClassMap(p, be::swap<uint32>(*pPasses) - (p - (byte *)pSilf), version);
+    int clen = readClassMap(p, be::peek<uint32>(pPasses) - (p - (byte *)pSilf), version);
     if (clen < 0) {
         releaseBuffers();
         return false;
@@ -167,8 +166,8 @@ bool Silf::readGraphite(const void* pSilf, size_t lSilf, const Face& face, uint3
 
     for (size_t i = 0; i < m_numPasses; ++i)
     {
-        uint32 pOffset = be::swap<uint32>(pPasses[i]);
-        uint32 pEnd = be::swap<uint32>(pPasses[i + 1]);
+        uint32 pOffset = be::read<uint32>(pPasses);
+        uint32 pEnd = be::peek<uint32>(pPasses);
         if ((uint8 *)pSilf + pEnd > eSilf || pOffset > pEnd)
         {
             releaseBuffers();

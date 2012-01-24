@@ -98,25 +98,25 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
         return false;
 
     if (p + numRanges * 6 - 4 > pass_end) return false;
-    m_numGlyphs = be::swap<uint16>(*(uint16 *)(p + numRanges * 6 - 4)) + 1;
+    m_numGlyphs = be::peek<uint16>(p + numRanges * 6 - 4) + 1;
     // Caculate the start of vairous arrays.
-    const uint16 * const ranges = reinterpret_cast<const uint16 *>(p);
+    const byte * const ranges = p;
     p += numRanges*sizeof(uint16)*3;
-    const uint16 * const o_rule_map = reinterpret_cast<const uint16 *>(p);
+    const byte * const o_rule_map = p;
     p += (m_sSuccess + 1)*sizeof(uint16);
 
     // More sanity checks
     if (   reinterpret_cast<const byte *>(o_rule_map) > pass_end
             || p > pass_end)
         return false;
-    const size_t numEntries = be::swap<uint16>(o_rule_map[m_sSuccess]);
-    const uint16 * const   rule_map = reinterpret_cast<const uint16 *>(p);
+    const size_t numEntries = be::peek<uint16>(o_rule_map + m_sSuccess*sizeof(uint16));
+    const byte * const   rule_map = p;
     p += numEntries*sizeof(uint16);
 
     if (p > pass_end) return false;
     m_minPreCtxt = *p++;
     m_maxPreCtxt = *p++;
-    const int16 * const start_states = reinterpret_cast<const int16 *>(p);
+    const byte * const start_states = p;
     p += (m_maxPreCtxt - m_minPreCtxt + 1)*sizeof(int16);
     const uint16 * const sort_keys = reinterpret_cast<const uint16 *>(p);
     p += m_numRules*sizeof(uint16);
@@ -130,13 +130,13 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     p += (m_numRules + 1)*sizeof(uint16);
     const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);
     p += (m_numRules + 1)*sizeof(uint16);
-    const int16 * const states = reinterpret_cast<const int16 *>(p);
+    const byte * const states = p;
     p += m_sTransition*m_sColumns*sizeof(int16);
     p += sizeof(byte);          // skip reserved byte
     if (p != pcCode || p >= pass_end) return false;
     p += pass_constraint_len;
     if (p != rcCode || p >= pass_end) return false;
-    p += be::swap<uint16>(o_constraint[m_numRules]);
+    p += be::peek<uint16>(o_constraint + m_numRules);
     if (p != aCode || p >= pass_end) return false;
     if (size_t(rcCode - pcCode) != pass_constraint_len) return false;
 
@@ -144,7 +144,7 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     if (pass_constraint_len)
     {
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
-                                  precontext[0], be::swap<uint16>(sort_keys[0]), *m_silf, face);
+                                  precontext[0], be::peek<uint16>(sort_keys), *m_silf, face);
         if (!m_cPConstraint) return false;
     }
     if (!readRanges(ranges, numRanges)) return false;
@@ -154,14 +154,14 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
 }
 
 
-bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
+bool Pass::readRules(const byte * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *rc_data,
                      const uint16 * o_action,     const byte * ac_data,
                      const Face & face)
 {
-    const byte * const ac_data_end = ac_data + be::swap<uint16>(o_action[m_numRules]);
-    const byte * const rc_data_end = rc_data + be::swap<uint16>(o_constraint[m_numRules]);
+    const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
+    const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);
 
     if (!(m_rules = new Rule [m_numRules])) return false;
     precontext += m_numRules;
@@ -171,20 +171,20 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 
     // Load rules.
     const byte * ac_begin = 0, * rc_begin = 0,
-               * ac_end = ac_data + be::swap<uint16>(*o_action),
-               * rc_end = rc_data + be::swap<uint16>(*o_constraint);
+               * ac_end = ac_data + be::peek<uint16>(o_action),
+               * rc_end = rc_data + be::peek<uint16>(o_constraint);
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
         r->preContext = *--precontext;
-        r->sort       = be::swap<uint16>(*--sort_key);
+        r->sort       = be::peek<uint16>(--sort_key);
 #ifndef NDEBUG
         r->rule_idx   = n - 1;
 #endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
-        ac_begin      = ac_data + be::swap<uint16>(*--o_action);
-        rc_begin      = *--o_constraint ? rc_data + be::swap<uint16>(*o_constraint) : rc_end;
+        ac_begin      = ac_data + be::peek<uint16>(--o_action);
+        rc_begin      = *--o_constraint ? rc_data + be::peek<uint16>(o_constraint) : rc_end;
 
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
@@ -203,7 +203,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
     for (size_t n = num_entries; n; --n, ++re)
     {
-        const ptrdiff_t rn = be::swap<uint16>(*rule_map++);
+        const ptrdiff_t rn = be::read<uint16>(rule_map);
         if (rn >= m_numRules)  return false;
         re->rule = m_rules + rn;
     }
@@ -214,7 +214,7 @@ bool Pass::readRules(const uint16 * rule_map, const size_t num_entries,
 static int cmpRuleEntry(const void *a, const void *b) { return (*(RuleEntry *)a < *(RuleEntry *)b ? -1 :
                                                                 (*(RuleEntry *)b < *(RuleEntry *)a ? 1 : 0)); }
 
-bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * o_rule_map)
+bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map)
 {
     m_startStates = gralloc<State *>(m_maxPreCtxt - m_minPreCtxt + 1);
     m_states      = gralloc<State>(m_sRows);
@@ -225,7 +225,7 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     for (State * * s = m_startStates,
             * * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
     {
-        *s = m_states + be::swap<uint16>(*starts++);
+        *s = m_states + be::read<uint16>(starts);
         if (*s < m_states || *s >= m_states + m_sRows) return false; // true;
     }
 
@@ -233,19 +233,19 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     for (State * * t = m_sTable,
                * * const t_end = t + m_sTransition*m_sColumns; t != t_end; ++t)
     {
-        *t = m_states + be::swap<uint16>(*states++);
+        *t = m_states + be::read<uint16>(states);
         if (*t < m_states || *t >= m_states + m_sRows) return false;
     }
 
     State * s = m_states,
           * const transitions_end = m_states + m_sTransition,
           * const success_begin = m_states + m_sRows - m_sSuccess;
-    const RuleEntry * rule_map_end = m_ruleMap + be::swap<uint16>(o_rule_map[m_sSuccess]);
+    const RuleEntry * rule_map_end = m_ruleMap + be::peek<uint16>(o_rule_map + m_sSuccess*sizeof(uint16));
     for (size_t n = m_sRows; n; --n, ++s)
     {
         s->transitions = s < transitions_end ? m_sTable + (s-m_states)*m_sColumns : 0;
-        RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + be::swap<uint16>(*o_rule_map++),
-                  * const end   = s < success_begin ? 0 : m_ruleMap + be::swap<uint16>(*o_rule_map);
+        RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + be::read<uint16>(o_rule_map),
+                  * const end   = s < success_begin ? 0 : m_ruleMap + be::peek<uint16>(o_rule_map);
 
         if (begin >= rule_map_end || end > rule_map_end || begin > end)
             return false;
@@ -261,15 +261,15 @@ bool Pass::readStates(const int16 * starts, const int16 *states, const uint16 * 
     return true;
 }
 
-bool Pass::readRanges(const uint16 *ranges, size_t num_ranges)
+bool Pass::readRanges(const byte * ranges, size_t num_ranges)
 {
     m_cols = gralloc<uint16>(m_numGlyphs);
     memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
     for (size_t n = num_ranges; n; --n)
     {
-        const uint16 first = be::swap<uint16>(*ranges++),
-                     last  = be::swap<uint16>(*ranges++),
-                     col   = be::swap<uint16>(*ranges++);
+        const uint16 first = be::read<uint16>(ranges),
+                     last  = be::read<uint16>(ranges),
+                     col   = be::read<uint16>(ranges);
         uint16 *p;
 
         if (first > last || last >= m_numGlyphs || col >= m_sColumns)

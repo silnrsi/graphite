@@ -106,15 +106,19 @@ GlyphFace::GlyphFace(const GlyphFaceCacheHeader& hdr, unsigned short glyphid)
     if (glyphid < hdr.m_nGlyphsWithAttributes)
     {
         size_t glocs, gloce;
+        const byte * gloc = hdr.m_pGloc;
+
         if (hdr.m_locFlagsUse32Bit)
         {
-            glocs = be::swap<uint32>(((uint32 *)hdr.m_pGloc)[2+glyphid]);
-            gloce = be::swap<uint32>(((uint32 *)hdr.m_pGloc)[3+glyphid]);
+        	be::skip<uint32>(gloc, glyphid);
+            glocs = be::read<uint32>(gloc);
+            gloce = be::read<uint32>(gloc);
         }
         else
         {
-            glocs = be::swap<uint16>(((uint16 *)hdr.m_pGloc)[4+glyphid]);
-            gloce = be::swap<uint16>(((uint16 *)hdr.m_pGloc)[5+glyphid]);
+        	be::skip<uint16>(gloc, glyphid);
+            glocs = be::read<uint16>(gloc);
+            gloce = be::read<uint16>(gloc);
         }
         if (glocs < hdr.m_lGlat && gloce <= hdr.m_lGlat)
         {
