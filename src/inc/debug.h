@@ -42,7 +42,7 @@ class CharInfo;
 class Segment;
 class Slot;
 
-typedef std::pair<Segment &, Slot &>	dslot;
+typedef std::pair<Segment * const, Slot * const>	dslot;
 struct slotid
 {
 	char name[16];

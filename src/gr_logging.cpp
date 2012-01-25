@@ -78,8 +78,10 @@ json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 
 json & graphite2::operator << (json & j, const dslot & ds) throw()
 {
-	Segment & seg = ds.first;
-	Slot & s = ds.second;
+	assert(ds.first);
+	assert(ds.second);
+	Segment & seg = *ds.first;
+	Slot & s = *ds.second;
 
 	j << json::object
 		<< "id"				<< slotid(&s)

@@ -339,7 +339,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         					<< "slots"	<< json::array;
         		seg->positionSlots(0);
         		for(Slot * s = seg->first(); s; s = s->next())
-        			*dbgout		<< dslot(*seg, *s);
+        			*dbgout		<< dslot(seg, s);
         		*dbgout			<< json::close
         					<< "rules"	<< json::array << json::close
         					<< json::close;
@@ -368,7 +368,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
     					<< "slots"	<< json::array;
     		seg->positionSlots(0);
     		for(Slot * s = seg->first(); s; s = s->next())
-    			*dbgout		<< dslot(*seg, *s);
+    			*dbgout		<< dslot(seg, s);
     		*dbgout			<< json::close;
     	}
 #endif
@@ -388,7 +388,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 							<< json::close // Close up the passes array
 				<< "output" << json::array;
 		for(Slot * s = seg->first(); s; s = s->next())
-			*dbgout		<< dslot(*seg, *s);
+			*dbgout		<< dslot(seg, s);
 		seg->finalise(0);					// Call this here to fix up charinfo back indexes.
 		*dbgout			<< json::close
 				<< "advance" << seg->advance()
