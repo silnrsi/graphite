@@ -31,6 +31,8 @@ of the License or (at your option) any later version.
 
 #pragma once
 
+#if !defined GRAPHITE2_NTRACING
+
 #include <utility>
 #include "inc/json.h"
 #include "inc/Position.h"
@@ -72,4 +74,6 @@ json & operator << (json & j, const slotid & sid) throw()
 
 
 } // namespace graphite2
+
+#endif //!defined GRAPHITE2_NTRACING
 
