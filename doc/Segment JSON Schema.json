@@ -102,6 +102,8 @@
                                     ]
                                 },
                                 
+                                "shift" : { "$ref" : "Point" },
+                                
                                 "advance" : { "$ref" : "Point" },
                                 
                                 "insert" : 
@@ -220,15 +222,25 @@
                                         }
                                    }    
                                 },
-                                                                
+                                
                                 "output" :
                                 {
-                                    "type" : "array",
-                                    "title" : "Rule output slots",
-                                    "description" : "Sub sequence of the \
-                                                     output slots stream.",
-                                    "required" : true, 
-                                    "items" : { "$ref" : "Slot" }
+                                    "type" : "object",
+                                    "title" : "Output slot cursor and slots"
+                                    "required" : true,
+                                    "properties" :
+                                    {
+                                        "slots" :
+                                        {
+                                            "type" : "array",
+                                            "title" : "Rule output slots",
+                                            "description" : "Sub sequence of the \
+                                                             output slots stream.",
+                                            "required" : true, 
+                                            "items" : { "$ref" : "Slot" }
+                                        },
+                                        "cursor" : { "$ref" : "SlotRef" }
+                                    }
                                 }
                             }
                         } 
