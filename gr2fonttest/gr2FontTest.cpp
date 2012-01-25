@@ -36,9 +36,8 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <climits>
 #include <iomanip>
 #include <cstring>
-#ifdef HAVE_ICONV
-#include <iconv.h>
-#endif
+
+#include "UtfCodec.h"
 
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
@@ -160,56 +159,36 @@ void Parameters::closeLog()
 
 int lookup(size_t *map, size_t val);
 
+namespace gr2 = graphite2;
 
-#ifdef HAVE_ICONV
-
-template <class A,class B> int
-convertUtf(const char * inType, const char * outType, A* pIn, B * & pOut)
+template <typename utf>
+size_t convertUtf(const void * src, unsigned int * & dest)
 {
-    int length = 0;//strlen(reinterpret_cast<char*>(pIn));
-    while (pIn[length] != 0) length++;
-    int outFactor = 1;
-    if (sizeof(B) < sizeof(A))
-    {
-        outFactor = sizeof(A) / sizeof(B);
-    }
-#ifdef WIN32
-    const char * pText = reinterpret_cast<char*>(pIn);
-#else
-    char * pText = reinterpret_cast<char*>(pIn);
-#endif
-    // It seems to be necessary to include the trailing null to prevent
-    // stray characters appearing with utf16
-    size_t bytesLeft = (length+1) * sizeof(A);
-    // allow 2 extra for null + bom
-    size_t outBytesLeft = (length*outFactor + 2) * sizeof(B);
-    size_t outBufferSize = outBytesLeft;
-    //B * textOut = new B[length*outFactor + 2];
-    B * textOut = reinterpret_cast<B*>(malloc(sizeof(B) * length*outFactor + 2));// new operator not defined
-    iconv_t utfInOut = iconv_open(outType,inType);
-    assert(utfInOut != (iconv_t)(-1));
-    char * pTextOut = reinterpret_cast<char*>(&textOut[0]);
-    size_t status = iconv(utfInOut, &pText, &bytesLeft, &pTextOut, &outBytesLeft);
-    if (status == size_t(-1)) perror("iconv failed:");
-    size_t charLength = (outBufferSize - outBytesLeft) / sizeof(B);
-    assert(status != size_t(-1));
-    // offset by 1 to avoid bom
-    unsigned char * bom = reinterpret_cast<unsigned char*>(&textOut[0]);
-    if ((charLength * sizeof(B) > 1) && ((bom[1] == 0xfe && bom[0] == 0xff)
-        || (bom[0] == 0xfe && bom[1] == 0xff)))
-    {
-            charLength--;
-            for (size_t i = 0; i < charLength; i++)
-                textOut[i] = textOut[i+1];
-            textOut[charLength] = 0;
-    }
-    if (textOut[charLength] == 0) --charLength;
-    pOut = textOut;
-    iconv_close(utfInOut);
-    return charLength;
+    dest = static_cast<unsigned int *>(malloc(sizeof(*dest)*strlen(reinterpret_cast<const char *>(src)+1)));
+    if (!dest)
+    	return 0;
+
+    gr2::uchar_t usv;
+    typename utf::const_iterator ui = src;
+    size_t n_chars = 0;
+    unsigned int * out = dest;
+	while ((*out = *ui) != 0 && !ui.error())
+	{
+		++ui;
+		++out;
+		++n_chars;
+	}
+
+	if (ui.error())
+	{
+		free(dest);
+		dest = 0;
+		return size_t(-1);
+	}
+
+	return n_chars;
 }
 
-#endif
 
 bool Parameters::loadFromArgs(int argc, char *argv[])
 {
@@ -438,8 +417,14 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     {
         if (!useCodes && pText != NULL)
         {
-#ifdef HAVE_ICONV
-            charLength = convertUtf("utf-8","utf-32",pText, pText32);
+            charLength = convertUtf<gr2::utf8>(pText, pText32);
+            if (!pText32)
+            {
+            	if (charLength == -1)
+            		perror("decoding utf-8 data failed");
+            	else
+            		perror("insufficent memory for text buffer");
+            }
             fprintf(log, "String has %d characters\n", (int)charLength);
             size_t ci;
             for (ci = 0; ci < 10 && ci < charLength; ci++)
@@ -454,10 +439,6 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                         fprintf(log, "\n");
             }
             fprintf(log, "\n");
-#else
-            fprintf(stderr,"Only the -codes option is supported on Win32\n");
-            argError = true;
-#endif
         }
         else 
         {
@@ -759,16 +740,7 @@ int Parameters::testFileFont() const
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
         gr_face_destroy(face);
-//            delete featureParser;
-        // setText copies the text, so it is no longer needed
-//        delete [] parameters.pText32;
-//        logStream.close();
     }
-//    catch (...)
-//    {
-//        printf("Exception occurred\n");
-//        returnCode = 5;
-//    }
     if (trace) graphite_stop_logging();
     return returnCode;
 }

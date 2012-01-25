@@ -27,7 +27,15 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include <cstdlib>
-#include "inc/Main.h"
+#include "graphite2/Types.h"
+
+typedef gr_uint8        uint8;
+typedef gr_uint8        byte;
+typedef gr_uint16       uint16;
+typedef gr_uint32       uint32;
+typedef gr_int8         int8;
+typedef gr_int16        int16;
+typedef gr_int32        int32;
 
 namespace graphite2 {
 
