@@ -365,11 +365,18 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 					dumpRuleEventOutput(fsm, *r->rule, slot);
 					if (r->rule->action->deletes()) fsm.slots.collectGarbage();
 					adjustSlot(adv, slot, fsm.slots);
+					*dbgout		<< "cursor" << slotid(slot)
+								<< json::close	// Close "output" object
+							<< json::close; // Close RuelEvent object
+
 					return;
 				}
 				else
-					*dbgout 	<< json::close
-							<< "output" << json::array << json::close
+					*dbgout 	<< json::close	// close "considered" array
+							<< "output" << json::object
+								<< "slots" 	<< json::array << json::close
+								<< "cursor"	<< slotid(slot->next())
+								<< json::close
 							<< json::close;
         	}
         }
@@ -437,12 +444,12 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 							<< json::close // close "input"
 						<< json::close	// close Rule object
 				<< json::close // close considered array
-				<< "output"	<< json::array;
+				<< "output" << json::object
+					<< "slots"	<< json::array;
 	fsm.slots.segment.positionSlots(0);
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
-		*dbgout 	<< dslot(&fsm.slots.segment, slot);
-	*dbgout 		<< json::close // close "output"
-				<< json::close;	// close RuleEvent object
+		*dbgout 		<< dslot(&fsm.slots.segment, slot);
+	*dbgout 			<< json::close; // close "slots";
 }
 
 #endif
@@ -492,11 +499,8 @@ void SlotMap::collectGarbage()
 {
     for(Slot **s = begin(), *const *const se = end() - 1; s != se; ++s) {
         Slot *& slot = *s;
-        if(slot->isDeleted() || slot->isCopied()){
-//            if(slot == m_highwater)
-//                m_highwater = slot->next();
+        if(slot->isDeleted() || slot->isCopied())
             segment.freeSlot(slot);
-        }
     }
 }
 

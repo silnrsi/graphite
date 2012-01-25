@@ -92,6 +92,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 			<< "after" 			<< s.after()
 			<< json::close
 		<< "origin"			<< s.origin()
+		<< "shift"			<< Position(s.getAttr(0, gr_slatShiftX, 0), s.getAttr(0, gr_slatShiftY, 0))
 		<< "advance"		<< s.advancePos()
 		<< "insert"			<< s.isInsertBefore()
 		<< "break"			<< s.getAttr(&seg, gr_slatBreak, 0);
@@ -122,7 +123,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 graphite2::slotid::slotid(const Slot * const p) throw()
 {
 	uint32 s = reinterpret_cast<size_t>(p);
-	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p->index()), uint16(s));
+	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->index() : 0), uint16(s));
 	name[sizeof name-1] = 0;
 }
 
