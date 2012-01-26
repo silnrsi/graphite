@@ -231,6 +231,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatJWeight :	return 0;
     case gr_slatJWidth :	return m_just;
     case gr_slatUserDefn :	return m_userAttr[subindex];
+    case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     default :				return 0;
     }
 }
@@ -291,6 +292,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJStep :         break;
     case gr_slatJWeight :       break;
     case gr_slatJWidth :	m_just = value; break;
+    case gr_slatSegSplit :  seg->charinfo(m_original)->orflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
     default :
     	break;

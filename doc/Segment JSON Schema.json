@@ -283,6 +283,14 @@
                     },
                     
                     "break" : { "$ref" : "BreakWeight" },
+
+                    "flags" :
+                    {
+                        "type" : "integer",
+                        "required" : true,
+                        "minimum" : 0,
+                        "maximum" : 3
+                    },
                     
                     "slot" : 
                     {

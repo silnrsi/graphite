@@ -68,6 +68,7 @@ json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 				<< "offset"			<< ci.base()
 				<< "unicode"		<< ci.unicodeChar()
 				<< "break"			<< ci.breakWeight()
+                << "flags"          << ci.flags()
 				<< "slot" << json::flat << json::object
 					<< "before"	<< ci.before()
 					<< "after"	<< ci.after()
