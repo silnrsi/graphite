@@ -292,7 +292,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJStep :         break;
     case gr_slatJWeight :       break;
     case gr_slatJWidth :	m_just = value; break;
-    case gr_slatSegSplit :  seg->charinfo(m_original)->orflags(value & 3); break;
+    case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
     default :
     	break;
