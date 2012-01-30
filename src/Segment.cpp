@@ -408,12 +408,11 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSE
     Slot *pEnd = pSlot;
     Slot *s, *end;
     int numBase = 0;
-    float currWidth = 0.;
-    float scale = font ? font->scale() : 1.0;
-    float base;
+    float currWidth = 0.0;
+    const float scale = font ? font->scale() : 1.0;
 
     if (!pFirst) pFirst = pSlot;
-    base = pFirst->origin().x / scale;
+    const float base = pFirst->origin().x / scale;
     width = width / scale;
     end = pLast ? pLast->next() : NULL;
 

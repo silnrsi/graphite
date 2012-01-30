@@ -271,7 +271,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     				 * 	max = min + cls[0]*2; // lookups aray is numIDs (cls[0]) uint16 pairs long
     	do
         {
-        	const uint16 * p = min + (-2U & ((max-min)/2));
+        	const uint16 * p = min + (-2 & ((max-min)/2));
         	if 	(p[0] > gid)	max = p;
         	else 				min = p;
         }

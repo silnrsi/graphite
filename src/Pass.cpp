@@ -477,7 +477,7 @@ bool Pass::testPassConstraint(Machine & m) const
 
 bool Pass::testConstraint(const Rule &r, Machine & m) const
 {
-    if ((r.sort - r.preContext) > (m.slotMap().size() - m.slotMap().context()))    return false;
+    if (unsigned(r.sort - r.preContext) > m.slotMap().size() - m.slotMap().context())    return false;
     if (m.slotMap().context() - r.preContext < 0) return false;
     if (!*r.constraint)                 return true;
     assert(r.constraint->constraint());

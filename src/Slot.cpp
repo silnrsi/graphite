@@ -229,7 +229,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatJShrink :
     case gr_slatJStep :
     case gr_slatJWeight :	return 0;
-    case gr_slatJWidth :	return m_just;
+    case gr_slatJWidth :	return int(m_just);
     case gr_slatUserDefn :	return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     default :				return 0;

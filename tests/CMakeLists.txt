@@ -7,6 +7,8 @@ CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output 
 include_directories(${graphite2_core_SOURCE_DIR})
 set(S ${graphite2_core_SOURCE_DIR})
 
+add_definitions(-DGRAPHITE2_STATIC)
+
 add_library(graphite2-base STATIC
     ${S}/FeatureMap.cpp
     ${S}/NameTable.cpp
@@ -24,6 +26,7 @@ add_library(graphite2-segcache STATIC
     ${S}/SegCacheStore.cpp
     ${S}/Slot.cpp)
 
+remove_definitions(-DGRAPHITE2_STATIC)
 
 if (GRAPHITE2_COMPARE_RENDERER)
     add_subdirectory(comparerenderer)
