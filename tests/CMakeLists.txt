@@ -29,9 +29,16 @@ add_library(graphite2-segcache STATIC
     ${S}/SegCacheStore.cpp
     ${S}/Slot.cpp)
 
-remove_definitions(-DGRAPHITE2_STATIC)
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    remove_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set_target_properties(graphite2-base PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS UNICODE")
+    set_target_properties(graphite2-segcache PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS UNICODE")
+else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set_target_properties(graphite2-base PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
+    set_target_properties(graphite2-segcache PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 if (GRAPHITE2_COMPARE_RENDERER)
