@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     gr_segment * seg = NULL;
     const gr_slot *s, *sprev;
     int i;
-    int lineend = width;
+    float lineend = width;
     int numlines = 0;
     const gr_slot **lineslots;
     gr_face *face = gr_make_file_face(argv[1], 0);
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
             printf("%d(%.2f,%.2f@%d) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s), gr_slot_attr(s, seg, gr_slatJWidth, 0));
         printf("\n");
     }
-    free(lineslots);
+    free((void*)lineslots);
     gr_font_destroy(font);
     gr_face_destroy(face);
     return 0;

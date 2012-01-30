@@ -168,7 +168,6 @@ size_t convertUtf(const void * src, unsigned int * & dest)
     if (!dest)
     	return 0;
 
-    gr2::uchar_t usv;
     typename utf::const_iterator ui = src;
     size_t n_chars = 0;
     unsigned int * out = dest;

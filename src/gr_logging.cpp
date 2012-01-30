@@ -35,7 +35,7 @@ using namespace graphite2;
 extern "C" {
 
 
-GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask)
+bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 {
 	if (!logFile || !mask)	return false;
 
@@ -47,7 +47,7 @@ GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 #endif
 }
 
-GR2_API void graphite_stop_logging()
+void graphite_stop_logging()
 {
 #if !defined GRAPHITE2_NTRACING
 	delete dbgout;
