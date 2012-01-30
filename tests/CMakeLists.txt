@@ -8,6 +8,9 @@ include_directories(${graphite2_core_SOURCE_DIR})
 set(S ${graphite2_core_SOURCE_DIR})
 
 add_definitions(-DGRAPHITE2_STATIC)
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_library(graphite2-base STATIC
     ${S}/FeatureMap.cpp
@@ -27,6 +30,9 @@ add_library(graphite2-segcache STATIC
     ${S}/Slot.cpp)
 
 remove_definitions(-DGRAPHITE2_STATIC)
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    remove_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 if (GRAPHITE2_COMPARE_RENDERER)
     add_subdirectory(comparerenderer)

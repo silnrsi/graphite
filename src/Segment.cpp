@@ -409,7 +409,7 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSE
     Slot *s, *end;
     int numBase = 0;
     float currWidth = 0.0;
-    const float scale = font ? font->scale() : 1.0;
+    const float scale = font ? font->scale() : 1.0f;
 
     if (!pFirst) pFirst = pSlot;
     const float base = pFirst->origin().x / scale;
@@ -470,7 +470,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     unsigned int bmask = 0;
     for (s = first(); s; s = s->next())
     {
-        unsigned int bAttr = glyphAttr(s->gid(), aBidi);
+    	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
         s->setBidiClass((bAttr <= 16) * bAttr);
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
@@ -485,7 +485,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
             resolveNeutrals(baseLevel, first());
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());
-        s = resolveOrder(s = first(), baseLevel);
+        s = resolveOrder(s = first(), baseLevel != 0);
         first(s); last(s->prev());
         s->prev()->next(0); s->prev(0);
     }

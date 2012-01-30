@@ -182,7 +182,7 @@ public:
 	{
 		if (!backing_font_path) return;
 		std::ifstream 	font_file(backing_font_path, std::ifstream::binary);
-		const size_t	font_size = font_file.seekg(0, std::ios::end).tellg();
+		const size_t	font_size = size_t(font_file.seekg(0, std::ios::end).tellg());
 		font_file.seekg(0, std::ios::beg);
 		_header = new char [font_size];
 		font_file.read(const_cast<char *>(_header), font_size);
