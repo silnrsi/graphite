@@ -89,14 +89,16 @@ bool CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
         int breakWeight = seg->charinfo(i)->breakWeight();
         int nextBreakWeight = (i + 1 < seg->charInfoCount())?
             seg->charinfo(i+1)->breakWeight() : 0;
-        if (((breakWeight > 0) &&
-             (breakWeight <= gr_breakWord)) ||
-            (i + 1 == seg->charInfoCount()) ||
-             m_cacheStore->isSpaceGlyph(subSegEndSlot->gid()) ||
-            ((i + 1 < seg->charInfoCount()) &&
-             (((nextBreakWeight < 0) &&
-              (nextBreakWeight >= gr_breakBeforeWord)) ||
-              (subSegEndSlot->next() && m_cacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))
+        uint8 f = seg->charinfo(i)->flags();
+        if ((f == 2) || ((f != 1) && 
+            (((breakWeight > 0) &&
+              (breakWeight <= gr_breakWord)) ||
+             (i + 1 == seg->charInfoCount()) ||
+              m_cacheStore->isSpaceGlyph(subSegEndSlot->gid()) ||
+             ((i + 1 < seg->charInfoCount()) &&
+              (((nextBreakWeight < 0) &&
+               (nextBreakWeight >= gr_breakBeforeWord)) ||
+               (subSegEndSlot->next() && m_cacheStore->isSpaceGlyph(subSegEndSlot->next()->gid())))))))
         {
             // record the next slot before any splicing
             Slot * nextSlot = subSegEndSlot->next();
