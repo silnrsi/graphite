@@ -22,8 +22,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 

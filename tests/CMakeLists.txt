@@ -7,11 +7,6 @@ CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output 
 include_directories(${graphite2_core_SOURCE_DIR})
 set(S ${graphite2_core_SOURCE_DIR})
 
-add_definitions(-DGRAPHITE2_STATIC)
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-
 add_library(graphite2-base STATIC
     ${S}/FeatureMap.cpp
     ${S}/NameTable.cpp
