@@ -57,6 +57,7 @@ public:
                 m_grFeatures = gr_face_featureval_for_lang(m_grFace, 0);
             }
         }
+        m_name = cache == 0 ? "graphite2 (uncached)" : "graphite2 (cached)";
     }
     virtual ~Gr2Renderer()
     {
@@ -95,10 +96,11 @@ public:
                                    gr_slot_after(s));
         gr_seg_destroy(pSeg);
     }
-    virtual const char * name() const { return "graphite2"; }
+    virtual const char * name() const { return m_name; }
 private:
     int m_rtl;
     gr_face * m_grFace;
     gr_font * m_grFont;
     gr_feature_val * m_grFeatures;
+    const char * m_name;
 };

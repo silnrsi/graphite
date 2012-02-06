@@ -66,7 +66,7 @@
 #include "IcuRenderer.h"
 #endif
 
-const size_t NUM_RENDERERS = 5;
+const size_t NUM_RENDERERS = 6;
 
 class CompareRenderer
 {
@@ -411,13 +411,17 @@ int main(int argc, char ** argv)
 #endif
         if (rendererOptions[OptGraphite2].exists())
             renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
+
+        if (rendererOptions[OptGraphite2s].exists())
+            renderers[2] = (new Gr2Renderer(fontFile, fontSize, direction, 0, featureSettings));
+
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
-            renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
+            renderers[3] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
-            renderers[3] = (new IcuRenderer(fontFile, fontSize, direction));
+            renderers[4] = (new IcuRenderer(fontFile, fontSize, direction));
 #endif
 #ifdef HAVE_USP10
         if (rendererOptions[OptUniscribe].exists())
@@ -426,12 +430,12 @@ int main(int argc, char ** argv)
             const char * usp10 = rendererOptions[OptUniscribe].get(argv);
             if (strlen(usp10) == 0)
                 usp10 = defaultUsp10;
-            renderers[4] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
+            renderers[5] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
         }
 #endif
     }
 
-    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL)
+    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL && renderers[5] == NULL)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
