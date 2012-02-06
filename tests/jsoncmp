@@ -27,6 +27,7 @@ def any_re(s, *res):
 def canonids(j) :
     slotmap = {'0000-00-0000':0} # The only pre-exisiting slotref for one past the end
     initcount = 1
+    del j['version']
     for (v, p, h) in walktree(j) :
         if any_re(p, r"slots/\d+/id$", r"output/\d+/id$"):
             if v not in slotmap :
