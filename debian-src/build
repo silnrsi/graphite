@@ -1,0 +1,35 @@
+#!/bin/bash
+HERE=`pwd`
+if [ ! -n "${TARGETS}" ]; then
+    TARGETS="lucid maverick natty oneiric precise"
+fi
+#PUBLISH='SIL'
+PUBLISH='LINGNET'
+#REVISION=`echo $BUILD_NUMBER | sed -e 's/[:-].*$//'`
+#VARIANT='lingnet'
+PRODUCT='libgraphite2'
+ZIPTYPE='gz'
+DEST=${HERE}/../output
+BUILDINGDIR=${HERE}/../building
+
+NO_DPUT=1
+
+BASE=$(dpkg-parsechangelog -lchangelog| grep ^Vers | cut -d\  -f2 | cut -d\- -f1 | cut -d\: -f2)
+
+if [ "${BUILD_ARCHS}:0:6" = "source" ]; then
+    cp $1/building/${PRODUCT}-${BASE}.tar.gz ~/upstream/${PRODUCT}_${BASE}.orig.tar.gz  || exit $?
+    rm -rf ${DEST}/results
+else
+    rm ${BUILDINGDIR}/*build*
+fi
+
+source /home/bob/pbuilder/build.common
+
+# create artifacts
+if [ "${BUILD_ARCHS:0:6}" = "source" ]; then
+    mkdir ${DEST}/results || exit $?
+    cp /home/bob/pbuilder/results/lucid/${PRODUCT}_${BASE}-* ${DEST}/results || exit $?
+    cp /home/bob/pbuilder/results/lucid/${PRODUCT}_${BASE}.orig.tar.gz ${DEST}/results || exit $?
+    test -e ${DEST}/results/${PRODUCT}_${BASE}.orig.tar.gz || exit $?
+fi
+
