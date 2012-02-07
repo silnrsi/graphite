@@ -18,7 +18,7 @@ BASE=$(dpkg-parsechangelog -lchangelog| grep ^Vers | cut -d\  -f2 | cut -d\- -f1
 
 echo "build archs: $BUILD_ARCHS"
 
-if [ "${BUILD_ARCHS}:0:6" = "source" ]; then
+if [ "${BUILD_ARCHS:0:6}" = "source" ]; then
     echo ">> cp tarball to ~/upstream"
     cp $1/building/${PRODUCT}-${BASE}.tar.gz ~/upstream/${PRODUCT}_${BASE}.orig.tar.gz  || exit $?
     rm -rf ${DEST}/results
