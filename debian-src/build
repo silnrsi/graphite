@@ -7,7 +7,7 @@ fi
 PUBLISH='LINGNET'
 #REVISION=`echo $BUILD_NUMBER | sed -e 's/[:-].*$//'`
 #VARIANT='lingnet'
-PRODUCT='libgraphite2'
+PRODUCT='graphite2'
 ZIPTYPE='gz'
 DEST=${HERE}/../output
 BUILDINGDIR=${HERE}/../building
