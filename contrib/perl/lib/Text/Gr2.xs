@@ -6,7 +6,7 @@
 
 #include <graphite2/Font.h>
 #include <graphite2/Segment.h>
-#include <graphite2/XmlLog.h>
+#include <graphite2/Log.h>
 
 typedef gr_face              Text_Graphite2_Face;
 typedef gr_font              Text_Graphite2_Font;

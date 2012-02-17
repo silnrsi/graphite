@@ -1,0 +1,5 @@
+Changes to make to the API when we are forced to change it:
+
+* add font table deletion function ptr so that the app doesn't have to
+  manage a collection of font tables
+

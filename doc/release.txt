@@ -1,0 +1,14 @@
+== Release Process ==
+
+These notes are not necessarily part of the manual. They are here for code developers to remember to do the right thing when it comes to release day.
+
+. The first line of the Changelog must be the version number. This is so that packagers can extract the version number from the source.
+. Make sure the version numbers in the #defines reflect the release number in includes/graphite2/Font.h
+. Make sure the libtool version numbers are correct in src/CMakeLists.txt
+. Ensure the builds.palaso.org gives a clear build
+
+== Anticipated API Changes ==
+
+Here are the things we will probably change in the API once we come to the conclusion that we have got to change the API for some really important reason.
+
+
