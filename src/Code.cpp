@@ -207,10 +207,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
-    if (_data_size)
-        _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
-    else
-        _data = 0;
+    _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
     
     // Make this RET_ZERO, we should never reach this but just in case ...
     _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
