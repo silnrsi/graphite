@@ -8,7 +8,7 @@ from random import uniform, seed
 
 import multiprocessing
 import shutil, tempfile 
-import os, resource, sys, time
+import os, re, resource, sys, time
 from subprocess import call
 
 from optparse import OptionParser
@@ -18,6 +18,7 @@ from optparse import OptionParser
 tablerecord = collections.namedtuple("tablerecord", "tag start end")
 
 class font:
+    __recm = re.compile('^(?:-?\d+)?\s*,\s*(0[xX][\da-fA-F]+)\s*,\s*(0[xX][\da-fA-F]+|\d+)\s*')
     random_bytes = imap(int, starmap(uniform, repeat((0,256))))
 
     @staticmethod
@@ -49,9 +50,8 @@ class font:
         return sum(tr.end-tr.start for tr in self.__table_dir)
     
     def input(self,path):
-        with open(path, "rt") as f:
-            for f in imap(operator.methodcaller('split',','), f):
-                yield (int(f[1],0), int(f[2],0))
+        return [(int(m.group(1),0), int(m.group(2),0)) for m in imap(self.__recm.match, open(path, "rt")) if m]
+        
 
     def linear(self, value=[], start=0, passes=0):
         tables = chain.from_iterable(repeat(self.__table_dir, passes)) if passes else cycle(self.__table_dir)
@@ -143,6 +143,7 @@ def bayes(x, s, m, t):
     st = s + t
     return m*s/st + x*t/st
 
+
 parser = OptionParser(usage="usage: %prog -f font [options] -- command")
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
@@ -190,9 +191,14 @@ if __name__ == '__main__':
             if   opts.input:    cs = fnt.input(opts.input)
             elif opts.position: cs = fnt.position(opts.position, opts.value)
             else:               cs = fnt.linear(opts.value, opts.position, opts.passes)
-
-            if opts.status:
+            
+            if opts.input or opts.position:
+                opts.passes = 1
+                total_tests = len(cs)
+            else:
                 total_tests = fnt.tests_per_pass()
+                
+            if opts.status:
                 sys.stdout.write("tests per pass: {0}\t\tpasses: {1}\n".format(total_tests, opts.passes if opts.passes else 'until killed'))
                 sys.stdout.write("% {0}complete\ttests per second\testimated time to {0}complete\n".format('' if opts.passes else 'pass '))
                 total_tests *= opts.passes or 1
@@ -208,10 +214,10 @@ if __name__ == '__main__':
                             sys.stdout.flush()
                     if rv < 0 :
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
-                        log.write("{0:d},{1[0]:#010X},{1[1]:02d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
+                        log.write("{0:d},{1[0]:#010X},{1[1]: >3d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
                     elif opts.verbose and errlog:
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
-                        log.write(",{0[0]:#010X},{0[1]:02d},{1!s}{2:#010X}\n".format(cr, t + '+' if t else '', cr[0]-s))
+                        log.write(",{0[0]:#010X},{0[1]: >3d},{1!s}{2:#010X}\n".format(cr, t + '+' if t else '', cr[0]-s))
                         log.flush()
                         if errlog :
                             with open(errlog,'r') as logpart:  shutil.copyfileobj(logpart, log)
