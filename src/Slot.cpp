@@ -205,7 +205,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     {
     case gr_slatAdvX :		return int(m_advance.x);
     case gr_slatAdvY :		return int(m_advance.y);
-    case gr_slatAttTo :		return 0;
+    case gr_slatAttTo :		return m_parent ? 1 : 0;
     case gr_slatAttX :		return int(m_attach.x);
     case gr_slatAttY :  	return int(m_attach.y);
     case gr_slatAttXOff :

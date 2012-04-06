@@ -151,7 +151,9 @@ include::../tests/examples/cluster.c[]
     cluster.
 
 <3> If this slot starts after the end of the current cluster, then create a new
-    cluster for it.
+    cluster for it. You can't start a new cluster with a glyph that cannot take
+    a cursor position before it. Also don't make a new cluster the first time
+    around (i.e. at the start of the string).
 
 <4> If this slot ends after the end of this cluster then extend this cluster to
     include it.
