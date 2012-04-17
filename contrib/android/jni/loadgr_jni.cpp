@@ -123,6 +123,7 @@ private:
 extern "C" void Java_org_sil_palaso_Graphite_loadGraphite( JNIEnv* env, jobject thiz )
 {
     load_fns("libload-graphite.so", "libskia.so", &thismap, 12);
+    load_fns("libload-graphite.so", "libharfbuzz.so", &hbmap, 1); 
 }
 
 static FT_Library gFTLibrary = NULL;

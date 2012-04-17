@@ -48,7 +48,7 @@ void load_fns(const char *srcname, const char *targetname, func_map *map, int nu
     soinfo *soHead = (soinfo *)dlopen("libdl.so", 0);
     soinfo *soTarget = (soinfo *)dlopen(targetname, 0);
     soinfo *soSrc = (soinfo *)dlopen(srcname, 0);
-    soinfo *si, *sislast, *sitlast;
+    soinfo *si;
     int i, j;
 
     // turn names into pointers
@@ -57,8 +57,6 @@ void load_fns(const char *srcname, const char *targetname, func_map *map, int nu
 //  See "ELF for the Arm Architecture" sect. 4.6.3, p 21. But we don't strip because that's Thumb code's job
         map[i].ptarget = dlsym(soTarget, map[i].starget);
         map[i].psrc = dlsym(soSrc, map[i].ssrc);
-//        map[i].ptarget = (void *)((size_t)dlsym(soTarget, map[i].starget) & ~1);
-//        map[i].psrc = (void *)((size_t)dlsym(soSrc, map[i].ssrc) & ~1);
     }
     
     pthread_mutex_lock(&dl_lock);
@@ -66,10 +64,6 @@ void load_fns(const char *srcname, const char *targetname, func_map *map, int nu
     for (si = soHead; si; si = si->next)
     {
         unsigned *d;
-        if (si->next == soSrc)
-            sislast = si;
-        else if (si->next == soTarget)
-            sitlast = si;
         // don't redirect ourselves, that could cause nasty loops
         if (si == soSrc)
             continue;
@@ -98,49 +92,6 @@ void load_fns(const char *srcname, const char *targetname, func_map *map, int nu
         }
     }
 
-// The following code doesn't work and causes crashes in some situations
-// Also we regain control of the JNI calls again.
-#if 0
-    Elf32_Sym *symSrc;
-    // move our library to the front and swap names
-    goto notdone;
-    sitlast->next = soSrc;
-    si = soSrc->next;  // as temp var
-    soSrc->next = soTarget->next;
-    sislast->next = soTarget;
-    soTarget->next = si;
-    notdone:
-    strncpy((char *)soSrc->name, soTarget->name, 128);
-    strncpy((char *)soTarget->name, srcname, 128);
-
-    // copy and modify the target's symbol table
-    symSrc = (Elf32_Sym *)malloc(soTarget->nchain * 16);
-    memcpy(symSrc, soTarget->symtab, soTarget->nchain * 16);
-    for (i = 0; i < soTarget->nchain; i++)
-    {
-        if ((symSrc[i].st_info & 0xF) != STT_FUNC) continue;
-
-        for (j = 0; j < num_map; j++)
-        {
-            if ((void *)(symSrc[i].st_value + soTarget->base) == map[j].ptarget)
-            {
-                symSrc[i].st_value = (Elf32_Addr)map[j].psrc - soTarget->base;
-                break;
-            }
-        }
-        symSrc[i].st_value = symSrc[i].st_value + soTarget->base - soSrc->base;
-    }
-    soSrc->symtab = symSrc;
-    // copy string and hash tables
-    soSrc->strtab = soTarget->strtab;
-    soSrc->nbucket = soTarget->nbucket;
-    soSrc->nchain = soTarget->nchain;
-    soSrc->bucket = soTarget->bucket;
-    soSrc->chain = soTarget->chain;
-    pthread_mutex_unlock(&dl_lock);
-    // all done
-    done:
-#endif
     dlclose(soHead);
     dlclose(soTarget);
     dlclose(soSrc);

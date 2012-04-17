@@ -32,6 +32,7 @@ MY_ANDROID_LIBS := $(MY_ANDROID_SRC)/out/target/product/generic/symbols/system/l
 MY_ANDROID_LIBS := $(HOME)/Work/android/android-sdk-linux_x86/platforms/android-8/symbols/system/lib
 MY_SKIA := $(MY_ANDROID_SRC)/external/skia
 MY_SKIA := $(HOME)/Work/android/skia/8
+MY_HARFBUZZ := $(HOME)/Work/android/harfbuzz/15
 
 include $(CLEAR_VARS)
 
@@ -56,9 +57,10 @@ LOCAL_MODULE := load-graphite
 LOCAL_SHARED_LIBRARIES := graphite2
 LOCAL_LDLIBS := -L $(MY_ANDROID_LIBS) -lskia -lcutils -landroid_runtime -lutils
 LOCAL_CPPFLAGS += -fno-rtti -mapcs -fno-inline
-LOCAL_SRC_FILES := loadgr_jni.cpp load.cpp graphite_layer.cpp
+LOCAL_SRC_FILES := loadgr_jni.cpp load.cpp graphite_layer.cpp graphite_hbuzz.cpp
 LOCAL_C_INCLUDES := $(MY_SKIA)/include/core \
                     $(MY_SKIA)/src/core \
+                    $(MY_HARFBUZZ)/src \
                     $(MY_ANDROID_SRC)/external/freetype/include \
                     $(MY_ANDROID_SRC)/frameworks/base/include \
                     $(MY_ANDROID_SRC)/system/core/include
