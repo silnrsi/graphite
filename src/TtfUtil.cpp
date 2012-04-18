@@ -798,7 +798,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 	size_t cLongHorMetrics = be::swap(phhea->num_long_hor_metrics);
 	if (nGlyphId < cLongHorMetrics) 
 	{	// glyph id is acceptable
-                if (nGlyphId * sizeof(Sfnt::HorizontalMetric) > lHmtxSize) return false;
+		if (nGlyphId * sizeof(Sfnt::HorizontalMetric) >= lHmtxSize) return false;
 		nAdvWid = be::swap(phmtx[nGlyphId].advance_width);
 		nLsb = be::swap(phmtx[nGlyphId].left_side_bearing);
 	}
