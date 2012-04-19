@@ -82,7 +82,8 @@ typedef enum {
     OptTrace,
     OptLogMask,
     OptFeatures,
-    OptAltFeatures
+    OptAltFeatures,
+    OptQuiet
 } OptionId;
 
 static Option rendererOptions[] = {
@@ -110,6 +111,7 @@ static Option rendererOptions[] = {
     Option("", "--log-mask", "XML trace log mask (only used with --trace)", Option::OPTION_INT),
     Option("", "--features", "Feature list", Option::OPTION_STRING),
     Option("", "--alt-features", "Feature list for alternative font (if different)", Option::OPTION_STRING),
+    Option("-q", "--quiet", "Supress all output, including error messages", Option::OPTION_BOOL)
 };
 
 const int NUM_RENDERER_OPTIONS = sizeof(rendererOptions) / sizeof(Option);

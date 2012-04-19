@@ -1,6 +1,42 @@
 #!/usr/bin/python
+'''
+A multiprocess fuzz test framework that generates corrupt fonts to run a user 
+supplied test harness against.  This will check each byte in every table of a 
+TTF or subset if specified by overwriting with a random or user specified 
+value. It can also re-run tests using previous output logs as input.
+'''
 from __future__ import division, print_function, unicode_literals
 
+__version__ = "1.0"
+__date__    = "4 April 2012"
+__author__  = "Tim Eves <tim_eves@sil.org>"
+__license__ ='''  
+GRAPHITE2 LICENSING
+
+    Copyright 2010, SIL International
+    All rights reserved.
+
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published
+    by the Free Software Foundation; either version 2.1 of License, or
+    (at your option) any later version.
+
+    This program is distributI might beed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should also have received a copy of the GNU Lesser General Public
+    License along with this library in the file named "LICENSE".
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
+    internet at http://www.fsf.org/licenses/lgpl.html.
+
+Alternatively, the contents of this file may be used under the terms of the
+Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
+License, as published by the Free Software Foundation, either version 2
+of the License or (at your option) any later version.
+'''
 import collections, operator, struct
 from contextlib import closing, contextmanager
 from itertools import chain, cycle, imap, islice, izip, repeat, starmap
@@ -144,7 +180,7 @@ def bayes(x, s, m, t):
     return m*s/st + x*t/st
 
 
-parser = OptionParser(usage="usage: %prog -f font [options] -- command")
+parser = OptionParser(usage="usage: %prog -f font [options] -- command\n" + __doc__)
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
 parser.add_option("-p", "--position", default="0", help="Specifies position to corrupt (hex)")
@@ -191,14 +227,9 @@ if __name__ == '__main__':
             if   opts.input:    cs = fnt.input(opts.input)
             elif opts.position: cs = fnt.position(opts.position, opts.value)
             else:               cs = fnt.linear(opts.value, opts.position, opts.passes)
-            
-            if opts.input or opts.position:
-                opts.passes = 1
-                total_tests = len(cs)
-            else:
-                total_tests = fnt.tests_per_pass()
-                
+
             if opts.status:
+                total_tests = fnt.tests_per_pass()
                 sys.stdout.write("tests per pass: {0}\t\tpasses: {1}\n".format(total_tests, opts.passes if opts.passes else 'until killed'))
                 sys.stdout.write("% {0}complete\ttests per second\testimated time to {0}complete\n".format('' if opts.passes else 'pass '))
                 total_tests *= opts.passes or 1
@@ -214,10 +245,10 @@ if __name__ == '__main__':
                             sys.stdout.flush()
                     if rv < 0 :
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
-                        log.write("{0:d},{1[0]:#010X},{1[1]: >3d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
+                        log.write("{0:d},{1[0]:#010X},{1[1]:02d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
                     elif opts.verbose and errlog:
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
-                        log.write(",{0[0]:#010X},{0[1]: >3d},{1!s}{2:#010X}\n".format(cr, t + '+' if t else '', cr[0]-s))
+                        log.write(",{0[0]:#010X},{0[1]:02d},{1!s}{2:#010X}\n".format(cr, t + '+' if t else '', cr[0]-s))
                         log.flush()
                         if errlog :
                             with open(errlog,'r') as logpart:  shutil.copyfileobj(logpart, log)

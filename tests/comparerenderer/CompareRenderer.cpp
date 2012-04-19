@@ -351,6 +351,11 @@ int main(int argc, char ** argv)
         featureSettings = new FeatureParser(rendererOptions[OptFeatures].get(argv));
     }
 
+    if (rendererOptions[OptQuiet].exists())
+    {
+    	fclose(stderr);
+    }
+
     if (rendererOptions[OptAlternativeFont].exists())
     {
         if (rendererOptions[OptAltFeatures].exists())
