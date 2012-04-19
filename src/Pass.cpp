@@ -63,10 +63,9 @@ Pass::~Pass()
     delete [] m_rules;
 }
 
-bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const Face & face)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, const Face & face)
 {
-    const byte *                p = reinterpret_cast<const byte *>(pass),
-               * const pass_start = p,
+    const byte *                p = pass_start,
                * const pass_end   = p + pass_length;
     size_t numRanges;
 
@@ -111,8 +110,8 @@ bool Pass::readPass(void *pass, size_t pass_length, size_t subtable_base, const 
     be::skip<uint16>(p, numEntries);
 
     if (p > pass_end) return false;
-    m_minPreCtxt = *p++;
-    m_maxPreCtxt = *p++;
+    m_minPreCtxt = be::read<uint8>(p);
+    m_maxPreCtxt = be::read<uint8>(p);
     const byte * const start_states = p;
     be::skip<int16>(p, m_maxPreCtxt - m_minPreCtxt + 1);
     const uint16 * const sort_keys = reinterpret_cast<const uint16 *>(p);
@@ -476,14 +475,15 @@ bool Pass::testPassConstraint(Machine & m) const
 }
 
 
-bool Pass::testConstraint(const Rule &r, Machine & m) const
+bool Pass::testConstraint(const Rule & r, Machine & m) const
 {
-    if (unsigned(r.sort - r.preContext) > m.slotMap().size() - m.slotMap().context())    return false;
-    if (m.slotMap().context() - r.preContext < 0) return false;
-    if (!*r.constraint)                 return true;
+	const uint16 curr_context = m.slotMap().context();
+    if (unsigned(r.sort - r.preContext) > m.slotMap().size() - curr_context
+    	|| curr_context - r.preContext < 0) return false;
+    if (!*r.constraint) return true;
     assert(r.constraint->constraint());
 
-    vm::slotref * map = m.slotMap().begin() + m.slotMap().context() - r.preContext;
+    vm::slotref * map = m.slotMap().begin() + curr_context - r.preContext;
     for (int n = r.sort; n && map; --n, ++map)
     {
     	if (!*map) continue;
