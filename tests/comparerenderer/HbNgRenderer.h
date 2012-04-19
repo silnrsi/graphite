@@ -23,13 +23,15 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <hb-shape.h>
-#include <hb-buffer.h>
-#include <hb-font.h>
+#include <hb.h>
+#include <hb-ot.h>
 #include <hb-ft.h>
 #include <hb-glib.h>
-#include <hb-ot.h>
+/*
+#include <hb-buffer.h>
+#include <hb-font.h>
 #include <hb-ot-layout.h>
+*/
 #include <glib/gunicode.h>
 
 #include "Renderer.h"
@@ -124,7 +126,7 @@ public:
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
         //hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
-        hb_shape_full(m_font, m_buffer, m_feats, m_featCount, NULL, shapers);
+        hb_shape_full(m_font, m_buffer, m_feats, m_featCount, shapers);
         hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer, NULL);
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer, NULL);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);

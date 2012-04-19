@@ -1,3 +1,11 @@
+1.1.2
+    . Support feature ids < 4 chars when space padded for inclusion in FF 14.
+    . More fuzztesting and removal of causes of valgrind bad reads and sigabrts
+    . Remove contrib/android into its own repo (http://hg.palaso.org/grandroid)
+    . Update comparerenderer to latest harfbuzzng api
+1.1.1
+    . Missing Log.h included
+    . perl wrappers updated
 1.1.0
     . Refactored debug output to use json
     . Renamed VM_MACHINE_TYPE to GRAPHITE2_VM_TYPE
