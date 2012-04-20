@@ -1,3 +1,9 @@
+graphite2 (1.1.2-1~palaso1) lucid; urgency=low
+
+  * New upstream release
+
+ -- Daniel Glassey <daniel_glassey@sil.org>  Fri, 20 Apr 2012 11:02:56 +0700
+
 graphite2 (1.1.0-1) lucid; urgency=low
 
   * New upstream release
