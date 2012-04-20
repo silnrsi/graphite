@@ -16,6 +16,6 @@ ${TESTSDIR}/fuzztest \
     -t 10 -s 60 \
     --memory=200 \
     --exclude=opentype,volt,advtypo \
-    $@ -- comparerenderer/comparerenderer \
-        -s 12 -n ${RTL} \
+    "$@" -- comparerenderer/comparerenderer \
+        -q -s 12 -n ${RTL} \
         -f {} -t ${TESTSDIR}/texts/${TEXT}.txt
