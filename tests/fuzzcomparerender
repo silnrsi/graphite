@@ -15,7 +15,8 @@ ${TESTSDIR}/fuzztest \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
     -t 10 -s 60 \
     --memory=200 \
-    --exclude=opentype,volt,advtypo \
+    --include=required,graphite \
+    --exclude=fontdir,opentype,volt,advtypo,post \
     "$@" -- comparerenderer/comparerenderer \
         -q -s 12 -n ${RTL} \
         -f {} -t ${TESTSDIR}/texts/${TEXT}.txt

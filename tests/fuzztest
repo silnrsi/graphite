@@ -47,7 +47,7 @@ import shutil, tempfile
 import os, re, resource, sys, time
 from subprocess import call
 
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
 
 
 
@@ -67,11 +67,13 @@ class font:
         with open(fnt._font_path, "rb") as font_file:
             shutil.copyfileobj(font_file, self.file)
            
-    def __init__(self, font_path, inclusion=[], exclusion=['']):
+    def __init__(self, font_path, inclusion, exclusion):
         self._tmpdir = tempfile.mkdtemp(prefix='fuzztest-' + os.path.splitext(os.path.basename(font_path))[0]+'-')
         self._font_path = font_path
-        exclusion = set(exclusion) - set(inclusion)
-        self.__table_dir = filter(lambda tr: tr.tag not in exclusion, self.read_tabledir())
+        self.__table_dir = self.read_tabledir()
+        inclusion = set(inclusion or (tr.tag for tr in self.__table_dir)) - set(exclusion)
+        self.__table_dir = filter(lambda tr: tr.tag in inclusion, self.read_tabledir())
+        sys.stdout.write("tables tested: {0!s}\n".format(','.join(tr.tag for tr in self.__table_dir)))
         self.pool = multiprocessing.Pool(initializer=self.__initialise_worker, initargs=[self], processes=opts.jobs)
     
     def close(self):
@@ -180,14 +182,24 @@ def bayes(x, s, m, t):
     return m*s/st + x*t/st
 
 
-parser = OptionParser(usage="usage: %prog -f font [options] -- command\n" + __doc__)
+predefined_tablesets = {
+    'fontdir'   : [''],
+    'required'  : ['cmap','glyf','head','hhea','hmtx','loca','maxp','name','post'],
+    'graphite'  : ['Feat','Glat','Gloc','Sile','Silf','Sill'],
+    'volt'      : ['TSIV','TSID','TSIP','TSIS'],
+    'opentype'  : ['BASE','DSIG','GDEF','GPOS','GSUB','LTSH','OS/2','PCLT','VDMX','cvt','fpgm','prep','gasp','hdmx','kern','vhea','vmtx'],
+    'advtypo'   : ['acnt','cvar','bdat','bloc','bsln','feat','fdsc','fvar','gvar','just','kern','lcar','mort','morx','opbd','prop','trak','vhea','vmtx']
+}
+
+def tableset(tags):
+    return [(t+'   ')[:4] for t in chain.from_iterable(predefined_tablesets.get(n,[n]) for n in tags)]
+
+parser = OptionParser(usage="usage: %prog -f font [options] -- command\n" + __doc__, version = __version__)
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
 parser.add_option("-p", "--position", default="0", help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", default=[], help="Specifies value(s) to use (default: varying random number)")
 parser.add_option("-i", "--input", help=".log file to read test values from")
-parser.add_option("-x", "--exclude", default=[], help="A comma separated list of tables to exclude from testing")
-parser.add_option("-I", "--include", default=[], help="A comma spearated list of only the tables to test")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
 parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
@@ -196,16 +208,15 @@ parser.add_option("-P","--passes",type='int', default=0, help='Run this many pas
 parser.add_option("-j","--jobs",type='int', default=None, help='Number of subprocesses to run in parallel (default: cpu count)')
 parser.add_option("-r","--random",help="Seed the random number generator with the given string")
 parser.add_option("--valgrind",action="store_true",help="Run tests with valgrind and report errors")
-
-predefined_tablesets = {
-    'graphite'  : ['Silf','Feat','Gloc','Glat','Sill','Sile'],
-    'volt'      : ['TSIV','TSID','TSIP','TSIS'],
-    'opentype'  : ['GDEF','GSUB','GPOS','BASE'],
-    'advtypo'   : ['bsln', 'kern', 'lcar', 'morx', 'feat', 'mort', 'opbd', 'prop']
-}
-
-def tableset(tags):
-    return [(t+'   ')[:4] for t in chain.from_iterable(predefined_tablesets.get(n,[n]) for n in tags)]
+testset = OptionGroup(parser, 'Test sets',
+'Explicitly specify which tables to include or exclude from testing. '
+'By default all tables (including the font directory) are included.'
+' If both include and exclude sets are supplied any excluded tables'
+' are removed from the specified inclusion set.'
+' Sets may be either table tags or predefined tablesets from this list: ' + ', '.join(sorted(predefined_tablesets)))
+testset.add_option("-x", "--exclude", default=[], help="A comma separated list of tables to exclude")
+testset.add_option("-I", "--include", default=[], help="A comma spearated list of the only tables to test")
+parser.add_option_group(testset)
 
 CHUNK_SIZE=10
 
@@ -218,7 +229,7 @@ if __name__ == '__main__':
         opts.verbose = True
     opts.position = int(opts.position,0)
     opts.value    = opts.value and [int(n,0) for n in opts.value.split(',')]
-    opts.exclude  = opts.exclude and [''] + tableset(opts.exclude.split(','))
+    opts.exclude  = opts.exclude and tableset(opts.exclude.split(','))
     opts.include  = opts.include and tableset(opts.include.split(','))
     
     try:
