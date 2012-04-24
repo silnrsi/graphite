@@ -204,7 +204,7 @@
                                             "failed" : { "type" : "boolean", "required" : true },
                                 
                                             "input" : 
-                                            { 
+                                            {
                                                 "type" : "object",
                                                 "title" : "Input slot range",
                                                 "required" : true,
@@ -230,6 +230,18 @@
                                     "required" : true,
                                     "properties" :
                                     {
+                                        "range" : 
+                                        {
+                                            "type" : "object",
+                                            "title" : "Input slot range",
+                                            "description" : "Input slot range replaced by the output slots"
+                                            "required" : true,
+                                            "properties" : 
+                                            {
+                                                "start" : { "$ref" : "SlotRef" },
+                                                "end" : { "$ref" : "SlotRef" }
+                                            }
+                                        }
                                         "slots" :
                                         {
                                             "type" : "array",
