@@ -341,6 +341,26 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
     return true;
 }
 
+#if !defined GRAPHITE2_NTRACING
+
+inline
+Slot * input_slot(const SlotMap &  slots, const int n)
+{
+	Slot * s = slots[slots.context() + n];
+	if (!s->isCopied()) 	return s;
+
+	return s->prev() ? s->prev()->next() :  s->next()->prev();
+}
+
+inline
+Slot * output_slot(const SlotMap &  slots, const int n)
+{
+	Slot * s = slots[slots.context() + n - 1];
+	return s ? s->next() : slots.segment.first();
+}
+
+#endif //!defined GRAPHITE2_NTRACING
+
 void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) const
 {
     assert(slot);
@@ -372,12 +392,19 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 					return;
 				}
 				else
+				{
+					const slotid failed = input_slot(fsm.slots, -(--r)->rule->preContext);
 					*dbgout 	<< json::close	// close "considered" array
 							<< "output" << json::object
+								<< "range"	<< json::flat << json::object
+									<< "start" 	<< failed
+									<< "end" 	<< failed
+									<< json::close
 								<< "slots" 	<< json::array << json::close
 								<< "cursor"	<< slotid(slot->next())
 								<< json::close
 							<< json::close;
+				}
         	}
         }
         else
@@ -397,23 +424,6 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 }
 
 #if !defined GRAPHITE2_NTRACING
-
-inline
-Slot * input_slot(const SlotMap &  slots, const int n)
-{
-	Slot * s = slots[slots.context() + n];
-	if (!s->isCopied()) 	return s;
-
-	return s->prev() ? s->prev()->next() :  s->next()->prev();
-}
-
-inline
-Slot * output_slot(const SlotMap &  slots, const int n)
-{
-	Slot * s = slots[slots.context() + n - 1];
-	return s ? s->next() : slots.segment.first();
-}
-
 
 void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const
 {
@@ -445,8 +455,13 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 						<< json::close	// close Rule object
 				<< json::close // close considered array
 				<< "output" << json::object
+					<< "range" << json::flat << json::object
+						<< "start"	<< slotid(input_slot(fsm.slots, 0))
+						<< "end"	<< slotid(last_slot)
+					<< json::close // close "input"
 					<< "slots"	<< json::array;
 	fsm.slots.segment.positionSlots(0);
+
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
 		*dbgout 		<< dslot(&fsm.slots.segment, slot);
 	*dbgout 			<< json::close; // close "slots";
