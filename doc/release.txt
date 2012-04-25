@@ -8,7 +8,7 @@ These notes are not necessarily part of the manual. They are here for code devel
 . Make sure the libtool version numbers are correct in src/CMakeLists.txt
 . Update debian-src/changelog
 . Ensure the build.palaso.org gives a clear build for all Graphite targets including Linux packages.
-. Run the build.palaso.org Graphite Linux Packages - tarball manually.
+. Run the build.palaso.org Graphite Linux Packages - tarball manually. This triggers the debian package builds.
 
 === Distribution locations ===
 

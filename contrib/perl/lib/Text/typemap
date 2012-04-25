@@ -22,13 +22,13 @@ gr_uint8  T_UV
 enum gr_encform T_IV
 enum gr_attrCode T_IV
 
-Text_Graphite2_Face* T_PTROBJ_SPECIAL
-Text_Graphite2_Font* T_PTROBJ_SPECIAL
-Text_Graphite2_FeatureVal* T_PTROBJ_SPECIAL
-Text_Graphite2_FeatureRef* T_PTROBJ_SPECIAL
-Text_Graphite2_CharInfo* T_PTROBJ_SPECIAL
-Text_Graphite2_Segment* T_PTROBJ_SPECIAL
-Text_Graphite2_Slot* T_PTROBJ_SPECIAL
+Text_Gr2_Face* T_PTROBJ_SPECIAL
+Text_Gr2_Font* T_PTROBJ_SPECIAL
+Text_Gr2_FeatureVal* T_PTROBJ_SPECIAL
+Text_Gr2_FeatureRef* T_PTROBJ_SPECIAL
+Text_Gr2_CharInfo* T_PTROBJ_SPECIAL
+Text_Gr2_Segment* T_PTROBJ_SPECIAL
+Text_Gr2_Slot* T_PTROBJ_SPECIAL
 
 INPUT
 T_PTROBJ_SPECIAL

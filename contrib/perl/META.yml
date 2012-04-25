@@ -14,16 +14,16 @@ meta-spec:
 name: Text-Graphite2
 provides:
   Text::Graphite2:
-    file: lib/Text/Graphite2.pm
+    file: lib/Text/Gr2.pm
     version: 0.01
-  Text::Graphite2::Face:
-    file: lib/Text/Graphite2/Face.pm
-  Text::Graphite2::FeatureRef:
-    file: lib/Text/Graphite2/FeatureRef.pm
-  Text::Graphite2::Font:
-    file: lib/Text/Graphite2/Font.pm
-  Text::Graphite2::Segment:
-    file: lib/Text/Graphite2/Segment.pm
+  Text::Gr2::Face:
+    file: lib/Text/Gr2/Face.pm
+  Text::Gr2::FeatureRef:
+    file: lib/Text/Gr2/FeatureRef.pm
+  Text::Gr2::Font:
+    file: lib/Text/Gr2/Font.pm
+  Text::Gr2::Segment:
+    file: lib/Text/Gr2/Segment.pm
 requires:
   Test::More: 0
 version: 0.01
