@@ -42,7 +42,7 @@ from contextlib import closing, contextmanager
 from itertools import chain, cycle, imap, islice, izip, repeat, starmap
 from random import uniform, seed
 
-import multiprocessing
+import multiprocessing.dummy as multiprocessing
 import shutil, tempfile 
 import os, re, resource, sys, time
 from subprocess import call
@@ -94,13 +94,13 @@ class font:
     def linear(self, value=[], start=0, passes=0):
         tables = chain.from_iterable(repeat(self.__table_dir, passes)) if passes else cycle(self.__table_dir)
         locs = chain.from_iterable(xrange(tr.start, tr.end) for tr in tables)
-        vals = repeat(value) if value else self.random_bytes
+        vals = cycle(value) if value else self.random_bytes
         next(islice(locs, start, start),None)
         next(islice(vals, start, start),None)
         return izip(locs, vals)
 
-    def position(self, loc, val=None):
-        return [(loc, val or next(random_bytes))]
+    def position(self, loc, val=[]):
+        return zip(repeat(loc), val if val else [next(random_bytes)])
 
     def read_tabledir(self):
         import mmap
@@ -197,7 +197,7 @@ def tableset(tags):
 parser = OptionParser(usage="usage: %prog -f font [options] -- command\n" + __doc__, version = __version__)
 parser.add_option("-l", "--logfile", help="Log results to this file")
 parser.add_option("-f", "--font", help="Required font file to corrupt")
-parser.add_option("-p", "--position", default="0", help="Specifies position to corrupt (hex)")
+parser.add_option("-p", "--position", help="Specifies position to corrupt (hex)")
 parser.add_option("-v", "--value", default=[], help="Specifies value(s) to use (default: varying random number)")
 parser.add_option("-i", "--input", help=".log file to read test values from")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
@@ -227,11 +227,13 @@ if __name__ == '__main__':
     if opts.valgrind :  
         args = ["valgrind", "-q"] + args
         opts.verbose = True
-    opts.position = int(opts.position,0)
+    opts.position = opts.position and int(opts.position,0)
     opts.value    = opts.value and [int(n,0) for n in opts.value.split(',')]
     opts.exclude  = opts.exclude and tableset(opts.exclude.split(','))
     opts.include  = opts.include and tableset(opts.include.split(','))
     
+    if '{}' not in args: args += ['{}']
+     
     try:
         log = open(opts.logfile, "at") if opts.logfile else sys.stdout     
         with closing(font(opts.font, opts.include, opts.exclude)) as fnt:        
