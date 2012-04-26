@@ -386,23 +386,15 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 					if (r->rule->action->deletes()) fsm.slots.collectGarbage();
 					adjustSlot(adv, slot, fsm.slots);
 					*dbgout		<< "cursor" << slotid(slot)
-								<< json::close	// Close "output" object
 							<< json::close; // Close RuelEvent object
 
 					return;
 				}
 				else
 				{
-					const slotid failed = input_slot(fsm.slots, -(--r)->rule->preContext);
 					*dbgout 	<< json::close	// close "considered" array
-							<< "output" << json::object
-								<< "range"	<< json::flat << json::object
-									<< "start" 	<< failed
-									<< "end" 	<< failed
-									<< json::close
-								<< "slots" 	<< json::array << json::close
-								<< "cursor"	<< slotid(slot->next())
-								<< json::close
+							<< "output" << json::null
+							<< "cursor"	<< slotid(slot->next())
 							<< json::close;
 				}
         	}
@@ -464,7 +456,9 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
 		*dbgout 		<< dslot(&fsm.slots.segment, slot);
-	*dbgout 			<< json::close; // close "slots";
+	*dbgout 			<< json::close 	// close "slots"
+				<< json::close;			// close "output" object
+
 }
 
 #endif

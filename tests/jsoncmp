@@ -35,7 +35,7 @@ def canonids(j) :
                 initcount += 1
             settreeval(h, p, slotmap[v])
     for (v, p, h) in walktree(j) :
-        if any_re(p, r"parent/id$", "input/start$", r"output/range/(start|end)$", r"output/cursor$", r"children/\d+$") :
+        if any_re(p, r"parent/id$", "input/start$", r"output/range/(start|end)$", r"cursor$", r"children/\d+$") :
             settreeval(h, p, slotmap[v])
     return j
 

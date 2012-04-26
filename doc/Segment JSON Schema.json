@@ -225,8 +225,8 @@
                                 
                                 "output" :
                                 {
-                                    "type" : "object",
-                                    "title" : "Output slot cursor and slots"
+                                    "type" : ["object", "null"]
+                                    "title" : "Output slots"
                                     "required" : true,
                                     "properties" :
                                     {
