@@ -102,14 +102,14 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<uint16>(p, m_sSuccess + 1);
 
     // More sanity checks
-    if (   reinterpret_cast<const byte *>(o_rule_map) > pass_end
+    if (   reinterpret_cast<const byte *>(o_rule_map + m_sSuccess*sizeof(uint16)) > pass_end
             || p > pass_end)
         return false;
     const size_t numEntries = be::peek<uint16>(o_rule_map + m_sSuccess*sizeof(uint16));
     const byte * const   rule_map = p;
     be::skip<uint16>(p, numEntries);
 
-    if (p > pass_end) return false;
+    if (p + 2 > pass_end) return false;
     m_minPreCtxt = be::read<uint8>(p);
     m_maxPreCtxt = be::read<uint8>(p);
     const byte * const start_states = p;
@@ -120,7 +120,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<byte>(p, m_numRules);
     be::skip<byte>(p);     // skip reserved byte
 
-    if (p > pass_end) return false;
+    if (p + 2 > pass_end) return false;
     const size_t pass_constraint_len = be::read<uint16>(p);
     const uint16 * const o_constraint = reinterpret_cast<const uint16 *>(p);
     be::skip<uint16>(p, m_numRules + 1);
