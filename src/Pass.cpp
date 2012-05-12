@@ -349,7 +349,7 @@ Slot * input_slot(const SlotMap &  slots, const int n)
 	Slot * s = slots[slots.context() + n];
 	if (!s->isCopied()) 	return s;
 
-	return s->prev() ? s->prev()->next() :  s->next()->prev();
+	return s->prev() ? s->prev()->next() : (s->next() ? s->next()->prev() : slots.segment.last());
 }
 
 inline
