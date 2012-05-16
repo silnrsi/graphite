@@ -1,7 +1,7 @@
 project(testing)
 include(Graphite)
 include(CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output of different renderers" ON
+CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output of different renderers" OFF
                         "NOT GRAPHITE2_NFILEFACE;NOT GRAPHITE2_NSEGCACHE" OFF)
 
 include_directories(${graphite2_core_SOURCE_DIR})

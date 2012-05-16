@@ -1,6 +1,6 @@
-== Building GraphiteNG ==
+== Building Graphite 2 ==
 
-GraphiteNG uses cmake for its build system. The basic build procedure is to create a directory in which to build the library and produce the products. Then cmake is run to generate build files and then the build is run.
+Graphite 2 uses cmake for its build system. The basic build procedure is to create a directory in which to build the library and produce the products. Then cmake is run to generate build files and then the build is run.
 
 === Linux ===
 
@@ -11,4 +11,31 @@ cmake -G "Unix Makefiles" ..
 make
 make test
 ----
+
+This will do a default build of Graphite with minimal dependencies on other packages. There are various option settings
+that can be passed to cmake when generating. They are described here, along with their type and possible and default values. Boolean values may take the value OFF or ON. Options may be set using the -Doption=value command line option. For example: -DGRAPHITE2_COMPARE_RENDERER=ON
+
+CMAKE_BUILD_TYPE::
+    This specifies which type of build to do. It is a string and may take the values: Release, RelWithDeb, Debug.
+    The default is Release.
+
+GRAPHITE2_COMPARE_RENDERER::
+    This is a boolean value that specifies whether to build the comparerenderer program that may link to silGraphite
+    or harfbuzz, if libraries of those packages are installed. The default value is OFF.
+
+GRAPHITE2_NFILEFACE::
+    This boolean value turns off FileFace support to save code space. By default it is OFF.
+
+GRAPHITE2_NSEGCACHE::
+    This boolean value turns off Segment caching support to save code space. By default it is OFF.
+
+GRAPHITE2_NTRACING::
+    This boolean value turns off tracing support to save code space. Tracing support allows debug output of segment
+    creation. By default it is OFF.
+
+GRAPHITE2_VM_TYPE::
+    This string value can be auto, direct or call. It specifies which type of virtual machine processor to use. The
+    default value of auto tells the system to work out the best approach for this architecture. A value of direct
+    tells the system to use the direct machine which is faster. The value of call tells the system to use the slower
+    but less specialised call based machine.
 
