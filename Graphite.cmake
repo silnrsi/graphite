@@ -6,7 +6,7 @@ function(nolib_test LIBNAME OBJECTFILE)
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND otool -L ${OBJECTFILE})
         set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
-            FAIL_REGULAR_EXPRESSION "[ \\t]+/.*${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}[.0-9]+${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            FAIL_REGULAR_EXPRESSION "${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}[.0-9]+${CMAKE_SHARED_LIBRARY_SUFFIX}")
     else (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND readelf --dynamic ${OBJECTFILE})
