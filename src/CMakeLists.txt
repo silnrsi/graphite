@@ -111,6 +111,19 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
+     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
+     -fno-rtti -fno-exceptions
+     -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
+    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
+    target_link_libraries(graphite2 "-lc")
+    include(Graphite)
+    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+    CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGRAPHITE2_EXPORTING)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
