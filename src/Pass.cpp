@@ -90,12 +90,13 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     // Perform some sanity checks.
     if (   m_sTransition > m_sRows
             || m_sSuccess > m_sRows
-            || m_sSuccess + m_sTransition < m_sRows)
+            || m_sSuccess + m_sTransition < m_sRows
+            || numRanges == 0)
         return false;
 
     if (p + numRanges * 6 - 4 > pass_end) return false;
     m_numGlyphs = be::peek<uint16>(p + numRanges * 6 - 4) + 1;
-    // Caculate the start of vairous arrays.
+    // Calculate the start of various arrays.
     const byte * const ranges = p;
     be::skip<uint16>(p, numRanges*3);
     const byte * const o_rule_map = p;
