@@ -5,12 +5,14 @@ function(nolib_test LIBNAME OBJECTFILE)
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND otool -L ${OBJECTFILE})
+        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
+            FAIL_REGULAR_EXPRESSION "[ \\t]+/.*${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}[.0-9]+${CMAKE_SHARED_LIBRARY_SUFFIX}")
     else (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND readelf --dynamic ${OBJECTFILE})
-    endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
+        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
             FAIL_REGULAR_EXPRESSION "0x[0-9a-f]+ \\(NEEDED\\)[ \\t]+Shared library: \\[${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}${CMAKE_SHARED_LIBRARY_SUFFIX}.*\\]")
+    endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 endfunction(nolib_test)
 
 
