@@ -16,7 +16,7 @@ target_link_libraries(gr2fonttest graphite2)
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # -lgcc LINKER_LANGUAGE C
     add_definitions(-fno-rtti -fno-exceptions)
-    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nodefaultlibs" )
+    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
     nolib_test(stdc++ $<TARGET_FILE:gr2fonttest>)

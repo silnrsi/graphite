@@ -230,7 +230,7 @@ template <typename T, typename R> void testAssertEqual(const char * msg, const T
 {
     if (a != T(b))
     {
-        fprintf(stderr, msg, a, b);
+        fprintf(stderr, msg, a, T(b));
         exit(1);
     }
 }

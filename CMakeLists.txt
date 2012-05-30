@@ -42,10 +42,10 @@ if (GRAPHITE2_VM_TYPE STREQUAL "auto")
         set(GRAPHITE2_VM_TYPE "call")
     endif(CMAKE_BUILD_TYPE MATCHES "[Rr]el(ease|[Ww]ith[Dd]eb[Ii]nfo)")
 endif (GRAPHITE2_VM_TYPE STREQUAL "auto")
-if (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
+if (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_BASE_NAME STREQUAL "clang++"))
     message(WARNING "vm machine type direct can only be built using GCC")
     set(GRAPHITE2_VM_TYPE "call")
-endif (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT CMAKE_COMPILER_IS_GNUCXX)
+endif (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_BASE_NAME STREQUAL "clang++"))
 message(STATUS "Using vm machine type: ${GRAPHITE2_VM_TYPE}")
 
 

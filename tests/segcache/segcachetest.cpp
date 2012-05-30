@@ -165,7 +165,7 @@ int main(int argc, char ** argv)
     long long accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 16)
     {
-        fprintf(stderr, "SegCache contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -178,7 +178,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 29)
     {
-        fprintf(stderr, "SegCache after repeat contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after repeat contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -190,7 +190,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount > 10 || accessCount != 30)
     {
-        fprintf(stderr, "SegCache after purge contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after purge contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
