@@ -241,7 +241,7 @@
                                                 "start" : { "$ref" : "SlotRef" },
                                                 "end" : { "$ref" : "SlotRef" }
                                             }
-                                        }
+                                        },
                                         "slots" :
                                         {
                                             "type" : "array",
@@ -250,6 +250,15 @@
                                                              output slots stream.",
                                             "required" : true, 
                                             "items" : { "$ref" : "Slot" }
+                                        },
+                                        "delta" : 
+                                        {
+                                            "title" : "Output slots displacement",
+                                            "description" : "The delta in the \
+                                                             right side edge of\
+                                                             ouput slot range.",
+                                            "required" : true,
+                                            "extends" : "Point"
                                         },
                                         "cursor" : { "$ref" : "SlotRef" }
                                     }

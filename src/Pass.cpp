@@ -454,11 +454,13 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 						<< "end"	<< slotid(last_slot)
 					<< json::close // close "input"
 					<< "slots"	<< json::array;
+	const Position rsb_prepos = last_slot ? last_slot->origin() : fsm.slots.segment.advance();
 	fsm.slots.segment.positionSlots(0);
 
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
 		*dbgout 		<< dslot(&fsm.slots.segment, slot);
 	*dbgout 			<< json::close 	// close "slots"
+					<< "delta"	<< (last_slot ? last_slot->origin() : fsm.slots.segment.advance()) - rsb_prepos
 				<< json::close;			// close "output" object
 
 }
