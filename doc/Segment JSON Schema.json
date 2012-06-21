@@ -251,12 +251,12 @@
                                             "required" : true, 
                                             "items" : { "$ref" : "Slot" }
                                         },
-                                        "delta" : 
+                                        "postshift" : 
                                         {
-                                            "title" : "Output slots displacement",
-                                            "description" : "The delta in the \
-                                                             right side edge of\
-                                                             ouput slot range.",
+                                            "title" : "Output advance delta",
+                                            "description" : "The delta in the right\
+                                                             side edge of output\
+                                                             slot range.",
                                             "required" : true,
                                             "extends" : "Point"
                                         },
