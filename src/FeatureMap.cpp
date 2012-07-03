@@ -60,8 +60,9 @@ namespace
 		uint16 max_val = 0;
         for (FeatureSetting * const end = s + num_settings; s != end; ++s)
         {
-            new (s) FeatureSetting(be::read<int16>(p), be::read<uint16>(p));
-            if (uint16(s->value()) > max_val) 	max_val = s->value();
+        	const int16 value = be::read<int16>(p);
+            ::new (s) FeatureSetting(value, be::read<uint16>(p));
+            if (uint16(value) > max_val) 	max_val = value;
         }
 
         return max_val;
