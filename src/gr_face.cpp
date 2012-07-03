@@ -120,16 +120,21 @@ void gr_tag_to_str(gr_uint32 tag, char *str)
         tag >>= 8;
     }
 }
-        
-#define zeropad(x) if (x == 0x20202020) x = 0;                             \
-    else if ((x & 0x00FFFFFF) == 0x00202020) x = x & 0xFF000000;   \
-    else if ((x & 0x0000FFFF) == 0x00002020) x = x & 0xFFFF0000;   \
-    else if ((x & 0x000000FF) == 0x00000020) x = x & 0xFFFFFF00;
+
+inline
+uint32 zeropad(const uint32 x)
+{
+	if (x == 0x20202020) 					return 0;
+	if ((x & 0x00FFFFFF) == 0x00202020)		return x & 0xFF000000;
+	if ((x & 0x0000FFFF) == 0x00002020)		return x & 0xFFFF0000;
+	if ((x & 0x000000FF) == 0x00000020)		return x & 0xFFFFFF00;
+	return x;
+}
 
 gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
 {
     assert(pFace);
-    zeropad(langname)
+    zeropad(langname);
     return static_cast<gr_feature_val *>(pFace->theSill().cloneFeatures(langname));
 }
 
@@ -137,7 +142,7 @@ gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 lang
 const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
 {
     assert(pFace);
-    zeropad(featId)
+    zeropad(featId);
     const FeatureRef* pRef = pFace->featureById(featId);
     return static_cast<const gr_feature_ref*>(pRef);
 }
@@ -182,24 +187,6 @@ gr_uint16 gr_face_name_lang_for_locale(gr_face *face, const char * locale)
     }
     return 0;
 }
-
-#if 0      //hidden since no way to release atm.
-
-uint16 *face_name(const gr_face * pFace, uint16 nameid, uint16 lid)
-{
-    size_t nLen = 0, lOffset = 0, lSize = 0;
-    const void *pName = pFace->getTable(tagName, &nLen);
-    uint16 *res;
-    if (!pName || !TtfUtil::GetNameInfo(pName, 3, 0, lid, nameid, lOffset, lSize))
-        return NULL;
-    lSize >>= 1;
-    res = gralloc<uint16>(lSize + 1);
-    for (size_t i = 0; i < lSize; ++i)
-        res[i] = swap16(*(uint16 *)((char *)pName + lOffset));
-    res[lSize] = 0;
-    return res;
-}
-#endif
 
 unsigned short gr_face_n_glyphs(const gr_face* pFace)
 {

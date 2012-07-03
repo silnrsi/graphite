@@ -24,38 +24,58 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+#pragma once
 
-#include "inc/Sparse.h"
-#include "inc/bits.h"
-
-using namespace graphite2;
-
-
-sparse::~sparse() throw()
+template<typename T>
+inline unsigned int bit_set_count(T v)
 {
-	free(m_array.values);
+	v = v - ((v >> 1) & T(~T(0)/3));                           // temp
+	v = (v & T(~T(0)/15*3)) + ((v >> 2) & T(~T(0)/15*3));      // temp
+	v = (v + (v >> 4)) & T(~T(0)/255*15);                      // temp
+	return (T)(v * T(~T(0)/255)) >> (sizeof(T)-1)*8;           // count
 }
 
 
-sparse::value sparse::operator [] (int k) const throw()
+template<int S>
+inline unsigned long _mask_over_val(unsigned long v)
 {
-	value g = value(k < m_nchunks*SIZEOF_CHUNK);	// This will be 0 is were out of bounds
-	k *= g;									// Force k to 0 if out of bounds making the map look up safe
-	const chunk & 		c = m_array.map[k/SIZEOF_CHUNK];
-	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - (k%SIZEOF_CHUNK));
-	g *= m & 1;			// Extend the guard value to consider the residency bit
+	v = _mask_over_val<S/2>(v);
+	v |= v >> S*4;
+	return v;
+}
 
-	return g*m_array.values[c.offset + g*bit_set_count(m >> 1)];
+template<>
+inline unsigned long _mask_over_val<1>(unsigned long v)
+{
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	return v;
+}
+
+template<typename T>
+inline T mask_over_val(T v)
+{
+	return _mask_over_val<sizeof(T)>(v);
+}
+
+template<typename T>
+inline unsigned long next_highest_power2(T v)
+{
+	return _mask_over_val<sizeof(T)>(v-1)+1;
+}
+
+template<typename T>
+inline T haszero(const T x)
+{
+	return (x - T(~T(0)/255)) & ~x & T(~T(0)/255*128);
+}
+
+template<typename T>
+inline T zerobytes(const T x, unsigned char n)
+{
+	const T t = T(~T(0)/255*n);
+	return T((haszero(x^t) >> 7)*n);
 }
 
 
-size_t sparse::size() const throw()
-{
-	size_t n = m_nchunks,
-		   s = 0;
-
-	for (const chunk *ci=m_array.map; n; --n, ++ci)
-		s += bit_set_count(ci->mask);
-
-	return s;
-}
