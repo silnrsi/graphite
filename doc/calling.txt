@@ -80,6 +80,8 @@ through that linked list. Given that a diacritic may attach to another
 diacritic, an attached slot may in its turn have a linked list of attached
 slots. In all cases, linked lists terminate with a NULL.
 
+image::glyph_string.png[]
+
 The core information held by a slot is the glyph id of the glyph the slot
 corresponds to (`gr_slot_gid()`); the position relative to the start of the
 segment that the glyph is to be rendered at (`gr_slot_origin_X()` and
