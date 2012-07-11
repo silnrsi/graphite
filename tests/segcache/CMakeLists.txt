@@ -13,6 +13,7 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 set(S ${graphite2_core_SOURCE_DIR})
 add_executable(grsegcachetest segcachetest.cpp)
+set_target_properties(grsegcachetest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
 target_link_libraries(grsegcachetest graphite2 graphite2-segcache graphite2-base)
     
 add_test(NAME grsegcachetest COMMAND $<TARGET_FILE:grsegcachetest> ${testing_SOURCE_DIR}/fonts/Padauk.ttf)
