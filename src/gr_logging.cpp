@@ -32,24 +32,47 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+namespace
+{
+	class json_file : public json
+	{
+	public:
+		json_file(const char *path) : graphite2::json(fopen(path, "wt")) {}
+		~json_file() throw()
+		{
+			if (stream() != 0)
+				fclose(stream());
+		}
+	};
+}
+
+
 extern "C" {
 
 
-bool graphite_start_logging(FILE * logFile, GrLogMask mask)
+bool graphite_start_logging(gr_face * face, const char *log_path)
 {
-	if (!logFile || !mask)	return false;
-
 #if !defined GRAPHITE2_NTRACING
-	dbgout = new json(logFile);
+	if (!face || !log_path)	return false;
+
+	dbgout = new json_file(log_path);
+	if (!dbgout->good())
+	{
+		graphite_stop_logging(face);
+		return false;
+	}
+
 	return dbgout != 0;
 #else
 	return false;
 #endif
 }
 
-void graphite_stop_logging()
+void graphite_stop_logging(gr_face * face)
 {
 #if !defined GRAPHITE2_NTRACING
+	if (!face)	return;
+
 	delete dbgout;
 #endif
 }

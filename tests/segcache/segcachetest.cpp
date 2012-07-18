@@ -139,8 +139,6 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Usage: %s font.ttf\n", argv[0]);
         return 1;
     }
-    FILE * log = fopen("grsegcache.xml", "w");
-    graphite_start_logging(log, GRLOG_SEGMENT);
     CachedFace *face = static_cast<CachedFace *>(static_cast<Face *>(
         gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default)));
     if (!face)
@@ -148,6 +146,7 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
+    graphite_start_logging(api_cast(face), "grsegcache.json");
     gr_font *sizedFont = gr_make_font(12, api_cast(face));
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
@@ -198,6 +197,6 @@ int main(int argc, char ** argv)
     gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
-    graphite_stop_logging();
+    graphite_stop_logging(api_cast(face));
     return 0;
 }

@@ -92,7 +92,7 @@ static Option rendererOptions[] = {
     Option("-s", "--size", "Font size", Option::OPTION_INT),
     Option("-g", "--graphite", "Use Graphite renderer", Option::OPTION_BOOL),
     Option("-n", "--graphite2", "Use Graphite2 renderer", Option::OPTION_BOOL),
-    Option("-N", "--graphite2", "Use Graphite2 uncached renderer", Option::OPTION_BOOL),
+    Option("-N", "--graphite2uc", "Use Graphite2 uncached renderer", Option::OPTION_BOOL),
     Option("-h", "--harfbuzzng", "Use Harfbuzz NG renderer", Option::OPTION_BOOL),
     Option("-H", "--harfbuzz", "Use Harfbuzz renderer", Option::OPTION_BOOL),
     Option("-i", "--icu", "Use ICU renderer", Option::OPTION_BOOL),
