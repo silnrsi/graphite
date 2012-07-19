@@ -51,9 +51,6 @@ class json
 	void push_context(const char, const char) throw();
 	void pop_context() throw();
 
-protected:
-	FILE * stream() const throw();
-
 public:
 	class closer;
 
@@ -70,7 +67,9 @@ public:
 	static void item(json &) throw();
 
 	json(FILE * stream) throw();
-	virtual ~json() throw ();
+	~json() throw ();
+
+	FILE * stream() const throw();
 
 	json & operator << (string) throw();
 	json & operator << (number) throw();
