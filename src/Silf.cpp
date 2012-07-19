@@ -293,11 +293,8 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-    	char version[64];
-    	sprintf(version, "%d.%d.%d",
-    			GR2_VERSION_MAJOR, GR2_VERSION_MINOR, GR2_VERSION_BUGFIX);
     	*dbgout << json::object
-    				<< "version"	<< version
+    				<< "id"			<< objectid(seg)
     				<< "passes"		<< json::array;
     }
 #endif

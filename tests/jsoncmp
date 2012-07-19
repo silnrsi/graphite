@@ -18,24 +18,32 @@ def settreeval(parent, path, value) :
     parent[p] = value
 
 def readjson(fname) :
-    with open(fname,'r') as f: 
-        return json.load(f)
+    return json.load(open(fname,'r'))
 
 def any_re(s, *res): 
     return any(re.search(r,s) for r in res)
 
 def canonids(j) :
+    segmap = {}
+    segcount = 1
     slotmap = {'0000-00-0000':0} # The only pre-exisiting slotref for one past the end
-    initcount = 1
-    del j['version']
+    slotcount = 1
     for (v, p, h) in walktree(j) :
         if any_re(p, r"slots/\d+/id$", r"output/\d+/id$"):
             if v not in slotmap :
-                slotmap[v] = initcount
-                initcount += 1
+                slotmap[v] = slotcount
+                slotcount += 1
             settreeval(h, p, slotmap[v])
+        elif any_re(p, r"/\d+/id$"):
+            if v not in segmap :
+                segmap[v] = segcount
+                segcount += 1
+            settreeval(h, p, segmap[v])
+            
     for (v, p, h) in walktree(j) :
         if any_re(p, r"parent/id$", "input/start$", r"output/range/(start|end)$", r"cursor$", r"children/\d+$") :
+            settreeval(h, p, slotmap[v])
+        elif any_re(p, r"/\d+/segment$") :
             settreeval(h, p, slotmap[v])
     return j
 

@@ -387,7 +387,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 					dumpRuleEventOutput(fsm, *r->rule, slot);
 					if (r->rule->action->deletes()) fsm.slots.collectGarbage();
 					adjustSlot(adv, slot, fsm.slots);
-					*dbgout		<< "cursor" << slotid(slot)
+					*dbgout		<< "cursor" << objectid(slot)
 							<< json::close; // Close RuelEvent object
 
 					return;
@@ -396,7 +396,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 				{
 					*dbgout 	<< json::close	// close "considered" array
 							<< "output" << json::null
-							<< "cursor"	<< slotid(slot->next())
+							<< "cursor"	<< objectid(slot->next())
 							<< json::close;
 				}
         	}
@@ -429,7 +429,7 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
 					<< "id" 	<< r->rule - m_rules
 					<< "failed"	<< true
 					<< "input" << json::flat << json::object
-						<< "start" << slotid(input_slot(fsm.slots, -r->rule->preContext))
+						<< "start" << objectid(input_slot(fsm.slots, -r->rule->preContext))
 						<< "length" << r->rule->sort
 						<< json::close	// close "input"
 					<< json::close;	// close Rule object
@@ -443,15 +443,15 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 						<< "id" 	<< &r - m_rules
 						<< "failed" << false
 						<< "input" << json::flat << json::object
-							<< "start" << slotid(input_slot(fsm.slots, 0))
+							<< "start" << objectid(input_slot(fsm.slots, 0))
 							<< "length" << r.sort - r.preContext
 							<< json::close // close "input"
 						<< json::close	// close Rule object
 				<< json::close // close considered array
 				<< "output" << json::object
 					<< "range" << json::flat << json::object
-						<< "start"	<< slotid(input_slot(fsm.slots, 0))
-						<< "end"	<< slotid(last_slot)
+						<< "start"	<< objectid(input_slot(fsm.slots, 0))
+						<< "end"	<< objectid(last_slot)
 					<< json::close // close "input"
 					<< "slots"	<< json::array;
 	const Position rsb_prepos = last_slot ? last_slot->origin() : fsm.slots.segment.advance();

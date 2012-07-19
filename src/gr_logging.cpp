@@ -41,7 +41,10 @@ bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 
 #if !defined GRAPHITE2_NTRACING
 	dbgout = new json(logFile);
-	return dbgout != 0;
+	if (!dbgout)	return false;
+
+	*dbgout << json::array;
+	return true;
 #else
 	return false;
 #endif
@@ -85,7 +88,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 	Slot & s = *ds.second;
 
 	j << json::object
-		<< "id"				<< slotid(&s)
+		<< "id"				<< objectid(&s)
 		<< "gid"			<< s.gid()
 		<< "charinfo" << json::flat << json::object
 			<< "original"		<< s.original()
@@ -104,7 +107,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		j << "bidi"		<< s.getBidiLevel();
 	if (!s.isBase())
 		j << "parent" << json::flat << json::object
-			<< "id"				<< slotid(s.attachedTo())
+			<< "id"				<< objectid(s.attachedTo())
 			<< "level"			<< s.getAttr(0, gr_slatAttLevel, 0)
 			<< "offset"			<< s.attachOffset()
 			<< json::close;
@@ -115,17 +118,24 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 	if (s.firstChild())
 	{
 		j	<< "children" << json::flat << json::array;
-		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << slotid(c);
+		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << objectid(c);
 		j		<< json::close;
 	}
 	return j << json::close;
 }
 
 
-graphite2::slotid::slotid(const Slot * const p) throw()
+graphite2::objectid::objectid(const Slot * const p) throw()
 {
 	uint32 s = reinterpret_cast<size_t>(p);
 	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->index() : 0), uint16(s));
+	name[sizeof name-1] = 0;
+}
+
+graphite2::objectid::objectid(const Segment * const p) throw()
+{
+	uint32 s = reinterpret_cast<size_t>(p);
+	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), 0, uint16(s));
 	name[sizeof name-1] = 0;
 }
 
