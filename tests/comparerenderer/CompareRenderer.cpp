@@ -19,6 +19,8 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cassert>
+#include <cstddef>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -338,13 +340,9 @@ int main(int argc, char ** argv)
     FeatureParser * altFeatureSettings = NULL;
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
-    if (rendererOptions[OptTrace].exists())
-    {
-        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "wb");
-        int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
-            (GRLOG_SEGMENT | GRLOG_CACHE);
-        graphite_start_logging(traceFile, static_cast<GrLogMask>(logMask));
-    }
+    const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
+	Gr2Face face(fontFile, segCacheSize, traceLogPath);
+
 
     if (rendererOptions[OptFeatures].exists())
     {
@@ -369,8 +367,12 @@ int main(int argc, char ** argv)
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
         if (rendererOptions[OptGraphite2].exists())
         {
-            renderers[0] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
-            renderers[1] = (new Gr2Renderer(altFontFile, fontSize, direction, segCacheSize, altFeatureSettings));
+            std::string altTraceLogPath = traceLogPath;
+            altTraceLogPath.insert(traceLogPath.find_last_of('.'), ".alt");
+        	Gr2Face altFace(altFontFile, segCacheSize, altTraceLogPath);
+
+            renderers[0] = new Gr2Renderer(face, fontSize, direction, featureSettings);
+            renderers[1] = new Gr2Renderer(altFace, fontSize, direction, altFeatureSettings);
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
@@ -415,10 +417,14 @@ int main(int argc, char ** argv)
             renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
         if (rendererOptions[OptGraphite2].exists())
-            renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
+            renderers[1] = new Gr2Renderer(face, fontSize, direction, featureSettings);
 
         if (rendererOptions[OptGraphite2s].exists())
-            renderers[2] = (new Gr2Renderer(fontFile, fontSize, direction, 0, featureSettings));
+        {
+        	Gr2Face uncached(fontFile, 0,
+        			std::string(traceLogPath).insert(traceLogPath.find_last_of('.'), ".uncached"));
+            renderers[2] = new Gr2Renderer(uncached, fontSize, direction, featureSettings);
+        }
 
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
@@ -474,7 +480,6 @@ int main(int argc, char ** argv)
         delete altFeatureSettings;
     delete featureSettings;
     if (rendererOptions[OptLogFile].exists()) fclose(log);
-    if (rendererOptions[OptTrace].exists()) graphite_stop_logging();
 
     return status;
 }

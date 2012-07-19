@@ -27,28 +27,18 @@
 #pragma once
 
 #include <graphite2/Types.h>
-#include <stdio.h>
-
-typedef enum {
-    GRLOG_NONE = 0x0,
-    GRLOG_FACE = 0x01,
-    GRLOG_SEGMENT = 0x02,
-    GRLOG_PASS = 0x04,
-    GRLOG_CACHE = 0x08,
-    
-    GRLOG_OPCODE = 0x80,
-    GRLOG_ALL = 0xFF
-} GrLogMask;
+#include <graphite2/Font.h>
 
 // If startGraphiteLogging returns true, logging is enabled and the FILE handle
 // will be closed by graphite when stopGraphiteLogging is called.
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
-GR2_API void graphite_stop_logging();
+GR2_API bool graphite_start_logging(gr_face * face, const char *log_path);
+GR2_API void graphite_stop_logging(gr_face * face);
 
 #ifdef __cplusplus
 }
