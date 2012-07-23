@@ -1,5 +1,7 @@
 == Building Graphite 2 ==
 
+Graphite 2 is made available as a source tarball from: http://projects.palaso.org/graphitedev/files and also from http://sf.net/projects/silgraphite/files/graphite2
+
 Graphite 2 uses cmake for its build system. The basic build procedure is to 
 create a directory in which to build the library and produce the products. 
 Then cmake is run to generate build files and then the build is run.
