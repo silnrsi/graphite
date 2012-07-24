@@ -55,7 +55,7 @@ bool graphite_start_logging(gr_face * face, const char *log_path)
 	LPWSTR wlog_path = gralloc<WCHAR>(n);
 	FILE *log = 0;
 	if (wlog_path && MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, wlog_path, n))
-		log = _wfopen(nwlog_path, L"wt");
+		log = _wfopen(wlog_path, L"wt");
 
 	free(wlog_path);
 #else
