@@ -22,22 +22,51 @@
 #pragma once
 
 #include <new>
+#include <memory>
+#include <string>
 #include "Renderer.h"
 #include "FeatureParser.h"
 #include <graphite2/Types.h>
 #include <graphite2/Segment.h>
+#include <graphite2/Log.h>
+
+class Gr2Face : private std::auto_ptr<gr_face>
+{
+	bool m_cached;
+
+public:
+	Gr2Face(const char * fontFile, int cache, const std::string & logPath)
+    :  std::auto_ptr<gr_face>(cache == 0
+          ? gr_make_file_face(fontFile, gr_face_preloadGlyphs)
+          : gr_make_file_face_with_seg_cache(fontFile, cache, gr_face_cacheCmap | gr_face_preloadGlyphs)),
+       m_cached(cache > 0)
+	{
+        if (!get()) return;
+
+    	if (logPath.size())	graphite_start_logging(get(), logPath.c_str());
+	}
+
+	~Gr2Face() throw()
+	{
+    	graphite_stop_logging(get());
+        gr_face_destroy(get());
+        release();
+	}
+
+	bool cached() const 		{ return m_cached; }
+	operator bool () const		{ return get() != 0; }
+	operator gr_face* () const	{ return get(); }
+};
+
 
 class Gr2Renderer : public Renderer
 {
 public:
-    Gr2Renderer(const char * fontFile, int fontSize, int textDir, int cache, FeatureParser * features)
-        : m_rtl(textDir),
-          m_grFace((cache == 0)?
-            gr_make_file_face(fontFile, gr_face_preloadGlyphs):
-            gr_make_file_face_with_seg_cache(fontFile, cache,
-                gr_face_cacheCmap | gr_face_preloadGlyphs)),
-        m_grFont(0),
-        m_grFeatures(0)
+    Gr2Renderer(Gr2Face & face, int fontSize, int textDir, FeatureParser * features)
+	: m_rtl(textDir),
+	  m_grFace(face),
+	  m_grFont(0),
+	  m_grFeatures(0)
     {
         if (m_grFace)
         {
@@ -57,16 +86,14 @@ public:
                 m_grFeatures = gr_face_featureval_for_lang(m_grFace, 0);
             }
         }
-        m_name = cache == 0 ? "graphite2 (uncached)" : "graphite2 (cached)";
+        m_name = !m_grFace.cached() ? "graphite2 (uncached)" : "graphite2 (cached)";
     }
     virtual ~Gr2Renderer()
     {
         gr_featureval_destroy(m_grFeatures);
         gr_font_destroy(m_grFont);
-        gr_face_destroy(m_grFace);
-        m_grFont = NULL;
-        m_grFace = NULL;
     }
+
     virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
     {
         const void * pError = NULL;
@@ -99,7 +126,7 @@ public:
     virtual const char * name() const { return m_name; }
 private:
     int m_rtl;
-    gr_face * m_grFace;
+    Gr2Face   m_grFace;
     gr_font * m_grFont;
     gr_feature_val * m_grFeatures;
     const char * m_name;

@@ -24,24 +24,47 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+#include <cstdio>
+
 #include "graphite2/Log.h"
 #include "inc/debug.h"
 #include "inc/CharInfo.h"
 #include "inc/Slot.h"
 #include "inc/Segment.h"
 
+#if defined _WIN32
+#include "Windows.h"
+#endif
+
 using namespace graphite2;
+
 
 extern "C" {
 
 
-bool graphite_start_logging(FILE * logFile, GrLogMask mask)
+bool graphite_start_logging(gr_face * face, const char *log_path)
 {
-	if (!logFile || !mask)	return false;
-
 #if !defined GRAPHITE2_NTRACING
-	dbgout = new json(logFile);
-	if (!dbgout)	return false;
+	if (!face || !log_path)	return false;
+
+	graphite_stop_logging(face);
+#if defined _WIN32
+	int n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, 0, 0);
+	if (n == 0 || n > MAX_PATH - 12) return false;
+
+	LPWSTR wlog_path = gralloc<WCHAR>(n);
+	FILE *log = 0;
+	if (wlog_path && MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, wlog_path, n))
+		log = _wfopen(wlog_path, L"wt");
+
+	free(wlog_path);
+#else
+	FILE *log = fopen(log_path, "wt");
+#endif
+	if (!log)	return false;
+
+	dbgout = new json(log);
+	if (!dbgout) return false;
 
 	*dbgout << json::array;
 	return true;
@@ -50,10 +73,18 @@ bool graphite_start_logging(FILE * logFile, GrLogMask mask)
 #endif
 }
 
-void graphite_stop_logging()
+void graphite_stop_logging(gr_face * face)
 {
 #if !defined GRAPHITE2_NTRACING
-	delete dbgout;
+	if (!face)	return;
+
+	if (dbgout)
+	{
+		FILE * log = dbgout->stream();
+		delete dbgout;
+		dbgout = 0;
+		fclose(log);
+	}
 #endif
 }
 

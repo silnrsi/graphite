@@ -1,15 +1,15 @@
 [patterns]
-**.h = native
 **.c = native
+**.cfg = native
 **.cpp = native
-**.txt = native
-**.log = native
-**.ttf = BIN
+**.gdh = native
+**.h = native
+**.json = native
 **.log = native
 **.pdf = BIN
-**.gdh = native
-**.cfg = native
 **.sh = native
+**.txt = native
+**.ttf = BIN
 
 [repository]
 native=LF

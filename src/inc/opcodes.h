@@ -568,11 +568,7 @@ STARTOP(iattr_sub)
 ENDOP
 
 STARTOP(push_proc_state)
-//    declare_params(1);
-//    unsigned int  pstate = uint8(*param);
-//    pstate = 0;     // This is here to stop the compiler bleating about unused 
-                    // variables.
-    // TODO; Implement body
+    // TODO Implement body
     use_params(1);
     push(1);
 ENDOP

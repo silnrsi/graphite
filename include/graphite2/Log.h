@@ -27,28 +27,31 @@
 #pragma once
 
 #include <graphite2/Types.h>
-#include <stdio.h>
+#include <graphite2/Font.h>
 
-typedef enum {
-    GRLOG_NONE = 0x0,
-    GRLOG_FACE = 0x01,
-    GRLOG_SEGMENT = 0x02,
-    GRLOG_PASS = 0x04,
-    GRLOG_CACHE = 0x08,
-    
-    GRLOG_OPCODE = 0x80,
-    GRLOG_ALL = 0xFF
-} GrLogMask;
-
-// If startGraphiteLogging returns true, logging is enabled and the FILE handle
-// will be closed by graphite when stopGraphiteLogging is called.
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
-GR2_API void graphite_stop_logging();
+/** Start logging all segment creation and updates on the provided face.  This
+  * is logged to a JSON file, see "Segment JSON Schema.txt" for a precise
+  * definition of the file
+  *
+  * @return true if the file was successfully created and logging is correctly
+  * 			 initialised.
+  * @param face the gr_face whose segments you want to log to the given file
+  * @param log_path a utf8 encoded file name and path to log to.
+  */
+GR2_API bool graphite_start_logging(gr_face * face, const char *log_path);
+
+
+/** Stop logging on the given face.  This will close the log file created by
+  * graphite_start_loging.
+  *
+  * @param face the gr_face whose segments you want to stop logging
+  */
+GR2_API void graphite_stop_logging(gr_face * face);
 
 #ifdef __cplusplus
 }

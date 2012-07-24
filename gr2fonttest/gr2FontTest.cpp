@@ -101,8 +101,7 @@ public:
     size_t charLength;
     size_t offset;
     FILE * log;
-    FILE * trace;
-    int mask;
+    char * trace;
     
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
@@ -144,7 +143,6 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
-    mask = GRLOG_SEGMENT | GRLOG_OPCODE;
 }
 
 
@@ -278,16 +276,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             option = NONE;
             break;
         case TRACE:
-            if (trace) fclose(trace);
-            trace = fopen(argv[a], "wb");
-            if (trace == NULL)
-            {
-                fprintf(stderr,"Failed to open %s\n", argv[a]);
-            }
-            option = NONE;
-            break;
-        case TRACE_MASK:
-            mask = atoi(argv[a]);
+            trace = argv[a];
             option = NONE;
             break;
         default:
@@ -586,14 +575,14 @@ int Parameters::testFileFont() const
     int returnCode = 0;
 //    try
     {
-        // use the -trace option to specify a file
-    	if (trace)	graphite_start_logging(trace, static_cast<GrLogMask>(mask));
-
         gr_face *face = NULL;
         if (enableCache)
             face = gr_make_file_face_with_seg_cache(fileName, 1000, gr_face_preloadGlyphs | gr_face_dumbRendering);
         else
             face = gr_make_file_face(fileName, gr_face_preloadGlyphs);
+
+        // use the -trace option to specify a file
+    	if (trace)	graphite_start_logging(face, trace);
 
         if (!face)
         {
@@ -603,8 +592,8 @@ int Parameters::testFileFont() const
         if (charLength == 0)
         {
             printFeatures(face);
+            graphite_stop_logging(face);
             gr_face_destroy(face);
-            graphite_stop_logging();
             return 0;
         }
 
@@ -738,9 +727,9 @@ int Parameters::testFileFont() const
        }
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
+        if (trace) graphite_stop_logging(face);
         gr_face_destroy(face);
     }
-    if (trace) graphite_stop_logging();
     return returnCode;
 }
 
