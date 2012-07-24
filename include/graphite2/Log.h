@@ -29,15 +29,28 @@
 #include <graphite2/Types.h>
 #include <graphite2/Font.h>
 
-// If startGraphiteLogging returns true, logging is enabled and the FILE handle
-// will be closed by graphite when stopGraphiteLogging is called.
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+/** Start logging all segment creation and updates on the provided face.  This
+  * is logged to a JSON file, see "Segment JSON Schema.txt" for a precise
+  * definition of the file
+  *
+  * @return true if the file was successfully created and logging is correctly
+  * 			 initialised.
+  * @param face the gr_face whose segments you want to log to the given file
+  * @param log_path a utf8 encoded file name and path to log to.
+  */
 GR2_API bool graphite_start_logging(gr_face * face, const char *log_path);
+
+
+/** Stop logging on the given face.  This will close the log file created by
+  * graphite_start_loging.
+  *
+  * @param face the gr_face whose segments you want to stop logging
+  */
 GR2_API void graphite_stop_logging(gr_face * face);
 
 #ifdef __cplusplus
