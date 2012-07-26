@@ -35,6 +35,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+namespace { static const uint32 ERROROFFSET = 0xFFFFFFFF; }
 
 Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
@@ -137,7 +138,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     }
 
     const size_t clen = readClassMap(p, passes_start - p, version);
-    if (clen == 0 || p + clen > passes_start)  { releaseBuffers(); return false; }
+    if (clen == ERROROFFSET || p + clen > passes_start)  { releaseBuffers(); return false; }
 
     m_passes = new Pass[m_numPasses];
     for (size_t i = 0; i < m_numPasses; ++i)
@@ -164,7 +165,7 @@ template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t
 	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
 	// Check that the last+1 offset is less than or equal to the class map length.
 	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
-		return 0;
+		return ERROROFFSET;
 
 	// Read in all the offsets.
 	m_classOffsets = gralloc<uint32>(m_nClass+1);
@@ -172,14 +173,14 @@ template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t
 	{
 		*o = (be::read<T>(p) - cls_off)/sizeof(uint16);
 		if (*o > max_off)
-			return 0;
+			return ERROROFFSET;
 	}
     return max_off;
 }
 
 size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
 {
-	if (data_len < sizeof(uint16)*2)	return 0;
+	if (data_len < sizeof(uint16)*2)	return ERROROFFSET;
 
 	m_nClass  = be::read<uint16>(p);
 	m_nLinear = be::read<uint16>(p);
@@ -188,7 +189,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
 	// that there is at least enough data for numClasses offsets.
 	if (m_nLinear > m_nClass
 	 || (m_nClass + 1) * (version >= 0x00040000 ? sizeof(uint32) : sizeof(uint16))> (data_len - 4))
-		return 0;
+		return ERROROFFSET;
 
     
     uint32 max_off;
@@ -197,12 +198,12 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
     else
         max_off = readClassOffsets<uint16>(p, data_len);
 
-    if (max_off == 0) return 0;
+    if (max_off == ERROROFFSET) return ERROROFFSET;
 
 	// Check the linear offsets are sane, these must be monotonically increasing.
 	for (const uint32 *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
 		if (o[0] > o[1])
-			return 0;
+			return ERROROFFSET;
 
 	// Fortunately the class data is all uint16s so we can decode these now
     m_classData = gralloc<uint16>(max_off);
@@ -217,7 +218,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version)
          || lookup[0] == 0							// A LookupClass with no looks is a suspicious thing ...
 		 || lookup[0] > (max_off - *o - 4)/2  	    // numIDs lookup pairs fits within (start of LookupClass' lookups array, max_off]
 		 || lookup[3] != lookup[0] - lookup[1])		// rangeShift:	 numIDs  - searchRange
-			return 0;
+			return ERROROFFSET;
 	}
 
 	return max_off;
