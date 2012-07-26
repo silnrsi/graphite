@@ -22,47 +22,73 @@ packages. There are various option settings see
 
 === Windows ===
 
-1. Create your build directory:
+1. Create your build directory 
++
 ----
 mkdir build
 cd build
 ----
 
 2. Generate project files for your build system
-You need to specify the CMAKE_BUILD_TYPE. Here we also turn off building 
-the `comparerenderer` testing tool for Windows, this will result in fewer 
-tests being run but keeps build dependencies down.
++ 
+You need to specify the CMAKE_BUILD_TYPE as some Windows generators require it.
++
 ----
-cmake -DCMAKE_BUILD_TYPE:STRING=Release -DGRAPHITE2_COMPARE_RENDERER:BOOL=OFF
+cmake -DCMAKE_BUILD_TYPE:STRING=Release
 ----
-This will do a default build of Graphite for build system CMake detected 
-automatically with minimal dependencies on other packages. To specify a build 
-system other than the default pass the `-G <generator name>` option to the 
-initial cmake configuration call, you can get a list of generators CMakes 
-supports with `cmake --help`
++
+CMake will automatically detect your build system and generate a project for 
+that. The options passed above will do a default build of Graphite with minimal
+dependencies on other packages. 
+You may wish to specify a build system other than the automatically detected 
+one, for examples if you have multiple versions of Visual Studio installed or 
+other toolchains such as MinGW you wish build under. To do this pass 
+the `-G <generator name>` option to the initial cmake configuration call, for 
+example for Visual Studio 8:
++
+----
+cmake -G "Visual Studio 8 2005" -DCMAKE_BUILD_TYPE:STRING=Release
+----
++
+or for MinGW
++
+----
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release
+----
++
+TIP: You can get a list of generators CMakes supports with `cmake --help`.
 
-3. Build graphite binaries:
+3. Build graphite binaries
++ 
 ----
 cmake --build .
 ----
++
 When building with using the Visual Studio generator you will need to append 
 `--config Debug` or `--config Release` for you debug and release builds 
 respectively to the end of above command. Depending on your chosen generator 
 the next step varies, for MS Visual Studio projects you will need to run:
++
 ----
 cmake --build . --target RUN_TESTS
 ---- 
++
 for everything else:
++
 ----
 cmake --build . --target test
 ----
 
 4. Rebuilds
++ 
 You can clean the project with:
++
 ----
 cmake --build . --target clean
 ----
++
 Or just delete the build directory and start again.
+
 
 [[X1]]
 === Generator configuration options ===
@@ -73,25 +99,25 @@ Boolean values may take the value OFF or ON. Options may be set using
 the -Doption=value command line option. 
 For example: -DGRAPHITE2_COMPARE_RENDERER=ON
 
-CMAKE_BUILD_TYPE:STRING
+CMAKE_BUILD_TYPE:STRING::
     This specifies which type of build to do. It is a string and may take the values: Release, RelWithDeb, Debug.
     The default is Release. This must be specified on Windows.
 
-GRAPHITE2_COMPARE_RENDERER:BOOL
+GRAPHITE2_COMPARE_RENDERER:BOOL::
     This is a boolean value that specifies whether to build the comparerenderer program that may link to silGraphite
     or harfbuzz, if libraries of those packages are installed. The default value is OFF.
 
-GRAPHITE2_NFILEFACE:BOOL
+GRAPHITE2_NFILEFACE:BOOL::
     This boolean value turns off FileFace support to save code space. By default it is OFF.
 
-GRAPHITE2_NSEGCACHE:BOOL
+GRAPHITE2_NSEGCACHE:BOOL::
     This boolean value turns off Segment caching support to save code space. By default it is OFF.
 
-GRAPHITE2_NTRACING:BOOL
+GRAPHITE2_NTRACING:BOOL::
     This boolean value turns off tracing support to save code space. Tracing support allows debug output of segment
     creation. By default it is OFF.
 
-GRAPHITE2_VM_TYPE:STRING
+GRAPHITE2_VM_TYPE:STRING::
     This string value can be auto, direct or call. It specifies which type of virtual machine processor to use. The
     default value of auto tells the system to work out the best approach for this architecture. A value of direct
     tells the system to use the direct machine which is faster. The value of call tells the system to use the slower
