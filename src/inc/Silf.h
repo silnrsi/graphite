@@ -80,6 +80,7 @@ public:
     uint8 numPasses() const { return m_numPasses; }
     uint8 maxCompPerLig() const { return m_iMaxComp; }
     uint16 numClasses() const { return m_nClass; }
+    uint8 flags() const { return m_flags; }
 
     CLASS_NEW_DELETE
 

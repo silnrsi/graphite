@@ -291,15 +291,6 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
         lastPass = m_numPasses;
     }
 
-#if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-    {
-    	*dbgout << json::object
-    				<< "id"			<< objectid(seg)
-    				<< "passes"		<< json::array;
-    }
-#endif
-
     for (size_t i = firstPass; i < lastPass; ++i)
     {
     	// bidi and mirroring
@@ -355,23 +346,5 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
             || (seg->slotCount() && seg->slotCount() * MAX_SEG_GROWTH_FACTOR < initSize))))
             return false;
     }
-#if !defined GRAPHITE2_NTRACING
-	if (dbgout)
-	{
-		*dbgout 			<< json::item
-							<< json::close // Close up the passes array
-				<< "output" << json::array;
-		for(Slot * s = seg->first(); s; s = s->next())
-			*dbgout		<< dslot(seg, s);
-		seg->finalise(0);					// Call this here to fix up charinfo back indexes.
-		*dbgout			<< json::close
-				<< "advance" << seg->advance()
-				<< "chars"	 << json::array;
-		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-			*dbgout 	<< json::flat << *seg->charinfo(i);
-		*dbgout			<< json::close	// Close up the chars array
-					<< json::close;		// Clsoe up the segment object
-	}
-#endif
     return true;
 }

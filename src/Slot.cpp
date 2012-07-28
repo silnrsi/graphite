@@ -104,7 +104,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (!m_parent)
     {
         res = base + Position(tAdvance, m_advance.y * scale);
-        cMin = 0.;
+        //cMin = 0.;
         clusterMin = base.x;
     }
     else
@@ -124,7 +124,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
     //bbox->widen(ourBbox);
 
-    if (m_parent && m_position.x < cMin) cMin = m_position.x;
+    //if (m_parent && m_position.x < cMin) cMin = m_position.x;
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
@@ -140,14 +140,15 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     
     if (!m_parent)
     {
-        if (cMin < 0)
-        {
-            Position adj = Position(-cMin, 0.);
-            res += adj;
-            m_position += adj;
-            if (m_child) m_child->floodShift(adj);
-        }
-        else if ((seg->dir() & 1) && (clusterMin < base.x))
+    //    if (cMin < 0)
+    //    {
+    //        Position adj = Position(-cMin, 0.);
+    //        res += adj;
+    //        m_position += adj;
+    //        if (m_child) m_child->floodShift(adj);
+    //    }
+    //    else if ((seg->dir() & 1) && (clusterMin < base.x))
+        if (clusterMin < base.x)
         {
             Position adj = Position(base.x - clusterMin, 0.);
             res += adj;
@@ -257,7 +258,10 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             if (other != this && other->child(this))
             {
                 attachTo(other);
-                m_attach = Position(seg->glyphAdvance(other->gid()), 0);
+                if (((seg->dir() & 1) != 0) ^ (idx > subindex))
+                    m_with = Position(advance(), 0);
+                else        // normal match to previous root
+                    m_attach = Position(other->advance(), 0);
             }
         }
         break;

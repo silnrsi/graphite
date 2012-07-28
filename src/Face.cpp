@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include <cstring>
 #include "graphite2/Segment.h"
+#include "inc/debug.h"
 #include "inc/Face.h"
 #include "inc/Endian.h"
 #include "inc/Segment.h"
@@ -116,7 +117,38 @@ bool Face::readGraphite()
 
 bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 {
-    return aSilf->runGraphite(seg, 0, aSilf->numPasses());
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+    {
+    	*dbgout << json::object
+    				<< "id"			<< objectid(seg)
+    				<< "passes"		<< json::array;
+    }
+#endif
+
+    bool res = aSilf->runGraphite(seg, 0, aSilf->justificationPass());
+    res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses());
+
+#if !defined GRAPHITE2_NTRACING
+	if (dbgout)
+	{
+		*dbgout 			<< json::item
+							<< json::close // Close up the passes array
+				<< "output" << json::array;
+		for(Slot * s = seg->first(); s; s = s->next())
+			*dbgout		<< dslot(seg, s);
+		seg->finalise(0);					// Call this here to fix up charinfo back indexes.
+		*dbgout			<< json::close
+				<< "advance" << seg->advance()
+				<< "chars"	 << json::array;
+		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
+			*dbgout 	<< json::flat << *seg->charinfo(i);
+		*dbgout			<< json::close	// Close up the chars array
+					<< json::close;		// Close up the segment object
+	}
+#endif
+
+    return res;
 }
 
 const Silf *Face::chooseSilf(uint32 script) const

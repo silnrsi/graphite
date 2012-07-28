@@ -373,7 +373,6 @@ void Segment::prepare_pos(const Font * /*font*/)
 
 void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags flags, Slot *pFirst, Slot *pLast)
 {
-    Slot *pEnd = pSlot;
     Slot *s, *end;
     int numBase = 0;
     float currWidth = 0.0;
@@ -382,39 +381,40 @@ void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSE
     if (!pFirst) pFirst = pSlot;
     const float base = pFirst->origin().x / scale;
     width = width / scale;
-    end = pLast ? pLast->next() : NULL;
+    if (!pLast) pLast = last();
+    if ((flags & gr_justEndInline) == 0)
+    {
+        do {
+            Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
+            if (bbox.bl.x != 0. || bbox.bl.y != 0. || bbox.tr.x != 0. || bbox.tr.y == 0.)
+                break;
+            pLast = pLast->prev();
+        } while (pLast != pFirst);
+    }
+    end = pLast->next();
 
     for (s = pFirst; s != end; s=s->next())
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
-        pEnd = s;
-        if (!s->attachedTo())       // what about trailing whitespace?
+        if (!s->attachedTo())
             numBase++;
     }
-    if (pLast)
-        while (s)
-        {
-            pEnd = s;
-            s = s->next();
-        }
-    else
-        pLast = pEnd;
-        
+
     if (!numBase) return;
 
     Slot *oldFirst = m_first;
     Slot *oldLast = m_last;
     // add line end contextuals to linked list
     m_first = pSlot;
-    m_last = pEnd;
+    m_last = pLast;
     // process the various silf justification stuff returning updated currwidth
 
     // now fallback to spreading the remaining space among all the bases
     float nShift = (width - currWidth) / (numBase - 1);
     for (s = pFirst->nextSibling(); s != end; s = s->nextSibling())
         s->just(nShift + s->just());
-    positionSlots(font, pSlot, pEnd);
+    positionSlots(font, pSlot, pLast);
 
     m_first = oldFirst;
     m_last = oldLast;
