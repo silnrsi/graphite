@@ -94,7 +94,7 @@ public:
         gr_font_destroy(m_grFont);
     }
 
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
         const void * pError = NULL;
         if (!m_grFace)

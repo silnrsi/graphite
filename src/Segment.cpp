@@ -292,7 +292,6 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 {
     Position currpos(0., 0.);
     Rect bbox;
-    float cMin = 0.;
     float clusterMin = 0.;
 
     if (!iStart)	iStart = m_first;
@@ -303,7 +302,7 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
         for (Slot * s = iEnd, * const end = iStart->prev(); s && s != end; s = s->prev())
         {
             if (s->isBase())
-                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin = currpos.x);
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x);
         }
     }
     else
@@ -311,7 +310,7 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
         for (Slot * s = iStart, * const end = iEnd->next(); s && s != end; s = s->next())
         {
             if (s->isBase())
-                currpos = s->finalise(this, font, currpos, bbox, cMin, 0, clusterMin = currpos.x);
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x);
         }
     }
     return currpos;

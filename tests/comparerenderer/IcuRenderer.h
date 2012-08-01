@@ -47,7 +47,7 @@ public:
         delete m_eIcu;
     }
 
-    virtual void renderText(const char *utf8, size_t length, RenderedLine *result)
+    virtual void renderText(const char *utf8, size_t length, RenderedLine *result, FILE *log)
     {
         UScriptCode scriptCode = USCRIPT_UNKNOWN;
         LEErrorCode status = LE_NO_ERROR;

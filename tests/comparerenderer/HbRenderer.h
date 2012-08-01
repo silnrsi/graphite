@@ -182,7 +182,7 @@ public:
 
 #define FREE(x) if(x) {free(x); x=NULL; }
 
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
 using graphite2 {
         graphite2::ToUtf16Processor processor(m_buffer, m_bufferLength * 2);

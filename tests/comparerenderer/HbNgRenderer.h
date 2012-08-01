@@ -110,7 +110,7 @@ public:
         if (m_ftLibrary) FT_Done_FreeType(m_ftLibrary);
         delete m_feats;
     }
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
 //        if (length > m_bufferLength)
 //        {

@@ -143,7 +143,7 @@ public:
             if (m_renderers[r])
             {
                 for (int i = 0; i < repeat; i++)
-                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r]);
+                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r], log);
                 fprintf(log, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
             }
         }
@@ -183,7 +183,7 @@ public:
     }
     void setDifferenceMask(LineDifference m) { m_cfMask = m; }
 protected:
-    float runRenderer(Renderer & renderer, RenderedLine * pLineResult, unsigned long & glyphCount)
+    float runRenderer(Renderer & renderer, RenderedLine * pLineResult, unsigned long & glyphCount, FILE *log)
     {
         glyphCount = 0;
         unsigned int i = 0;
@@ -217,7 +217,7 @@ protected:
                 fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
-                renderer.renderText(pLine, lineLength, pLineResult + i);
+                renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 pLineResult[i].dump(stdout);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
@@ -229,7 +229,7 @@ protected:
             {
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
-                renderer.renderText(pLine, lineLength, pLineResult + i);
+                renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }

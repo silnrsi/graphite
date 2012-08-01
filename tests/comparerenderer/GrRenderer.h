@@ -42,7 +42,7 @@ public:
         m_layout.setJustifier(NULL);
         m_layout.setRightToLeft(direction);
     }
-    void renderText(const char * utf8, size_t length, RenderedLine * result)
+    void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
         if ((length == 0) || !m_fileFont.isValid())
             new(result) RenderedLine();
@@ -59,16 +59,27 @@ public:
 //            if (m_layout.rightToLeft())
 //                i = numGlyphs - 1;
             gr::GlyphIterator iGlyph = glyphs.first;
+//            float segadv = 0.;
             while (iGlyph != glyphs.second)
             {
                 gr::GlyphInfo & gi = *iGlyph;
+                gr::Rect dummyRect;
+                gr::Point gAdvances;
+//                m_fileFont.getGlyphMetrics(gi.glyphID(), dummyRect, gAdvances);
                 (*renderedLine)[i].set(gi.glyphID(), gi.origin(), gi.yOffset(), gi.firstChar(), gi.lastChar());
+//                if (!gi.isSpace()) // && gAdvances.x > 0.01)
+//                    segadv = max(segadv, (gi.origin() + gi.advanceWidth()));
                 ++iGlyph;
 //                if (m_layout.rightToLeft())
 //                    --i;
 //                else
                     ++i;
             }
+//            if (segadv != renderedLine->advance())
+//            {
+//                if (log) fprintf(log, "different advances: %f -> %f\n", renderedLine->advance(), segadv);
+//                renderedLine->setAdvance(segadv);
+//            }
         }
         catch (...)
         {

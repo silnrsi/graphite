@@ -77,7 +77,7 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, float & cMin, uint8 attrLevel, float & clusterMin)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin)
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
@@ -91,9 +91,9 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         if (font->isHinted())
         {
             if (glyphFace)
-                tAdvance = (m_advance.x - glyphFace->theAdvance().x) * scale + font->advance(m_glyphid);
+                tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(m_glyphid);
             else
-                tAdvance = (m_advance.x - seg->glyphAdvance(glyph())) * scale + font->advance(m_glyphid);
+                tAdvance = (m_advance.x - seg->glyphAdvance(glyph()) + m_just) * scale + font->advance(m_glyphid);
         }
         else
             tAdvance *= scale;
@@ -104,16 +104,15 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (!m_parent)
     {
         res = base + Position(tAdvance, m_advance.y * scale);
-        //cMin = 0.;
         clusterMin = base.x;
     }
     else
     {
         float tAdv;
         m_position += (m_attach - m_with) * scale;
-        tAdv = tAdvance > 0.f ? m_position.x + tAdvance - shift.x : 0.f;
+        tAdv = m_advance.x >= 0.5 ? m_position.x + tAdvance - shift.x : 0.f;
         res = Position(tAdv, 0);
-        if (m_position.x < clusterMin) clusterMin = m_position.x;
+        if ((m_advance.x >= 0.5 || m_position.x < 0) && m_position.x < clusterMin) clusterMin = m_position.x;
     }
 
     if (glyphFace)
@@ -121,40 +120,25 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         Rect ourBbox = glyphFace->theBBox() * scale + m_position;
         bbox = bbox.widen(ourBbox);
     }
-    //Rect ourBbox = seg->theGlyphBBoxTemporary(glyph()) * scale + m_position;
-    //bbox->widen(ourBbox);
-
-    //if (m_parent && m_position.x < cMin) cMin = m_position.x;
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, cMin, attrLevel, clusterMin);
-        if (tRes.x > res.x) res = tRes;
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin);
+        if ((!m_parent || m_advance.x >= 0.5) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, cMin, attrLevel, clusterMin);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin);
         if (tRes.x > res.x) res = tRes;
     }
     
-    if (!m_parent)
+    if (!m_parent && clusterMin < base.x)
     {
-    //    if (cMin < 0)
-    //    {
-    //        Position adj = Position(-cMin, 0.);
-    //        res += adj;
-    //        m_position += adj;
-    //        if (m_child) m_child->floodShift(adj);
-    //    }
-    //    else if ((seg->dir() & 1) && (clusterMin < base.x))
-        if (clusterMin < base.x)
-        {
-            Position adj = Position(base.x - clusterMin, 0.);
-            res += adj;
-            m_position += adj;
-            if (m_child) m_child->floodShift(adj);
-        }
+        Position adj = Position(base.x - clusterMin, 0.);
+        res += adj;
+        m_position += adj;
+        if (m_child) m_child->floodShift(adj);
     }
     return res;
 }
@@ -163,9 +147,8 @@ uint32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
 {
     Position base;
     Rect bbox = seg->theGlyphBBoxTemporary(gid());
-    float cMin = 0.;
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, cMin, attrLevel, clusterMin);
+    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin);
 
     switch (metrics(metric))
     {
