@@ -51,6 +51,11 @@ public:
     Justinfo(uint8 stretch, uint8 shrink, uint8 step, uint8 weight) :
         m_astretch(stretch), m_ashrink(shrink), m_astep(step),
         m_aweight(weight) {};
+    uint8 attrStretch() const { return m_astretch; }
+    uint8 attrShrink() const { return m_ashrink; }
+    uint8 attrStep() const { return m_astep; }
+    uint8 attrWeight() const { return m_aweight; }
+
 private:
     uint8   m_astretch;
     uint8   m_ashrink;
@@ -81,6 +86,9 @@ public:
     uint8 maxCompPerLig() const { return m_iMaxComp; }
     uint16 numClasses() const { return m_nClass; }
     uint8 flags() const { return m_flags; }
+    uint8 numJusts() const { return m_numJusts; }
+    Justinfo *justAttrs() const { return m_justs; }
+    uint16 endLineGlyphid() const { return m_gEndLine; }
 
     CLASS_NEW_DELETE
 
@@ -103,7 +111,8 @@ private:
     uint16  m_aLig,
             m_numPseudo,
             m_nClass,
-            m_nLinear;
+            m_nLinear,
+            m_gEndLine;
     
     void releaseBuffers() throw();
     

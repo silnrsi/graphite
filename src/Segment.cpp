@@ -46,10 +46,12 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
         m_numGlyphs(numchars),
         m_numCharinfo(numchars),
         m_defaultOriginal(0),
+        m_freeJustifies(NULL),
         m_charinfo(new CharInfo[numchars]),
         m_face(face),
         m_silf(face->chooseSilf(script)),
         m_bbox(Rect(Position(0, 0), Position(0, 0))),
+        m_wscount(0),
         m_dir(textDir)
 {
     unsigned int i, j;
@@ -158,6 +160,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->prev(m_last);
     m_last = aSlot;
     if (!m_first) m_first = aSlot;
+    if (isWhitespace(cid)) ++m_wscount;
 }
 
 Slot *Segment::newSlot()
@@ -201,6 +204,38 @@ void Segment::freeSlot(Slot *aSlot)
     else
         aSlot->next(m_freeSlots);
     m_freeSlots = aSlot;
+}
+
+SlotJustify *Segment::newJustify()
+{
+    if (!m_freeJustifies)
+    {
+        int numJust = 1;
+        if (m_silf->numJusts() > 0) numJust = m_silf->numJusts();
+        int justSize = sizeof(SlotJustify) + (numJust * NUMJUSTPARAMS - 1) * sizeof(int16);
+        char *justs = grzeroalloc<char>(justSize * m_wscount);
+        for (int i = m_wscount - 2; i >= 0; --i)
+        {
+            SlotJustify *p = (SlotJustify *)(justs + justSize * i);
+            SlotJustify *next = (SlotJustify *)(justs + justSize * (i + 1));
+            ::new (p) SlotJustify(next);
+        }
+        m_freeJustifies = (SlotJustify *)justs;
+        m_justifies.push_back(m_freeJustifies);
+    }
+    SlotJustify *res = m_freeJustifies;
+    m_freeJustifies = m_freeJustifies->next();
+    res->next(NULL);
+    return res;
+}
+
+void Segment::freeJustify(SlotJustify *aJustify)
+{
+    int numJust = 1;
+    if (m_silf->numJusts() > 0) numJust = m_silf->numJusts();
+    ::new (aJustify) SlotJustify(m_freeJustifies);
+    memset(aJustify->values(), 0, numJust * NUMJUSTPARAMS * sizeof(int16));
+    m_freeJustifies = aJustify;
 }
 
 #ifndef GRAPHITE2_NSEGCACHE
@@ -368,56 +403,6 @@ void Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
 void Segment::prepare_pos(const Font * /*font*/)
 {
     // copy key changeable metrics into slot (if any);
-}
-
-void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags flags, Slot *pFirst, Slot *pLast)
-{
-    Slot *s, *end;
-    int numBase = 0;
-    float currWidth = 0.0;
-    const float scale = font ? font->scale() : 1.0f;
-
-    if (!pFirst) pFirst = pSlot;
-    const float base = pFirst->origin().x / scale;
-    width = width / scale;
-    if (!pLast) pLast = last();
-    if ((flags & gr_justEndInline) == 0)
-    {
-        do {
-            Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
-            if (bbox.bl.x != 0. || bbox.bl.y != 0. || bbox.tr.x != 0. || bbox.tr.y == 0.)
-                break;
-            pLast = pLast->prev();
-        } while (pLast != pFirst);
-    }
-    end = pLast->next();
-
-    for (s = pFirst; s != end; s=s->next())
-    {
-        float w = s->origin().x / scale + s->advance() - base;
-        if (w > currWidth) currWidth = w;
-        if (!s->attachedTo())
-            numBase++;
-    }
-
-    if (!numBase) return;
-
-    Slot *oldFirst = m_first;
-    Slot *oldLast = m_last;
-    // add line end contextuals to linked list
-    m_first = pSlot;
-    m_last = pLast;
-    // process the various silf justification stuff returning updated currwidth
-
-    // now fallback to spreading the remaining space among all the bases
-    float nShift = (width - currWidth) / (numBase - 1);
-    for (s = pFirst->nextSibling(); s != end; s = s->nextSibling())
-        s->just(nShift + s->just());
-    positionSlots(font, pSlot, pLast);
-
-    m_first = oldFirst;
-    m_last = oldLast;
-    // dump line end contextual markers
 }
 
 Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0);

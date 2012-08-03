@@ -43,7 +43,8 @@ namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
-typedef Vector<int16 *>        AttributeRope;
+typedef Vector<int16 *>         AttributeRope;
+typedef Vector<SlotJustify *>   JustifyRope;
 
 #ifndef GRAPHITE2_NSEGCACHE
 class SegmentScopeState;
@@ -75,6 +76,8 @@ private:
 class Segment
 {
 public:
+    static const int NUMJUSTPARAMS = 5;
+
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
@@ -103,6 +106,8 @@ public:
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     Slot *newSlot();
     void freeSlot(Slot *);
+    SlotJustify *newJustify();
+    void freeJustify(SlotJustify *aJustify);
     Position positionSlots(const Font *font, Slot *first=0, Slot *last=0);
     void associateChars();
     void linkClusters(Slot *first, Slot *last);
@@ -121,6 +126,10 @@ public:
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void bidiPass(uint8 aBidi, int paradir, uint8 aMirror);
+    Slot *addLineEnd(Slot *nSlot);
+    void delLineEnd(Slot *s);
+
+    bool isWhitespace(const int cid) const;
 
     CLASS_NEW_DELETE
 
@@ -140,12 +149,15 @@ private:
     unsigned int m_numCharinfo; // size of the array and number of input characters
     int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
     AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
+    JustifyRope m_justifies;    // Slot justification info buffers
+    SlotJustify *m_freeJustifies;    // Slot justification blocks free list
     CharInfo *m_charinfo;       // character info, one per input character
 
     const Face *m_face;       // GrFace
     const Silf *m_silf;
     Position m_advance;         // whole segment advance
     Rect m_bbox;                // ink box of the segment
+    int m_wscount;              // number of whitespace chars in the string
     int8 m_dir;
     FeatureList m_feats;	// feature settings referenced by charinfos in this segment
 
@@ -175,6 +187,23 @@ uint16 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const
     }
     else
         return m_face->getGlyphMetric(iSlot->gid(), metric);
+}
+
+inline
+bool Segment::isWhitespace(const int cid) const
+{
+    return (cid >= 0x0009) * (cid <= 0x000D)
+         + (cid == 0x0020)
+         + (cid == 0x0085)
+         + (cid == 0x00A0)
+         + (cid == 0x1680)
+         + (cid == 0x180E)
+         + (cid >= 0x2000) * (cid <= 0x200A)
+         + (cid == 0x2028)
+         + (cid == 0x2029)
+         + (cid == 0x202F)
+         + (cid == 0x205F)
+         + (cid == 0x3000);
 }
 
 } // namespace graphite2

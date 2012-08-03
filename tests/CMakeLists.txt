@@ -15,14 +15,23 @@ add_library(graphite2-base STATIC
     ${S}/UtfCodec.cpp)
 
 add_library(graphite2-segcache STATIC
+    ${S}/Bidi.cpp
+    ${S}/call_machine.cpp
+    ${S}/CmapCache.cpp
+    ${S}/Code.cpp
+    ${S}/Face.cpp
     ${S}/GlyphFaceCache.cpp
     ${S}/GlyphFace.cpp
     ${S}/gr_logging.cpp
     ${S}/json.cpp
+    ${S}/Pass.cpp
     ${S}/SegCache.cpp
     ${S}/SegCacheEntry.cpp
     ${S}/SegCacheStore.cpp
-    ${S}/Slot.cpp)
+    ${S}/Segment.cpp
+    ${S}/Silf.cpp
+    ${S}/Slot.cpp
+)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 

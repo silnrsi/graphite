@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include "inc/Segment.h"
 #include "inc/Slot.h"
+#include "inc/Silf.h"
 #include "inc/CharInfo.h"
 #include "inc/Rule.h"
 
@@ -38,7 +39,7 @@ Slot::Slot() :
     m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
     m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0)
+    m_flags(0), m_attLevel(0), m_justs(NULL)
     // Do not set m_userAttr since it is set *before* new is called since this
     // is used as a positional new to reset the GrSlot
 {
@@ -185,6 +186,12 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
         ind = gr_slatUserDefn;
         subindex = 0;
     }
+    else if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
+    {
+        int indx = ind - gr_slatJStretch;
+        return getJustify(seg, indx / 5, indx % 5);
+    }
+
     switch (ind)
     {
     case gr_slatAdvX :		return int(m_advance.x);
@@ -209,11 +216,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatShiftY :	return int(m_shift.y);
     case gr_slatMeasureSol:	return -1; // err what's this?
     case gr_slatMeasureEol: return -1;
-    case gr_slatJStretch :
-    case gr_slatJShrink :
-    case gr_slatJStep :
-    case gr_slatJWeight :	return 0;
-    case gr_slatJWidth :	return int(m_just);
+    case gr_slatJWidth:     return m_just;
     case gr_slatUserDefn :	return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     default :				return 0;
@@ -228,6 +231,12 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         ind = gr_slatUserDefn;
         subindex = 0;
     }
+    else if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
+    {
+        int indx = ind - gr_slatJStretch;
+        return setJustify(seg, indx / 5, indx % 5, value);
+    }
+
     switch (ind)
     {
     case gr_slatAdvX :	m_advance.x = value; break;
@@ -274,16 +283,41 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatShiftY :    m_shift.y = value; break;
     case gr_slatMeasureSol :	break;
     case gr_slatMeasureEol :	break;
-    case gr_slatJStretch :      break;  // handle these later
-    case gr_slatJShrink :       break;
-    case gr_slatJStep :         break;
-    case gr_slatJWeight :       break;
-    case gr_slatJWidth :	m_just = value; break;
+    case gr_slatJWidth :	just(value); break;
     case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
     default :
     	break;
     }
+}
+
+int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
+{
+    if (level >= seg->silf()->numJusts()) return 0;
+
+    if (m_justs)
+        return m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex];
+
+    Justinfo *jAttrs = seg->silf()->justAttrs() + level;
+
+    switch (subindex) {
+        case 0 : return seg->glyphAttr(gid(), jAttrs->attrStretch());
+        case 1 : return seg->glyphAttr(gid(), jAttrs->attrShrink());
+        case 2 : return seg->glyphAttr(gid(), jAttrs->attrStep());
+        case 3 : return seg->glyphAttr(gid(), jAttrs->attrWeight());
+        case 4 : return 0;      // not been set yet, so clearly 0
+        default: return 0;
+    }
+}
+
+void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
+{
+    if (!m_justs)
+    {
+        m_justs = seg->newJustify();
+        m_justs->LoadSlot(this, seg);
+    }
+    m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex] = value;
 }
 
 bool Slot::child(Slot *ap)
@@ -335,4 +369,17 @@ void Slot::floodShift(Position adj)
     m_position += adj;
     if (m_child) m_child->floodShift(adj);
     if (m_sibling) m_sibling->floodShift(adj);
+}
+
+void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
+{
+    for (int i = seg->silf()->numJusts() - 1; i >= 0; --i)
+    {
+        Justinfo *justs = seg->silf()->justAttrs() + i;
+        int16 *v = m_values + i * Segment::NUMJUSTPARAMS;
+        v[0] = seg->glyphAttr(s->gid(), justs->attrStretch());
+        v[1] = seg->glyphAttr(s->gid(), justs->attrShrink());
+        v[2] = seg->glyphAttr(s->gid(), justs->attrStep());
+        v[3] = seg->glyphAttr(s->gid(), justs->attrWeight());
+    }
 }

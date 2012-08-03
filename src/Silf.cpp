@@ -41,7 +41,7 @@ Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0)
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_gEndLine(0)
 {
 }
 
@@ -111,7 +111,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     be::skip<byte>(p);							// reserved
     if (p >= silf_end)   { releaseBuffers(); return false; }
     be::skip<uint32>(p, be::read<uint8>(p));	// don't use scriptTag array.
-    be::skip<uint16>(p); // lbGID
+    m_gEndLine  = be::read<uint16>(p);          // lbGID
     if (p >= silf_end)   { releaseBuffers(); return false; }
     const byte * o_passes = p,
                * const passes_start = silf_start + be::read<uint32>(p);

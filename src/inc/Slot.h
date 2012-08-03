@@ -40,6 +40,20 @@ typedef gr_attrCode attrCode;
 class Segment;
 class SegCacheEntry;
 
+class SlotJustify
+{
+public:
+    SlotJustify(SlotJustify *n) : m_next(n) {}
+    void LoadSlot(const Slot *s, const Segment *seg);
+    SlotJustify *next() const { return m_next; }
+    void next(SlotJustify *n) { m_next = n; }
+    int16 *values() { return m_values; }
+
+private:
+    SlotJustify *m_next;
+    int16 m_values[1];
+};
+
 class Slot
 {
 	enum Flag
@@ -97,6 +111,8 @@ public:
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
     void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
     int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
+    int getJustify(const Segment *seg, uint8 level, uint8 subindex) const;
+    void setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value);
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     Position attachOffset() const { return m_attach - m_with; }
@@ -129,12 +145,13 @@ private:
     Position m_advance;     // .advance slot attribute
     Position m_attach;      // attachment point on us
     Position m_with;	    // attachment point position on parent
-    float    m_just;        // justification adjustment
+    float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     byte     m_attLevel;    // attachment level
     byte     m_bidiCls;     // bidirectional class
     byte     m_bidiLevel;   // bidirectional level
-    int16   *m_userAttr;     // pointer to user attributes
+    int16   *m_userAttr;    // pointer to user attributes
+    SlotJustify *m_justs;   // pointer to justification parameters
 
     friend class SegCacheEntry;
     friend class Segment;
