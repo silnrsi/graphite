@@ -93,7 +93,7 @@ public:
     bool rtl;
     bool useLineFill;
     bool useCodes;
-    bool justification;
+    int justification;
     bool enableCache;
     float width;
     int textArgIndex;
@@ -134,7 +134,7 @@ void Parameters::clear()
     ws = false;
     useLineFill = false;
     useCodes = false;
-    justification = false;
+    justification = 0;
     enableCache = false;
     width = 100.0f;
     pText32 = NULL;
@@ -200,6 +200,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         NONE,
         POINT_SIZE,
         DPI,
+        JUSTIFY,
         LINE_START,
         LINE_END,
         LINE_FILL,
@@ -243,6 +244,16 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             {
                 fprintf(stderr,"Invalid point size %s\n", argv[a]);
                 argError = true;
+            }
+            option = NONE;
+            break;
+        case JUSTIFY:
+            pIntEnd = NULL;
+            justification = strtol(argv[a], &pIntEnd, 10);
+            if (justification <= 0)
+            {
+                fprintf(stderr, "Justification value must be > 0 but was %s\n", argv[a]);
+                justification = 0;
             }
             option = NONE;
             break;
@@ -341,8 +352,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 }
                 else if (strcmp(argv[a], "-j") == 0)
                 {
-                    option = NONE;
-                    justification = true;
+                    option = JUSTIFY;
                 }
                 else if (strcmp(argv[a], "-log") == 0)
                 {
@@ -661,6 +671,8 @@ int Parameters::testFileFont() const
             int numSlots = gr_seg_n_slots(pSeg);
     #endif
     //        size_t *map = new size_t [seg.length() + 1];
+            if (justification > 0)
+                gr_seg_justify(pSeg, gr_seg_first_slot(pSeg), sizedFont, gr_seg_advance_X(pSeg) * justification / 100., gr_justCompleteLine, NULL, NULL);
             size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
             for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
             { map[i] = (size_t)slot; }
@@ -756,6 +768,7 @@ int main(int argc, char *argv[])
         //fprintf(stderr,"-ls\tStart of line = true (false)\n");
         //fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
+        fprintf(stderr,"-j percentage\tJustify to percentage of string width\n");
         //fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
         //fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");

@@ -293,11 +293,12 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
 
 int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
 {
-    if (level >= seg->silf()->numJusts()) return 0;
+    if (level && level >= seg->silf()->numJusts()) return 0;
 
     if (m_justs)
         return m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex];
 
+    if (level >= seg->silf()->numJusts()) return 0;
     Justinfo *jAttrs = seg->silf()->justAttrs() + level;
 
     switch (subindex) {
@@ -314,8 +315,9 @@ void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
 {
     if (!m_justs)
     {
-        m_justs = seg->newJustify();
-        m_justs->LoadSlot(this, seg);
+        SlotJustify *j = seg->newJustify();
+        j->LoadSlot(this, seg);
+        m_justs = j;
     }
     m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex] = value;
 }
