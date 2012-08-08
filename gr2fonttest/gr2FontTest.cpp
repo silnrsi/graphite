@@ -667,12 +667,15 @@ int Parameters::testFileFont() const
         if (pSeg)
         {
             int i = 0;
+            float advanceWidth;
     #ifndef NDEBUG
             int numSlots = gr_seg_n_slots(pSeg);
     #endif
     //        size_t *map = new size_t [seg.length() + 1];
             if (justification > 0)
-                gr_seg_justify(pSeg, gr_seg_first_slot(pSeg), sizedFont, gr_seg_advance_X(pSeg) * justification / 100., gr_justCompleteLine, NULL, NULL);
+                advanceWidth = gr_seg_justify(pSeg, gr_seg_first_slot(pSeg), sizedFont, gr_seg_advance_X(pSeg) * justification / 100., gr_justCompleteLine, NULL, NULL);
+            else
+                advanceWidth = gr_seg_advance_X(pSeg);
             size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
             for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
             { map[i] = (size_t)slot; }
@@ -724,7 +727,6 @@ int Parameters::testFileFont() const
             assert(i == numSlots);
             // assign last point to specify advance of the whole array
             // position arrays must be one bigger than what countGlyphs() returned
-            float advanceWidth = gr_seg_advance_X(pSeg);
             fprintf(log, "Advance width = %6.1f\n", advanceWidth);
             unsigned int numchar = gr_seg_n_cinfo(pSeg);
             fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");

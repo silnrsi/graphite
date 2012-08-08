@@ -137,7 +137,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     void read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
     void prepare_pos(const Font *font);
     void finalise(const Font *font);
-    void justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
+    float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
   
 private:
     SlotRope m_slots;           // std::vector of slot buffers
