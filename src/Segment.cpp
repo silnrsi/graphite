@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/Segment.h"
 #include "graphite2/Font.h"
 #include "inc/CharInfo.h"
+#include "inc/debug.h"
 #include "inc/Slot.h"
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
@@ -168,6 +169,9 @@ Slot *Segment::newSlot()
     if (!m_freeSlots)
     {
         int numUser = m_silf->numUser();
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout) ++numUser;
+#endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
         newSlots[0].userAttrs(newAttrs);
@@ -197,7 +201,10 @@ void Segment::freeSlot(Slot *aSlot)
     ::new (aSlot) Slot;
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
     // Update generation counter for debug
-    aSlot->index(aSlot->index()+1);
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        ++aSlot->userAttrs()[m_silf->numUser()];
+#endif
     // update next pointer
     if (!m_freeSlots)
         aSlot->next(NULL);

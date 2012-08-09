@@ -115,11 +115,11 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 {
 	assert(ds.first);
 	assert(ds.second);
-	Segment & seg = *ds.first;
-	Slot & s = *ds.second;
+	const Segment & seg = *ds.first;
+	const Slot & s = *ds.second;
 
 	j << json::object
-		<< "id"				<< objectid(&s)
+		<< "id"				<< objectid(ds)
 		<< "gid"			<< s.gid()
 		<< "charinfo" << json::flat << json::object
 			<< "original"		<< s.original()
@@ -134,27 +134,11 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		<< "break"			<< s.getAttr(&seg, gr_slatBreak, 0);
 	if (s.just() > 0)
 		j << "justification"	<< s.just();
-    if (s.isLocalJustify())
-    {
-        j << "justinfo" << json::array;
-        for (int n = 0; n < seg.silf()->numJusts(); ++n)
-        {
-            j << json::flat << json::object
-                << "stretch" << s.getJustify(&seg, n, 0)
-                << "shrink" << s.getJustify(&seg, n, 1)
-                << "step" << s.getJustify(&seg, n, 2)
-                << "weight" << s.getJustify(&seg, n, 3);
-            if (n > 0)
-                j << "width" << s.getJustify(&seg, n, 4);
-            j << json::close;
-        }
-        j << json::close;
-    }
 	if (s.getBidiLevel() > 0)
 		j << "bidi"		<< s.getBidiLevel();
 	if (!s.isBase())
 		j << "parent" << json::flat << json::object
-			<< "id"				<< objectid(s.attachedTo())
+			<< "id"				<< objectid(dslot(&seg, s.attachedTo()))
 			<< "level"			<< s.getAttr(0, gr_slatAttLevel, 0)
 			<< "offset"			<< s.attachOffset()
 			<< json::close;
@@ -165,17 +149,19 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 	if (s.firstChild())
 	{
 		j	<< "children" << json::flat << json::array;
-		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << objectid(c);
-		j   << json::close;
+		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
+		    j   << objectid(dslot(&seg, c));
+		j		<< json::close;
 	}
 	return j << json::close;
 }
 
 
-graphite2::objectid::objectid(const Slot * const p) throw()
+graphite2::objectid::objectid(const dslot & ds) throw()
 {
+    const Slot * const p = ds.second;
 	uint32 s = reinterpret_cast<size_t>(p);
-	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->index() : 0), uint16(s));
+	sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->userAttrs()[ds.first->silf()->numUser()] : 0), uint16(s));
 	name[sizeof name-1] = 0;
 }
 

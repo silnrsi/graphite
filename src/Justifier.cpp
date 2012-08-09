@@ -211,9 +211,9 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-        Slot *lEnd = pLast->next();
+        Slot *lEnd = pLast->nextSibling();
         *dbgout << "output" << json::array;
-        for(Slot * t = pFirst; t != lEnd; t = t->next())
+        for(Slot * t = pSlot; t != lEnd; t = t->next())
             *dbgout		<< dslot(this, t);
         *dbgout			<< json::close << json::close;
     }

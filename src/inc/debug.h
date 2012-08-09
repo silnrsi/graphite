@@ -44,11 +44,11 @@ class CharInfo;
 class Segment;
 class Slot;
 
-typedef std::pair<Segment * const, Slot * const>	dslot;
+typedef std::pair<const Segment * const, const Slot * const>	dslot;
 struct objectid
 {
 	char name[16];
-	objectid(const Slot * const p) throw();
+	objectid(const dslot &) throw();
 	objectid(const Segment * const p) throw();
 };
 
