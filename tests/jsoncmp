@@ -34,7 +34,7 @@ def canonids(j) :
                 slotmap[v] = slotcount
                 slotcount += 1
             settreeval(h, p, slotmap[v])
-        elif any_re(p, r"/\d+/id$"):
+        elif any_re(p, r"^/\d+/id$"):
             if v not in segmap :
                 segmap[v] = segcount
                 segcount += 1
@@ -43,7 +43,7 @@ def canonids(j) :
     for (v, p, h) in walktree(j) :
         if any_re(p, r"parent/id$", "input/start$", r"output/range/(start|end)$", r"cursor$", r"children/\d+$") :
             settreeval(h, p, slotmap[v])
-        elif any_re(p, r"/\d+/segment$") :
+        elif any_re(p, r"^/\d+/justifies$") :
             settreeval(h, p, slotmap[v])
     return j
 
