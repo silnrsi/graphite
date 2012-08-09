@@ -218,23 +218,23 @@ SlotJustify *Segment::newJustify()
         {
             SlotJustify *p = (SlotJustify *)(justs + justSize * i);
             SlotJustify *next = (SlotJustify *)(justs + justSize * (i + 1));
-            ::new (p) SlotJustify(next);
+            p->next = next;
         }
         m_freeJustifies = (SlotJustify *)justs;
         m_justifies.push_back(m_freeJustifies);
     }
     SlotJustify *res = m_freeJustifies;
-    m_freeJustifies = m_freeJustifies->next();
-    res->next(NULL);
+    m_freeJustifies = m_freeJustifies->next;
+    res->next = NULL;
     return res;
 }
 
 void Segment::freeJustify(SlotJustify *aJustify)
 {
-    int numJust = 1;
-    if (m_silf->numJusts() > 0) numJust = m_silf->numJusts();
-    ::new (aJustify) SlotJustify(m_freeJustifies);
-    memset(aJustify->values(), 0, numJust * NUMJUSTPARAMS * sizeof(int16));
+    int numJust = m_silf->numJusts();
+    if (m_silf->numJusts() <= 0) numJust = 1;
+    aJustify->next = m_freeJustifies;
+    memset(aJustify->values, 0, numJust * NUMJUSTPARAMS * sizeof(int16));
     m_freeJustifies = aJustify;
 }
 

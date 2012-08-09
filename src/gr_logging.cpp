@@ -134,6 +134,22 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 		<< "break"			<< s.getAttr(&seg, gr_slatBreak, 0);
 	if (s.just() > 0)
 		j << "justification"	<< s.just();
+    if (s.isLocalJustify())
+    {
+        j << "justinfo" << json::array;
+        for (int n = 0; n < seg.silf()->numJusts(); ++n)
+        {
+            j << json::flat << json::object
+                << "stretch" << s.getJustify(&seg, n, 0)
+                << "shrink" << s.getJustify(&seg, n, 1)
+                << "step" << s.getJustify(&seg, n, 2)
+                << "weight" << s.getJustify(&seg, n, 3);
+            if (n > 0)
+                j << "width" << s.getJustify(&seg, n, 4);
+            j << json::close;
+        }
+        j << json::close;
+    }
 	if (s.getBidiLevel() > 0)
 		j << "bidi"		<< s.getBidiLevel();
 	if (!s.isBase())
@@ -150,7 +166,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 	{
 		j	<< "children" << json::flat << json::array;
 		for (const Slot *c = s.firstChild(); c; c = c->nextSibling())  j << objectid(c);
-		j		<< json::close;
+		j   << json::close;
 	}
 	return j << json::close;
 }

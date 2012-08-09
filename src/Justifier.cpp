@@ -27,9 +27,11 @@ of the License or (at your option) any later version.
 
 #include "inc/Segment.h"
 #include "graphite2/Font.h"
+#include "inc/debug.h"
 #include "inc/CharInfo.h"
 #include "inc/Slot.h"
 #include "inc/Main.h"
+#include <math.h>
 
 using namespace graphite2;
 
@@ -70,9 +72,10 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 
     if (!pFirst) pFirst = pSlot;
     while (!pFirst->isBase()) pFirst = pFirst->attachedTo();
+    if (!pLast) pLast = last();
+    while (!pLast->isBase()) pLast = pLast->attachedTo();
     const float base = pFirst->origin().x / scale;
     width = width / scale;
-    if (!pLast) pLast = last();
     if ((flags & gr_justEndInline) == 0)
     {
         do {
@@ -83,8 +86,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         } while (pLast != pFirst);
     }
 
-    end = pLast->next();
-    // advance pFirst to not add space to the first base
+    end = pLast->nextSibling();
     pFirst = pFirst->nextSibling();
 
     int icount = 0;
@@ -136,7 +138,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             diff = width - currWidth;
             diffpw = diff / tWeight;
             tWeight = 0;
-            for (s = pFirst; s != end; s = s->nextSibling())
+            for (s = pFirst; s != end; s = s->nextSibling()) // don't include final glyph
             {
                 int w = s->getJustify(this, i, 3);
                 float pref = diffpw * w + error;
@@ -168,7 +170,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
                 }
             }
             currWidth += diff - error;
-        } while (i == 0 && abs(int(error)) > 0 && tWeight);
+        } while (i == 0 && int(abs(error)) > 0 && tWeight);
     }
 
     Slot *oldFirst = m_first;
@@ -185,10 +187,37 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 
     // run justification passes here
-    if ((width >= 0. || silf()->flags() & 1) && m_silf->justificationPass() != m_silf->positionPass())
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::object
+                    << "justifies"	<< objectid(this);
+#endif
+
+    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0. || silf()->flags() & 1))
+    {
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+            *dbgout << "passes"		<< json::array;
+#endif
         m_silf->runGraphite(this, m_silf->justificationPass(), m_silf->positionPass());
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+            *dbgout	<< json::item << json::close; // Close up the passes array
+#endif
+    }
 
     res = positionSlots(font, pSlot, pLast);
+
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+    {
+        Slot *lEnd = pLast->next();
+        *dbgout << "output" << json::array;
+        for(Slot * t = pFirst; t != lEnd; t = t->next())
+            *dbgout		<< dslot(this, t);
+        *dbgout			<< json::close << json::close;
+    }
+#endif
 
     if (silf()->flags() & 1)
     {

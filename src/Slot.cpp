@@ -296,7 +296,7 @@ int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
     if (level && level >= seg->silf()->numJusts()) return 0;
 
     if (m_justs)
-        return m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex];
+        return m_justs->values[level * Segment::NUMJUSTPARAMS + subindex];
 
     if (level >= seg->silf()->numJusts()) return 0;
     Justinfo *jAttrs = seg->silf()->justAttrs() + level;
@@ -319,7 +319,7 @@ void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
         j->LoadSlot(this, seg);
         m_justs = j;
     }
-    m_justs->values()[level * Segment::NUMJUSTPARAMS + subindex] = value;
+    m_justs->values[level * Segment::NUMJUSTPARAMS + subindex] = value;
 }
 
 bool Slot::child(Slot *ap)
@@ -378,7 +378,7 @@ void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
     for (int i = seg->silf()->numJusts() - 1; i >= 0; --i)
     {
         Justinfo *justs = seg->silf()->justAttrs() + i;
-        int16 *v = m_values + i * Segment::NUMJUSTPARAMS;
+        int16 *v = values + i * Segment::NUMJUSTPARAMS;
         v[0] = seg->glyphAttr(s->gid(), justs->attrStretch());
         v[1] = seg->glyphAttr(s->gid(), justs->attrShrink());
         v[2] = seg->glyphAttr(s->gid(), justs->attrStep());

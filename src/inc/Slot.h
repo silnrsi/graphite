@@ -40,18 +40,13 @@ typedef gr_attrCode attrCode;
 class Segment;
 class SegCacheEntry;
 
-class SlotJustify
+struct SlotJustify
 {
 public:
-    SlotJustify(SlotJustify *n) : m_next(n) {}
     void LoadSlot(const Slot *s, const Segment *seg);
-    SlotJustify *next() const { return m_next; }
-    void next(SlotJustify *n) { m_next = n; }
-    int16 *values() { return m_values; }
 
-private:
-    SlotJustify *m_next;
-    int16 m_values[1];
+    SlotJustify *next;
+    int16 values[1];
 };
 
 class Slot
@@ -113,6 +108,7 @@ public:
     int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
     int getJustify(const Segment *seg, uint8 level, uint8 subindex) const;
     void setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value);
+    bool isLocalJustify() const { return m_justs != NULL; };
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     Position attachOffset() const { return m_attach - m_with; }
