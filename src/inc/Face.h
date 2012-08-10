@@ -123,7 +123,7 @@ public:
     float getAdvance(unsigned short glyphid, float scale) const { return advance(glyphid) * scale; }
     const Rect &theBBoxTemporary(uint16 gid) const { return m_pGlyphFaceCache->glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     unsigned short upem() const { return m_upem; }
-    uint16 glyphAttr(uint16 gid, uint8 gattr) const { return m_pGlyphFaceCache->glyphAttr(gid, gattr); }
+    uint16 glyphAttr(uint16 gid, uint16 gattr) const { return m_pGlyphFaceCache->glyphAttr(gid, gattr); }
 
 private:
     friend class Font;

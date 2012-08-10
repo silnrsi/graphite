@@ -75,7 +75,7 @@ public:
     ~GlyphFaceCache();
 
     const GlyphFace *glyphSafe(unsigned short glyphid) const { return glyphid<numGlyphs()?glyph(glyphid):NULL; }
-    uint16 glyphAttr(uint16 gid, uint8 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
+    uint16 glyphAttr(uint16 gid, uint16 gattr) const { if (gattr>=numAttrs()) return 0; const GlyphFace*p=glyphSafe(gid); return p?p->getAttr(gattr):0; }
 
     void * operator new (size_t s, const GlyphFaceCacheHeader& hdr)
     {

@@ -66,7 +66,7 @@ public:
 
     const Position    & theAdvance() const;
     const Rect &theBBox() const { return m_bbox; }
-    uint16  getAttr(uint8 index) const { 
+    uint16  getAttr(uint16 index) const { 
     	return m_attrs ? m_attrs[index] : 0;
     }
     uint16  getMetric(uint8 metric) const;
