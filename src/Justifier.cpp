@@ -206,11 +206,10 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 #endif
     }
 
-    res = positionSlots(font, pSlot, pLast);
-
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
+        positionSlots(NULL, pSlot, pLast);
         Slot *lEnd = pLast->nextSibling();
         *dbgout << "output" << json::array;
         for(Slot * t = pSlot; t != lEnd; t = t->next())
@@ -218,6 +217,8 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         *dbgout			<< json::close << json::close;
     }
 #endif
+
+    res = positionSlots(font, pSlot, pLast);
 
     if (silf()->flags() & 1)
     {
