@@ -27,7 +27,8 @@ of the License or (at your option) any later version.
 #include "graphite2/Font.h"
 #include "inc/Face.h"
 #include "inc/CachedFace.h"
-
+#include "inc/CmapCache.h"
+#include "inc/Silf.h"
 
 using namespace graphite2;
 
@@ -193,6 +194,17 @@ unsigned short gr_face_n_glyphs(const gr_face* pFace)
     return pFace->getGlyphFaceCache()->numGlyphs();
 }
 
+int gr_face_is_char_supported(const gr_face* pFace, gr_uint32 usv, gr_uint32 script)
+{
+    const Cmap & cmap = pFace->cmap();
+    gr_uint16 gid = cmap[usv];
+    if (!gid)
+    {
+        const Silf * silf = pFace->chooseSilf(script);
+        gid = silf->findPseudo(usv);
+    }
+    return (gid != 0);
+}
 
 #ifndef GRAPHITE2_NFILEFACE
 gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)

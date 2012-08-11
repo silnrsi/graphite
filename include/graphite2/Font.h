@@ -154,6 +154,15 @@ GR2_API void gr_face_destroy(gr_face *face);
 /** Returns the number of glyphs in the face **/
 GR2_API unsigned short gr_face_n_glyphs(const gr_face* pFace);
 
+/** Returns whether the font supports a given Unicode character
+  *
+  * @return true if the character is supported.
+  * @param pFace    face to test within
+  * @param usv      Unicode Scalar Value of character to test
+  * @param scrtip   Tag of script for selecting which set of pseudo glyphs to test. May be NULL.
+  */
+GR2_API int gr_face_is_char_supported(const gr_face *pFace, gr_uint32 usv, gr_uint32 script);
+
 #ifndef GRAPHITE2_NFILEFACE
 /** Create gr_face from a font file
   *
