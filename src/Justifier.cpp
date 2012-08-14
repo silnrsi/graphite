@@ -100,7 +100,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             {
                 s->setJustify(this, 0, 3, 1);
                 s->setJustify(this, 0, 2, 1);
-                s->setJustify(this, 0, 0, 0xffff);
+                s->setJustify(this, 0, 0, -1);
                 ++icount;
             }
         }
@@ -110,7 +110,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             {
                 s->setJustify(this, 0, 3, 1);
                 s->setJustify(this, 0, 2, 1);
-                s->setJustify(this, 0, 0, 0xffff);
+                s->setJustify(this, 0, 0, -1);
             }
         }
         ++numLevels;
