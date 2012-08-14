@@ -100,7 +100,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             {
                 s->setJustify(this, 0, 3, 1);
                 s->setJustify(this, 0, 2, 1);
-                s->setJustify(this, 0, 0, 65535);
+                s->setJustify(this, 0, 0, 0xffff);
                 ++icount;
             }
         }
@@ -110,7 +110,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             {
                 s->setJustify(this, 0, 3, 1);
                 s->setJustify(this, 0, 2, 1);
-                s->setJustify(this, 0, 0, 65535);
+                s->setJustify(this, 0, 0, 0xffff);
             }
         }
         ++numLevels;
@@ -126,7 +126,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         s->just(0);
     }
 
-    for (int i = (width < 0.) ? -1 : numLevels - 1; i >= 0; --i)
+    for (int i = (width < 0.0) ? -1 : numLevels - 1; i >= 0; --i)
     {
         float diff;
         float error = 0.;
@@ -146,14 +146,14 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
                 if (!step) step = 1;        // handle lazy font developers
                 if (pref > 0)
                 {
-                    int max = (uint16)(s->getJustify(this, i, 0));
+                    float max = uint16(s->getJustify(this, i, 0));
                     if (i == 0) max -= s->just();
                     if (pref > max) pref = max;
                     else tWeight += w;
                 }
                 else
                 {
-                    int max = (uint16)(s->getJustify(this, i, 1));
+                    float max = uint16(s->getJustify(this, i, 1));
                     if (i == 0) max += s->just();
                     if (-pref > max) pref = -max;
                     else tWeight += w;
@@ -190,25 +190,17 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
         *dbgout << json::object
-                    << "justifies"	<< objectid(this);
+                    << "justifies"	<< objectid(this)
+                    << "passes"     << json::array;
 #endif
 
-    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0. || silf()->flags() & 1))
-    {
-#if !defined GRAPHITE2_NTRACING
-        if (dbgout)
-            *dbgout << "passes"		<< json::array;
-#endif
+    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0. || (silf()->flags() & 1)))
         m_silf->runGraphite(this, m_silf->justificationPass(), m_silf->positionPass());
-#if !defined GRAPHITE2_NTRACING
-        if (dbgout)
-            *dbgout	<< json::item << json::close; // Close up the passes array
-#endif
-    }
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
+        *dbgout     << json::item << json::close; // Close up the passes array
         positionSlots(NULL, pSlot, pLast);
         Slot *lEnd = pLast->nextSibling();
         *dbgout << "output" << json::array;
