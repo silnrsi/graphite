@@ -44,9 +44,9 @@ extern "C" {
 
 bool graphite_start_logging(gr_face * face, const char *log_path)
 {
-#if !defined GRAPHITE2_NTRACING
 	if (!face || !log_path)	return false;
 
+#if !defined GRAPHITE2_NTRACING
 	graphite_stop_logging(face);
 #if defined _WIN32
 	int n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, 0, 0);
@@ -75,9 +75,9 @@ bool graphite_start_logging(gr_face * face, const char *log_path)
 
 void graphite_stop_logging(gr_face * face)
 {
-#if !defined GRAPHITE2_NTRACING
 	if (!face)	return;
 
+#if !defined GRAPHITE2_NTRACING
 	if (dbgout)
 	{
 		FILE * log = dbgout->stream();

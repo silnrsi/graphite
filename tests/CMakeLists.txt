@@ -17,17 +17,14 @@ add_library(graphite2-base STATIC
 add_library(graphite2-segcache STATIC
     ${S}/Bidi.cpp
     ${S}/call_machine.cpp
-    ${S}/CmapCache.cpp
     ${S}/Code.cpp
+    ${S}/CmapCache.cpp
     ${S}/Face.cpp
     ${S}/GlyphFaceCache.cpp
     ${S}/GlyphFace.cpp
-    ${S}/gr_logging.cpp
-    ${S}/json.cpp
     ${S}/Pass.cpp
     ${S}/SegCache.cpp
     ${S}/SegCacheEntry.cpp
-    ${S}/SegCacheStore.cpp
     ${S}/Segment.cpp
     ${S}/Silf.cpp
     ${S}/Slot.cpp
@@ -35,14 +32,14 @@ add_library(graphite2-segcache STATIC
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS UNICODE")
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS UNICODE")
     set_target_properties(graphite2-segcache PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS UNICODE")
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS UNICODE")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
     set_target_properties(graphite2-segcache PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 if (GRAPHITE2_COMPARE_RENDERER)

@@ -10,15 +10,9 @@ set(S ${graphite2_core_SOURCE_DIR})
 # I build the vm code here since it needs to be built for both code threading
 # models rather than linking against the library from source.
 add_library(vm-test-common STATIC 
-    basic_test.cpp
-    ${S}/Bidi.cpp 
-    ${S}/Code.cpp 
-    ${S}/CmapCache.cpp 
-    ${S}/Face.cpp 
-    ${S}/Pass.cpp
-    ${S}/Segment.cpp
-    ${S}/Silf.cpp)
-target_link_libraries(vm-test-common graphite2 graphite2-base graphite2-segcache)
+    basic_test.cpp)
+target_link_libraries(vm-test-common graphite2 graphite2-segcache graphite2-base)
+add_definitions(-DGRAPHITE2_NTRACING)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
