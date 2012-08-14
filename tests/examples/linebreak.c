@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     gr_segment * seg = NULL;
     const gr_slot *s, *sprev;
     int i;
-    float lineend = width;
+    float lineend = float(width);
     int numlines = 0;
     const gr_slot **lineslots;
     gr_face *face = gr_make_file_face(argv[1], 0);

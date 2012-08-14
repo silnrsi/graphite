@@ -192,7 +192,7 @@ uint16 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const
 inline
 bool Segment::isWhitespace(const int cid) const
 {
-    return (cid >= 0x0009) * (cid <= 0x000D)
+    return ((cid >= 0x0009) * (cid <= 0x000D)
          + (cid == 0x0020)
          + (cid == 0x0085)
          + (cid == 0x00A0)
@@ -203,7 +203,7 @@ bool Segment::isWhitespace(const int cid) const
          + (cid == 0x2029)
          + (cid == 0x202F)
          + (cid == 0x205F)
-         + (cid == 0x3000);
+         + (cid == 0x3000)) != 0;
 }
 
 } // namespace graphite2
