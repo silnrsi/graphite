@@ -41,7 +41,7 @@ Silf::Silf() throw()
 : m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
   m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
   m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_gEndLine(0)
+  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_gEndLine(0), m_silfinfo()
 {
 }
 
@@ -78,7 +78,8 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     }
     else if (lSilf < 20) 	{ releaseBuffers(); return false; }
     be::skip<uint16>(p);  // maxGlyphID
-    be::skip<int16>(p,2); // extra ascent & descent
+    m_silfinfo.extra_ascent = be::read<uint16>(p);
+    m_silfinfo.extra_descent = be::read<uint16>(p);
     m_numPasses = be::read<uint8>(p);
     m_sPass     = be::read<uint8>(p);
     m_pPass     = be::read<uint8>(p);
@@ -155,7 +156,15 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
         	releaseBuffers();
         	return false;
         }
+        else
+        { m_silfinfo.space_contextuals = gr_faceinfo::gr_space_contextuals(mergeSpaceContextuals(m_passes[i].spaceContextuals())); }
     }
+
+    // fill in gr_faceinfo
+    m_silfinfo.upem = face.upem();
+    m_silfinfo.has_bidi_pass = (m_bPass != 0xFF);
+    m_silfinfo.justifies = (m_numJusts != 0) || (m_jPass < m_pPass);
+    m_silfinfo.line_ends = (m_flags & 1);
     return true;
 }
 

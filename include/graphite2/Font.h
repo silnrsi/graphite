@@ -66,6 +66,26 @@ enum gr_face_options {
     gr_face_preloadAll = 6
 };
 
+struct _gr_faceinfo {
+    gr_uint16 extra_ascent;
+    gr_uint16 extra_descent;
+    gr_uint16 upem;
+    enum gr_space_contextuals {
+        gr_space_unknown = 0,
+        gr_space_none = 1,
+        gr_space_left_only = 2,
+        gr_space_right_only = 3,
+        gr_space_either_only = 4,
+        gr_space_both = 5,
+        gr_space_cross = 6
+    } space_contextuals;
+    unsigned int has_bidi_pass : 1;
+    unsigned int line_ends : 1;
+    unsigned int justifies : 1;
+};
+
+typedef struct _gr_faceinfo gr_faceinfo;
+
 /** type describing function to retrieve font table information
   *
   * @return a pointer to the table in memory. The pointed to memory must exist as
@@ -153,6 +173,9 @@ GR2_API void gr_face_destroy(gr_face *face);
 
 /** Returns the number of glyphs in the face **/
 GR2_API unsigned short gr_face_n_glyphs(const gr_face* pFace);
+
+/** Returns a faceinfo for the face and script **/
+GR2_API const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script);
 
 /** Returns whether the font supports a given Unicode character
   *

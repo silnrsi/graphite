@@ -194,6 +194,14 @@ unsigned short gr_face_n_glyphs(const gr_face* pFace)
     return pFace->getGlyphFaceCache()->numGlyphs();
 }
 
+const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script)
+{
+    if (!pFace) return 0;
+    const Silf *silf = pFace->chooseSilf(script);
+    if (silf) return silf->silfInfo();
+    return 0;
+}
+
 int gr_face_is_char_supported(const gr_face* pFace, gr_uint32 usv, gr_uint32 script)
 {
     const Cmap & cmap = pFace->cmap();

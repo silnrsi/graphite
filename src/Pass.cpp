@@ -48,7 +48,8 @@ Pass::Pass()
         m_ruleMap(0),
         m_startStates(0),
         m_sTable(0),
-        m_states(0)
+        m_states(0),
+        m_flags()
 {
 }
 
@@ -71,7 +72,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
 
     if (pass_length < 40) return false; 
     // Read in basic values
-    m_immutable = be::read<byte>(p) & 0x1U;
+    m_flags = be::read<byte>(p);
     m_iMaxLoop = be::read<byte>(p);
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);

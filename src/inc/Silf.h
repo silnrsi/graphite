@@ -26,8 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#include "graphite2/Font.h"
 #include "inc/Main.h"
-
 #include "inc/Pass.h"
 
 namespace graphite2 {
@@ -89,6 +89,12 @@ public:
     uint8 numJusts() const { return m_numJusts; }
     Justinfo *justAttrs() const { return m_justs; }
     uint16 endLineGlyphid() const { return m_gEndLine; }
+    byte mergeSpaceContextuals(byte value) const {
+        if (((m_silfinfo.space_contextuals ^ value) == 1) && (value & 2) != 0) return 5;
+        if (m_silfinfo.space_contextuals > value || value == 4) return m_silfinfo.space_contextuals;
+        return value;
+    }
+    const gr_faceinfo *silfInfo() const { return &m_silfinfo; }
 
     CLASS_NEW_DELETE
 
@@ -113,6 +119,7 @@ private:
             m_nClass,
             m_nLinear,
             m_gEndLine;
+    gr_faceinfo m_silfinfo;
     
     void releaseBuffers() throw();
     
