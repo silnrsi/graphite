@@ -27,16 +27,22 @@ of the License or (at your option) any later version.
 
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
+#include "inc/Face.h"
 #include "inc/TtfTypes.h"
 #include "inc/TtfUtil.h"
 
 
 using namespace graphite2;
 
-CmapCache::CmapCache(const void* cmapTable, size_t length)
+CachedCmap::CachedCmap(const Face & face)
+: m_isBmpOnly(true),
+  m_blocks(0)
 {
-    const void * table31 = TtfUtil::FindCmapSubtable(cmapTable, 3, 1, length);
-    const void * table310 = TtfUtil::FindCmapSubtable(cmapTable, 3, 10, length);
+    const Face::Table cmap(face, Tag::cmap);
+    if (!cmap)	return;
+
+    const void * table31 = TtfUtil::FindCmapSubtable(cmap, 3, 1, cmap.size());
+    const void * table310 = TtfUtil::FindCmapSubtable(cmap, 3, 10, cmap.size());
     m_isBmpOnly = (!table310);
     int rangeKey = 0;
     uint32 	codePoint = 0,
@@ -92,7 +98,7 @@ CmapCache::CmapCache(const void* cmapTable, size_t length)
     }
 }
 
-CmapCache::~CmapCache() throw()
+CachedCmap::~CachedCmap() throw()
 {
     unsigned int numBlocks = (m_isBmpOnly)? 0x100 : 0x1100;
     for (unsigned int i = 0; i < numBlocks; i++)
@@ -100,7 +106,7 @@ CmapCache::~CmapCache() throw()
     free(m_blocks);
 }
 
-uint16 CmapCache::operator [] (const uint32 usv) const throw()
+uint16 CachedCmap::operator [] (const uint32 usv) const throw()
 {
     if ((m_isBmpOnly && usv > 0xFFFF) || (usv > 0x10FFFF))
         return 0;
@@ -110,21 +116,24 @@ uint16 CmapCache::operator [] (const uint32 usv) const throw()
     return 0;
 };
 
-CmapCache::operator bool() const throw()
+CachedCmap::operator bool() const throw()
 {
 	return m_blocks != 0;
 }
 
 
-DirectCmap::DirectCmap(const void* cmap, size_t length)
+DirectCmap::DirectCmap(const Face & face)
+: _cmap(face, Tag::cmap)
 {
-    _ctable = TtfUtil::FindCmapSubtable(cmap, 3, 1, length);
+    if (!_cmap)	return;
+
+    _ctable = TtfUtil::FindCmapSubtable(_cmap, 3, 1, _cmap.size());
     if (!_ctable || !TtfUtil::CheckCmap31Subtable(_ctable))
     {
         _ctable =  0;
         return;
     }
-    _stable = TtfUtil::FindCmapSubtable(cmap, 3, 10, length);
+    _stable = TtfUtil::FindCmapSubtable(_cmap, 3, 10, _cmap.size());
     if (_stable && !TtfUtil::CheckCmap310Subtable(_stable))
     	_stable = 0;
 }
@@ -136,6 +145,6 @@ uint16 DirectCmap::operator [] (const uint32 usv) const throw()
 
 DirectCmap::operator bool () const throw()
 {
-	return _ctable != 0;
+	return _cmap != 0;
 }
 

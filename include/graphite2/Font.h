@@ -96,6 +96,38 @@ typedef struct _gr_faceinfo gr_faceinfo;
   */
 typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int name, size_t *len);
 
+/** type describing function to release any resources allocated by the above get_table table function
+  *
+  * @param appFaceHandle is the unique information passed to gr_make_face()
+  * @param pointer to table memory returned by get_table.
+  */
+typedef const void *(*gr_release_table_fn)(const void* appFaceHandle, const void *);
+
+/** query function to find the hinted advance width of a glyph
+  *
+  * @param appFontHandle is the unique information passed to gr_make_font_with_advance()
+  * @param glyphid is the glyph to retireve the hinted advance for.
+ */
+typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
+
+
+/** struct housing function pointers to manage font table buffers for the graphite engine.
+  *
+  * @member get_table is a pointer to a function to request a table from the client.
+  * @member release_table is a pointer to a function to notify the client the a table can be released.
+  *                       This can be NULL to signify that the client does not wish to do any release handling.
+  * @member glyph_advance is a pointer to a function to retrieve the hinted advance width of a glyph which the
+  *                       font cannot provide without client assistance.  This can be NULL to signify no
+  *                       hinted metrics necessary.
+  */
+struct gr_face_ops
+{
+	gr_get_table_fn 	get_table;
+	gr_release_table_fn	release_table;
+	gr_advance_fn		glyph_advance;
+};
+typedef struct gr_face_ops	gr_face_ops;
+
 /** Create a gr_face object given application information and a getTable function
   *
   * @return gr_face or NULL if the font fails to load for some reason.
@@ -105,7 +137,7 @@ typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int n
   *                  in the font.
   * @param faceOptions   Bitfield describing various options. See enum gr_face_options for details.
   */
-GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *face_ops, unsigned int faceOptions);
 
 //#ifndef GRAPHITE2_NSEGCACHE
 /** Create a gr_face object given application information, with subsegmental caching support
@@ -117,7 +149,7 @@ GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_tabl
   * @param segCacheMaxSize   How large the segment cache is.
   * @param faceOptions   Bitfield of values from enum gr_face_options
   */
-GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, const gr_face_ops *face_ops, unsigned int segCacheMaxSize, unsigned int faceOptions);
 //#endif
 
 /** Convert a tag in a string into a gr_uint32
@@ -215,18 +247,14 @@ GR2_API gr_face* gr_make_file_face_with_seg_cache(const char *filename, unsigned
   */
 GR2_API gr_font* gr_make_font(float ppm, const gr_face *face);
 
-/** query function to find the hinted advance width of a glyph **/
-typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
-
 /** Creates a font with hinted advance width query function
   *
   * @return gr_font to be destroyed via font_destroy
   * @param ppm size of font in pixels per em
   * @param appFontHandle font specific information that must stay alive as long as the font does
-  * @param advance function to call with appFontHandle and glyphid to get horizontal advance in pixels.
   * @param face the face this font corresponds to. Must stay alive as long as the font does.
   */
-GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, gr_advance_fn advance, const gr_face *face);
+GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, const gr_face *face);
 
 /** Free a font **/
 GR2_API void gr_font_destroy(gr_font *font);

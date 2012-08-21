@@ -12,6 +12,6 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 set(S ${graphite2_core_SOURCE_DIR})
 add_executable(featuremaptest featuremaptest.cpp)
 set_target_properties(featuremaptest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
-target_link_libraries(featuremaptest graphite2 graphite2-base)
+target_link_libraries(featuremaptest graphite2 graphite2-base graphite2-segcache graphite2-base)
 
 add_test(NAME featuremaptest COMMAND $<TARGET_FILE:featuremaptest> ${testing_SOURCE_DIR}/fonts/tiny.ttf)

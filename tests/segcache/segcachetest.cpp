@@ -19,6 +19,7 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cstdio>
 #include <graphite2/Segment.h>
 #include <graphite2/Log.h>
 #include "inc/Main.h"
@@ -39,7 +40,8 @@ inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_c
 template <typename utf_itr>
 void resolve_unicode_to_glyphs(const Face & face, utf_itr first, size_t n_chars, uint16 * glyphs)
 {
-	const void * cmap = TtfUtil::FindCmapSubtable(face.getTable("cmap", NULL), 3, 1);
+    Face::Table  cmap_tbl = Face::Table(face, "cmap");
+	const void * cmap = TtfUtil::FindCmapSubtable(cmap_tbl, 3, 1);
 
 	for (; n_chars; --n_chars, ++first)
 	{

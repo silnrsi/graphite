@@ -36,8 +36,7 @@ Description:
 ----------------------------------------------------------------------------------------------*/
 
 
-//#include <cstddef>
-//#include <stdexcept>
+#include <cstddef>
 
 namespace graphite2
 {

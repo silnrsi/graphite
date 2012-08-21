@@ -226,7 +226,7 @@ Slot *Segment::addLineEnd(Slot *nSlot)
 {
     Slot *eSlot = newSlot();
     const uint16 gid = silf()->endLineGlyphid();
-    const GlyphFace * theGlyph = m_face->getGlyphFaceCache()->glyphSafe(gid);
+    const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     eSlot->setGlyph(this, gid, theGlyph);
     if (nSlot)
     {

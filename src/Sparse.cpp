@@ -37,9 +37,9 @@ sparse::~sparse() throw()
 }
 
 
-sparse::value sparse::operator [] (int k) const throw()
+sparse::mapped_type sparse::operator [] (key_type k) const throw()
 {
-	value g = value(k < m_nchunks*SIZEOF_CHUNK);	// This will be 0 is were out of bounds
+    mapped_type g = mapped_type(k < m_nchunks*SIZEOF_CHUNK);	// This will be 0 is were out of bounds
 	k *= g;									// Force k to 0 if out of bounds making the map look up safe
 	const chunk & 		c = m_array.map[k/SIZEOF_CHUNK];
 	const mask_t 		m = c.mask >> (SIZEOF_CHUNK - 1 - (k%SIZEOF_CHUNK));

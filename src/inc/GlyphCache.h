@@ -25,65 +25,70 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #pragma once
-#include <cassert>
+
+
 #include "graphite2/Font.h"
 #include "inc/Main.h"
-#include "inc/Face.h"
 
 namespace graphite2 {
 
-#define INVALID_ADVANCE -1e38f		// can't be a static const because non-integral
+class Face;
+class FeatureVal;
+class GlyphFace;
+class Segment;
 
-class Font
+class GlyphCache
 {
+    class Loader;
+
+	GlyphCache(const GlyphCache&);
+    GlyphCache& operator=(const GlyphCache&);
+
 public:
-    Font(float ppm, const Face & face, const void * appFontHandle=0);
-    virtual ~Font();
+    GlyphCache(const Face & face, const bool dumb_font, bool preload);
+    ~GlyphCache();
 
-    float advance(unsigned short glyphid) const;
-    float scale() const;
-    bool isHinted() const;
-    const Face & face() const;
+    size_t numGlyphs() const throw();
+    size_t numAttrs() const throw();
+    size_t unitsPerEm() const throw();
 
-    CLASS_NEW_DELETE
+    const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    const GlyphFace *glyphSafe(unsigned short glyphid) const;
+    uint16 glyphAttr(uint16 gid, uint8 gattr) const;
+
+    CLASS_NEW_DELETE;
     
-protected:
-    const Face	& m_face;
-    float m_scale;      // scales from design units to ppm
-    float *m_advances;  // One advance per glyph in pixels. Nan if not defined
-    const void * const m_appFontHandle;
-    
-private:			//defensive on m_advances
-    Font(const Font&);
-    Font& operator=(const Font&);
+private:
+    const Loader        * _glyph_loader;
+    const GlyphFace *   * const _glyphs;
+    const unsigned short	    _num_glyphs,
+    						    _num_attrs,
+    						    _upem;
 };
 
 inline
-float Font::advance(unsigned short glyphid) const
+size_t GlyphCache::numGlyphs() const throw()
 {
-    if (m_advances[glyphid] == INVALID_ADVANCE)
-        m_advances[glyphid] = (*m_face.m_ops.glyph_advance)(m_appFontHandle, glyphid);
-    return m_advances[glyphid];
+    return _num_glyphs;
 }
 
 inline
-float Font::scale() const
+size_t GlyphCache::numAttrs() const throw()
 {
-	return m_scale;
+    return _num_attrs;
 }
 
 inline
-bool Font::isHinted() const
+size_t GlyphCache::unitsPerEm() const throw()
 {
-	return m_appFontHandle;
+    return _upem;
 }
 
 inline
-const Face & Font::face() const
+const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 {
-    return m_face;
+    return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
 }
+
 
 } // namespace graphite2
-
-struct gr_font : public graphite2::Font {};

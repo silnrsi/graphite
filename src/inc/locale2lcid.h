@@ -28,6 +28,9 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <cassert>
 
+#include "inc/Main.h"
+
+
 namespace graphite2 {
 
 struct IsoLangEntry
@@ -427,7 +430,8 @@ public:
         }
         return &LANG_ENTRIES[guess];
     }
-    CLASS_NEW_DELETE
+
+    CLASS_NEW_DELETE;
 
 private:
     const IsoLangEntry ** mLangLookup[26][26];

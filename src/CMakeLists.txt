@@ -39,8 +39,10 @@ if (GRAPHITE2_NSEGCACHE)
     set(SEGCACHE)
 endif (GRAPHITE2_NSEGCACHE)
 
+set(FILEFACE FileFace.cpp)
 if (GRAPHITE2_NFILEFACE)
     add_definitions(-DGRAPHITE2_NFILEFACE)
+    set(FILEFACE)
 endif (GRAPHITE2_NFILEFACE)
 
 set(TRACING json.cpp)
@@ -76,7 +78,7 @@ add_library(graphite2 SHARED
     FeatureMap.cpp
     Font.cpp
     GlyphFace.cpp
-    GlyphFaceCache.cpp
+    GlyphCache.cpp
     Justifier.cpp
     NameTable.cpp
     Pass.cpp
@@ -86,6 +88,7 @@ add_library(graphite2 SHARED
     Sparse.cpp
     TtfUtil.cpp
     UtfCodec.cpp
+    ${FILEFACE}
     ${SEGCACHE}
     ${TRACING})
 
