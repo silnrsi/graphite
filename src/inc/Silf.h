@@ -27,7 +27,6 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include "inc/Main.h"
-
 #include "inc/Pass.h"
 
 namespace graphite2 {

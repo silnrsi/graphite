@@ -38,8 +38,7 @@ SegCacheStore::SegCacheStore(const Face *face, unsigned int numSilf, size_t maxS
    m_maxCmapGid(0)
 {
     assert(face);
-    assert(face->getGlyphFaceCache());
-    m_maxCmapGid = face->getGlyphFaceCache()->numGlyphs();
+    m_maxCmapGid = face->glyphs().numGlyphs();
 
     m_spaceGid = face->cmap()[0x20];
     m_zwspGid = face->cmap()[0x200B];

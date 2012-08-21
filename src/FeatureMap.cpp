@@ -111,13 +111,13 @@ FeatureRef::~FeatureRef() throw()
 
 bool FeatureMap::readFeats(const Face & face)
 {
-    size_t feat_len;
-    const byte *p = face.getTable(TtfUtil::Tag::Feat, &feat_len);
+    const Face::Table feat(face, TtfUtil::Tag::Feat);
+    const byte * p = feat;
     if (!p) return true;
-    if (feat_len < FEAT_HEADER) return false;
+    if (feat.size() < FEAT_HEADER) return false;
 
     const byte *const feat_start = p,
-    		   *const feat_end = p + feat_len;
+    		   *const feat_end = p + feat.size();
 
     const uint32 version = be::read<uint32>(p);
     m_numFeats = be::read<uint16>(p);
@@ -197,28 +197,27 @@ bool SillMap::readFace(const Face & face)
 
 bool SillMap::readSill(const Face & face)
 {
-    size_t lSill;
-    const byte *pSill = face.getTable(TtfUtil::Tag::Sill, &lSill);
-    const byte *pBase = pSill;
+	const Face::Table sill(face, TtfUtil::Tag::Sill);
+    const byte *pSill = sill;
 
     if (!pSill) return true;
-    if (lSill < 12) return false;
+    if (sill.size() < 12) return false;
     if (be::read<uint32>(pSill) != 0x00010000UL) return false;
     m_numLanguages = be::read<uint16>(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
     if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return true; }        //defensive
 
     pSill += 6;     // skip the fast search
-    if (lSill < m_numLanguages * 8U + 12) return false;
+    if (sill.size() < m_numLanguages * 8U + 12) return false;
 
     for (int i = 0; i < m_numLanguages; i++)
     {
         uint32 langid = be::read<uint32>(pSill);
         uint16 numSettings = be::read<uint16>(pSill);
         uint16 offset = be::read<uint16>(pSill);
-        if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
+        if (offset + 8U * numSettings > sill.size() && numSettings > 0) return false;
         Features* feats = new Features(*m_FeatureMap.m_defaultFeatures);
-        const byte *pLSet = pBase + offset;
+        const byte *pLSet = sill + offset;
 
         // Apply langauge specific settings
         for (int j = 0; j < numSettings; j++)

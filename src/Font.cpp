@@ -24,21 +24,23 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+#include "inc/Face.h"
 #include "inc/Font.h"
-
+#include "inc/GlyphCache.h"
 
 using namespace graphite2;
 
-Font::Font(float ppm, const Face *face/*needed for scaling*/) :
-    m_scale(ppm / face->upem())
+Font::Font(float ppm, const Face & f, const void * appFontHandle)
+:	m_face(f),
+    m_scale(ppm / f.glyphs().unitsPerEm()),
+    m_appFontHandle(appFontHandle ? appFontHandle : this)
 {
-    size_t nGlyphs=face->numGlyphs();
+    size_t nGlyphs = f.glyphs().numGlyphs();
     m_advances = gralloc<float>(nGlyphs);
     if (m_advances)
     {
-        float *advp = m_advances;
-        for (size_t i = 0; i < nGlyphs; i++)
-        { *advp++ = INVALID_ADVANCE; }
+        for (float *advp = m_advances; nGlyphs; --nGlyphs)
+        	*advp++ = INVALID_ADVANCE;
     }
 }
 
@@ -46,34 +48,6 @@ Font::Font(float ppm, const Face *face/*needed for scaling*/) :
 /*virtual*/ Font::~Font()
 {
 	free(m_advances);
-}
-
-
-SimpleFont::SimpleFont(float ppm/*pixels per em*/, const Face *face) :
-  Font(ppm, face),
-  m_face(face)
-{
-}
-  
-  
-/*virtual*/ float SimpleFont::computeAdvance(unsigned short glyphid) const
-{
-    return m_face->getAdvance(glyphid, m_scale);
-}
-
-
-
-HintedFont::HintedFont(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn advance2, const Face *face/*needed for scaling*/) :
-    Font(ppm, face), 
-    m_appFontHandle(appFontHandle),
-    m_advance(advance2)
-{
-}
-
-
-/*virtual*/ float HintedFont::computeAdvance(unsigned short glyphid) const
-{
-    return (*m_advance)(m_appFontHandle, glyphid);
 }
 
 
