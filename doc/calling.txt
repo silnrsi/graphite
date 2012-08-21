@@ -47,7 +47,7 @@ Assuming that graphite2 has been built and installed, this example can be
 built and run on linux using:
 
 ----
-gcc -o simple -lgraphiteng simple.c
+gcc -o simple -lgraphite2 simple.c
 LD_LIBRARY_PATH=/usr/local/lib ./simple ../fonts/Padauk.ttf 'Hello World!'
 ----
 
@@ -60,6 +60,18 @@ Running simple gives the results:
 Not very pretty, but reassuring! Graphite isn't a graphical rendering engine,
 it merely calculates which glyphs should render where and leaves the actual
 process of displaying those glyphs to other libraries.
+
+This example is pretty simple and uses a convenient way to load fonts into Graphite
+for testing purposes. But when integrating into real applications, that is rarely
+the most appropriate way. Instead the necessary font information comes to Graphite
+via some other data structure with its own accessor functions. In the following example
+we show the same application but using a FreeType font rather than a font file.
+
+[source, c]
+----
+include::../tests/examples/freetype.c[]
+----
+
 
 === Slots ===
 
