@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #include "graphite2/Font.h"
 #include "inc/Face.h"
+#include "inc/FileFace.h"
+#include "inc/GlyphCache.h"
 #include "inc/CachedFace.h"
 #include "inc/CmapCache.h"
 #include "inc/Silf.h"
@@ -34,13 +36,17 @@ using namespace graphite2;
 
 extern "C" {
 
-
-gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions)
+gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
 {
-    Face *res = new Face(appFaceHandle, getTable);
+	if (ops == 0)	return 0;
 
-    if (res->getTable(Tag::Silf) == 0)
+	faceOptions &= ~gr_face_preloadAll;
+
+    Face *res = new Face(appFaceHandle, *ops);
+    if (res == 0)	return 0;
+
+    if (Face::Table(*res, Tag::Silf) == 0)
     {
 		if (!(faceOptions & gr_face_dumbRendering))
 		{
@@ -67,13 +73,23 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn get
     return static_cast<gr_face *>(res);
 }
 
+gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tablefn, unsigned int faceOptions)
+{
+    const gr_face_ops ops = {sizeof(gr_face_ops), tablefn, NULL};
+    return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
+}
+
 #ifndef GRAPHITE2_NSEGCACHE
-gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
+gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int cacheSize, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
 {
-    CachedFace *res = new CachedFace(appFaceHandle, getTable);
+	if (ops == 0)	return 0;
 
-    if (res->getTable(Tag::Silf) == 0)
+    faceOptions &= ~gr_face_preloadAll;
+    CachedFace *res = new CachedFace(appFaceHandle, *ops);
+    if (res == 0)	return 0;
+
+    if (Face::Table(*res, Tag::Silf) == 0)
     {
 		if (!(faceOptions & gr_face_dumbRendering))
 		{
@@ -99,6 +115,12 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
         return 0;
     }
     return static_cast<gr_face *>(static_cast<Face *>(res));
+}
+
+gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
+{
+    const gr_face_ops ops = {sizeof(gr_face_ops), getTable, NULL};
+    return gr_make_face_with_seg_cache_and_ops(appFaceHandle, &ops, cacheSize, faceOptions);
 }
 #endif
 
@@ -191,7 +213,7 @@ gr_uint16 gr_face_name_lang_for_locale(gr_face *face, const char * locale)
 
 unsigned short gr_face_n_glyphs(const gr_face* pFace)
 {
-    return pFace->getGlyphFaceCache()->numGlyphs();
+    return pFace->glyphs().numGlyphs();
 }
 
 const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script)
@@ -218,9 +240,9 @@ int gr_face_is_char_supported(const gr_face* pFace, gr_uint32 usv, gr_uint32 scr
 gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
 {
     FileFace* pFileFace = new FileFace(filename);
-    if (pFileFace->m_pTableDir)
+    if (*pFileFace)
     {
-      gr_face* pRes =gr_make_face(pFileFace, &FileFace::table_fn, faceOptions);
+      gr_face* pRes = gr_make_face_with_ops(pFileFace, &FileFace::ops, faceOptions);
       if (pRes)
       {
         pRes->takeFileFace(pFileFace);        //takes ownership
@@ -239,9 +261,9 @@ gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int seg
                   //when finished with, call destroy_face
 {
     FileFace* pFileFace = new FileFace(filename);
-    if (pFileFace->m_pTableDir)
+    if (*pFileFace)
     {
-      gr_face* pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace::table_fn, segCacheMaxSize, faceOptions);
+      gr_face * pRes = gr_make_face_with_seg_cache_and_ops(pFileFace, &FileFace::ops, segCacheMaxSize, faceOptions);
       if (pRes)
       {
         pRes->takeFileFace(pFileFace);        //takes ownership

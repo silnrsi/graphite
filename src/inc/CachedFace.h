@@ -38,7 +38,7 @@ class SegCache;
 class CachedFace : public Face
 {
 public:
-    CachedFace(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable2);
+    CachedFace(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     bool setupCache(unsigned int cacheSize);
     virtual ~CachedFace();
     virtual bool runGraphite(Segment *seg, const Silf *silf) const;

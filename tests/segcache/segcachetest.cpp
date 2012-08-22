@@ -19,6 +19,7 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cstdio>
 #include <graphite2/Segment.h>
 #include <graphite2/Log.h>
 #include "inc/Main.h"
@@ -39,7 +40,8 @@ inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_c
 template <typename utf_itr>
 void resolve_unicode_to_glyphs(const Face & face, utf_itr first, size_t n_chars, uint16 * glyphs)
 {
-	const void * cmap = TtfUtil::FindCmapSubtable(face.getTable("cmap", NULL), 3, 1);
+    Face::Table  cmap_tbl = Face::Table(face, "cmap");
+	const void * cmap = TtfUtil::FindCmapSubtable(cmap_tbl, 3, 1);
 
 	for (; n_chars; --n_chars, ++first)
 	{
@@ -146,7 +148,7 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
-    graphite_start_logging(api_cast(face), "grsegcache.json");
+    graphite_start_logging_face(api_cast(face), "grsegcache.json");
     gr_font *sizedFont = gr_make_font(12, api_cast(face));
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
@@ -197,6 +199,6 @@ int main(int argc, char ** argv)
     gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
-    graphite_stop_logging(api_cast(face));
+    graphite_stop_logging_face(api_cast(face));
     return 0;
 }

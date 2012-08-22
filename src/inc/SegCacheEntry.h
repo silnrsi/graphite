@@ -29,6 +29,7 @@ of the License or (at your option) any later version.
 #ifndef GRAPHITE2_NSEGCACHE
 
 #include "inc/Main.h"
+#include "inc/Slot.h"
 
 namespace graphite2 {
 

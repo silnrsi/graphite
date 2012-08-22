@@ -27,7 +27,7 @@ of the License or (at your option) any later version.
 #pragma once
 // #include <cstring>
 // #include "graphite2/Types.h"
-#include "graphite2/Font.h"
+//#include "graphite2/Font.h"
 #include "inc/Main.h"
 #include "inc/FeatureVal.h"
 
@@ -171,7 +171,6 @@ public:
 
     const FeatureMap & theFeatureMap() const { return m_FeatureMap; };
 private:
-friend class Face;
     FeatureMap m_FeatureMap;        //of face
     LangFeaturePair * m_langFeats;
     uint16 m_numLanguages;

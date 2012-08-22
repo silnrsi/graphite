@@ -35,10 +35,12 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include "graphite2/Segment.h"
 #include "inc/Code.h"
-#include "inc/Machine.h"
-#include "inc/Silf.h"
 #include "inc/Face.h"
+#include "inc/GlyphFace.h"
+#include "inc/GlyphCache.h"
+#include "inc/Machine.h"
 #include "inc/Rule.h"
+#include "inc/Silf.h"
 
 #include <cstdio>
 
@@ -168,7 +170,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
         pre_context,
         rule_length,
         silf.numClasses(),
-        face.getGlyphFaceCache()->numAttrs(),
+        face.glyphs().numAttrs(),
         face.numFeatures(), 
         {1,1,1,1,1,1,1,1, 
          1,1,1,1,1,1,1,255,

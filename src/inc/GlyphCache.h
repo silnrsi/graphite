@@ -26,34 +26,69 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+
+#include "graphite2/Font.h"
+#include "inc/Main.h"
+
 namespace graphite2 {
 
-class Position
+class Face;
+class FeatureVal;
+class GlyphFace;
+class Segment;
+
+class GlyphCache
 {
+    class Loader;
+
+	GlyphCache(const GlyphCache&);
+    GlyphCache& operator=(const GlyphCache&);
+
 public:
-    Position() : x(0), y(0) { }
-    Position(const float inx, const float iny) { x = inx; y = iny; }
-    Position operator + (const Position& a) const { return Position(x + a.x, y + a.y); }
-    Position operator - (const Position& a) const { return Position(x - a.x, y - a.y); }
-    Position operator * (const float m) const { return Position(x * m, y * m); }
-    Position &operator += (const Position &a) { x += a.x; y += a.y; return *this; }
-    Position &operator *= (const float m) { x *= m; y *= m; return *this; }
+    GlyphCache(const Face & face, const bool dumb_font, bool preload);
+    ~GlyphCache();
 
-    float x;
-    float y;
+    size_t numGlyphs() const throw();
+    size_t numAttrs() const throw();
+    size_t unitsPerEm() const throw();
+
+    const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
+    const GlyphFace *glyphSafe(unsigned short glyphid) const;
+    uint16 glyphAttr(uint16 gid, uint8 gattr) const;
+
+    CLASS_NEW_DELETE;
+    
+private:
+    const Loader        * _glyph_loader;
+    const GlyphFace *   * const _glyphs;
+    const unsigned short	    _num_glyphs,
+    						    _num_attrs,
+    						    _upem;
 };
 
-class Rect
+inline
+size_t GlyphCache::numGlyphs() const throw()
 {
-public :
-    Rect() {}
-    Rect(const Position& botLeft, const Position& topRight): bl(botLeft), tr(topRight) {}
-    Rect widen(const Rect& other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
-    Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
-    Rect operator * (float m) const { return Rect(Position(bl.x, bl.y) * m, Position(tr.x, tr.y) * m); }
+    return _num_glyphs;
+}
 
-    Position bl;
-    Position tr;
-};
+inline
+size_t GlyphCache::numAttrs() const throw()
+{
+    return _num_attrs;
+}
+
+inline
+size_t GlyphCache::unitsPerEm() const throw()
+{
+    return _upem;
+}
+
+inline
+const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
+{
+    return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
+}
+
 
 } // namespace graphite2

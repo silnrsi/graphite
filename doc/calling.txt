@@ -47,7 +47,7 @@ Assuming that graphite2 has been built and installed, this example can be
 built and run on linux using:
 
 ----
-gcc -o simple -lgraphiteng simple.c
+gcc -o simple -lgraphite2 simple.c
 LD_LIBRARY_PATH=/usr/local/lib ./simple ../fonts/Padauk.ttf 'Hello World!'
 ----
 
@@ -60,6 +60,48 @@ Running simple gives the results:
 Not very pretty, but reassuring! Graphite isn't a graphical rendering engine,
 it merely calculates which glyphs should render where and leaves the actual
 process of displaying those glyphs to other libraries.
+
+This example is pretty simple and uses a convenient way to load fonts into Graphite
+for testing purposes. But when integrating into real applications, that is rarely
+the most appropriate way. Instead the necessary font information comes to Graphite
+via some other data structure with its own accessor functions. In the following example
+we show the same application but using a FreeType font rather than a font file.
+
+[source, c]
+----
+include::../tests/examples/freetype.c[]
+----
+
+<1> We cast the pointer to remove its const restriction. Since when the memory was allocated, it was
+    passed to Graphite as a read only memory block, via const, it gets passed back to us as a read only
+    memory block. But we are the owner of the block and so can mess with it (like freeing it). So we
+    are free to break the const restriction here.
+
+<2> The structure of an operations structure is to first hold the size of the structure and then the
+    pointers to the functions. Storing the size allows an older application to call a newer version
+    of the Graphite engine which might support more function pointers. In such a case, all those
+    newer pointers are assumed to be NULL.
+
+<3> Pass the function pointers structure for creating the font face. The first function is called to
+    load a table from the font and pass it back to Graphite. The second is called by Graphite to say
+    that it no longer needs the table loaded in memory and will make no further reference to it.
+
+<4> Pass a function pointers structure for fonts. The two functions (either can be NULL) return
+    the horizontal or vertical advance for a glyph in pixels. Notice that usually fractional advances
+    are preferable to grid fit advances, unless working entirely in a low resolution graphical framework.
++
+The code following is virtually identical to the fileface code, apart from some housekeeping at the end.
+
+<5> Note that freetype works with fixed point arithmetic of 26.6, thus 1.0 is stored as 64. We
+    therefore multiply the pointsize by 64 (or shift left by 6) and divide the resulting positions
+    down by 64 to true floating point values.
+
+Building and running this example gives similar, but not identical, results to the simple case. Notice that since the advances
+are grid fit, all the positions are integral, unlike the fractional positioning in the simple application:
+
+----
+43(0.000000,0.000000) 72(9.000000,0.000000) 79(17.000000,0.000000) 79(20.000000,0.000000) 82(23.000000,0.000000) 3(31.000000,0.000000) 58(37.000000,0.000000) 82(51.000000,0.000000) 85(59.000000,0.000000) 79(64.000000,0.000000) 71(67.000000,0.000000) 4(75.000000,0.000000) 
+----
 
 === Slots ===
 

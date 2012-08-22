@@ -84,7 +84,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     float scale = 1.0;
     Position shift = m_shift + Position(m_just, 0);
     float tAdvance = m_advance.x + m_just;
-    const GlyphFace * glyphFace = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyph());
+    const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
     {
         scale = font->scale();
@@ -349,7 +349,7 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
     m_glyphid = glyphid;
     if (!theGlyph)
     {
-        theGlyph = seg->getFace()->getGlyphFaceCache()->glyphSafe(glyphid);
+        theGlyph = seg->getFace()->glyphs().glyphSafe(glyphid);
         if (!theGlyph)
         {
             m_realglyphid = 0;
@@ -357,10 +357,10 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
             return;
         }
     }
-    m_realglyphid = theGlyph->getAttr(seg->silf()->aPseudo());
+    m_realglyphid = theGlyph->attrs()[seg->silf()->aPseudo()];
     if (m_realglyphid)
     {
-        const GlyphFace *aGlyph = seg->getFace()->getGlyphFaceCache()->glyphSafe(m_realglyphid);
+        const GlyphFace *aGlyph = seg->getFace()->glyphs().glyphSafe(m_realglyphid);
         if (aGlyph) theGlyph = aGlyph;
     }
     m_advance = Position(theGlyph->theAdvance().x, 0.);

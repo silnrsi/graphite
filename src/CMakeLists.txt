@@ -24,9 +24,9 @@ project(graphite2_core)
 cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckCXXSourceCompiles)
 
-set(GRAPHITE_API_CURRENT 2)
+set(GRAPHITE_API_CURRENT 3)
 set(GRAPHITE_API_REVISION 0)
-set(GRAPHITE_API_AGE 0)
+set(GRAPHITE_API_AGE 1)
 set(GRAPHITE_SO_VERSION ${GRAPHITE_API_CURRENT}.${GRAPHITE_API_REVISION}.${GRAPHITE_API_AGE})
 
 include(TestBigEndian)
@@ -39,8 +39,10 @@ if (GRAPHITE2_NSEGCACHE)
     set(SEGCACHE)
 endif (GRAPHITE2_NSEGCACHE)
 
+set(FILEFACE FileFace.cpp)
 if (GRAPHITE2_NFILEFACE)
     add_definitions(-DGRAPHITE2_NFILEFACE)
+    set(FILEFACE)
 endif (GRAPHITE2_NFILEFACE)
 
 set(TRACING json.cpp)
@@ -76,7 +78,7 @@ add_library(graphite2 SHARED
     FeatureMap.cpp
     Font.cpp
     GlyphFace.cpp
-    GlyphFaceCache.cpp
+    GlyphCache.cpp
     Justifier.cpp
     NameTable.cpp
     Pass.cpp
@@ -86,6 +88,7 @@ add_library(graphite2 SHARED
     Sparse.cpp
     TtfUtil.cpp
     UtfCodec.cpp
+    ${FILEFACE}
     ${SEGCACHE}
     ${TRACING})
 

@@ -30,11 +30,14 @@ of the License or (at your option) any later version.
 
 #include <cassert>
 
-#include "inc/Slot.h"
 #include "inc/CharInfo.h"
+#include "inc/Face.h"
 #include "inc/FeatureVal.h"
-#include "inc/Silf.h"
-
+#include "inc/GlyphCache.h"
+#include "inc/GlyphFace.h"
+//#include "inc/Silf.h"
+#include "inc/Slot.h"
+#include "inc/Position.h"
 #include "inc/List.h"
 
 #define MAX_SEG_GROWTH_FACTOR  256
@@ -43,13 +46,15 @@ namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
-typedef Vector<int16 *>         AttributeRope;
+typedef Vector<int16 *>        AttributeRope;
 typedef Vector<SlotJustify *>   JustifyRope;
 
 #ifndef GRAPHITE2_NSEGCACHE
 class SegmentScopeState;
 #endif
+class Font;
 class Segment;
+class Silf;
 
 enum SpliceParam {
 /** sub-Segments longer than this are not cached
@@ -116,10 +121,10 @@ public:
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
     uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void dir(int8 val) { m_dir = val; }
-    uint16 glyphAttr(uint16 gid, uint16 gattr) const { return m_face->glyphAttr(gid, gattr); }
+    uint16 glyphAttr(uint16 gid, uint16 gattr) const { return m_face->glyphs().glyphAttr(gid, gattr); }
     uint16 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const;
-    float glyphAdvance(uint16 gid) const { return m_face->getAdvance(gid, 1.0); }
-    const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->theBBoxTemporary(gid); }   //warning value may become invalid when another glyph is accessed
+    float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
+    const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
     int numAttrs() const { return m_silf->numUser(); }
     int defaultOriginal() const { return m_defaultOriginal; }
@@ -205,6 +210,62 @@ bool Segment::isWhitespace(const int cid) const
          + (cid == 0x205F)
          + (cid == 0x3000)) != 0;
 }
+
+//inline
+//bool Segment::isWhitespace(const int cid) const
+//{
+//    switch (cid >> 8)
+//    {
+//        case 0x00:
+//            switch (cid)
+//            {
+//            case 0x09:
+//            case 0x0A:
+//            case 0x0B:
+//            case 0x0C:
+//            case 0x0D:
+//            case 0x20:
+//                return true;
+//            default:
+//                break;
+//            }
+//            break;
+//        case 0x16:
+//            return cid == 0x1680;
+//            break;
+//        case 0x18:
+//            return cid == 0x180E;
+//            break;
+//        case 0x20:
+//            switch (cid)
+//            {
+//            case 0x00:
+//            case 0x01:
+//            case 0x02:
+//            case 0x03:
+//            case 0x04:
+//            case 0x05:
+//            case 0x06:
+//            case 0x07:
+//            case 0x08:
+//            case 0x09:
+//            case 0x0A:
+//            case 0x28:
+//            case 0x29:
+//            case 0x2F:
+//            case 0x5F:
+//                return true
+//            default:
+//                break;
+//            }
+//            break;
+//        case 0x30:
+//            return cid == 0x3000;
+//            break;
+//    }
+//
+//    return false;
+//}
 
 } // namespace graphite2
 

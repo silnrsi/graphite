@@ -170,13 +170,6 @@ public:
 	typedef std::pair<const void *, size_t>		table_t;
 	static const table_t						no_table;
 
-	static const void * get_table_fn(const void* afh, unsigned int name, size_t *len) {
-		const face_handle & fh = *reinterpret_cast<const face_handle *>(afh);
-		const table_t & t = fh[name];
-		*len = t.second;
-		return t.first;
-	}
-
 	face_handle(const char *backing_font_path = 0)
 	: _header(0), _dir(0)
 	{
@@ -208,13 +201,22 @@ public:
 		return _tables[name] = table_t(_header + off, len);
 	}
 
+	static const gr_face_ops ops;
 private:
+	static const void * get_table_fn(const void* afh, unsigned int name, size_t *len) {
+		const face_handle & fh = *reinterpret_cast<const face_handle *>(afh);
+		const table_t & t = fh[name];
+		*len = t.second;
+		return t.first;
+	}
+
     const char 						  * _header,
 									  * _dir;
 	mutable std::map<const TtfUtil::Tag, table_t> _tables;
 };
 
 const face_handle::table_t	face_handle::no_table = face_handle::table_t(reinterpret_cast<void *>(0),0);
+const gr_face_ops face_handle::ops = { sizeof(gr_face_ops), face_handle::get_table_fn, 0 };
 
 
 template <typename T> void testAssert(const char * msg, const T b)
@@ -241,7 +243,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 {
     FeatureMap testFeatureMap;
     dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
-    const gr_face * face = gr_make_face(&dummyFace, face_handle::get_table_fn, gr_face_dumbRendering);
+    const gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
     if (!face) throw std::runtime_error("failed to load font");
     bool readStatus = testFeatureMap.readFeats(*face);
     testAssert("readFeats", readStatus);
@@ -281,7 +283,7 @@ int main(int argc, char * argv[])
 		// test a bad settings offset stradling the end of the table
 		FeatureMap testFeatureMap;
 		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
-		const gr_face * face = gr_make_face(&dummyFace, face_handle::get_table_fn, gr_face_dumbRendering);
+		const gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
 		bool readStatus = testFeatureMap.readFeats(*face);
 		testAssert("fail gracefully on bad table", !readStatus);
 	}

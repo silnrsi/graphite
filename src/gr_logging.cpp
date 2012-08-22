@@ -42,12 +42,12 @@ using namespace graphite2;
 extern "C" {
 
 
-bool graphite_start_logging(gr_face * face, const char *log_path)
+bool graphite_start_logging_face(gr_face * face, const char *log_path)
 {
 	if (!face || !log_path)	return false;
 
 #if !defined GRAPHITE2_NTRACING
-	graphite_stop_logging(face);
+	graphite_stop_logging_face(face);
 #if defined _WIN32
 	int n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, 0, 0);
 	if (n == 0 || n > MAX_PATH - 12) return false;
@@ -73,7 +73,24 @@ bool graphite_start_logging(gr_face * face, const char *log_path)
 #endif
 }
 
-void graphite_stop_logging(gr_face * face)
+bool graphite_start_logging(FILE *log, GrLogMask /* mask */)
+{
+#if !defined GRAPHITE2_NTRACING
+	graphite_stop_logging();
+
+    if (!log) return false;
+
+    dbgout = new json(log);
+    if (!dbgout) return false;
+
+    *dbgout << json::array;
+    return true;
+#else
+    return false;
+#endif
+}
+
+void graphite_stop_logging_face(gr_face * face)
 {
 	if (!face)	return;
 
@@ -88,6 +105,11 @@ void graphite_stop_logging(gr_face * face)
 #endif
 }
 
+void graphite_stop_logging()
+{
+    if (dbgout) delete dbgout;
+    dbgout = 0;
+}
 
 } // extern "C"
 

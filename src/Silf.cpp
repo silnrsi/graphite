@@ -161,7 +161,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     }
 
     // fill in gr_faceinfo
-    m_silfinfo.upem = face.upem();
+    m_silfinfo.upem = face.glyphs().unitsPerEm();
     m_silfinfo.has_bidi_pass = (m_bPass != 0xFF);
     m_silfinfo.justifies = (m_numJusts != 0) || (m_jPass < m_pPass);
     m_silfinfo.line_ends = (m_flags & 1);

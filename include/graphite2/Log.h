@@ -28,11 +28,24 @@
 
 #include <graphite2/Types.h>
 #include <graphite2/Font.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+// deprecated mechanism that doesn't do anything now.
+typedef enum {
+    GRLOG_NONE = 0x0,
+    GRLOG_FACE = 0x01,
+    GRLOG_SEGMENT = 0x02,
+    GRLOG_PASS = 0x04,
+    GRLOG_CACHE = 0x08,
+    
+    GRLOG_OPCODE = 0x80,
+    GRLOG_ALL = 0xFF
+} GrLogMask;
 
 /** Start logging all segment creation and updates on the provided face.  This
   * is logged to a JSON file, see "Segment JSON Schema.txt" for a precise
@@ -43,7 +56,7 @@ extern "C"
   * @param face the gr_face whose segments you want to log to the given file
   * @param log_path a utf8 encoded file name and path to log to.
   */
-GR2_API bool graphite_start_logging(gr_face * face, const char *log_path);
+GR2_API bool graphite_start_logging_face(gr_face * face, const char *log_path);
 
 
 /** Stop logging on the given face.  This will close the log file created by
@@ -51,7 +64,11 @@ GR2_API bool graphite_start_logging(gr_face * face, const char *log_path);
   *
   * @param face the gr_face whose segments you want to stop logging
   */
-GR2_API void graphite_stop_logging(gr_face * face);
+GR2_API void graphite_stop_logging_face(gr_face * face);
+
+/* These functions are deprecated as of 1.2.0, use the _face versions instead. */
+GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
+GR2_API void graphite_stop_logging();
 
 #ifdef __cplusplus
 }
