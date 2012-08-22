@@ -66,22 +66,23 @@ enum gr_face_options {
     gr_face_preloadAll = 6
 };
 
+/** Holds information about a particular Graphite silf table that has been loaded */
 struct gr_faceinfo {
-    gr_uint16 extra_ascent;
-    gr_uint16 extra_descent;
-    gr_uint16 upem;
+    gr_uint16 extra_ascent;     /**< The extra_ascent in the GDL, in design units */
+    gr_uint16 extra_descent;    /**< The extra_descent in the GDL, in design units */
+    gr_uint16 upem;             /**< The design units for the font */
     enum gr_space_contextuals {
-        gr_space_unknown = 0,
-        gr_space_none = 1,
-        gr_space_left_only = 2,
-        gr_space_right_only = 3,
-        gr_space_either_only = 4,
-        gr_space_both = 5,
-        gr_space_cross = 6
+        gr_space_unknown = 0,       /**< no information is known. */
+        gr_space_none = 1,          /**< the space character never occurs in any rules. */
+        gr_space_left_only = 2,     /**< the space character only occurs as the first element in a rule. */
+        gr_space_right_only = 3,    /**< the space character only occurs as the last element in a rule. */
+        gr_space_either_only = 4,   /**< the space character only occurs as the only element in a rule. */
+        gr_space_both = 5,          /**< the space character may occur as the first or last element of a rule. */
+        gr_space_cross = 6          /**< the space character occurs in a rule not as a first or last element. */
     } space_contextuals;
-    unsigned int has_bidi_pass : 1;
-    unsigned int line_ends : 1;
-    unsigned int justifies : 1;
+    unsigned int has_bidi_pass : 1; /**< the table specifies that a bidirectional pass should run */
+    unsigned int line_ends : 1;     /**< there are line end contextuals somewhere */
+    unsigned int justifies : 1;     /**< there are .justify properties set somewhere on some glyphs */
 };
 
 typedef struct gr_faceinfo gr_faceinfo;
@@ -103,20 +104,16 @@ typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int n
   */
 typedef void (*gr_release_table_fn)(const void* appFaceHandle, const void *table_buffer);
 
-/** struct housing function pointers to manage font table buffers for the graphite engine.
-  *
-  * @member get_table is a pointer to a function to request a table from the client.
-  * @member release_table is a pointer to a function to notify the client the a table can be released.
-  *                       This can be NULL to signify that the client does not wish to do any release handling.
-  * @member glyph_advance is a pointer to a function to retrieve the hinted advance width of a glyph which the
-  *                       font cannot provide without client assistance.  This can be NULL to signify no
-  *                       hinted metrics necessary.
-  */
+/** struct housing function pointers to manage font table buffers for the graphite engine. */
 struct gr_face_ops
 {
+        /** size in bytes of this structure */
     size_t              size;
+        /** a pointer to a function to request a table from the client. */
 	gr_get_table_fn 	get_table;
-	gr_release_table_fn	release_table;
+        /** is a pointer to a function to notify the client the a table can be released.
+          * This can be NULL to signify that the client does not wish to do any release handling. */
+	gr_release_table_fn	release_table;  
 };
 typedef struct gr_face_ops	gr_face_ops;
 
@@ -233,7 +230,7 @@ GR2_API const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script);
   * @return true if the character is supported.
   * @param pFace    face to test within
   * @param usv      Unicode Scalar Value of character to test
-  * @param scrtip   Tag of script for selecting which set of pseudo glyphs to test. May be NULL.
+  * @param script   Tag of script for selecting which set of pseudo glyphs to test. May be NULL.
   */
 GR2_API int gr_face_is_char_supported(const gr_face *pFace, gr_uint32 usv, gr_uint32 script);
 
@@ -274,23 +271,20 @@ GR2_API gr_font* gr_make_font(float ppm, const gr_face *face);
 typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
 
 /** struct housing function pointers to manage font hinted metrics for the
-  * graphite engine.
-  *
-  * @member glyph_advance_x is a pointer to a function to retrieve the hinted
-  *                         advance width of a glyph which the font cannot
-  *                         provide without client assistance.  This can be
-  *                         NULL to signify no horizontal hinted metrics are
-  *                         necessary.
-  * @member glyph_advance_y is a pointer to a function to retrieve the hinted
-  *                         advance height of a glyph which the font cannot
-  *                         provide without client assistance.  This can be
-  *                         NULL to signify no hinted vertical metrics are
-  *                         necessary.
-  */
+  * graphite engine. */
 struct gr_font_ops
 {
+        /** size of the structure in bytes to allow for future extensibility */
     size_t              size;
+        /** a pointer to a function to retrieve the hinted
+          * advance width of a glyph which the font cannot
+          * provide without client assistance.  This can be
+          * NULL to signify no horizontal hinted metrics are necessary. */
     gr_advance_fn       glyph_advance_x;
+        /** a pointer to a function to retrieve the hinted
+          * advance height of a glyph which the font cannot
+          * provide without client assistance.  This can be
+          * NULL to signify no horizontal hinted metrics are necessary. */
     gr_advance_fn       glyph_advance_y;
 };
 typedef struct gr_font_ops  gr_font_ops;
