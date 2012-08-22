@@ -51,44 +51,54 @@ class TableCacheItem
 {
 public:
     TableCacheItem(char * theData, size_t theSize) : m_data(theData), m_size(theSize) {}
-    TableCacheItem() : m_data(0), m_size(0) {}
+    TableCacheItem() : m_data(0), m_size(0), m_count(0) {}
     ~TableCacheItem()
     {
         if (m_size) free(m_data);
     }
-    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; }
+    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; m_count = 0; }
     const void * data() const { return m_data; }
     size_t size() const { return m_size; }
+    void add_ref() { ++m_count; }
+    size_t refs() const { return m_count; }
 private:
     char * m_data;
     size_t m_size;
+    size_t m_count;
 };
 
 
 
 class FileFace
 {
-    static const void *table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
-public:
-    FileFace(const char *filename);
-    ~FileFace();
-//    virtual const void *getTable(unsigned int name, size_t *len) const;
-    bool isValid() const { return m_pfile && m_pHeader && m_pTableDir; }
+    static const void * get_table_fn(const void* appFaceHandle, unsigned int name, size_t *len);
+    static void         rel_table_fn(const void* appFaceHandle, const void *table_buffer);
 
+public:
     static const gr_face_ops ops;
 
+    FileFace(const char *filename);
+    ~FileFace();
+
+    operator bool () const throw();
     CLASS_NEW_DELETE;
-public:     //for local convenience    
-    FILE* m_pfile;
-    unsigned int m_lfile;
-    mutable TableCacheItem m_tables[18];
-    TtfUtil::Sfnt::OffsetSubTable* m_pHeader;
-    TtfUtil::Sfnt::OffsetSubTable::Entry* m_pTableDir;       //[] number of elements is determined by m_pHeader->num_tables
-   
+
 private:        //defensive
+    FILE          * _file;
+    size_t          _file_len;
+
+    TtfUtil::Sfnt::OffsetSubTable         * _header_tbl;
+    TtfUtil::Sfnt::OffsetSubTable::Entry  * _table_dir;
+
     FileFace(const FileFace&);
     FileFace& operator=(const FileFace&);
 };
+
+inline
+FileFace::operator bool() const throw()
+{
+    return _file && _header_tbl && _table_dir;
+}
 
 } // namespace graphite2
 

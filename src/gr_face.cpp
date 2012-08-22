@@ -237,7 +237,7 @@ int gr_face_is_char_supported(const gr_face* pFace, gr_uint32 usv, gr_uint32 scr
 gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
 {
     FileFace* pFileFace = new FileFace(filename);
-    if (pFileFace->m_pTableDir)
+    if (*pFileFace)
     {
       gr_face* pRes = gr_make_face_with_ops(pFileFace, &FileFace::ops, faceOptions);
       if (pRes)
@@ -258,7 +258,7 @@ gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int seg
                   //when finished with, call destroy_face
 {
     FileFace* pFileFace = new FileFace(filename);
-    if (pFileFace->m_pTableDir)
+    if (*pFileFace)
     {
       gr_face * pRes = gr_make_face_with_seg_cache_and_ops(pFileFace, &FileFace::ops, segCacheMaxSize, faceOptions);
       if (pRes)
