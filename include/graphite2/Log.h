@@ -66,8 +66,9 @@ GR2_API bool graphite_start_logging_face(gr_face * face, const char *log_path);
   */
 GR2_API void graphite_stop_logging_face(gr_face * face);
 
-/* These functions are deprecated as of 1.2.0, use the _face versions instead. */
+/** Start logging to a FILE object. This function is deprecated as of 1.2.0, use the _face versions instead. */
 GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.
+/** Stop logging to a FILE object. This function is deprecated as of 1.2.0, use the _face versions instead. */
 GR2_API void graphite_stop_logging();
 
 #ifdef __cplusplus
