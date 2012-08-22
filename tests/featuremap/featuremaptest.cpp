@@ -216,7 +216,7 @@ private:
 };
 
 const face_handle::table_t	face_handle::no_table = face_handle::table_t(reinterpret_cast<void *>(0),0);
-const gr_face_ops face_handle::ops = { face_handle::get_table_fn, 0, 0};
+const gr_face_ops face_handle::ops = { sizeof(gr_face_ops), face_handle::get_table_fn, 0 };
 
 
 template <typename T> void testAssert(const char * msg, const T b)

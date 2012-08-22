@@ -24,23 +24,31 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
+#include <algorithm>
 #include "inc/Face.h"
 #include "inc/Font.h"
 #include "inc/GlyphCache.h"
 
 using namespace graphite2;
 
-Font::Font(float ppm, const Face & f, const void * appFontHandle)
-:	m_face(f),
-    m_scale(ppm / f.glyphs().unitsPerEm()),
-    m_appFontHandle(appFontHandle ? appFontHandle : this)
+Font::Font(float ppm, const Face & f, const void * appFontHandle, const gr_font_ops * ops)
+: m_appFontHandle(appFontHandle ? appFontHandle : this),
+  m_face(f),
+  m_scale(ppm / f.glyphs().unitsPerEm()),
+  m_hinted(appFontHandle && ops && (ops->glyph_advance_x || ops->glyph_advance_y))
 {
+    memset(&m_ops, 0, sizeof m_ops);
+    if (m_hinted)
+        memcpy(&m_ops, ops, std::min(sizeof m_ops, ops->size));
+    else
+        m_ops.glyph_advance_x = &Face::default_glyph_advance;
+
     size_t nGlyphs = f.glyphs().numGlyphs();
     m_advances = gralloc<float>(nGlyphs);
     if (m_advances)
     {
-        for (float *advp = m_advances; nGlyphs; --nGlyphs)
-        	*advp++ = INVALID_ADVANCE;
+        for (float *advp = m_advances; nGlyphs; --nGlyphs, ++advp)
+        	*advp = INVALID_ADVANCE;
     }
 }
 

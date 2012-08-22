@@ -41,7 +41,6 @@ using namespace graphite2;
 
 Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
 : m_appFaceHandle(appFaceHandle),
-  m_ops(ops),
   m_pGlyphFaceCache(NULL),
   m_cmap(NULL),
   m_numSilf(0),
@@ -49,8 +48,8 @@ Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
   m_pFileFace(NULL),
   m_pNames(NULL)
 {
-    if (m_ops.glyph_advance == 0)
-        m_ops.glyph_advance = &Face::default_glyph_advance;
+    memset(&m_ops, 0, sizeof m_ops);
+    memcpy(&m_ops, &ops, std::min(sizeof m_ops, ops.size));
 }
 
 

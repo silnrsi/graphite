@@ -120,6 +120,6 @@ const void *FileFace::table_fn(const void* appFaceHandle, unsigned int name, siz
     return tci->data();
 }
 
-const gr_face_ops FileFace::ops = { &FileFace::table_fn, 0, 0 };
+const gr_face_ops FileFace::ops = { sizeof FileFace::ops, &FileFace::table_fn, 0, };
 
 #endif                  //!GRAPHITE2_NFILEFACE

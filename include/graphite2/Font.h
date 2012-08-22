@@ -66,7 +66,7 @@ enum gr_face_options {
     gr_face_preloadAll = 6
 };
 
-struct _gr_faceinfo {
+struct gr_faceinfo {
     gr_uint16 extra_ascent;
     gr_uint16 extra_descent;
     gr_uint16 upem;
@@ -84,7 +84,7 @@ struct _gr_faceinfo {
     unsigned int justifies : 1;
 };
 
-typedef struct _gr_faceinfo gr_faceinfo;
+typedef struct gr_faceinfo gr_faceinfo;
 
 /** type describing function to retrieve font table information
   *
@@ -101,15 +101,7 @@ typedef const void *(*gr_get_table_fn)(const void* appFaceHandle, unsigned int n
   * @param appFaceHandle is the unique information passed to gr_make_face()
   * @param pointer to table memory returned by get_table.
   */
-typedef const void *(*gr_release_table_fn)(const void* appFaceHandle, const void *);
-
-/** query function to find the hinted advance width of a glyph
-  *
-  * @param appFontHandle is the unique information passed to gr_make_font_with_advance()
-  * @param glyphid is the glyph to retireve the hinted advance for.
- */
-typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
-
+typedef void (*gr_release_table_fn)(const void* appFaceHandle, const void *table_buffer);
 
 /** struct housing function pointers to manage font table buffers for the graphite engine.
   *
@@ -122,19 +114,22 @@ typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
   */
 struct gr_face_ops
 {
+    size_t              size;
 	gr_get_table_fn 	get_table;
 	gr_release_table_fn	release_table;
-	gr_advance_fn		glyph_advance;
 };
 typedef struct gr_face_ops	gr_face_ops;
 
-/** Create a gr_face object given application information and a getTable function
+/** Create a gr_face object given application information and a getTable
+  * function.
   *
   * @return gr_face or NULL if the font fails to load for some reason.
-  * @param appFaceHandle This is application specific information that is passed to the getTable
-  *                      function. The appFaceHandle must stay alive as long as the gr_face is alive.
-  * @param getTable  This function is called whenever graphite needs access to a table of data
-  *                  in the font.
+  * @param appFaceHandle This is application specific information that is passed
+  *                      to the getTable function. The appFaceHandle must stay
+  *                      alive as long as the gr_face is alive.
+  * @param face_ops pointer face specific callback structure for table
+  *                         management. Must stay alive for the duration of the
+  *                         call.
   * @param faceOptions   Bitfield describing various options. See enum gr_face_options for details.
   */
 GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *face_ops, unsigned int faceOptions);
@@ -247,14 +242,47 @@ GR2_API gr_face* gr_make_file_face_with_seg_cache(const char *filename, unsigned
   */
 GR2_API gr_font* gr_make_font(float ppm, const gr_face *face);
 
+/** query function to find the hinted advance of a glyph
+  *
+  * @param appFontHandle is the unique information passed to gr_make_font_with_advance()
+  * @param glyphid is the glyph to retireve the hinted advance for.
+ */
+typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
+
+/** struct housing function pointers to manage font hinted metrics for the
+  * graphite engine.
+  *
+  * @member glyph_advance_x is a pointer to a function to retrieve the hinted
+  *                         advance width of a glyph which the font cannot
+  *                         provide without client assistance.  This can be
+  *                         NULL to signify no horizontal hinted metrics are
+  *                         necessary.
+  * @member glyph_advance_y is a pointer to a function to retrieve the hinted
+  *                         advance height of a glyph which the font cannot
+  *                         provide without client assistance.  This can be
+  *                         NULL to signify no hinted vertical metrics are
+  *                         necessary.
+  */
+struct gr_font_ops
+{
+    size_t              size;
+    gr_advance_fn       glyph_advance_x;
+    gr_advance_fn       glyph_advance_y;
+};
+typedef struct gr_font_ops  gr_font_ops;
+
 /** Creates a font with hinted advance width query function
   *
   * @return gr_font to be destroyed via font_destroy
   * @param ppm size of font in pixels per em
-  * @param appFontHandle font specific information that must stay alive as long as the font does
-  * @param face the face this font corresponds to. Must stay alive as long as the font does.
+  * @param appFontHandle font specific information that must stay alive as long
+  *        as the font does
+  * @param font_ops pointer font specific callback structure for hinted metrics.
+  *        Must stay alive for the duration of the call.
+  * @param face the face this font corresponds to. Must stay alive as long as
+  *        the font does.
   */
-GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, const gr_face *face);
+GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, const gr_font_ops * font_ops, const gr_face *face);
 
 /** Free a font **/
 GR2_API void gr_font_destroy(gr_font *font);
