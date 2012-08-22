@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7.0), cmake, libfreetype6-dev, libgraphite-dev, lib
 Build-Depends-Indep: asciidoc, dblatex, doxygen, docbook-xsl, latex-xcolor, libxml2-utils
 Standards-Version: 3.9.1
 
-Package: libgraphite2-2.0.0
+Package: libgraphite2-3.0.1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -35,7 +35,7 @@ Description: Font rendering engine for Complex Scripts -- library
 Package: libgraphite2-dev
 Section: libdevel
 Architecture: any
-Depends: libgraphite2-2.0.0 (= ${binary:Version}), ${misc:Depends}
+Depends: libgraphite2-3.0.1 (= ${binary:Version}), ${misc:Depends}
 Description: Development files for libgraphite2
  Graphite is a system that can be used to create and use "smart fonts" capable
  of displaying writing systems with various complex behaviors, such as:
@@ -56,11 +56,11 @@ Description: Development files for libgraphite2
  .
  This package contains the development libraries for libgraphite2 
 
-Package: libgraphite2-2.0.0-dbg
+Package: libgraphite2-3.0.1-dbg
 Priority: extra
 Section: debug
 Architecture: any
-Depends: libgraphite2-2.0.0 (= ${binary:Version}), ${misc:Depends}
+Depends: libgraphite2-3.0.1 (= ${binary:Version}), ${misc:Depends}
 Description: Debug symbols for libgraphite2
  Graphite is a system that can be used to create and use "smart fonts" capable
  of displaying writing systems with various complex behaviors, such as:

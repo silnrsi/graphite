@@ -36,8 +36,7 @@ using namespace graphite2;
 
 extern "C" {
 
-
-gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int faceOptions)
+gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
 {
 	if (ops == 0)	return 0;
@@ -72,8 +71,14 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *
     return static_cast<gr_face *>(res);
 }
 
+gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tablefn, unsigned int faceOptions)
+{
+    const gr_face_ops ops = {sizeof(gr_face_ops), tablefn, NULL};
+    return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
+}
+
 #ifndef GRAPHITE2_NSEGCACHE
-gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int cacheSize, unsigned int faceOptions)
+gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int cacheSize, unsigned int faceOptions)
                   //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
 {
 	if (ops == 0)	return 0;
@@ -107,6 +112,12 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, cons
         return 0;
     }
     return static_cast<gr_face *>(static_cast<Face *>(res));
+}
+
+gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
+{
+    const gr_face_ops ops = {sizeof(gr_face_ops), getTable, NULL};
+    return gr_make_face_with_seg_cache_and_ops(appFaceHandle, &ops, cacheSize, faceOptions);
 }
 #endif
 
@@ -228,7 +239,7 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     FileFace* pFileFace = new FileFace(filename);
     if (pFileFace->m_pTableDir)
     {
-      gr_face* pRes = gr_make_face(pFileFace, &FileFace::ops, faceOptions);
+      gr_face* pRes = gr_make_face_with_ops(pFileFace, &FileFace::ops, faceOptions);
       if (pRes)
       {
         pRes->takeFileFace(pFileFace);        //takes ownership
@@ -249,7 +260,7 @@ gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int seg
     FileFace* pFileFace = new FileFace(filename);
     if (pFileFace->m_pTableDir)
     {
-      gr_face * pRes = gr_make_face_with_seg_cache(pFileFace, &FileFace::ops, segCacheMaxSize, faceOptions);
+      gr_face * pRes = gr_make_face_with_seg_cache_and_ops(pFileFace, &FileFace::ops, segCacheMaxSize, faceOptions);
       if (pRes)
       {
         pRes->takeFileFace(pFileFace);        //takes ownership

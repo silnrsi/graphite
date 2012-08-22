@@ -120,19 +120,30 @@ struct gr_face_ops
 };
 typedef struct gr_face_ops	gr_face_ops;
 
-/** Create a gr_face object given application information and a getTable
-  * function.
+/** Create a gr_face object given application information and a table functions.
   *
   * @return gr_face or NULL if the font fails to load for some reason.
   * @param appFaceHandle This is application specific information that is passed
   *                      to the getTable function. The appFaceHandle must stay
   *                      alive as long as the gr_face is alive.
-  * @param face_ops pointer face specific callback structure for table
-  *                         management. Must stay alive for the duration of the
-  *                         call.
+  * @param face_ops      Pointer to face specific callback structure for table
+  *                      management. Must stay alive for the duration of the
+  *                      call only.
   * @param faceOptions   Bitfield describing various options. See enum gr_face_options for details.
   */
-GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *face_ops, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *face_ops, unsigned int faceOptions);
+
+/** Create a gr_face object given application information and a getTable function. This function is deprecated as of v1.2.0 in
+  * favour of gr_make_face_with_ops.
+  *
+  * @return gr_face or NULL if the font fails to load for some reason.
+  * @param appFaceHandle This is application specific information that is passed
+  *                      to the getTable function. The appFaceHandle must stay
+  *                      alive as long as the gr_face is alive.
+  * @param getTable      Callback function to get table data.
+  * @param faceOptions   Bitfield describing various options. See enum gr_face_options for details.
+  */
+GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
 
 //#ifndef GRAPHITE2_NSEGCACHE
 /** Create a gr_face object given application information, with subsegmental caching support
@@ -140,11 +151,24 @@ GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, const gr_fa
   * @return gr_face or NULL if the font fails to load.
   * @param appFaceHandle is a pointer to application specific information that is passed to getTable.
   *                      This may not be NULL and must stay alive as long as the gr_face is alive.
-  * @param getTable  The function graphite calls to access font table data
+  * @param face_ops      Pointer to face specific callback structure for table management. Must stay
+  *                      alive for the duration of the call only.
   * @param segCacheMaxSize   How large the segment cache is.
   * @param faceOptions   Bitfield of values from enum gr_face_options
   */
-GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, const gr_face_ops *face_ops, unsigned int segCacheMaxSize, unsigned int faceOptions);
+GR2_API gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle, const gr_face_ops *face_ops, unsigned int segCacheMaxSize, unsigned int faceOptions);
+
+/** Create a gr_face object given application information, with subsegmental caching support.
+  * This function is deprecated as of v1.2.0 in favour of gr_make_face_with_seg_cache_and_ops.
+  *
+  * @return gr_face or NULL if the font fails to load.
+  * @param appFaceHandle is a pointer to application specific information that is passed to getTable.
+  *                      This may not be NULL and must stay alive as long as the gr_face is alive.
+  * @param getTable      The function graphite calls to access font table data
+  * @param segCacheMaxSize   How large the segment cache is.
+  * @param faceOptions   Bitfield of values from enum gr_face_options
+  */
+GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
 //#endif
 
 /** Convert a tag in a string into a gr_uint32
@@ -271,7 +295,7 @@ struct gr_font_ops
 };
 typedef struct gr_font_ops  gr_font_ops;
 
-/** Creates a font with hinted advance width query function
+/** Creates a font with hinted advance width query functions
   *
   * @return gr_font to be destroyed via font_destroy
   * @param ppm size of font in pixels per em
@@ -282,7 +306,21 @@ typedef struct gr_font_ops  gr_font_ops;
   * @param face the face this font corresponds to. Must stay alive as long as
   *        the font does.
   */
-GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, const gr_font_ops * font_ops, const gr_face *face);
+GR2_API gr_font* gr_make_font_with_ops(float ppm, const void* appFontHandle, const gr_font_ops * font_ops, const gr_face *face);
+
+/** Creates a font with hinted advance width query function.
+  * This function is deprecated. Use gr_make_font_with_ops instead.
+  *
+  * @return gr_font to be destroyed via font_destroy
+  * @param ppm size of font in pixels per em
+  * @param appFontHandle font specific information that must stay alive as long
+  *        as the font does
+  * @param getAdvance callback function reference that returns horizontal advance in pixels for a glyph.
+  *        Must stay alive for the duration of the call.
+  * @param face the face this font corresponds to. Must stay alive as long as
+  *        the font does.
+  */
+GR2_API gr_font* gr_make_font_with_advance_fn(float ppm, const void* appFontHandle, gr_advance_fn getAdvance, const gr_face *face);
 
 /** Free a font **/
 GR2_API void gr_font_destroy(gr_font *font);
