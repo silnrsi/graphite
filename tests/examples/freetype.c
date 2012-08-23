@@ -10,11 +10,13 @@ const void *getTable(const void *appHandle, unsigned int name, size_t *len)
 {
     void *res;
     FT_Face ftface = (FT_Face)appHandle;
-    FT_Load_Sfnt_Table(ftface, name, 0, NULL, len);     /* find length of table */
-    if (!*len) return NULL;
-    res = malloc(*len);                                 /* allocate somewhere to hold it */
+    FT_ULong ftlen = 0;
+    FT_Load_Sfnt_Table(ftface, name, 0, NULL, &ftlen);     /* find length of table */
+    if (!ftlen) return NULL;
+    res = malloc(ftlen);                                 /* allocate somewhere to hold it */
     if (!res) return NULL;
-    FT_Load_Sfnt_Table(ftface, name, 0, res, len);      /* copy table into buffer */
+    FT_Load_Sfnt_Table(ftface, name, 0, res, &ftlen);      /* copy table into buffer */
+    *len = ftlen;
     return res;
 }
 
