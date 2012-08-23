@@ -41,6 +41,8 @@ gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_f
 {
 	if (ops == 0)	return 0;
 
+	faceOptions &= ~gr_face_preloadAll;
+
     Face *res = new Face(appFaceHandle, *ops);
     if (res == 0)	return 0;
 
@@ -83,6 +85,7 @@ gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL
 {
 	if (ops == 0)	return 0;
 
+    faceOptions &= ~gr_face_preloadAll;
     CachedFace *res = new CachedFace(appFaceHandle, *ops);
     if (res == 0)	return 0;
 

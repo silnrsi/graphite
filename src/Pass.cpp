@@ -292,8 +292,8 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
     Slot *currHigh = s->next();
 
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)  *dbgout << "rules"	<< json::array;
-	json::closer rules_array_closer = dbgout;
+    if (fsm.dbgout)  *fsm.dbgout << "rules"	<< json::array;
+	json::closer rules_array_closer = fsm.dbgout;
 #endif
 
     m.slotMap().highwater(currHigh);
@@ -376,11 +376,11 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
         for (; r != re && !testConstraint(*r->rule, m); ++r);
 
 #if !defined GRAPHITE2_NTRACING
-        if (dbgout)
+        if (fsm.dbgout)
         {
         	if (fsm.rules.size() != 0)
         	{
-				*dbgout << json::item << json::object;
+				*fsm.dbgout << json::item << json::object;
 				dumpRuleEventConsidered(fsm, *r);
 				if (r != re)
 				{
@@ -388,14 +388,14 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 					dumpRuleEventOutput(fsm, *r->rule, slot);
 					if (r->rule->action->deletes()) fsm.slots.collectGarbage();
 					adjustSlot(adv, slot, fsm.slots);
-					*dbgout		<< "cursor" << objectid(dslot(&fsm.slots.segment, slot))
+					*fsm.dbgout	<< "cursor" << objectid(dslot(&fsm.slots.segment, slot))
 							<< json::close; // Close RuelEvent object
 
 					return;
 				}
 				else
 				{
-					*dbgout 	<< json::close	// close "considered" array
+					*fsm.dbgout << json::close	// close "considered" array
 							<< "output" << json::null
 							<< "cursor"	<< objectid(dslot(&fsm.slots.segment, slot->next()))
 							<< json::close;
@@ -422,11 +422,11 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
 
 void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const
 {
-	*dbgout << "considered" << json::array;
+	*fsm.dbgout << "considered" << json::array;
 	for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
 	{
 		if (r->rule->preContext > fsm.slots.context())	continue;
-	*dbgout 	<< json::flat << json::object
+	*fsm.dbgout << json::flat << json::object
 					<< "id" 	<< r->rule - m_rules
 					<< "failed"	<< true
 					<< "input" << json::flat << json::object
@@ -440,7 +440,7 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
 
 void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * const last_slot) const
 {
-	*dbgout 		<< json::item << json::flat << json::object
+	*fsm.dbgout		<< json::item << json::flat << json::object
 						<< "id" 	<< &r - m_rules
 						<< "failed" << false
 						<< "input" << json::flat << json::object
@@ -459,8 +459,8 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
 	fsm.slots.segment.positionSlots(0);
 
 	for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
-		*dbgout 		<< dslot(&fsm.slots.segment, slot);
-	*dbgout 			<< json::close 	// close "slots"
+		*fsm.dbgout		<< dslot(&fsm.slots.segment, slot);
+	*fsm.dbgout			<< json::close 	// close "slots"
 					<< "postshift"	<< (last_slot ? last_slot->origin() : fsm.slots.segment.advance()) - rsb_prepos
 				<< json::close;			// close "output" object
 
@@ -481,6 +481,7 @@ bool Pass::testPassConstraint(Machine & m) const
     const uint32 ret = m_cPConstraint.run(m, map);
 
 #if !defined GRAPHITE2_NTRACING
+    json * const dbgout = m.slotMap().segment.getFace()->logger();
     if (dbgout)
     	*dbgout << "constraint" << (ret || m.status() != Machine::finished);
 #endif

@@ -42,12 +42,12 @@ using namespace graphite2;
 extern "C" {
 
 
-bool graphite_start_logging_face(gr_face * face, const char *log_path)
+bool gr_start_logging(gr_face * face, const char *log_path)
 {
 	if (!face || !log_path)	return false;
 
 #if !defined GRAPHITE2_NTRACING
-	graphite_stop_logging_face(face);
+	gr_stop_logging(face);
 #if defined _WIN32
 	int n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, 0, 0);
 	if (n == 0 || n > MAX_PATH - 12) return false;
@@ -63,43 +63,42 @@ bool graphite_start_logging_face(gr_face * face, const char *log_path)
 #endif
 	if (!log)	return false;
 
-	dbgout = new json(log);
-	if (!dbgout) return false;
+	face->setLogger(log);
+	if (!face->logger()) return false;
 
-	*dbgout << json::array;
+	*face->logger() << json::array;
 	return true;
 #else
 	return false;
 #endif
 }
 
-bool graphite_start_logging(FILE *log, GrLogMask /* mask */)
+bool graphite_start_logging(FILE * /* log */, GrLogMask /* mask */)
 {
-#if !defined GRAPHITE2_NTRACING
-	graphite_stop_logging();
-
-    if (!log) return false;
-
-    dbgout = new json(log);
-    if (!dbgout) return false;
-
-    *dbgout << json::array;
-    return true;
-#else
+//#if !defined GRAPHITE2_NTRACING
+//	graphite_stop_logging();
+//
+//    if (!log) return false;
+//
+//    dbgout = new json(log);
+//    if (!dbgout) return false;
+//
+//    *dbgout << json::array;
+//    return true;
+//#else
     return false;
-#endif
+//#endif
 }
 
-void graphite_stop_logging_face(gr_face * face)
+void gr_stop_logging(gr_face * face)
 {
 	if (!face)	return;
 
 #if !defined GRAPHITE2_NTRACING
-	if (dbgout)
+	if (face->logger())
 	{
-		FILE * log = dbgout->stream();
-		delete dbgout;
-		dbgout = 0;
+		FILE * log = face->logger()->stream();
+		face->setLogger(0);
 		fclose(log);
 	}
 #endif
@@ -107,16 +106,13 @@ void graphite_stop_logging_face(gr_face * face)
 
 void graphite_stop_logging()
 {
-    if (dbgout) delete dbgout;
-    dbgout = 0;
+//    if (dbgout) delete dbgout;
+//    dbgout = 0;
 }
 
 } // extern "C"
 
 #if !defined GRAPHITE2_NTRACING
-
-json *graphite2::dbgout = 0;
-
 
 json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 {

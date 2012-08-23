@@ -27,7 +27,8 @@ INCLUDE(CheckCXXSourceCompiles)
 set(GRAPHITE_API_CURRENT 3)
 set(GRAPHITE_API_REVISION 0)
 set(GRAPHITE_API_AGE 1)
-set(GRAPHITE_SO_VERSION ${GRAPHITE_API_CURRENT}.${GRAPHITE_API_REVISION}.${GRAPHITE_API_AGE})
+set(GRAPHITE_VERSION ${GRAPHITE_API_CURRENT}.${GRAPHITE_API_REVISION}.${GRAPHITE_API_AGE})
+set(GRAPHITE_SO_VERSION ${GRAPHITE_API_CURRENT})
 
 include(TestBigEndian)
 
@@ -82,6 +83,7 @@ add_library(graphite2 SHARED
     Justifier.cpp
     NameTable.cpp
     Pass.cpp
+    Rule.cpp
     Segment.cpp
     Silf.cpp
     Slot.cpp
@@ -94,6 +96,7 @@ add_library(graphite2 SHARED
 
 set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             SOVERSION ${GRAPHITE_SO_VERSION}
+                                            VERSION ${GRAPHITE_VERSION}
                                             LT_VERSION_CURRENT ${GRAPHITE_API_CURRENT}
                                             LT_VERSION_REVISION ${GRAPHITE_API_REVISION}
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})

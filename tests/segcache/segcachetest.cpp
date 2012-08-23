@@ -148,7 +148,7 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
-    graphite_start_logging_face(api_cast(face), "grsegcache.json");
+    gr_start_logging(api_cast(face), "grsegcache.json");
     gr_font *sizedFont = gr_make_font(12, api_cast(face));
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
@@ -199,6 +199,6 @@ int main(int argc, char ** argv)
     gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
-    graphite_stop_logging_face(api_cast(face));
+    gr_stop_logging(api_cast(face));
     return 0;
 }

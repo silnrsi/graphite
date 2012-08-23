@@ -56,7 +56,7 @@ typedef enum {
   * @param face the gr_face whose segments you want to log to the given file
   * @param log_path a utf8 encoded file name and path to log to.
   */
-GR2_API bool graphite_start_logging_face(gr_face * face, const char *log_path);
+GR2_API bool gr_start_logging(gr_face * face, const char *log_path);
 
 
 /** Stop logging on the given face.  This will close the log file created by
@@ -64,7 +64,7 @@ GR2_API bool graphite_start_logging_face(gr_face * face, const char *log_path);
   *
   * @param face the gr_face whose segments you want to stop logging
   */
-GR2_API void graphite_stop_logging_face(gr_face * face);
+GR2_API void gr_stop_logging(gr_face * face);
 
 /** Start logging to a FILE object. This function is deprecated as of 1.2.0, use the _face versions instead. */
 GR2_API bool graphite_start_logging(FILE * logFile, GrLogMask mask);		//may not do anthing if disabled in the implementation of the engine.

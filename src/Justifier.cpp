@@ -188,6 +188,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 
     // run justification passes here
 #if !defined GRAPHITE2_NTRACING
+    json * const dbgout = m_face->logger();
     if (dbgout)
         *dbgout << json::object
                     << "justifies"	<< objectid(this)

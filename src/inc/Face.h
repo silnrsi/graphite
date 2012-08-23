@@ -26,6 +26,8 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#include <cstdio>
+
 #include "graphite2/Font.h"
 
 #include "inc/Main.h"
@@ -39,6 +41,7 @@ class Cmap;
 class FileFace;
 class GlyphCache;
 class NameTable;
+class json;
 
 using TtfUtil::Tag;
 
@@ -46,15 +49,17 @@ using TtfUtil::Tag;
 
 class Face
 {
-    static float default_glyph_advance(const void* face_ptr, gr_uint16 glyphid);
+    // Prevent any kind of copying
+    Face(const Face&);
+    Face& operator=(const Face&);
 
 public:
 	class Table;
+    static float default_glyph_advance(const void* face_ptr, gr_uint16 glyphid);
 
     Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     virtual ~Face();
 
-//    const Silf *silf(int i) const { return ((i < m_numSilf) ? m_silfs + i : (const Silf *)NULL); }
     virtual bool        runGraphite(Segment *seg, const Silf *silf) const;
 
 public:
@@ -65,9 +70,11 @@ public:
 
 
     const SillMap     & theSill() const;
-    const GlyphCache      & glyphs() const;
+    const GlyphCache  & glyphs() const;
     Cmap              & cmap() const;
     NameTable         * nameTable() const;
+    void                setLogger(FILE *log_file);
+    json              * logger() const throw();
 
     const Silf        * chooseSilf(uint32 script) const;
     uint16              languageForLocale(const char * locale) const;
@@ -83,29 +90,23 @@ public:
 
     CLASS_NEW_DELETE;
 private:
-    const void* m_appFaceHandle/*non-NULL*/;
-    gr_face_ops m_ops;
-    uint16 m_ascent;
-    uint16 m_descent;
-    // unsigned short *m_glyphidx;     // index for each glyph id in the font
-    // unsigned short m_readglyphs;    // how many glyphs have we in m_glyphs?
-    // unsigned short m_capacity;      // how big is m_glyphs
-    mutable GlyphCache* m_pGlyphFaceCache;      //owned - never NULL
-    mutable Cmap * m_cmap; // cmap cache if available
-protected:
-    unsigned short m_numSilf;       // number of silf subtables in the silf table
-    Silf *m_silfs;                   // silf subtables.
-private:
     SillMap m_Sill;
-    FileFace* m_pFileFace;      //owned
-    mutable NameTable* m_pNames;
-    
-private:        //defensive on m_pGlyphFaceCache, m_pFileFace and m_silfs
-    Face(const Face&);
-    Face& operator=(const Face&);
-
-    friend class Font;
+    gr_face_ops             m_ops;
+    const void            * m_appFaceHandle;    // non-NULL
+    FileFace              * m_pFileFace;        //owned
+    mutable GlyphCache    * m_pGlyphFaceCache;  // owned - never NULL
+    mutable Cmap          * m_cmap;             // cmap cache if available
+    mutable NameTable     * m_pNames;
+    mutable json          * m_logger;
+protected:
+    Silf                  * m_silfs;            // silf subtables.
+    uint16 m_numSilf;       // number of silf subtables in the silf table
+private:
+    uint16 m_ascent,
+           m_descent;
 };
+
+
 
 inline
 const SillMap & Face::theSill() const
@@ -142,6 +143,12 @@ Cmap & Face::cmap() const
 {
     return *m_cmap;
 };
+
+inline
+json * Face::logger() const throw()
+{
+    return m_logger;
+}
 
 
 

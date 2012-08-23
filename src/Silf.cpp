@@ -289,9 +289,12 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
 {
     assert(seg != 0);
     SlotMap            map(*seg);
-    FiniteStateMachine fsm(map);
+    FiniteStateMachine fsm(map, seg->getFace()->logger());
     vm::Machine        m(map);
     unsigned int       initSize = seg->slotCount();
+#if !defined GRAPHITE2_NTRACING
+    json * const dbgout = seg->getFace()->logger();
+#endif
 
     if (lastPass == 0)
     {

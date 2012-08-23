@@ -43,12 +43,12 @@ public:
 	{
         if (!get()) return;
 
-    	if (logPath.size())	graphite_start_logging_face(get(), logPath.c_str());
+    	if (logPath.size())	gr_start_logging(get(), logPath.c_str());
 	}
 
 	~Gr2Face() throw()
 	{
-    	graphite_stop_logging_face(get());
+    	gr_stop_logging(get());
         gr_face_destroy(get());
         release();
 	}

@@ -592,7 +592,7 @@ int Parameters::testFileFont() const
             face = gr_make_file_face(fileName, gr_face_preloadGlyphs);
 
         // use the -trace option to specify a file
-    	if (trace)	graphite_start_logging_face(face, trace);
+    	if (trace)	gr_start_logging(face, trace);
 
         if (!face)
         {
@@ -602,7 +602,7 @@ int Parameters::testFileFont() const
         if (charLength == 0)
         {
             printFeatures(face);
-            graphite_stop_logging_face(face);
+            gr_stop_logging(face);
             gr_face_destroy(face);
             return 0;
         }
@@ -741,7 +741,7 @@ int Parameters::testFileFont() const
        }
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
-        if (trace) graphite_stop_logging_face(face);
+        if (trace) gr_stop_logging(face);
         gr_face_destroy(face);
     }
     return returnCode;
