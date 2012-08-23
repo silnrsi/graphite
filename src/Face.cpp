@@ -32,6 +32,7 @@ of the License or (at your option) any later version.
 #include "inc/Face.h"
 #include "inc/FileFace.h"
 #include "inc/GlyphFace.h"
+#include "inc/json.h"
 #include "inc/SegCacheStore.h"
 #include "inc/Segment.h"
 #include "inc/NameTable.h"
@@ -41,12 +42,12 @@ using namespace graphite2;
 
 Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
 : m_appFaceHandle(appFaceHandle),
+  m_pFileFace(NULL),
   m_pGlyphFaceCache(NULL),
   m_cmap(NULL),
-  m_numSilf(0),
+  m_pNames(NULL),
   m_silfs(NULL),
-  m_pFileFace(NULL),
-  m_pNames(NULL)
+  m_numSilf(0)
 {
     memset(&m_ops, 0, sizeof m_ops);
     memcpy(&m_ops, &ops, std::min(sizeof m_ops, ops.size));
@@ -135,6 +136,7 @@ bool Face::readFeatures()
 bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 {
 #if !defined GRAPHITE2_NTRACING
+    json * dbgout = logger();
     if (dbgout)
     {
     	*dbgout << json::object
@@ -166,6 +168,15 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 #endif
 
     return res;
+}
+
+void Face::setLogger(FILE * log_file GR_MAYBE_UNUSED)
+{
+#if !defined GRAPHITE2_NTRACING
+    if (m_logger)   delete m_logger;
+
+    m_logger = new json(log_file);
+#endif
 }
 
 const Silf *Face::chooseSilf(uint32 script) const

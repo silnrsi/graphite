@@ -40,23 +40,23 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir) :
-        m_freeSlots(NULL),
-        m_first(NULL),
-        m_last(NULL),
-        m_numGlyphs(numchars),
-        m_numCharinfo(numchars),
-        m_defaultOriginal(0),
-        m_freeJustifies(NULL),
-        m_charinfo(new CharInfo[numchars]),
-        m_face(face),
-        m_silf(face->chooseSilf(script)),
-        m_bbox(Rect(Position(0, 0), Position(0, 0))),
-        m_wscount(0),
-        m_dir(textDir)
+Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir)
+: m_freeSlots(NULL),
+  m_freeJustifies(NULL),
+  m_charinfo(new CharInfo[numchars]),
+  m_face(face),
+  m_silf(face->chooseSilf(script)),
+  m_first(NULL),
+  m_last(NULL),
+  m_bufSize(numchars + 10),
+  m_numGlyphs(numchars),
+  m_numCharinfo(numchars),
+  m_defaultOriginal(0),
+  m_wscount(0),
+  m_dir(textDir)
 {
     unsigned int i, j;
-    m_bufSize = numchars + 10;
+
     freeSlot(newSlot());
     for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
     if (!i) i = 1;
@@ -170,7 +170,7 @@ Slot *Segment::newSlot()
     {
         int numUser = m_silf->numUser();
 #if !defined GRAPHITE2_NTRACING
-        if (dbgout) ++numUser;
+        if (m_face->logger()) ++numUser;
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
@@ -202,7 +202,7 @@ void Segment::freeSlot(Slot *aSlot)
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
     // Update generation counter for debug
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)
+    if (m_face->logger())
         ++aSlot->userAttrs()[m_silf->numUser()];
 #endif
     // update next pointer

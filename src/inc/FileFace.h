@@ -43,31 +43,6 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-using TtfUtil::Tag;
-
-// These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
-
-class TableCacheItem
-{
-public:
-    TableCacheItem(char * theData, size_t theSize) : m_data(theData), m_size(theSize) {}
-    TableCacheItem() : m_data(0), m_size(0), m_count(0) {}
-    ~TableCacheItem()
-    {
-        if (m_size) free(m_data);
-    }
-    void set(char * theData, size_t theSize) { m_data = theData; m_size = theSize; m_count = 0; }
-    const void * data() const { return m_data; }
-    size_t size() const { return m_size; }
-    void add_ref() { ++m_count; }
-    size_t refs() const { return m_count; }
-private:
-    char * m_data;
-    size_t m_size;
-    size_t m_count;
-};
-
-
 
 class FileFace
 {

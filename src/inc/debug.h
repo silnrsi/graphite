@@ -52,8 +52,6 @@ struct objectid
 	objectid(const Segment * const p) throw();
 };
 
-extern json * dbgout;
-
 json & operator << (json & j, const Position &) throw();
 json & operator << (json & j, const CharInfo &) throw();
 json & operator << (json & j, const dslot &) throw();

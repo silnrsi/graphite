@@ -80,6 +80,10 @@ private:
 
 class Segment
 {
+    // Prevent copying of any kind.
+    Segment(const Segment&);
+    Segment& operator=(const Segment&);
+
 public:
     static const int NUMJUSTPARAMS = 5;
 
@@ -145,30 +149,25 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
   
 private:
-    SlotRope m_slots;           // std::vector of slot buffers
-    Slot *m_freeSlots;          // linked list of free slots
-    Slot *m_first;              // first slot in segment
-    Slot *m_last;               // last slot in segment
-    unsigned int m_bufSize;     // how big a buffer to create when need more slots
-    unsigned int m_numGlyphs;
-    unsigned int m_numCharinfo; // size of the array and number of input characters
-    int m_defaultOriginal;      // CharInfo index used if all slots have been deleted
-    AttributeRope m_userAttrs;  // std::vector of userAttrs buffers
-    JustifyRope m_justifies;    // Slot justification info buffers
-    SlotJustify *m_freeJustifies;    // Slot justification blocks free list
-    CharInfo *m_charinfo;       // character info, one per input character
-
-    const Face *m_face;       // GrFace
-    const Silf *m_silf;
-    Position m_advance;         // whole segment advance
-    Rect m_bbox;                // ink box of the segment
-    int m_wscount;              // number of whitespace chars in the string
-    int8 m_dir;
-    FeatureList m_feats;	// feature settings referenced by charinfos in this segment
-
-private:		//defensive on m_charinfo
-    Segment(const Segment&);
-    Segment& operator=(const Segment&);
+    Rect            m_bbox;             // ink box of the segment
+    Position        m_advance;          // whole segment advance
+    SlotRope        m_slots;            // std::vector of slot buffers
+    AttributeRope   m_userAttrs;        // std::vector of userAttrs buffers
+    JustifyRope     m_justifies;        // Slot justification info buffers
+    FeatureList     m_feats;            // feature settings referenced by charinfos in this segment
+    Slot          * m_freeSlots;        // linked list of free slots
+    SlotJustify   * m_freeJustifies;    // Slot justification blocks free list
+    CharInfo      * m_charinfo;         // character info, one per input character
+    const Face    * m_face;             // GrFace
+    const Silf    * m_silf;
+    Slot          * m_first;            // first slot in segment
+    Slot          * m_last;             // last slot in segment
+    unsigned int    m_bufSize,          // how big a buffer to create when need more slots
+                    m_numGlyphs,
+                    m_numCharinfo;      // size of the array and number of input characters
+    int             m_defaultOriginal,  // CharInfo index used if all slots have been deleted
+                    m_wscount;          // number of whitespace chars in the string
+    int8            m_dir;
 };
 
 

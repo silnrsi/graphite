@@ -24,6 +24,7 @@ add_library(graphite2-segcache STATIC
     ${S}/GlyphCache.cpp
     ${S}/GlyphFace.cpp
     ${S}/Pass.cpp
+    ${S}/Rule.cpp
     ${S}/SegCache.cpp
     ${S}/SegCacheEntry.cpp
     ${S}/Segment.cpp
