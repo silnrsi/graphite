@@ -17,3 +17,4 @@ set_target_properties(grsegcachetest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_S
 target_link_libraries(grsegcachetest graphite2 graphite2-segcache graphite2-base)
     
 add_test(NAME grsegcachetest COMMAND $<TARGET_FILE:grsegcachetest> ${testing_SOURCE_DIR}/fonts/Padauk.ttf)
+set_tests_properties(grsegcachetest PROPERTIES TIMEOUT 3)

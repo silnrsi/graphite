@@ -20,6 +20,7 @@ macro(test_example TESTNAME SRCFILE)
     target_link_libraries(${TESTNAME} graphite2)
 
     add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
+    set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
 endmacro(test_example)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -35,6 +36,7 @@ macro(test_freetype TESTNAME SRCFILE)
         set_target_properties(${TESTNAME} PROPERTIES LINKER_LANGUAGE C)
         target_link_libraries(${TESTNAME} graphite2 ${FREETYPE_LIBRARIES})
         add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
+        set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
     endif (${FREETYPE_FOUND})
 endmacro(test_freetype)
 

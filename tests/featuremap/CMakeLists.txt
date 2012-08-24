@@ -15,3 +15,4 @@ set_target_properties(featuremaptest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_S
 target_link_libraries(featuremaptest graphite2 graphite2-base graphite2-segcache graphite2-base)
 
 add_test(NAME featuremaptest COMMAND $<TARGET_FILE:featuremaptest> ${testing_SOURCE_DIR}/fonts/tiny.ttf)
+set_tests_properties(featuremaptest PROPERTIES TIMEOUT 3)

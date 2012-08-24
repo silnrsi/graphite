@@ -119,6 +119,8 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
         -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_comparison.log -c -g -n --tolerance 0.0001 ${ARGN})
         add_test(NAME ${TESTNAME}_cached_comparison COMMAND $<TARGET_FILE:comparerenderer>
         -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096 --tolerance 0.0001 ${ARGN})
+        set_tests_properties(${TESTNAME}_comparison PROPERTIES TIMEOUT 3)
+        set_tests_properties(${TESTNAME}_cached_comparison PROPERTIES TIMEOUT 3)
     endif (${GR_FOUND})
 endmacro(comparetest)
 
