@@ -83,9 +83,7 @@ bool Face::readGlyphs(uint32 faceOptions)
     else
     	m_cmap = new DirectCmap(*this);
 
-    m_pGlyphFaceCache = new GlyphCache(*this,
-                                           faceOptions & gr_face_dumbRendering,
-                                           faceOptions & gr_face_preloadGlyphs);
+    m_pGlyphFaceCache = new GlyphCache(*this, faceOptions);
     if (!m_pGlyphFaceCache
         || m_pGlyphFaceCache->numGlyphs() == 0
         || m_pGlyphFaceCache->unitsPerEm() == 0

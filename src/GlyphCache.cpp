@@ -110,27 +110,28 @@ private:
 
 
 
-GlyphCache::GlyphCache(const Face & face, const bool dumb_font, bool preload)
-: _glyph_loader(new Loader(face, dumb_font)),
+GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
+: _glyph_loader(new Loader(face, bool(face_options & gr_face_dumbRendering))),
   _glyphs(_glyph_loader && *_glyph_loader ? grzeroalloc<const GlyphFace *>(_glyph_loader->num_glyphs()) : 0),
   _num_glyphs(_glyphs ? _glyph_loader->num_glyphs() : 0),
   _num_attrs(_glyphs ? _glyph_loader->num_attrs() : 0),
   _upem(_glyphs ? _glyph_loader->units_per_em() : 0)
 {
-    if (!preload || !_glyph_loader || !_glyphs) return;
+    if (face_options & gr_face_preloadGlyphs && _glyph_loader && _glyphs)
+    {
+        GlyphFace * const glyphs = gralloc<GlyphFace>(_num_glyphs);
+        if (!glyphs)
+            return;
 
-    GlyphFace * const glyphs = gralloc<GlyphFace>(_num_glyphs);
-    if (!glyphs)
-        return;
+        // glyphs[0] has the same address as the glyphs array, thus assigning
+        //  the &glyphs[0] to _glyphs[0] means _glyphs[0] points to the entire
+        //  array.
+        for (uint16 gid = 0; gid != _num_glyphs; ++gid)
+            _glyphs[gid] = _glyph_loader->read_glyph(gid, glyphs[gid]);
 
-    // glyphs[0] has the same address as the glyphs array, thus assigning
-    //  the &glyphs[0] to _glyphs[0] means _glyphs[0] points to the entire
-    //  array.
-    for (uint16 gid = 0; gid != _num_glyphs; ++gid)
-        _glyphs[gid] = _glyph_loader->read_glyph(gid, glyphs[gid]);
-
-    delete _glyph_loader;
-    _glyph_loader = 0;
+        delete _glyph_loader;
+        _glyph_loader = 0;
+    }
 }
 
 
@@ -163,7 +164,7 @@ const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result m
     return p;
 }
 
-uint16 GlyphCache::glyphAttr(uint16 gid, uint8 gattr) const
+uint16 GlyphCache::glyphAttr(uint16 gid, uint16 gattr) const
 {
 	if (gattr >= _num_attrs) return 0;
 

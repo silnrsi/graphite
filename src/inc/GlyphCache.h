@@ -45,7 +45,7 @@ class GlyphCache
     GlyphCache& operator=(const GlyphCache&);
 
 public:
-    GlyphCache(const Face & face, const bool dumb_font, bool preload);
+    GlyphCache(const Face & face, const uint32 face_options);
     ~GlyphCache();
 
     size_t numGlyphs() const throw();
@@ -54,7 +54,7 @@ public:
 
     const GlyphFace *glyph(unsigned short glyphid) const;      //result may be changed by subsequent call with a different glyphid
     const GlyphFace *glyphSafe(unsigned short glyphid) const;
-    uint16 glyphAttr(uint16 gid, uint8 gattr) const;
+    uint16 glyphAttr(uint16 gid, uint16 gattr) const;
 
     CLASS_NEW_DELETE;
     
