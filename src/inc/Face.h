@@ -68,7 +68,6 @@ public:
     bool                readFeatures();
     void                takeFileFace(FileFace* pFileFace/*takes ownership*/);
 
-
     const SillMap     & theSill() const;
     const GlyphCache  & glyphs() const;
     Cmap              & cmap() const;

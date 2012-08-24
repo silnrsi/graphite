@@ -62,7 +62,9 @@ Face::~Face()
     m_pGlyphFaceCache = NULL;
     m_cmap = NULL;
     m_silfs = NULL;
+#ifndef GRAPHITE2_NFILEFACE
     delete m_pFileFace;
+#endif
     delete m_pNames;
     m_pFileFace = NULL;
 }
@@ -204,13 +206,15 @@ uint16 Face::getGlyphMetric(uint16 gid, uint8 metric) const
     }
 }
 
-void Face::takeFileFace(FileFace* pFileFace/*takes ownership*/)
+void Face::takeFileFace(FileFace* pFileFace GR_MAYBE_UNUSED/*takes ownership*/)
 {
+#ifndef GRAPHITE2_NFILEFACE
     if (m_pFileFace==pFileFace)
       return;
     
     delete m_pFileFace;
     m_pFileFace = pFileFace;
+#endif
 }
 
 NameTable * Face::nameTable() const
@@ -229,8 +233,6 @@ uint16 Face::languageForLocale(const char * locale) const
         return m_pNames->getLanguageId(locale);
     return 0;
 }
-
-
 
 Face::Table::Table(const Face & face, const Tag n) throw()
 : _f(&face)
