@@ -253,6 +253,9 @@ const IsoLangEntry LANG_ENTRIES[] = {
 
 class Locale2Lang
 {
+    Locale2Lang(const Locale2Lang &);
+    Locale2Lang & operator = (const Locale2Lang &);
+
 public:
     Locale2Lang() : mSeedPosition(128)
     {

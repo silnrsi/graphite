@@ -41,15 +41,23 @@ typedef Machine::Code  Code;
 
 
 Pass::Pass()
-        :
-        m_silf(0),
-        m_cols(0),
-        m_rules(0),
-        m_ruleMap(0),
-        m_startStates(0),
-        m_sTable(0),
-        m_states(0),
-        m_flags()
+: m_silf(0),
+  m_cols(0),
+  m_rules(0),
+  m_ruleMap(0),
+  m_startStates(0),
+  m_sTable(0),
+  m_states(0),
+  m_flags(0),
+  m_iMaxLoop(0),
+  m_numGlyphs(0),
+  m_numRules(0),
+  m_sRows(0),
+  m_sTransition(0),
+  m_sSuccess(0),
+  m_sColumns(0),
+  m_minPreCtxt(0),
+  m_maxPreCtxt(0)
 {
 }
 
@@ -252,9 +260,6 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 
         if (begin >= rule_map_end || end > rule_map_end || begin > end)
             return false;
-#ifndef NDEBUG
-        s->index = (s - m_states);
-#endif
         s->rules = begin;
         s->rules_end = (end - begin <= FiniteStateMachine::MAX_RULES)? end :
             begin + FiniteStateMachine::MAX_RULES;
@@ -293,7 +298,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 
 #if !defined GRAPHITE2_NTRACING
     if (fsm.dbgout)  *fsm.dbgout << "rules"	<< json::array;
-	json::closer rules_array_closer = fsm.dbgout;
+	json::closer rules_array_closer(fsm.dbgout);
 #endif
 
     m.slotMap().highwater(currHigh);

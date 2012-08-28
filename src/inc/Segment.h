@@ -85,8 +85,6 @@ class Segment
     Segment& operator=(const Segment&);
 
 public:
-    static const int NUMJUSTPARAMS = 5;
-
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
@@ -137,6 +135,7 @@ public:
     void bidiPass(uint8 aBidi, int paradir, uint8 aMirror);
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
+    bool hasJustification() const { return m_justifies.size() != 0; }
 
     bool isWhitespace(const int cid) const;
 

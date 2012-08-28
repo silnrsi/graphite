@@ -38,10 +38,29 @@ using namespace graphite2;
 namespace { static const uint32 ERROROFFSET = 0xFFFFFFFF; }
 
 Silf::Silf() throw()
-: m_passes(0), m_pseudos(0), m_classOffsets(0), m_classData(0), m_justs(0),
-  m_numPasses(0), m_sPass(0), m_pPass(0), m_jPass(0), m_bPass(0), m_flags(0),
-  m_aBreak(0), m_aUser(0), m_iMaxComp(0),
-  m_aLig(0), m_numPseudo(0), m_nClass(0), m_nLinear(0), m_gEndLine(0), m_silfinfo()
+: m_passes(0),
+  m_pseudos(0),
+  m_classOffsets(0),
+  m_classData(0),
+  m_justs(0),
+  m_numPasses(0),
+  m_numJusts(0),
+  m_sPass(0),
+  m_pPass(0),
+  m_jPass(0),
+  m_bPass(0),
+  m_flags(0),
+  m_aPseudo(0),
+  m_aBreak(0),
+  m_aUser(0),
+  m_aBidi(0),
+  m_aMirror(0),
+  m_iMaxComp(0),
+  m_aLig(0),
+  m_numPseudo(0),
+  m_nClass(0),
+  m_nLinear(0),
+  m_gEndLine(0)
 {
 }
 

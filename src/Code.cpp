@@ -141,7 +141,7 @@ inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
            uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
- :  _code(0), _data_size(0), _instr_count(0), _status(loaded),
+ :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(true)
 {
     assert(bytecode_begin != 0);

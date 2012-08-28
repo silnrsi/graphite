@@ -44,7 +44,14 @@ class SegCacheEntry;
 
 struct SlotJustify
 {
+    static const int NUMJUSTPARAMS = 5;
+
+    SlotJustify(const SlotJustify &);
+    SlotJustify & operator = (const SlotJustify &);
+
 public:
+    static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16); }
+
     void LoadSlot(const Slot *s, const Segment *seg);
 
     SlotJustify *next;
@@ -75,7 +82,7 @@ public:
     void index(uint32 val) { m_index = val; }
 
     Slot();
-    void set(const Slot & slot, int charOffset, uint8 numUserAttr);
+    void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }
     Slot *prev() const { return m_prev; }

@@ -36,17 +36,17 @@ using namespace graphite2;
 Slot::Slot() :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
-    m_parent(NULL), m_child(NULL), m_sibling(NULL),
+    m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
     m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_justs(NULL)
+    m_flags(0), m_attLevel(0), m_bidiCls(0), m_bidiLevel(0), m_justs(NULL)
     // Do not set m_userAttr since it is set *before* new is called since this
     // is used as a positional new to reset the GrSlot
 {
 }
 
 // take care, this does not copy any of the GrSlot pointer fields
-void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
+void Slot::set(const Slot & orig, int charOffset, size_t numUserAttr, size_t justLevels)
 {
     // leave m_next and m_prev unchanged
     m_glyphid = orig.m_glyphid;
@@ -64,10 +64,15 @@ void Slot::set(const Slot & orig, int charOffset, uint8 numUserAttr)
     m_with = orig.m_with;
     m_flags = orig.m_flags;
     m_attLevel = orig.m_attLevel;
-    assert(!orig.m_userAttr || m_userAttr);
+    m_bidiCls = orig.m_bidiCls;
+    m_bidiLevel = orig.m_bidiLevel;
     if (m_userAttr && orig.m_userAttr)
     {
         memcpy(m_userAttr, orig.m_userAttr, numUserAttr * sizeof(*m_userAttr));
+    }
+    if (m_justs && orig.m_justs)
+    {
+        memcpy(m_justs, orig.m_justs, SlotJustify::size_of(justLevels));
     }
 }
 
@@ -293,12 +298,12 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
 
 int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
 {
-    if (level && level >= seg->silf()->numJusts()) return 0;
+    if (level && level >= seg->silf()->numJustLevels()) return 0;
 
     if (m_justs)
-        return m_justs->values[level * Segment::NUMJUSTPARAMS + subindex];
+        return m_justs->values[level * SlotJustify::NUMJUSTPARAMS + subindex];
 
-    if (level >= seg->silf()->numJusts()) return 0;
+    if (level >= seg->silf()->numJustLevels()) return 0;
     Justinfo *jAttrs = seg->silf()->justAttrs() + level;
 
     switch (subindex) {
@@ -319,7 +324,7 @@ void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
         j->LoadSlot(this, seg);
         m_justs = j;
     }
-    m_justs->values[level * Segment::NUMJUSTPARAMS + subindex] = value;
+    m_justs->values[level * SlotJustify::NUMJUSTPARAMS + subindex] = value;
 }
 
 bool Slot::child(Slot *ap)
@@ -375,10 +380,10 @@ void Slot::floodShift(Position adj)
 
 void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
 {
-    for (int i = seg->silf()->numJusts() - 1; i >= 0; --i)
+    for (int i = seg->silf()->numJustLevels() - 1; i >= 0; --i)
     {
         Justinfo *justs = seg->silf()->justAttrs() + i;
-        int16 *v = values + i * Segment::NUMJUSTPARAMS;
+        int16 *v = values + i * NUMJUSTPARAMS;
         v[0] = seg->glyphAttr(s->gid(), justs->attrStretch());
         v[1] = seg->glyphAttr(s->gid(), justs->attrShrink());
         v[2] = seg->glyphAttr(s->gid(), justs->attrStep());

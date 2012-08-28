@@ -105,8 +105,7 @@ private:        //unimplemented
 class NameAndFeatureRef
 {
   public:
-    NameAndFeatureRef() : m_pFRef(NULL) {}
-    NameAndFeatureRef(uint32 name) : m_name(name) {}
+    NameAndFeatureRef(uint32 name = 0) : m_name(name) , m_pFRef(NULL){}
     NameAndFeatureRef(const FeatureRef* p/*not NULL*/) : m_name(p->getId()), m_pFRef(p) {}
 
     bool operator<(const NameAndFeatureRef& rhs) const //orders by m_name
@@ -152,8 +151,11 @@ class SillMap
 private:
     class LangFeaturePair
     {
+        LangFeaturePair(const LangFeaturePair &);
+        LangFeaturePair & operator = (const LangFeaturePair &);
+
     public:
-        LangFeaturePair() : m_pFeatures(NULL) {}
+        LangFeaturePair() :  m_lang(0), m_pFeatures(0) {}
         ~LangFeaturePair() { delete m_pFeatures; }
         
         uint32 m_lang;

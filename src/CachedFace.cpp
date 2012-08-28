@@ -46,8 +46,8 @@ CachedFace::~CachedFace()
 
 bool CachedFace::setupCache(unsigned int cacheSize)
 {
-    m_cacheStore = new SegCacheStore(this, m_numSilf, cacheSize);
-    return (m_cacheStore != NULL);
+    m_cacheStore = new SegCacheStore(*this, m_numSilf, cacheSize);
+    return bool(m_cacheStore);
 }
 
 

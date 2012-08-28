@@ -123,7 +123,9 @@ CachedCmap::operator bool() const throw()
 
 
 DirectCmap::DirectCmap(const Face & face)
-: _cmap(face, Tag::cmap)
+: _cmap(face, Tag::cmap),
+  _stable(0),
+  _ctable(0)
 {
     if (!_cmap)	return;
 

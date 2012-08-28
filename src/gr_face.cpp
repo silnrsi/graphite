@@ -41,8 +41,6 @@ gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_f
 {
 	if (ops == 0)	return 0;
 
-	faceOptions &= ~gr_face_preloadAll;
-
     Face *res = new Face(appFaceHandle, *ops);
     if (res == 0)	return 0;
 

@@ -90,7 +90,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     pFirst = pFirst->nextSibling();
 
     int icount = 0;
-    int numLevels = silf()->numJusts();
+    int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
         for (s = pSlot; s != end; s = s->next())

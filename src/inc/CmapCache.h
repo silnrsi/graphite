@@ -47,6 +47,9 @@ public:
 
 class DirectCmap : public Cmap
 {
+    DirectCmap(const DirectCmap &);
+    DirectCmap & operator = (const DirectCmap &);
+
 public:
 	DirectCmap(const Face &);
 	virtual uint16 operator [] (const uint32 usv) const throw();
@@ -61,6 +64,9 @@ private:
 
 class CachedCmap : public Cmap
 {
+    CachedCmap(const CachedCmap &);
+    CachedCmap & operator = (const CachedCmap &);
+
 public:
 	CachedCmap(const Face &);
 	virtual ~CachedCmap() throw();

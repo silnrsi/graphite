@@ -52,7 +52,7 @@ class sparse
 public:
     typedef uint16  key_type;
     typedef uint16  mapped_type;
-	std::pair<const key_type, mapped_type> value_type;
+	typedef std::pair<const key_type, mapped_type> value_type;
 
 	template<typename I>
 	sparse(I first, const I last);

@@ -41,6 +41,7 @@ using namespace graphite2;
 
 FileFace::FileFace(const char *filename)
 : _file(fopen(filename, "rb")),
+  _file_len(0),
   _header_tbl(NULL),
   _table_dir(NULL)
 {

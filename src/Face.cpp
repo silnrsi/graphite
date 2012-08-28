@@ -46,8 +46,11 @@ Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
   m_pGlyphFaceCache(NULL),
   m_cmap(NULL),
   m_pNames(NULL),
+  m_logger(NULL),
   m_silfs(NULL),
-  m_numSilf(0)
+  m_numSilf(0),
+  m_ascent(0),
+  m_descent(0)
 {
     memset(&m_ops, 0, sizeof m_ops);
     memcpy(&m_ops, &ops, std::min(sizeof m_ops, ops.size));

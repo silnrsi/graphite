@@ -67,8 +67,8 @@ namespace
     public:
         glat2_iterator(const void * glat) : glat_iterator(glat) {}
 
-        glat_iterator & operator ++ ()      { ++_v.first; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.first = be::read<uint16>(_p); _n = be::read<uint16>(_p); } return *this; }
-        glat_iterator   operator ++ (int)   { glat_iterator tmp(*this); operator++(); return tmp; }
+        glat2_iterator & operator ++ ()      { ++_v.first; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.first = be::read<uint16>(_p); _n = be::read<uint16>(_p); } return *this; }
+        glat2_iterator   operator ++ (int)   { glat2_iterator tmp(*this); operator++(); return tmp; }
 
         value_type          operator * () const {
             if (_n==0) { _v.first = be::read<uint16>(_p); _n = be::read<uint16>(_p); }
@@ -181,8 +181,10 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
   m_pHmtx(face, Tag::hmtx),
   m_pGlyf(face, Tag::glyf),
   m_pLoca(face, Tag::loca),
+  m_locFlagsUse32Bit(false),
   m_nGlyphsWithGraphics(0),
-  m_nGlyphsWithAttributes(0)
+  m_nGlyphsWithAttributes(0),
+  m_nAttrs(0)
 {
     if (!operator bool())
         return;

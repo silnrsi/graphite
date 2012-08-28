@@ -37,6 +37,10 @@ namespace graphite2 {
 
 class json
 {
+    // Prevent copying
+    json(const json &);
+    json & operator = (const json &);
+
 	typedef void (*_context_t)(json &);
 	class _null_t {};
 
@@ -88,6 +92,10 @@ public:
 
 class json::closer
 {
+    // Prevent copying.
+    closer(const closer &);
+    closer & operator = (const closer &);
+
 	json * const	_j;
 public:
 	closer(json * const j) : _j(j) {}

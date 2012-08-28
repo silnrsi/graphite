@@ -89,7 +89,7 @@ public:
 
     CLASS_NEW_DELETE;
 private:
-    SillMap m_Sill;
+    SillMap                 m_Sill;
     gr_face_ops             m_ops;
     const void            * m_appFaceHandle;    // non-NULL
     FileFace              * m_pFileFace;        //owned
@@ -98,8 +98,8 @@ private:
     mutable NameTable     * m_pNames;
     mutable json          * m_logger;
 protected:
-    Silf                  * m_silfs;            // silf subtables.
-    uint16 m_numSilf;       // number of silf subtables in the silf table
+    Silf                  * m_silfs;    // silf subtables.
+    uint16                  m_numSilf;  // num silf subtables in the silf table
 private:
     uint16 m_ascent,
            m_descent;

@@ -217,10 +217,8 @@ SlotJustify *Segment::newJustify()
 {
     if (!m_freeJustifies)
     {
-        int numJust = 1;
-        if (m_silf->numJusts() > 0) numJust = m_silf->numJusts();
-        int justSize = sizeof(SlotJustify) + (numJust * NUMJUSTPARAMS - 1) * sizeof(int16);
-        char *justs = grzeroalloc<char>(justSize * m_wscount);
+        const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
+        byte *justs = grzeroalloc<byte>(justSize * m_wscount);
         for (int i = m_wscount - 2; i >= 0; --i)
         {
             SlotJustify *p = (SlotJustify *)(justs + justSize * i);
@@ -238,10 +236,10 @@ SlotJustify *Segment::newJustify()
 
 void Segment::freeJustify(SlotJustify *aJustify)
 {
-    int numJust = m_silf->numJusts();
-    if (m_silf->numJusts() <= 0) numJust = 1;
+    int numJust = m_silf->numJustLevels();
+    if (m_silf->numJustLevels() <= 0) numJust = 1;
     aJustify->next = m_freeJustifies;
-    memset(aJustify->values, 0, numJust * NUMJUSTPARAMS * sizeof(int16));
+    memset(aJustify->values, 0, numJust*SlotJustify::NUMJUSTPARAMS*sizeof(int16));
     m_freeJustifies = aJustify;
 }
 
@@ -293,7 +291,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
     slot = startSlot;
     for (slot=startSlot; slot != endSlot; slot = slot->next(), srcSlot = srcSlot->next())
     {
-        slot->set(*srcSlot, offset, m_silf->numUser());
+        slot->set(*srcSlot, offset, m_silf->numUser(), m_silf->numJustLevels());
         if (srcSlot->attachedTo())	slot->attachTo(indexmap[srcSlot->attachedTo()->index()]);
         if (srcSlot->nextSibling())	slot->m_sibling = indexmap[srcSlot->nextSibling()->index()];
         if (srcSlot->firstChild())	slot->m_child = indexmap[srcSlot->firstChild()->index()];

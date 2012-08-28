@@ -42,6 +42,8 @@ public:
     FeatureVal(int num, const FeatureMap & pMap) : Vector<uint32>(num), m_pMap(&pMap) {}
     FeatureVal(const FeatureVal & rhs) : Vector<uint32>(rhs), m_pMap(rhs.m_pMap) {}
 
+    FeatureVal & operator = (const FeatureVal & rhs) { Vector<uint32>::operator = (rhs); m_pMap = rhs.m_pMap; return *this; }
+
     bool operator ==(const FeatureVal & b) const
     {
         size_t n = size();

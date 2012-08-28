@@ -102,15 +102,14 @@ set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
-     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
-     -fno-rtti -fno-exceptions
-     -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
-    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fdiagnostics-show-option -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector"
+        LINK_FLAGS      "-nodefaultlibs" 
+        LINKER_LANGUAGE C)
     if (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
-        target_link_libraries(graphite2 "-lkernel32 -lmsvcr90 -lmingw32 -lgcc -luser32")
+        target_link_libraries(graphite2 kernel32 msvcr90 mingw32 gcc user32)
     else (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
-        target_link_libraries(graphite2 "-lc -lgcc")
+        target_link_libraries(graphite2 c gcc)
         include(Graphite)
         nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
     endif (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
@@ -119,12 +118,11 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
-     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
-     -fno-rtti -fno-exceptions
-     -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
-    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
-    target_link_libraries(graphite2 "-lc")
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector"
+        LINK_FLAGS      "-nodefaultlibs" 
+        LINKER_LANGUAGE C)
+    target_link_libraries(graphite2 c)
     include(Graphite)
     nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
@@ -132,7 +130,8 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGRAPHITE2_EXPORTING)
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 

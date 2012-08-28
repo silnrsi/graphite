@@ -91,19 +91,6 @@ FeatureRef::FeatureRef(const Face & face,
 	m_mask <<= m_bits;
 }
 
-//FeatureRef::FeatureRef(const FeatureRef & rhs)
-//: m_pFace(rhs.m_pFace), m_nameValues((rhs.m_nameValues)? gralloc<FeatureSetting>(rhs.m_numSet) : NULL),
-//  m_mask(rhs.m_mask), m_max(rhs.m_max), m_id(rhs.m_id),
-//  m_nameid(rhs.m_nameid), m_flags(rhs.m_flags), m_numSet(rhs.m_numSet),
-//  m_bits(rhs.m_bits), m_index(rhs.m_index)
-//{
-//    // most of the time these name values aren't used, so NULL might be acceptable
-//    if (rhs.m_nameValues)
-//    {
-//        memcpy(m_nameValues, rhs.m_nameValues, sizeof(FeatureSetting) * m_numSet);
-//    }
-//}
-
 FeatureRef::~FeatureRef() throw()
 {
     free(m_nameValues);

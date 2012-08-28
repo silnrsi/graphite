@@ -37,6 +37,9 @@ class SegCache;
 
 class CachedFace : public Face
 {
+    CachedFace(const CachedFace &);
+    CachedFace & operator = (const CachedFace &);
+
 public:
     CachedFace(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     bool setupCache(unsigned int cacheSize);

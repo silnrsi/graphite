@@ -41,10 +41,14 @@ struct Rule {
   uint16           rule_idx;
 #endif
 
-  Rule() : constraint(0), action(0) {}
+  Rule() : constraint(0), action(0), sort(0), preContext(0) {}
   ~Rule();
 
   CLASS_NEW_DELETE;
+
+private:
+  Rule(const Rule &);
+  Rule & operator = (const Rule &);
 };
 
 inline Rule::~Rule()
@@ -82,9 +86,6 @@ struct State
   size_t size() const;
   bool   is_success() const;
   bool   is_transition() const;
-#ifndef NDEBUG
-    uint32 index;
-#endif
 };
 
 inline
@@ -189,9 +190,8 @@ void FiniteStateMachine::reset(Slot * & slot, const short unsigned int max_pre_c
 
 inline
 FiniteStateMachine::Rules::Rules()
-  : m_begin(m_rules)
+  : m_begin(m_rules), m_end(m_rules)
 {
-  m_end = m_begin;
 }
 
 inline
@@ -248,7 +248,7 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 
 inline
 SlotMap::SlotMap(Segment & seg)
-: segment(seg), m_size(0), m_precontext(0)
+: segment(seg), m_size(0), m_precontext(0), m_highwater(0), m_highpassed(false)
 {
     m_slot_map[0] = 0;
 }
