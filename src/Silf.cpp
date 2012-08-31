@@ -62,6 +62,7 @@ Silf::Silf() throw()
   m_nLinear(0),
   m_gEndLine(0)
 {
+    memset(&m_silfinfo, 0, sizeof m_silfinfo);
 }
 
 Silf::~Silf() throw()
