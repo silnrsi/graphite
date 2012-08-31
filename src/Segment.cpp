@@ -438,7 +438,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
             resolveExplicit(baseLevel, 0, first(), 0);
         if (bmask & 0x10178)
             resolveWeak(baseLevel, first());
-        if (bmask & 0x161)
+        if (bmask & 0x361)
             resolveNeutrals(baseLevel, first());
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());

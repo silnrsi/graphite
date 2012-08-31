@@ -56,8 +56,8 @@ public:
             int numGlyphs = glyphs.second - glyphs.first;
             RenderedLine * renderedLine = new(result) RenderedLine(numGlyphs, seg.advanceWidth());
             int i = 0;
-//            if (m_layout.rightToLeft())
-//                i = numGlyphs - 1;
+            if (m_layout.rightToLeft())
+                i = numGlyphs - 1;
             gr::GlyphIterator iGlyph = glyphs.first;
 //            float segadv = 0.;
             while (iGlyph != glyphs.second)
@@ -70,9 +70,9 @@ public:
 //                if (!gi.isSpace()) // && gAdvances.x > 0.01)
 //                    segadv = max(segadv, (gi.origin() + gi.advanceWidth()));
                 ++iGlyph;
-//                if (m_layout.rightToLeft())
-//                    --i;
-//                else
+                if (m_layout.rightToLeft())
+                    --i;
+                else
                     ++i;
             }
 //            if (segadv != renderedLine->advance())
