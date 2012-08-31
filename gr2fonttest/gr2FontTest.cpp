@@ -162,7 +162,7 @@ namespace gr2 = graphite2;
 template <typename utf>
 size_t convertUtf(const void * src, unsigned int * & dest)
 {
-    dest = static_cast<unsigned int *>(malloc(sizeof(*dest)*strlen(reinterpret_cast<const char *>(src)+1)));
+    dest = static_cast<unsigned int *>(malloc(sizeof(*dest)*strlen(reinterpret_cast<const char *>(src))+1));
     if (!dest)
     	return 0;
 
