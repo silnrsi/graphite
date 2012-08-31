@@ -39,9 +39,15 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
+        COMPILE_FLAGS       "-Wall -Wextra -fdiagnostics-show-option -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_DEFINITIONS "GRAPHITE2_STATIC"
+        LINK_FLAGS          "-nodefaultlibs" 
+        LINKER_LANGUAGE     C)
     set_target_properties(graphite2-segcache PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING")
+        COMPILE_FLAGS       "-Wall -Wextra -fdiagnostics-show-option -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING"
+        LINK_FLAGS          "-nodefaultlibs" 
+        LINKER_LANGUAGE     C)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 if (GRAPHITE2_COMPARE_RENDERER)
