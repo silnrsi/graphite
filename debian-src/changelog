@@ -1,4 +1,4 @@
-graphite2 (1.2.0) precise; urgency=low
+graphite2 (1.2.0-1~palaso1) precise; urgency=low
 
   * New upstream release with library API bump from 2.0.0 to 3.0.1 (v3 API with age of 1) 
 

@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7.0), cmake, libfreetype6-dev, libgraphite-dev, lib
 Build-Depends-Indep: asciidoc, dblatex, doxygen, docbook-xsl, latex-xcolor, libxml2-utils
 Standards-Version: 3.9.1
 
-Package: libgraphite2-3.0.1
+Package: libgraphite2-3
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -56,7 +56,7 @@ Description: Development files for libgraphite2
  .
  This package contains the development libraries for libgraphite2 
 
-Package: libgraphite2-3.0.1-dbg
+Package: libgraphite2-3-dbg
 Priority: extra
 Section: debug
 Architecture: any

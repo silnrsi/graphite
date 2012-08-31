@@ -4,7 +4,7 @@
 	dh $@ --builddirectory=build
 
 override_dh_strip:
-	dh_strip --dbg-package=libgraphite2-2.0.0-dbg
+	dh_strip --dbg-package=libgraphite2-3-dbg
 
 override_dh_auto_build:
 	dh_auto_build
