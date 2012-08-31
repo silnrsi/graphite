@@ -25,12 +25,13 @@ typedef const gr_slot        Text_Gr2_Slot;
 
 MODULE = Text::Gr2  PACKAGE = Text::Gr2 PREFIX = graphite_
 
-bool graphite_start_logging(SV* class, FILE* logFile, IV mask)
+bool gr_start_logging(SV* class, Text_Gr2_Face *face, char* logFile)
     C_ARGS:
-        logFile, mask
+        face, logFile
 
-void graphite_stop_logging(SV* class)
+void gr_stop_logging(SV* class, Text_Gr2_Face *face)
     C_ARGS:
+        face
 
 MODULE = Text::Gr2  PACKAGE = Text::Gr2 PREFIX = gr_
 

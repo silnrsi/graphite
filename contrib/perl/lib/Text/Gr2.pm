@@ -58,24 +58,13 @@ only provides two functions, for logging:
 
 =head2 start_logging
 
-    Text::Gr2->start_logging($fh, $mask);
-
-Writes an XML log to the filehandle given. Mask is a bitmask made up of
-the following flags:
-
-    GRLOG_NONE = 0x0,
-    GRLOG_FACE = 0x01,
-    GRLOG_SEGMENT = 0x02,
-    GRLOG_PASS = 0x04,
-    GRLOG_CACHE = 0x08,
-    GRLOG_OPCODE = 0x80,
-    GRLOG_ALL = 0xFF
+    Text::Gr2->start_logging($face, $fname);
 
 =head2 stop_logging
 
-    END { Text::Gr2->stop_logging }
+    END { Text::Gr2->stop_logging($face) }
 
-Finishes writing the log.
+Finishes writing the log for the given face.
 
 =head1 INTERNAL METHODS
 

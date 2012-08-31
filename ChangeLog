@@ -1,3 +1,22 @@
+1.2.0
+    . API Changes:
+        . Added Windows friendly gr_start_logging and gr_stop_logging, now per face
+        . Added gr_make_face_with_ops, gr_make_face_with_seg_cache_and_ops
+        . Added gr_make_font_with_ops
+        . Added gr_face_is_char_supported
+        . Added gr_face_info to give info to apps about face capabilities
+        . Deprecated gr_make_face, gr_make_face_with_seg_cache, gr_make_font_with_advance_fn
+        . Deprecated graphite_start_logging and graphite_stop_logging
+            . These functions are stubbed now and do nothing, but do compile and link.
+        . Bump API version to 3
+    . Handle justification information in a font and do something useful with it
+    . Builds clang clean (has done for a while)
+    . Bug fixes
+    . Windows build and bug fixes
+    . Add extra information to json debug output
+    . Added windows build documentation
+    . Added freetype sample code and test
+
 1.1.3
     . Default build has GRAPHITE2_COMPARE_RENDERER to OFF to reduce dependencies
     . Builds on Mac with clang

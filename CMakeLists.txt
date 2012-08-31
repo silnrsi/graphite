@@ -7,10 +7,18 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif (NOT CMAKE_BUILD_TYPE)
+#if (CMAKE_BUILD_TYPE STREQUAL ClangASN)
+#    add_definitions(-faddress-sanitizer -fno-omit-frame-pointer)
+#    set_property(CACHE CMAKE_C_COMPILER PROPERTY VALUE clang)
+#    set_property(CACHE CMAKE_CXX_COMPILER PROPERTY VALUE clang)
+#endif (CMAKE_BUILD_TYPE STREQUAL ClangASN)
 
 enable_language(CXX C)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+if (CMAKE_BUILD_TYPE STREQUAL ClangASN)
+    add_definitions(-faddress-sanitizer -fno-omit-frame-pointer)
+endif (CMAKE_BUILD_TYPE STREQUAL ClangASN)
 
 enable_testing()
 
@@ -47,7 +55,6 @@ if (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMA
     set(GRAPHITE2_VM_TYPE "call")
 endif (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_BASE_NAME STREQUAL "clang++"))
 message(STATUS "Using vm machine type: ${GRAPHITE2_VM_TYPE}")
-
 
 add_subdirectory(src)
 add_subdirectory(tests)
