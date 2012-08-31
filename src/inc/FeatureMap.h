@@ -59,6 +59,7 @@ class FeatureRef
 	static const uint8	SIZEOF_CHUNK = sizeof(chunk_t)*8;
 
 public:
+	FeatureRef() : m_nameValues(0) {}
     FeatureRef(const Face & face, unsigned short & bits_offset, uint32 max_val,
                uint32 name, uint16 uiName, uint16 flags,
                FeatureSetting *settings, uint16 num_set) throw();
@@ -84,7 +85,6 @@ public:
     CLASS_NEW_DELETE;
 private:
     FeatureRef(const FeatureRef & rhs);
-    FeatureRef();
 
     const Face 	   * m_pFace;   //not NULL
     FeatureSetting * m_nameValues; // array of name table ids for feature values
@@ -122,7 +122,7 @@ class FeatureMap
 public:
     FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL),
         m_defaultFeatures(NULL) {}
-    ~FeatureMap() { free(m_feats); delete[] m_pNamedFeats; delete m_defaultFeatures; }
+    ~FeatureMap() { delete [] m_feats; delete[] m_pNamedFeats; delete m_defaultFeatures; }
 
     bool readFeats(const Face & face);
     const FeatureRef *findFeatureRef(uint32 name) const;

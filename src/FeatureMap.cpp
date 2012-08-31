@@ -120,7 +120,7 @@ bool FeatureMap::readFeats(const Face & face)
     	return false;
     }
 
-    m_feats = gralloc<FeatureRef>(m_numFeats);
+    m_feats = new FeatureRef [m_numFeats];
     uint16 * const	defVals = gralloc<uint16>(m_numFeats);
     unsigned short bits = 0;     //to cause overflow on first Feature
 

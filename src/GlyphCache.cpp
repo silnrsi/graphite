@@ -119,13 +119,13 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
 {
     if (face_options & gr_face_preloadGlyphs && _glyph_loader && _glyphs)
     {
-        GlyphFace * const glyphs = gralloc<GlyphFace>(_num_glyphs);
+        GlyphFace * const glyphs = new GlyphFace [_num_glyphs];
         if (!glyphs)
             return;
 
-        // glyphs[0] has the same address as the glyphs array, thus assigning
-        //  the &glyphs[0] to _glyphs[0] means _glyphs[0] points to the entire
-        //  array.
+        // glyphs[0] has the same address as the glyphs array just allocated,
+        //  thus assigning the &glyphs[0] to _glyphs[0] means _glyphs[0] points
+        //  to the entire array.
         for (uint16 gid = 0; gid != _num_glyphs; ++gid)
             _glyphs[gid] = _glyph_loader->read_glyph(gid, glyphs[gid]);
 
@@ -144,12 +144,9 @@ GlyphCache::~GlyphCache()
     		delete *g;
     }
     else
-    {
-    	for(unsigned short n = _num_glyphs; n; --n, ++g)
-    		(*g)->~GlyphFace();
-    	free(const_cast<GlyphFace *>(*_glyphs));
-    }
+    	delete [] _glyphs[0];
 
+    free(_glyphs);
     delete _glyph_loader;
 }
 

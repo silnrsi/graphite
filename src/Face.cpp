@@ -59,6 +59,7 @@ Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
 
 Face::~Face()
 {
+    setLogger(0);
     delete m_pGlyphFaceCache;
     delete m_cmap;
     delete[] m_silfs;
@@ -176,9 +177,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 void Face::setLogger(FILE * log_file GR_MAYBE_UNUSED)
 {
 #if !defined GRAPHITE2_NTRACING
-    if (m_logger)   delete m_logger;
-
-    m_logger = new json(log_file);
+    delete m_logger;
+    m_logger = log_file ? new json(log_file) : 0;
 #endif
 }
 
