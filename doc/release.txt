@@ -6,6 +6,7 @@ These notes are not necessarily part of the manual. They are here for code devel
 . The first line of the Changelog must be the version number. This is so that packagers can extract the version number from the source.
 . Make sure the version numbers in the #defines reflect the release number in includes/graphite2/Font.h
 . Make sure the libtool version numbers are correct in src/CMakeLists.txt
+. Test build perl wrapper
 . Update debian-src/changelog with version of x.y.z-1~palaso1
 . Ensure the build.palaso.org gives a clear build for all Graphite targets including Linux packages.
 . Run the build.palaso.org Graphite Linux Packages - tarball manually. This triggers the debian package builds.
