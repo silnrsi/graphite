@@ -489,10 +489,10 @@ bool Pass::testPassConstraint(Machine & m) const
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = m.slotMap().segment.getFace()->logger();
     if (dbgout)
-    	*dbgout << "constraint" << (ret || m.status() != Machine::finished);
+    	*dbgout << "constraint" << (ret && m.status() == Machine::finished);
 #endif
 
-    return ret || m.status() != Machine::finished;
+    return ret && m.status() == Machine::finished;
 }
 
 
