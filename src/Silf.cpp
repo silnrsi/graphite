@@ -177,7 +177,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
         	return false;
         }
         else
-        { m_silfinfo.space_contextuals = gr_faceinfo::gr_space_contextuals(mergeSpaceContextuals(m_passes[i].spaceContextuals())); }
+            m_silfinfo.space_contextuals = gr_faceinfo::gr_space_contextuals(mergeSpaceContextuals(m_passes[i].spaceContextuals()));
     }
 
     // fill in gr_faceinfo
@@ -191,7 +191,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
 template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t data_len)
 {
 	const T cls_off = 2*sizeof(uint16) + sizeof(T)*(m_nClass+1);
-	const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
+	const size_t max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
 	// Check that the last+1 offset is less than or equal to the class map length.
 	if (be::peek<T>(p) != cls_off || max_off > (data_len - cls_off)/sizeof(uint16))
 		return ERROROFFSET;

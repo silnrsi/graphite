@@ -481,8 +481,9 @@ bool Pass::testPassConstraint(Machine & m) const
 
     assert(m_cPConstraint.constraint());
 
+    m.slotMap().reset(*m.slotMap().segment.first(), 0);
+    m.slotMap().pushSlot(m.slotMap().segment.first());
     vm::slotref * map = m.slotMap().begin();
-    *map = m.slotMap().segment.first();
     const uint32 ret = m_cPConstraint.run(m, map);
 
 #if !defined GRAPHITE2_NTRACING
