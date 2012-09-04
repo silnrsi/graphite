@@ -147,6 +147,6 @@ uint16 DirectCmap::operator [] (const uint32 usv) const throw()
 
 DirectCmap::operator bool () const throw()
 {
-	return _cmap != 0;
+	return _cmap && _ctable;
 }
 
