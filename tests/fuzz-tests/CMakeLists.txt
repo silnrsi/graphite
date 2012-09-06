@@ -14,6 +14,7 @@ foreach (tfile IN LISTS tfiles)
     trimtail(tpath tname)
     trimtail(tpath textname)
     trimtail(tpath fname)
-    add_custom_command(TARGET fuzztest PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../fuzztest ARGS -l fuzzfont-${fname}-${textname}.log -f ${PROJECT_SOURCE_DIR}/../fonts/${fname}.ttf -t 10 -s 60 --memory=200 --include=required,graphite --exclude==fontdir,opentype,volt,advtypo,post --valgrind --input=${PROJECT_SOURCE_DIR}/${fname}/${textname}/${tname} --logfile=${tname} -- ../comparerenderer/comparerenderer -q -s 12 -n -f {} -t ${PROJECT_SOURCE_DIR}/texts/${tname}.txt)
+    add_custom_command(TARGET fuzztest PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../fuzztest ARGS -l fuzzfont-${fname}-${textname}.log -f ${PROJECT_SOURCE_DIR}/../fonts/${fname}.ttf -t 10 -s 60 --memory=200 --include=required,graphite --exclude==fontdir,opentype,volt,advtypo,post --valgrind --input=${PROJECT_SOURCE_DIR}/${fname}/${textname}/${tname} --logfile=${tname} -- ../comparerenderer/comparerenderer -q -s 12 -n -f {} -t ${PROJECT_SOURCE_DIR}/texts/${textname}.txt)
+    add_custom_command(TARGET fuzztest POST_BUILD COMMAND perl ARGS -e 'print"$$ARGV[0] Failed\\n" if(-s $$ARGV[0])' ${tname})
 endforeach(tfile)
 
