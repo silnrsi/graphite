@@ -68,6 +68,7 @@ add_subdirectory(utftest)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(vm)
 endif (NOT GRAPHITE2_NFILEFACE)
+add_subdirectory(fuzz-tests)
 
 enable_testing()
 
