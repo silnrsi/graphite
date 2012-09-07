@@ -422,7 +422,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUT_SUBS : 
       _code._modify = true;
       _analysis.set_changed(_analysis.slotref);
-      // no break here;
+      // no break
     case PUT_COPY :
     {
       if (arg[0] != 0) { _analysis.set_changed(_analysis.slotref); _code._modify = true; }
@@ -433,6 +433,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     }
     case PUSH_ATT_TO_GATTR_OBS : // slotref on 2nd parameter
         if (_code._constraint) return;
+        // no break
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_SLOT_ATTR :
     case PUSH_GLYPH_METRIC :
@@ -445,6 +446,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
         if (_code._constraint) return;
+        // no break
     case PUSH_GLYPH_ATTR :
       if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(_analysis.slotref + arg[2] - _analysis.contexts[_analysis.slotref].flags.inserted);

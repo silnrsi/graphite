@@ -117,7 +117,7 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
   _num_attrs(_glyphs ? _glyph_loader->num_attrs() : 0),
   _upem(_glyphs ? _glyph_loader->units_per_em() : 0)
 {
-    if (face_options & gr_face_preloadGlyphs && _glyph_loader && _glyphs)
+    if ((face_options & gr_face_preloadGlyphs) && _glyph_loader && _glyphs)
     {
         GlyphFace * const glyphs = new GlyphFace [_num_glyphs];
         if (!glyphs)

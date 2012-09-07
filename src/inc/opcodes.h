@@ -569,7 +569,6 @@ STARTOP(iattr_sub)
 ENDOP
 
 STARTOP(push_proc_state)
-    // TODO Implement body
     use_params(1);
     push(1);
 ENDOP

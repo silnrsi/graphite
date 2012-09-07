@@ -57,7 +57,7 @@ class GrUtfTextSrc : public gr::IColorTextSource
 {
 public:
   GrUtfTextSrc();
-  ~GrUtfTextSrc();
+  virtual ~GrUtfTextSrc();
   bool setText(const gr::utf8 * pszText, int len);
   bool setText(const gr::utf16 * pszText, int len);
   bool setText(const gr::utf32 * pszText, int len);
