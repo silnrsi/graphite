@@ -94,13 +94,8 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     {
         scale = font->scale();
         shift *= scale;
-        if (font->isHinted())
-        {
-            if (glyphFace)
-                tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(m_glyphid);
-            else
-                tAdvance = (m_advance.x - seg->glyphAdvance(glyph()) + m_just) * scale + font->advance(m_glyphid);
-        }
+        if (font->isHinted() && glyphFace)
+            tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(m_glyphid);
         else
             tAdvance *= scale;
     }    
