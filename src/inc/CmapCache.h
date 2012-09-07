@@ -36,6 +36,7 @@ class Face;
 class Cmap
 {
 public:
+
 	virtual ~Cmap() throw() {}
 
 	virtual uint16 operator [] (const uint32) const throw() { return 0; }
@@ -57,9 +58,9 @@ public:
 
     CLASS_NEW_DELETE;
 private:
-    const Face::Table _cmap;
-    const void *_stable,
-    		   *_ctable;
+    const Face::Table   _cmap;
+    const void        * _smp,
+                      * _bmp;
 };
 
 class CachedCmap : public Cmap

@@ -47,7 +47,7 @@ void resolve_unicode_to_glyphs(const Face & face, utf_itr first, size_t n_chars,
 	{
 		const uint32 usv = *first;
 		assert(usv < 0xFFFF); 	// only lower plane supported for this test
-		*glyphs++ = TtfUtil::Cmap31Lookup(cmap, usv);
+		*glyphs++ = TtfUtil::CmapSubtable4Lookup(cmap, usv);
 	}
 }
 
