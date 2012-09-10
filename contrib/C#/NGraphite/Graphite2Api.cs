@@ -752,19 +752,6 @@ namespace NGraphite
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_linebreak_before")]
 		internal static extern void SlotLinebreakBefore(/*gr_slot **/ IntPtr p/*not NULL*/);
 		
-		#endregion
-				
-		#region Log
-				
-		/// <summary>
-		/// If you want to use this then you will need to PInvoke "fopen" to get a a FILE ptr.
-		/// </summary>	
-		[DllImport("graphite2.dll", EntryPoint="graphite_start_logging")]
-		internal static extern bool GraphiteStartLogging(IntPtr logFile, LogMask mask);		//may not do anthing if disabled in the implementation of the engine.
-		
-		[DllImport("graphite2.dll", EntryPoint="graphite_stop_logging")]
-		internal static extern void GraphiteStopLogging();
-		
 		#endregion		
 	}
 }

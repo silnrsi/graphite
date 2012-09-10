@@ -41,7 +41,6 @@
     <Compile Include="JustFlags.cs" />
     <Compile Include="AttrCode.cs" />
     <Compile Include="Bidirtl.cs" />
-    <Compile Include="LogMask.cs" />
     <Compile Include="Encform.cs" />
     <Compile Include="Featureval.cs" />
     <Compile Include="FeatureRef.cs" />
