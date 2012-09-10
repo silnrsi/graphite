@@ -1,0 +1,13 @@
+*** Linux MonoDevelop build instructions. ***
+
+To run unittests first install the libgraphite2-2.0.0 package and ensure that the Paduak font is installed.
+
+1. Open NGraphite.sln in MonoDevelop.
+2. Build All
+3. Optionally run unittests by:
+- View -> Unittesting
+- Right click on NGraphite top level target -> Run test.
+
+The build should produce:
+NGraphite.dll + NGraphite.dll.config
+These should exist NGraphite/bin/Debug if a debug build was done or NGraphite/bin/Release if a release build was done.
