@@ -82,11 +82,9 @@ namespace NGraphite
 			switch(utf)
 			{
 				case Encform.Utf8:
-					return Marshal.PtrToStringAnsi(labelPtr, (int)length);
-					break;
+					return Marshal.PtrToStringAnsi(labelPtr, (int)length);					
 				case Encform.Utf16:
-					return Marshal.PtrToStringUni(labelPtr, (int)length);
-					break;
+					return Marshal.PtrToStringUni(labelPtr, (int)length);					
 				case Encform.utf32:
 					// I am assuming that PtrToStringUni only works for utf-16
 					throw new NotImplementedException("Getting labels as utf32 not supportted");
