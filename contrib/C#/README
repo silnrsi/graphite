@@ -1,6 +1,6 @@
 *** Linux MonoDevelop build instructions. ***
 
-To run unittests first install the libgraphite2-2.0.0 package and ensure that the Paduak font is installed.
+To run unittests first install the libgraphite2-2.0.0 package and ensure that the fonts Paduak and DejaVuSans are installed.
 
 1. Open NGraphite.sln in MonoDevelop.
 2. Build All

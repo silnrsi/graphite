@@ -20,6 +20,42 @@ namespace NGraphiteTests
 		}
 		
 		[Test()]
+		public void Face_ConstructWithNonGraphiteFont_ThrowsArgumentException()
+		{
+			Assert.Throws<ArgumentException>(() => new Face(TestConstants.DejaVuSansLocation, FaceOptions.face_default));
+		}
+		
+		[Test()]
+		public void Face_ConstructWithNonInvalidFileName_ThrowsArgumentException()
+		{
+			Assert.Throws<ArgumentException>(() => new Face(TestConstants.DejaVuSansLocation, FaceOptions.face_default));
+		}
+		
+		[Test()]
+		public void Face_ConstructWithNonGraphiteFontWithSegCache_ThrowsArgumentException()
+		{
+			Assert.Throws<ArgumentException>(() => new Face(TestConstants.DejaVuSansLocation, 50, FaceOptions.face_default));
+		}
+		
+		[Test()]
+		public void Face_ConstructWithNonInvalidFileNameWithSegCache_ThrowsArgumentException()
+		{
+			Assert.Throws<ArgumentException>(() => new Face(TestConstants.DejaVuSansLocation, 50, FaceOptions.face_default));
+		}
+		
+		[Test()]
+		public void IsGraphiteFont_WithGraphiteFont_ReturnsTrue()
+		{
+			Assert.IsTrue(Face.IsGraphiteFont(TestConstants.PaduakFontLocation));
+		}
+		
+		[Test()]
+		public void IsGraphiteFont_WithNonGraphiteFont_ReturnsFalse()
+		{
+			Assert.IsFalse(Face.IsGraphiteFont(TestConstants.DejaVuSansLocation));
+		}
+		
+		[Test()]
 		public void FeaturevalForLang_EnLang_ReturnsNonNullFeatureval()
 		{
 			using (var face = new Face(TestConstants.PaduakFontLocation, FaceOptions.face_default))

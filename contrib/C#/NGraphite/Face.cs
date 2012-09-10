@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace NGraphite
 {
@@ -14,12 +15,40 @@ namespace NGraphite
 		/// </param>
 		public Face(string filename, FaceOptions options)
 		{
+			if (!File.Exists(filename))
+				throw new ArgumentException("filename");
+			
 			_face = Graphite2Api.MakeFileFace(filename, options);
+			
+			if (_face == IntPtr.Zero)
+				throw new ArgumentException("filename is not a graphite font");
 		}
 		
 		public Face(string filename, uint segCacheMaxSize, FaceOptions options)
 		{
+			if (!File.Exists(filename))
+				throw new ArgumentException("filename");
+			
 			_face = Graphite2Api.MakeFileFaceWithSegCache(filename, segCacheMaxSize, options);
+			
+			if (_face == IntPtr.Zero)
+				throw new ArgumentException("filename is not a graphite font");
+		}
+		
+		/// <summary>
+		/// Determins if filename is a graphite font or not.
+		/// </summary>		
+		public static bool IsGraphiteFont(string filename)
+		{
+			if (!File.Exists(filename))
+				return false;
+			
+			IntPtr face = Graphite2Api.MakeFileFace(filename, FaceOptions.face_default);
+			if (face == IntPtr.Zero)
+				return false;
+			
+			Graphite2Api.FaceDestroy(face);
+			return true;
 		}
 		
 		internal IntPtr FacePtr
