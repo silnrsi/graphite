@@ -19,7 +19,7 @@ namespace NGraphiteTests
 			Graphite2Api.EngineVersion(out major, out minor, out bugfix);
 			Assert.AreEqual(1, major, "Major");
 			if (major == 1)
-				Assert.GreaterOrEqual(minor, 1, "Minor");			
+				Assert.GreaterOrEqual(minor, 0, "Minor");			
 		}
 		
 		[Test]
