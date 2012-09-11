@@ -3,6 +3,7 @@ using NUnit.Framework;
 using NGraphite;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace NGraphiteTests
 {
@@ -671,6 +672,30 @@ namespace NGraphiteTests
 				IntPtr firstSlot = Graphite2Api.SegLastSlot(seg.Seg);
 				Graphite2Api.SlotLinebreakBefore(firstSlot);				
 			}
+		}
+				
+		#endregion
+		
+		#region Log Tests
+		
+		[Test]
+		public void StartLogging_WithTestFaceAndValidLogFileLocation_FileShouldBeCreated()
+		{
+			int major, minor, bugfix;
+			Graphite2Api.EngineVersion(out major, out minor, out bugfix);
+			
+			if (major <= 1 && minor < 2)
+				Assert.Ignore("Need newer engine to support logging");
+			
+			using(var face = new PaduakDisposableFace())
+			{
+				string filename = Path.GetTempPath() + Guid.NewGuid().ToString();
+				Assert.IsTrue(Graphite2Api.StartLogging(face.Face, filename));
+				Assert.IsTrue(File.Exists(filename));
+				Graphite2Api.StopLogging(face.Face);
+				File.Delete(filename);
+			}
+				              
 		}
 				
 		#endregion

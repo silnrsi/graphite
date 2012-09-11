@@ -100,6 +100,28 @@ namespace NGraphite
 			return Graphite2Api.FaceNGlyphs(_face);	
 		}
 
+		public bool StartLogging(string filename)
+		{
+			int major, minor, bugfix;
+			Graphite2Api.EngineVersion(out major, out minor, out bugfix);
+			
+			if (major <= 1 && minor < 2)
+				throw new NotSupportedException("A newer graphite engine is needed to support logging");
+			
+			return Graphite2Api.StartLogging(_face, filename);
+		}
+
+		public void StopLogging()
+		{
+			int major, minor, bugfix;
+			Graphite2Api.EngineVersion(out major, out minor, out bugfix);
+			
+			if (major <= 1 && minor < 2)
+				throw new NotSupportedException("A newer graphite engine is needed to support logging");
+			
+			Graphite2Api.StopLogging(_face);
+		}
+
 		#region IDisposable implementation
 		public void Dispose()
 		{

@@ -372,7 +372,7 @@ namespace NGraphite
 				
 		#endregion
 				
-		#region Segment
+		#region Segment methods
 		
 		/// <summary>
 		/// Returns Unicode character for a charinfo.
@@ -753,6 +753,38 @@ namespace NGraphite
 		internal static extern void SlotLinebreakBefore(/*gr_slot **/ IntPtr p/*not NULL*/);
 		
 		#endregion		
+		
+		#region Log methods
+			
+		/// <summary>
+		/// Start logging all segment creation and updates on the provided face.  This
+		/// is logged to a JSON file, see "Segment JSON Schema.txt" for a precise
+		/// definition of the file
+		/// </summary>
+		/// <returns>
+		/// true if the file was successfully created and logging is correctly initialised.
+		/// </returns>
+		/// <param name='face'>
+		///  the gr_face whose segments you want to log to the given file
+		/// </param>
+		/// <param name='log_path'>
+		/// a utf8 encoded file name and path to log to.
+		/// </param>
+		[DllImport("graphite2.dll", EntryPoint="gr_start_logging", CharSet = CharSet.Ansi)]
+		internal static extern bool StartLogging(/*gr_face **/IntPtr face, string log_path);
+
+
+		/// <summary>
+		/// GStop logging on the given face.  This will close the log file created by
+		/// gr_start_logging.
+		/// </summary>
+		/// <param name='face'>
+		/// the gr_face whose segments you want to stop logging
+		/// </param>
+		[DllImport("graphite2.dll", EntryPoint="gr_stop_logging", CharSet = CharSet.Ansi)]
+		internal static extern void StopLogging(/*gr_face **/IntPtr face);
+		
+		#endregion
 	}
 }
 

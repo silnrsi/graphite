@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using NGraphite;
+using System.IO;
 
 namespace NGraphiteTests
 {
@@ -119,6 +120,32 @@ namespace NGraphiteTests
 			using (var face = new Face(TestConstants.PaduakFontLocation, FaceOptions.face_default))
 			{
 				Assert.AreEqual(445, face.NGlyphs());
+			}
+		}
+		
+		[Test()]
+		public void StartLogging_PaduakFace_LogFileIsCreated()
+		{
+			int major, minor, bugfix;
+			Graphite2Api.EngineVersion(out major, out minor, out bugfix);
+			
+			if (major <= 1 && minor < 2)
+			{
+				using (var face = new Face(TestConstants.PaduakFontLocation, FaceOptions.face_default))
+				{
+					Assert.Throws<NotSupportedException>(() => face.StartLogging(String.Empty));
+					Assert.Throws<NotSupportedException>(() => face.StopLogging());
+				}
+				return;
+			}
+			
+			using (var face = new Face(TestConstants.PaduakFontLocation, FaceOptions.face_default))
+			{
+				string filename = Path.GetTempPath() + Guid.NewGuid().ToString();
+				Assert.IsTrue(face.StartLogging(filename));
+				Assert.IsTrue(File.Exists(filename));
+				face.StopLogging();
+				File.Delete(filename);
 			}
 		}
 	}
