@@ -232,7 +232,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 inline
 GlyphCache::Loader::operator bool () const throw()
 {
-    return bool(m_pHead);
+    return m_pHead && m_pHHea && m_pHmtx && m_pGlyf && m_pLoca;
 }
 
 inline

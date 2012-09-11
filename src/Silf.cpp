@@ -138,8 +138,8 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
                * const passes_start = silf_start + be::read<uint32>(p);
 
     if (m_numPasses > 128 || passes_start >= silf_end
-    	|| m_pPass < m_sPass
-    	|| m_jPass < m_pPass
+    	|| m_pPass < m_sPass || m_pPass >= m_numPasses || m_sPass >= m_numPasses
+    	|| m_jPass < m_pPass || m_jPass >= m_numPasses
     	|| (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses))
     	|| m_aLig > 127) {
         releaseBuffers(); return false;
