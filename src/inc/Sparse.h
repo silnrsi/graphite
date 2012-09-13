@@ -36,38 +36,40 @@ namespace graphite2 {
 
 class sparse
 {
+public:
+    typedef uint16  key_type;
+    typedef uint16  mapped_type;
+	typedef std::pair<const key_type, mapped_type> value_type;
+
+private:
 	typedef unsigned long	mask_t;
 
-	static const unsigned char  SIZEOF_CHUNK = (sizeof(mask_t) - sizeof(uint16))*8;
+	static const unsigned char  SIZEOF_CHUNK = (sizeof(mask_t) - sizeof(key_type))*8;
 
 	struct chunk
 	{
 		mask_t			mask:SIZEOF_CHUNK;
-		uint16			offset;
+		key_type		offset;
 	};
 
 	sparse(const sparse &);
 	sparse & operator = (const sparse &);
 
 public:
-    typedef uint16  key_type;
-    typedef uint16  mapped_type;
-	typedef std::pair<const key_type, mapped_type> value_type;
-
 	template<typename I>
 	sparse(I first, const I last);
 	sparse() throw();
 	~sparse() throw();
 
 	operator bool () const throw();
-	mapped_type 	operator [] (key_type k) const throw();
+	mapped_type 	operator [] (const key_type k) const throw();
 
-	size_t capacity() const throw();
 	size_t size()     const throw();
 
 	size_t _sizeof() const throw();
 	
 	CLASS_NEW_DELETE;
+
 private:
 	union {
 		chunk         * map;
@@ -114,7 +116,7 @@ sparse::sparse(I attr, const I last)
 	mapped_type * vi = m_array.values + ci->offset;
 	for (; attr != last; ++attr, ++vi)
 	{
-		const typename I::value_type v = *attr;
+		const typename std::iterator_traits<I>::value_type v = *attr;
 		chunk * const ci_ = m_array.map + v.first/SIZEOF_CHUNK;
 
 		if (ci != ci_)
@@ -133,13 +135,6 @@ inline
 sparse::operator bool () const throw()
 {
 	return m_array.map != 0;
-}
-
-
-inline
-size_t sparse::capacity() const throw()
-{
-	return m_nchunks;
 }
 
 

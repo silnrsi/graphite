@@ -163,11 +163,9 @@ const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result m
 
 uint16 GlyphCache::glyphAttr(uint16 gid, uint16 gattr) const
 {
-	if (gattr >= _num_attrs) return 0;
-
 	const GlyphFace * p = glyphSafe(gid);
 
-	return p ? p->attrs()[gattr] : 0;
+	return p && gattr < _num_attrs ? p->attrs()[gattr] : 0;
 }
 
 
@@ -210,7 +208,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
         const int     version = be::read<uint32>(p);
         const uint16 locFlags = be::read<uint16>(p);
         m_nAttrs = be::read<uint16>(p);
-        if (version != 0x00010000 || m_nAttrs > 0x1000) // is this hard limit appropriate?
+        if (version != 0x00010000 || m_nAttrs == 0 || m_nAttrs > 0x1000) // is this hard limit appropriate?
         {
             m_pHead = Face::Table();
             return;

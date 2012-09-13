@@ -137,7 +137,12 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     const byte * o_passes = p,
                * const passes_start = silf_start + be::read<uint32>(p);
 
-    if (m_numPasses > 128 || passes_start >= silf_end
+    const size_t num_attrs = face.glyphs().numAttrs();
+    if (m_aPseudo   >= num_attrs
+        || m_aBreak >= num_attrs
+        || m_aBidi  >= num_attrs
+        || m_aMirror>= num_attrs
+        || m_numPasses > 128 || passes_start >= silf_end
     	|| m_pPass < m_sPass || m_pPass > m_numPasses || m_sPass > m_numPasses
     	|| m_jPass < m_pPass || m_jPass > m_numPasses
     	|| (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses))
