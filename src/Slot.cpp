@@ -313,7 +313,7 @@ int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
 
 void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
 {
-    if (level && level > seg->silf()->numJustLevels()) return;
+    if (level >= seg->silf()->numJustLevels()) return;
     if (!m_justs)
     {
         SlotJustify *j = seg->newJustify();

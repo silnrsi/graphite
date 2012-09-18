@@ -164,8 +164,7 @@ private:
     unsigned int    m_bufSize,          // how big a buffer to create when need more slots
                     m_numGlyphs,
                     m_numCharinfo;      // size of the array and number of input characters
-    int             m_defaultOriginal,  // CharInfo index used if all slots have been deleted
-                    m_wscount;          // number of whitespace chars in the string
+    int             m_defaultOriginal;  // number of whitespace chars in the string
     int8            m_dir;
 };
 

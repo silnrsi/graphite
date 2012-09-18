@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <cstdlib>
 
+#include "inc/bits.h"
 #include "inc/Segment.h"
 #include "graphite2/Font.h"
 #include "inc/CharInfo.h"
@@ -52,15 +53,10 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
   m_defaultOriginal(0),
-  m_wscount(0),
   m_dir(textDir)
 {
-    unsigned int i, j;
-
     freeSlot(newSlot());
-    for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
-    if (!i) i = 1;
-    m_bufSize = i;                  // log2(numchars)
+    m_bufSize = log_binary(numchars)+1;
 }
 
 Segment::~Segment()
@@ -161,7 +157,6 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->prev(m_last);
     m_last = aSlot;
     if (!m_first) m_first = aSlot;
-    if (isWhitespace(cid)) ++m_wscount;
 }
 
 Slot *Segment::newSlot()
@@ -218,11 +213,11 @@ SlotJustify *Segment::newJustify()
     if (!m_freeJustifies)
     {
         const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
-        byte *justs = grzeroalloc<byte>(justSize * m_wscount);
-        for (int i = m_wscount - 2; i >= 0; --i)
+        byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
+        for (int i = m_bufSize - 2; i >= 0; --i)
         {
-            SlotJustify *p = (SlotJustify *)(justs + justSize * i);
-            SlotJustify *next = (SlotJustify *)(justs + justSize * (i + 1));
+            SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
+            SlotJustify *next = reinterpret_cast<SlotJustify *>(justs + justSize * (i + 1));
             p->next = next;
         }
         m_freeJustifies = (SlotJustify *)justs;

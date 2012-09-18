@@ -66,6 +66,12 @@ inline unsigned long next_highest_power2(T v)
 }
 
 template<typename T>
+inline unsigned int log_binary(T v)
+{
+    return bit_set_count(mask_over_val(v))-1;
+}
+
+template<typename T>
 inline T haszero(const T x)
 {
 	return (x - T(~T(0)/255)) & ~x & T(~T(0)/255*128);
