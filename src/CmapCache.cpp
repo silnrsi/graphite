@@ -60,19 +60,18 @@ template <unsigned int (*NextCodePoint)(const void *, unsigned int, int *),
 bool cache_subtable(uint16 * blocks[], const void * cst, const unsigned int limit)
 {
     int rangeKey = 0;
-    unsigned int    codePoint = NextCodePoint(cst, 0, &rangeKey),
+    uint32          codePoint = NextCodePoint(cst, 0, &rangeKey),
                     prevCodePoint = 0;
     while (codePoint != limit)
     {
-        unsigned int block = (codePoint & 0xFFFF00) >> 8;
+        unsigned int block = codePoint >> 8;
         if (!blocks[block])
         {
             blocks[block] = grzeroalloc<uint16>(0x100);
             if (!blocks[block])
                 return false;
         }
-        uint16 gid;
-        blocks[block][codePoint & 0xFF] = gid = LookupCodePoint(cst, codePoint, rangeKey);
+        blocks[block][codePoint & 0xFF] = LookupCodePoint(cst, codePoint, rangeKey);
         // prevent infinite loop
         if (codePoint <= prevCodePoint)
             codePoint = prevCodePoint + 1;
@@ -94,19 +93,16 @@ CachedCmap::CachedCmap(const Face & face)
     const void * smp_cmap = smp_subtable(cmap);
     m_isBmpOnly = !smp_cmap;
 
-    if (smp_cmap)
+    m_blocks = grzeroalloc<uint16 *>(m_isBmpOnly ? 0x100 : 0x1100);
+    if (m_blocks && smp_cmap)
     {
-        m_blocks = grzeroalloc<uint16*>(0x1100);
-        if (!m_blocks
-         || !cache_subtable<TtfUtil::CmapSubtable12NextCodepoint, TtfUtil::CmapSubtable12Lookup>(m_blocks, smp_cmap, 0x10FFFF))
+        if (!cache_subtable<TtfUtil::CmapSubtable12NextCodepoint, TtfUtil::CmapSubtable12Lookup>(m_blocks, smp_cmap, 0x10FFFF))
             return;
     }
 
-    if (bmp_cmap)
+    if (m_blocks && bmp_cmap)
     {
-        m_blocks = grzeroalloc<uint16*>(0x100);
-        if (!m_blocks
-         || !cache_subtable<TtfUtil::CmapSubtable4NextCodepoint, TtfUtil::CmapSubtable4Lookup>(m_blocks, bmp_cmap, 0xFFFF))
+        if (!cache_subtable<TtfUtil::CmapSubtable4NextCodepoint, TtfUtil::CmapSubtable4Lookup>(m_blocks, bmp_cmap, 0xFFFF))
             return;
     }
 }

@@ -34,6 +34,23 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+namespace
+{
+    bool load_face(Face & face, unsigned int options)
+    {
+        Face::Table silf(face, Tag::Silf);
+        if (silf)   options &= ~gr_face_dumbRendering;
+        else if (!(options &  gr_face_dumbRendering))
+            return false;
+
+        if (!face.readGlyphs(options))
+            return false;
+
+        return silf ? face.readFeatures() && face.readGraphite(silf)
+                    : options & gr_face_dumbRendering;
+    }
+}
+
 extern "C" {
 
 gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int faceOptions)
@@ -42,33 +59,11 @@ gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_f
 	if (ops == 0)	return 0;
 
     Face *res = new Face(appFaceHandle, *ops);
-    if (res == 0)	return 0;
+    if (res && load_face(*res, faceOptions))
+        return static_cast<gr_face *>(res);
 
-    if (Face::Table(*res, Tag::Silf) == 0)
-    {
-		if (!(faceOptions & gr_face_dumbRendering))
-		{
-			delete res;
-			return 0;
-		}
-    }
-    else
-    	faceOptions &= ~gr_face_dumbRendering;
-
-    bool valid = true;
-    valid &= res->readGlyphs(faceOptions);
-    if (!valid) {
-        delete res;
-        return 0;
-    }
-    valid &= res->readFeatures();
-    valid &= res->readGraphite();
-    
-    if (!(faceOptions & gr_face_dumbRendering) && !valid) {
-        delete res;
-        return 0;
-    }
-    return static_cast<gr_face *>(res);
+    delete res;
+    return 0;
 }
 
 gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tablefn, unsigned int faceOptions)
@@ -83,36 +78,13 @@ gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL
 {
 	if (ops == 0)	return 0;
 
-    faceOptions &= ~gr_face_preloadAll;
     CachedFace *res = new CachedFace(appFaceHandle, *ops);
-    if (res == 0)	return 0;
+    if (res && load_face(*res, faceOptions)
+            && res->setupCache(cacheSize))
+        return static_cast<gr_face *>(static_cast<Face *>(res));
 
-    if (Face::Table(*res, Tag::Silf) == 0)
-    {
-		if (!(faceOptions & gr_face_dumbRendering))
-		{
-			delete res;
-			return 0;
-		}
-    }
-    else
-    	faceOptions &= ~gr_face_dumbRendering;
-
-    bool valid = true;
-    valid &= res->readGlyphs(faceOptions);
-    if (!valid) {
-        delete res;
-        return 0;
-    }
-    valid &= res->readFeatures();
-    valid &= res->readGraphite();
-    valid &= res->setupCache(cacheSize);
-
-    if (!(faceOptions & gr_face_dumbRendering) && !valid) {
-        delete res;
-        return 0;
-    }
-    return static_cast<gr_face *>(static_cast<Face *>(res));
+    delete res;
+    return 0;
 }
 
 gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)

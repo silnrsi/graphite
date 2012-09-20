@@ -97,7 +97,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
         be::skip<uint16>(p,2); // passOffset & pseudosOffset
     }
     else if (lSilf < 20) 	{ releaseBuffers(); return false; }
-    be::skip<uint16>(p);  // maxGlyphID
+    const uint16 maxGlyph = be::read<uint16>(p);
     m_silfinfo.extra_ascent = be::read<uint16>(p);
     m_silfinfo.extra_descent = be::read<uint16>(p);
     m_numPasses = be::read<uint8>(p);
@@ -115,7 +115,8 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
 
     // Read Justification levels.
     m_numJusts  = be::read<uint8>(p);
-    if (p + m_numJusts * 8 >= silf_end)  { releaseBuffers(); return false; }
+    if (maxGlyph >= face.glyphs().numGlyphs()
+        || p + m_numJusts * 8 >= silf_end)  { releaseBuffers(); return false; }
     m_justs = gralloc<Justinfo>(m_numJusts);
     for (uint8 i = 0; i < m_numJusts; i++)
     {
@@ -146,9 +147,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     	|| m_pPass < m_sPass || m_pPass > m_numPasses || m_sPass > m_numPasses
     	|| m_jPass < m_pPass || m_jPass > m_numPasses
     	|| (m_bPass != 0xFF && (m_bPass < m_jPass || m_bPass > m_numPasses))
-    	|| m_aLig > 127) {
-        releaseBuffers(); return false;
-    }
+    	|| m_aLig > 127) { releaseBuffers(); return false; }
     be::skip<uint32>(p, m_numPasses);
     if (p + sizeof(uint16) >= passes_start)  { releaseBuffers(); return false; }
     m_numPseudo = be::read<uint16>(p);

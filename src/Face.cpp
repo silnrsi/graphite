@@ -63,14 +63,10 @@ Face::~Face()
     delete m_pGlyphFaceCache;
     delete m_cmap;
     delete[] m_silfs;
-    m_pGlyphFaceCache = NULL;
-    m_cmap = NULL;
-    m_silfs = NULL;
 #ifndef GRAPHITE2_NFILEFACE
     delete m_pFileFace;
 #endif
     delete m_pNames;
-    m_pFileFace = NULL;
 }
 
 float Face::default_glyph_advance(const void* font_ptr, gr_uint16 glyphid)
@@ -100,9 +96,8 @@ bool Face::readGlyphs(uint32 faceOptions)
     return true;
 }
 
-bool Face::readGraphite()
+bool Face::readGraphite(const Table & silf)
 {
-    const Table silf(*this, Tag::Silf);
     const byte * p = silf;
     if (!p) return false;
 

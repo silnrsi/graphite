@@ -64,7 +64,7 @@ public:
 
 public:
     bool                readGlyphs(uint32 faceOptions);
-    bool                readGraphite();
+    bool                readGraphite(const Table & silf);
     bool                readFeatures();
     void                takeFileFace(FileFace* pFileFace/*takes ownership*/);
 

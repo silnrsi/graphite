@@ -94,18 +94,18 @@ public:
 
     CLASS_NEW_DELETE;
 private:
-    Face::Table m_pHead,
-                m_pHHea,
-                m_pHmtx,
-                m_pGlyf,
-                m_pLoca,
+    Face::Table _head,
+                _hhea,
+                _hmtx,
+                _glyf,
+                _loca,
                 m_pGlat,
                 m_pGloc;
 
-    bool            m_locFlagsUse32Bit;
-    unsigned short  m_nGlyphsWithGraphics,        //i.e. boundary box and advance
-                    m_nGlyphsWithAttributes,
-                    m_nAttrs;                    // number of glyph attributes per glyph
+    bool            _long_fmt;
+    unsigned short  _num_glyphs_graphics,        //i.e. boundary box and advance
+                    _num_glyphs_attributes,
+                    _nun_attrs;                    // number of glyph attributes per glyph
 };
 
 
@@ -171,27 +171,27 @@ uint16 GlyphCache::glyphAttr(uint16 gid, uint16 gattr) const
 
 
 GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
-: m_pHead(face, Tag::head),
-  m_pHHea(face, Tag::hhea),
-  m_pHmtx(face, Tag::hmtx),
-  m_pGlyf(face, Tag::glyf),
-  m_pLoca(face, Tag::loca),
-  m_locFlagsUse32Bit(false),
-  m_nGlyphsWithGraphics(0),
-  m_nGlyphsWithAttributes(0),
-  m_nAttrs(0)
+: _head(face, Tag::head),
+  _hhea(face, Tag::hhea),
+  _hmtx(face, Tag::hmtx),
+  _glyf(face, Tag::glyf),
+  _loca(face, Tag::loca),
+  _long_fmt(false),
+  _num_glyphs_graphics(0),
+  _num_glyphs_attributes(0),
+  _nun_attrs(0)
 {
     if (!operator bool())
         return;
 
     const Face::Table maxp = Face::Table(face, Tag::maxp);
-    if (!maxp) { m_pHead = Face::Table(); return; }
+    if (!maxp) { _head = Face::Table(); return; }
 
-    m_nGlyphsWithGraphics = TtfUtil::GlyphCount(maxp);
+    _num_glyphs_graphics = TtfUtil::GlyphCount(maxp);
     // This will fail if the number of glyphs is wildly out of range.
-    if (TtfUtil::LocaLookup(m_nGlyphsWithGraphics-1, m_pLoca, m_pLoca.size(), m_pHead) == size_t(-1))
+    if (TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-1))
     {
-        m_pHead = Face::Table();
+        _head = Face::Table();
         return;
     }
 
@@ -201,28 +201,28 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
             || (m_pGloc = Face::Table(face, Tag::Gloc)) == NULL
             || m_pGloc.size() < 6)
         {
-            m_pHead = Face::Table();
+            _head = Face::Table();
             return;
         }
-        const byte * p = m_pGloc;
-        const int     version = be::read<uint32>(p);
-        const uint16 locFlags = be::read<uint16>(p);
-        m_nAttrs = be::read<uint16>(p);
-        if (version != 0x00010000 || m_nAttrs == 0 || m_nAttrs > 0x1000) // is this hard limit appropriate?
-        {
-            m_pHead = Face::Table();
-            return;
-        }
+        const byte    * p = m_pGloc;
+        const int       version = be::read<uint32>(p);
+        const uint16    flags = be::read<uint16>(p);
+        _nun_attrs = be::read<uint16>(p);
+        // We can accurately calculate the number of attributed glyphs by
+        //  subtracting the length of the attribids array (numAttribs long if present)
+        //  and dividing by either 2 or 4 depending on shor or lonf format
+        _long_fmt              = flags & 1;
+        _num_glyphs_attributes = (m_pGloc.size()
+                                   - (p - m_pGloc)
+                                   - sizeof(uint16)*(flags & 0x2 ? _nun_attrs : 0))
+                                       / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
 
-        if (locFlags & 1)
+        if (version != 0x00010000
+            || _nun_attrs == 0 || _nun_attrs > 0x1000  // is this hard limit appropriate?
+            || _num_glyphs_graphics > _num_glyphs_attributes)
         {
-            m_locFlagsUse32Bit = true;
-            m_nGlyphsWithAttributes = (m_pGloc.size() - 12) / 4;
-        }
-        else
-        {
-            m_locFlagsUse32Bit = false;
-            m_nGlyphsWithAttributes = (m_pGloc.size() - 10) / 2;
+            _head = Face::Table();
+            return;
         }
     }
 }
@@ -230,25 +230,25 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 inline
 GlyphCache::Loader::operator bool () const throw()
 {
-    return m_pHead && m_pHHea && m_pHmtx && m_pGlyf && m_pLoca;
+    return _head && _hhea && _hmtx && _glyf && _loca;
 }
 
 inline
 unsigned short int GlyphCache::Loader::units_per_em() const throw()
 {
-    return m_pHead ? TtfUtil::DesignUnits(m_pHead) : 0;
+    return _head ? TtfUtil::DesignUnits(_head) : 0;
 }
 
 inline
 unsigned short int GlyphCache::Loader::num_glyphs() const throw()
 {
-    return std::max(m_nGlyphsWithAttributes, m_nGlyphsWithGraphics);
+    return std::max(_num_glyphs_graphics, _num_glyphs_attributes);
 }
 
 inline
 unsigned short int GlyphCache::Loader::num_attrs() const throw()
 {
-    return m_nAttrs;
+    return _nun_attrs;
 }
 
 const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFace & glyph) const throw()
@@ -258,13 +258,13 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
     size_t      glocs = 0, gloce = 0;
 
 
-    if (glyphid < m_nGlyphsWithGraphics)
+    if (glyphid < _num_glyphs_graphics)
     {
         int nLsb, xMin, yMin, xMax, yMax;
         unsigned int nAdvWid;
-        size_t locidx = TtfUtil::LocaLookup(glyphid, m_pLoca, m_pLoca.size(), m_pHead);
-        void *pGlyph = TtfUtil::GlyfLookup(m_pGlyf, locidx, m_pGlyf.size());
-        if (TtfUtil::HorMetrics(glyphid, m_pHmtx, m_pHmtx.size(), m_pHHea, nLsb, nAdvWid))
+        size_t locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
+        void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
+        if (TtfUtil::HorMetrics(glyphid, _hmtx, _hmtx.size(), _hhea, nLsb, nAdvWid))
             advance = Position(static_cast<float>(nAdvWid), 0);
 
         if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
@@ -272,13 +272,13 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
                 Position(static_cast<float>(xMax), static_cast<float>(yMax)));
     }
 
-    if (glyphid < m_nGlyphsWithAttributes)
+    if (glyphid < _num_glyphs_attributes)
     {
         const byte * gloc = m_pGloc;
 
         be::skip<uint32>(gloc);
         be::skip<uint16>(gloc,2);
-        if (m_locFlagsUse32Bit)
+        if (_long_fmt)
         {
             be::skip<uint32>(gloc, glyphid);
             glocs = be::read<uint32>(gloc);
@@ -298,7 +298,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         if (glat_version < 0x00020000)
         {
             if (gloce - glocs < 2*sizeof(byte)+sizeof(uint16)
-                || gloce - glocs > m_nAttrs*(2*sizeof(byte)+sizeof(uint16)))
+                || gloce - glocs > _nun_attrs*(2*sizeof(byte)+sizeof(uint16)))
             {
                 return 0;
             }
@@ -308,7 +308,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         else
         {
             if (gloce - glocs < 3*sizeof(uint16)
-                || gloce - glocs > m_nAttrs*3*sizeof(uint16))
+                || gloce - glocs > _nun_attrs*3*sizeof(uint16))
             {
                 return 0;
             }
@@ -316,7 +316,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
 
-        if (glyph.attrs().size() > m_nAttrs)
+        if (glyph.attrs().size() > _nun_attrs)
         {
             glyph.~GlyphFace();
             new (&glyph) GlyphFace(bbox, advance, glat_iterator(), glat_iterator());
