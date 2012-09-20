@@ -93,11 +93,6 @@ public:
     size_t numJustLevels() const { return m_numJusts; }
     Justinfo *justAttrs() const { return m_justs; }
     uint16 endLineGlyphid() const { return m_gEndLine; }
-    byte mergeSpaceContextuals(byte value) const {
-        if (((m_silfinfo.space_contextuals ^ value) == 1) && (value & 2) != 0) return 5;
-        if (m_silfinfo.space_contextuals > value || value == 4) return m_silfinfo.space_contextuals;
-        return value;
-    }
     const gr_faceinfo *silfInfo() const { return &m_silfinfo; }
 
     CLASS_NEW_DELETE;

@@ -68,12 +68,15 @@ class font:
             shutil.copyfileobj(font_file, self.file)
            
     def __init__(self, font_path, inclusion, exclusion):
-        self._tmpdir = tempfile.mkdtemp(prefix='fuzztest-' + os.path.splitext(os.path.basename(font_path))[0]+'-')
+        fpath = os.path.splitext(os.path.basename(font_path))[0]
+        self._tmpdir = tempfile.mkdtemp(prefix='fuzztest-' + fpath + '-')
         self._font_path = font_path
         self.__table_dir = self.read_tabledir()
         inclusion = set(inclusion or (tr.tag for tr in self.__table_dir)) - set(exclusion)
         self.__table_dir = filter(lambda tr: tr.tag in inclusion, self.read_tabledir())
-        sys.stdout.write("tables tested: {0!s}\n".format(','.join(tr.tag for tr in self.__table_dir)))
+        if not opts.quiet :
+            sys.stdout.write("Font: {0}\n".format(fpath)) 
+            sys.stdout.write("tables tested: {0!s}\n".format(','.join(tr.tag for tr in self.__table_dir)))
         self.pool = multiprocessing.Pool(initializer=self.__initialise_worker, initargs=[self], processes=opts.jobs)
     
     def close(self):
@@ -201,6 +204,7 @@ parser.add_option("-p", "--position", help="Specifies position to corrupt (hex)"
 parser.add_option("-v", "--value", default=[], help="Specifies value(s) to use (default: varying random number)")
 parser.add_option("-i", "--input", help=".log file to read test values from")
 parser.add_option("-V", "--verbose", action="store_true", help="Be noisy")
+parser.add_option("-q", "--quiet", action="store_true", help="Be quiet, don't print to stdout")
 parser.add_option("-t", "--timeout", type="int", help="limit subprocess time in seconds")
 parser.add_option("--memory", type="int", help="limit subprocess address space in MB")
 parser.add_option("-s","--status",type='int',help='update status every STATUS seconds (default: None)')
@@ -231,6 +235,7 @@ if __name__ == '__main__':
     opts.value    = opts.value and [int(n,0) for n in opts.value.split(',')]
     opts.exclude  = opts.exclude and tableset(opts.exclude.split(','))
     opts.include  = opts.include and tableset(opts.include.split(','))
+    if opts.quiet : opts.status = None
     
     if '{}' not in args: args += ['{}']
      
@@ -279,4 +284,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.stdout.write('\n')
         sys.exit(0)
-    sys.stdout.write("Finished at {0}\n".format(time.ctime()))
+    if opts.status :
+        sys.stdout.write("Finished at {0}\n".format(time.ctime()))
