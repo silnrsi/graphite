@@ -187,7 +187,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face&
     m_silfinfo.has_bidi_pass = (m_bPass != 0xFF);
     m_silfinfo.justifies = (m_numJusts != 0) || (m_jPass < m_pPass);
     m_silfinfo.line_ends = (m_flags & 1);
-    m_silfinfo.space_contextuals = gr_faceinfo::gr_space_contextuals((m_flags & 0x0E) >> 1);
+    m_silfinfo.space_contextuals = gr_faceinfo::gr_space_contextuals((m_flags >> 2) & 0x7);
     return true;
 }
 

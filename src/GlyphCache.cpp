@@ -105,7 +105,7 @@ private:
     bool            _long_fmt;
     unsigned short  _num_glyphs_graphics,        //i.e. boundary box and advance
                     _num_glyphs_attributes,
-                    _nun_attrs;                    // number of glyph attributes per glyph
+                    _num_attrs;                    // number of glyph attributes per glyph
 };
 
 
@@ -123,30 +123,48 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
         if (!glyphs)
             return;
 
+        // The 0 glyph is definately required.
+        _glyphs[0] = _glyph_loader->read_glyph(0, glyphs[0]);
+
         // glyphs[0] has the same address as the glyphs array just allocated,
         //  thus assigning the &glyphs[0] to _glyphs[0] means _glyphs[0] points
         //  to the entire array.
-        for (uint16 gid = 0; gid != _num_glyphs; ++gid)
-            _glyphs[gid] = _glyph_loader->read_glyph(gid, glyphs[gid]);
+        const GlyphFace * loaded = _glyphs[0];
+        for (uint16 gid = 1; loaded && gid != _num_glyphs; ++gid)
+            _glyphs[gid] = loaded = _glyph_loader->read_glyph(gid, glyphs[gid]);
 
+        if (!loaded)
+        {
+            _glyphs[0] = 0;
+            delete [] glyphs;
+        }
         delete _glyph_loader;
         _glyph_loader = 0;
+    }
+
+    if (_glyphs && glyph(0) == 0)
+    {
+        free(_glyphs);
+        _glyphs = 0;
+        _num_glyphs = _num_attrs = _upem = 0;
     }
 }
 
 
 GlyphCache::~GlyphCache()
 {
-    const GlyphFace *  * g = _glyphs;
-    if (_glyph_loader)
+    if (_glyphs)
     {
-    	for(unsigned short n = _num_glyphs; n; --n, ++g)
-    		delete *g;
+        if (_glyph_loader)
+        {
+            const GlyphFace *  * g = _glyphs;
+            for(unsigned short n = _num_glyphs; n; --n, ++g)
+                delete *g;
+        }
+        else
+            delete [] _glyphs[0];
+        free(_glyphs);
     }
-    else
-    	delete [] _glyphs[0];
-
-    free(_glyphs);
     delete _glyph_loader;
 }
 
@@ -179,7 +197,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
   _long_fmt(false),
   _num_glyphs_graphics(0),
   _num_glyphs_attributes(0),
-  _nun_attrs(0)
+  _num_attrs(0)
 {
     if (!operator bool())
         return;
@@ -207,18 +225,18 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
         const byte    * p = m_pGloc;
         const int       version = be::read<uint32>(p);
         const uint16    flags = be::read<uint16>(p);
-        _nun_attrs = be::read<uint16>(p);
+        _num_attrs = be::read<uint16>(p);
         // We can accurately calculate the number of attributed glyphs by
         //  subtracting the length of the attribids array (numAttribs long if present)
         //  and dividing by either 2 or 4 depending on shor or lonf format
         _long_fmt              = flags & 1;
         _num_glyphs_attributes = (m_pGloc.size()
                                    - (p - m_pGloc)
-                                   - sizeof(uint16)*(flags & 0x2 ? _nun_attrs : 0))
+                                   - sizeof(uint16)*(flags & 0x2 ? _num_attrs : 0))
                                        / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
 
         if (version != 0x00010000
-            || _nun_attrs == 0 || _nun_attrs > 0x1000  // is this hard limit appropriate?
+            || _num_attrs == 0 || _num_attrs > 0x1000  // is this hard limit appropriate?
             || _num_glyphs_graphics > _num_glyphs_attributes)
         {
             _head = Face::Table();
@@ -248,15 +266,13 @@ unsigned short int GlyphCache::Loader::num_glyphs() const throw()
 inline
 unsigned short int GlyphCache::Loader::num_attrs() const throw()
 {
-    return _nun_attrs;
+    return _num_attrs;
 }
 
 const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFace & glyph) const throw()
 {
     Rect        bbox;
     Position    advance;
-    size_t      glocs = 0, gloce = 0;
-
 
     if (glyphid < _num_glyphs_graphics)
     {
@@ -275,6 +291,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
     if (glyphid < _num_glyphs_attributes)
     {
         const byte * gloc = m_pGloc;
+        size_t      glocs = 0, gloce = 0;
 
         be::skip<uint32>(gloc);
         be::skip<uint16>(gloc,2);
@@ -290,15 +307,15 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             glocs = be::read<uint16>(gloc);
             gloce = be::peek<uint16>(gloc);
         }
-    }
 
-    if (glocs < m_pGlat.size() && gloce <= m_pGlat.size())
-    {
+        if (glocs >= m_pGlat.size() && gloce > m_pGlat.size())
+            return 0;
+
         const uint32 glat_version = be::peek<uint32>(m_pGlat);
         if (glat_version < 0x00020000)
         {
             if (gloce - glocs < 2*sizeof(byte)+sizeof(uint16)
-                || gloce - glocs > _nun_attrs*(2*sizeof(byte)+sizeof(uint16)))
+                || gloce - glocs > _num_attrs*(2*sizeof(byte)+sizeof(uint16)))
             {
                 return 0;
             }
@@ -308,7 +325,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         else
         {
             if (gloce - glocs < 3*sizeof(uint16)
-                || gloce - glocs > _nun_attrs*3*sizeof(uint16))
+                || gloce - glocs > _num_attrs*3*sizeof(uint16))
             {
                 return 0;
             }
@@ -316,10 +333,10 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
 
-        if (glyph.attrs().size() > _nun_attrs)
+        if (glyph.attrs().size() > _num_attrs)
         {
             glyph.~GlyphFace();
-            new (&glyph) GlyphFace(bbox, advance, glat_iterator(), glat_iterator());
+            return 0;
         }
     }
 

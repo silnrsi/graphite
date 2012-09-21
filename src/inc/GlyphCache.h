@@ -59,11 +59,11 @@ public:
     CLASS_NEW_DELETE;
     
 private:
-    const Loader        * _glyph_loader;
-    const GlyphFace *   * const _glyphs;
-    const unsigned short	    _num_glyphs,
-    						    _num_attrs,
-    						    _upem;
+    const Loader              * _glyph_loader;
+    const GlyphFace *   *       _glyphs;
+    unsigned short              _num_glyphs,
+                                _num_attrs,
+                                _upem;
 };
 
 inline
@@ -89,6 +89,5 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 {
     return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
 }
-
 
 } // namespace graphite2
