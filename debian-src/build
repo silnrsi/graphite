@@ -26,6 +26,8 @@ if [ "${BUILD_ARCHS:0:6}" = "source" ]; then
 else
     echo ">> non-source build"
     rm ${BUILDINGDIR}/*build*
+    rm ${BUILDINGDIR}/*lucid*
+    rm ${BUILDINGDIR}/*precise*
 fi
 
 source /home/bob/pbuilder/build.common
