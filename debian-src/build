@@ -17,6 +17,7 @@ NO_DPUT=1
 BASE=$(dpkg-parsechangelog -lchangelog| grep ^Vers | cut -d\  -f2 | cut -d\- -f1 | cut -d\: -f2)
 
 echo "build archs: $BUILD_ARCHS"
+echo "base: $BASE"
 
 if [ "${BUILD_ARCHS:0:6}" = "source" ]; then
     echo ">> cp tarball to ~/upstream"

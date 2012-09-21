@@ -9,6 +9,7 @@
         . Deprecated graphite_start_logging and graphite_stop_logging
             . These functions are stubbed now and do nothing, but do compile and link.
         . Bump API version to 3
+    . Add C# wrapper to contrib
     . Handle justification information in a font and do something useful with it
     . Builds clang clean (has done for a while)
     . Bug fixes
