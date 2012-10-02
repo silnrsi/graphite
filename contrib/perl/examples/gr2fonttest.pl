@@ -7,7 +7,7 @@ use Encode qw/encode/;
 
 use strict;
 #use warnings;
-use Text::Graphite2;
+use Text::Gr2;
 use Getopt::Long;
 my %opts;
 my $mask = 0x80 | 0x02;
@@ -21,10 +21,10 @@ die "Font file not readable!\n" unless -r $fontfile;
 if ($opts{trace}) {
     $mask = $opts{mask} if defined $opts{mask};
     open my $t, ">", $opts{trace} or die "Can't write on trace file!\n";
-    Text::Graphite2->start_logging($t, $mask);
+    Text::Gr2->start_logging($t, $mask);
 }
 
-my $face = Text::Graphite2::Face->open($fontfile,
+my $face = Text::Gr2::Face->open($fontfile,
     $opts{cache} ? (cache_size => 1000, dumb_rendering => 1) : (),
     preload_glyphs => 1);
 die "Invalid font, failed to read or parse tables\n" unless $face;
@@ -80,4 +80,4 @@ sub print_features {
     print "Feature languages: ",join "\t", $face->languages;
     print "\n";
 }
-END { Text::Graphite2->stop_logging; }
+END { Text::Gr2->stop_logging; }

@@ -25,6 +25,7 @@ int main(int argc, char **argv)
     cluster_t *clusters;
     int ic, ci = 0;
     const gr_slot *s, *is;
+    FILE *log;
     gr_face *face = gr_make_file_face(argv[1], 0);
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);
@@ -65,7 +66,7 @@ int main(int argc, char **argv)
     }
 
     ci = 0;
-    FILE *log = fopen("cluster.log", "w");
+    log = fopen("cluster.log", "w");
     for (s = gr_seg_first_slot(seg); s; s = gr_slot_next_in_segment(s))
     {
         fprintf(log, "%d(%f,%f) ", gr_slot_gid(s), gr_slot_origin_X(s),

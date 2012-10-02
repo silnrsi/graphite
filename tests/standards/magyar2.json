@@ -1,0 +1,469 @@
+[
+    {
+        "id" : "0241-00-7010",
+        "version" : "1.1.3",
+        "passes" : [
+            {
+                "id" : 1,
+                "slots" : [
+                    {
+                        "id" : "0241-01-7110",
+                        "gid" : 20,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 440, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    },
+                    {
+                        "id" : "0241-00-7188",
+                        "gid" : 19,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 440, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 440, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    }
+                ],
+                "rules" : [
+                    {
+                        "considered" : [
+                            { "id" : 194, "failed" : false, "input" : { "start" : "0241-01-7110", "length" : 2 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0241-01-7110", "end" : "0000-00-0000" },
+                            "slots" : [
+                                {
+                                    "id" : "0241-01-7110",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                                    "origin" : [ 0, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7188",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 0, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-01-72f0",
+                                    "gid" : 20,
+                                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                                    "origin" : [ 0, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 440, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7368",
+                                    "gid" : 19,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 440, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 440, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-73e0",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 880, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7458",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 880, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                }
+                            ],
+                            "postshift" : [ 0, 0 ]
+                        },
+                        "cursor" : "0241-01-7110"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 44, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 5 } },
+                            { "id" : 47, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 5 } },
+                            { "id" : 108, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 5 } },
+                            { "id" : 157, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 5 } },
+                            { "id" : 158, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 5 } },
+                            { "id" : 64, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 120, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 132, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 173, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 178, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 183, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 184, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 215, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 222, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 229, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 230, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 242, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 250, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 260, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 283, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 288, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 293, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 319, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 337, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 350, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 353, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 4 } },
+                            { "id" : 398, "failed" : false, "input" : { "start" : "0241-00-7188", "length" : 4 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0241-00-7188", "end" : "0241-00-7458" },
+                            "slots" : [
+                                {
+                                    "id" : "0241-00-7188",
+                                    "gid" : 71,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 0, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 503, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-01-72f0",
+                                    "gid" : 72,
+                                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                                    "origin" : [ 503, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 427, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7368",
+                                    "gid" : 78,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 930, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 479, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-73e0",
+                                    "gid" : 29,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 1409, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 320, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7548",
+                                    "gid" : 29,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 1729, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 320, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-75c0",
+                                    "gid" : 19,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 2049, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 440, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7638",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 2489, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-76c0",
+                                    "gid" : 19,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 2489, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 440, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                },
+                                {
+                                    "id" : "0241-00-7740",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 2929, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                }
+                            ],
+                            "postshift" : [ 2049, 0 ]
+                        },
+                        "cursor" : "0241-00-7188"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 1079, "failed" : true, "input" : { "start" : "0241-01-7110", "length" : 2 } },
+                            { "id" : 1080, "failed" : true, "input" : { "start" : "0241-01-7110", "length" : 2 } },
+                            { "id" : 1074, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1075, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1078, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1081, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1082, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1083, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } },
+                            { "id" : 1084, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 1 } }
+                        ],
+                        "output" : null,
+                        "cursor" : "0241-01-72f0"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 1072, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1073, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1076, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1077, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1079, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1080, "failed" : true, "input" : { "start" : "0241-00-7188", "length" : 2 } },
+                            { "id" : 1074, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1075, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1078, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1081, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1082, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1083, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } },
+                            { "id" : 1084, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 1 } }
+                        ],
+                        "output" : null,
+                        "cursor" : "0241-00-7368"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 1072, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1073, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1076, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1077, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1079, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1080, "failed" : true, "input" : { "start" : "0241-01-72f0", "length" : 2 } },
+                            { "id" : 1074, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1075, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1078, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1081, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1082, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1083, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } },
+                            { "id" : 1084, "failed" : true, "input" : { "start" : "0241-00-7368", "length" : 1 } }
+                        ],
+                        "output" : null,
+                        "cursor" : "0241-00-73e0"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 24, "failed" : false, "input" : { "start" : "0241-00-73e0", "length" : 4 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0241-00-73e0", "end" : "0241-00-76c0" },
+                            "slots" : [
+                                {
+                                    "id" : "0241-00-73e0",
+                                    "gid" : 1630,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 1409, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "user" : []
+                                }
+                            ],
+                            "postshift" : [ -1080, 0 ]
+                        },
+                        "cursor" : "0241-00-73e0"
+                    },
+                    {
+                        "considered" : [
+                            { "id" : 32, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 53, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 97, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 104, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 110, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 151, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 163, "failed" : true, "input" : { "start" : "0241-00-73e0", "length" : 4 } },
+                            { "id" : 14, "failed" : false, "input" : { "start" : "0241-00-73e0", "length" : 3 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0241-00-73e0", "end" : "0241-00-7458" },
+                            "slots" : [],
+                            "postshift" : [ -440, 0 ]
+                        },
+                        "cursor" : "0241-00-7458"
+                    }
+                ]
+            },
+            {
+                "id" : 2,
+                "slots" : [
+                    {
+                        "id" : "0241-01-7110",
+                        "gid" : 1630,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    },
+                    {
+                        "id" : "0241-00-7188",
+                        "gid" : 71,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 503, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    },
+                    {
+                        "id" : "0241-01-72f0",
+                        "gid" : 72,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 503, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 427, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    },
+                    {
+                        "id" : "0241-00-7368",
+                        "gid" : 78,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 930, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 479, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    },
+                    {
+                        "id" : "0241-00-7458",
+                        "gid" : 1630,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1409, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : []
+                    }
+                ],
+                "rules" : []
+            }
+        ],
+        "output" : [
+            {
+                "id" : "0241-01-7110",
+                "gid" : 1630,
+                "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                "origin" : [ 0, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 0, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : []
+            },
+            {
+                "id" : "0241-00-7188",
+                "gid" : 71,
+                "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                "origin" : [ 0, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 503, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : []
+            },
+            {
+                "id" : "0241-01-72f0",
+                "gid" : 72,
+                "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                "origin" : [ 503, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 427, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : []
+            },
+            {
+                "id" : "0241-00-7368",
+                "gid" : 78,
+                "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                "origin" : [ 930, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 479, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : []
+            },
+            {
+                "id" : "0241-00-7458",
+                "gid" : 1630,
+                "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                "origin" : [ 1409, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 0, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : []
+            }
+        ],
+        "advance" : [ 1409, 0 ],
+        "chars" : [
+            { "offset" : 0, "unicode" : 49, "break" : 30, "flags" : 0, "slot" : { "before" : 0, "after" : 2 } },
+            { "offset" : 1, "unicode" : 48, "break" : 30, "flags" : 0, "slot" : { "before" : 1, "after" : 4 } }
+        ]
+    }
+]

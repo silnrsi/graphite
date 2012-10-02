@@ -25,10 +25,10 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "graphite2/Font.h"
-#include "Face.h"
-#include "FeatureMap.h"
-#include "FeatureVal.h"
-#include "NameTable.h"
+#include "inc/Face.h"
+#include "inc/FeatureMap.h"
+#include "inc/FeatureVal.h"
+#include "inc/NameTable.h"
 
 using namespace graphite2;
 
@@ -37,21 +37,15 @@ extern "C" {
 
 gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats)    //returns 0 if either pointer is NULL
 {
-    if (!pfeatureref)
-    return 0;
-    if (!feats)
-    return 0;
-    
+    if (!pfeatureref || !feats)	return 0;
+
     return pfeatureref->getFeatureVal(*feats);
 }
 
 
 int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest)
 {
-    if (!pfeatureref)
-    return false;
-    if (!pDest)
-    return false;
+    if (!pfeatureref || !pDest)	return 0;
     
     return pfeatureref->applyValToFeature(val, *pDest);
 }
@@ -127,31 +121,13 @@ void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
 
 void gr_label_destroy(void * label)
 {
-    if (label)
-        free(label);
+	free(label);
 }
 
 gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures/*may be NULL*/)
 {                      //When finished with the Features, call features_destroy    
     return static_cast<gr_feature_val*>(pfeatures ? new Features(*pfeatures) : new Features);
 }
-
-
-#if 0
-//not public since there is no public way of making the mask
-int gr_featureval_masked_or(gr_feature_val* pSrc, const gr_feature_val* pOther, const gr_feature_val* pMask)    //returns false iff any of the Features* are NULL
-{
-    if (!pSrc)
-    return false;
-    if (!pOther)
-    return false;
-    if (!pMask)
-    return false;
-    
-    pSrc->maskedOr(*pOther, *pMask);
-    return true;
-}
-#endif 
   
 void gr_featureval_destroy(gr_feature_val *p)
 {

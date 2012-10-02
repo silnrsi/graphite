@@ -1,12 +1,12 @@
 use PDF::API2;
-use Graphite2;
+use Text::Gr2;
 use File::Slurp;
 my ($fontfile, $textfile) = @ARGV;
 
 push @PDF::API2::FontDirs, "/Library/Fonts", "/Users/simon/Library/Fonts";
 
 my $graf = read_file($textfile);
-my $face = Graphite2::Face->open("/Users/simon/Library/Fonts/$fontfile",
+my $face = Text::Gr2::Face->open("/Users/simon/Library/Fonts/$fontfile",
     cache_size => 1000,
     preload_glyphs => 1);
 die "Invalid font, failed to read or parse tables\n" unless $face;

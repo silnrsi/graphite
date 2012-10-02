@@ -24,9 +24,9 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "Main.h"
-#include "Slot.h"
-#include "Segment.h"
+#include "inc/Main.h"
+#include "inc/Slot.h"
+#include "inc/Segment.h"
 
 using namespace graphite2;
 
@@ -300,8 +300,8 @@ const bidi_action actionWeak[][10] =
 inline uint8    GetDeferredType(bidi_action a)          { return (a >> 4) & 0xF; }
 inline uint8    GetResolvedType(bidi_action a)          { return a & 0xF; }
 inline DirCode  EmbeddingDirection(int l)               { return l & 1 ? R : L; }
-inline bool     IsDeferredState(bidi_state a)           { return (1 << a) & (rtmask | ltmask | acmask | rcmask | rsmask | lcmask | lsmask); }
-inline bool     IsModifiedClass(DirCode a)              { return (1 << a) & (ALmask | NSMmask | ESmask | CSmask | ETmask | ENmask); }
+inline bool     IsDeferredState(bidi_state a)           { return 0 != ((1 << a) & (rtmask | ltmask | acmask | rcmask | rsmask | lcmask | lsmask)); }
+inline bool     IsModifiedClass(DirCode a)              { return 0 != ((1 << a) & (ALmask | NSMmask | ESmask | CSmask | ETmask | ENmask)); }
 
 void SetDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
@@ -438,7 +438,7 @@ void resolveNeutrals(int baseLevel, Slot *s)
     int state = baseLevel ? r : l;
     int cls;
     Slot *sRun = NULL;
-    Slot *sLast;
+    Slot *sLast = s;
     int level = baseLevel;
 
     for ( ; s; s = s->next())
@@ -462,6 +462,8 @@ void resolveNeutrals(int baseLevel, Slot *s)
         int clsNew = GetResolvedNeutrals(action);
         if (clsNew != N)
             s->setBidiClass(clsNew);
+        if (!sRun && (action & In))
+            sRun = s->prev();
         state = stateNeutrals[state][neutral_class_map[cls]];
         level = s->getBidiLevel();
     }
@@ -499,7 +501,7 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
             {
                 int hasChar = seg->glyphAttr(s->gid(), aMirror + 1);
                 if ( ((level & 1) && (!(seg->dir() & 4) || !hasChar)) 
-                  || ((rtl ^ !(level & 1)) && (seg->dir() & 4) && hasChar) )
+                  || ((rtl ^ (level & 1)) && (seg->dir() & 4) && hasChar) )
                 {
                     unsigned short g = seg->glyphAttr(s->gid(), aMirror);
                     if (g) s->setGlyph(seg, g);

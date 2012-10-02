@@ -1,4 +1,0 @@
-#!/bin/sh
-
-ttftable -delete opentype ../../tests/fonts/Padauk.ttf Padauk.ttf
-../../tests/fuzztest -l fuzztest.log -f Padauk.ttf -t 10 -c 1000 --memory=200 $@ -- comparerenderer/comparerenderer -f Padauk.ttf -t ../../tests/texts/my_HeadwordSyllables.txt -s 12 -n 

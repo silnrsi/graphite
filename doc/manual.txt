@@ -1,4 +1,4 @@
-= GraphiteNG Manual =
+= Graphite2 Manual =
 Martin Hosken <martin_hosken@sil.org>
 
 :numbered:
@@ -8,4 +8,4 @@ include::building.txt[]
 include::calling.txt[]
 include::features.txt[]
 include::hacking.txt[]
-include::android.txt[]
+include::testing.txt[]

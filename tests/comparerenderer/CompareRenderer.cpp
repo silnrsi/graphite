@@ -19,11 +19,13 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cassert>
+#include <cstddef>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -48,7 +50,7 @@
 #endif
 
 #include "Gr2Renderer.h"
-#include "graphite2/XmlLog.h"
+#include "graphite2/Log.h"
 
 #ifdef HAVE_HARFBUZZNG
 #include "HbNgRenderer.h"
@@ -66,7 +68,7 @@
 #include "IcuRenderer.h"
 #endif
 
-const size_t NUM_RENDERERS = 5;
+const size_t NUM_RENDERERS = 6;
 
 class CompareRenderer
 {
@@ -141,7 +143,7 @@ public:
             if (m_renderers[r])
             {
                 for (int i = 0; i < repeat; i++)
-                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r]);
+                    m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r], log);
                 fprintf(log, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
             }
         }
@@ -181,7 +183,7 @@ public:
     }
     void setDifferenceMask(LineDifference m) { m_cfMask = m; }
 protected:
-    float runRenderer(Renderer & renderer, RenderedLine * pLineResult, unsigned long & glyphCount)
+    float runRenderer(Renderer & renderer, RenderedLine * pLineResult, unsigned long & glyphCount, FILE *log)
     {
         glyphCount = 0;
         unsigned int i = 0;
@@ -215,7 +217,7 @@ protected:
                 fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
-                renderer.renderText(pLine, lineLength, pLineResult + i);
+                renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 pLineResult[i].dump(stdout);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
@@ -227,7 +229,7 @@ protected:
             {
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
-                renderer.renderText(pLine, lineLength, pLineResult + i);
+                renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }
@@ -338,17 +340,18 @@ int main(int argc, char ** argv)
     FeatureParser * altFeatureSettings = NULL;
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
-    if (rendererOptions[OptTrace].exists())
-    {
-        FILE * traceFile = fopen(rendererOptions[OptTrace].get(argv), "wb");
-        int logMask = (rendererOptions[OptLogMask].exists())? rendererOptions[OptLogMask].getInt(argv) :
-            (GRLOG_SEGMENT | GRLOG_CACHE);
-        graphite_start_logging(traceFile, static_cast<GrLogMask>(logMask));
-    }
+    const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
+	Gr2Face face(fontFile, segCacheSize, traceLogPath);
+
 
     if (rendererOptions[OptFeatures].exists())
     {
         featureSettings = new FeatureParser(rendererOptions[OptFeatures].get(argv));
+    }
+
+    if (rendererOptions[OptQuiet].exists())
+    {
+    	fclose(stderr);
     }
 
     if (rendererOptions[OptAlternativeFont].exists())
@@ -364,8 +367,12 @@ int main(int argc, char ** argv)
         const char * altFontFile = rendererOptions[OptAlternativeFont].get(argv);
         if (rendererOptions[OptGraphite2].exists())
         {
-            renderers[0] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
-            renderers[1] = (new Gr2Renderer(altFontFile, fontSize, direction, segCacheSize, altFeatureSettings));
+            std::string altTraceLogPath = traceLogPath;
+            altTraceLogPath.insert(traceLogPath.find_last_of('.'), ".alt");
+        	Gr2Face altFace(altFontFile, segCacheSize, altTraceLogPath);
+
+            renderers[0] = new Gr2Renderer(face, fontSize, direction, featureSettings);
+            renderers[1] = new Gr2Renderer(altFace, fontSize, direction, altFeatureSettings);
         }
 #ifdef HAVE_GRAPHITE
         else if (rendererOptions[OptGraphite].exists())
@@ -410,14 +417,22 @@ int main(int argc, char ** argv)
             renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
         if (rendererOptions[OptGraphite2].exists())
-            renderers[1] = (new Gr2Renderer(fontFile, fontSize, direction, segCacheSize, featureSettings));
+            renderers[1] = new Gr2Renderer(face, fontSize, direction, featureSettings);
+
+        if (rendererOptions[OptGraphite2s].exists())
+        {
+        	Gr2Face uncached(fontFile, 0,
+        			std::string(traceLogPath).insert(traceLogPath.find_last_of('.'), ".uncached"));
+            renderers[2] = new Gr2Renderer(uncached, fontSize, direction, featureSettings);
+        }
+
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
-            renderers[2] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
+            renderers[3] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
 #endif
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
-            renderers[3] = (new IcuRenderer(fontFile, fontSize, direction));
+            renderers[4] = (new IcuRenderer(fontFile, fontSize, direction));
 #endif
 #ifdef HAVE_USP10
         if (rendererOptions[OptUniscribe].exists())
@@ -426,12 +441,12 @@ int main(int argc, char ** argv)
             const char * usp10 = rendererOptions[OptUniscribe].get(argv);
             if (strlen(usp10) == 0)
                 usp10 = defaultUsp10;
-            renderers[4] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
+            renderers[5] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
         }
 #endif
     }
 
-    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL)
+    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL && renderers[5] == NULL)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
@@ -465,7 +480,6 @@ int main(int argc, char ** argv)
         delete altFeatureSettings;
     delete featureSettings;
     if (rendererOptions[OptLogFile].exists()) fclose(log);
-    if (rendererOptions[OptTrace].exists()) graphite_stop_logging();
 
     return status;
 }

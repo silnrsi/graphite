@@ -28,6 +28,6 @@ class Renderer
 {
 public:
     virtual ~Renderer() {}
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result) = 0;
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log = NULL) = 0;
     virtual const char * name() const = 0;
 };

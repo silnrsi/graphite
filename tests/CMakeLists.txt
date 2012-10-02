@@ -1,21 +1,75 @@
 project(testing)
 include(Graphite)
-option(ENABLE_COMPARE_RENDERER "Build tool to compare output of different renderers" ON) 
+include(CMakeDependentOption)
+CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output of different renderers" OFF
+                        "NOT GRAPHITE2_NFILEFACE;NOT GRAPHITE2_NSEGCACHE" OFF)
 
-add_subdirectory(vm)
+include_directories(${graphite2_core_SOURCE_DIR})
+set(S ${graphite2_core_SOURCE_DIR})
 
-if (ENABLE_COMPARE_RENDERER)
+add_library(graphite2-base STATIC
+    ${S}/FeatureMap.cpp
+    ${S}/NameTable.cpp
+    ${S}/Sparse.cpp
+    ${S}/TtfUtil.cpp
+    ${S}/UtfCodec.cpp)
+
+add_library(graphite2-segcache STATIC
+    ${S}/Bidi.cpp
+    ${S}/call_machine.cpp
+    ${S}/Code.cpp
+    ${S}/CmapCache.cpp
+    ${S}/Face.cpp
+    ${S}/FileFace.cpp
+    ${S}/GlyphCache.cpp
+    ${S}/GlyphFace.cpp
+    ${S}/Pass.cpp
+    ${S}/Rule.cpp
+    ${S}/SegCache.cpp
+    ${S}/SegCacheEntry.cpp
+    ${S}/Segment.cpp
+    ${S}/Silf.cpp
+    ${S}/Slot.cpp
+    )
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set_target_properties(graphite2-base PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
+    set_target_properties(graphite2-segcache PROPERTIES 
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
+else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set_target_properties(graphite2-base PROPERTIES 
+        COMPILE_FLAGS       "-Wall -Wextra -fdiagnostics-show-option -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_DEFINITIONS "GRAPHITE2_STATIC"
+        LINK_FLAGS          "-nodefaultlibs" 
+        LINKER_LANGUAGE     C)
+    set_target_properties(graphite2-segcache PROPERTIES 
+        COMPILE_FLAGS       "-Wall -Wextra -fdiagnostics-show-option -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING"
+        LINK_FLAGS          "-nodefaultlibs" 
+        LINKER_LANGUAGE     C)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+
+if (GRAPHITE2_COMPARE_RENDERER)
     add_subdirectory(comparerenderer)
-endif (ENABLE_COMPARE_RENDERER)
-
-add_subdirectory(segcache)
+endif (GRAPHITE2_COMPARE_RENDERER)
+add_subdirectory(endian)
+if (NOT GRAPHITE2_NFILEFACE)
+    add_subdirectory(examples)
+endif (NOT GRAPHITE2_NFILEFACE)
 add_subdirectory(featuremap)
-add_subdirectory(nametabletest)
-add_subdirectory(examples)
-
-if (EXISTS ${PROJECT_SOURCE_DIR}/grlist)
 add_subdirectory(grlist)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/grlist)
+add_subdirectory(json)
+add_subdirectory(nametabletest)
+if (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
+    add_subdirectory(segcache)
+endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
+add_subdirectory(sparsetest)
+add_subdirectory(utftest)
+if (NOT GRAPHITE2_NFILEFACE)
+    add_subdirectory(vm)
+endif (NOT GRAPHITE2_NFILEFACE)
+add_subdirectory(fuzz-tests)
 
 enable_testing()
 
@@ -39,9 +93,12 @@ fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')
 fonttest(charis4 charis_r_gr.ttf 006b 0361 070)
 fonttest(charis5 charis_r_gr.ttf 0020 006C 0325 0065)
+fonttest(charis6 charis_r_gr.ttf 0048 0065 006C 006C 006F 0020 004D 0075 006D -j 107)
 fonttest(magyar1 MagyarLinLibertineG.ttf 0031 0035 -feat 210=36)
 fonttest(magyar2 MagyarLinLibertineG.ttf 0031 0030 -feat 210=200)
 fonttest(magyar3 MagyarLinLibertineG.ttf 0066 0069 0066 0074 0079 002d 0066 0069 0076 0065 -feat 209=3)
+fonttest(grtest1 grtest1gr.ttf 0062 0061 0061 0061 0061 0061 0061 0062 0061)
+fonttest(general1 general.ttf 0E01 0062)
 
 feattest(padauk_feat Padauk.ttf)
 feattest(charis_feat charis_r_gr.ttf)

@@ -24,9 +24,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <graphite2/Types.h>
-#include "Main.h"
-#include "TtfTypes.h"
-#include "NameTable.h"
+#include "inc/Main.h"
+#include "inc/Endian.h"
+#include "inc/TtfTypes.h"
+#include "inc/NameTable.h"
 
 #pragma pack(push, 1)
 
@@ -131,26 +132,26 @@ void testLangId(void * data, size_t length, const char * id, uint16 expected)
 template <class T> T * toBigEndian(T & table)
 {
     T * bigEndian = gralloc<T>(1);
-    bigEndian->m_nameHeader.format = swap16(table.m_nameHeader.format);
-    bigEndian->m_nameHeader.count = swap16(table.m_nameHeader.count);
-    bigEndian->m_nameHeader.string_offset = swap16(table.m_nameHeader.string_offset);
+    bigEndian->m_nameHeader.format = be::swap<uint16>(table.m_nameHeader.format);
+    bigEndian->m_nameHeader.count = be::swap<uint16>(table.m_nameHeader.count);
+    bigEndian->m_nameHeader.string_offset = be::swap<uint16>(table.m_nameHeader.string_offset);
 
     for (uint16 i = 0; i < table.m_nameHeader.count; i++)
     {
-        bigEndian->m_records[i].platform_id = swap16(table.m_records[i].platform_id);
-        bigEndian->m_records[i].platform_specific_id = swap16(table.m_records[i].platform_specific_id);
-        bigEndian->m_records[i].language_id = swap16(table.m_records[i].language_id);
-        bigEndian->m_records[i].name_id = swap16(table.m_records[i].name_id);
-        bigEndian->m_records[i].length = swap16(table.m_records[i].length);
-        bigEndian->m_records[i].offset = swap16(table.m_records[i].offset);
+        bigEndian->m_records[i].platform_id = be::swap<uint16>(table.m_records[i].platform_id);
+        bigEndian->m_records[i].platform_specific_id = be::swap<uint16>(table.m_records[i].platform_specific_id);
+        bigEndian->m_records[i].language_id = be::swap<uint16>(table.m_records[i].language_id);
+        bigEndian->m_records[i].name_id = be::swap<uint16>(table.m_records[i].name_id);
+        bigEndian->m_records[i].length = be::swap<uint16>(table.m_records[i].length);
+        bigEndian->m_records[i].offset = be::swap<uint16>(table.m_records[i].offset);
     }
 
-    bigEndian->m_nameHeader.name_record[0].platform_id = swap16(table.m_nameHeader.name_record[0].platform_id);
-    bigEndian->m_nameHeader.name_record[0].platform_specific_id = swap16(table.m_nameHeader.name_record[0].platform_specific_id);
-    bigEndian->m_nameHeader.name_record[0].language_id = swap16(table.m_nameHeader.name_record[0].language_id);
-    bigEndian->m_nameHeader.name_record[0].name_id = swap16(table.m_nameHeader.name_record[0].name_id);
-    bigEndian->m_nameHeader.name_record[0].length = swap16(table.m_nameHeader.name_record[0].length);
-    bigEndian->m_nameHeader.name_record[0].offset = swap16(table.m_nameHeader.name_record[0].offset);
+    bigEndian->m_nameHeader.name_record[0].platform_id = be::swap<uint16>(table.m_nameHeader.name_record[0].platform_id);
+    bigEndian->m_nameHeader.name_record[0].platform_specific_id = be::swap<uint16>(table.m_nameHeader.name_record[0].platform_specific_id);
+    bigEndian->m_nameHeader.name_record[0].language_id = be::swap<uint16>(table.m_nameHeader.name_record[0].language_id);
+    bigEndian->m_nameHeader.name_record[0].name_id = be::swap<uint16>(table.m_nameHeader.name_record[0].name_id);
+    bigEndian->m_nameHeader.name_record[0].length = be::swap<uint16>(table.m_nameHeader.name_record[0].length);
+    bigEndian->m_nameHeader.name_record[0].offset = be::swap<uint16>(table.m_nameHeader.name_record[0].offset);
     
     memcpy(bigEndian->m_textData, table.m_textData, sizeof(table.m_textData) );
     return bigEndian;
@@ -159,11 +160,11 @@ template <class T> T * toBigEndian(T & table)
 template <class T> T * toBigEndian1(T & table)
 {
     T * bigEndian = toBigEndian<T>(table);
-    bigEndian->m_langTagCount = swap16(table.m_langTagCount);
+    bigEndian->m_langTagCount = be::swap<uint16>(table.m_langTagCount);
     for (size_t i = 0; i < table.m_langTagCount; i++)
     {
-        bigEndian->m_languages[i] = swap16(table.m_languages[i]);
-        bigEndian->m_languages[i] = swap16(table.m_languages[i]);
+        bigEndian->m_languages[i] = be::swap<uint16>(table.m_languages[i]);
+        bigEndian->m_languages[i] = be::swap<uint16>(table.m_languages[i]);
     }
 }
 
@@ -198,5 +199,7 @@ int main(int, char **)
     testName(testBData, sizeof(NameTestB), 0x8000, 0x8000, 7, "ကၢၤ");
     testName(testBData, sizeof(NameTestB), 0x8001, 0x8001, 7, "ၜ");
     testName(testBData, sizeof(NameTestB), 0x8002, 0x409, 1, "Aa");
+
+    return 0;
 }
 

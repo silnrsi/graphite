@@ -64,6 +64,7 @@ typedef enum {
     OptSize,
     OptGraphite,
     OptGraphite2,
+    OptGraphite2s,
     OptHarfbuzzNg,
     OptHarfbuzz,
     OptIcu,
@@ -81,7 +82,8 @@ typedef enum {
     OptTrace,
     OptLogMask,
     OptFeatures,
-    OptAltFeatures
+    OptAltFeatures,
+    OptQuiet
 } OptionId;
 
 static Option rendererOptions[] = {
@@ -90,6 +92,7 @@ static Option rendererOptions[] = {
     Option("-s", "--size", "Font size", Option::OPTION_INT),
     Option("-g", "--graphite", "Use Graphite renderer", Option::OPTION_BOOL),
     Option("-n", "--graphite2", "Use Graphite2 renderer", Option::OPTION_BOOL),
+    Option("-N", "--graphite2uc", "Use Graphite2 uncached renderer", Option::OPTION_BOOL),
     Option("-h", "--harfbuzzng", "Use Harfbuzz NG renderer", Option::OPTION_BOOL),
     Option("-H", "--harfbuzz", "Use Harfbuzz renderer", Option::OPTION_BOOL),
     Option("-i", "--icu", "Use ICU renderer", Option::OPTION_BOOL),
@@ -108,6 +111,7 @@ static Option rendererOptions[] = {
     Option("", "--log-mask", "XML trace log mask (only used with --trace)", Option::OPTION_INT),
     Option("", "--features", "Feature list", Option::OPTION_STRING),
     Option("", "--alt-features", "Feature list for alternative font (if different)", Option::OPTION_STRING),
+    Option("-q", "--quiet", "Supress all output, including error messages", Option::OPTION_BOOL)
 };
 
 const int NUM_RENDERER_OPTIONS = sizeof(rendererOptions) / sizeof(Option);

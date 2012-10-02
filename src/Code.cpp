@@ -30,20 +30,21 @@ of the License or (at your option) any later version.
 // Author: Tim Eves
 
 #include <cassert>
+#include <cstddef>
 #include <cstdlib>
-#include <stdexcept>
-#include <string.h>
+#include <cstring>
 #include "graphite2/Segment.h"
-#include "Code.h"
-#include "Machine.h"
-#include "Silf.h"
-#include "Face.h"
-#include "Rule.h"
-#include "XmlTraceLog.h"
+#include "inc/Code.h"
+#include "inc/Face.h"
+#include "inc/GlyphFace.h"
+#include "inc/GlyphCache.h"
+#include "inc/Machine.h"
+#include "inc/Rule.h"
+#include "inc/Silf.h"
 
 #include <cstdio>
 
-#ifdef DISABLE_TRACING
+#ifdef NDEBUG
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
@@ -63,8 +64,6 @@ inline bool is_return(const instr i) {
     return i == pop_ret || i == ret_zero || i == ret_true;
 }
 
-void emit_trace_message(opcode, const byte *const, const opcode_t &);
-
 struct context
 {
     context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
@@ -79,7 +78,7 @@ struct context
 } // end namespace
 
 
-class Code::decoder
+class Machine::Code::decoder
 {
 public:
     struct limits;
@@ -106,7 +105,8 @@ private:
     opcode      fetch_opcode(const byte * bc);
     void        analyse_opcode(const opcode, const int8 * const dp) throw();
     bool        emit_opcode(opcode opc, const byte * & bc);
-    void        valid_upto(const uint16 limit, const uint16 x) const throw();
+    bool 		validate_opcode(const opcode opc, const byte * const bc);
+    bool        valid_upto(const uint16 limit, const uint16 x) const throw();
     void        failure(const status_t s) const throw() { _code.failure(s); }
     
     Code              & _code;
@@ -119,7 +119,7 @@ private:
 };
 
 
-struct Code::decoder::limits 
+struct Machine::Code::decoder::limits
 {
   const byte * const bytecode;
   const uint8        pre_context;
@@ -130,7 +130,7 @@ struct Code::decoder::limits
   const byte         attrid[gr_slatMax];
 };
    
-inline Code::decoder::decoder(const limits & lims, Code &code) throw() 
+inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
@@ -139,9 +139,9 @@ inline Code::decoder::decoder(const limits & lims, Code &code) throw()
     
 
 
-Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end, 
+Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
            uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
- :  _code(0), _data_size(0), _instr_count(0), _status(loaded),
+ :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(true)
 {
     assert(bytecode_begin != 0);
@@ -170,10 +170,10 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
         pre_context,
         rule_length,
         silf.numClasses(),
-        face.getGlyphFaceCache()->numAttrs(),
+        face.glyphs().numAttrs(),
         face.numFeatures(), 
         {1,1,1,1,1,1,1,1, 
-         1,1,1,1,1,1,1,(uint8)-1, 
+         1,1,1,1,1,1,1,255,
          1,1,1,1,1,1,1,1, 
          1,1,1,1,1,1,0,0, 
          0,0,0,0,0,0,0,0, 
@@ -206,8 +206,8 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
     // Now we know exactly how much code and data the program really needs
     // realloc the buffers to exactly the right size so we don't waste any 
     // memory.
-    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_instr_count));
-    assert((bytecode_end - bytecode_begin) >= ptrdiff_t(_data_size));
+    assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
+    assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
     _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
     
@@ -218,14 +218,14 @@ Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const b
         failure(alloc_failed);
 }
 
-Code::~Code() throw ()
+Machine::Code::~Code() throw ()
 {
     if (_own)
         release_buffers();
 }
 
 
-bool Code::decoder::load(const byte * bc, const byte * bc_end)
+bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
 {
     while (bc < bc_end)
     {
@@ -239,21 +239,20 @@ bool Code::decoder::load(const byte * bc, const byte * bc_end)
             return false;
     }
     
-    if (bc > bc_end)
-        failure(arguments_exhausted);
-
-    return _code.status() == loaded;
+    return bool(_code);
 }
 
 // Validation check and fixups.
 //
 
-opcode Code::decoder::fetch_opcode(const byte * bc)
+opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
 {
-    opcode opc = opcode(*bc++);
+    const opcode opc = opcode(*bc++);
 
     // Do some basic sanity checks based on what we know about the opcode
-    // and it's arguments.
+    if (!validate_opcode(opc, bc))	return MAX_OPCODE;
+
+    // And check it's arguments as far as possible
     switch (opc)
     {
         case NOP :
@@ -304,30 +303,23 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case DELETE :
             break;
         case ASSOC :
-        {
-            uint8 num = bc[0];
-            if (bc + 1 + num >= _max.bytecode)
-            {
-                failure(arguments_exhausted);
-                break;
-            }
-            while (num) 
-                valid_upto(_rule_length, _pre_context + int8(bc[num--]));
+            for (uint8 num = bc[0]; num; --num)
+                valid_upto(_rule_length, _pre_context + int8(bc[num]));
             break;
-        }
         case CNTXT_ITEM :
             valid_upto(_max.rule_length, _max.pre_context + int8(bc[0]));
             if (bc + 2 + bc[1] >= _max.bytecode)  failure(jump_past_end);
+            if (_pre_context != 0)                failure(nested_context_item);
             break;
         case ATTR_SET :
         case ATTR_ADD :
         case ATTR_SUB :
         case ATTR_SET_SLOT :
-            valid_upto(gr_slatMax, bc[0]);
+        	valid_upto(gr_slatMax, bc[0]);
             break;
         case IATTR_SET_SLOT :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_max.attrid[bc[0]], bc[1]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            	valid_upto(_max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_SLOT_ATTR :
             valid_upto(gr_slatMax, bc[0]);
@@ -356,9 +348,11 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
             // level: dp[2] no check necessary
             break;
         case PUSH_ISLOT_ATTR :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_rule_length, _pre_context + int8(bc[1]));
-            valid_upto(_max.attrid[bc[0]], bc[2]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            {
+            	valid_upto(_rule_length, _pre_context + int8(bc[1]));
+            	valid_upto(_max.attrid[bc[0]], bc[2]);
+            }
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
         case POP_RET :
@@ -368,8 +362,8 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
         case IATTR_SET :
         case IATTR_ADD :
         case IATTR_SUB :
-            valid_upto(gr_slatMax, bc[0]);
-            valid_upto(_max.attrid[bc[0]], bc[1]);
+            if (valid_upto(gr_slatMax, bc[0]))
+            	valid_upto(_max.attrid[bc[0]], bc[1]);
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
         case PUSH_VERSION :
@@ -395,11 +389,11 @@ opcode Code::decoder::fetch_opcode(const byte * bc)
             break;
     }
 
-    return _code._status == loaded ? opc : MAX_OPCODE;
+    return bool(_code) ? opc : MAX_OPCODE;
 }
 
 
-void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
+void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
 {
   if (_code._constraint) return;
   
@@ -428,7 +422,7 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
     case PUT_SUBS : 
       _code._modify = true;
       _analysis.set_changed(_analysis.slotref);
-      // no break here;
+      // no break
     case PUT_COPY :
     {
       if (arg[0] != 0) { _analysis.set_changed(_analysis.slotref); _code._modify = true; }
@@ -437,10 +431,11 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
       break;
     }
-    case PUSH_ATT_TO_GATTR_OBS :
+    case PUSH_ATT_TO_GATTR_OBS : // slotref on 2nd parameter
         if (_code._constraint) return;
+        // no break
     case PUSH_GLYPH_ATTR_OBS :
-    case PUSH_SLOT_ATTR :       // slotref on 2nd parameter
+    case PUSH_SLOT_ATTR :
     case PUSH_GLYPH_METRIC :
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :
@@ -451,6 +446,7 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
         if (_code._constraint) return;
+        // no break
     case PUSH_GLYPH_ATTR :
       if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(_analysis.slotref + arg[2] - _analysis.contexts[_analysis.slotref].flags.inserted);
@@ -464,7 +460,7 @@ void Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
 }
 
 
-bool Code::decoder::emit_opcode(opcode opc, const byte * & bc)
+bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
 {
     const opcode_t * op_to_fn = Machine::getOpcodeTable();
     const opcode_t & op       = op_to_fn[opc];
@@ -479,13 +475,12 @@ bool Code::decoder::emit_opcode(opcode opc, const byte * & bc)
     // Add this instruction
     *_instr++ = op.impl[_code._constraint]; 
     ++_code._instr_count;
-    emit_trace_message(opc, bc, op);
 
     // Grab the parameters
     if (param_sz) {
-        memmove(_data, bc, param_sz * sizeof(byte));
-        bc         += param_sz;
-        _data         += param_sz;
+        memcpy(_data, bc, param_sz * sizeof(byte));
+        bc               += param_sz;
+        _data            += param_sz;
         _code._data_size += param_sz;
     }
     
@@ -513,37 +508,11 @@ bool Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         }
     }
     
-    return _code._status == loaded;
+    return bool(_code);
 }
 
 
-
-namespace {
-
-inline void emit_trace_message(opcode opc, const byte *const params, 
-                        const opcode_t &op)
-{
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementAction);
-        XmlTraceLog::get().addAttribute(AttrActionCode, opc);
-        XmlTraceLog::get().addAttribute(AttrAction, op.name);
-        for (size_t p = 0; p < 8 && p < op.param_sz; ++p)
-        {
-            XmlTraceLog::get().addAttribute(
-                                XmlTraceLogAttribute(Attr0 + p),
-                                params[p]);
-        }
-        XmlTraceLog::get().closeElement(ElementAction);
-    }
-#endif
-}
-
-} // end of namespace
-
-
-void Code::decoder::apply_analysis(instr * const code, instr * code_end)
+void Machine::Code::decoder::apply_analysis(instr * const code, instr * code_end)
 {
     // insert TEMP_COPY commands for slots that need them (that change and are referenced later)
     int tempcount = 0;
@@ -565,32 +534,55 @@ void Code::decoder::apply_analysis(instr * const code, instr * code_end)
 }
 
 
-inline 
-void Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
+inline
+bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * const bc)
 {
-    if (x >= limit)
-        failure(out_of_range_data);
+	if (opc >= MAX_OPCODE)
+	{
+		failure(invalid_opcode);
+		return false;
+	}
+	const opcode_t & op = Machine::getOpcodeTable()[opc];
+	const size_t param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;
+	if (bc + param_sz > _max.bytecode)
+	{
+		failure(arguments_exhausted);
+		return false;
+	}
+	return true;
 }
 
+
+bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
+{
+	const bool t = x < limit;
+    if (!t)	failure(out_of_range_data);
+    return t;
+}
+
+
 inline 
-void Code::failure(const status_t s) throw() {
+void Machine::Code::failure(const status_t s) throw() {
     release_buffers();
     _status = s;
 }
 
+
 inline
-void Code::decoder::analysis::set_ref(const int index) throw() {
+void Machine::Code::decoder::analysis::set_ref(const int index) throw() {
     contexts[index].flags.referenced = true;
     if (index > max_ref) max_ref = index;
 }
 
+
 inline
-void Code::decoder::analysis::set_changed(const int index) throw() {
+void Machine::Code::decoder::analysis::set_changed(const int index) throw() {
     contexts[index].flags.changed = true;
     if (index > max_ref) max_ref = index;
 }
 
-void Code::release_buffers() throw() 
+
+void Machine::Code::release_buffers() throw()
 {
     free(_code);
     free(_data);
@@ -599,17 +591,19 @@ void Code::release_buffers() throw()
     _own  = false;
 }
 
-int32 Code::run(Machine & m, slotref * & map, Machine::status_t & status_out) const
+
+int32 Machine::Code::run(Machine & m, slotref * & map) const
 {
     assert(_own);
     assert(*this);          // Check we are actually runnable
 
-    if (m.slotMap().size() <= _max_ref + m.slotMap().context())
+    if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context()))
     {
-        status_out = Machine::slot_offset_out_bounds;
+        m._status = Machine::slot_offset_out_bounds;
 //        return (m.slotMap().end() - map);
         return 1;
     }
-    return  m.run(_code, _data, map, status_out);
+
+    return  m.run(_code, _data, map);
 }
 

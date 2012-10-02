@@ -125,6 +125,7 @@ public:
                             featId.uChar[nameLength++] = features[i];
                         }
                     }
+                    break;
             }
             if (featIndex < m_featureCount && valueText)
             {
@@ -164,6 +165,7 @@ public:
                     otId.uChar[i] = ' ';
             }
         }
+        return otId.uId;
     }
 private:
     FeatID m_lang;

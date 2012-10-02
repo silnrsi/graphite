@@ -24,45 +24,46 @@ project(graphite2_core)
 cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckCXXSourceCompiles)
 
-set(GRAPHITE_API_MAJOR 2)
-set(GRAPHITE_API_MINOR 0)
-set(GRAPHITE_API_AGE 0)
-set(GRAPHITE_SO_VERSION ${GRAPHITE_API_MAJOR}.${GRAPHITE_API_MINOR}.${GRAPHITE_API_AGE})
+set(GRAPHITE_API_CURRENT 3)
+set(GRAPHITE_API_REVISION 0)
+set(GRAPHITE_API_AGE 1)
+set(GRAPHITE_VERSION ${GRAPHITE_API_CURRENT}.${GRAPHITE_API_REVISION}.${GRAPHITE_API_AGE})
+set(GRAPHITE_SO_VERSION ${GRAPHITE_API_CURRENT})
 
 include(TestBigEndian)
-TEST_BIG_ENDIAN(WORDS_BIGENDIAN)
-if (WORDS_BIGENDIAN)
-    add_definitions(-DWORDS_BIGENDIAN)
-endif (WORDS_BIGENDIAN)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-if (DISABLE_SEGCACHE)
-    add_definitions(-DDISABLE_SEGCACHE)
-endif (DISABLE_SEGCACHE)
+set(SEGCACHE SegCache.cpp SegCacheEntry.cpp SegCacheStore.cpp)
+if (GRAPHITE2_NSEGCACHE)
+    add_definitions(-DGRAPHITE2_NSEGCACHE)
+    set(SEGCACHE)
+endif (GRAPHITE2_NSEGCACHE)
 
-if (DISABLE_FILEFACE)
-    add_definitions(-DDISABLE_FILE_FACE)
-endif (DISABLE_FILEFACE)
+set(FILEFACE FileFace.cpp)
+if (GRAPHITE2_NFILEFACE)
+    add_definitions(-DGRAPHITE2_NFILEFACE)
+    set(FILEFACE)
+endif (GRAPHITE2_NFILEFACE)
 
-if (NOT DISABLE_TRACING)
-    set(TRACE_HEADERS ../include/graphite2/XmlLog.h)
-    if (ENABLE_DEEP_TRACING)
-        add_definitions(-DENABLE_DEEP_TRACING)
-    endif (ENABLE_DEEP_TRACING)
-endif (NOT DISABLE_TRACING)
+set(TRACING json.cpp)
+if (GRAPHITE2_NTRACING)
+    add_definitions(-DGRAPHITE2_NTRACING)
+    set(TRACING)
+endif (GRAPHITE2_NTRACING)
+
 
 set(GRAPHITE_HEADERS 
     ../include/graphite2/Font.h
     ../include/graphite2/Segment.h
     ../include/graphite2/Types.h
-    ${TRACE_HEADERS}
+    ../include/graphite2/Log.h
     )
 
-file(GLOB PRIVATE_HEADERS *.h) 
+file(GLOB PRIVATE_HEADERS inc/*.h) 
 
 add_library(graphite2 SHARED
-    ${VM_MACHINE_TYPE}_machine.cpp
+    ${GRAPHITE2_VM_TYPE}_machine.cpp
     gr_char_info.cpp
     gr_features.cpp
     gr_face.cpp
@@ -78,36 +79,37 @@ add_library(graphite2 SHARED
     FeatureMap.cpp
     Font.cpp
     GlyphFace.cpp
-    GlyphFaceCache.cpp
+    GlyphCache.cpp
+    Justifier.cpp
     NameTable.cpp
     Pass.cpp
-    SegCache.cpp
-    SegCacheEntry.cpp
-    SegCacheStore.cpp
+    Rule.cpp
     Segment.cpp
     Silf.cpp
     Slot.cpp
     Sparse.cpp
     TtfUtil.cpp
-    XmlTraceLog.cpp
-    XmlTraceLogTags.cpp)
+    UtfCodec.cpp
+    ${FILEFACE}
+    ${SEGCACHE}
+    ${TRACING})
 
 set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             SOVERSION ${GRAPHITE_SO_VERSION}
-                                            LT_VERSION_CURRENT ${GRAPHITE_API_MAJOR}
-                                            LT_VERSION_REVISION ${GRAPHITE_API_MINOR}
+                                            VERSION ${GRAPHITE_VERSION}
+                                            LT_VERSION_CURRENT ${GRAPHITE_API_CURRENT}
+                                            LT_VERSION_REVISION ${GRAPHITE_API_REVISION}
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-Wall -Wno-unknown-pragmas -Wparentheses -Wextra -Wendif-labels
-     -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option
-     -fno-rtti -fno-exceptions -nodefaultlibs
-     -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector)
-    set_target_properties(graphite2 PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fdiagnostics-show-option -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector"
+        LINK_FLAGS      "-nodefaultlibs" 
+        LINKER_LANGUAGE C)
     if (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
-        target_link_libraries(graphite2 "-lkernel32 -lmsvcr90 -lmingw32 -lgcc -luser32")
+        target_link_libraries(graphite2 kernel32 msvcr90 mingw32 gcc user32)
     else (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
-        target_link_libraries(graphite2 "-lc -lgcc")
+        target_link_libraries(graphite2 c gcc)
         include(Graphite)
         nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
     endif (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
@@ -115,8 +117,21 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fdiagnostics-show-option -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector"
+        LINK_FLAGS      "-nodefaultlibs" 
+        LINKER_LANGUAGE C)
+    target_link_libraries(graphite2 c)
+    include(Graphite)
+    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+    CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -DGR2_EXPORTING)
+    set_target_properties(graphite2 PROPERTIES 
+        COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 

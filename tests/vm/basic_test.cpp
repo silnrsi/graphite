@@ -2,13 +2,14 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
-#include "Code.h"
-#include "Rule.h"
-#include "Silf.h"
-#include "Face.h"
+#include "inc/Code.h"
+#include "inc/Rule.h"
+#include "inc/Silf.h"
+#include "inc/Face.h"
 
 using namespace graphite2;
 using namespace vm;
+typedef Machine::Code  Code;
 
 const byte simple_prog[] = 
 {
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
     
     // Load the code.
     Silf silf;
-    gr_face *face = gr_make_file_face(font_path, gr_face_default);
+    gr_face *face = gr_make_file_face(font_path, gr_face_dumbRendering);
     if (!face)
     {
         std::cerr << argv[0] << ": failed to load graphite tables for font: " << font_path << std::endl;
@@ -97,18 +98,17 @@ int main(int argc, char *argv[])
     // run the program
     Segment seg;
     uint32 ret = 0;
-    Machine::status_t status;
     SlotMap smap(seg);
     Machine m(smap);
     smap.pushSlot(0);
     slotref * map = smap.begin();
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, map, status);
-        switch (status) {
+        ret = prog.run(m, map);
+        switch (m.status()) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:
                 std::cerr << "program terminated early: " 
-                          << run_error_msg[status] << std::endl;
+                          << run_error_msg[m.status()] << std::endl;
                 std::cout << "--------" << std::endl
                           << "between " << prog.instructionCount()*(repeats-n) 
                           << " and "    << prog.instructionCount()*(repeats-std::min(n-1,repeats))

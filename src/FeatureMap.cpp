@@ -24,147 +24,144 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include <string.h>
+#include <cstring>
 
-#include "Main.h"
-#include "FeatureMap.h"
-#include "FeatureVal.h"
+#include "inc/Main.h"
+#include "inc/bits.h"
+#include "inc/Endian.h"
+#include "inc/FeatureMap.h"
+#include "inc/FeatureVal.h"
 #include "graphite2/Font.h"
-#include "XmlTraceLog.h"
-#include "TtfUtil.h"
-//#include <algorithm>
-#include <stdlib.h>
-#include "Face.h"
+#include "inc/TtfUtil.h"
+#include <cstdlib>
+#include "inc/Face.h"
 
 
 using namespace graphite2;
 
-static int cmpNameAndFeatures(const void *a, const void *b) { return (*(NameAndFeatureRef *)a < *(NameAndFeatureRef *)b 
-                                                                        ? -1 : (*(NameAndFeatureRef *)b < *(NameAndFeatureRef *)a 
-                                                                                    ? 1 : 0)); }
+namespace
+{
+	static int cmpNameAndFeatures(const void *ap, const void *bp)
+	{
+		const NameAndFeatureRef & a = *static_cast<const NameAndFeatureRef *>(ap),
+								& b = *static_cast<const NameAndFeatureRef *>(bp);
+		return (a < b ? -1 : (b < a ? 1 : 0));
+	}
+
+	const size_t 	FEAT_HEADER		= sizeof(uint32) + 2*sizeof(uint16) + sizeof(uint32),
+					FEATURE_SIZE    = sizeof(uint32)
+									+ 2*sizeof(uint16)
+									+ sizeof(uint32)
+									+ 2*sizeof(uint16),
+					FEATURE_SETTING_SIZE = sizeof(int16) + sizeof(uint16);
+
+	uint16 readFeatureSettings(const byte * p, FeatureSetting * s, size_t num_settings)
+	{
+		uint16 max_val = 0;
+        for (FeatureSetting * const end = s + num_settings; s != end; ++s)
+        {
+        	const int16 value = be::read<int16>(p);
+            ::new (s) FeatureSetting(value, be::read<uint16>(p));
+            if (uint16(value) > max_val) 	max_val = value;
+        }
+
+        return max_val;
+	}
+}
+
+FeatureRef::FeatureRef(const Face & face,
+	unsigned short & bits_offset, uint32 max_val,
+	uint32 name, uint16 uiName, uint16 flags,
+	FeatureSetting *settings, uint16 num_set) throw()
+: m_pFace(&face),
+  m_nameValues(settings),
+  m_mask(mask_over_val(max_val)),
+  m_max(max_val),
+  m_id(name),
+  m_nameid(uiName),
+  m_flags(flags),
+  m_numSet(num_set)
+{
+	const uint8 need_bits = bit_set_count(m_mask);
+	m_index = (bits_offset + need_bits) / SIZEOF_CHUNK;
+	if (m_index > bits_offset / SIZEOF_CHUNK)
+		bits_offset = m_index*SIZEOF_CHUNK;
+	m_bits = bits_offset % SIZEOF_CHUNK;
+	bits_offset += need_bits;
+	m_mask <<= m_bits;
+}
+
+FeatureRef::~FeatureRef() throw()
+{
+    free(m_nameValues);
+}
 
 bool FeatureMap::readFeats(const Face & face)
 {
-    size_t lFeat;
-    const byte *pFeat = face.getTable(TtfUtil::Tag::Feat, &lFeat);
-    const byte *pOrig = pFeat;
-    uint16 *defVals=0;
-    uint32 version;
-    if (!pFeat) return true;
-    if (lFeat < 12) return false;
+    const Face::Table feat(face, TtfUtil::Tag::Feat);
+    const byte * p = feat;
+    if (!p) return true;
+    if (feat.size() < FEAT_HEADER) return false;
 
-    version = read32(pFeat);
-    if (version < 0x00010000) return false;
-    m_numFeats = read16(pFeat);
-    read16(pFeat);
-    read32(pFeat);
-    if (m_numFeats * 16U + 12 > lFeat) { m_numFeats = 0; return false; }		//defensive
-    if (m_numFeats)
-    {
-        m_feats = new FeatureRef[m_numFeats];
-        m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
-        defVals = gralloc<uint16>(m_numFeats);
-    }
-    byte currIndex = 0;
-    byte currBits = 0;     //to cause overflow on first Feature
+    const byte *const feat_start = p,
+    		   *const feat_end = p + feat.size();
 
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementFeatures);
-        XmlTraceLog::get().addAttribute(AttrMajor, version >> 16);
-        XmlTraceLog::get().addAttribute(AttrMinor, version & 0xFFFF);
-        XmlTraceLog::get().addAttribute(AttrNum, m_numFeats);
+    const uint32 version = be::read<uint32>(p);
+    m_numFeats = be::read<uint16>(p);
+    be::skip<uint16>(p);
+    be::skip<uint32>(p);
+
+    // Sanity checks
+    if (m_numFeats == 0) 	return true;
+    if (version < 0x00010000 ||
+    	p + m_numFeats*FEATURE_SIZE > feat_end)
+    {   //defensive
+    	m_numFeats = 0;
+    	return false;
     }
-#endif
+
+    m_feats = new FeatureRef [m_numFeats];
+    uint16 * const	defVals = gralloc<uint16>(m_numFeats);
+    unsigned short bits = 0;     //to cause overflow on first Feature
+
     for (int i = 0, ie = m_numFeats; i != ie; i++)
     {
-        uint32 name;
-        if (version < 0x00020000)
-            name = read16(pFeat);
+        const uint32 	label   = version < 0x00020000 ? be::read<uint16>(p) : be::read<uint32>(p);
+        const uint16 	num_settings = be::read<uint16>(p);
+        if (version >= 0x00020000)
+        	be::skip<uint16>(p);
+        const byte * const feat_setts = feat_start + be::read<uint32>(p);
+        const uint16 	flags  = be::read<uint16>(p),
+        				uiName = be::read<uint16>(p);
+
+        if (feat_setts + num_settings * FEATURE_SETTING_SIZE > feat_end)
+        {
+            free(defVals);
+            return false;
+        }
+
+        FeatureSetting *uiSet;
+        uint32 maxVal;
+        if (num_settings != 0)
+        {
+			uiSet = gralloc<FeatureSetting>(num_settings);
+			maxVal = readFeatureSettings(feat_setts, uiSet, num_settings);
+			defVals[i] = uiSet[0].value();
+        }
         else
-            name = read32(pFeat);
-        uint16 numSet = read16(pFeat);
-
-        uint32 offset;
-        if (version < 0x00020000)
-            offset = read32(pFeat);
-        else
         {
-            read16(pFeat);
-            offset = read32(pFeat);
-        }
-        uint16 flags = read16(pFeat);
-        uint16 uiName = read16(pFeat);
-        const byte *pSet = pOrig + offset;
-        uint16 maxVal = 0;
-
-#ifndef DISABLE_TRACING
-        if (XmlTraceLog::get().active())
-        {
-            XmlTraceLog::get().openElement(ElementFeature);
-            XmlTraceLog::get().addAttribute(AttrIndex, i);
-            XmlTraceLog::get().addAttribute(AttrNum, name);
-            XmlTraceLog::get().addAttribute(AttrFlags, flags);
-            XmlTraceLog::get().addAttribute(AttrLabel, uiName);
-        }
-#endif
-
-        if (numSet == 0)
-        {
-            --m_numFeats;
-#ifndef DISABLE_TRACING
-            XmlTraceLog::get().closeElement(ElementFeature);
-#endif
-            continue;
+        	uiSet = 0;
+        	maxVal = 0xffffffff;
+        	defVals[i] = 0;
         }
 
-        if (offset + numSet * 4 > lFeat) return false;
-        FeatureSetting *uiSet = gralloc<FeatureSetting>(numSet);
-        for (int j = 0; j < numSet; j++)
-        {
-            int16 val = read16(pSet);
-            if (val > maxVal) maxVal = val;
-            if (j == 0) defVals[i] = val;
-            uint16 label = read16(pSet);
-            ::new(uiSet + j) FeatureSetting(label, val);
-#ifndef DISABLE_TRACING
-            if (XmlTraceLog::get().active())
-            {
-                XmlTraceLog::get().openElement(ElementFeatureSetting);
-                XmlTraceLog::get().addAttribute(AttrIndex, j);
-                XmlTraceLog::get().addAttribute(AttrValue, val);
-                XmlTraceLog::get().addAttribute(AttrLabel, label);
-                if (j == 0) XmlTraceLog::get().addAttribute(AttrDefault, defVals[i]);
-                XmlTraceLog::get().closeElement(ElementFeatureSetting);
-            }
-#endif
-        }
-        uint32 mask = 1;
-        byte bits = 0;
-        for (bits = 0; bits < 32; bits++, mask <<= 1)
-        {
-            if (mask > maxVal)
-            {
-                if (bits + currBits > 32)
-                {
-                    currIndex++;
-                    currBits = 0;
-                    mask = 2;
-                }
-                ::new (m_feats + i) FeatureRef (currBits, currIndex,
-                                               (mask - 1) << currBits, flags,
-                                               name, uiName, numSet, uiSet, &face);
-                currBits += bits;
-                break;
-            }
-        }
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementFeature);
-#endif
+		::new (m_feats + i) FeatureRef (face, bits, maxVal,
+									   label, uiName, flags,
+									   uiSet, num_settings);
     }
-    m_defaultFeatures = new Features(currIndex + 1, *this);
-    for (int i = 0; i < m_numFeats; i++)
+    m_defaultFeatures = new Features(bits/(sizeof(uint32)*8) + 1, *this);
+    m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
+    for (int i = 0; i < m_numFeats; ++i)
     {
     	m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
         m_pNamedFeats[i] = m_feats+i;
@@ -173,10 +170,6 @@ bool FeatureMap::readFeats(const Face & face)
     free(defVals);
 
     qsort(m_pNamedFeats, m_numFeats, sizeof(NameAndFeatureRef), &cmpNameAndFeatures);
-
-#ifndef DISABLE_TRACING
-    XmlTraceLog::get().closeElement(ElementFeatures);
-#endif
 
     return true;
 }
@@ -191,40 +184,41 @@ bool SillMap::readFace(const Face & face)
 
 bool SillMap::readSill(const Face & face)
 {
-    size_t lSill;
-    const byte *pSill = face.getTable(TtfUtil::Tag::Sill, &lSill);
-    const byte *pBase = pSill;
+	const Face::Table sill(face, TtfUtil::Tag::Sill);
+    const byte *pSill = sill;
 
     if (!pSill) return true;
-    if (lSill < 12) return false;
-    if (read32(pSill) != 0x00010000UL) return false;
-    m_numLanguages = read16(pSill);
+    if (sill.size() < 12) return false;
+    if (be::read<uint32>(pSill) != 0x00010000UL) return false;
+    m_numLanguages = be::read<uint16>(pSill);
     m_langFeats = new LangFeaturePair[m_numLanguages];
     if (!m_langFeats || !m_FeatureMap.m_numFeats) { m_numLanguages = 0; return true; }        //defensive
 
     pSill += 6;     // skip the fast search
-    if (lSill < m_numLanguages * 8U + 12) return false;
+    if (sill.size() < m_numLanguages * 8U + 12) return false;
 
     for (int i = 0; i < m_numLanguages; i++)
     {
-        uint32 langid = read32(pSill);
-        uint16 numSettings = read16(pSill);
-        uint16 offset = read16(pSill);
-        if (offset + 8U * numSettings > lSill && numSettings > 0) return false;
+        uint32 langid = be::read<uint32>(pSill);
+        uint16 numSettings = be::read<uint16>(pSill);
+        uint16 offset = be::read<uint16>(pSill);
+        if (offset + 8U * numSettings > sill.size() && numSettings > 0) return false;
         Features* feats = new Features(*m_FeatureMap.m_defaultFeatures);
-        const byte *pLSet = pBase + offset;
+        const byte *pLSet = sill + offset;
 
+        // Apply langauge specific settings
         for (int j = 0; j < numSettings; j++)
         {
-            uint32 name = read32(pLSet);
-            uint16 val = read16(pLSet);
+            uint32 name = be::read<uint32>(pLSet);
+            uint16 val = be::read<uint16>(pLSet);
             pLSet += 2;
             const FeatureRef* pRef = m_FeatureMap.findFeatureRef(name);
-            if (pRef)
-                pRef->applyValToFeature(val, *feats);
+            if (pRef) 	pRef->applyValToFeature(val, *feats);
         }
-        //std::pair<uint32, Features *>kvalue = std::pair<uint32, Features *>(langid, feats);
-        //m_langMap.insert(kvalue);
+        // Add the language id feature which is always feature id 1
+        const FeatureRef* pRef = m_FeatureMap.findFeatureRef(1);
+        if (pRef)	pRef->applyValToFeature(langid, *feats);
+
         m_langFeats[i].m_lang = langid;
         m_langFeats[i].m_pFeatures = feats;
     }
@@ -259,9 +253,9 @@ const FeatureRef *FeatureMap::findFeatureRef(uint32 name) const
     return NULL;
 }
 
-bool FeatureRef::applyValToFeature(uint16 val, Features & pDest) const 
+bool FeatureRef::applyValToFeature(uint32 val, Features & pDest) const
 { 
-    if (val>m_max || !m_pFace)
+    if (val>maxVal() || !m_pFace)
       return false;
     if (pDest.m_pMap==NULL)
       pDest.m_pMap = &m_pFace->theSill().theFeatureMap();
@@ -274,7 +268,7 @@ bool FeatureRef::applyValToFeature(uint16 val, Features & pDest) const
     return true;
 }
 
-uint16 FeatureRef::getFeatureVal(const Features& feats) const
+uint32 FeatureRef::getFeatureVal(const Features& feats) const
 { 
   if (m_index < feats.size() && &m_pFace->theSill().theFeatureMap()==feats.m_pMap) 
     return (feats[m_index] & m_mask) >> m_bits; 

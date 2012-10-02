@@ -139,8 +139,6 @@ class RenderedLine
         unsigned long numGlyphs() const { return m_numGlyphs; }
         float advance() const { return m_advance; }
         // define placement new for windows
-        void * operator new (size_t size, RenderedLine * p) { return p; }
-        void operator delete (void *, RenderedLine * p) { }
         bool resize(size_t newGlyphCount)
         {
             if (newGlyphCount <= m_numGlyphs)

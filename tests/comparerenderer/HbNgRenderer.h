@@ -23,17 +23,23 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <hb-shape.h>
-#include <hb-buffer.h>
-#include <hb-font.h>
+#include <hb.h>
+#include <hb-ot.h>
 #include <hb-ft.h>
 #include <hb-glib.h>
-#include <hb-ot.h>
+/*
+#include <hb-buffer.h>
+#include <hb-font.h>
 #include <hb-ot-layout.h>
+*/
 #include <glib/gunicode.h>
 
 #include "Renderer.h"
 #include "FeatureParser.h"
+
+static const char *shapers[] = {
+    "ot", NULL
+};
 
 void hbngFtDestroy(void *user_data)
 {
@@ -45,7 +51,7 @@ class HbNgRenderer : public Renderer
 public:
     HbNgRenderer(const char * fileName, int fontSize, int textDir, FeatureParser * features)
         : m_ftLibrary(NULL), m_ftFace(NULL),
-        m_face(NULL), m_font(NULL), m_feats(NULL), m_bufferLength(1024), m_featCount(0)
+        m_face(NULL), m_font(NULL), m_feats(NULL), m_featCount(0)
     {
         if ((FT_Init_FreeType(&m_ftLibrary) == 0) &&
             (FT_New_Face(m_ftLibrary, fileName, 0, &m_ftFace) == 0))
@@ -69,7 +75,7 @@ public:
                 fprintf(stderr, "FT_Request_Size %d failed\n", fontSize);
             }
         }
-        m_buffer = hb_buffer_create(m_bufferLength);
+        m_buffer = hb_buffer_create();
         if (features)
         {
             m_featCount = features->featureCount() + 1;
@@ -104,14 +110,14 @@ public:
         if (m_ftLibrary) FT_Done_FreeType(m_ftLibrary);
         delete m_feats;
     }
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
-        if (length > m_bufferLength)
-        {
-            hb_buffer_destroy(m_buffer);
-            m_bufferLength = length;
-            hb_buffer_create(m_bufferLength);
-        }
+//        if (length > m_bufferLength)
+//        {
+//            hb_buffer_destroy(m_buffer);
+//            m_bufferLength = length;
+//            hb_buffer_create(m_bufferLength);
+//        }
         hb_buffer_reset(m_buffer);
         hb_buffer_add_utf8(m_buffer, utf8, length, 0, length);
         hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
@@ -120,7 +126,7 @@ public:
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
         //hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
-        hb_shape(m_font, m_buffer, m_feats, m_featCount);
+        hb_shape_full(m_font, m_buffer, m_feats, m_featCount, shapers);
         hb_glyph_info_t * infos = hb_buffer_get_glyph_infos(m_buffer, NULL);
         hb_glyph_position_t * positions = hb_buffer_get_glyph_positions(m_buffer, NULL);
         size_t numGlyphs = hb_buffer_get_length(m_buffer);
@@ -145,6 +151,5 @@ private:
     hb_font_t * m_font;
     hb_buffer_t * m_buffer;
     hb_feature_t* m_feats;
-    size_t m_bufferLength;
     size_t m_featCount;
 };

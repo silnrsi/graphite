@@ -24,42 +24,39 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "processUTF.h"
-#include <string.h>
-#include <stdlib.h>
-#include <new>
+#include "inc/UtfCodec.h"
+#include <cstring>
+#include <cstdlib>
 
-#include "Segment.h"
+#include "inc/bits.h"
+#include "inc/Segment.h"
 #include "graphite2/Font.h"
-#include "CharInfo.h"
-#include "Slot.h"
-#include "Main.h"
-#include "XmlTraceLog.h"
-#include "CmapCache.h"
+#include "inc/CharInfo.h"
+#include "inc/debug.h"
+#include "inc/Slot.h"
+#include "inc/Main.h"
+#include "inc/CmapCache.h"
 #include "graphite2/Segment.h"
 
 
 using namespace graphite2;
 
-Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir) :
-        m_freeSlots(NULL),
-        m_first(NULL),
-        m_last(NULL),
-        m_numGlyphs(numchars),
-        m_numCharinfo(numchars),
-        m_defaultOriginal(0),
-        m_charinfo(new CharInfo[numchars]),
-        m_face(face),
-        m_silf(face->chooseSilf(script)),
-        m_bbox(Rect(Position(0, 0), Position(0, 0))),
-        m_dir(textDir)
+Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir)
+: m_freeSlots(NULL),
+  m_freeJustifies(NULL),
+  m_charinfo(new CharInfo[numchars]),
+  m_face(face),
+  m_silf(face->chooseSilf(script)),
+  m_first(NULL),
+  m_last(NULL),
+  m_bufSize(numchars + 10),
+  m_numGlyphs(numchars),
+  m_numCharinfo(numchars),
+  m_defaultOriginal(0),
+  m_dir(textDir)
 {
-    unsigned int i, j;
-    m_bufSize = numchars + 10;
     freeSlot(newSlot());
-    for (i = 0, j = 1; j < numchars; i++, j <<= 1) {}
-    if (!i) i = 1;
-    m_bufSize = i;                  // log2(numchars)
+    m_bufSize = log_binary(numchars)+1;
 }
 
 Segment::~Segment()
@@ -71,7 +68,7 @@ Segment::~Segment()
     delete[] m_charinfo;
 }
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 SegmentScopeState Segment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
 {
     SegmentScopeState state;
@@ -132,7 +129,7 @@ void Segment::append(const Segment &other)
     m_advance = m_advance + other.m_advance;
     m_bbox = m_bbox.widen(bbox);
 }
-#endif // DISABLE_SEGCACHE
+#endif // GRAPHITE2_NSEGCACHE
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
@@ -141,10 +138,10 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
     m_charinfo[id].base(coffset);
-    const GlyphFace * theGlyph = m_face->getGlyphFaceCache()->glyphSafe(gid);
+    const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     if (theGlyph)
     {
-        m_charinfo[id].breakWeight(theGlyph->getAttr(m_silf->aBreak()));
+        m_charinfo[id].breakWeight(theGlyph->attrs()[m_silf->aBreak()]);
     }
     else
     {
@@ -167,8 +164,11 @@ Slot *Segment::newSlot()
     if (!m_freeSlots)
     {
         int numUser = m_silf->numUser();
+#if !defined GRAPHITE2_NTRACING
+        if (m_face->logger()) ++numUser;
+#endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
-        uint16 *newAttrs = grzeroalloc<uint16>(numUser * m_bufSize);
+        int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
         newSlots[0].userAttrs(newAttrs);
         for (size_t i = 1; i < m_bufSize - 1; i++)
         {
@@ -194,7 +194,12 @@ void Segment::freeSlot(Slot *aSlot)
     if (m_first == aSlot) m_first = aSlot->next();
     // reset the slot incase it is reused
     ::new (aSlot) Slot;
-    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(uint16));
+    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
+    // Update generation counter for debug
+#if !defined GRAPHITE2_NTRACING
+    if (m_face->logger())
+        ++aSlot->userAttrs()[m_silf->numUser()];
+#endif
     // update next pointer
     if (!m_freeSlots)
         aSlot->next(NULL);
@@ -203,389 +208,201 @@ void Segment::freeSlot(Slot *aSlot)
     m_freeSlots = aSlot;
 }
 
-#ifndef DISABLE_SEGCACHE
-void Segment::splice(size_t offset, size_t length, Slot * startSlot,
-                       Slot * endSlot, const Slot * firstSpliceSlot,
-                       size_t numGlyphs)
+SlotJustify *Segment::newJustify()
 {
-    const Slot * replacement = firstSpliceSlot;
-    Slot * slot = startSlot;
-    extendLength(numGlyphs - length);
-    // insert extra slots if needed
-    while (numGlyphs > length)
+    if (!m_freeJustifies)
     {
-        Slot * extra = newSlot();
-        extra->prev(endSlot);
-        extra->next(endSlot->next());
-        endSlot->next(extra);
-        if (extra->next())
-            extra->next()->prev(extra);
-        if (m_last == endSlot)
-            m_last = extra;
-        endSlot = extra;
-        ++length;
+        const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
+        byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
+        for (int i = m_bufSize - 2; i >= 0; --i)
+        {
+            SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
+            SlotJustify *next = reinterpret_cast<SlotJustify *>(justs + justSize * (i + 1));
+            p->next = next;
+        }
+        m_freeJustifies = (SlotJustify *)justs;
+        m_justifies.push_back(m_freeJustifies);
     }
+    SlotJustify *res = m_freeJustifies;
+    m_freeJustifies = m_freeJustifies->next;
+    res->next = NULL;
+    return res;
+}
+
+void Segment::freeJustify(SlotJustify *aJustify)
+{
+    int numJust = m_silf->numJustLevels();
+    if (m_silf->numJustLevels() <= 0) numJust = 1;
+    aJustify->next = m_freeJustifies;
+    memset(aJustify->values, 0, numJust*SlotJustify::NUMJUSTPARAMS*sizeof(int16));
+    m_freeJustifies = aJustify;
+}
+
+#ifndef GRAPHITE2_NSEGCACHE
+void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
+                       Slot * endSlot, const Slot * srcSlot,
+                       const size_t numGlyphs)
+{
+    extendLength(numGlyphs - length);
     // remove any extra
     if (numGlyphs < length)
     {
-        Slot * afterSplice = endSlot->next();
+        Slot * end = endSlot->next();
         do
         {
             endSlot = endSlot->prev();
             freeSlot(endSlot->next());
-            --length;
-        } while (numGlyphs < length);
-        endSlot->next(afterSplice);
-        if (afterSplice)
-            afterSplice->prev(endSlot);
+        } while (numGlyphs < --length);
+        endSlot->next(end);
+        if (end)
+            end->prev(endSlot);
     }
-    assert(numGlyphs == length);
-    // keep a record of consecutive slots wrt start of splice to minimize
-    // iterative next/prev calls
-    Slot * slotArray[eMaxSpliceSize];
-    uint16 slotPosition = 0;
-    for (uint16 i = 0; i < numGlyphs; i++)
+    else
     {
-        if (slotPosition <= i)
+        // insert extra slots if needed
+        while (numGlyphs > length)
         {
-            slotArray[i] = slot;
-            slotPosition = i;
+            Slot * extra = newSlot();
+            extra->prev(endSlot);
+            extra->next(endSlot->next());
+            endSlot->next(extra);
+            if (extra->next())
+                extra->next()->prev(extra);
+            if (m_last == endSlot)
+                m_last = extra;
+            endSlot = extra;
+            ++length;
         }
-        slot->set(*replacement, offset, m_silf->numUser());
-        if (replacement->attachedTo())
-        {
-            uint16 parentPos = replacement->attachedTo() - firstSpliceSlot;
-            while (slotPosition < parentPos)
-            {
-                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
-                ++slotPosition;
-            }
-            slot->attachTo(slotArray[parentPos]);
-        }
-        if (replacement->nextSibling())
-        {
-            uint16 pos = replacement->nextSibling() - firstSpliceSlot;
-            while (slotPosition < pos)
-            {
-                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
-                ++slotPosition;
-            }
-            slot->sibling(slotArray[pos]);
-        }
-        if (replacement->firstChild())
-        {
-            uint16 pos = replacement->firstChild() - firstSpliceSlot;
-            while (slotPosition < pos)
-            {
-                slotArray[slotPosition+1] = slotArray[slotPosition]->next();
-                ++slotPosition;
-            }
-            slot->child(slotArray[pos]);
-        }
-        slot = slot->next();
-        replacement = replacement->next();
+    }
+
+    endSlot = endSlot->next();
+    assert(numGlyphs == length);
+    Slot * indexmap[eMaxSpliceSize*3];
+    assert(numGlyphs < sizeof indexmap/sizeof *indexmap);
+    Slot * slot = startSlot;
+    for (uint16 i=0; i < numGlyphs; slot = slot->next(), ++i)
+    	indexmap[i] = slot;
+
+    slot = startSlot;
+    for (slot=startSlot; slot != endSlot; slot = slot->next(), srcSlot = srcSlot->next())
+    {
+        slot->set(*srcSlot, offset, m_silf->numUser(), m_silf->numJustLevels());
+        if (srcSlot->attachedTo())	slot->attachTo(indexmap[srcSlot->attachedTo()->index()]);
+        if (srcSlot->nextSibling())	slot->m_sibling = indexmap[srcSlot->nextSibling()->index()];
+        if (srcSlot->firstChild())	slot->m_child = indexmap[srcSlot->firstChild()->index()];
     }
 }
-#endif // DISABLE_SEGCACHE
-        
-void Segment::positionSlots(const Font *font, Slot *iStart, Slot *iEnd)
+#endif // GRAPHITE2_NSEGCACHE
+
+void Segment::linkClusters(Slot *s, Slot * end)
+{
+	end = end->next();
+
+	for (; s != end && !s->isBase(); s = s->next());
+	Slot * ls = s;
+
+	if (m_dir & 1)
+	{
+		for (; s != end; s = s->next())
+		{
+			if (!s->isBase())	continue;
+
+			s->sibling(ls);
+			ls = s;
+		}
+	}
+	else
+	{
+		for (; s != end; s = s->next())
+		{
+			if (!s->isBase())	continue;
+
+			ls->sibling(s);
+			ls = s;
+		}
+	}
+}
+
+Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 {
     Position currpos(0., 0.);
-    Slot *s, *ls = NULL;
-    int iSlot = 0;
-    float cMin = 0.;
-    float clusterMin = 0.;
     Rect bbox;
+    float clusterMin = 0.;
 
-    if (!iStart) iStart = m_first;
-    if (!iEnd) iEnd = m_last;
-    
+    if (!iStart)	iStart = m_first;
+    if (!iEnd)		iEnd   = m_last;
+
     if (m_dir & 1)
     {
-        for (s = iEnd, iSlot = m_numGlyphs - 1; s && s != iStart->prev(); s = s->prev(), --iSlot)
+        for (Slot * s = iEnd, * const end = iStart->prev(); s && s != end; s = s->prev())
         {
-            int j = s->before();
-            if (j >= 0)
-            {
-                for ( ; j <= s->after(); j++)
-                {
-                    CharInfo *c = charinfo(j);
-                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                    if (c->after() < iSlot) c->after(iSlot);
-                }
-            }
-            s->index(iSlot);
-
             if (s->isBase())
-            {
-                clusterMin = currpos.x;
-                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0, &clusterMin);
-                if (ls)
-                    ls->sibling(s);
-                ls = s;
-            }
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x);
         }
     }
     else
     {
-        for (s = iStart, iSlot = 0; s && s != iEnd->next(); s = s->next(), ++iSlot)
+        for (Slot * s = iStart, * const end = iEnd->next(); s && s != end; s = s->next())
         {
-            int j = s->before();
-            if (j >= 0)
-            {
-                for ( ; j <= s->after(); j++)
-                {
-                    CharInfo *c = charinfo(j);
-                    if (c->before() == -1 || iSlot < c->before()) c->before(iSlot);
-                    if (c->after() < iSlot) c->after(iSlot);
-                }
-            }
-            s->index(iSlot);
-
             if (s->isBase())
-            {
-                clusterMin = currpos.x;
-                currpos = s->finalise(this, font, &currpos, &bbox, &cMin, 0, &clusterMin);
-                if (ls)
-                    ls->sibling(s);
-                ls = s;
-            }
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x);
         }
     }
-    if (iStart == m_first && iEnd == m_last) m_advance = currpos;
+    return currpos;
 }
 
-#ifndef DISABLE_TRACING
-void Segment::logSegment(gr_encform enc, const void* pStart, size_t nChars) const
+
+void Segment::associateChars()
 {
-    if (XmlTraceLog::get().active())
+    int i = 0;
+    for (Slot * s = m_first; s; s->index(i++), s = s->next())
     {
-        if (pStart)
-        {
-            XmlTraceLog::get().openElement(ElementText);
-            XmlTraceLog::get().addAttribute(AttrEncoding, enc);
-            XmlTraceLog::get().addAttribute(AttrLength, nChars);
-            switch (enc)
-            {
-            case gr_utf8:
-                XmlTraceLog::get().writeText(
-                    reinterpret_cast<const char *>(pStart));
-                break;
-            case gr_utf16:
-                for (size_t j = 0; j < nChars; ++j)
-                {
-                    uint32 code = reinterpret_cast<const uint16 *>(pStart)[j];
-                    if (code >= 0xD800 && code <= 0xDBFF) // high surrogate
-                    {
-                        j++;
-                        // append low surrogate
-                        code = (code << 16) + reinterpret_cast<const uint16 *>(pStart)[j];
-                    }
-                    else if (code >= 0xDC00 && code <= 0xDFFF)
-                    {
-                        XmlTraceLog::get().warning("Unexpected low surrogate %x at %d", code, j);
-                    }
-                    XmlTraceLog::get().writeUnicode(code);
-                }
-                break;
-            case gr_utf32:
-                for (size_t j = 0; j < nChars; ++j)
-                {
-                    XmlTraceLog::get().writeUnicode(
-                        reinterpret_cast<const uint32 *>(pStart)[j]);
-                }
-                break;
-            }
-            XmlTraceLog::get().closeElement(ElementText);
-        }
-        logSegment();
+        int j = s->before();
+        if (j < 0)	continue;
+
+        for (const int after = s->after(); j <= after; ++j)
+		{
+			CharInfo & c = *charinfo(j);
+			if (c.before() == -1 || i < c.before()) 	c.before(i);
+			if (c.after() < i) 							c.after(i);
+		}
     }
 }
 
-void Segment::logSegment() const
+
+template <typename utf_iter>
+inline void process_utf_data(Segment & seg, const Face & face, const int fid, utf_iter c, size_t n_chars)
 {
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementSegment);
-        XmlTraceLog::get().addAttribute(AttrLength, slotCount());
-        XmlTraceLog::get().addAttribute(AttrAdvanceX, advance().x);
-        XmlTraceLog::get().addAttribute(AttrAdvanceY, advance().y);
-        for (Slot *i = m_first; i; i = i->next())
-        {
-            XmlTraceLog::get().openElement(ElementSlot);
-            XmlTraceLog::get().addAttribute(AttrGlyphId, i->gid());
-            XmlTraceLog::get().addAttribute(AttrX, i->origin().x);
-            XmlTraceLog::get().addAttribute(AttrY, i->origin().y);
-            XmlTraceLog::get().addAttribute(AttrBefore, i->before());
-            XmlTraceLog::get().addAttribute(AttrAfter, i->after());
-            XmlTraceLog::get().closeElement(ElementSlot);
-        }
-        XmlTraceLog::get().closeElement(ElementSegment);
-    }
+	const Cmap    & cmap = face.cmap();
+	int slotid = 0;
+
+	const typename utf_iter::codeunit_type * const base = c;
+	for (; n_chars; --n_chars, ++c, ++slotid)
+	{
+		const uint32 usv = *c;
+		uint16 gid = cmap[usv];
+		if (!gid)	gid = face.findPseudo(usv);
+		seg.appendSlot(slotid, usv, gid, fid, c - base);
+	}
 }
 
-#endif
-
-
-
-class SlotBuilder
-{
-public:
-      SlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
-      :	  m_face(face2), 
-	  m_pDest(pDest2), 
-	  m_ctable(NULL),
-	  m_stable(NULL),
-	  m_fid(pDest2->addFeatures(*pFeats)),
-	  m_nCharsProcessed(0) 
-      {
-          size_t cmapSize = 0;
-          const void * table = face2->getTable(Tag::cmap, &cmapSize);
-          if (!table) return;
-          m_ctable = TtfUtil::FindCmapSubtable(table, 3, 1, cmapSize);
-          if (!m_ctable || !TtfUtil::CheckCmap31Subtable(m_ctable))
-          {
-              m_ctable = NULL;
-              return;
-          }
-          m_stable = TtfUtil::FindCmapSubtable(table, 3, 10, cmapSize);
-          if (m_stable && !TtfUtil::CheckCmap310Subtable(m_stable)) m_stable = NULL;
-      }
-
-      bool processChar(uint32 cid/*unicode character*/, size_t coffset)		//return value indicates if should stop processing
-      {
-          if (!m_ctable) return false;
-          uint16 gid = cid > 0xFFFF ? (m_stable ? TtfUtil::Cmap310Lookup(m_stable, cid) : 0) : (m_ctable ? TtfUtil::Cmap31Lookup(m_ctable, cid) : 0);
-          if (!gid)
-              gid = m_face->findPseudo(cid);
-          m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
-          ++m_nCharsProcessed;
-          return true;
-      }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      const Face *m_face;
-      Segment *m_pDest;
-      const void *   m_ctable;
-      const void *   m_stable;
-      const unsigned int m_fid;
-      size_t m_nCharsProcessed ;
-};
-
-class CachedSlotBuilder
-{
-public:
-    CachedSlotBuilder(const Face *face2, const Features* pFeats/*must not be NULL*/, Segment* pDest2)
-    :  m_face(face2),
-    m_cmap(face2->getCmapCache()),
-    m_pDest(pDest2),
-    m_breakAttr(pDest2->silf()->aBreak()),
-    m_fid(pDest2->addFeatures(*pFeats)),
-    m_nCharsProcessed(0)
-    {
-    }
-
-    bool processChar(uint32 cid/*unicode character*/, size_t coffset)     //return value indicates if should stop processing
-    {
-        if (!m_cmap) return false;
-        uint16 gid = m_cmap->lookup(cid);
-        if (!gid)
-            gid = m_face->findPseudo(cid);
-        //int16 bw = m_face->glyphAttr(gid, m_breakAttr);
-        m_pDest->appendSlot(m_nCharsProcessed, cid, gid, m_fid, coffset);
-        ++m_nCharsProcessed;
-        return true;
-    }
-
-      size_t charsProcessed() const { return m_nCharsProcessed; }
-
-private:
-      const Face *m_face;
-      const CmapCache *m_cmap;
-      Segment *m_pDest;
-      uint8 m_breakAttr;
-      const unsigned int m_fid;
-      size_t m_nCharsProcessed ;
-};
 
 void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
-    assert(pFeats);
-    CharacterCountLimit limit(enc, pStart, nChars);
-    IgnoreErrors ignoreErrors;
-    if (face->getCmapCache())
-    {
-        CachedSlotBuilder slotBuilder(face, pFeats, this);
-        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
-    }
-    else
-    {
-        SlotBuilder slotBuilder(face, pFeats, this);
-        processUTF(limit/*when to stop processing*/, &slotBuilder, &ignoreErrors);
-    }
+	assert(face);
+	assert(pFeats);
+
+	switch (enc)
+	{
+	case gr_utf8:	process_utf_data(*this, *face, addFeatures(*pFeats), utf8::const_iterator(pStart), nChars); break;
+	case gr_utf16:	process_utf_data(*this, *face, addFeatures(*pFeats), utf16::const_iterator(pStart), nChars); break;
+	case gr_utf32:	process_utf_data(*this, *face, addFeatures(*pFeats), utf32::const_iterator(pStart), nChars); break;
+	}
 }
 
 void Segment::prepare_pos(const Font * /*font*/)
 {
     // copy key changeable metrics into slot (if any);
-}
-
-void Segment::finalise(const Font *font)
-{
-    positionSlots(font);
-}
-
-void Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags flags, Slot *pFirst, Slot *pLast)
-{
-    Slot *pEnd = pSlot;
-    Slot *s, *end;
-    int numBase = 0;
-    float currWidth = 0.;
-    float scale = font ? font->scale() : 1.0;
-    float base;
-
-    if (!pFirst) pFirst = pSlot;
-    base = pFirst->origin().x / scale;
-    width = width / scale;
-    end = pLast ? pLast->next() : NULL;
-
-    for (s = pFirst; s != end; s=s->next())
-    {
-        float w = s->origin().x / scale + s->advance() - base;
-        if (w > currWidth) currWidth = w;
-        pEnd = s;
-        if (!s->attachedTo())       // what about trailing whitespace?
-            numBase++;
-    }
-    if (pLast)
-        while (s)
-        {
-            pEnd = s;
-            s = s->next();
-        }
-    else
-        pLast = pEnd;
-        
-    if (!numBase) return;
-
-    Slot *oldFirst = m_first;
-    Slot *oldLast = m_last;
-    // add line end contextuals to linked list
-    m_first = pSlot;
-    m_last = pEnd;
-    // process the various silf justification stuff returning updated currwidth
-
-    // now fallback to spreading the remaining space among all the bases
-    float nShift = (width - currWidth) / (numBase - 1);
-    for (s = pFirst->nextSibling(); s != end; s = s->nextSibling())
-        s->just(nShift + s->just());
-    positionSlots(font, pSlot, pEnd);
-
-    m_first = oldFirst;
-    m_last = oldLast;
-    // dump line end contextual markers
 }
 
 Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0);
@@ -605,7 +422,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     unsigned int bmask = 0;
     for (s = first(); s; s = s->next())
     {
-        unsigned int bAttr = glyphAttr(s->gid(), aBidi);
+    	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
         s->setBidiClass((bAttr <= 16) * bAttr);
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
@@ -616,11 +433,11 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
             resolveExplicit(baseLevel, 0, first(), 0);
         if (bmask & 0x10178)
             resolveWeak(baseLevel, first());
-        if (bmask & 0x161)
+        if (bmask & 0x361)
             resolveNeutrals(baseLevel, first());
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());
-        s = resolveOrder(s = first(), baseLevel);
+        s = resolveOrder(s = first(), baseLevel != 0);
         first(s); last(s->prev());
         s->prev()->next(0); s->prev(0);
     }

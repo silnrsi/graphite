@@ -201,7 +201,7 @@ public:
         return lf;
     }
 
-    virtual void renderText(const char * utf8, size_t length, RenderedLine * result)
+    virtual void renderText(const char * utf8, size_t length, RenderedLine * result, FILE *log)
     {
         if (!length || !m_usp.fScriptItemize || !m_usp.fScriptShape || !m_usp.fScriptPlace)
         {

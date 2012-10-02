@@ -25,62 +25,35 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "graphite2/Segment.h"
-#include "processUTF.h"
-#include "Segment.h"
+#include "inc/UtfCodec.h"
+#include "inc/Segment.h"
 
 using namespace graphite2;
 
 namespace 
 {
-  template <class LIMIT, class CHARPROCESSOR>
-  size_t doCountUnicodeCharacters(const LIMIT& limit, CHARPROCESSOR* pProcessor, const void** pError)
-  {
-      BreakOnError breakOnError;
-      
-      processUTF(limit/*when to stop processing*/, pProcessor, &breakOnError);
-      if (pError) {
-          *pError = breakOnError.m_pErrorPos;
-      }
-      return pProcessor->charsProcessed();
-  }
-
-  class CharCounterToNul
-  {
-  public:
-        CharCounterToNul()
-        :	  m_nCharsProcessed(0) 
-        {
-        }	  
-
-        bool processChar(uint32 cid/*unicode character*/, size_t /*offset*/)		//return value indicates if should stop processing
-        {
-            if (cid==0)
-                return false;
-            ++m_nCharsProcessed;
-            return true;
-        }
-
-        size_t charsProcessed() const { return m_nCharsProcessed; }
-
-  private:
-        size_t m_nCharsProcessed ;
-  };
 
   gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
+      if (script == 0x20202020) script = 0;
+      else if ((script & 0x00FFFFFF) == 0x00202020) script = script & 0xFF000000;
+      else if ((script & 0x0000FFFF) == 0x00002020) script = script & 0xFFFF0000;
+      else if ((script & 0x000000FF) == 0x00000020) script = script & 0xFFFFFF00;
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
 
       pRes->read_text(face, pFeats, enc, pStart, nChars);
-      pRes->runGraphite();
+      if (!pRes->runGraphite())
+      {
+        delete pRes;
+        return NULL;
+      }
       // run the line break passes
       // run the substitution passes
       pRes->prepare_pos(font);
       // run the positioning passes
       pRes->finalise(font);
-  #ifndef DISABLE_TRACING
-      pRes->logSegment(enc, pStart, nChars);
-  #endif
+
       return static_cast<gr_segment*>(pRes);
   }
 
@@ -88,23 +61,43 @@ namespace
 }
 
 
-extern "C" {
+template <typename utf_iter>
+inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
+{
+	size_t n_chars = 0;
+	uint32 usv = 0;
 
+	if (last)
+	{
+		for (;first != last; ++first, ++n_chars)
+			if ((usv = *first) == 0 || first.error()) break;
+	}
+	else
+	{
+		while ((usv = *first) != 0 && !first.error())
+		{
+			++first;
+			++n_chars;
+		}
+	}
+
+	if (error)	*error = first.error() ? first : 0;
+	return n_chars;
+}
+
+extern "C" {
 
 size_t gr_count_unicode_characters(gr_encform enc, const void* buffer_begin, const void* buffer_end/*don't go on or past end, If NULL then ignored*/, const void** pError)   //Also stops on nul. Any nul is not in the count
 {
-  if (buffer_end)
-  {
-    BufferLimit limit(enc, buffer_begin, buffer_end);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-  }
-  else
-  {
-    NoLimit limit(enc, buffer_begin);
-    CharCounterToNul counter;
-    return doCountUnicodeCharacters(limit, &counter, pError);
-  }
+	assert(buffer_begin);
+
+	switch (enc)
+	{
+	case gr_utf8:	return count_unicode_chars<utf8::const_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf16:	return count_unicode_chars<utf16::const_iterator>(buffer_begin, buffer_end, pError); break;
+	case gr_utf32:	return count_unicode_chars<utf32::const_iterator>(buffer_begin, buffer_end, pError); break;
+	default:		return 0;
+	}
 }
 
 
@@ -171,12 +164,11 @@ const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
     return static_cast<const gr_slot*>(pSeg->last());
 }
 
-void gr_seg_justify(gr_segment* pSeg/*not NULL*/, gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags, gr_slot *pFirst, gr_slot *pLast)
+float gr_seg_justify(gr_segment* pSeg/*not NULL*/, const gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags, const gr_slot *pFirst, const gr_slot *pLast)
 {
     assert(pSeg);
     assert(pSlot);
-    printf("[%f]", width);
-    pSeg->justify(pSlot, pFont, width, justFlags(flags), pFirst, pLast);
+    return pSeg->justify(const_cast<gr_slot *>(pSlot), pFont, float(width), justFlags(flags), const_cast<gr_slot *>(pFirst), const_cast<gr_slot *>(pLast));
 }
 
 } // extern "C"

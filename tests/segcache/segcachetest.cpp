@@ -19,40 +19,37 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cstdio>
 #include <graphite2/Segment.h>
-#include "Main.h"
-#include "Silf.h"
-#include "Face.h"
-#include "CachedFace.h"
-#include "Segment.h"
-#include "SegCache.h"
-#include "SegCacheStore.h"
-#include "processUTF.h"
-#include "TtfTypes.h"
-#include "TtfUtil.h"
+#include <graphite2/Log.h>
+#include "inc/Main.h"
+#include "inc/Silf.h"
+#include "inc/Face.h"
+#include "inc/CachedFace.h"
+#include "inc/Segment.h"
+#include "inc/SegCache.h"
+#include "inc/SegCacheStore.h"
+#include "inc/UtfCodec.h"
+#include "inc/TtfTypes.h"
+#include "inc/TtfUtil.h"
 
 using namespace graphite2;
 
 inline gr_face * api_cast(CachedFace *p) { return static_cast<gr_face*>(static_cast<Face*>(p)); }
 
-class CmapProcessor
+template <typename utf_itr>
+void resolve_unicode_to_glyphs(const Face & face, utf_itr first, size_t n_chars, uint16 * glyphs)
 {
-public:
-    CmapProcessor(Face * face, uint16 * buffer) :
-        m_cmapTable(TtfUtil::FindCmapSubtable(face->getTable("cmap", NULL), 3, 1)),
-        m_buffer(buffer), m_pos(0) {};
-    bool processChar(uint32 cid, size_t /*offset*/)      //return value indicates if should stop processing
-    {
-        assert(cid < 0xFFFF); // only lower plane supported for this test
-        m_buffer[m_pos++] = TtfUtil::Cmap31Lookup(m_cmapTable, cid);
-        return true;
-    }
-    size_t charsProcessed() const { return m_pos; } //number of characters processed. Usually starts from 0 and incremented by processChar(). Passed in to LIMIT::needMoreChars
-private:
-    const void * m_cmapTable;
-    uint16 * m_buffer;
-    size_t m_pos;
-};
+    Face::Table  cmap_tbl = Face::Table(face, "cmap");
+	const void * cmap = TtfUtil::FindCmapSubtable(cmap_tbl, 3, 1);
+
+	for (; n_chars; --n_chars, ++first)
+	{
+		const uint32 usv = *first;
+		assert(usv < 0xFFFF); 	// only lower plane supported for this test
+		*glyphs++ = TtfUtil::CmapSubtable4Lookup(cmap, usv);
+	}
+}
 
 bool checkEntries(CachedFace
  * face, const char * testString, uint16 * glyphString, size_t testLength)
@@ -120,10 +117,7 @@ bool testSeg(CachedFace
                                                     testString + strlen(testString),
                                                     &badUtf8);
     *testGlyphString = gralloc<uint16>(*testLength + 1);
-    CharacterCountLimit limit(gr_utf8, testString, *testLength);
-    CmapProcessor cmapProcessor(face, *testGlyphString);
-    IgnoreErrors ignoreErrors;
-    processUTF(limit, &cmapProcessor, &ignoreErrors);
+    resolve_unicode_to_glyphs(*face, utf8::iterator(testString), *testLength, *testGlyphString);
 
     gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);
@@ -147,18 +141,14 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Usage: %s font.ttf\n", argv[0]);
         return 1;
     }
-    FILE * log = fopen("grsegcache.xml", "w");
-    graphite_start_logging(log, GRLOG_SEGMENT);
-    CachedFace
- *face = static_cast<CachedFace
-*>(static_cast<Face
-*>(
-        (gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default))));
+    CachedFace *face = static_cast<CachedFace *>(static_cast<Face *>(
+        gr_make_file_face_with_seg_cache(fileName, 10, gr_face_default)));
     if (!face)
     {
         fprintf(stderr, "Invalid font, failed to parse tables\n");
         return 3;
     }
+    gr_start_logging(api_cast(face), "grsegcache.json");
     gr_font *sizedFont = gr_make_font(12, api_cast(face));
     const char * testStrings[] = { "a", "aa", "aaa", "aaab", "aaac", "a b c",
         "aaa ", " aa", "aaaf", "aaad", "aaaa"};
@@ -176,7 +166,7 @@ int main(int argc, char ** argv)
     long long accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 16)
     {
-        fprintf(stderr, "SegCache contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -189,7 +179,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount != 10 || accessCount != 29)
     {
-        fprintf(stderr, "SegCache after repeat contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after repeat contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -201,7 +191,7 @@ int main(int argc, char ** argv)
     accessCount = segCache->totalAccessCount();
     if (segCount > 10 || accessCount != 30)
     {
-        fprintf(stderr, "SegCache after purge contains %u entries, which were used %Ld times\n",
+        fprintf(stderr, "SegCache after purge contains %u entries, which were used %lld times\n",
             segCount, accessCount);
         return -2;
     }
@@ -209,6 +199,6 @@ int main(int argc, char ** argv)
     gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
-    graphite_stop_logging();
+    gr_stop_logging(api_cast(face));
     return 0;
 }

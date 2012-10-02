@@ -1,0 +1,10 @@
+Text codes
+ e01	  62	
+pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
+00    66  -1@0,0	   0.0	   0.0	 1  30	  0   0	    e01	    e01
+01    68  -1@0,0	   4.3	   0.0	 1  30	  1   1	     62	     62
+Advance width =   10.9
+
+Char	Unicode	Before	After
+0	0E01	0	0
+1	0062	1	1

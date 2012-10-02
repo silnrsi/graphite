@@ -25,27 +25,26 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 
-#include "Main.h"
-#include "TtfTypes.h"
-#include "TtfUtil.h"
-#include "SegCache.h"
-#include "SegCacheEntry.h"
-#include "SegCacheStore.h"
-#include "CmapCache.h"
+#include "inc/Main.h"
+#include "inc/TtfTypes.h"
+#include "inc/TtfUtil.h"
+#include "inc/SegCache.h"
+#include "inc/SegCacheEntry.h"
+#include "inc/SegCacheStore.h"
+#include "inc/CmapCache.h"
 
 
 using namespace graphite2;
 
-#ifndef DISABLE_SEGCACHE
+#ifndef GRAPHITE2_NSEGCACHE
 
 SegCache::SegCache(const SegCacheStore * store, const Features & feats)
-    :
-    m_prefixLength(ePrefixLength),
-    m_maxCachedSegLength(eMaxSpliceSize),
-    m_segmentCount(0),
-    m_features(feats),
-    m_totalAccessCount(0l), m_totalMisses(0l),
-    m_purgeFactor(1.0f / (ePurgeFactor * store->maxSegmentCount()))
+: m_prefixLength(ePrefixLength),
+  m_maxCachedSegLength(eMaxSpliceSize),
+  m_segmentCount(0),
+  m_features(feats),
+  m_totalAccessCount(0l), m_totalMisses(0l),
+  m_purgeFactor(1.0f / (ePurgeFactor * store->maxSegmentCount()))
 {
     m_prefixes.raw = grzeroalloc<void*>(store->maxCmapGid() + 2);
     m_prefixes.range[SEG_CACHE_MIN_INDEX] = SEG_CACHE_UNSET_INDEX;
@@ -72,22 +71,7 @@ void SegCache::freeLevel(SegCacheStore * store, SegCachePrefixArray prefixes, si
 
 void SegCache::clear(SegCacheStore * store)
 {
-    #ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().openElement(ElementSegCache);
-        XmlTraceLog::get().addAttribute(AttrNum, m_segmentCount);
-        XmlTraceLog::get().addAttribute(AttrAccessCount, m_totalAccessCount);
-        XmlTraceLog::get().addAttribute(AttrMisses, m_totalMisses);
-    }
-#endif
     freeLevel(store, m_prefixes, 0);
-#ifndef DISABLE_TRACING
-    if (XmlTraceLog::get().active())
-    {
-        XmlTraceLog::get().closeElement(ElementSegCache);
-    }
-#endif
     m_prefixes.raw = NULL;
 }
 
@@ -159,7 +143,7 @@ SegCacheEntry* SegCache::cache(SegCacheStore * store, const uint16* cmapGlyphs, 
 
 void SegCache::purge(SegCacheStore * store)
 {
-    unsigned long long minAccessCount = m_totalAccessCount * m_purgeFactor + 1;
+    unsigned long long minAccessCount = static_cast<unsigned long long>(m_totalAccessCount * m_purgeFactor + 1);
     if (minAccessCount < 2) minAccessCount = 2;
     unsigned long long oldAccessTime = m_totalAccessCount - store->maxSegmentCount() / eAgeFactor;
     purgeLevel(store, m_prefixes, 0, minAccessCount, oldAccessTime);
@@ -215,7 +199,7 @@ uint32 SegCachePrefixEntry::purge(unsigned long long minAccessCount,
             }
             else
             {
-                m_entries[length][newIndex++] = m_entries[length][j];
+                memcpy(m_entries[length] + newIndex++, m_entries[length] + j, sizeof(SegCacheEntry));
             }
         }
         if (purgeCount == m_entryCounts[length])

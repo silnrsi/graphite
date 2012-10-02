@@ -36,21 +36,12 @@ diagnostic log of the segment creation in grSegmentLog.txt
 #include <climits>
 #include <iomanip>
 #include <cstring>
-#ifdef HAVE_ICONV
-#include <iconv.h>
-#endif
+
+#include "UtfCodec.h"
 
 #include "graphite2/Types.h"
 #include "graphite2/Segment.h"
-#include "graphite2/XmlLog.h"
-
-#if !defined WORDS_BIGENDIAN || defined PC_OS
-#define swap16(x) (((x & 0xff) << 8) | ((x & 0xff00) >> 8))
-#define swap32(x) (((x & 0xff) << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24))
-#else
-#define swap16(x) (x)
-#define swap32(x) (x)
-#endif
+#include "graphite2/Log.h"
 
 class Gr2TextSrc
 {
@@ -102,7 +93,7 @@ public:
     bool rtl;
     bool useLineFill;
     bool useCodes;
-    bool justification;
+    int justification;
     bool enableCache;
     float width;
     int textArgIndex;
@@ -110,8 +101,7 @@ public:
     size_t charLength;
     size_t offset;
     FILE * log;
-    FILE * trace;
-    int mask;
+    char * trace;
     
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
@@ -144,7 +134,7 @@ void Parameters::clear()
     ws = false;
     useLineFill = false;
     useCodes = false;
-    justification = false;
+    justification = 0;
     enableCache = false;
     width = 100.0f;
     pText32 = NULL;
@@ -153,7 +143,6 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
-    mask = GRLOG_SEGMENT | GRLOG_OPCODE;
 }
 
 
@@ -168,56 +157,35 @@ void Parameters::closeLog()
 
 int lookup(size_t *map, size_t val);
 
+namespace gr2 = graphite2;
 
-#ifdef HAVE_ICONV
-
-template <class A,class B> int
-convertUtf(const char * inType, const char * outType, A* pIn, B * & pOut)
+template <typename utf>
+size_t convertUtf(const void * src, unsigned int * & dest)
 {
-    int length = 0;//strlen(reinterpret_cast<char*>(pIn));
-    while (pIn[length] != 0) length++;
-    int outFactor = 1;
-    if (sizeof(B) < sizeof(A))
-    {
-        outFactor = sizeof(A) / sizeof(B);
-    }
-#ifdef WIN32
-    const char * pText = reinterpret_cast<char*>(pIn);
-#else
-    char * pText = reinterpret_cast<char*>(pIn);
-#endif
-    // It seems to be necessary to include the trailing null to prevent
-    // stray characters appearing with utf16
-    size_t bytesLeft = (length+1) * sizeof(A);
-    // allow 2 extra for null + bom
-    size_t outBytesLeft = (length*outFactor + 2) * sizeof(B);
-    size_t outBufferSize = outBytesLeft;
-    //B * textOut = new B[length*outFactor + 2];
-    B * textOut = reinterpret_cast<B*>(malloc(sizeof(B) * length*outFactor + 2));// new operator not defined
-    iconv_t utfInOut = iconv_open(outType,inType);
-    assert(utfInOut != (iconv_t)(-1));
-    char * pTextOut = reinterpret_cast<char*>(&textOut[0]);
-    size_t status = iconv(utfInOut, &pText, &bytesLeft, &pTextOut, &outBytesLeft);
-    if (status == size_t(-1)) perror("iconv failed:");
-    size_t charLength = (outBufferSize - outBytesLeft) / sizeof(B);
-    assert(status != size_t(-1));
-    // offset by 1 to avoid bom
-    unsigned char * bom = reinterpret_cast<unsigned char*>(&textOut[0]);
-    if ((charLength * sizeof(B) > 1) && ((bom[1] == 0xfe && bom[0] == 0xff)
-        || (bom[0] == 0xfe && bom[1] == 0xff)))
-    {
-            charLength--;
-            for (size_t i = 0; i < charLength; i++)
-                textOut[i] = textOut[i+1];
-            textOut[charLength] = 0;
-    }
-    if (textOut[charLength] == 0) --charLength;
-    pOut = textOut;
-    iconv_close(utfInOut);
-    return charLength;
+    dest = static_cast<unsigned int *>(malloc(sizeof(*dest)*strlen(reinterpret_cast<const char *>(src))+1));
+    if (!dest)
+    	return 0;
+
+    typename utf::const_iterator ui = src;
+    size_t n_chars = 0;
+    unsigned int * out = dest;
+	while ((*out = *ui) != 0 && !ui.error())
+	{
+		++ui;
+		++out;
+		++n_chars;
+	}
+
+	if (ui.error())
+	{
+		free(dest);
+		dest = 0;
+		return size_t(-1);
+	}
+
+	return n_chars;
 }
 
-#endif
 
 bool Parameters::loadFromArgs(int argc, char *argv[])
 {
@@ -232,6 +200,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         NONE,
         POINT_SIZE,
         DPI,
+        JUSTIFY,
         LINE_START,
         LINE_END,
         LINE_FILL,
@@ -278,6 +247,16 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             }
             option = NONE;
             break;
+        case JUSTIFY:
+            pIntEnd = NULL;
+            justification = strtol(argv[a], &pIntEnd, 10);
+            if (justification <= 0)
+            {
+                fprintf(stderr, "Justification value must be > 0 but was %s\n", argv[a]);
+                justification = 0;
+            }
+            option = NONE;
+            break;
         case LINE_FILL:
             pFloatEnd = NULL;
             fTestSize = strtof(argv[a],&pFloatEnd);
@@ -308,16 +287,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             option = NONE;
             break;
         case TRACE:
-            if (trace) fclose(trace);
-            trace = fopen(argv[a], "wb");
-            if (trace == NULL)
-            {
-                fprintf(stderr,"Failed to open %s\n", argv[a]);
-            }
-            option = NONE;
-            break;
-        case TRACE_MASK:
-            mask = atoi(argv[a]);
+            trace = argv[a];
             option = NONE;
             break;
         default:
@@ -382,8 +352,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 }
                 else if (strcmp(argv[a], "-j") == 0)
                 {
-                    option = NONE;
-                    justification = true;
+                    option = JUSTIFY;
                 }
                 else if (strcmp(argv[a], "-log") == 0)
                 {
@@ -446,8 +415,14 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     {
         if (!useCodes && pText != NULL)
         {
-#ifdef HAVE_ICONV
-            charLength = convertUtf("utf-8","utf-32",pText, pText32);
+            charLength = convertUtf<gr2::utf8>(pText, pText32);
+            if (!pText32)
+            {
+            	if (charLength == -1)
+            		perror("decoding utf-8 data failed");
+            	else
+            		perror("insufficent memory for text buffer");
+            }
             fprintf(log, "String has %d characters\n", (int)charLength);
             size_t ci;
             for (ci = 0; ci < 10 && ci < charLength; ci++)
@@ -462,10 +437,6 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                         fprintf(log, "\n");
             }
             fprintf(log, "\n");
-#else
-            fprintf(stderr,"Only the -codes option is supported on Win32\n");
-            argError = true;
-#endif
         }
         else 
         {
@@ -476,11 +447,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     return (argError) ? false : true;
 }
 
-union FeatID
-{
-    gr_uint8 uChar[4];
-    gr_uint32 uId;
-};
+typedef gr_uint32 tag_t;
 
 void Parameters::printFeatures(const gr_face * face) const
 {
@@ -492,28 +459,21 @@ void Parameters::printFeatures(const gr_face * face) const
         const gr_feature_ref * f = gr_face_fref(face, i);
         gr_uint32 length = 0;
         char * label = reinterpret_cast<char *>(gr_fref_label(f, &langId, gr_utf8, &length));
-        FeatID featId;
-        featId.uId = gr_fref_id(f);
+        const tag_t featId = gr_fref_id(f);
         if (label)
-            if ((featId.uChar[0] >= 0x20 && featId.uChar[0] < 0x7F) &&
-                (featId.uChar[1] >= 0x20 && featId.uChar[1] < 0x7F) &&
-                (featId.uChar[2] >= 0x20 && featId.uChar[2] < 0x7F) &&
-                (featId.uChar[3] >= 0x20 && featId.uChar[3] < 0x7F))
+            if ((char(featId >> 24) >= 0x20 && char(featId >> 24) < 0x7F) &&
+                (char(featId >> 16) >= 0x20 && char(featId >> 16) < 0x7F) &&
+                (char(featId >> 8)  >= 0x20 && char(featId >> 8)  < 0x7F) &&
+                (char(featId)       >= 0x20 && char(featId)       < 0x7F))
             {
-#ifdef WORDS_BIGENDIAN
-                fprintf(log, "%d %c%c%c%c %s\n", featId.uId, featId.uChar[0], featId.uChar[1],
-                       featId.uChar[2], featId.uChar[3], label);
-#else
-                fprintf(log, "%d %c%c%c%c %s\n", featId.uId, featId.uChar[3], featId.uChar[2],
-                       featId.uChar[1], featId.uChar[0], label);
-#endif
+                fprintf(log, "%d %c%c%c%c %s\n", featId, featId >> 24, featId >> 16, featId >> 8, featId, label);
             }
             else
             {
-                fprintf(log, "%d %s\n", featId.uId, label);
+                fprintf(log, "%d %s\n", featId, label);
             }
         else
-            fprintf(log, "%d\n", featId.uId);
+            fprintf(log, "%d\n", featId);
         gr_label_destroy(reinterpret_cast<void*>(label));
         gr_uint16 numSettings = gr_fref_n_values(f);
         for (gr_uint16 j = 0; j < numSettings; j++)
@@ -529,14 +489,13 @@ void Parameters::printFeatures(const gr_face * face) const
     fprintf(log, "Feature Languages:");
     for (gr_uint16 i = 0; i < numLangs; i++)
     {
-        FeatID langID;
-        langID.uId = gr_face_lang_by_index(face, i);
-        langID.uId = swap32(langID.uId);
+    	const tag_t lang_id = gr_face_lang_by_index(face, i);
         fprintf(log, "\t");
-        for (size_t j = 0; j < 4; j++)
+        for (size_t j = 4; j; --j)
         {
-            if ((langID.uChar[j]) >= 0x20 && (langID.uChar[j] < 0x80))
-                fprintf(log, "%c", langID.uChar[j]);
+        	const char c = lang_id >> (j*8-8);
+            if ((c >= 0x20) && (c < 0x80))
+                fprintf(log, "%c", c);
         }
     }
     fprintf(log, "\n");
@@ -546,21 +505,18 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
 {
     gr_feature_val * featureList = NULL;
     const char * pLang = NULL;
-    FeatID lang;
-    lang.uId = 0;
+    tag_t lang_id = 0;
     if (features && (pLang = strstr(features, "lang=")))
     {
         pLang += 5;
         size_t i = 0;
-        while ((i < 4) && (*pLang != '0') && (*pLang != '&'))
+        for (int i = 4; i; --i, lang_id <<= 8)
         {
-            lang.uChar[i] = *pLang;
-            ++pLang;
-            ++i;
+        	if (*pLang == '0' || *pLang == '&') continue;
+        	lang_id |= *pLang++;
         }
-        lang.uId = swap32(lang.uId);
     }
-    featureList = gr_face_featureval_for_lang(face, lang.uId);
+    featureList = gr_face_featureval_for_lang(face, lang_id);
     if (!features || strlen(features) == 0)
         return featureList;
     size_t featureLength = strlen(features);
@@ -568,9 +524,8 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
     const char * valueText = NULL;
     size_t nameLength = 0;
     gr_int32 value = 0;
-    FeatID featId;
     const gr_feature_ref* ref = NULL;
-    featId.uId = 0;
+    tag_t feat_id = 0;
     for (size_t i = 0; i < featureLength; i++)
     {
         switch (features[i])
@@ -586,18 +541,17 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
                 valueText = NULL;
                 name = features + i + 1;
                 nameLength = 0;
-                featId.uId = 0;
+                feat_id = 0;
                 break;
             case '=':
                 if (nameLength <= 4)
                 {
-                    featId.uId = swap32(featId.uId);
-                    ref = gr_face_find_fref(face, featId.uId);
+                    ref = gr_face_find_fref(face, feat_id);
                 }
                 if (!ref)
                 {
-                    featId.uId = atoi(name);
-                    ref = gr_face_find_fref(face, featId.uId);
+                    feat_id = atoi(name);
+                    ref = gr_face_find_fref(face, feat_id);
                 }
                 valueText = features + i + 1;
                 name = NULL;
@@ -606,9 +560,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
                 if (valueText == NULL)
                 {
                     if (nameLength < 4)
-                    {
-                        featId.uChar[nameLength++] = features[i];
-                    }
+                    	feat_id = feat_id << 8 | features[i];
                 }
                 break;
         }
@@ -616,14 +568,12 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
         {
             value = atoi(valueText);
             gr_fref_set_feature_value(ref, value, featureList);
-            if (featId.uId > 0x20000000)
+            if (feat_id > 0x20000000)
             {
-                featId.uId = swap32(featId.uId);
-                fprintf(log, "%c%c%c%c=%d\n", featId.uChar[0], featId.uChar[1],
-                         featId.uChar[2], featId.uChar[3], value);
+                fprintf(log, "%c%c%c%c=%d\n", feat_id >> 24, feat_id >> 16, feat_id >> 8, feat_id, value);
             }
             else
-                fprintf(log, "%u=%d\n", featId.uId, value);
+                fprintf(log, "%u=%d\n", feat_id, value);
             ref = NULL;
         }
     }
@@ -635,16 +585,14 @@ int Parameters::testFileFont() const
     int returnCode = 0;
 //    try
     {
-        // use the -trace option to specify a file
-#ifndef DISABLE_TRACING
-        graphite_start_logging(trace, static_cast<GrLogMask>(mask));
-#endif
-
         gr_face *face = NULL;
         if (enableCache)
             face = gr_make_file_face_with_seg_cache(fileName, 1000, gr_face_preloadGlyphs | gr_face_dumbRendering);
         else
             face = gr_make_file_face(fileName, gr_face_preloadGlyphs);
+
+        // use the -trace option to specify a file
+    	if (trace)	gr_start_logging(face, trace);
 
         if (!face)
         {
@@ -654,8 +602,8 @@ int Parameters::testFileFont() const
         if (charLength == 0)
         {
             printFeatures(face);
+            gr_stop_logging(face);
             gr_face_destroy(face);
-            graphite_stop_logging();
             return 0;
         }
 
@@ -716,90 +664,86 @@ int Parameters::testFileFont() const
             pSeg = gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
         }
-        int i = 0;
-#ifndef NDEBUG
-        int numSlots = gr_seg_n_slots(pSeg);
-#endif
-//        size_t *map = new size_t [seg.length() + 1];
-        size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
-        for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
-        { map[i] = (size_t)slot; }
-        map[i] = 0;
-        fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
-        fprintf(log, "\n");
-        i = 0;
-        for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+        if (pSeg)
         {
-            // consistency check for last slot
-            assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
-            float orgX = gr_slot_origin_X(slot);
-            float orgY = gr_slot_origin_Y(slot);
-            fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
-                    i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
-                    gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
-                    gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
-                    gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
-           
-            if (pText32 != NULL)
-            {
-                fprintf(log, "%7x\t%7x",
-                    pText32[gr_slot_before(slot) + offset],
-                    pText32[gr_slot_after(slot) + offset]);
-            }
-#if 0
-            if (parameters.justification)
-            {
-                // only level 0 seems to be supported without an assertion
-                for (int level = 0; level < 1; level++)
-                {
-                    printf("\t% 2d %6.1f %6.1f %6.1f %d", level,
-                        info.maxShrink(level),
-                        info.maxStretch(level), info.stretchStep(level),
-                        info.justWeight(level));
-                    if (info.maxShrink(level) == 0.0f &&
-                        info.maxStretch(level) == 0.0f &&
-                        info.stretchStep(level) == 0.0f &&
-                        info.justWeight(level) == 0)
-                        break;
-                }
-            }
-            printf("\n");
-            ++i;
-            ++gi;
-#endif
+            int i = 0;
+            float advanceWidth;
+    #ifndef NDEBUG
+            int numSlots = gr_seg_n_slots(pSeg);
+    #endif
+    //        size_t *map = new size_t [seg.length() + 1];
+            if (justification > 0)
+                advanceWidth = gr_seg_justify(pSeg, gr_seg_first_slot(pSeg), sizedFont, gr_seg_advance_X(pSeg) * justification / 100., gr_justCompleteLine, NULL, NULL);
+            else
+                advanceWidth = gr_seg_advance_X(pSeg);
+            size_t *map = (size_t*)malloc((gr_seg_n_slots(pSeg) + 1) * sizeof(size_t));
+            for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+            { map[i] = (size_t)slot; }
+            map[i] = 0;
+            fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
             fprintf(log, "\n");
+            i = 0;
+            for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
+            {
+                // consistency check for last slot
+                assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
+                float orgX = gr_slot_origin_X(slot);
+                float orgY = gr_slot_origin_Y(slot);
+                fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
+                        i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
+                        gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
+                        gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
+                        gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
+               
+                if (pText32 != NULL)
+                {
+                    fprintf(log, "%7x\t%7x",
+                        pText32[gr_slot_before(slot) + offset],
+                        pText32[gr_slot_after(slot) + offset]);
+                }
+    #if 0
+                if (parameters.justification)
+                {
+                    // only level 0 seems to be supported without an assertion
+                    for (int level = 0; level < 1; level++)
+                    {
+                        printf("\t% 2d %6.1f %6.1f %6.1f %d", level,
+                            info.maxShrink(level),
+                            info.maxStretch(level), info.stretchStep(level),
+                            info.justWeight(level));
+                        if (info.maxShrink(level) == 0.0f &&
+                            info.maxStretch(level) == 0.0f &&
+                            info.stretchStep(level) == 0.0f &&
+                            info.justWeight(level) == 0)
+                            break;
+                    }
+                }
+                printf("\n");
+                ++i;
+                ++gi;
+    #endif
+                fprintf(log, "\n");
+            }
+            assert(i == numSlots);
+            // assign last point to specify advance of the whole array
+            // position arrays must be one bigger than what countGlyphs() returned
+            fprintf(log, "Advance width = %6.1f\n", advanceWidth);
+            unsigned int numchar = gr_seg_n_cinfo(pSeg);
+            fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
+            for (unsigned int j = 0; j < numchar; j++)
+            {
+                const gr_char_info *c = gr_seg_cinfo(pSeg, j);
+                fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
+            }
+            free(map);
+            gr_seg_destroy(pSeg);
         }
-        assert(i == numSlots);
-        // assign last point to specify advance of the whole array
-        // position arrays must be one bigger than what countGlyphs() returned
-        float advanceWidth = gr_seg_advance_X(pSeg);
-        fprintf(log, "Advance width = %6.1f\n", advanceWidth);
-        unsigned int numchar = gr_seg_n_cinfo(pSeg);
-        fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
-        for (unsigned int j = 0; j < numchar; j++)
-        {
-            const gr_char_info *c = gr_seg_cinfo(pSeg, j);
-            fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
-        }
-        free(map);
-        gr_seg_destroy(pSeg);
        }
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
+        if (trace) gr_stop_logging(face);
         gr_face_destroy(face);
-//            delete featureParser;
-        // setText copies the text, so it is no longer needed
-//        delete [] parameters.pText32;
-//        logStream.close();
     }
-//    catch (...)
-//    {
-//        printf("Exception occurred\n");
-//        returnCode = 5;
-//    }
-#ifndef DISABLE_TRACING
-    if (trace) graphite_stop_logging();
-#endif
     return returnCode;
 }
 
@@ -826,6 +770,7 @@ int main(int argc, char *argv[])
         //fprintf(stderr,"-ls\tStart of line = true (false)\n");
         //fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
+        fprintf(stderr,"-j percentage\tJustify to percentage of string width\n");
         //fprintf(stderr,"-ws\tAllow trailing whitespace = true (false)\n");
         //fprintf(stderr,"-linefill w\tuse a LineFillSegment of width w (RangeSegment)\n");
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
