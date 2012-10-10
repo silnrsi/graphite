@@ -3,6 +3,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* calculate the breakweight between two slots */
+int breakweight_before(const gr_slot *s, const gr_segment *seg)
+{
+    int bbefore = gr_cinfo_break_weight(gr_seg_cinfo(seg, gr_slot_after(gr_slot_prev_in_segment(s))));
+    int bafter = gr_cinfo_break_weight(gr_seg_cinfo(seg, gr_slot_before(s)));
+
+    if (!gr_slot_can_insert_before(s))
+        return 50;
+    if (bbefore < 0) bbefore = 0;
+    if (bafter > 0) bafter = 0;
+    return (bbefore > bafter) ? bbefore : bafter;
+}
+
 /* usage: ./linebreak fontfile.ttf width string */
 int main(int argc, char **argv)
 {
@@ -37,16 +50,11 @@ int main(int argc, char **argv)
         sprev = NULL;
         if (gr_slot_origin_X(s) > lineend)                                      /*<3>*/
         {
-            for (sprev = gr_slot_prev_in_segment(s); sprev;                     /*<4>*/
-                                    s = sprev, sprev = gr_slot_prev_in_segment(sprev))
+            while (s)
             {
-                int bw = gr_cinfo_break_weight(gr_seg_cinfo(seg, gr_slot_before(s)));
-                if (bw < -15)                                                   /*<5>*/
-                    continue;
-                bw  = gr_cinfo_break_weight(gr_seg_cinfo(seg, gr_slot_after(sprev)));
-                if (bw > 15)
-                    continue;
-                break;
+                if (breakweight_before(s, seg) >= gr_breakWord)                 /*<4>*/
+                    break;
+                s = gr_slot_prev_in_segment(s);                                 /*<5>*/
             }
             lineslots[numlines++] = s;
             gr_slot_linebreak_before((gr_slot *)s);                             /*<6>*/

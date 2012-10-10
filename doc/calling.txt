@@ -230,11 +230,9 @@ include::../tests/examples/linebreak.c[]
 
 <3> Scan through the slots, if we are past the end of the line then find somewhere to chop.
 
-<4> Scan backwards for a valid linebreak location.
+<4> We use 15 (word break) as an appropriate break value.
 
-<5> We use 15 (syllable break) as an appropriate break value. A negative value means the
-    break constraint is before the slot, so we test that. Likewise for after we test for
-    a positive value.
+<5> Scan backwards for a valid linebreak location.
 
 <6> Break the line here.
 
@@ -247,7 +245,7 @@ include::../tests/examples/linebreak.c[]
 
 === Bidi ===
 
-Bidirectional processing is complex not so much because of any algorithms
+Bidirectional processing is complex; not so much because of any algorithms
 involved, but because of the tendency for applications to address bidi text
 processing differently. Some try to do everything themselves, inverting the text
 order, etc. While others do nothing, expecting the shaper to resolve all the
