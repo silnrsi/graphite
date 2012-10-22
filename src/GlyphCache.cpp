@@ -24,8 +24,6 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include <algorithm>
-
 #include "graphite2/Font.h"
 
 #include "inc/Main.h"
@@ -260,7 +258,7 @@ unsigned short int GlyphCache::Loader::units_per_em() const throw()
 inline
 unsigned short int GlyphCache::Loader::num_glyphs() const throw()
 {
-    return std::max(_num_glyphs_graphics, _num_glyphs_attributes);
+    return max(_num_glyphs_graphics, _num_glyphs_attributes);
 }
 
 inline
