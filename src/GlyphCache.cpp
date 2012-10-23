@@ -173,6 +173,11 @@ const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result m
     {
         GlyphFace * g = new GlyphFace();
         if (g)  p = _glyph_loader->read_glyph(glyphid, *g);
+        if (!p)
+        {
+            delete g;
+            return *_glyphs;
+        }
     }
     return p;
 }
@@ -181,7 +186,7 @@ uint16 GlyphCache::glyphAttr(uint16 gid, uint16 gattr) const
 {
 	const GlyphFace * p = glyphSafe(gid);
 
-	return p && gattr < _num_attrs ? p->attrs()[gattr] : 0;
+	return p && gattr < p->attrs().size() ? p->attrs()[gattr] : 0;
 }
 
 
@@ -234,7 +239,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
                                        / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
 
         if (version != 0x00010000
-            || _num_attrs == 0 || _num_attrs > 0x1000  // is this hard limit appropriate?
+            || _num_attrs == 0 || _num_attrs > 0x3000  // is this hard limit appropriate?
             || _num_glyphs_graphics > _num_glyphs_attributes)
         {
             _head = Face::Table();
@@ -331,11 +336,8 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
 
-        if (glyph.attrs().size() > _num_attrs)
-        {
-            glyph.~GlyphFace();
+        if (glyph.attrs().capacity() > _num_attrs)
             return 0;
-        }
     }
 
     return &glyph;

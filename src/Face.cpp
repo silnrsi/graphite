@@ -91,7 +91,7 @@ bool Face::readGlyphs(uint32 faceOptions)
     	return false;
 
     if (faceOptions & gr_face_preloadGlyphs)
-        nameTable();        // preload the name table along with the glyphs, heh.
+        nameTable();        // preload the name table along with the glyphs.
 
     return true;
 }
