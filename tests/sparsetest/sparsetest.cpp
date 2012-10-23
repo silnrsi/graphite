@@ -64,7 +64,7 @@ int main(int argc , char *argv[])
     sparse sp(data, data_end);
 
     // Check all values are stored
-    if (sp.size() != sizeof(data)/sizeof(sparse::value_type))
+    if (sp.capacity() != sizeof(data)/sizeof(sparse::value_type))
         return 1;
 
     // Check the values we put in are coming out again
@@ -99,8 +99,8 @@ int main(int argc , char *argv[])
               << "\tsize:           " << (data_end[-1].first+1)*sizeof(uint16) << std::endl
 
               << "sparse uint16 array:" << std::endl
-              << "\tcapacity:       " << sp.size() << std::endl
-              << "\tresidency:      " << sp.size() << std::endl
+              << "\tcapacity:       " << sp.capacity() << std::endl
+              << "\tresidency:      " << sp.capacity() << std::endl
               << "\tfill ratio:     " << 100.0f << "%" << std::endl
               << "\tsize:           " << sp._sizeof() << std::endl;
 
