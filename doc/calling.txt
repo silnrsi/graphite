@@ -228,20 +228,29 @@ include::../tests/examples/linebreak.c[]
 <2> Create an area to store line starts. There won't be more line starts than characters
     in the text. The first line starts at the start of the segment.
 
-<3> Scan through the slots, if we are past the end of the line then find somewhere to chop.
+<3> A simplistic approach would scan forwards using gr_slot_next_sibling_attachment, thus
+    walking the bases. The bases are guaranteed to be ordered graphically, and so we can
+    chop when we pass the line end. But in some cases, particularly Arabic, fonts are
+    implemented with one base per word and all the other base characters are attached in
+    a chain from that. So we need to walk the segment by slot, even considering attached
+    slots. This is not a problem since attached slots are not going to have a wildly
+    different position to their base and if one leaks over the end of the line, the
+    breakweight considerations will get us back to a good base.
 
-<4> We use 15 (word break) as an appropriate break value.
+<4> Scan through the slots, if we are past the end of the line then find somewhere to chop.
 
-<5> Scan backwards for a valid linebreak location.
+<5> We use 15 (word break) as an appropriate break value.
 
-<6> Break the line here.
+<6> Scan backwards for a valid linebreak location.
 
-<7> Update the line width for the new line based on the start of the new line.
+<7> Break the line here.
 
-<8> Justify each line to be width wide. And tell it to skip final whitespace (as if that whitespace were outside the width).
+<8> Update the line width for the new line based on the start of the new line.
 
-<9> Each line is a complete linked list that we can iterate over. We can no longer iterate
-    over the whole segment. We have to do it line by line now.
+<9> Justify each line to be width wide. And tell it to skip final whitespace (as if that whitespace were outside the width).
+
+<10> Each line is a complete linked list that we can iterate over. We can no longer iterate
+     over the whole segment. We have to do it line by line now.
 
 === Bidi ===
 

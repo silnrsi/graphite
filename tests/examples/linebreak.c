@@ -45,28 +45,28 @@ int main(int argc, char **argv)
 
     lineslots = (const gr_slot **)malloc(numCodePoints * sizeof(gr_slot *));
     lineslots[numlines++] = gr_seg_first_slot(seg);                             /*<2>*/
-    for (s = lineslots[0]; s; s = gr_slot_next_in_segment(s))
+    for (s = lineslots[0]; s; s = gr_slot_next_in_segment(s))                   /*<3>*/
     {
         sprev = NULL;
-        if (gr_slot_origin_X(s) > lineend)                                      /*<3>*/
+        if (gr_slot_origin_X(s) > lineend)                                      /*<4>*/
         {
             while (s)
             {
-                if (breakweight_before(s, seg) >= gr_breakWord)                 /*<4>*/
+                if (breakweight_before(s, seg) >= gr_breakWord)                 /*<5>*/
                     break;
-                s = gr_slot_prev_in_segment(s);                                 /*<5>*/
+                s = gr_slot_prev_in_segment(s);                                 /*<6>*/
             }
             lineslots[numlines++] = s;
-            gr_slot_linebreak_before((gr_slot *)s);                             /*<6>*/
-            lineend = gr_slot_origin_X(s) + width;                              /*<7>*/
+            gr_slot_linebreak_before((gr_slot *)s);                             /*<7>*/
+            lineend = gr_slot_origin_X(s) + width;                              /*<8>*/
         }
     }
 
     printf("%d:", width);
     for (i = 0; i < numlines; i++)
     {                                                                           
-        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, width, 0, NULL, NULL); /*<8>*/
-        for (s = lineslots[i]; s; s = gr_slot_next_in_segment(s))               /*<9>*/
+        gr_seg_justify(seg, (gr_slot *)lineslots[i], font, width, 0, NULL, NULL); /*<9>*/
+        for (s = lineslots[i]; s; s = gr_slot_next_in_segment(s))               /*<10>*/
             printf("%d(%.2f,%.2f@%d) ", gr_slot_gid(s), gr_slot_origin_X(s), gr_slot_origin_Y(s), gr_slot_attr(s, seg, gr_slatJWidth, 0));
         printf("\n");
     }
