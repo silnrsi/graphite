@@ -162,18 +162,16 @@ namespace gr2 = graphite2;
 template <typename utf>
 size_t convertUtf(const void * src, unsigned int * & dest)
 {
-    dest = static_cast<unsigned int *>(malloc(sizeof(*dest)*strlen(reinterpret_cast<const char *>(src))+1));
+    dest = static_cast<unsigned int *>(malloc(sizeof(unsigned int)*(strlen(reinterpret_cast<const char *>(src))+1)));
     if (!dest)
     	return 0;
 
     typename utf::const_iterator ui = src;
-    size_t n_chars = 0;
     unsigned int * out = dest;
 	while ((*out = *ui) != 0 && !ui.error())
 	{
 		++ui;
 		++out;
-		++n_chars;
 	}
 
 	if (ui.error())
@@ -183,7 +181,7 @@ size_t convertUtf(const void * src, unsigned int * & dest)
 		return size_t(-1);
 	}
 
-	return n_chars;
+	return (out-dest);
 }
 
 
