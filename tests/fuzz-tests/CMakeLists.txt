@@ -21,5 +21,7 @@ foreach (tfile IN LISTS tfiles)
     endif(NOT lastfontname EQUAL fname)
     add_custom_command(TARGET fuzztest PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../fuzztest ARGS -l fuzzregress-${fname}-${textname}-${tname}.log -f ${PROJECT_SOURCE_DIR}/../fonts/${fname}.ttf -t 10 -q --memory=200 --include=required,graphite --exclude==fontdir,opentype,volt,advtypo,post --valgrind --input=${PROJECT_SOURCE_DIR}/${fname}/${textname}/${tname} -- ../comparerenderer/comparerenderer -q -s 12 -n -f {} -t ${PROJECT_SOURCE_DIR}/texts/${textname}.txt)
     add_custom_command(TARGET fuzztest POST_BUILD COMMAND perl ARGS -e 'print"$$ARGV[0] Failed\\n" if(-s $$ARGV[0])' fuzzregress-${fname}-${textname}-${tname}.log)
+    add_custom_command(TARGET fuzztest PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../fuzztest ARGS -l fuzzregress-demand-${fname}-${textname}-${tname}.log -f ${PROJECT_SOURCE_DIR}/../fonts/${fname}.ttf -t 10 -q --memory=200 --include=required,graphite --exclude==fontdir,opentype,volt,advtypo,post --valgrind --input=${PROJECT_SOURCE_DIR}/${fname}/${textname}/${tname} -- ../comparerenderer/comparerenderer --demand -q -s 12 -n -f {} -t ${PROJECT_SOURCE_DIR}/texts/${textname}.txt)
+    add_custom_command(TARGET fuzztest POST_BUILD COMMAND perl ARGS -e 'print"$$ARGV[0] Failed\\n" if(-s $$ARGV[0])' fuzzregress-demand-${fname}-${textname}-${tname}-demand.log)
 endforeach(tfile)
 
