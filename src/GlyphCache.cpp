@@ -182,13 +182,6 @@ const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result m
     return p;
 }
 
-uint16 GlyphCache::glyphAttr(uint16 gid, uint16 gattr) const
-{
-	const GlyphFace * p = glyphSafe(gid);
-
-	return p && gattr < p->attrs().size() ? p->attrs()[gattr] : 0;
-}
-
 
 
 GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
