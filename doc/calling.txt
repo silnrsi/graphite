@@ -266,24 +266,21 @@ various bits to control bidi processing within the Graphite engine.
 
 [width="100%",cols="^2,^3,<15",options="header"]
 |=======================================================
-|gr_nobidi  |gr_nomirror  |Description
+| gr_nobidi | gr_nomirror | Description
 
-|0          |0            |
-Runs the bidi algorithm and does all mirroring
+| 0         | 0           | Runs the bidi algorithm and does all mirroring
 
-|0          |1            |
-Runs the bidi algorithm and mirrors those chars that don't have char
-replacements. It also un/remirrors anything that ends up in the opposite direction
-to the stated text direction on input.
-
-|1          |0            |
-Doesn't run the bidi algorithm but does do mirroring of all characters if
-direction is rtl.
-
-|1          |1            |
-Doesn't run the bidi algorithm and only mirrors those glyphs for which there is
-no corresponding mirroring character.
-
+| 0         | 1           | Runs the bidi algorithm and mirrors those chars 
+                            that don't have char replacements. It also 
+                            un/remirrors anything that ends up in the opposite 
+                            direction to the stated text direction on input.
+                            
+| 1         | 0           | Doesn't run the bidi algorithm but does do 
+                            mirroring of all characters if direction is rtl.
+                            
+| 1         | 1           | Doesn't run the bidi algorithm and only mirrors 
+                            those glyphs for which there is no corresponding 
+                            mirroring character.
 |=======================================================
 
 

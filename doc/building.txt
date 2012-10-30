@@ -1,6 +1,8 @@
 == Building Graphite 2 ==
 
-Graphite 2 is made available as a source tarball from: http://projects.palaso.org/graphitedev/files and also from http://sf.net/projects/silgraphite/files/graphite2
+Graphite 2 is made available as a source tarball from these urls: 
+    http://projects.palaso.org/graphitedev/files 
+ or http://sf.net/projects/silgraphite/files/graphite2
 
 Graphite 2 uses cmake for its build system. The basic build procedure is to 
 create a directory in which to build the library and produce the products. 
@@ -100,32 +102,55 @@ the -Doption=value command line option.
 For example: -DGRAPHITE2_COMPARE_RENDERER=ON
 
 CMAKE_BUILD_TYPE:STRING::
-    This specifies which type of build to do. It is a string and may take the values: Release, RelWithDeb, Debug.
+    This specifies which type of build to do. It is a string and may take the 
+    values: Release, RelWithDeb, Debug.
     The default is Release. This must be specified on Windows.
 
 GRAPHITE2_COMPARE_RENDERER:BOOL::
-    This is a boolean value that specifies whether to build the comparerenderer program that may link to silGraphite
-    or harfbuzz, if libraries of those packages are installed. The default value is OFF.
+    This is a boolean value that specifies whether to build the comparerenderer 
+    program that may link to silGraphite or harfbuzz, if libraries of those 
+    packages are installed. The default value is OFF.
 
 GRAPHITE2_NFILEFACE:BOOL::
-    This boolean value turns off FileFace support to save code space. By default it is OFF.
+    This boolean value turns off FileFace support to save code space. 
+    By default it is OFF.
 
 GRAPHITE2_NSEGCACHE:BOOL::
-    This boolean value turns off Segment caching support to save code space. By default it is OFF.
+    This boolean value turns off Segment caching support to save code space. 
+    By default it is OFF.
 
 GRAPHITE2_NTRACING:BOOL::
-    This boolean value turns off tracing support to save code space. Tracing support allows debug output of segment
-    creation. By default it is OFF.
+    This boolean value turns off tracing support to save code space. Tracing 
+    support allows debug output of segment creation. By default it is OFF.
 
 GRAPHITE2_VM_TYPE:STRING::
-    This string value can be auto, direct or call. It specifies which type of virtual machine processor to use. The
-    default value of auto tells the system to work out the best approach for this architecture. A value of direct
-    tells the system to use the direct machine which is faster. The value of call tells the system to use the slower
-    but more cross compiler portable call based machine.
+    This string value can be auto, direct or call. It specifies which type of 
+    virtual machine processor to use. The default value of auto tells the 
+    system to work out the best approach for this architecture. A value of 
+    direct tells the system to use the direct machine which is faster. 
+    The value of call tells the system to use the slower but more cross 
+    compiler portable call based machine.
 
 === Limitations ===
 
-There are some known build configuration dependencies:
+There are some hard build dependencies:
 
 python::
-    To run the make test, the build system requires python v2.6 or later. Currently python 3 is not supported.
+    To run the make test and make fuzztest, the build system requires 
+    python v2.6 or later. Currently python 3 is not supported, however porting
+    using 2to3 is straightforward. 
+
+Other configuration related dependencies:
+
+silgraphite::
+    Required to build the comparerender test and benchmarking tool and in turn
+    to allow extra tests to be run which check graphite2's rendering against 
+    silgraphite.
+
+freetype::
+    Also required by comparerender
+
+harfbuzz, harfbuzng, icule::
+    If found comparerenderer will be built with support for these but they are 
+    not required to build or run any tests
+
