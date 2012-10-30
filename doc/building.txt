@@ -123,3 +123,9 @@ GRAPHITE2_VM_TYPE:STRING::
     tells the system to use the direct machine which is faster. The value of call tells the system to use the slower
     but more cross compiler portable call based machine.
 
+=== Limitations ===
+
+There are some known build configuration dependencies:
+
+python::
+    To run the make test, the build system requires python v2.6 or later. Currently python 3 is not supported.
