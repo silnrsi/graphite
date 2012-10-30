@@ -35,10 +35,10 @@ class Gr2Face : private std::auto_ptr<gr_face>
 	bool m_cached;
 
 public:
-	Gr2Face(const char * fontFile, int cache, const std::string & logPath)
+	Gr2Face(const char * fontFile, int cache, const std::string & logPath, const bool demand_load)
     :  std::auto_ptr<gr_face>(cache == 0
-          ? gr_make_file_face(fontFile, gr_face_preloadGlyphs)
-          : gr_make_file_face_with_seg_cache(fontFile, cache, gr_face_cacheCmap | gr_face_preloadGlyphs)),
+          ? gr_make_file_face(fontFile, !demand_load ? gr_face_preloadGlyphs : gr_face_default)
+          : gr_make_file_face_with_seg_cache(fontFile, cache, (!demand_load ? gr_face_preloadGlyphs : gr_face_default) | gr_face_cacheCmap)),
        m_cached(cache > 0)
 	{
         if (!get()) return;

@@ -80,7 +80,7 @@ typedef enum {
     OptIgnoreGlyphIdDifferences,
     OptSegCache,
     OptTrace,
-    OptLogMask,
+    OptDemand,
     OptFeatures,
     OptAltFeatures,
     OptQuiet
@@ -107,8 +107,8 @@ static Option rendererOptions[] = {
     Option("-a", "--alt-font", "Alternative font file", Option::OPTION_STRING),
     Option("", "--ignore-gid", "Ignore Glyph IDs in comparison (use with -c -a alt.ttf)", Option::OPTION_BOOL),
     Option("", "--seg-cache", "Enable Segment Cache of given size", Option::OPTION_INT),
-    Option("", "--trace", "XML trace log file", Option::OPTION_STRING),
-    Option("", "--log-mask", "XML trace log mask (only used with --trace)", Option::OPTION_INT),
+    Option("", "--trace", "JSON trace log file", Option::OPTION_STRING),
+    Option("", "--demand", "Load glyphs on demand", Option::OPTION_BOOL),
     Option("", "--features", "Feature list", Option::OPTION_STRING),
     Option("", "--alt-features", "Feature list for alternative font (if different)", Option::OPTION_STRING),
     Option("-q", "--quiet", "Supress all output, including error messages", Option::OPTION_BOOL)

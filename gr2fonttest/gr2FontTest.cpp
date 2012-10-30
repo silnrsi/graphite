@@ -102,6 +102,7 @@ public:
     size_t offset;
     FILE * log;
     char * trace;
+    gr_face_options opts;
     
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
@@ -143,6 +144,7 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
+    opts = gr_face_preloadAll;
 }
 
 
@@ -205,8 +207,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         CODES,
         FEAT,
         LOG,
-        TRACE,
-        TRACE_MASK
+        TRACE
     } TestOptions;
     TestOptions option = NONE;
     char * pIntEnd = NULL;
@@ -360,9 +361,10 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 {
                     option = TRACE;
                 }
-                else if (strcmp(argv[a], "-mask") == 0)
+                else if (strcmp(argv[a], "-demand") == 0)
                 {
-                    option = TRACE_MASK;
+                    option = NONE;
+                    opts = gr_face_default;
                 }
                 else
                 {
@@ -585,9 +587,9 @@ int Parameters::testFileFont() const
     {
         gr_face *face = NULL;
         if (enableCache)
-            face = gr_make_file_face_with_seg_cache(fileName, 1000, gr_face_preloadGlyphs | gr_face_dumbRendering);
+            face = gr_make_file_face_with_seg_cache(fileName, 1000, opts | gr_face_dumbRendering);
         else
-            face = gr_make_file_face(fileName, gr_face_preloadGlyphs);
+            face = gr_make_file_face(fileName, opts);
 
         // use the -trace option to specify a file
     	if (trace)	gr_start_logging(face, trace);
@@ -775,7 +777,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with ,\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
-        fprintf(stderr,"-mask mask\tDefine the mask to use for trace logging\n");
+        fprintf(stderr,"-demand\tDemand load glyphs and cmap cache\n");
         fprintf(stderr,"-cache\tEnable Segment Cache\n");
         return 1;
     }

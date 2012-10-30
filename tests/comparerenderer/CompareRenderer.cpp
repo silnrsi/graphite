@@ -341,7 +341,7 @@ int main(int argc, char ** argv)
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
-	Gr2Face face(fontFile, segCacheSize, traceLogPath);
+	Gr2Face face(fontFile, segCacheSize, traceLogPath, rendererOptions[OptDemand].get(argv));
 
 
     if (rendererOptions[OptFeatures].exists())
@@ -369,7 +369,7 @@ int main(int argc, char ** argv)
         {
             std::string altTraceLogPath = traceLogPath;
             altTraceLogPath.insert(traceLogPath.find_last_of('.'), ".alt");
-        	Gr2Face altFace(altFontFile, segCacheSize, altTraceLogPath);
+        	Gr2Face altFace(altFontFile, segCacheSize, altTraceLogPath, rendererOptions[OptDemand].get(argv));
 
             renderers[0] = new Gr2Renderer(face, fontSize, direction, featureSettings);
             renderers[1] = new Gr2Renderer(altFace, fontSize, direction, altFeatureSettings);
@@ -422,7 +422,7 @@ int main(int argc, char ** argv)
         if (rendererOptions[OptGraphite2s].exists())
         {
         	Gr2Face uncached(fontFile, 0,
-        			std::string(traceLogPath).insert(traceLogPath.find_last_of('.'), ".uncached"));
+        			std::string(traceLogPath).insert(traceLogPath.find_last_of('.'), ".uncached"), rendererOptions[OptDemand].get(argv));
             renderers[2] = new Gr2Renderer(uncached, fontSize, direction, featureSettings);
         }
 
