@@ -63,7 +63,7 @@ if (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
     add_subdirectory(gr2fonttest)
 endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
 
-set(version 2.1.0)
+set(version 3.0.1)
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
