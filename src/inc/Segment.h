@@ -124,7 +124,7 @@ public:
     uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void dir(int8 val) { m_dir = val; }
     int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
-    uint16 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const;
+    int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const;
     float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
@@ -181,7 +181,7 @@ void Segment::finalise(const Font *font)
 }
 
 inline
-uint16 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const {
+int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const {
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);

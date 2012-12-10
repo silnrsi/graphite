@@ -144,7 +144,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     return res;
 }
 
-uint32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
+int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
 {
     Position base;
     Rect bbox = seg->theGlyphBBoxTemporary(gid());

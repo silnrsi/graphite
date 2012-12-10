@@ -491,7 +491,7 @@ STARTOP(push_att_to_glyph_metric)
     {
         slotref att = slot->attachedTo();
         if (att) slot = att;
-        push(seg.getGlyphMetric(slot, glyph_attr, attr_level));
+        push(int32(seg.getGlyphMetric(slot, glyph_attr, attr_level)));
     }
 ENDOP
 
