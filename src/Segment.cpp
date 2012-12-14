@@ -185,6 +185,13 @@ void Segment::freeSlot(Slot *aSlot)
 {
     if (m_last == aSlot) m_last = aSlot->prev();
     if (m_first == aSlot) m_first = aSlot->next();
+    if (aSlot->attachedTo())
+        aSlot->attachedTo()->removeChild(aSlot);
+    while (aSlot->firstChild())
+    {
+        aSlot->firstChild()->attachTo(NULL);
+        aSlot->removeChild(aSlot->firstChild());
+    }
     // reset the slot incase it is reused
     ::new (aSlot) Slot;
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
