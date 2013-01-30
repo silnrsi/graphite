@@ -1,5 +1,6 @@
 Text codes
 100b	1039	100c	1031	102c	
+Segment length: 3
 pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
 00   216  -1@0,0	   0.0	   0.0	 1 -30	  3   3	   1031	   1031
 01   137  -1@0,0	   6.8	   0.0	 1 -30	  0   2	   100b	   100c

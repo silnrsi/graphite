@@ -1,5 +1,6 @@
 Text codes
  627	  31	  32	  2d	  34	  35	 627	
+Segment length: 7
 pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
 00   257  -1@0,0	  22.8	   0.0	 1  30	  0   0	    627	    627
 01    22  -1@0,0	  18.3	   0.0	 1  30	  2   2	     32	     32

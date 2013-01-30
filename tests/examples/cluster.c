@@ -40,8 +40,8 @@ int main(int argc, char **argv)
     memset(clusters, 0, numCodePoints * sizeof(cluster_t));
     for (is = gr_seg_first_slot(seg), ic = 0; is; is = gr_slot_next_in_segment(is), ic++)
     {
-        unsigned int before = gr_slot_before(is);
-        unsigned int after = gr_slot_after(is);
+        unsigned int before = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_before(is)));
+        unsigned int after = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_after(is)));
         while (clusters[ci].base_char > before && ci)                               /*<2>*/
         {
             clusters[ci-1].num_chars += clusters[ci].num_chars;

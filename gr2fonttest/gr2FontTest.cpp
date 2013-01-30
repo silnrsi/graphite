@@ -680,6 +680,7 @@ int Parameters::testFileFont() const
             for (const gr_slot* slot = gr_seg_first_slot(pSeg); slot; slot = gr_slot_next_in_segment(slot), ++i)
             { map[i] = (size_t)slot; }
             map[i] = 0;
+            fprintf(log, "Segment length: %d\n", gr_seg_n_slots(pSeg));
             fprintf(log, "pos  gid   attach\t     x\t     y\tins bw\t  chars\t\tUnicode\t");
             fprintf(log, "\n");
             i = 0;
