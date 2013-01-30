@@ -687,7 +687,8 @@ int Parameters::testFileFont() const
             unsigned int *p = pText32;
             for (int i = 0; i < textSrc.getLength(); ++i)
             {
-                *ui++ = *p++;
+                *ui = *p++;
+                ui++;
             }
             *ui = 0;
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, (gr_encform)codesize, pText8, textSrc.getLength(), rtl ? 1 : 0);
