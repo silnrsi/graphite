@@ -92,7 +92,7 @@ public:
     bool ws;
     bool rtl;
     bool useLineFill;
-    bool useCodes;
+    int useCodes;
     int justification;
     bool enableCache;
     float width;
@@ -102,6 +102,7 @@ public:
     size_t offset;
     FILE * log;
     char * trace;
+    int codesize;
     gr_face_options opts;
     
 private :  //defensive since log should not be copied
@@ -134,13 +135,14 @@ void Parameters::clear()
     rtl = false;
     ws = false;
     useLineFill = false;
-    useCodes = false;
+    useCodes = 0;
     justification = 0;
     enableCache = false;
     width = 100.0f;
     pText32 = NULL;
     textArgIndex = 0;
     charLength = 0;
+    codesize = 4;
     offset = 0;
     log = stdout;
     trace = NULL;
@@ -193,6 +195,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     pText32 = NULL;
     features = NULL;
     log = stdout;
+    codesize = 4;
     bool argError = false;
     char* pText = NULL;
     typedef enum 
@@ -207,7 +210,8 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         CODES,
         FEAT,
         LOG,
-        TRACE
+        TRACE,
+        SIZE
     } TestOptions;
     TestOptions option = NONE;
     char * pIntEnd = NULL;
@@ -289,6 +293,11 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             trace = argv[a];
             option = NONE;
             break;
+        case SIZE :
+            pIntEnd = NULL;
+            codesize = strtol(argv[a],&pIntEnd, 10);
+            option = NONE;
+            break;
         default:
             option = NONE;
             if (argv[a][0] == '-')
@@ -335,10 +344,14 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 {
                     option = FEAT;
                 }
+                else if (strcmp(argv[a], "-bytes") == 0)
+                {
+                    option = SIZE;
+                }
                 else if (strcmp(argv[a], "-codes") == 0)
                 {
                     option = NONE;
-                    useCodes = true;
+                    useCodes = 4;
                     // must be less than argc
                     //pText32 = new unsigned int[argc];
                     pText32 = (unsigned int *)malloc(sizeof(unsigned int) * argc);
@@ -653,17 +666,36 @@ int Parameters::testFileFont() const
        {
         gr_segment* pSeg = NULL;
         if (features)
-        {
             featureList = parseFeatures(face);
-            pSeg = gr_make_seg(sizedFont,
-                face, 0, featureList, textSrc.utfEncodingForm(),
-                textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
+        if (codesize == 2)
+        {
+            unsigned short *pText16 = (unsigned short *)malloc(textSrc.getLength() * 2 * sizeof(unsigned short));
+            gr2::utf16::iterator ui = pText16;
+            unsigned int *p = pText32;
+            for (int i = 0; i < textSrc.getLength(); ++i)
+            {
+                *ui = *p++;
+                ui++;
+            }
+            *ui = 0;
+            pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, (gr_encform)codesize, pText16, textSrc.getLength(), rtl ? 1 : 0);
+        }
+        else if (codesize == 1)
+        {
+            unsigned char *pText8 = (unsigned char *)malloc(textSrc.getLength() * 4);
+            gr2::utf8::iterator ui = pText8;
+            unsigned int *p = pText32;
+            for (int i = 0; i < textSrc.getLength(); ++i)
+            {
+                *ui++ = *p++;
+            }
+            *ui = 0;
+            pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, (gr_encform)codesize, pText8, textSrc.getLength(), rtl ? 1 : 0);
         }
         else
-        {
-            pSeg = gr_make_seg(sizedFont, face, 0, NULL, textSrc.utfEncodingForm(),
+            pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
-        }
+
         if (pSeg)
         {
             int i = 0;
@@ -780,6 +812,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
         fprintf(stderr,"-demand\tDemand load glyphs and cmap cache\n");
         fprintf(stderr,"-cache\tEnable Segment Cache\n");
+        fprintf(stderr,"-bytes\tword size for character transfer [1,2,4] defaults to 4\n");
         return 1;
     }
     return parameters.testFileFont();
