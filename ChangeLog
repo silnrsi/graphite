@@ -1,3 +1,10 @@
+1.2.1
+    . Bug fixes:
+        . Allow glyph reattachment
+        . Allow signed glyph attributes
+        . Various build problems with MacOS, old gcc versions, etc.
+        . Various overrun read errors fixed
+
 1.2.0
     . API Changes:
         . Added Windows friendly gr_start_logging and gr_stop_logging, now per face
