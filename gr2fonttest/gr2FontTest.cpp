@@ -225,7 +225,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         case DPI:
             pIntEnd = NULL;
             lTestSize = strtol(argv[a],&pIntEnd, 10);
-            if (lTestSize > 0 && lTestSize < INT_MAX && lTestSize != LONG_MAX)
+            if (lTestSize >= 0 && lTestSize < INT_MAX && lTestSize != LONG_MAX)
             {
                 dpi = lTestSize;
             }
@@ -620,7 +620,9 @@ int Parameters::testFileFont() const
             return 0;
         }
 
-        gr_font *sizedFont = gr_make_font(pointSize * dpi / 72, face);
+        gr_font *sizedFont = NULL;
+        if (dpi)
+            sizedFont = gr_make_font(pointSize * dpi / 72, face);
         gr_feature_val * featureList = NULL;
 #if 0
         layout.setStartOfLine(parameters.lineStart);

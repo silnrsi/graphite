@@ -3,8 +3,8 @@ Text codes
 Segment length: 2
 pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
 00   368  -1@0,0	   0.0	   0.0	 1 -30	  0   2	   1004	   1039
-01   111   0@318,493	   4.8	  -0.0	 0 -30	  0   2	   1004	   1039
-Advance width =    7.5
+01   111   0@318,493	 410.0	  -2.0	 0 -30	  0   2	   1004	   1039
+Advance width =  636.0
 
 Char	Unicode	Before	After
 0	1004	0	1
