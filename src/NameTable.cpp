@@ -50,6 +50,9 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
         m_nameData = reinterpret_cast<const uint8*>(pdata) + offset;
         setPlatformEncoding(platformId, encodingID);
         m_nameDataLength = length - offset;
+#ifdef GRAPHITE2_TELEMETRY
+        if (palloc_size) *palloc_size += length;
+#endif
     }
     else
     {

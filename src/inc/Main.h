@@ -46,13 +46,24 @@ typedef size_t          uintptr;
 
 // typesafe wrapper around malloc for simple types
 // use free(pointer) to deallocate
+
+#ifdef GRAPHITE2_TELEMETRY
+extern size_t *palloc_size;
+#endif
+
 template <typename T> T * gralloc(size_t n)
 {
+#ifdef GRAPHITE2_TELEMETRY
+    if (palloc_size) *palloc_size += sizeof(T) * n;
+#endif
     return reinterpret_cast<T*>(malloc(sizeof(T) * n));
 }
 
 template <typename T> T * grzeroalloc(size_t n)
 {
+#ifdef GRAPHITE2_TELEMETRY
+    if (palloc_size) *palloc_size += sizeof(T) * n;
+#endif
     return reinterpret_cast<T*>(calloc(n, sizeof(T)));
 }
 

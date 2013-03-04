@@ -85,7 +85,7 @@ void Silf::releaseBuffers() throw()
 }
 
 
-bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, const Face& face, uint32 version)
+bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face, uint32 version)
 {
     const byte * p = silf_start,
     		   * const silf_end = p + lSilf;

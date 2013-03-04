@@ -38,6 +38,9 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+#ifdef GRAPHITE2_TELEMETRY
+size_t *graphite2::palloc_size = NULL;
+#endif
 
 extern "C" {
 
@@ -67,6 +70,10 @@ bool gr_start_logging(gr_face * face, const char *log_path)
 	if (!face->logger()) return false;
 
 	*face->logger() << json::array;
+#ifdef GRAPHITE2_TELEMETRY
+    face->logTelemetry(face->logger());
+#endif
+
 	return true;
 #else
 	return false;

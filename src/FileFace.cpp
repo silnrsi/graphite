@@ -93,6 +93,9 @@ const void *FileFace::get_table_fn(const void* appFaceHandle, unsigned int name,
         free(tbl);
         return 0;
     }
+#ifdef GRAPHITE2_TELEMETRY
+    if (palloc_size) *palloc_size -= tbl_len;
+#endif
 
     if (len) *len = tbl_len;
     return tbl;

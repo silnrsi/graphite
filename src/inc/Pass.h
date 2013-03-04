@@ -45,7 +45,7 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, const Face & face);
+    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face);
     void runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
     byte spaceContextuals() const { return (m_flags & 0x0E) >> 1; }
@@ -60,7 +60,7 @@ private:
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
                      const uint16 * o_action, const byte * action_data,
-                     const Face &);
+                     Face &);
     bool   	readStates(const byte * starts, const byte * states, const byte * o_rule_map);
     bool   	readRanges(const byte * ranges, size_t num_ranges);
     uint16 	glyphToCol(const uint16 gid) const;

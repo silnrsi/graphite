@@ -79,7 +79,7 @@ private:
 public:
     Code() throw();
     Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-         uint8 pre_context, uint16 rule_length, const Silf &, const Face &);
+         uint8 pre_context, uint16 rule_length, const Silf &, Face &);
     Code(const Machine::Code &) throw();
     ~Code() throw();
     
