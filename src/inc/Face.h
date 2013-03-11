@@ -43,16 +43,10 @@ class GlyphCache;
 class NameTable;
 class json;
 
+
 using TtfUtil::Tag;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
-
-#ifdef GRAPHITE2_TELEMETRY
-#define ALLOC_SILF 1
-#define ALLOC_GLYPH 2
-#define ALLOC_CODE 3
-#define ALLOC_STATES 4
-#endif
 
 class Face
 {
@@ -93,19 +87,6 @@ public:
     // Glyph related
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
     uint16 findPseudo(uint32 uid) const;
-#ifdef GRAPHITE2_TELEMETRY
-    void logTelemetry(json *dbgout) const;
-    void switchTelemetry(int num) {
-        switch(num)
-        {
-            case ALLOC_SILF : palloc_size = &m_silfsize; break;
-            case ALLOC_GLYPH : palloc_size = &m_glyphsize; break;
-            case ALLOC_CODE : palloc_size = &m_codesize; break;
-            case ALLOC_STATES : palloc_size = &m_statesize; break;
-            default : palloc_size = &m_allocsize;
-        }
-    }
-#endif
 
     CLASS_NEW_DELETE;
 private:
@@ -124,11 +105,8 @@ private:
     uint16 m_ascent,
            m_descent;
 #ifdef GRAPHITE2_TELEMETRY
-    size_t  m_allocsize;
-    size_t  m_silfsize;
-    size_t  m_codesize;
-    size_t  m_glyphsize;
-    size_t  m_statesize;
+public:
+    mutable telemetry   tele;
 #endif
 };
 

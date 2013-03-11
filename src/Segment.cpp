@@ -55,10 +55,6 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_defaultOriginal(0),
   m_dir(textDir)
 {
-#ifdef GRAPHITE2_TELEMETRY
-    if (palloc_size) *palloc_size = 0;
-#endif
-
     freeSlot(newSlot());
     m_bufSize = log_binary(numchars)+1;
 }

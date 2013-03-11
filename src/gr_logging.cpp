@@ -38,10 +38,6 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-#ifdef GRAPHITE2_TELEMETRY
-size_t *graphite2::palloc_size = NULL;
-#endif
-
 extern "C" {
 
 
@@ -61,9 +57,9 @@ bool gr_start_logging(gr_face * face, const char *log_path)
 		log = _wfopen(wlog_path, L"wt");
 
 	free(wlog_path);
-#else
+#else   // _WIN32
 	FILE *log = fopen(log_path, "wt");
-#endif
+#endif  // _WIN32
 	if (!log)	return false;
 
 	face->setLogger(log);
@@ -71,13 +67,13 @@ bool gr_start_logging(gr_face * face, const char *log_path)
 
 	*face->logger() << json::array;
 #ifdef GRAPHITE2_TELEMETRY
-    face->logTelemetry(face->logger());
+    *face->logger() << face->tele;
 #endif
 
 	return true;
-#else
+#else   // GRAPHITE2_NTRACING
 	return false;
-#endif
+#endif  // GRAPHITE2_NTRACING
 }
 
 bool graphite_start_logging(FILE * /* log */, GrLogMask /* mask */)
@@ -120,6 +116,30 @@ void graphite_stop_logging()
 } // extern "C"
 
 #if !defined GRAPHITE2_NTRACING
+
+#ifdef GRAPHITE2_TELEMETRY
+size_t   * graphite2::telemetry::_category = 0UL;
+
+json & graphite2::operator << (json & j, const telemetry & t) throw()
+{
+    j << json::object
+            << "type"   << "telemetry"
+            << "silf"   << t.silf
+            << "states" << t.states
+            << "glyphs" << t.glyph
+            << "code"   << t.code
+            << "misc"   << t.misc
+            << "total"  << (t.silf + t.states + t.glyph + t.code + t.misc)
+        << json::close;
+    return j;
+}
+#else
+json & graphite2::operator << (json & j, const telemetry &) throw()
+{
+    return j;
+}
+#endif
+
 
 json & graphite2::operator << (json & j, const CharInfo & ci) throw()
 {

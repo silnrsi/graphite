@@ -54,13 +54,6 @@ Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
 {
     memset(&m_ops, 0, sizeof m_ops);
     memcpy(&m_ops, &ops, min(sizeof m_ops, ops.size));
-#ifdef GRAPHITE2_TELEMETRY
-    m_allocsize = 0;
-    m_silfsize = 0;
-    m_codesize = 0;
-    m_glyphsize = 0;
-    switchTelemetry(0);
-#endif
 }
 
 
@@ -74,9 +67,6 @@ Face::~Face()
     delete m_pFileFace;
 #endif
     delete m_pNames;
-#ifdef GRAPHITE2_TELEMETRY
-    palloc_size = NULL;
-#endif
 }
 
 float Face::default_glyph_advance(const void* font_ptr, gr_uint16 glyphid)
@@ -89,7 +79,7 @@ float Face::default_glyph_advance(const void* font_ptr, gr_uint16 glyphid)
 bool Face::readGlyphs(uint32 faceOptions)
 {
 #ifdef GRAPHITE2_TELEMETRY
-    switchTelemetry(ALLOC_GLYPH);
+    telemetry::category _glyph_cat(tele.glyph);
 #endif
     if (faceOptions & gr_face_cacheCmap)
     	m_cmap = new CachedCmap(*this);
@@ -101,26 +91,18 @@ bool Face::readGlyphs(uint32 faceOptions)
         || m_pGlyphFaceCache->numGlyphs() == 0
         || m_pGlyphFaceCache->unitsPerEm() == 0
     	|| !m_cmap || !*m_cmap)
-    {
-#ifdef GRAPHITE2_TELEMETRY
-        switchTelemetry(0);
-#endif
-    	return false;
-    }
+        return false;
 
     if (faceOptions & gr_face_preloadGlyphs)
         nameTable();        // preload the name table along with the glyphs.
 
-#ifdef GRAPHITE2_TELEMETRY
-    switchTelemetry(0);
-#endif
     return true;
 }
 
 bool Face::readGraphite(const Table & silf)
 {
 #ifdef GRAPHITE2_TELEMETRY
-    switchTelemetry(ALLOC_SILF);
+    telemetry::category _silf_cat(tele.silf);
 #endif
     const byte * p = silf;
     if (!p) return false;
@@ -139,28 +121,15 @@ bool Face::readGraphite(const Table & silf)
         const uint32 offset = be::read<uint32>(p),
         			 next   = i == m_numSilf - 1 ? silf.size() : be::peek<uint32>(p);
         if (next > silf.size() || offset >= next)
-        {
-#ifdef GRAPHITE2_TELEMETRY
-            switchTelemetry(0);
-#endif
             return false;
-        }
 
         if (!m_silfs[i].readGraphite(silf + offset, next - offset, *this, version))
-        {
-#ifdef GRAPHITE2_TELEMETRY
-            switchTelemetry(0);
-#endif
             return false;
-        }
 
         if (m_silfs[i].numPasses())
             havePasses = true;
     }
 
-#ifdef GRAPHITE2_TELEMETRY
-    switchTelemetry(0);
-#endif
     return havePasses;
 }
 
@@ -198,11 +167,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 				<< "chars"	 << json::array;
 		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
 			*dbgout 	<< json::flat << *seg->charinfo(i);
-		*dbgout			<< json::close;	    // Close up the chars array
-#ifdef GRAPHITE2_TELEMETRY
-        if (palloc_size) *dbgout << "alloc_size" << *palloc_size;
-#endif
-		*dbgout			<< json::close;		// Close up the segment object
+		*dbgout			<< json::close	    // Close up the chars array
+		             << json::close;		// Close up the segment object
 	}
 #endif
 
@@ -216,20 +182,6 @@ void Face::setLogger(FILE * log_file GR_MAYBE_UNUSED)
     m_logger = log_file ? new json(log_file) : 0;
 #endif
 }
-
-#ifdef GRAPHITE2_TELEMETRY
-void Face::logTelemetry(json *dbgout) const
-{
-    *dbgout << json::object
-                << "type" << "telemetry"
-                << "silf" << m_silfsize
-                << "states" << m_statesize
-                << "glyphs" << m_glyphsize
-                << "code" << m_codesize
-                << "misc" << m_allocsize
-            << json::close;
-}
-#endif
 
 const Silf *Face::chooseSilf(uint32 script) const
 {

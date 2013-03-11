@@ -37,7 +37,7 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
    m_platformOffset(0), m_platformLastRecord(0), m_nameDataLength(0),
    m_table(0), m_nameData(NULL)
 {
-    void *pdata = malloc(length);
+    void *pdata = gralloc<byte>(length);
     if (!pdata) return;
     memcpy(pdata, data, length);
     m_table = reinterpret_cast<const TtfUtil::Sfnt::FontNames*>(pdata);
@@ -50,9 +50,6 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
         m_nameData = reinterpret_cast<const uint8*>(pdata) + offset;
         setPlatformEncoding(platformId, encodingID);
         m_nameDataLength = length - offset;
-#ifdef GRAPHITE2_TELEMETRY
-        if (palloc_size) *palloc_size += length;
-#endif
     }
     else
     {

@@ -72,12 +72,11 @@ Pass::~Pass()
     delete [] m_rules;
 }
 
-bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, Face & face)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, const Face & face)
 {
     const byte *                p = pass_start,
                * const pass_end   = p + pass_length;
     size_t numRanges;
-    bool res;
 
     if (pass_length < 40) return false; 
     // Read in basic values
@@ -163,13 +162,9 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     if (!readRules(rule_map, numEntries,  precontext, sort_keys,
                    o_constraint, rcCode, o_actions, aCode, face)) return false;
 #ifdef GRAPHITE2_TELEMETRY
-    face.switchTelemetry(ALLOC_STATES);
+    telemetry::category _states_cat(face.tele.states);
 #endif
-    res = readStates(start_states, states, o_rule_map);
-#ifdef GRAPHITE2_TELEMETRY
-    face.switchTelemetry(ALLOC_SILF);
-#endif
-    return res;
+    return readStates(start_states, states, o_rule_map);
 }
 
 
@@ -177,7 +172,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *rc_data,
                      const uint16 * o_action,     const byte * ac_data,
-                     Face & face)
+                     const Face & face)
 {
     const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
     const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);

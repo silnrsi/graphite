@@ -140,20 +140,17 @@ inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-           uint8 pre_context, uint16 rule_length, const Silf & silf, Face & face)
+           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(true)
 {
 #ifdef GRAPHITE2_TELEMETRY
-    face.switchTelemetry(ALLOC_CODE);
+    telemetry::category _code_cat(face.tele.code);
 #endif
     assert(bytecode_begin != 0);
     if (bytecode_begin == bytecode_end)
     {
       ::new (this) Code();
-#ifdef GRAPHITE2_TELEMETRY
-      face.switchTelemetry(ALLOC_SILF);
-#endif
       return;
     }
     assert(bytecode_end > bytecode_begin);
@@ -168,9 +165,6 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     if (!_code || !_data) {
         failure(alloc_failed);
-#ifdef GRAPHITE2_TELEMETRY
-        face.switchTelemetry(ALLOC_SILF);
-#endif
         return;
     }
     
@@ -192,30 +186,19 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     decoder dec(lims, *this);
     if(!dec.load(bytecode_begin, bytecode_end))
-    {
-#ifdef GRAPHITE2_TELEMETRY
-      face.switchTelemetry(ALLOC_SILF);
-#endif
        return;
-    }
     
     // Is this an empty program?
     if (_instr_count == 0)
     {
       release_buffers();
       ::new (this) Code();
-#ifdef GRAPHITE2_TELEMETRY
-      face.switchTelemetry(ALLOC_SILF);
-#endif
       return;
     }
     
     // When we reach the end check we've terminated it correctly
     if (!is_return(_code[_instr_count-1])) {
         failure(missing_return);
-#ifdef GRAPHITE2_TELEMETRY
-        face.switchTelemetry(ALLOC_SILF);
-#endif
         return;
     }
 
@@ -230,16 +213,16 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
     _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
-#ifdef GRAPHITE2_TELEMETRY
-    if (palloc_size) *palloc_size += _data_size + (_instr_count+1)*sizeof(instr);
-    face.switchTelemetry(ALLOC_SILF);
-#endif
-    
-    // Make this RET_ZERO, we should never reach this but just in case ...
-    _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
 
     if (!_code)
         failure(alloc_failed);
+
+    // Make this RET_ZERO, we should never reach this but just in case ...
+    _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
+
+#ifdef GRAPHITE2_TELEMETRY
+    telemetry::count_bytes(_data_size + (_instr_count+1)*sizeof(instr));
+#endif
 }
 
 Machine::Code::~Code() throw ()
