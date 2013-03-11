@@ -58,9 +58,11 @@ struct telemetry
             silf,
             glyph,
             code,
-            states;
+            states,
+            starts,
+            transitions;
 
-    telemetry() : misc(0), silf(0), glyph(0), code(0), states(0) {}
+    telemetry() : misc(0), silf(0), glyph(0), code(0), states(0), starts(0), transitions(0) {}
 };
 
 class telemetry::category

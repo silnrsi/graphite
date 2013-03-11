@@ -164,7 +164,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.states);
 #endif
-    return readStates(start_states, states, o_rule_map);
+    return readStates(start_states, states, o_rule_map, face);
 }
 
 
@@ -228,10 +228,19 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 static int cmpRuleEntry(const void *a, const void *b) { return (*(RuleEntry *)a < *(RuleEntry *)b ? -1 :
                                                                 (*(RuleEntry *)b < *(RuleEntry *)a ? 1 : 0)); }
 
-bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map)
+bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map, const Face & face)
 {
+#ifdef GRAPHITE2_TELEMETRY
+    telemetry::category _states_cat(face.tele.starts);
+#endif
     m_startStates = gralloc<State *>(m_maxPreCtxt - m_minPreCtxt + 1);
+#ifdef GRAPHITE2_TELEMETRY
+    telemetry::set_category(face.tele.states);
+#endif
     m_states      = gralloc<State>(m_sRows);
+#ifdef GRAPHITE2_TELEMETRY
+    telemetry::set_category(face.tele.transitions);
+#endif
     m_sTable      = gralloc<State *>(m_sTransition * m_sColumns);
 
     if (!m_startStates || !m_states || !m_sTable) return false;
@@ -344,7 +353,7 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
         const uint16 col = glyphToCol(slot->gid());
         if (col == 0xffffU || !state->is_transition()) return true;
 
-        state = state->transitions[col];
+        state = state->next(col);
         if (state->is_success())
             fsm.rules.accumulate_rules(*state);
 

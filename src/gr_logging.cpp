@@ -126,10 +126,12 @@ json & graphite2::operator << (json & j, const telemetry & t) throw()
             << "type"   << "telemetry"
             << "silf"   << t.silf
             << "states" << t.states
+            << "starts" << t.starts
+            << "transitions" << t.transitions
             << "glyphs" << t.glyph
             << "code"   << t.code
             << "misc"   << t.misc
-            << "total"  << (t.silf + t.states + t.glyph + t.code + t.misc)
+            << "total"  << (t.silf + t.states + t.starts + t.transitions + t.glyph + t.code + t.misc)
         << json::close;
     return j;
 }
