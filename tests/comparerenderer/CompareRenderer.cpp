@@ -384,8 +384,8 @@ int main(int argc, char ** argv)
 #ifdef HAVE_HARFBUZZNG
         else if (rendererOptions[OptHarfbuzzNg].exists())
         {
-            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
-            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction, altFeatureSettings));
+            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction, rendererOptions[OptScript].get(argv), featureSettings));
+            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction, rendererOptions[OptScript].get(argv), altFeatureSettings));
         }
 #endif
 #ifdef HAVE_HARFBUZZ
@@ -428,7 +428,7 @@ int main(int argc, char ** argv)
 
 #ifdef HAVE_HARFBUZZNG
         if (rendererOptions[OptHarfbuzzNg].exists())
-            renderers[3] = (new HbNgRenderer(fontFile, fontSize, direction, featureSettings));
+            renderers[3] = (new HbNgRenderer(fontFile, fontSize, direction, rendererOptions[OptScript].get(argv), featureSettings));
 #endif
 #ifdef HAVE_ICU
         if (rendererOptions[OptIcu].exists())
