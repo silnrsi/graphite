@@ -81,12 +81,11 @@ struct State
 {
   const RuleEntry     * rules,
                       * rules_end;
-  const State * const * transitions;
+  const uint16        * transitions;
   
   size_t size() const;
   bool   is_success() const;
   bool   is_transition() const;
-  const State * next(uint16 s) const;
 };
 
 inline
@@ -105,12 +104,6 @@ inline
 bool State::is_transition() const
 {
   return (transitions != NULL);
-}
-
-inline
-const State * State::next(uint16 s) const
-{
-    return transitions[s];
 }
 
 

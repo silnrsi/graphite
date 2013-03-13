@@ -73,7 +73,7 @@ private:
     Rule      * m_rules; // rules
     RuleEntry * m_ruleMap;
     State *   * m_startStates; // prectxt length
-    State *   * m_sTable;
+    uint16    * m_sTable;
     State     * m_states;
     
     byte   m_flags;
