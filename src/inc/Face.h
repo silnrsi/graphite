@@ -43,7 +43,6 @@ class GlyphCache;
 class NameTable;
 class json;
 
-
 using TtfUtil::Tag;
 
 // These are the actual tags, as distinct from the consecutive IDs in TtfUtil.h
@@ -104,10 +103,6 @@ protected:
 private:
     uint16 m_ascent,
            m_descent;
-#ifdef GRAPHITE2_TELEMETRY
-public:
-    mutable telemetry   tele;
-#endif
 };
 
 

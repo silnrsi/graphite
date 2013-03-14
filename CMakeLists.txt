@@ -26,7 +26,6 @@ set(GRAPHITE2_VM_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Di
 option(GRAPHITE2_NSEGCACHE "Compile out the gr_*_with_seg_cache APIs")
 option(GRAPHITE2_NFILEFACE "Compile out the gr_make_file_face* APIs")
 option(GRAPHITE2_NTRACING "Compile out log segment tracing capability")
-option(GRAPHITE2_TELEMETRY "Add memory usage telemetry")
 
 
 message(STATUS "Build: " ${CMAKE_BUILD_TYPE})

@@ -38,9 +38,6 @@ namespace
 {
     bool load_face(Face & face, unsigned int options)
     {
-#ifdef GRAPHITE2_TELEMETRY
-        telemetry::category _misc_cat(face.tele.misc);
-#endif
         Face::Table silf(face, Tag::Silf);
         if (silf)   options &= ~gr_face_dumbRendering;
         else if (!(options &  gr_face_dumbRendering))
