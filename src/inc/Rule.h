@@ -81,7 +81,7 @@ struct State
 {
   const RuleEntry     * rules,
                       * rules_end;
-  const State * const * transitions;
+  const uint16        * transitions;
   
   size_t size() const;
   bool   is_success() const;

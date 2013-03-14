@@ -210,12 +210,12 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
     _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
-    
-    // Make this RET_ZERO, we should never reach this but just in case ...
-    _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
 
     if (!_code)
         failure(alloc_failed);
+
+    // Make this RET_ZERO, we should never reach this but just in case ...
+    _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
 }
 
 Machine::Code::~Code() throw ()
