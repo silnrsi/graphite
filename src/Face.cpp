@@ -91,7 +91,7 @@ bool Face::readGlyphs(uint32 faceOptions)
         || m_pGlyphFaceCache->numGlyphs() == 0
         || m_pGlyphFaceCache->unitsPerEm() == 0
     	|| !m_cmap || !*m_cmap)
-        return false;
+    	return false;
 
     if (faceOptions & gr_face_preloadGlyphs)
         nameTable();        // preload the name table along with the glyphs.
@@ -167,8 +167,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 				<< "chars"	 << json::array;
 		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
 			*dbgout 	<< json::flat << *seg->charinfo(i);
-		*dbgout			<< json::close	    // Close up the chars array
-		             << json::close;		// Close up the segment object
+		*dbgout			<< json::close	// Close up the chars array
+					<< json::close;		// Close up the segment object
 	}
 #endif
 

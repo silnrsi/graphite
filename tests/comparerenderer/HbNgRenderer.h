@@ -49,9 +49,9 @@ void hbngFtDestroy(void *user_data)
 class HbNgRenderer : public Renderer
 {
 public:
-    HbNgRenderer(const char * fileName, int fontSize, int textDir, FeatureParser * features)
+    HbNgRenderer(const char * fileName, int fontSize, int textDir, const char *script, FeatureParser * features)
         : m_ftLibrary(NULL), m_ftFace(NULL),
-        m_face(NULL), m_font(NULL), m_feats(NULL), m_featCount(0)
+        m_face(NULL), m_font(NULL), m_feats(NULL), m_featCount(0), m_textDir(textDir), m_script(script)
     {
         if ((FT_Init_FreeType(&m_ftLibrary) == 0) &&
             (FT_New_Face(m_ftLibrary, fileName, 0, &m_ftFace) == 0))
@@ -120,9 +120,10 @@ public:
 //        }
         hb_buffer_reset(m_buffer);
         hb_buffer_add_utf8(m_buffer, utf8, length, 0, length);
-        hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
-        hb_script_t script = hb_buffer_get_script(m_buffer);
+        hb_script_t script = hb_script_from_string(m_script, -1);
         hb_buffer_set_script(m_buffer, script);
+        hb_buffer_set_direction(m_buffer, m_textDir ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+        hb_unicode_funcs_t * unicodeFuncs = hb_glib_get_unicode_funcs();
         hb_language_t lang = hb_ot_tag_to_language(HB_OT_TAG_DEFAULT_LANGUAGE);
         hb_buffer_set_language(m_buffer, lang);
         //hb_feature_t feats = {HB_TAG(' ', 'R', 'N', 'D'), 0, 0, -1};
@@ -152,4 +153,6 @@ private:
     hb_buffer_t * m_buffer;
     hb_feature_t* m_feats;
     size_t m_featCount;
+    int m_textDir;
+    const char *m_script;
 };
