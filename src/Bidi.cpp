@@ -40,7 +40,7 @@ enum DirCode {  // Hungarian: dirc
         EUS        =  5,   // European separator, left-to-right, weak - ES
         ET         =  6,   // European number terminator, left-to-right, weak - ET
         AN         =  7,   // Arabic number, left-to-right, weak - AN
-        CS         =  8,   // Common number separator, left-to-right, weak - CS
+        CUS        =  8,   // Common number separator, left-to-right, weak - CS
         WS         =  9,   // white space, neutral - WS
         BN         = 10,   // boundary neutral - BN
 
