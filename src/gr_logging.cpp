@@ -115,10 +115,13 @@ void graphite_stop_logging()
 
 } // extern "C"
 
+#ifdef GRAPHITE2_TELEMETRY
+size_t   * graphite2::telemetry::_category = 0UL;
+#endif
+
 #if !defined GRAPHITE2_NTRACING
 
 #ifdef GRAPHITE2_TELEMETRY
-size_t   * graphite2::telemetry::_category = 0UL;
 
 json & graphite2::operator << (json & j, const telemetry & t) throw()
 {

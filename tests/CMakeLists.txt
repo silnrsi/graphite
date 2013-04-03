@@ -23,6 +23,7 @@ add_library(graphite2-segcache STATIC
     ${S}/FileFace.cpp
     ${S}/GlyphCache.cpp
     ${S}/GlyphFace.cpp
+    ${S}/gr_logging.cpp
     ${S}/Pass.cpp
     ${S}/Rule.cpp
     ${S}/SegCache.cpp
@@ -32,11 +33,16 @@ add_library(graphite2-segcache STATIC
     ${S}/Slot.cpp
     )
 
+set(TELEMETRY)
+if (GRAPHITE2_TELEMETRY)
+    set(TELEMETRY ";GRAPHITE2_TELEMETRY")
+endif (GRAPHITE2_TELEMETRY)
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
     set_target_properties(graphite2-segcache PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING${TELEMETRY};_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
@@ -45,7 +51,7 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         LINKER_LANGUAGE     C)
     set_target_properties(graphite2-segcache PROPERTIES 
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
-        COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING"
+        COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING${TELEMETRY}"
         LINK_FLAGS          "-nodefaultlibs" 
         LINKER_LANGUAGE     C)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
