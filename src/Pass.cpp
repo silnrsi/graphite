@@ -72,7 +72,7 @@ Pass::~Pass()
     delete [] m_rules;
 }
 
-bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, const Face & face)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED const Face & face)
 {
     const byte *                p = pass_start,
                * const pass_end   = p + pass_length;

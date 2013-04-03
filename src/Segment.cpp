@@ -52,6 +52,7 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
+  m_passBits(0),
   m_defaultOriginal(0),
   m_dir(textDir)
 {
@@ -128,6 +129,7 @@ void Segment::append(const Segment &other)
     m_numGlyphs += other.m_numGlyphs;
     m_advance = m_advance + other.m_advance;
     m_bbox = m_bbox.widen(bbox);
+    m_passBits &= other.passBits();
 }
 #endif // GRAPHITE2_NSEGCACHE
 
@@ -150,6 +152,8 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->prev(m_last);
     m_last = aSlot;
     if (!m_first) m_first = aSlot;
+    if (theGlyph && m_silf->aPassBits())
+        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()];
 }
 
 Slot *Segment::newSlot()

@@ -395,6 +395,8 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
         if (aGlyph) theGlyph = aGlyph;
     }
     m_advance = Position(theGlyph->theAdvance().x, 0.);
+    if (seg->silf()->aPassBits())
+        seg->mergePassBits(theGlyph->attrs()[seg->silf()->aPassBits()]);
 }
 
 void Slot::floodShift(Position adj)
