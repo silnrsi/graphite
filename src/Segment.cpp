@@ -52,7 +52,7 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
-  m_passBits(0),
+  m_passBits(m_silf->aPassBits() ? -1 : 0),
   m_defaultOriginal(0),
   m_dir(textDir)
 {
