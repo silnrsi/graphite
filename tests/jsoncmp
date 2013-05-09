@@ -47,6 +47,12 @@ def canonids(j) :
             settreeval(h, p, segmap[v])
     return j
 
+def trimtelemetry(j) :
+    if not isinstance(j, list) : return
+    if not isinstance(j[0], dict) or 'type' not in j[0] : return
+    if j[0]['type'] == 'telemetry' : del j[0]
+    return
+
 def _compare(t1, t2):
     v1,p1,_ = t1
     v2,p2,_ = t2
@@ -59,6 +65,8 @@ def _compare(t1, t2):
     return True
     
 def compare(j1, j2) :
+    trimtelemetry(j1)
+    trimtelemetry(j2)
     return all(imap(_compare, walktree(j1), walktree(j2)))
 
 try:
