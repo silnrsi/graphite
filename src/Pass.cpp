@@ -229,7 +229,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 static int cmpRuleEntry(const void *a, const void *b) { return (*(RuleEntry *)a < *(RuleEntry *)b ? -1 :
                                                                 (*(RuleEntry *)b < *(RuleEntry *)a ? 1 : 0)); }
 
-bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map, const Face & face)
+bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map, GR_MAYBE_UNUSED const Face & face)
 {
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.starts);
