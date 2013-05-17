@@ -153,7 +153,8 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_last = aSlot;
     if (!m_first) m_first = aSlot;
     if (theGlyph && m_silf->aPassBits())
-        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()];
+        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()] 
+                    | (m_silf->numPasses() > 16 ? (theGlyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
 }
 
 Slot *Segment::newSlot()
