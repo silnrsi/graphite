@@ -95,6 +95,7 @@ fonttest(padauk12 Padauk.ttf 0048 0065 006C 006C 006F 0020 004D 0075 006D -j 107
 fonttest(scher1 Scheherazadegr.ttf 0628 0628 064E 0644 064E 0654 0627 064E -rtl)
 fonttest(scher2 Scheherazadegr.ttf 0627 0644 0625 0639 0644 0627 0646 -rtl)
 fonttest(scher3 Scheherazadegr.ttf 0627 0031 0032 002D 0034 0035 0627 -rtl)
+fonttest(scher4 Scheherazadegr.ttf 0627 0653 06AF -rtl)
 fonttest(charis1 charis_r_gr.ttf 0069 02E6 02E8 02E5)
 fonttest(charis2 charis_r_gr.ttf 1D510 0041 1D513)
 fonttest(charis3 charis_r_gr.ttf 0054 0069 1ec3 0075 -feat 'lang=vie')

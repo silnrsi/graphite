@@ -1,0 +1,557 @@
+[
+    {
+        "type" : "telemetry",
+        "silf" : 52226,
+        "states" : 9440,
+        "starts" : 30,
+        "transitions" : 16588,
+        "glyphs" : 150296,
+        "code" : 29362,
+        "misc" : 1446,
+        "total" : 259388
+    },
+    {
+        "id" : "0177-00-4ea0",
+        "passes" : [
+            {
+                "id" : 1,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 2,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 3,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 4,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 5,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 6,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : -1,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 7,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : [
+                    {
+                        "considered" : [
+                            { "id" : 17, "failed" : false, "input" : { "start" : "0177-01-4f70", "length" : 2 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0177-01-4f70", "end" : "0177-00-5070" },
+                            "slots" : [
+                                {
+                                    "id" : "0177-01-4f70",
+                                    "gid" : 257,
+                                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                                    "origin" : [ 1544, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 297, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "bidi" : 1,
+                                    "user" : [ 0 ],
+                                    "children" : [ "0177-00-4ff0" ]
+                                },
+                                {
+                                    "id" : "0177-00-4ff0",
+                                    "gid" : 970,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 1544, -10 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "bidi" : 1,
+                                    "parent" : { "id" : "0177-01-4f70", "level" : 0, "offset" : [ 0, -10 ] },
+                                    "user" : [ 0 ]
+                                }
+                            ],
+                            "postshift" : [ 0, 0 ]
+                        },
+                        "cursor" : "0177-00-4ff0"
+                    }
+                ]
+            },
+            {
+                "id" : 8,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ],
+                        "children" : [ "0177-00-4ff0" ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, -10 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "parent" : { "id" : "0177-01-4f70", "level" : 0, "offset" : [ 0, -10 ] },
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            },
+            {
+                "id" : 9,
+                "slots" : [
+                    {
+                        "id" : "0177-01-4f70",
+                        "gid" : 257,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 1544, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 297, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ],
+                        "children" : [ "0177-00-4ff0" ]
+                    },
+                    {
+                        "id" : "0177-00-4ff0",
+                        "gid" : 970,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 1544, -10 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 0, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "parent" : { "id" : "0177-01-4f70", "level" : 0, "offset" : [ 0, -10 ] },
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0177-00-5070",
+                        "gid" : 420,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 1544, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "bidi" : 1,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : [
+                    {
+                        "considered" : [
+                            { "id" : 34, "failed" : false, "input" : { "start" : "0177-01-4f70", "length" : 3 } }
+                        ],
+                        "output" : {
+                            "range" : { "start" : "0177-01-4f70", "end" : "0000-00-0000" },
+                            "slots" : [
+                                {
+                                    "id" : "0177-01-4f70",
+                                    "gid" : 257,
+                                    "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                                    "origin" : [ 1574, 0 ],
+                                    "shift" : [ 0, 0 ],
+                                    "advance" : [ 297, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "bidi" : 1,
+                                    "user" : [ 0 ],
+                                    "children" : [ "0177-00-4ff0" ]
+                                },
+                                {
+                                    "id" : "0177-00-4ff0",
+                                    "gid" : 970,
+                                    "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                                    "origin" : [ 1704, -10 ],
+                                    "shift" : [ -130, 0 ],
+                                    "advance" : [ 0, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "bidi" : 1,
+                                    "parent" : { "id" : "0177-01-4f70", "level" : 0, "offset" : [ 0, -10 ] },
+                                    "user" : [ 0 ]
+                                },
+                                {
+                                    "id" : "0177-00-5070",
+                                    "gid" : 420,
+                                    "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                                    "origin" : [ -30, 0 ],
+                                    "shift" : [ 30, 0 ],
+                                    "advance" : [ 1574, 0 ],
+                                    "insert" : true,
+                                    "break" : 30,
+                                    "bidi" : 1,
+                                    "user" : [ 0 ]
+                                }
+                            ],
+                            "postshift" : [ 0, 0 ]
+                        },
+                        "cursor" : "0000-00-0000"
+                    }
+                ]
+            }
+        ],
+        "output" : [
+            {
+                "id" : "0177-01-4f70",
+                "gid" : 257,
+                "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                "origin" : [ 1574, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 297, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "bidi" : 1,
+                "user" : [ 0 ],
+                "children" : [ "0177-00-4ff0" ]
+            },
+            {
+                "id" : "0177-00-4ff0",
+                "gid" : 970,
+                "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                "origin" : [ 1704, -10 ],
+                "shift" : [ -130, 0 ],
+                "advance" : [ 0, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "bidi" : 1,
+                "parent" : { "id" : "0177-01-4f70", "level" : 0, "offset" : [ 0, -10 ] },
+                "user" : [ 0 ]
+            },
+            {
+                "id" : "0177-00-5070",
+                "gid" : 420,
+                "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                "origin" : [ -30, 0 ],
+                "shift" : [ 30, 0 ],
+                "advance" : [ 1574, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "bidi" : 1,
+                "user" : [ 0 ]
+            }
+        ],
+        "advance" : [ 1871, 0 ],
+        "chars" : [
+            { "offset" : 0, "unicode" : 1575, "break" : 30, "flags" : 0, "slot" : { "before" : 0, "after" : 0 } },
+            { "offset" : 1, "unicode" : 1619, "break" : 30, "flags" : 0, "slot" : { "before" : 1, "after" : 1 } },
+            { "offset" : 2, "unicode" : 1711, "break" : 30, "flags" : 0, "slot" : { "before" : 2, "after" : 2 } }
+        ]
+    }
+]

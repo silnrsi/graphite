@@ -87,7 +87,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
-    Position shift = m_shift + Position(m_just, 0);
+    Position shift = m_shift * ((seg->dir() & 1) * -2 + 1) + Position(m_just, 0);
     float tAdvance = m_advance.x + m_just;
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
