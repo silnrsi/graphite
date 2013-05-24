@@ -1,10 +1,12 @@
 1.2.2
-    . Add support for passKeySlot (makes Charis 2x faster)
+    . Add support for passKeySlot (makes Charis 2x faster) up to 32 passes
     . Add telemetry output to json if enabled in build GRAPHITE2_TELEMETRY
     . Shrink font memory footprint particularly in the fsm
     . Add -S to comparerenderer
     . Bug fixes:
+        . Fix shift.x being reversed for rtl text
         . Fix faulty fallback justification
+        . Fix bad cmap handling
         . Support compiling on old Solaris where bidi attributes clash with register names
         . Follow the crowd in using Windows.h
 
