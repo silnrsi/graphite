@@ -18,6 +18,20 @@ The release is done by:
 . hg archive graphite-<version>.tgz
 . Then push up to sf.net/projects/silgraphite and projects.palaso.org/graphiteng-dev
 
+=== How to do a test pdebuild ===
+
+Here's a sample script to do from the project root directory.
+
+----
+mkdir debianbuild
+cd debianbuild
+cp ../graphite2-x,y.z.tgz graphite_x.y.z.orig.tar.gz
+mkdir build
+cd build
+cp -a ../../debian-src debian
+pdebuild
+----
+
 == Anticipated API Changes ==
 
 Here are the things we will probably change in the API once we come to the conclusion that we have got to change the API for some really important reason.

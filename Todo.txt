@@ -1,9 +1,5 @@
-Changes to make to the API when we are forced to change it:
+Expected changes to come:
 
-* add font table deletion function ptr so that the app doesn't have to
-  manage a collection of font tables
-
-Other stuff we should do
-
-* Change logging generation id to be a magic extra user attribute. This allows for use within justification logging. Also add [ ] around the whoe log to bring the fragments together.
+* Handle new isolated direction overrides in bidi.
+* Handle type 14 tables for variation selectors, not that anyone is using them yet.
 
