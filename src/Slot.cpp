@@ -389,12 +389,13 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
         }
     }
     m_realglyphid = theGlyph->attrs()[seg->silf()->aPseudo()];
+    const GlyphFace *aGlyph = theGlyph;
     if (m_realglyphid)
     {
-        const GlyphFace *aGlyph = seg->getFace()->glyphs().glyphSafe(m_realglyphid);
-        if (aGlyph) theGlyph = aGlyph;
+        aGlyph = seg->getFace()->glyphs().glyphSafe(m_realglyphid);
+        if (!aGlyph) aGlyph = theGlyph;
     }
-    m_advance = Position(theGlyph->theAdvance().x, 0.);
+    m_advance = Position(aGlyph->theAdvance().x, 0.);
     if (seg->silf()->aPassBits())
         seg->mergePassBits(theGlyph->attrs()[seg->silf()->aPassBits()]);
 }

@@ -108,7 +108,7 @@ sparse::sparse(I attr, const I last)
 
 	m_array.values = grzeroalloc<mapped_type>((m_nchunks*sizeof(chunk) + sizeof(mapped_type)/2)
 	                                             / sizeof(mapped_type)
-	                                             + n_values*sizeof(mapped_type));
+	                                             + n_values); // *sizeof(mapped_type));
 
 	if (m_array.values == 0)
 	{
