@@ -1,3 +1,9 @@
+1.2.3
+    . Bug fixes only:
+        . fix byte swapping when testing cmap subtable lengths
+        . work around armel compilation problems with conditional operators
+        . fix pseudoglyph support for advance and bbox
+
 1.2.2
     . Add support for passKeySlot (makes Charis 2x faster) up to 32 passes
     . Add telemetry output to json if enabled in build GRAPHITE2_TELEMETRY

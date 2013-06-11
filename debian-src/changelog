@@ -1,3 +1,9 @@
+graphite2 (1.2.3-1~palaso1) precise; urgency=low
+
+  * Bug fixes release
+
+ -- Martin Hosken <martin_hosken@sil.org>  Tue, 11 Jun 2013 12:53:29 +0100
+
 graphite2 (1.2.2-1~palaso1) precise; urgency=low
 
   * New upstream release with added features and bug fixes 
