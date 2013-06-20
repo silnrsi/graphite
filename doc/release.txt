@@ -3,6 +3,7 @@
 These notes are not necessarily part of the manual. They are here for code developers to remember to do the right thing when it comes to release day.
 
 . make and make docs
+. make fuzztest and check .log file results
 . The first line of the Changelog must be the version number. This is so that packagers can extract the version number from the source.
 . Make sure the version numbers in the #defines reflect the release number in includes/graphite2/Font.h
 . Make sure the libtool version numbers are correct in src/CMakeLists.txt
