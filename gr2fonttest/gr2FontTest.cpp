@@ -523,9 +523,10 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
     {
         pLang += 5;
         size_t i = 0;
-        for (int i = 4; i; --i, lang_id <<= 8)
+        for (int i = 4; i; --i)
         {
-        	if (*pLang == '0' || *pLang == '&') continue;
+            lang_id <<= 8;
+        	if (!*pLang || *pLang == '0' || *pLang == '&') continue;
         	lang_id |= *pLang++;
         }
     }
