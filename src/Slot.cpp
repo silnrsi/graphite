@@ -37,9 +37,9 @@ Slot::Slot() :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
-    m_position(0, 0), m_shift(0, 0), m_advance(-1, -1),
+    m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_bidiCls(0), m_bidiLevel(0), m_justs(NULL)
+    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0), m_justs(NULL)
     // Do not set m_userAttr since it is set *before* new is called since this
     // is used as a positional new to reset the GrSlot
 {
@@ -208,7 +208,9 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatAttLevel :	return m_attLevel;
     case gr_slatBreak :		return seg->charinfo(m_original)->breakWeight();
     case gr_slatCompRef : 	return 0;
-    case gr_slatDir :		return seg->dir();
+    case gr_slatDir :		if (m_bidiCls == -1)
+                                const_cast<Slot *>(this)->setBidiClass(seg->glyphAttr(gid(), seg->silf()->aBidi()));
+                            return m_bidiCls;
     case gr_slatInsert :	return isInsertBefore();
     case gr_slatPosX :		return int(m_position.x); // but need to calculate it
     case gr_slatPosY :		return int(m_position.y);
@@ -216,7 +218,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatShiftY :	return int(m_shift.y);
     case gr_slatMeasureSol:	return -1; // err what's this?
     case gr_slatMeasureEol: return -1;
-    case gr_slatJWidth:     return m_just;
+    case gr_slatJWidth:     return int(m_just);
     case gr_slatUserDefn :	return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     default :				return 0;
@@ -275,7 +277,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         seg->charinfo(m_original)->breakWeight(value);
         break;
     case gr_slatCompRef :	break;      // not sure what to do here
-    case gr_slatDir :		break;  // read only
+    case gr_slatDir :		m_bidiCls = value; break;
     case gr_slatInsert :
         markInsertBefore(value? true : false);
         break;

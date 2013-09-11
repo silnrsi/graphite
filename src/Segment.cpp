@@ -167,14 +167,14 @@ Slot *Segment::newSlot()
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
-        newSlots[0].userAttrs(newAttrs);
-        for (size_t i = 1; i < m_bufSize - 1; i++)
+        for (size_t i = 0; i < m_bufSize; i++)
         {
             newSlots[i].next(newSlots + i + 1);
             newSlots[i].userAttrs(newAttrs + i * numUser);
+            newSlots[i].setBidiClass(-1);
         }
-        newSlots[m_bufSize - 1].userAttrs(newAttrs + (m_bufSize - 1) * numUser);
         newSlots[m_bufSize - 1].next(NULL);
+        newSlots[0].next(NULL);
         m_slots.push_back(newSlots);
         m_userAttrs.push_back(newAttrs);
         m_freeSlots = (m_bufSize > 1)? newSlots + 1 : NULL;
@@ -427,8 +427,11 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     unsigned int bmask = 0;
     for (s = first(); s; s = s->next())
     {
-    	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
-        s->setBidiClass((bAttr <= 16) * bAttr);
+        if (s->getBidiClass() == -1)
+        {
+        	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
+            s->setBidiClass((bAttr <= 16) * bAttr);
+        }
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
     }

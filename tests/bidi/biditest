@@ -1,0 +1,85 @@
+#!/usr/bin/python
+
+import graphite, sys
+
+def runtests(chars, modes, orders, levels) :
+    # print chars
+    t = []
+    for c in chars :
+        try :
+            x = charmap[c]
+        except KeyError : 
+            return (True, [], [], 0)
+        t.append(x)
+    test = u"".join(t)
+    if modes & 2 :
+        (r, o, d) = runonetest(test, 0, orders, levels)
+        if not r : return (r, o, d, 'l')
+    if modes & 4 :
+        (r, o, d) = runonetest(test, 1, orders, levels)
+        if not r : return (r, o, d, 'r')
+    return (True, [], [], 1)
+
+def runonetest(test, rtl, orders, levels) :
+    seg = graphite.Segment(font, face, "", test, rtl)
+    orgs = map(lambda x : x.original, seg.slots)
+    if rtl : orgs.reverse()
+    i = 0
+    for o in orgs :
+        if i < len(orders) and o == orders[i] :
+            i += 1
+        elif o in orders :
+            return (False, orgs, orders)
+    return (True, orgs, orders)
+
+ignores = ['B', 'S']
+charmap = {
+    'L' : u"A",
+    'R' : u"\u08F1",
+    'EN' : u"3",
+    'ES' : u"-",
+    'ET' : u"%",
+    'AN' : u"\u0663",
+    'CS' : u".",
+#    'B' : u"",    # delete for ignore
+#    'S' : u"",
+    'WS' : u" ",
+    'ON' : u"=",
+#    'LRE' : u"\u202A",
+#    'LRO' : u"\u202D",
+    'AL' : u"\u0627",
+#    'RLE' : u"\u202B",
+#    'RLO' : u"\u202E",
+    'PDF' : u"\u202C",
+    'NSM' : u"\u064B",
+    'BN' : u"\u200B"
+#    'FSI' : u"\u2068",
+#    'LRI' : u"\u2066",
+#    'RLI' : u"\u2067",
+#    'PDI' : u"\u2069"
+}   
+
+#tf = open("BidiTest.txt")
+#face = graphite.Face("Scheherazade-R.ttf")
+tf = open(sys.argv[1])
+face = graphite.Face(sys.argv[2])
+font = graphite.Font(face, 16)
+
+count = 0
+for l in tf.readlines() :
+    if l.startswith('#') or len(l) < 2 : continue
+    elif l.startswith('@Levels:') :
+        levels = l[8:].split()
+    elif l.startswith('@Reorder:') :
+        orders = map(int, l[9:].split())
+    else :
+        (chars, modes) = l.split(';')
+        (res, orgs, right, d) = runtests(chars.split(), int(modes), orders, levels)
+        if not res :
+            print "Failed: {0} : {1} vs {2} - {3}".format(l.strip(), orgs, right, d) 
+        elif d :
+            count += 1
+
+print "{0} tests passed".format(count)
+
+        

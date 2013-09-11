@@ -108,8 +108,8 @@ public:
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
-    uint8 getBidiClass() const { return m_bidiCls; }
-    void setBidiClass(uint8 cls) { m_bidiCls = cls; }
+    int8 getBidiClass() const { return m_bidiCls; }
+    void setBidiClass(int8 cls) { m_bidiCls = cls; }
     int16 *userAttrs() const { return m_userAttr; }
     void userAttrs(int16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
@@ -155,7 +155,7 @@ private:
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     byte     m_attLevel;    // attachment level
-    byte     m_bidiCls;     // bidirectional class
+    int8     m_bidiCls;     // bidirectional class
     byte     m_bidiLevel;   // bidirectional level
     int16   *m_userAttr;    // pointer to user attributes
     SlotJustify *m_justs;   // pointer to justification parameters

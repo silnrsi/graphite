@@ -233,8 +233,8 @@ const bidi_state stateWeak[][10] =
 { /*lc*/        lo, xl, xr, la, le, xa, lo, lo, lo, lt, /* CS following la        */ },
 { /*ls*/        lo, xl, xr, la, le, xa, lo, lo, lo, lt, /* CS,ES following le     */ },
 
-{ /*ret*/ ro, xl, xr, ra, re, xa,ret, ro, ro,ret, /* ET following re              */ },
-{ /*let*/ lo, xl, xr, la, le, xa,let, lo, lo,let, /* ET following le              */ },
+{ /*ret*/       ro, xl, xr, ra, re, xa,ret, ro, ro,ret, /* ET following re        */ },
+{ /*let*/       lo, xl, xr, la, le, xa,let, lo, lo,let, /* ET following le        */ },
 
 
 };
@@ -269,7 +269,7 @@ enum bidi_action // possible actions
 
 const bidi_action actionWeak[][10] =
 {
-          //   N,.. L,   R,  AN,  EN,  AL, NSM,  CS,..ES,  ET,
+    //   N,.. L,   R,   AN,  EN,  AL,  NSM, CS,..ES,  ET,
 { /*xa*/ xxx, xxx, xxx, xxx, xxA, xxR, xxR, xxN, xxN, xxN, /* arabic letter             */ },
 { /*xr*/ xxx, xxx, xxx, xxx, xxE, xxR, xxR, xxN, xxN, xIx, /* right leter               */ },
 { /*xl*/ xxx, xxx, xxx, xxx, xxL, xxR, xxL, xxN, xxN, xIx, /* left letter               */ },
@@ -306,8 +306,15 @@ inline bool     IsModifiedClass(DirCode a)              { return 0 != ((1 << a) 
 void SetDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
     if (!sRun || s == sRun) return;
-    for (Slot *p = s->prev(); p != sRun; p = p->prev())
+    for (Slot *p = s->prev(), *e = sRun->prev(); p != e; p = p->prev())
         p->setBidiClass(nval);
+}
+
+void SetThisDeferredRunClass(Slot *s, Slot *sRun, int nval)
+{
+    if (!sRun) return;
+    for (Slot *e = sRun->prev(); s != e; s = s->prev())
+        s->setBidiClass(nval);
 }
 
 void resolveWeak(int baseLevel, Slot *s)
@@ -351,14 +358,14 @@ void resolveWeak(int baseLevel, Slot *s)
         if (clsNew != XX)
             s->setBidiClass(clsNew);
         if (!sRun && (IX & action))
-            sRun = s->prev();
+            sRun = s;
         state = stateWeak[state][bidi_class_map[cls]];
     }
 
     cls = EmbeddingDirection(level);
     int clsRun = GetDeferredType(actionWeak[state][bidi_class_map[cls]]);
     if (clsRun != XX)
-        SetDeferredRunClass(sLast, sRun, clsRun);
+        SetThisDeferredRunClass(sLast, sRun, clsRun);
 }
 
 // Neutrals
@@ -384,11 +391,7 @@ int GetDeferredNeutrals(int action, int level)
 
 int GetResolvedNeutrals(int action)
 {
-        action = action & 0xF;
-        if (action == In)
-            return 0;
-        else
-            return action;
+        return action & 0xF;
 }
 
 // state values
@@ -407,8 +410,7 @@ const uint8 neutral_class_map[] = { 0, 1, 2, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
 
 const int actionNeutrals[][5] =
 {
-//      N,      L,      R, AN, EN, = cls
-                                // state =
+// cls= N,   L,  R, AN, EN,        state =
 {       In,  0,  0,  0,  0, },  // r    right
 {       In,  0,  0,  0,  L, },  // l    left
 
@@ -421,8 +423,7 @@ const int actionNeutrals[][5] =
 
 const int stateNeutrals[][5] =
 {
-//       N, L,  R,      AN, EN = cls
-                                                // state =
+// cls= N,  L,  R,      AN, EN                     state =
 {       rn, l,  r,      r,      r, },           // r   right
 {       ln, l,  r,      a,      l, },           // l   left
 
@@ -435,7 +436,7 @@ const int stateNeutrals[][5] =
 
 void resolveNeutrals(int baseLevel, Slot *s)
 {
-    int state = baseLevel ? r : l;
+    int state = (baseLevel & 1) ? r : l;
     int cls;
     Slot *sRun = NULL;
     Slot *sLast = s;
@@ -447,8 +448,7 @@ void resolveNeutrals(int baseLevel, Slot *s)
         cls = s->getBidiClass();
         if (cls == BN)
         {
-            if (sRun)
-                sRun = sRun->prev();
+            level = s->getBidiLevel();
             continue;
         }
 
@@ -463,20 +463,18 @@ void resolveNeutrals(int baseLevel, Slot *s)
         if (clsNew != N)
             s->setBidiClass(clsNew);
         if (!sRun && (action & In))
-            sRun = s->prev();
+            sRun = s;
         state = stateNeutrals[state][neutral_class_map[cls]];
-        level = s->getBidiLevel();
     }
     cls = EmbeddingDirection(level);
     int clsRun = GetDeferredNeutrals(actionNeutrals[state][neutral_class_map[cls]], level);
     if (clsRun != N)
-        SetDeferredRunClass(sLast, sRun, clsRun);
+        SetThisDeferredRunClass(sLast, sRun, clsRun);
 }
 
 const int addLevel[][4] =
 {
-                //    L,  R,    AN, EN = cls
-                                                // level =
+        //  cls = L,    R,      AN,     EN         level =
 /* even */      { 0,    1,      2,      2, },   // EVEN
 /* odd  */      { 1,    0,      1,      1, },   // ODD
 
@@ -485,16 +483,20 @@ const int addLevel[][4] =
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
 {
     bool rtl = seg->dir() & 1;
+    int level = rtl;
     for ( ; s; s = s->next())
     {
         int cls = s->getBidiClass();
         if (cls == BN)
+        {
+            s->setBidiLevel(level);
             continue;
+        }
         else if (cls == AN)
             cls = AL;
         if (cls < 5 && cls > 0)
         {
-            int level = s->getBidiLevel();
+            level = s->getBidiLevel();
             level += addLevel[level & 1][cls - 1];
             s->setBidiLevel(level);
             if (aMirror)

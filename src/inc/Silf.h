@@ -83,6 +83,7 @@ public:
     uint8 aBreak() const { return m_aBreak; }
     uint8 aMirror() const {return m_aMirror; }
     uint8 aPassBits() const { return m_aPassBits; }
+    uint8 aBidi() const { return m_aBidi; }
     uint8 substitutionPass() const { return m_sPass; }
     uint8 positionPass() const { return m_pPass; }
     uint8 justificationPass() const { return m_jPass; }
