@@ -78,7 +78,7 @@ unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
 #define MAX_LEVEL 61
 
-Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
+Slot *resolveExplicit(int level, int dir, Slot *s, int plevel = 0, int nNest = 0)
 {
     int nLastValid = nNest;
     Slot *res = NULL;
@@ -94,16 +94,16 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
                 s->setBidiLevel(level + 1);
             else
                 s->setBidiLevel(level + 2);
+            s->setBidiClass(BN);
             if (s->getBidiLevel() > MAX_LEVEL)
                 s->setBidiLevel(level);
             else
             {
-                s = resolveExplicit(s->getBidiLevel(), (cls == LRE ? N : L), s->next(), nNest);
+                s = resolveExplicit(s->getBidiLevel(), (cls == LRE ? N : L), s->next(), level, nNest);
                 nNest--;
-                if (s) continue; else break;
+                if (s) continue;
             }
             cls = BN;
-            s->setBidiClass(cls);
             break;
 
         case RLO:
@@ -113,27 +113,28 @@ Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
                 s->setBidiLevel(level + 2);
             else
                 s->setBidiLevel(level + 1);
+            s->setBidiClass(BN);
             if (s->getBidiLevel() > MAX_LEVEL)
                 s->setBidiLevel(level);
             else
             {
-                s = resolveExplicit(s->getBidiLevel(), (cls == RLE ? N : R), s->next(), nNest);
+                s = resolveExplicit(s->getBidiLevel(), (cls == RLE ? N : R), s->next(), level, nNest);
                 nNest--;
-                if (s) continue; else break;
+                if (s) continue;
             }
             cls = BN;
-            s->setBidiClass(cls);
             break;
 
         case PDF:
             cls = BN;
             s->setBidiClass(cls);
-            if (nNest)
+            if (nLastValid < nNest)
+                --nNest;
+            else if (nNest > 0)
             {
-                if (nLastValid < nNest)
-                    --nNest;
-                else
-                    res = s;
+                --nNest;
+                s->setBidiLevel(plevel);
+                return s;
             }
             break;
         }
@@ -303,18 +304,37 @@ inline DirCode  EmbeddingDirection(int l)               { return l & 1 ? R : L; 
 inline bool     IsDeferredState(bidi_state a)           { return 0 != ((1 << a) & (rtmask | ltmask | acmask | rcmask | rsmask | lcmask | lsmask)); }
 inline bool     IsModifiedClass(DirCode a)              { return 0 != ((1 << a) & (ALmask | NSMmask | ESmask | CSmask | ETmask | ENmask)); }
 
+// Neutrals
+enum neutral_action
+{
+        // action to resolve previous input
+        nL = L,         // resolve EN to L
+        En = 3 << 4,    // resolve neutrals run to embedding level direction
+        Rn = R << 4,    // resolve neutrals run to strong right
+        Ln = L << 4,    // resolved neutrals run to strong left
+        In = (1<<8),    // increment count of deferred neutrals
+        LnL = (1<<4)+L, // set run and EN to L
+
+        WSflag = (1 << 7),     // keep track of WS for eos handling
+        WSMask = ~(1 << 7)
+};
+
+inline uint8    BaseClass(Slot *s)                      { return s->getBidiClass() & WSMask; }
+
 void SetDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
     if (!sRun || s == sRun) return;
     for (Slot *p = s->prev(), *e = sRun->prev(); p != e; p = p->prev())
-        p->setBidiClass(nval);
+        if (p->getBidiClass() == WS) p->setBidiClass(nval | WSflag);
+        else if (p->getBidiClass() != BN) p->setBidiClass(nval);
 }
 
 void SetThisDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
     if (!sRun) return;
     for (Slot *e = sRun->prev(); s != e; s = s->prev())
-        s->setBidiClass(nval);
+        if (s->getBidiClass() == WS) s->setBidiClass(nval | WSflag);
+        else if (s->getBidiClass() != BN) s->setBidiClass(nval);
 }
 
 void resolveWeak(int baseLevel, Slot *s)
@@ -331,7 +351,10 @@ void resolveWeak(int baseLevel, Slot *s)
         cls = s->getBidiClass();
         if (cls == BN)
         {
-            s->setBidiLevel(level);
+            // s->setBidiLevel(level);
+            continue;
+
+            level = s->getBidiLevel();
             if (!s->next() && level != baseLevel)
                 s->setBidiClass(EmbeddingDirection(level));
             else if (s->next() && level != s->next()->getBidiLevel() && s->next()->getBidiClass() != BN)
@@ -367,18 +390,6 @@ void resolveWeak(int baseLevel, Slot *s)
     if (clsRun != XX)
         SetThisDeferredRunClass(sLast, sRun, clsRun);
 }
-
-// Neutrals
-enum neutral_action
-{
-        // action to resolve previous input
-        nL = L,         // resolve EN to L
-        En = 3 << 4,    // resolve neutrals run to embedding level direction
-        Rn = R << 4,    // resolve neutrals run to strong right
-        Ln = L << 4,    // resolved neutrals run to strong left
-        In = (1<<8),    // increment count of deferred neutrals
-        LnL = (1<<4)+L, // set run and EN to L
-};
 
 int GetDeferredNeutrals(int action, int level)
 {
@@ -445,9 +456,16 @@ void resolveNeutrals(int baseLevel, Slot *s)
     for ( ; s; s = s->next())
     {
         sLast = s;
-        cls = s->getBidiClass();
+        cls = BaseClass(s);
         if (cls == BN)
         {
+            cls = EmbeddingDirection(level);
+            int clsRun = GetDeferredNeutrals(actionNeutrals[state][neutral_class_map[cls]], level);
+            if (clsRun != N)
+            {
+                SetThisDeferredRunClass(sLast, sRun, clsRun);
+                sRun = NULL;
+            }
             level = s->getBidiLevel();
             continue;
         }
@@ -486,13 +504,8 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
     int level = rtl;
     for ( ; s; s = s->next())
     {
-        int cls = s->getBidiClass();
-        if (cls == BN)
-        {
-            s->setBidiLevel(level);
-            continue;
-        }
-        else if (cls == AN)
+        int cls = BaseClass(s);
+        if (cls == AN)
             cls = AL;
         if (cls < 5 && cls > 0)
         {
@@ -510,6 +523,11 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
                 }
             }
         }
+        else if (cls != BN)
+        {
+            s->setBidiLevel(level);
+            continue;
+        }
     }
 }
 
@@ -517,15 +535,19 @@ void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s)
 {
     for ( ; s; s = s->prev())
     {
-        int cls = seg->glyphAttr(s->gid(), aBidi);
-        if (cls == WS)
+        int8 cls = s->getBidiClass();
+        if (cls == WS || cls & WSflag)
             s->setBidiLevel(baseLevel);
-        else
+        else if (cls != BN)
             break;
     }
 }
 
 
+/*
+Stitch two spans together to make another span (with ends tied together).
+If the level is odd then swap the order of the two spans
+*/
 inline
 Slot * join(int level, Slot * a, Slot * b)
 {
@@ -537,14 +559,19 @@ Slot * join(int level, Slot * a, Slot * b)
     return a;
 }
 
-
+/*
+Given the first slot in a run of slots with the same bidi level, turn the run
+into it's own little doubly linked list ring (a span) with the two ends joined together.
+If the run is rtl then reverse its direction.
+Returns the first slot after the span
+*/
 Slot * span(Slot * & cs, const bool rtl)
 {
     Slot * r = cs, * re = cs; cs = cs->next();
     if (rtl)
     {
         Slot * t = r->next(); r->next(r->prev()); r->prev(t);
-        for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->prev())
+        for (int l = r->getBidiLevel(); cs && (l == cs->getBidiLevel() || cs->getBidiClass() == BN); cs = cs->prev())
         {
             re = cs;
             t = cs->next(); cs->next(cs->prev()); cs->prev(t);
@@ -555,7 +582,7 @@ Slot * span(Slot * & cs, const bool rtl)
     }
     else
     {
-        for (int l = r->getBidiLevel(); cs && l == cs->getBidiLevel(); cs = cs->next())
+        for (int l = r->getBidiLevel(); cs && (l == cs->getBidiLevel() || cs->getBidiClass() == BN); cs = cs->next())
             re = cs;
         r->prev(re);
         re->next(r);
@@ -564,17 +591,25 @@ Slot * span(Slot * & cs, const bool rtl)
     return r;
 }
 
+inline int getlevel(const Slot *cs, const int level)
+{
+    while (cs && cs->getBidiClass() == BN)
+    { cs = cs->next(); }
+    if (cs)
+        return cs->getBidiLevel();
+    else
+        return level;
+}
 
 Slot *resolveOrder(Slot * & cs, const bool reordered, const int level)
 {
     Slot * r = 0;
     int ls;
-    while (cs && level <= (ls = cs->getBidiLevel() - reordered))
+    while (cs && level <= (ls = getlevel(cs, level) - reordered))
     {
-        r = join(level, r, level >= ls
-                                ? span(cs, level & 1)
-                                : resolveOrder(cs, reordered, level+1));
+        r = join(level, r, level < ls
+                                ? resolveOrder(/* updates */cs, reordered, level+1) // find span of heighest level
+                                : span(/* updates */cs, level & 1));
     }
     return r;
 }
-

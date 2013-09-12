@@ -410,7 +410,7 @@ void Segment::prepare_pos(const Font * /*font*/)
     // copy key changeable metrics into slot (if any);
 }
 
-Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0);
+Slot *resolveExplicit(int level, int dir, Slot *s, int plevel = 0, int nNest = 0);
 void resolveWeak(int baseLevel, Slot *s);
 void resolveNeutrals(int baseLevel, Slot *s);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
@@ -435,19 +435,22 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
     }
-    if (bmask & (paradir ? 0x92 : 0x9C))
+    if (bmask & (paradir ? 0x1892 : 0x509C))
     {
         if (bmask & 0xF800)
-            resolveExplicit(baseLevel, 0, first(), 0);
+            resolveExplicit(baseLevel, 0, first(), baseLevel, 0);
         if (bmask & 0x10178)
             resolveWeak(baseLevel, first());
         if (bmask & 0x361)
             resolveNeutrals(baseLevel, first());
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());
-        s = resolveOrder(s = first(), baseLevel != 0);
-        first(s); last(s->prev());
-        s->prev()->next(0); s->prev(0);
+        s = resolveOrder(s = first(), baseLevel != 0);      // hack around passing value to ref
+        if (s)
+        {
+            first(s); last(s->prev());
+            s->prev()->next(0); s->prev(0);
+        }
     }
     else if (!(dir() & 4) && baseLevel && aMirror)
     {

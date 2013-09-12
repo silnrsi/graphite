@@ -12,6 +12,7 @@ def runtests(chars, modes, orders, levels) :
             return (True, [], [], 0)
         t.append(x)
     test = u"".join(t)
+    # if u"\u202E" in test : print "Testing: {}".format(chars)
     if modes & 2 :
         (r, o, d) = runonetest(test, 0, orders, levels)
         if not r : return (r, o, d, 'l')
@@ -48,8 +49,8 @@ charmap = {
 #    'LRE' : u"\u202A",
 #    'LRO' : u"\u202D",
     'AL' : u"\u0627",
-#    'RLE' : u"\u202B",
-#    'RLO' : u"\u202E",
+    'RLE' : u"\u202B",
+    'RLO' : u"\u202E",
     'PDF' : u"\u202C",
     'NSM' : u"\u064B",
     'BN' : u"\u200B"
@@ -65,7 +66,8 @@ tf = open(sys.argv[1])
 face = graphite.Face(sys.argv[2])
 font = graphite.Font(face, 16)
 
-count = 0
+passes = 0
+fails = 0
 for l in tf.readlines() :
     if l.startswith('#') or len(l) < 2 : continue
     elif l.startswith('@Levels:') :
@@ -76,10 +78,11 @@ for l in tf.readlines() :
         (chars, modes) = l.split(';')
         (res, orgs, right, d) = runtests(chars.split(), int(modes), orders, levels)
         if not res :
-            print "Failed: {0} : {1} vs {2} - {3}".format(l.strip(), orgs, right, d) 
+            print "Failed: {0} : {1} vs {2} - {3}".format(l.strip(), orgs, right, d)
+            fails += 1
         elif d :
-            count += 1
+            passes += 1
 
-print "{0} tests passed".format(count)
+print "{0} tests passed, {1} failed.".format(passes, fails)
 
         
