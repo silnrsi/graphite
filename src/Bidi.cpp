@@ -27,6 +27,7 @@ of the License or (at your option) any later version.
 #include "inc/Main.h"
 #include "inc/Slot.h"
 #include "inc/Segment.h"
+#include "inc/Bidi.h"
 
 using namespace graphite2;
 
@@ -54,6 +55,8 @@ enum DirCode {  // Hungarian: dirc
         RLI        = 18,   // RLI isolate
         FSI        = 19,   // FSI isolate
         PDI        = 20,   // pop isolate
+        OPP        = 21,   // opening paired parenthesis
+        CPP        = 22,   // closing paired parenthesis
 
         ON = N
 };
@@ -65,11 +68,12 @@ enum DirMask {
 
 inline uint8    BaseClass(Slot *s)                      { return s->getBidiClass() & WSMask; }
 
-unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0 };
+unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0 };
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
 
-void resolveWeak(Slot *start, int baseLevel, int sos, int eos);
+void resolveWeak(Slot *start, int sos, int eos);
 void resolveNeutrals(Slot *s, int baseLevel, int sos, int eos);
+void processParens(Slot *s, Segment *seg, uint8 aMirror, int level);
 
 inline int calc_base_level(Slot *s)
 {
@@ -109,11 +113,12 @@ inline int calc_base_level(Slot *s)
 }
 
 // inline or not?
-void do_resolves(Slot *start, int level, int sos, int eos, int isol, Slot *pstart, int &bmask)
+void do_resolves(Slot *start, int level, int sos, int eos, int &bmask, Segment *seg, uint8 aMirror)
 {
     if (bmask & 0x1F1178)
-        resolveWeak(start, level, sos, eos);
-    // do bracket pairing here
+        resolveWeak(start, sos, eos);
+    if (bmask & 0x200000)
+        processParens(start, seg, aMirror, level);
     if (bmask & 0x1E0361)
         resolveNeutrals(start, level, sos, eos);
     bmask = 0;
@@ -126,7 +131,7 @@ enum maxs
 };
 
 // returns where we are up to in processing
-Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init)
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror)
 {
     int bmask = 0;
     Slot *s = start;
@@ -175,7 +180,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             lnextLevel = newLevel;
             scurr = s;
             s->setBidiLevel(newLevel); // to make it vanish
-            s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0);
+            s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0, seg, aMirror);
             // s points at PDF or end of sequence
             // try to keep extending the run and not process it until we have to
             if (lnextLevel != level || !s)      // if at end of run
@@ -183,7 +188,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 if (slast != scurr)             // process the run now, don't try to extend it
                 {
                     // process text preceeding embedding
-                    do_resolves(slast, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, isol, start, bmask);
+                    do_resolves(slast, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, bmask, seg, aMirror);
                     empty = 0;
                     nextLevel = level;
                 }
@@ -216,7 +221,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (slast != s)
             {
                 scurr->prev(0);     // if slast, then scurr
-                do_resolves(slast, level, level & 1, level & 1, isol, start, bmask);
+                do_resolves(slast, level, level & 1, level & 1, bmask, seg, aMirror);
                 empty = 0;
             }
             if (empty)
@@ -254,7 +259,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (scurr) scurr->prev(s);
             scurr = s;  // include FSI
             lnextLevel = newLevel;
-            s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0);
+            s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0, seg, aMirror);
             // s points at PDI
             if (s)
             {
@@ -292,7 +297,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 if (slast != s)
                 {
                     scurr->prev(0);
-                    do_resolves(slast, level, prelevel & 1, level & 1, isol, start, bmask);
+                    do_resolves(slast, level, prelevel & 1, level & 1, bmask, seg, aMirror);
                     empty = 0;
                 }
                 //s->setBidiClass(ON | WSflag);    // no special treatment in final stages
@@ -312,7 +317,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
     }
     if (slast != s)
     {
-        do_resolves(slast, level, (level > prelevel ? level : prelevel) & 1, lnextLevel & 1, isol, start, bmask);
+        do_resolves(slast, level, (level > prelevel ? level : prelevel) & 1, lnextLevel & 1, bmask, seg, aMirror);
         empty = 0;
     }
     if (empty || isol)
@@ -350,30 +355,6 @@ enum bidi_state // possible states
         ret,            //      ET following re
         let,            //      ET following le
 } ;
-
-enum bidi_state_mask
-{
-    xamask = 1,
-    xrmask = 2,
-    xlmask = 4,
-    aomask = 8,
-    romask = 0x10,
-    lomask = 0x20,
-    rtmask = 0x40,
-    ltmask = 0x80,
-    cnmask = 0x100,
-    ramask = 0x200,
-    remask = 0x400,
-    lamask = 0x800,
-    lemask = 0x1000,
-    acmask = 0x2000,
-    rcmask = 0x4000,
-    rsmask = 0x8000,
-    lcmask = 0x10000,
-    lsmask = 0x20000,
-    retmask = 0x40000,
-    letmask = 0x80000
-};
 
 const bidi_state stateWeak[][10] =
 {
@@ -498,11 +479,10 @@ void SetThisDeferredRunClass(Slot *s, Slot *sRun, int nval)
         else if (BaseClass(p) != BN) p->setBidiClass(nval | (p->getBidiClass() & WSflag));
 }
 
-void resolveWeak(Slot *start, int baseLevel, int sos, int eos)
+void resolveWeak(Slot *start, int sos, int eos)
 {
     int state = (sos & 1) ? xr : xl;
     int cls;
-    //int level = baseLevel;
     Slot *s = start;
     Slot *sRun = NULL;
     Slot *sLast = s;
@@ -558,6 +538,56 @@ void resolveWeak(Slot *start, int baseLevel, int sos, int eos)
         SetThisDeferredRunClass(sLast, sRun, clsRun);
 }
 
+void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
+{
+    uint8 mask = 0;
+    int8 lastDir = -1;
+    BracketPairStack *stack = seg->bracket_stack();
+    for ( ; s; s = s->prev())       // walk the sequence
+    {
+        uint16 ogid = seg->glyphAttr(s->gid(), aMirror);
+        int cls = BaseClass(s);
+        
+        switch(cls)
+        {
+        case OPP :
+            stack->orin(mask);
+            stack->push(ogid, s, lastDir);
+            mask = 0;
+            break;
+        case CPP :
+            {
+                BracketPair *curr = stack->scan(s->gid());
+                if (!curr) break;
+                curr->orin(mask);
+                mask = 0;
+                if (curr->mask())
+                {
+                    int dir;
+                    if (curr->mask() & (1 << (level & 1)))  // if inside has strong embedding
+                        dir = level & 1;
+                    else if (curr->before() >= 0 && curr->before() == (1 << (level & 1)))
+                        dir = (~level & 1);     // if first strong before open is other direction
+                    else
+                        dir = level & 1;
+                    s->setBidiClass(EmbeddingDirection(dir));
+                    curr->open()->setBidiClass(EmbeddingDirection(dir));
+                }
+                stack->reset(curr);
+                break;
+            }
+        case L :
+            lastDir = 0;
+            mask |= 1;
+            break;
+        case R :
+        case AL :
+            lastDir = 1;
+            mask |= 1;
+        }
+    }
+}
+
 int GetDeferredNeutrals(int action, int level)
 {
         action = (action >> 4) & 0xF;
@@ -584,7 +614,7 @@ enum neutral_state
         na, // N preceeded by a
 } ;
 
-const uint8 neutral_class_map[] = { 0, 1, 2, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const uint8 neutral_class_map[] = { 0, 1, 2, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 const int actionNeutrals[][5] =
 {
@@ -700,7 +730,7 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
     }
 }
 
-void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s)
+void resolveWhitespace(int baseLevel, Slot *s)
 {
     for ( ; s; s = s->prev())
     {

@@ -36,6 +36,7 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
+#include "inc/Bidi.h"
 #include "graphite2/Segment.h"
 
 
@@ -49,6 +50,7 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_silf(face->chooseSilf(script)),
   m_first(NULL),
   m_last(NULL),
+  m_bstack(NULL),
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
@@ -67,6 +69,7 @@ Segment::~Segment()
     for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
         free(*j);
     delete[] m_charinfo;
+    if (m_bstack) delete m_bstack;
 }
 
 #ifndef GRAPHITE2_NSEGCACHE
@@ -410,9 +413,9 @@ void Segment::prepare_pos(const Font * /*font*/)
     // copy key changeable metrics into slot (if any);
 }
 
-Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init);
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
-void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
+void resolveWhitespace(int baseLevel, Slot *s);
 Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
 void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
@@ -423,23 +426,36 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     Slot *s;
     int baseLevel = paradir ? 1 : 0;
     unsigned int bmask = 0;
+    unsigned int ssize = 0;
     for (s = first(); s; s = s->next())
     {
         if (s->getBidiClass() == -1)
         {
         	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
-            s->setBidiClass((bAttr <= 20) * bAttr);
+            s->setBidiClass((bAttr <= 22) * bAttr);
         }
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
+        if (glyphAttr(s->gid(), aMirror))
+            ++ssize;
     }
-    if (bmask & (paradir ? 0xE7892 : 0xE789C))
+    if (m_bstack && m_bstack->size() < ssize)
+    {
+        free(m_bstack);
+        m_bstack = NULL;
+    }
+    if (!m_bstack)
+    {
+        m_bstack = grzeroalloc<BracketPairStack>(1);
+        ::new (m_bstack) BracketPairStack(ssize);
+    }
+    if (bmask & (paradir ? 0x2E7892 : 0x2E789C))
     {
         int nextLevel = paradir;
         int e, i, c;
-        process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1);
+        process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1, this, aMirror);
         resolveImplicit(first(), this, aMirror);
-        resolveWhitespace(baseLevel, this, aBidi, last());
+        resolveWhitespace(baseLevel, last());
         s = resolveOrder(s = first(), baseLevel != 0);      // s=... Hack around passing value to ref
         if (s)
         {
