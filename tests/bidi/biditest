@@ -12,8 +12,8 @@ def runtests(chars, modes, orders, levels) :
             return (True, [], [], 0)
         t.append(x)
     test = u"".join(t)
-    # if u"\u202B" in test : print "Testing: {}".format(chars)
-    # print "Testing: {}".format(chars)
+    #if u"\u202B" in test : print "Testing: {}".format(chars)
+    #print "Testing: {}".format(chars)
     if modes & 2 :
         (r, o, d) = runonetest(test, 0, orders, levels)
         if not r : return (r, o, d, 'l')
@@ -54,11 +54,11 @@ charmap = {
     'RLO' : u"\u202E",
     'PDF' : u"\u202C",
     'NSM' : u"\u064B",
-    'BN' : u"\u200B"
-#    'FSI' : u"\u2068",
-#    'LRI' : u"\u2066",
-#    'RLI' : u"\u2067",
-#    'PDI' : u"\u2069"
+    'BN' : u"\u200B",
+    'FSI' : u"\u2068",
+    'LRI' : u"\u2066",
+    'RLI' : u"\u2067",
+    'PDI' : u"\u2069"
 }   
 
 #tf = open("BidiTest.txt")

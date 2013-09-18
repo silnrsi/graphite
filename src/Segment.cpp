@@ -410,7 +410,7 @@ void Segment::prepare_pos(const Font * /*font*/)
     // copy key changeable metrics into slot (if any);
 }
 
-Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLevel, int dirover, int isol, int cisol, int cembed, int init);
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Segment *seg, uint8 aBidi, Slot *s);
 Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
@@ -436,7 +436,8 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     if (bmask & (paradir ? 0xE7892 : 0xE789C))
     {
         int nextLevel = paradir;
-        process_bidi(first(), NULL, baseLevel, paradir, nextLevel, 0, 0, 0, 0, 1);
+        int e, i, c;
+        process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1);
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, this, aBidi, last());
         s = resolveOrder(s = first(), baseLevel != 0);      // s=... Hack around passing value to ref

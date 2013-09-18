@@ -63,121 +63,59 @@ enum DirMask {
         WSMask = ~(1 << 7)
 };
 
+inline uint8    BaseClass(Slot *s)                      { return s->getBidiClass() & WSMask; }
+
 unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0 };
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
-/*
-Slot *resolveExplicit(int level, int dir, Slot *s, int nNest = 0)
-{
-    int nLastValid = nNest;
-    Slot *res = NULL;
-    for ( ; s && !res; s = s->next())
-    {
-        int cls = s->getBidiClass();
-        switch(cls)
-        {
-        case LRO:
-        case LRE:
-            nNest++;
-            if (level & 1)
-                s->setBidiLevel(level + 1);
-            else
-                s->setBidiLevel(level + 2);
-            s->setBidiClass(BN);
-            if (s->getBidiLevel() > MAX_LEVEL)
-                s->setBidiLevel(level);
-            else
-            {
-                s = resolveExplicit(s->getBidiLevel(), (cls == LRE ? N : L), s->next(), nNest);
-                nNest--;
-                if (s) continue;
-            }
-            cls = BN;
-            break;
 
-        case RLO:
-        case RLE:
-            nNest++;
-            if (level & 1)
-                s->setBidiLevel(level + 2);
-            else
-                s->setBidiLevel(level + 1);
-            s->setBidiClass(BN);
-            if (s->getBidiLevel() > MAX_LEVEL)
-                s->setBidiLevel(level);
-            else
-            {
-                s = resolveExplicit(s->getBidiLevel(), (cls == RLE ? N : R), s->next(), nNest);
-                nNest--;
-                if (s) continue;
-            }
-            cls = BN;
-            break;
+void resolveWeak(Slot *start, int baseLevel, int sos, int eos);
+void resolveNeutrals(Slot *s, int baseLevel, int sos, int eos);
 
-        case PDF:
-            cls = BN;
-            s->setBidiClass(cls);
-            if (nLastValid < nNest)
-                --nNest;
-            else if (nNest > 0)
-            {
-                --nNest;
-                s->setBidiLevel(level);
-                return s;
-            }
-            break;
-        }
-
-        if (dir != N)
-            cls = dir;
-        if (s)
-        {
-            s->setBidiLevel(level);
-            if (s->getBidiClass() != BN)
-                s->setBidiClass(cls);
-        }
-        else
-            break;
-    }
-    return res;
-}
-*/
-
-void resolveWeak(Slot *start, Slot *send, int baseLevel, int sos, int eos);
-void resolveNeutrals(Slot *s, Slot *send, int baseLevel, int sos, int eos);
-
-int calc_base_level(Slot *s, Slot *send, int level)
+inline int calc_base_level(Slot *s)
 {
     int count = 0;
-    for ( ; s != send; s = s->next())
+    for ( ; s; s = s->next())
     {
         int cls = s->getBidiClass();
-        switch(cls)
+        if (count)
         {
-            case L :
-                return 0;
-            case R :
-                return 1;
+            switch(cls)
+            {
             case LRI :
             case RLI :
             case FSI :
                 ++count;
             case PDI :
-                if (count) --count;
-                else
-                    return level & 1;
+                --count;
+            }
+        }
+        else
+        {
+            switch(cls)
+            {
+            case L :
+                return 0;
+            case R :
+            case AL :
+                return 1;
+            case LRI :
+            case RLI :
+            case FSI :
+                ++count;
+            }
         }
     }
-    return level & 1;
+    return 0;
 }
 
 // inline or not?
-void do_resolves(Slot *start, Slot *send, int level, int sos, int eos, int isol, Slot *pstart, int &bmask)
+void do_resolves(Slot *start, int level, int sos, int eos, int isol, Slot *pstart, int &bmask)
 {
-    if (bmask & 0xF1178)
-        resolveWeak((isol && start == pstart) ? start->prev() : start, send, level, sos, eos);
+    if (bmask & 0x1F1178)
+        resolveWeak(start, level, sos, eos);
     // do bracket pairing here
-    if (bmask & 0x361)
-        resolveNeutrals(start, send, level, sos, eos);
+    if (bmask & 0x1E0361)
+        resolveNeutrals(start, level, sos, eos);
     bmask = 0;
 }
 
@@ -188,20 +126,22 @@ enum maxs
 };
 
 // returns where we are up to in processing
-Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLevel, int dirover, int isol, int isolerr, int embederr, int init)
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init)
 {
     int bmask = 0;
     Slot *s = start;
     Slot *slast = start;
-    Slot *scurr = s;
+    Slot *scurr = 0;
+    Slot *stemp;
     int lnextLevel = nextLevel;
     int newLevel;
     int empty = 1;
-    for ( ; s && s != send; s = s ? s->next() : s)
+    for ( ; s; s = s ? s->next() : s)
     {
         int cls = s->getBidiClass();
         bmask |= (1 << cls);
         s->setBidiLevel(level);
+        // we keep s->prev() pointing backwards for PDI repeating
         
         switch (cls)
         {
@@ -224,35 +164,48 @@ Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLe
                 break;
             }
             s->setBidiClass(BN);
-            if (isolerr || newLevel >= MAX_LEVEL || embederr)
+            if (isolerr || newLevel > MAX_LEVEL || embederr)
             {
-                ++embederr;
+                if (!isolerr) ++embederr;
                 break;
             }
-            scurr = s;
+            stemp = scurr;
+            if (scurr)
+                scurr->prev(0);         // don't include control in string
             lnextLevel = newLevel;
-            s = process_bidi(s->next(), send, newLevel, level, lnextLevel, cls < LRE, 0, isolerr, embederr, 0);
-            scurr->setBidiLevel(newLevel); // to make it vanish
-            if (lnextLevel != level || !s)
+            scurr = s;
+            s->setBidiLevel(newLevel); // to make it vanish
+            s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0);
+            // s points at PDF or end of sequence
+            // try to keep extending the run and not process it until we have to
+            if (lnextLevel != level || !s)      // if at end of run
             {
-                if (lnextLevel != level)
-                {
-                    empty = 0;
-                    nextLevel = lnextLevel;
-                }
-                if (slast != scurr)
+                if (slast != scurr)             // process the run now, don't try to extend it
                 {
                     // process text preceeding embedding
-                    do_resolves(slast, scurr, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, isol, start, bmask);
+                    do_resolves(slast, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, isol, start, bmask);
                     empty = 0;
                     nextLevel = level;
                 }
+                else if (lnextLevel != level)   // the embedding had something
+                {
+                    empty = 0;                  // so we aren't empty either
+                    nextLevel = lnextLevel;     // but pass back from the embedded
+                }
+                if (s) 
+                {
+                    prelevel = lnextLevel;
+                    lnextLevel = level;
+                }
                 slast = s ? s->next() : s;
             }
+            else if (stemp)
+                stemp->prev(s);
             break;
 
         case PDF :
             s->setBidiClass(BN);
+            s->prev(0);
             if (isol || isolerr || init)
                 break;
             if (embederr)
@@ -262,11 +215,15 @@ Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLe
             }
             if (slast != s)
             {
-                do_resolves(slast, s, level, level & 1, level & 1, isol, start, bmask);
+                scurr->prev(0);     // if slast, then scurr
+                do_resolves(slast, level, level & 1, level & 1, isol, start, bmask);
                 empty = 0;
             }
             if (empty)
+            {
                 nextLevel = prelevel;
+                s->setBidiLevel(prelevel);
+            }
             return s;
 
         case FSI :
@@ -275,7 +232,7 @@ Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLe
             switch (cls)
             {
             case FSI :
-                if (calc_base_level(s->next(), send, level))
+                if (calc_base_level(s->next()))
                     newLevel = level + (level & 1 ? 2 : 1);
                 else
                     newLevel = level + (level & 1 ? 1 : 2);
@@ -287,34 +244,60 @@ Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLe
                 newLevel = level + (level & 1 ? 2 : 1);
                 break;
             }
-            if (newLevel >= MAX_LEVEL || isolerr)
+            if (newLevel > MAX_LEVEL || isolerr)
             {
                 ++isolerr;
-                s->setBidiClass(BN);
+                s->setBidiClass(ON | WSflag);
                 break;
             }
-            scurr = s;
+            ++cisol;
+            if (scurr) scurr->prev(s);
+            scurr = s;  // include FSI
             lnextLevel = newLevel;
-            s = process_bidi(s->next(), send, newLevel, level, lnextLevel, 0, 1, isolerr, embederr, 0);
-            if (slast != s)
-                do_resolves(slast, s, level, prelevel & 1, newLevel & 1, isol, start, bmask);
-            slast = s ? s->next() : s;
+            s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0);
+            // s points at PDI
+            if (s)
+            {
+                bmask |= 1 << BaseClass(s);
+                s->setBidiLevel(level);
+                // prelevel = s->getBidiLevel();
+            }
+            lnextLevel = level;
             break;
 
         case PDI :
             if (isolerr)
             {
                 --isolerr;
-                s->setBidiClass(BN);
+                s->setBidiClass(ON | WSflag);
                 break;
             }
-            if (slast != s)
-                do_resolves(slast, s, level, prelevel & 1, level & 1, isol, start, bmask);
+            if (init || !cisol)
+            {
+                s->setBidiClass(ON | WSflag);
+                break;
+            }
+            embederr = 0;
             if (!isol)
+            {
+                if (empty)
+                {
+                    nextLevel = prelevel;
+                    //s->setBidiLevel(prelevel);
+                }
                 return s->prev();       // keep working up the stack pointing at this PDI until we get to an isolate entry
+            }
             else
             {
-                s->setBidiClass(BN | WSflag);    // no special treatment in final stages
+                if (slast != s)
+                {
+                    scurr->prev(0);
+                    do_resolves(slast, level, prelevel & 1, level & 1, isol, start, bmask);
+                    empty = 0;
+                }
+                //s->setBidiClass(ON | WSflag);    // no special treatment in final stages
+                --cisol;
+                //s->setBidiLevel(prelevel);
                 return s;
             }
 
@@ -322,13 +305,17 @@ Slot *process_bidi(Slot *start, Slot *send, int level, int prelevel, int &nextLe
             if (dirover)
                 s->setBidiClass((level & 1 ? R : L) | (WSflag * (cls == WS)));
         }
+        if (s) s->prev(0);
+        if (scurr)
+            scurr->prev(s);
+        scurr = s;
     }
     if (slast != s)
     {
-        do_resolves(slast, s, level, lnextLevel & 1, (level > prelevel ? level : prelevel) & 1, isol, start, bmask);
+        do_resolves(slast, level, (level > prelevel ? level : prelevel) & 1, lnextLevel & 1, isol, start, bmask);
         empty = 0;
     }
-    if (empty && !isol)
+    if (empty || isol)
         nextLevel = prelevel;
     return s;
 }
@@ -494,25 +481,24 @@ enum neutral_action
         LnL = (1<<4)+L, // set run and EN to L
 };
 
-inline uint8    BaseClass(Slot *s)                      { return s->getBidiClass() & WSMask; }
-
+// ->prev() here means ->next()
 void SetDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
     if (!sRun || s == sRun) return;
-    for (Slot *p = s->prev(), *e = sRun->prev(); p != e; p = p->prev())
+    for (Slot *p = sRun; p != s; p = p->prev())
         if (p->getBidiClass() == WS) p->setBidiClass(nval | WSflag);
-        else if (p->getBidiClass() != BN) p->setBidiClass(nval);
+        else if (BaseClass(p) != BN) p->setBidiClass(nval | (p->getBidiClass() & WSflag));
 }
 
 void SetThisDeferredRunClass(Slot *s, Slot *sRun, int nval)
 {
     if (!sRun) return;
-    for (Slot *e = sRun->prev(); s != e; s = s->prev())
-        if (s->getBidiClass() == WS) s->setBidiClass(nval | WSflag);
-        else if (s->getBidiClass() != BN) s->setBidiClass(nval);
+    for (Slot *p = sRun, *e = s->prev(); p != e; p = p->prev())
+        if (p->getBidiClass() == WS) p->setBidiClass(nval | WSflag);
+        else if (BaseClass(p) != BN) p->setBidiClass(nval | (p->getBidiClass() & WSflag));
 }
 
-void resolveWeak(Slot *start, Slot *send, int baseLevel, int sos, int eos)
+void resolveWeak(Slot *start, int baseLevel, int sos, int eos)
 {
     int state = (sos & 1) ? xr : xl;
     int cls;
@@ -521,24 +507,26 @@ void resolveWeak(Slot *start, Slot *send, int baseLevel, int sos, int eos)
     Slot *sRun = NULL;
     Slot *sLast = s;
 
-    for ( ; s != send; s = s->next())
+    for ( ; s; s = s->prev())
     {
         sLast = s;
-        cls = s->getBidiClass();
+        cls = BaseClass(s);
         switch (cls)
         {
         case BN :
-            if (s == start) start = s->next();  // skip initial BNs for NSM resolving
+            if (s == start) start = s->prev();  // skip initial BNs for NSM resolving
             continue;
         case LRI :
         case RLI :
         case FSI :
+        case PDI :
             {
-                Slot *snext = s->next();
-                if (snext != send && snext->getBidiClass() == NSM)
+                Slot *snext = s->prev();
+                if (snext && snext->getBidiClass() == NSM)
                     snext->setBidiClass(ON);
+                s->setBidiClass(ON | WSflag);
             }
-            continue;
+            break;
 
         case NSM :
             if (s == start)
@@ -546,23 +534,22 @@ void resolveWeak(Slot *start, Slot *send, int baseLevel, int sos, int eos)
                 cls = EmbeddingDirection(sos);
                 s->setBidiClass(cls);
             }
-            // fall through into default
-
-        default :
-            bidi_action action = actionWeak[state][bidi_class_map[cls]];
-            int clsRun = GetDeferredType(action);
-            if (clsRun != XX)
-            {
-                SetDeferredRunClass(s, sRun, clsRun);
-                sRun = NULL;
-            }
-            int clsNew = GetResolvedType(action);
-            if (clsNew != XX)
-                s->setBidiClass(clsNew);
-            if (!sRun && (IX & action))
-                sRun = s;
-            state = stateWeak[state][bidi_class_map[cls]];
+            break;
         }
+        
+        bidi_action action = actionWeak[state][bidi_class_map[cls]];
+        int clsRun = GetDeferredType(action);
+        if (clsRun != XX)
+        {
+            SetDeferredRunClass(s, sRun, clsRun);
+            sRun = NULL;
+        }
+        int clsNew = GetResolvedType(action);
+        if (clsNew != XX)
+            s->setBidiClass(clsNew);
+        if (!sRun && (IX & action))
+            sRun = s;
+        state = stateWeak[state][bidi_class_map[cls]];
     }
 
     cls = EmbeddingDirection(eos);
@@ -625,7 +612,7 @@ const int stateNeutrals[][5] =
 {       na, l,  r,      a,      l, },           // na  N preceded by la
 } ;
 
-void resolveNeutrals(Slot *s, Slot *send, int baseLevel, int sos, int eos)
+void resolveNeutrals(Slot *s, int baseLevel, int sos, int eos)
 {
     int state = (sos & 1) ? r : l;
     int cls;
@@ -633,7 +620,7 @@ void resolveNeutrals(Slot *s, Slot *send, int baseLevel, int sos, int eos)
     Slot *sLast = s;
     int level = baseLevel;
 
-    for ( ; s != send; s = s->next())
+    for ( ; s; s = s->prev())
     {
         sLast = s;
         cls = BaseClass(s);
@@ -681,9 +668,12 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
 {
     bool rtl = seg->dir() & 1;
     int level = rtl;
+    Slot *slast = 0;
     for ( ; s; s = s->next())
     {
         int cls = BaseClass(s);
+        s->prev(slast);         // restitch the prev() side of the doubly linked list
+        slast = s;
         if (cls == AN)
             cls = AL;   // use AL value as the index for AN, no property change
         if (cls < 5 && cls > 0)
