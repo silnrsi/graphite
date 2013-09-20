@@ -111,7 +111,6 @@ public:
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
     void last(Slot *p) { m_last = p; }
-    BracketPairStack *bracket_stack() const { return m_bstack; }
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     Slot *newSlot();
     void freeSlot(Slot *);
@@ -165,7 +164,6 @@ private:
     const Silf    * m_silf;
     Slot          * m_first;            // first slot in segment
     Slot          * m_last;             // last slot in segment
-    BracketPairStack *m_bstack;         // for bidi bracket pairing
     unsigned int    m_bufSize,          // how big a buffer to create when need more slots
                     m_numGlyphs,
                     m_numCharinfo,      // size of the array and number of input characters

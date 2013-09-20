@@ -66,14 +66,14 @@ enum DirMask {
         WSMask = ~(1 << 7)
 };
 
-inline uint8    BaseClass(Slot *s)                      { return s->getBidiClass() & WSMask; }
+inline uint8    BaseClass(Slot *s)   { return s->getBidiClass() & WSMask; }
 
 unsigned int bidi_class_map[] = { 0, 1, 2, 5, 4, 8, 9, 3, 7, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0 };
 // Algorithms based on Unicode reference standard code. Thanks Asmus Freitag.
 
 void resolveWeak(Slot *start, int sos, int eos);
 void resolveNeutrals(Slot *s, int baseLevel, int sos, int eos);
-void processParens(Slot *s, Segment *seg, uint8 aMirror, int level);
+void processParens(Slot *s, Segment *seg, uint8 aMirror, int level, BracketPairStack &stack);
 
 inline int calc_base_level(Slot *s)
 {
@@ -113,12 +113,12 @@ inline int calc_base_level(Slot *s)
 }
 
 // inline or not?
-void do_resolves(Slot *start, int level, int sos, int eos, int &bmask, Segment *seg, uint8 aMirror)
+void do_resolves(Slot *start, int level, int sos, int eos, int &bmask, Segment *seg, uint8 aMirror, BracketPairStack &stack)
 {
     if (bmask & 0x1F1178)
         resolveWeak(start, sos, eos);
     if (bmask & 0x200000)
-        processParens(start, seg, aMirror, level);
+        processParens(start, seg, aMirror, level, stack);
     if (bmask & 0x7E0361)
         resolveNeutrals(start, level, sos, eos);
     bmask = 0;
@@ -126,12 +126,11 @@ void do_resolves(Slot *start, int level, int sos, int eos, int &bmask, Segment *
 
 enum maxs
 {
-    // MAX_LEVEL = 61,
     MAX_LEVEL = 125,
 };
 
 // returns where we are up to in processing
-Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror)
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror, BracketPairStack &bstack)
 {
     int bmask = 0;
     Slot *s = start;
@@ -180,7 +179,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             lnextLevel = newLevel;
             scurr = s;
             s->setBidiLevel(newLevel); // to make it vanish
-            s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0, seg, aMirror);
+            s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0, seg, aMirror, bstack);
             // s points at PDF or end of sequence
             // try to keep extending the run and not process it until we have to
             if (lnextLevel != level || !s)      // if at end of run
@@ -188,7 +187,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 if (slast != scurr)             // process the run now, don't try to extend it
                 {
                     // process text preceeding embedding
-                    do_resolves(slast, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, bmask, seg, aMirror);
+                    do_resolves(slast, level, (prelevel > level ? prelevel : level) & 1, lnextLevel & 1, bmask, seg, aMirror, bstack);
                     empty = 0;
                     nextLevel = level;
                 }
@@ -221,7 +220,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (slast != s)
             {
                 scurr->prev(0);     // if slast, then scurr
-                do_resolves(slast, level, level & 1, level & 1, bmask, seg, aMirror);
+                do_resolves(slast, level, level & 1, level & 1, bmask, seg, aMirror, bstack);
                 empty = 0;
             }
             if (empty)
@@ -259,13 +258,12 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (scurr) scurr->prev(s);
             scurr = s;  // include FSI
             lnextLevel = newLevel;
-            s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0, seg, aMirror);
+            s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0, seg, aMirror, bstack);
             // s points at PDI
             if (s)
             {
                 bmask |= 1 << BaseClass(s);
                 s->setBidiLevel(level);
-                // prelevel = s->getBidiLevel();
             }
             lnextLevel = level;
             break;
@@ -286,10 +284,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (!isol)
             {
                 if (empty)
-                {
                     nextLevel = prelevel;
-                    //s->setBidiLevel(prelevel);
-                }
                 return s->prev();       // keep working up the stack pointing at this PDI until we get to an isolate entry
             }
             else
@@ -297,12 +292,10 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 if (slast != s)
                 {
                     scurr->prev(0);
-                    do_resolves(slast, level, prelevel & 1, level & 1, bmask, seg, aMirror);
+                    do_resolves(slast, level, prelevel & 1, level & 1, bmask, seg, aMirror, bstack);
                     empty = 0;
                 }
-                //s->setBidiClass(ON | WSflag);    // no special treatment in final stages
                 --cisol;
-                //s->setBidiLevel(prelevel);
                 return s;
             }
 
@@ -317,7 +310,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
     }
     if (slast != s)
     {
-        do_resolves(slast, level, (level > prelevel ? level : prelevel) & 1, lnextLevel & 1, bmask, seg, aMirror);
+        do_resolves(slast, level, (level > prelevel ? level : prelevel) & 1, lnextLevel & 1, bmask, seg, aMirror, bstack);
         empty = 0;
     }
     if (empty || isol)
@@ -538,12 +531,11 @@ void resolveWeak(Slot *start, int sos, int eos)
         SetThisDeferredRunClass(sLast, sRun, clsRun);
 }
 
-void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
+void processParens(Slot *s, Segment *seg, uint8 aMirror, int level, BracketPairStack &stack)
 {
     uint8 mask = 0;
     int8 lastDir = -1;
     BracketPair *p;
-    BracketPairStack *stack = seg->bracket_stack();
     for ( ; s; s = s->prev())       // walk the sequence
     {
         uint16 ogid = seg->glyphAttr(s->gid(), aMirror);
@@ -552,17 +544,17 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
         switch(cls)
         {
         case OPP :
-            stack->orin(mask);
-            stack->push(ogid, s, lastDir, lastDir != CPP);
+            stack.orin(mask);
+            stack.push(ogid, s, lastDir, lastDir != CPP);
             mask = 0;
             lastDir = OPP;
             break;
         case CPP :
-            stack->orin(mask);
-            p = stack->scan(s->gid());
+            stack.orin(mask);
+            p = stack.scan(s->gid());
             if (!p) break;
             mask = 0;
-            stack->close(p, s);
+            stack.close(p, s);
             lastDir = CPP;
             break;
         case L :
@@ -577,7 +569,7 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
             mask |= 2;
         }
     }
-    for (p = stack->start(); p; p =p->next())      // walk the stack
+    for (p = stack.start(); p; p =p->next())      // walk the stack
     {
         if (p->close() && p->mask())
         {
@@ -605,7 +597,7 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
             p->close()->setBidiClass(dir);
         }
     }
-    stack->clear();
+    stack.clear();
 }
 
 int GetDeferredNeutrals(int action, int level)
@@ -732,7 +724,7 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
             level += addLevel[level & 1][cls - 1];
             s->setBidiLevel(level);
         }
-        else if ((cls == ON || cls == OPP || cls == CPP) && aMirror)
+        if (aMirror)
         {
             int hasChar = seg->glyphAttr(s->gid(), aMirror + 1);
             if ( ((level & 1) && (!(seg->dir() & 4) || !hasChar)) 
@@ -742,11 +734,6 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
                 if (g) s->setGlyph(seg, g);
             }
         }
-/*        else if (cls != BN)
-        {
-            s->setBidiLevel(level);
-            continue;
-        } */
     }
 }
 

@@ -50,7 +50,6 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
   m_silf(face->chooseSilf(script)),
   m_first(NULL),
   m_last(NULL),
-  m_bstack(NULL),
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
@@ -69,7 +68,6 @@ Segment::~Segment()
     for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
         free(*j);
     delete[] m_charinfo;
-    if (m_bstack) delete m_bstack;
 }
 
 #ifndef GRAPHITE2_NSEGCACHE
@@ -413,7 +411,7 @@ void Segment::prepare_pos(const Font * /*font*/)
     // copy key changeable metrics into slot (if any);
 }
 
-Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror);
+Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror, BracketPairStack &stack);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Slot *s);
 Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
@@ -439,21 +437,13 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
         if (glyphAttr(s->gid(), aMirror) && s->getBidiClass() == 21)
             ++ssize;
     }
-    if (m_bstack && m_bstack->size() < ssize)
-    {
-        free(m_bstack);
-        m_bstack = NULL;
-    }
-    if (!m_bstack)
-    {
-        m_bstack = grzeroalloc<BracketPairStack>(1);
-        ::new (m_bstack) BracketPairStack(ssize);
-    }
+
+    BracketPairStack bstack(ssize);
     if (bmask & (paradir ? 0x2E7892 : 0x2E789C))
     {
         int nextLevel = paradir;
         int e, i, c;
-        process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1, this, aMirror);
+        process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1, this, aMirror, bstack);
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, last());
         s = resolveOrder(s = first(), baseLevel != 0);      // s=... Hack around passing value to ref

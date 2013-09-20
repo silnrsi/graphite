@@ -76,6 +76,7 @@ if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(vm)
 endif (NOT GRAPHITE2_NFILEFACE)
 add_subdirectory(fuzz-tests)
+add_subdirectory(bidi)
 
 enable_testing()
 

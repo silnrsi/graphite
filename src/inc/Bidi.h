@@ -62,31 +62,11 @@ public:
     ~BracketPairStack() { free(_stack); }
 
 public:
-    void clear() { _ip = _stack - 1; _top = 0; _last = 0; _lastclose = 0; }
     BracketPair *scan(uint16 gid);
-    void close(BracketPair *tos, Slot *s) {
-        for ( ; _last && _last != tos && !_last->close(); _last = _last->parent())
-        { }
-        tos->close(s);
-        _last->next(NULL);
-        _lastclose = tos;
-        _top = tos->parent();
-    }
-    BracketPair *push(uint16 gid, Slot *pos, uint8 before, int prevopen) {
-        if (++_ip - _stack < _size)
-        {
-            ::new (_ip) BracketPair(gid, pos, before, _top, prevopen ? _last : _lastclose);
-            if (_last) _last->next(_ip);
-            _last = _ip;
-        }
-        _top = _ip;
-        return _ip;
-    }
-    void orin(uint8 mask) {
-        BracketPair *t = _top;
-        for ( ; t; t = t->parent())
-            t->orin(mask);
-    }
+    void close(BracketPair *tos, Slot *s);
+    BracketPair *push(uint16 gid, Slot *pos, uint8 before, int prevopen);
+    void orin(uint8 mask);
+    void clear() { _ip = _stack - 1; _top = 0; _last = 0; _lastclose = 0; }
     uint size() const { return _size; }
     BracketPair *start() const { return _stack; }
 
@@ -112,6 +92,35 @@ inline BracketPair *BracketPairStack::scan(uint16 gid)
         res = res->parent();
     }
     return 0;
+}
+
+inline void BracketPairStack::close(BracketPair *tos, Slot *s) 
+{
+    for ( ; _last && _last != tos && !_last->close(); _last = _last->parent())
+    { }
+    tos->close(s);
+    _last->next(NULL);
+    _lastclose = tos;
+    _top = tos->parent();
+}
+
+inline BracketPair *BracketPairStack::push(uint16 gid, Slot *pos, uint8 before, int prevopen)
+{
+    if (++_ip - _stack < _size)
+    {
+        ::new (_ip) BracketPair(gid, pos, before, _top, prevopen ? _last : _lastclose);
+        if (_last) _last->next(_ip);
+        _last = _ip;
+    }
+    _top = _ip;
+    return _ip;
+}
+
+inline void BracketPairStack::orin(uint8 mask)
+{
+    BracketPair *t = _top;
+    for ( ; t; t = t->parent())
+        t->orin(mask);
 }
 
 }
