@@ -436,7 +436,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
         }
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
-        if (glyphAttr(s->gid(), aMirror))
+        if (glyphAttr(s->gid(), aMirror) && s->getBidiClass() == 21)
             ++ssize;
     }
     if (m_bstack && m_bstack->size() < ssize)

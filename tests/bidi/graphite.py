@@ -27,7 +27,7 @@ if getattr(sys, 'frozen', None) :
 #elif sys.platform == 'win32' :
 #    basedir = os.path.join(os.path.dirname(__file__), '..', 'dll')
 else :
-    basedir = os.path.join('..', '..', 'src')
+    basedir = os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'src')
 
 grfiles = {
     'darwin' : 'libgraphite2.dylib',

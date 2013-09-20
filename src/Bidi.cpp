@@ -119,7 +119,7 @@ void do_resolves(Slot *start, int level, int sos, int eos, int &bmask, Segment *
         resolveWeak(start, sos, eos);
     if (bmask & 0x200000)
         processParens(start, seg, aMirror, level);
-    if (bmask & 0x1E0361)
+    if (bmask & 0x7E0361)
         resolveNeutrals(start, level, sos, eos);
     bmask = 0;
 }
@@ -542,6 +542,7 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
 {
     uint8 mask = 0;
     int8 lastDir = -1;
+    BracketPair *p;
     BracketPairStack *stack = seg->bracket_stack();
     for ( ; s; s = s->prev())       // walk the sequence
     {
@@ -552,40 +553,59 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level)
         {
         case OPP :
             stack->orin(mask);
-            stack->push(ogid, s, lastDir);
+            stack->push(ogid, s, lastDir, lastDir != CPP);
             mask = 0;
+            lastDir = OPP;
             break;
         case CPP :
-            {
-                BracketPair *curr = stack->scan(s->gid());
-                if (!curr) break;
-                curr->orin(mask);
-                mask = 0;
-                if (curr->mask())
-                {
-                    int dir;
-                    if (curr->mask() & (1 << (level & 1)))  // if inside has strong embedding
-                        dir = level & 1;
-                    else if (curr->before() >= 0 && curr->before() == (1 << (level & 1)))
-                        dir = (~level & 1);     // if first strong before open is other direction
-                    else
-                        dir = level & 1;
-                    s->setBidiClass(EmbeddingDirection(dir));
-                    curr->open()->setBidiClass(EmbeddingDirection(dir));
-                }
-                stack->reset(curr);
-                break;
-            }
+            stack->orin(mask);
+            p = stack->scan(s->gid());
+            if (!p) break;
+            mask = 0;
+            stack->close(p, s);
+            lastDir = CPP;
+            break;
         case L :
-            lastDir = 0;
+            lastDir = L;
             mask |= 1;
             break;
         case R :
         case AL :
-            lastDir = 1;
-            mask |= 1;
+        case AN :
+        case EN :
+            lastDir = R;
+            mask |= 2;
         }
     }
+    for (p = stack->start(); p; p =p->next())      // walk the stack
+    {
+        if (p->close() && p->mask())
+        {
+            int dir = (level & 1) + 1;
+            if (p->mask() & dir)
+            { }
+            else if (p->mask() & (1 << (~level & 1)))  // if inside has strong other embedding
+            {
+                int ldir = p->before();
+                if ((p->before() == OPP || p->before() == CPP) && p->prev())
+                {
+                    for (BracketPair *q = p->prev(); q; q = q->prev())
+                    {
+                        ldir = q->open()->getBidiClass();
+                        if (ldir < 3) break;
+                        ldir = q->before();
+                        if (ldir < 3) break;
+                    }
+                    if (ldir > 2) ldir = 0;
+                }
+                if (ldir > 0 && (ldir - 1) != (level & 1))     // is dir given opp. to level dir (ldir == R or L)
+                    dir = (~level & 1) + 1;
+            }
+            p->open()->setBidiClass(dir);
+            p->close()->setBidiClass(dir);
+        }
+    }
+    stack->clear();
 }
 
 int GetDeferredNeutrals(int action, int level)
@@ -711,15 +731,15 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror)
             level = s->getBidiLevel();
             level += addLevel[level & 1][cls - 1];
             s->setBidiLevel(level);
-            if (aMirror)
+        }
+        else if ((cls == ON || cls == OPP || cls == CPP) && aMirror)
+        {
+            int hasChar = seg->glyphAttr(s->gid(), aMirror + 1);
+            if ( ((level & 1) && (!(seg->dir() & 4) || !hasChar)) 
+              || ((rtl ^ (level & 1)) && (seg->dir() & 4) && hasChar) )
             {
-                int hasChar = seg->glyphAttr(s->gid(), aMirror + 1);
-                if ( ((level & 1) && (!(seg->dir() & 4) || !hasChar)) 
-                  || ((rtl ^ (level & 1)) && (seg->dir() & 4) && hasChar) )
-                {
-                    unsigned short g = seg->glyphAttr(s->gid(), aMirror);
-                    if (g) s->setGlyph(seg, g);
-                }
+                unsigned short g = seg->glyphAttr(s->gid(), aMirror);
+                if (g) s->setGlyph(seg, g);
             }
         }
 /*        else if (cls != BN)

@@ -14,7 +14,7 @@ def runtests(chars, modes, orders, levels) :
         t.append(x)
     test = u"".join(t)
     #if u"\u202B" in test : print "Testing: {}".format(chars)
-    #print "Testing: {}".format(chars)
+    #print "Testing: {} - dir({})".format(chars, str(modes))
     if modes & 2 :
         (r, o, d) = runonetest(test, 0, orders, levels)
         if not r : return (r, o, d, 'l')
@@ -124,8 +124,8 @@ ctmap = {
     '2066' : 'LRI',
     '2067' : 'RLI',
     '2069' : 'PDI',
-    '2329' : 'OPP',
-    '232A' : 'CLP',
+    '2329' : 'OPS',
+    '232A' : 'CLS',
     '2680' : 'ON',
     '2681' : 'ON',
     '2682' : 'ON',

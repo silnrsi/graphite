@@ -32,53 +32,84 @@ namespace graphite2
 class BracketPair
 {
 public:
-    BracketPair(uint16 g, Slot *s, uint8 b) : _open(s), _gid(g), _mask(0), _before(b) {};
+    BracketPair(uint16 g, Slot *s, uint8 b, BracketPair *p, BracketPair *l) : _open(s), _close(0), _parent(p), _next(0), _prev(l), _gid(g), _mask(0), _before(b) {};
     uint16 gid() const { return _gid; }
     Slot *open() const { return _open; }
+    Slot *close() const { return _close; }
     uint8 mask() const { return _mask; }
     int8 before() const { return _before; }
+    BracketPair *parent() const { return _parent; }
+    void close(Slot *s) { _close = s; }
+    BracketPair *next() const { return _next; }
+    BracketPair *prev() const { return _prev; }
+    void next(BracketPair *n) { _next = n; }
     void orin(uint8 m) { _mask |= m; }
 private:
-    Slot  * _open;
-    uint16  _gid;
-    uint8   _mask;
-    int8    _before;
+    Slot        *   _open;          // Slot of opening paren
+    Slot        *   _close;         // Slot of closing paren
+    BracketPair *   _parent;        // pair this pair is in or NULL
+    BracketPair *   _next;          // next pair along the string
+    BracketPair *   _prev;          // pair that closed last before we opened
+    uint16          _gid;           // gid of closing paren
+    uint8           _mask;          // bitmap (2 bits) of directions within the pair
+    int8            _before;        // most recent strong type (L, R, OPP, CPP)
 };
 
 class BracketPairStack
 {
 public:
-    BracketPairStack(uint s) : _stack(grzeroalloc<BracketPair>(s)), _tos(_stack - 1), _size(s) {}
+    BracketPairStack(uint s) : _stack(grzeroalloc<BracketPair>(s)), _ip(_stack - 1), _top(0), _last(0), _lastclose(0), _size(s) {}
     ~BracketPairStack() { free(_stack); }
 
 public:
+    void clear() { _ip = _stack - 1; _top = 0; _last = 0; _lastclose = 0; }
     BracketPair *scan(uint16 gid);
-    void reset(BracketPair *tos) { _tos = tos ? tos : _stack; --_tos; }
-    BracketPair *push(uint16 gid, Slot *pos, uint8 before) {
-        if (++_tos - _stack < _size)
-            ::new (_tos) BracketPair(gid, pos, before);
-        return _tos;
+    void close(BracketPair *tos, Slot *s) {
+        for ( ; _last && _last != tos && !_last->close(); _last = _last->parent())
+        { }
+        tos->close(s);
+        _last->next(NULL);
+        _lastclose = tos;
+        _top = tos->parent();
     }
-    void orin(uint8 mask) { if (_tos >= _stack) _tos->orin(mask); }
+    BracketPair *push(uint16 gid, Slot *pos, uint8 before, int prevopen) {
+        if (++_ip - _stack < _size)
+        {
+            ::new (_ip) BracketPair(gid, pos, before, _top, prevopen ? _last : _lastclose);
+            if (_last) _last->next(_ip);
+            _last = _ip;
+        }
+        _top = _ip;
+        return _ip;
+    }
+    void orin(uint8 mask) {
+        BracketPair *t = _top;
+        for ( ; t; t = t->parent())
+            t->orin(mask);
+    }
     uint size() const { return _size; }
+    BracketPair *start() const { return _stack; }
 
     CLASS_NEW_DELETE
 
 private:
 
-    BracketPair *_stack;
-    BracketPair *_tos;
-    uint         _size;
+    BracketPair *_stack;        // start of storage
+    BracketPair *_ip;           // where to add the next pair
+    BracketPair *_top;          // current parent
+    BracketPair *_last;         // end of next() chain
+    BracketPair *_lastclose;    // last pair to close
+    uint         _size;         // capacity
 };
 
 inline BracketPair *BracketPairStack::scan(uint16 gid)
 {
-    BracketPair *res = _tos;
-    while (res > _stack)
+    BracketPair *res = _top;
+    while (res >= _stack)
     {
         if (res->gid() == gid)
             return res;
-        --res;
+        res = res->parent();
     }
     return 0;
 }
