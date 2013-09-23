@@ -1,12 +1,41 @@
 #!/usr/bin/python
 
-import graphite, random, resource, sys, os, time, itertools
+import graphite, random, resource, sys, os, time, itertools, math
 from multiprocessing import Pool, current_process
 from argparse import ArgumentParser
 
-def multiproctest(self) :
-    proc = current_process()
-    return proc.inst.test()
+class Estimator:
+    def __init__(self, max):
+        self.__base = time.time()
+        self.__max = float(max)
+        self.__m = 0
+        self.__t = 1
+        self.__st = self.__base
+        self.__ct = 0
+        self.modulus = 10
+    
+    def sample(self, current):
+        ct = time.time()
+        if (ct - self.__st <= opts.status):
+            return None
+        else :
+            self.modulus = int(round(math.pow(10,math.floor(math.log10(current - self.__ct)))))
+        self.__ct = current
+        x = current / (ct-self.__base)
+        k = (ct-self.__base)/opts.status+1
+        m = self.__m + (x - self.__m)/k
+        s = (k-1) and (self.__t + (x - self.__m)*(x - m)) / (k-1)
+        m = self.bayes(x, s, self.__m, self.__t)
+        self.__t = s
+        self.__m = m
+        self.__st = ct
+        return (x, time.ctime(ct + (self.__max - current)/m) if m else 'never')
+
+    @staticmethod
+    def bayes(x, s, m, t):
+        st = s + t
+        return m*s/st + x*t/st
+
 
 class MultiProc(object) :
     chunksize = 10
@@ -23,7 +52,23 @@ class MultiProc(object) :
             myiter = itertools.repeat(1)
         else :
             myiter = xrange(top)
-        return enumerate(self.pool.imap_unordered(multiproctest, myiter, self.chunksize))
+        e = Estimator(top)
+        try :
+            for count, res in enumerate(self.pool.imap_unordered(multiproctest, myiter, self.chunksize)) :
+                if count % e.modulus == 0 :
+                    sam = e.sample(count)
+                    if sam :
+                        sys.stdout.write("{0} - {1:8.2f}: {2}\r".format(count, sam[0], (sam[1] if top else "")))
+                        sys.stdout.flush()
+                yield (count, res)
+        except KeyboardInterrupt :
+            sys.stdout.write("\n")
+            sys.exit(0)
+
+def multiproctest(val) :
+    proc = current_process()
+    return proc.inst.test()
+  
 
 class Test(object) :
     chars = u" %()-.3=[]A{}\u0627\u064b\u0663\u08f1\u200b\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069"
@@ -32,7 +77,7 @@ class Test(object) :
     def __init__(self, grface, grfont) :
         self.random = random.Random()
         self.random.seed(self.seed)
-        self.seed = self.random.random()
+        Test.seed = self.random.random()
         self.grface = grface
         self.font = grfont
         self.rtl = 1
@@ -64,33 +109,6 @@ class Test(object) :
         seg = graphite.Segment(self.font, self.grface, "", text, self.rtl, self.feats)
         sys.exit(0)
 
-class estimator:
-    def __init__(self, max):
-        self.__base = time.time()
-        self.__max = float(max)
-        self.__m = 0
-        self.__t = 1
-        self.__st = self.__base
-    
-    def sample(self, current):
-        ct = time.time()
-        if (ct - self.__st <= opts.status):
-            return None
-        x = current / (ct-self.__base)
-        k = (ct-self.__base)/opts.status+1
-        m = self.__m + (x - self.__m)/k
-        s = (k-1) and (self.__t + (x - self.__m)*(x - m)) / (k-1)
-        m = self.bayes(x, s, self.__m, self.__t)
-        self.__t = s
-        self.__m = m
-        self.__st = ct
-        return (x, time.ctime(ct + (self.__max - current)/m) if m else 'never')
-
-    @staticmethod
-    def bayes(x, s, m, t):
-        st = s + t
-        return m*s/st + x*t/st
-
 p = ArgumentParser()
 p.add_argument('fontname', help='font file')
 p.add_argument('-m','--max', type=int, default=0, help="Number of tests to run [infinite]")
@@ -99,21 +117,15 @@ p.add_argument('--memory', type=int, help="memory limit for subprocesses in MB")
 p.add_argument('-s','--status', type=int, default=10, help="Update status every n seconds")
 p.add_argument('-j','--cpus', type=int, help="Number of threads to run in parallel [num cpus]")
 opts = p.parse_args()
+
 grface = graphite.Face(opts.fontname)
+if not grface.face :
+    print "Failed to load font {}".format(opts.fontname)
+    sys.exit(1)
 grfont = graphite.Font(grface, 16)
+
 m = MultiProc(Test, grface, grfont)
-#t = Test(grface, grfont)
-e = estimator(opts.max)
-basetime = time.time()
-try :
-    for (count, res) in m.execute(opts.max) :
-        if res[0] : print "{0},{1}".format(res[0], repr(res[1]))
-        if count % 1000 == 0 :
-            sam = e.sample(count)
-            if sam :
-                sys.stdout.write("{0} - {1:8.2f}: {2}\r".format(count, sam[0], (sam[1] if opts.max else "")))
-                sys.stdout.flush()
-    sys.stdout.write("\n")
-except KeyboardInterrupt :
-    sys.stdout.write("\n")
-    sys.exit(0)
+
+for (count, res) in m.execute(opts.max) :
+    if res[0] : print "{0},{1}".format(res[0], repr(res[1]))
+sys.stdout.write("\n")
