@@ -309,28 +309,33 @@ uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
 }
 
 
-bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
+bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi) const
 {
     assert(seg != 0);
     SlotMap            map(*seg);
     FiniteStateMachine fsm(map, seg->getFace()->logger());
     vm::Machine        m(map);
     unsigned int       initSize = seg->slotCount();
+    uint8              lbidi = m_bPass;
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = seg->getFace()->logger();
 #endif
 
     if (lastPass == 0)
     {
-        if (firstPass == lastPass)
+        if (firstPass == lastPass && lbidi == 0xFF)
             return true;
         lastPass = m_numPasses;
     }
+    if (firstPass <= lbidi && lastPass >= lbidi && dobidi)
+        lastPass++;
+    else
+        lbidi = 0xFF;
 
     for (size_t i = firstPass; i < lastPass; ++i)
     {
     	// bidi and mirroring
-        if (i == m_bPass)
+        if (i == lbidi)
         {
 #if !defined GRAPHITE2_NTRACING
         	if (dbgout)
@@ -359,6 +364,10 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass) const
                         s->setGlyph(seg, g);
                 }
             }
+        --i;
+        --lastPass;
+        lbidi = 0xFF;
+        continue;
         }
 
 #if !defined GRAPHITE2_NTRACING

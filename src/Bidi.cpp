@@ -89,6 +89,7 @@ inline int calc_base_level(Slot *s)
             case RLI :
             case FSI :
                 ++count;
+                break;
             case PDI :
                 --count;
             }
@@ -150,7 +151,7 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
         switch (cls)
         {
         case BN :
-            if (slast == s) slast = s->next();
+            if (slast == s) slast = s->next();      // ignore if at front of text
             continue;
         case LRE :
         case LRO :
@@ -179,10 +180,11 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             lnextLevel = newLevel;
             scurr = s;
             s->setBidiLevel(newLevel); // to make it vanish
+            // recurse for the new subsequence. A sequence only contains text at the same level
             s = process_bidi(s->next(), newLevel, level, lnextLevel, cls < LRE, 0, cisol, isolerr, embederr, 0, seg, aMirror, bstack);
             // s points at PDF or end of sequence
             // try to keep extending the run and not process it until we have to
-            if (lnextLevel != level || !s)      // if at end of run
+            if (lnextLevel != level || !s)      // if the subsequence really had something in it, or we are at the end of the run
             {
                 if (slast != scurr)             // process the run now, don't try to extend it
                 {
@@ -191,15 +193,15 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                     empty = 0;
                     nextLevel = level;
                 }
-                else if (lnextLevel != level)   // the embedding had something
+                else if (lnextLevel != level)   // the subsequence had something
                 {
                     empty = 0;                  // so we aren't empty either
-                    nextLevel = lnextLevel;     // but pass back from the embedded
+                    nextLevel = lnextLevel;     // but since we really are empty, pass back our level from the subsequence
                 }
-                if (s) 
+                if (s)                          // if still more to process
                 {
-                    prelevel = lnextLevel;
-                    lnextLevel = level;
+                    prelevel = lnextLevel;      // future text starts out with sos of the higher subsequence
+                    lnextLevel = level;         // and eos is our level
                 }
                 slast = s ? s->next() : s;
             }
@@ -209,8 +211,8 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
 
         case PDF :
             s->setBidiClass(BN);
-            s->prev(0);
-            if (isol || isolerr || init)
+            s->prev(0);                         // unstitch us since we skip final stitching code when we return
+            if (isol || isolerr || init)        // boundary error conditions
                 break;
             if (embederr)
             {
@@ -219,13 +221,13 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             }
             if (slast != s)
             {
-                scurr->prev(0);     // if slast, then scurr
+                scurr->prev(0);     // if slast, then scurr. Terminate before here
                 do_resolves(slast, level, level & 1, level & 1, bmask, seg, aMirror, bstack);
                 empty = 0;
             }
             if (empty)
             {
-                nextLevel = prelevel;
+                nextLevel = prelevel;       // no contents? set our level to that of parent
                 s->setBidiLevel(prelevel);
             }
             return s;
@@ -258,12 +260,13 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (scurr) scurr->prev(s);
             scurr = s;  // include FSI
             lnextLevel = newLevel;
+            // recurse for the new sub sequence
             s = process_bidi(s->next(), newLevel, newLevel, lnextLevel, 0, 1, cisol, isolerr, embederr, 0, seg, aMirror, bstack);
             // s points at PDI
             if (s)
             {
-                bmask |= 1 << BaseClass(s);
-                s->setBidiLevel(level);
+                bmask |= 1 << BaseClass(s);     // include the PDI in the mask
+                s->setBidiLevel(level);         // reset its level to our level
             }
             lnextLevel = level;
             break;
@@ -281,21 +284,21 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 break;
             }
             embederr = 0;
-            if (!isol)
+            if (!isol)                  // we are in an embedded subsequence, we have to return through all those
             {
-                if (empty)
+                if (empty)              // if empty, reset the level to tell embedded parent
                     nextLevel = prelevel;
                 return s->prev();       // keep working up the stack pointing at this PDI until we get to an isolate entry
             }
-            else
+            else                        // we are terminating an isolate sequence
             {
-                if (slast != s)
+                if (slast != s)         // process any remaining content in this subseqence
                 {
                     scurr->prev(0);
                     do_resolves(slast, level, prelevel & 1, level & 1, bmask, seg, aMirror, bstack);
                     empty = 0;
                 }
-                --cisol;
+                --cisol;                // pop the isol sequence from the stack
                 return s;
             }
 
@@ -303,10 +306,10 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
             if (dirover)
                 s->setBidiClass((level & 1 ? R : L) | (WSflag * (cls == WS)));
         }
-        if (s) s->prev(0);
-        if (scurr)
+        if (s) s->prev(0);      // unstitch us
+        if (scurr)              // stitch in text for processing
             scurr->prev(s);
-        scurr = s;
+        scurr = s;              // add us to text to process
     }
     if (slast != s)
     {

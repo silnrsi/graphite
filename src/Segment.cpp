@@ -441,12 +441,13 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     BracketPairStack bstack(ssize);
     if (bmask & (paradir ? 0x2E7892 : 0x2E789C))
     {
+        // O(8N) algorithm, with no working data beyond what is needed for processParens
         int nextLevel = paradir;
         int e, i, c;
         process_bidi(first(), baseLevel, paradir, nextLevel, 0, 0, c = 0, i = 0, e = 0, 1, this, aMirror, bstack);
         resolveImplicit(first(), this, aMirror);
         resolveWhitespace(baseLevel, last());
-        s = resolveOrder(s = first(), baseLevel != 0);      // s=... Hack around passing value to ref
+        s = resolveOrder(s = first(), baseLevel != 0);
         if (s)
         {
             first(s); last(s->prev());

@@ -150,9 +150,9 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
     }
 #endif
 
-    bool res = aSilf->runGraphite(seg, 0, aSilf->justificationPass());
+    bool res = aSilf->runGraphite(seg, 0, aSilf->justificationPass(), true);
     if (res)
-        res = aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses());
+        res = aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
 
 #if !defined GRAPHITE2_NTRACING
 	if (dbgout)
