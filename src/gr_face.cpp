@@ -130,7 +130,7 @@ uint32 zeropad(const uint32 x)
 gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
 {
     assert(pFace);
-    zeropad(langname);
+    langname = zeropad(langname);
     return static_cast<gr_feature_val *>(pFace->theSill().cloneFeatures(langname));
 }
 
@@ -138,7 +138,7 @@ gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 lang
 const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
 {
     assert(pFace);
-    zeropad(featId);
+    featId = zeropad(featId);
     const FeatureRef* pRef = pFace->featureById(featId);
     return static_cast<const gr_feature_ref*>(pRef);
 }
