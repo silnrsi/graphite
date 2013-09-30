@@ -151,7 +151,6 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
   
 private:
-    Rect            m_bbox;             // ink box of the segment
     Position        m_advance;          // whole segment advance
     SlotRope        m_slots;            // Vector of slot buffers
     AttributeRope   m_userAttrs;        // Vector of userAttrs buffers

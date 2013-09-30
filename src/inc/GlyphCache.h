@@ -58,11 +58,11 @@ public:
     CLASS_NEW_DELETE;
     
 private:
-    const Loader              * _glyph_loader;
-    const GlyphFace *   *       _glyphs;
-    unsigned short              _num_glyphs,
-                                _num_attrs,
-                                _upem;
+    const Loader        * _glyph_loader;
+    const GlyphFace *   * _glyphs;
+    unsigned short        _num_glyphs,
+                          _num_attrs,
+                          _upem;
 };
 
 inline

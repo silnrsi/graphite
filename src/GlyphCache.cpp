@@ -203,7 +203,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 
     _num_glyphs_graphics = TtfUtil::GlyphCount(maxp);
     // This will fail if the number of glyphs is wildly out of range.
-    if (TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-1))
+    if (_glyf && TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-1))
     {
         _head = Face::Table();
         return;
@@ -244,7 +244,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 inline
 GlyphCache::Loader::operator bool () const throw()
 {
-    return _head && _hhea && _hmtx && _glyf && _loca;
+    return _head && _hhea && _hmtx && !(bool(_glyf) != bool(_loca));
 }
 
 inline
@@ -272,16 +272,20 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
 
     if (glyphid < _num_glyphs_graphics)
     {
-        int nLsb, xMin, yMin, xMax, yMax;
+        int nLsb;
         unsigned int nAdvWid;
-        size_t locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
-        void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
+        if (_glyf)
+        {
+            int xMin, yMin, xMax, yMax;
+            size_t locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
+            void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
+
+            if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+                bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
+                    Position(static_cast<float>(xMax), static_cast<float>(yMax)));
+        }
         if (TtfUtil::HorMetrics(glyphid, _hmtx, _hmtx.size(), _hhea, nLsb, nAdvWid))
             advance = Position(static_cast<float>(nAdvWid), 0);
-
-        if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
-            bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
-                Position(static_cast<float>(xMax), static_cast<float>(yMax)));
     }
 
     if (glyphid < _num_glyphs_attributes)

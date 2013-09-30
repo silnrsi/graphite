@@ -107,7 +107,7 @@ void Segment::removeScope(SegmentScopeState & state)
     m_defaultOriginal = 0;
 }
 
-
+#if 0
 void Segment::append(const Segment &other)
 {
     Rect bbox = other.m_bbox + m_advance;
@@ -132,6 +132,7 @@ void Segment::append(const Segment &other)
     m_bbox = m_bbox.widen(bbox);
     m_passBits &= other.passBits();
 }
+#endif
 #endif // GRAPHITE2_NSEGCACHE
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
@@ -332,8 +333,8 @@ void Segment::linkClusters(Slot *s, Slot * end)
 Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 {
     Position currpos(0., 0.);
-    Rect bbox;
     float clusterMin = 0.;
+    Rect bbox;
 
     if (!iStart)	iStart = m_first;
     if (!iEnd)		iEnd   = m_last;
