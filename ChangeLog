@@ -1,3 +1,12 @@
+1.2.4
+    . Face failure now has error code reporting
+    . Format 14 table support
+        . Not done. To be handled entirely in the compiler
+    . Bidi support for Unicode 6.3 Isolating direction controls
+    . Bug fixes:
+        . zeropadding was not getting called
+        . use direct engine on Mac
+
 1.2.3
     . Bug fixes only:
         . fix byte swapping when testing cmap subtable lengths
