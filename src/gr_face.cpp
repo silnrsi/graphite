@@ -31,8 +31,13 @@ of the License or (at your option) any later version.
 #include "inc/CachedFace.h"
 #include "inc/CmapCache.h"
 #include "inc/Silf.h"
+#include "inc/json.h"
 
 using namespace graphite2;
+
+#if !defined GRAPHITE2_NTRACING
+extern json *global_log;
+#endif
 
 namespace
 {
@@ -49,8 +54,27 @@ namespace
         if (!face.readGlyphs(options))
             return false;
 
-        return silf ? face.readFeatures() && face.readGraphite(silf)
-                    : options & gr_face_dumbRendering;
+        if (silf)
+        {
+            if (!face.readFeatures() || !face.readGraphite(silf))
+            {
+#if !defined GRAPHITE2_NTRACING
+                if (global_log)
+                {
+                    *global_log << json::object
+                        << "type" << "fontload"
+                        << "failure" << face.error()
+                        << "context" << face.error_context()
+                    << json::close;
+                }
+#endif
+                return false;
+            }
+            else
+                return true;
+        }
+        else
+            return options & gr_face_dumbRendering;
     }
 }
 

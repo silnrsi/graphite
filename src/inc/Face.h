@@ -34,6 +34,7 @@ of the License or (at your option) any later version.
 #include "inc/FeatureMap.h"
 #include "inc/TtfUtil.h"
 #include "inc/Silf.h"
+#include "inc/Error.h"
 
 namespace graphite2 {
 
@@ -88,6 +89,12 @@ public:
     uint16 getGlyphMetric(uint16 gid, uint8 metric) const;
     uint16 findPseudo(uint32 uid) const;
 
+    // Errors
+    unsigned int        error() const { return m_error; }
+    bool                error(Error e) { m_error = e.error(); return false; }
+    unsigned int        error_context() const { return m_error; }
+    void                error_context(unsigned int errcntxt) { m_errcntxt = errcntxt; }
+
     CLASS_NEW_DELETE;
 private:
     SillMap                 m_Sill;
@@ -98,6 +105,8 @@ private:
     mutable Cmap          * m_cmap;             // cmap cache if available
     mutable NameTable     * m_pNames;
     mutable json          * m_logger;
+    unsigned int            m_error;
+    unsigned int            m_errcntxt;
 protected:
     Silf                  * m_silfs;    // silf subtables.
     uint16                  m_numSilf;  // num silf subtables in the silf table

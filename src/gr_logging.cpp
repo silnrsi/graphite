@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/CharInfo.h"
 #include "inc/Slot.h"
 #include "inc/Segment.h"
+#include "inc/json.h"
 
 #if defined _WIN32
 #include "windows.h"
@@ -38,12 +39,15 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-extern "C" {
+#if !defined GRAPHITE2_NTRACING
+json *global_log = NULL;
+#endif
 
+extern "C" {
 
 bool gr_start_logging(gr_face * face, const char *log_path)
 {
-	if (!face || !log_path)	return false;
+	if (!log_path)	return false;
 
 #if !defined GRAPHITE2_NTRACING
 	gr_stop_logging(face);
@@ -62,13 +66,21 @@ bool gr_start_logging(gr_face * face, const char *log_path)
 #endif  // _WIN32
 	if (!log)	return false;
 
-	face->setLogger(log);
-	if (!face->logger()) return false;
+    if (face)
+    {
+        face->setLogger(log);
+        if (!face->logger()) return false;
 
-	*face->logger() << json::array;
+        *face->logger() << json::array;
 #ifdef GRAPHITE2_TELEMETRY
-    *face->logger() << face->tele;
+        *face->logger() << face->tele;
 #endif
+    }
+    else
+    {
+        global_log = new json(log);
+        *global_log << json::array;
+    }
 
 	return true;
 #else   // GRAPHITE2_NTRACING
@@ -95,15 +107,19 @@ bool graphite_start_logging(FILE * /* log */, GrLogMask /* mask */)
 
 void gr_stop_logging(gr_face * face)
 {
-	if (!face)	return;
-
 #if !defined GRAPHITE2_NTRACING
-	if (face->logger())
+	if (face && face->logger())
 	{
 		FILE * log = face->logger()->stream();
 		face->setLogger(0);
 		fclose(log);
 	}
+    else if (!face and global_log)
+    {
+        FILE * log = global_log->stream();
+        delete global_log;
+        fclose(log);
+    }
 #endif
 }
 

@@ -79,6 +79,7 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/CmapCache.h \
     $($(_NS)_BASE)/src/inc/Code.h \
     $($(_NS)_BASE)/src/inc/Endian.h \
+    $($(_NS)_BASE)/src/inc/Error.h \
     $($(_NS)_BASE)/src/inc/Face.h \
     $($(_NS)_BASE)/src/inc/FeatureMap.h \
     $($(_NS)_BASE)/src/inc/FeatureVal.h \

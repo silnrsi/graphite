@@ -34,6 +34,7 @@ of the License or (at your option) any later version.
 #include "inc/Segment.h"
 #include "inc/Code.h"
 #include "inc/Rule.h"
+#include "inc/Error.h"
 
 using namespace graphite2;
 using vm::Machine;
@@ -72,13 +73,13 @@ Pass::~Pass()
     delete [] m_rules;
 }
 
-bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED const Face & face)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, Error &e)
 {
     const byte *                p = pass_start,
                * const pass_end   = p + pass_length;
     size_t numRanges;
 
-    if (pass_length < 40) return false; 
+    if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e); 
     // Read in basic values
     m_flags = be::read<byte>(p);
     m_iMaxLoop = be::read<byte>(p);
@@ -97,14 +98,14 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<uint16>(p, 3); // skip searchRange, entrySelector & rangeShift.
     assert(p - pass_start == 40);
     // Perform some sanity checks.
-    if (   m_numTransition > m_numStates
-            || m_numSuccess > m_numStates
-            || m_numSuccess + m_numTransition < m_numStates
-            || numRanges == 0)
-        return false;
+    if ( e.test(m_numTransition > m_numStates, E_BADNUMTRANS)
+            || e.test(m_numSuccess > m_numStates, E_BADNUMSUCCESS)
+            || e.test(m_numSuccess + m_numTransition < m_numStates, E_BADNUMSTATES)
+            || e.test(numRanges == 0, E_NORANGES))
+        return face.error(e);
 
     m_successStart = m_numStates - m_numSuccess;
-    if (p + numRanges * 6 - 4 > pass_end) return false;
+    if (e.test(p + numRanges * 6 - 4 > pass_end, E_BADPASSLENGTH)) return face.error(e);
     m_numGlyphs = be::peek<uint16>(p + numRanges * 6 - 4) + 1;
     // Calculate the start of various arrays.
     const byte * const ranges = p;
@@ -113,17 +114,17 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<uint16>(p, m_numSuccess + 1);
 
     // More sanity checks
-    if (reinterpret_cast<const byte *>(o_rule_map + m_numSuccess*sizeof(uint16)) > pass_end
-            || p > pass_end)
-        return false;
+    if (e.test(reinterpret_cast<const byte *>(o_rule_map + m_numSuccess*sizeof(uint16)) > pass_end
+            || p > pass_end, E_BADRULEMAPLEN))
+        return face.error(e);
     const size_t numEntries = be::peek<uint16>(o_rule_map + m_numSuccess*sizeof(uint16));
     const byte * const   rule_map = p;
     be::skip<uint16>(p, numEntries);
 
-    if (p + 2*sizeof(uint8) > pass_end) return false;
+    if (e.test(p + 2*sizeof(uint8) > pass_end, E_BADPASSLENGTH)) return face.error(e);
     m_minPreCtxt = be::read<uint8>(p);
     m_maxPreCtxt = be::read<uint8>(p);
-    if (m_minPreCtxt > m_maxPreCtxt) return false;
+    if (e.test(m_minPreCtxt > m_maxPreCtxt, E_BADCTXTLENBOUNDS)) return face.error(e);
     const byte * const start_states = p;
     be::skip<int16>(p, m_maxPreCtxt - m_minPreCtxt + 1);
     const uint16 * const sort_keys = reinterpret_cast<const uint16 *>(p);
@@ -132,7 +133,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<byte>(p, m_numRules);
     be::skip<byte>(p);     // skip reserved byte
 
-    if (p + sizeof(uint16) > pass_end) return false;
+    if (e.test(p + sizeof(uint16) > pass_end, E_BADCTXTLENS)) return face.error(e);
     const size_t pass_constraint_len = be::read<uint16>(p);
     const uint16 * const o_constraint = reinterpret_cast<const uint16 *>(p);
     be::skip<uint16>(p, m_numRules + 1);
@@ -141,31 +142,35 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     const byte * const states = p;
     be::skip<int16>(p, m_numTransition*m_numColumns);
     be::skip<byte>(p);          // skip reserved byte
-    if (p != pcCode || p >= pass_end) return false;
+    if (e.test(p != pcCode, E_BADPASSCCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)) return face.error(e);
     be::skip<byte>(p, pass_constraint_len);
-    if (p != rcCode || p >= pass_end
-        || size_t(rcCode - pcCode) != pass_constraint_len) return false;
+    if (e.test(p != rcCode, E_BADRULECCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)
+        || e.test(size_t(rcCode - pcCode) != pass_constraint_len, E_BADCCODELEN)) return face.error(e);
     be::skip<byte>(p, be::peek<uint16>(o_constraint + m_numRules));
-    if (p != aCode || p >= pass_end) return false;
+    if (e.test(p != aCode, E_BADACTIONCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)) return face.error(e);
     be::skip<byte>(p, be::peek<uint16>(o_actions + m_numRules));
 
     // We should be at the end or within the pass
-    if (p > pass_end) return false;
+    if (e.test(p > pass_end, E_BADPASSLENGTH)) return face.error(e);
 
     // Load the pass constraint if there is one.
     if (pass_constraint_len)
     {
+        face.error_context(face.error_context() + 1);
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
                                   precontext[0], be::peek<uint16>(sort_keys), *m_silf, face);
-        if (!m_cPConstraint) return false;
+        if (e.test(!m_cPConstraint, E_OUTOFMEM)
+                || e.test(m_cPConstraint.status(), m_cPConstraint.status() + E_CODEFAILURE))
+            return face.error(e);
+        face.error_context(face.error_context() - 1);
     }
-    if (!readRanges(ranges, numRanges)) return false;
+    if (!readRanges(ranges, numRanges, e)) return face.error(e);
     if (!readRules(rule_map, numEntries,  precontext, sort_keys,
-                   o_constraint, rcCode, o_actions, aCode, face)) return false;
+                   o_constraint, rcCode, o_actions, aCode, face, e)) return false;
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.states);
 #endif
-    return readStates(start_states, states, o_rule_map, face);
+    return readStates(start_states, states, o_rule_map, face, e);
 }
 
 
@@ -173,12 +178,12 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *rc_data,
                      const uint16 * o_action,     const byte * ac_data,
-                     const Face & face)
+                     Face & face, Error &e)
 {
     const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
     const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);
 
-    if (!(m_rules = new Rule [m_numRules])) return false;
+    if (e.test(!(m_rules = new Rule [m_numRules]), E_OUTOFMEM)) return face.error(e);
     precontext += m_numRules;
     sort_key   += m_numRules;
     o_constraint += m_numRules;
@@ -191,6 +196,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
+        face.error_context((face.error_context() & 0xFFFF00) + EC_ARULE + ((n - 1) << 24));
         r->preContext = *--precontext;
         r->sort       = be::peek<uint16>(--sort_key);
 #ifndef NDEBUG
@@ -208,19 +214,20 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         r->action     = new vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
         r->constraint = new vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
 
-        if (!r->action || !r->constraint
-                || r->action->status() != Code::loaded
-                || r->constraint->status() != Code::loaded
-                || !r->constraint->immutable())
-            return false;
+        if (e.test(!r->action || !r->constraint, E_OUTOFMEM)
+                || e.test(r->action->status() != Code::loaded, r->action->status() + E_CODEFAILURE)
+                || e.test(r->constraint->status() != Code::loaded, r->constraint->status() + E_CODEFAILURE)
+                || e.test(!r->constraint->immutable(), E_MUTABLECCODE))
+            return face.error(e);
     }
 
     // Load the rule entries map
+    face.error_context((face.error_context() & 0xFFFF00) + EC_APASS);
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
     for (size_t n = num_entries; n; --n, ++re)
     {
         const ptrdiff_t rn = be::read<uint16>(rule_map);
-        if (rn >= m_numRules)  return false;
+        if (e.test(rn >= m_numRules, E_BADRULENUM))  return face.error(e);
         re->rule = m_rules + rn;
     }
 
@@ -230,7 +237,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 static int cmpRuleEntry(const void *a, const void *b) { return (*(RuleEntry *)a < *(RuleEntry *)b ? -1 :
                                                                 (*(RuleEntry *)b < *(RuleEntry *)a ? 1 : 0)); }
 
-bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map, GR_MAYBE_UNUSED const Face & face)
+bool Pass::readStates(const byte * starts, const byte *states, const byte * o_rule_map, GR_MAYBE_UNUSED Face & face, Error &e)
 {
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.starts);
@@ -245,13 +252,17 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 #endif
     m_transitions      = gralloc<uint16>(m_numTransition * m_numColumns);
 
-    if (!m_startStates || !m_states || !m_transitions) return false;
+    if (e.test(!m_startStates || !m_states || !m_transitions, E_OUTOFMEM)) return face.error(e);
     // load start states
     for (uint16 * s = m_startStates,
                 * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
     {
         *s = be::read<uint16>(starts);
-        if (*s >= m_numStates) return false; // true;
+        if (e.test(*s >= m_numStates, E_BADSTATE))
+        {
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ASTARTS + ((s - m_startStates) << 24));
+            return face.error(e); // true;
+        }
     }
 
     // load state transition table.
@@ -259,7 +270,11 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
                 * const t_end = t + m_numTransition*m_numColumns; t != t_end; ++t)
     {
         *t = be::read<uint16>(states);
-        if (*t >= m_numStates) return false;
+        if (e.test(*t >= m_numStates, E_BADSTATE))
+        {
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + (((t - m_transitions) / m_numColumns) << 24));
+            return face.error(e);
+        }
     }
 
     State * s = m_states,
@@ -270,8 +285,11 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
         RuleEntry * const begin = s < success_begin ? 0 : m_ruleMap + be::read<uint16>(o_rule_map),
                   * const end   = s < success_begin ? 0 : m_ruleMap + be::peek<uint16>(o_rule_map);
 
-        if (begin >= rule_map_end || end > rule_map_end || begin > end)
-            return false;
+        if (e.test(begin >= rule_map_end || end > rule_map_end || begin > end, E_BADRULEMAPPING))
+        {
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ARULEMAP + (n << 24));
+            return face.error(e);
+        }
         s->rules = begin;
         s->rules_end = (end - begin <= FiniteStateMachine::MAX_RULES)? end :
             begin + FiniteStateMachine::MAX_RULES;
@@ -281,7 +299,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
     return true;
 }
 
-bool Pass::readRanges(const byte * ranges, size_t num_ranges)
+bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 {
     m_cols = gralloc<uint16>(m_numGlyphs);
     memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
@@ -291,14 +309,14 @@ bool Pass::readRanges(const byte * ranges, size_t num_ranges)
                    * ci_end = m_cols + be::read<uint16>(ranges) + 1,
                      col    = be::read<uint16>(ranges);
 
-        if (ci >= ci_end || ci_end > m_cols+m_numGlyphs || col >= m_numColumns)
+        if (e.test(ci >= ci_end || ci_end > m_cols+m_numGlyphs || col >= m_numColumns, E_BADRANGE))
             return false;
 
         // A glyph must only belong to one column at a time
         while (ci != ci_end && *ci == 0xffff)
             *ci++ = col;
 
-        if (ci != ci_end)
+        if (e.test(ci != ci_end, E_BADRANGE))
             return false;
     }
     return true;
