@@ -60,17 +60,17 @@ public:
 
 class Slot
 {
-	enum Flag
-	{
-		DELETED 	= 1,
-		INSERTED 	= 2,
-		COPIED		= 4,
-		POSITIONED	= 8,
-		ATTACHED 	= 16
-	};
+    enum Flag
+    {
+        DELETED     = 1,
+        INSERTED    = 2,
+        COPIED      = 4,
+        POSITIONED  = 8,
+        ATTACHED    = 16
+    };
 
 public:
-	struct iterator;
+    struct iterator;
 
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
@@ -140,7 +140,7 @@ private:
     Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
-    uint32 m_original;	    // charinfo that originated this slot (e.g. for feature values)
+    uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)
     uint32 m_before;        // charinfo index of before association
     uint32 m_after;         // charinfo index of after association
     uint32 m_index;         // slot index given to this slot during finalising
@@ -151,7 +151,7 @@ private:
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
     Position m_attach;      // attachment point on us
-    Position m_with;	    // attachment point position on parent
+    Position m_with;        // attachment point position on parent
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     byte     m_attLevel;    // attachment level

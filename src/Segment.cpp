@@ -113,9 +113,9 @@ void Segment::append(const Segment &other)
     Rect bbox = other.m_bbox + m_advance;
 
     m_slots.insert(m_slots.end(), other.m_slots.begin(), other.m_slots.end());
-    CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];		//since CharInfo has no constructor, this doesn't do much
+    CharInfo* pNewCharInfo = new CharInfo[m_numCharinfo+other.m_numCharinfo];       //since CharInfo has no constructor, this doesn't do much
     for (unsigned int i=0 ; i<m_numCharinfo ; ++i)
-	pNewCharInfo[i] = m_charinfo[i];
+    pNewCharInfo[i] = m_charinfo[i];
     m_last->next(other.m_first);
     other.m_last->prev(m_last);
     m_userAttrs.insert(m_userAttrs.end(), other.m_userAttrs.begin(), other.m_userAttrs.end());
@@ -288,46 +288,46 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
     assert(numGlyphs < sizeof indexmap/sizeof *indexmap);
     Slot * slot = startSlot;
     for (uint16 i=0; i < numGlyphs; slot = slot->next(), ++i)
-    	indexmap[i] = slot;
+        indexmap[i] = slot;
 
     slot = startSlot;
     for (slot=startSlot; slot != endSlot; slot = slot->next(), srcSlot = srcSlot->next())
     {
         slot->set(*srcSlot, offset, m_silf->numUser(), m_silf->numJustLevels());
-        if (srcSlot->attachedTo())	slot->attachTo(indexmap[srcSlot->attachedTo()->index()]);
-        if (srcSlot->nextSibling())	slot->m_sibling = indexmap[srcSlot->nextSibling()->index()];
-        if (srcSlot->firstChild())	slot->m_child = indexmap[srcSlot->firstChild()->index()];
+        if (srcSlot->attachedTo())  slot->attachTo(indexmap[srcSlot->attachedTo()->index()]);
+        if (srcSlot->nextSibling()) slot->m_sibling = indexmap[srcSlot->nextSibling()->index()];
+        if (srcSlot->firstChild())  slot->m_child = indexmap[srcSlot->firstChild()->index()];
     }
 }
 #endif // GRAPHITE2_NSEGCACHE
 
 void Segment::linkClusters(Slot *s, Slot * end)
 {
-	end = end->next();
+    end = end->next();
 
-	for (; s != end && !s->isBase(); s = s->next());
-	Slot * ls = s;
+    for (; s != end && !s->isBase(); s = s->next());
+    Slot * ls = s;
 
-	if (m_dir & 1)
-	{
-		for (; s != end; s = s->next())
-		{
-			if (!s->isBase())	continue;
+    if (m_dir & 1)
+    {
+        for (; s != end; s = s->next())
+        {
+            if (!s->isBase())   continue;
 
-			s->sibling(ls);
-			ls = s;
-		}
-	}
-	else
-	{
-		for (; s != end; s = s->next())
-		{
-			if (!s->isBase())	continue;
+            s->sibling(ls);
+            ls = s;
+        }
+    }
+    else
+    {
+        for (; s != end; s = s->next())
+        {
+            if (!s->isBase())   continue;
 
-			ls->sibling(s);
-			ls = s;
-		}
-	}
+            ls->sibling(s);
+            ls = s;
+        }
+    }
 }
 
 Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
@@ -336,8 +336,8 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
     float clusterMin = 0.;
     Rect bbox;
 
-    if (!iStart)	iStart = m_first;
-    if (!iEnd)		iEnd   = m_last;
+    if (!iStart)    iStart = m_first;
+    if (!iEnd)      iEnd   = m_last;
 
     if (m_dir & 1)
     {
@@ -365,14 +365,14 @@ void Segment::associateChars()
     for (Slot * s = m_first; s; s->index(i++), s = s->next())
     {
         int j = s->before();
-        if (j < 0)	continue;
+        if (j < 0)  continue;
 
         for (const int after = s->after(); j <= after; ++j)
-		{
-			CharInfo & c = *charinfo(j);
-			if (c.before() == -1 || i < c.before()) 	c.before(i);
-			if (c.after() < i) 							c.after(i);
-		}
+        {
+            CharInfo & c = *charinfo(j);
+            if (c.before() == -1 || i < c.before())     c.before(i);
+            if (c.after() < i)                          c.after(i);
+        }
     }
 }
 
@@ -380,31 +380,31 @@ void Segment::associateChars()
 template <typename utf_iter>
 inline void process_utf_data(Segment & seg, const Face & face, const int fid, utf_iter c, size_t n_chars)
 {
-	const Cmap    & cmap = face.cmap();
-	int slotid = 0;
+    const Cmap    & cmap = face.cmap();
+    int slotid = 0;
 
-	const typename utf_iter::codeunit_type * const base = c;
-	for (; n_chars; --n_chars, ++c, ++slotid)
-	{
-		const uint32 usv = *c;
-		uint16 gid = cmap[usv];
-		if (!gid)	gid = face.findPseudo(usv);
-		seg.appendSlot(slotid, usv, gid, fid, c - base);
-	}
+    const typename utf_iter::codeunit_type * const base = c;
+    for (; n_chars; --n_chars, ++c, ++slotid)
+    {
+        const uint32 usv = *c;
+        uint16 gid = cmap[usv];
+        if (!gid)   gid = face.findPseudo(usv);
+        seg.appendSlot(slotid, usv, gid, fid, c - base);
+    }
 }
 
 
 void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
-	assert(face);
-	assert(pFeats);
+    assert(face);
+    assert(pFeats);
 
-	switch (enc)
-	{
-	case gr_utf8:	process_utf_data(*this, *face, addFeatures(*pFeats), utf8::const_iterator(pStart), nChars); break;
-	case gr_utf16:	process_utf_data(*this, *face, addFeatures(*pFeats), utf16::const_iterator(pStart), nChars); break;
-	case gr_utf32:	process_utf_data(*this, *face, addFeatures(*pFeats), utf32::const_iterator(pStart), nChars); break;
-	}
+    switch (enc)
+    {
+    case gr_utf8:   process_utf_data(*this, *face, addFeatures(*pFeats), utf8::const_iterator(pStart), nChars); break;
+    case gr_utf16:  process_utf_data(*this, *face, addFeatures(*pFeats), utf16::const_iterator(pStart), nChars); break;
+    case gr_utf32:  process_utf_data(*this, *face, addFeatures(*pFeats), utf32::const_iterator(pStart), nChars); break;
+    }
 }
 
 void Segment::prepare_pos(const Font * /*font*/)
@@ -419,8 +419,8 @@ Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
 void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
 {
-	if (slotCount() == 0)
-		return;
+    if (slotCount() == 0)
+        return;
 
     Slot *s;
     int baseLevel = paradir ? 1 : 0;
@@ -430,7 +430,7 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     {
         if (s->getBidiClass() == -1)
         {
-        	unsigned int bAttr = glyphAttr(s->gid(), aBidi);
+            unsigned int bAttr = glyphAttr(s->gid(), aBidi);
             s->setBidiClass((bAttr <= 22) * bAttr);
         }
         bmask |= (1 << s->getBidiClass());

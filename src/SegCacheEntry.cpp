@@ -73,11 +73,11 @@ SegCacheEntry::SegCacheEntry(const uint16* cmapGlyphs, size_t length, Segment * 
         slotCopy->set(*slot, -static_cast<int32>(charOffset), seg->numAttrs(), seg->silf()->numJustLevels());
         slotCopy->index(pos);
         if (slot->firstChild())
-        	slotCopy->m_child = m_glyph + slot->firstChild()->index();
+            slotCopy->m_child = m_glyph + slot->firstChild()->index();
         if (slot->attachedTo())
-        	slotCopy->attachTo(m_glyph + slot->attachedTo()->index());
+            slotCopy->attachTo(m_glyph + slot->attachedTo()->index());
         if (slot->nextSibling())
-        	slotCopy->m_sibling = m_glyph + slot->nextSibling()->index();
+            slotCopy->m_sibling = m_glyph + slot->nextSibling()->index();
         slot = slot->next();
         ++slotCopy;
         ++pos;

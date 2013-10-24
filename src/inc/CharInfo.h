@@ -56,8 +56,8 @@ private:
     int m_before;   // slot index before us, comes before
     int m_after;    // slot index after us, comes after
     size_t  m_base; // offset into input string corresponding to this charinfo
-    uint8 m_featureid;	// index into features list in the segment
-    int8 m_break;	// breakweight coming from lb table
+    uint8 m_featureid;  // index into features list in the segment
+    int8 m_break;   // breakweight coming from lb table
     uint8 m_flags;  // 0,1 segment split.
 };
 

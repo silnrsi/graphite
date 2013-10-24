@@ -43,7 +43,7 @@ $(_NS)_SOURCES = \
     $($(_NS)_BASE)/src/gr_face.cpp \
     $($(_NS)_BASE)/src/gr_features.cpp \
     $($(_NS)_BASE)/src/gr_font.cpp \
-	$($(_NS)_BASE)/src/gr_logging.cpp \
+    $($(_NS)_BASE)/src/gr_logging.cpp \
     $($(_NS)_BASE)/src/gr_segment.cpp \
     $($(_NS)_BASE)/src/gr_slot.cpp \
     $($(_NS)_BASE)/src/json.cpp \

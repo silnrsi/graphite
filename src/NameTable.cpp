@@ -154,26 +154,26 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
     {
     case gr_utf8:
     {
-    	utf8::codeunit_t* uniBuffer = gralloc<utf8::codeunit_t>(3 * utf16Length + 1);
+        utf8::codeunit_t* uniBuffer = gralloc<utf8::codeunit_t>(3 * utf16Length + 1);
         utf8::iterator d = uniBuffer;
         for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
-        	*d = *s;
+            *d = *s;
         length = d - uniBuffer;
         uniBuffer[length] = 0;
         return uniBuffer;
     }
     case gr_utf16:
-    	length = utf16Length;
-    	return utf16Name;
+        length = utf16Length;
+        return utf16Name;
     case gr_utf32:
     {
-    	utf32::codeunit_t * uniBuffer = gralloc<utf32::codeunit_t>(utf16Length  + 1);
-		utf32::iterator d = uniBuffer;
-		for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
-			*d = *s;
-		length = d - uniBuffer;
-		uniBuffer[length] = 0;
-		return uniBuffer;
+        utf32::codeunit_t * uniBuffer = gralloc<utf32::codeunit_t>(utf16Length  + 1);
+        utf32::iterator d = uniBuffer;
+        for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
+            *d = *s;
+        length = d - uniBuffer;
+        uniBuffer[length] = 0;
+        return uniBuffer;
     }
     }
     length = 0;

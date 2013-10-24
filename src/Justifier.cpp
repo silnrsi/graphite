@@ -191,7 +191,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     json * const dbgout = m_face->logger();
     if (dbgout)
         *dbgout << json::object
-                    << "justifies"	<< objectid(this)
+                    << "justifies"  << objectid(this)
                     << "passes"     << json::array;
 #endif
 
@@ -206,8 +206,8 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         Slot *lEnd = pLast->nextSibling();
         *dbgout << "output" << json::array;
         for(Slot * t = pSlot; t != lEnd; t = t->next())
-            *dbgout		<< dslot(this, t);
-        *dbgout			<< json::close << json::close;
+            *dbgout     << dslot(this, t);
+        *dbgout         << json::close << json::close;
     }
 #endif
 

@@ -85,15 +85,15 @@ bool Face::readGlyphs(uint32 faceOptions)
 #endif
     error_context(EC_READGLYPHS);
     if (faceOptions & gr_face_cacheCmap)
-    	m_cmap = new CachedCmap(*this);
+        m_cmap = new CachedCmap(*this);
     else
-    	m_cmap = new DirectCmap(*this);
+        m_cmap = new DirectCmap(*this);
 
     m_pGlyphFaceCache = new GlyphCache(*this, faceOptions);
     if (e.test(!m_pGlyphFaceCache, E_OUTOFMEM)
         || e.test(m_pGlyphFaceCache->numGlyphs() == 0, E_NOGLYPHS)
         || e.test(m_pGlyphFaceCache->unitsPerEm() == 0, E_BADUPEM)
-    	|| e.test(!m_cmap, E_OUTOFMEM) || e.test(!*m_cmap, E_BADCMAP))
+        || e.test(!m_cmap, E_OUTOFMEM) || e.test(!*m_cmap, E_BADCMAP))
     {
         return error(e);
     }
@@ -117,9 +117,9 @@ bool Face::readGraphite(const Table & silf)
     const uint32 version = be::read<uint32>(p);
     if (e.test(version < 0x00020000, E_TOOOLD)) return error(e);
     if (version >= 0x00030000)
-    	be::skip<uint32>(p);		// compilerVersion
+        be::skip<uint32>(p);        // compilerVersion
     m_numSilf = be::read<uint16>(p);
-    be::skip<uint16>(p);			// reserved
+    be::skip<uint16>(p);            // reserved
 
     bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
@@ -127,7 +127,7 @@ bool Face::readGraphite(const Table & silf)
     {
         error_context(EC_ASILF + (i << 8));
         const uint32 offset = be::read<uint32>(p),
-        			 next   = i == m_numSilf - 1 ? silf.size() : be::peek<uint32>(p);
+                     next   = i == m_numSilf - 1 ? silf.size() : be::peek<uint32>(p);
         if (e.test(next > silf.size() || offset >= next, E_BADSIZE))
             return error(e);
 
@@ -152,9 +152,9 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
     json * dbgout = logger();
     if (dbgout)
     {
-    	*dbgout << json::object
-    				<< "id"			<< objectid(seg)
-    				<< "passes"		<< json::array;
+        *dbgout << json::object
+                    << "id"         << objectid(seg)
+                    << "passes"     << json::array;
     }
 #endif
 
@@ -163,22 +163,22 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
         res = aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
 
 #if !defined GRAPHITE2_NTRACING
-	if (dbgout)
+    if (dbgout)
 {
-		*dbgout 			<< json::item
-							<< json::close // Close up the passes array
-				<< "output" << json::array;
-		for(Slot * s = seg->first(); s; s = s->next())
-			*dbgout		<< dslot(seg, s);
-		seg->finalise(0);					// Call this here to fix up charinfo back indexes.
-		*dbgout			<< json::close
-				<< "advance" << seg->advance()
-				<< "chars"	 << json::array;
-		for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-			*dbgout 	<< json::flat << *seg->charinfo(i);
-		*dbgout			<< json::close	// Close up the chars array
-					<< json::close;		// Close up the segment object
-	}
+        *dbgout             << json::item
+                            << json::close // Close up the passes array
+                << "output" << json::array;
+        for(Slot * s = seg->first(); s; s = s->next())
+            *dbgout     << dslot(seg, s);
+        seg->finalise(0);                   // Call this here to fix up charinfo back indexes.
+        *dbgout         << json::close
+                << "advance" << seg->advance()
+                << "chars"   << json::array;
+        for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
+            *dbgout     << json::flat << *seg->charinfo(i);
+        *dbgout         << json::close  // Close up the chars array
+                    << json::close;     // Close up the segment object
+    }
 #endif
 
     return res;

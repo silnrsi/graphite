@@ -56,7 +56,7 @@ class Face
     Face& operator=(const Face&);
 
 public:
-	class Table;
+    class Table;
     static float default_glyph_advance(const void* face_ptr, gr_uint16 glyphid);
 
     Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
@@ -148,7 +148,7 @@ const FeatureRef *Face::feature(uint16 index) const
 inline
 const GlyphCache & Face::glyphs() const
 {
-	return *m_pGlyphFaceCache;
+    return *m_pGlyphFaceCache;
 }
 
 inline
@@ -193,26 +193,26 @@ inline
 Face::Table::Table(const Table & rhs) throw()
 : _f(rhs._f), _p(rhs._p), _sz(rhs._sz)
 {
-	rhs._p = 0;
+    rhs._p = 0;
 }
 
 inline
 Face::Table::~Table() throw()
 {
-	if (_p && _f->m_ops.release_table)
-		(*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
+    if (_p && _f->m_ops.release_table)
+        (*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
 }
 
 inline
 Face::Table::operator const byte * () const throw()
 {
-	return _p;
+    return _p;
 }
 
 inline
-size_t 	Face::Table::size() const throw()
+size_t  Face::Table::size() const throw()
 {
-	return _sz;
+    return _sz;
 }
 
 } // namespace graphite2

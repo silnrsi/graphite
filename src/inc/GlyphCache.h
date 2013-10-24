@@ -41,7 +41,7 @@ class GlyphCache
 {
     class Loader;
 
-	GlyphCache(const GlyphCache&);
+    GlyphCache(const GlyphCache&);
     GlyphCache& operator=(const GlyphCache&);
 
 public:

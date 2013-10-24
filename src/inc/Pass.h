@@ -53,22 +53,22 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    void   	findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    int   	doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
-    bool   	testPassConstraint(vm::Machine & m) const;
-    bool   	testConstraint(const Rule & r, vm::Machine &) const;
-    bool   	readRules(const byte * rule_map, const size_t num_entries,
+    void    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    int     doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
+    bool    testPassConstraint(vm::Machine & m) const;
+    bool    testConstraint(const Rule & r, vm::Machine &) const;
+    bool    readRules(const byte * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
                      const uint16 * o_action, const byte * action_data,
                      Face &, Error &e);
-    bool   	readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
-    bool   	readRanges(const byte * ranges, size_t num_ranges, Error &e);
-    uint16 	glyphToCol(const uint16 gid) const;
-    bool   	runFSM(FiniteStateMachine & fsm, Slot * slot) const;
-    void	dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
-    void	dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
-    void	adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
+    bool    readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
+    bool    readRanges(const byte * ranges, size_t num_ranges, Error &e);
+    uint16  glyphToCol(const uint16 gid) const;
+    bool    runFSM(FiniteStateMachine & fsm, Slot * slot) const;
+    void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
+    void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
+    void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
     const Silf* m_silf;
     uint16    * m_cols;
     Rule      * m_rules; // rules
@@ -90,7 +90,7 @@ private:
     byte m_maxPreCtxt;
     vm::Machine::Code m_cPConstraint;
     
-private:		//defensive
+private:        //defensive
     Pass(const Pass&);
     Pass& operator=(const Pass&);
 };

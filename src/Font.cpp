@@ -47,14 +47,14 @@ Font::Font(float ppm, const Face & f, const void * appFontHandle, const gr_font_
     if (m_advances)
     {
         for (float *advp = m_advances; nGlyphs; --nGlyphs, ++advp)
-        	*advp = INVALID_ADVANCE;
+            *advp = INVALID_ADVANCE;
     }
 }
 
 
 /*virtual*/ Font::~Font()
 {
-	free(m_advances);
+    free(m_advances);
 }
 
 

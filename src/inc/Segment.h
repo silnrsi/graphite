@@ -176,7 +176,7 @@ private:
 inline
 void Segment::finalise(const Font *font)
 {
-	if (!m_first) return;
+    if (!m_first) return;
 
     m_advance = positionSlots(font);
     associateChars();
