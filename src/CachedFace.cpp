@@ -103,7 +103,7 @@ bool CachedFace::runGraphite(Segment *seg, const Silf *pSilf) const
                     pSilf->runGraphite(seg, pSilf->substitutionPass(), pSilf->numPasses());
                     if (length < eMaxSpliceSize)
                     {
-                        seg->associateChars();
+                        seg->associateChars(subSegStart, length);
                         entry = segCache->cache(m_cacheStore, cmapGlyphs, length, seg, subSegStart);
                     }
                     seg->removeScope(scopeState);

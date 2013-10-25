@@ -117,7 +117,7 @@ public:
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
     Position positionSlots(const Font *font, Slot *first=0, Slot *last=0);
-    void associateChars();
+    void associateChars(int offset, int num);
     void linkClusters(Slot *first, Slot *last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
@@ -179,7 +179,7 @@ void Segment::finalise(const Font *font)
     if (!m_first) return;
 
     m_advance = positionSlots(font);
-    associateChars();
+    associateChars(0, m_numCharinfo);
     linkClusters(m_first, m_last);
 }
 

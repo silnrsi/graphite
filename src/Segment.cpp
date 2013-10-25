@@ -360,12 +360,11 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 }
 
 
-void Segment::associateChars()
+void Segment::associateChars(int offset, int numChars)
 {
     int i = 0, j = 0;
-    int len = charInfoCount();
     CharInfo *c, *cend;
-    for (c = m_charinfo, cend = m_charinfo + len; c != cend; ++c)
+    for (c = m_charinfo + offset, cend = m_charinfo + offset + numChars; c != cend; ++c)
     {
         c->before(-1);
         c->after(-1);
@@ -385,12 +384,12 @@ void Segment::associateChars()
     for (Slot *s = m_first; s; s = s->next())
     {
         int a;
-        for (a = s->after() + 1; a < len && charinfo(a)->after() < 0; ++a)
+        for (a = s->after() + 1; a < offset + numChars && charinfo(a)->after() < 0; ++a)
         { charinfo(a)->after(s->index()); }
         --a;
         s->after(a);
 
-        for (a = s->before() - 1; a >=0 && charinfo(a)->before() < 0; --a)
+        for (a = s->before() - 1; a >= offset && charinfo(a)->before() < 0; --a)
         { charinfo(a)->before(s->index()); }
         ++a;
         s->before(a);
