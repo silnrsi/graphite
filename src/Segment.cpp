@@ -250,6 +250,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
                        Slot * endSlot, const Slot * srcSlot,
                        const size_t numGlyphs)
 {
+    size_t numChars = length;
     extendLength(numGlyphs - length);
     // remove any extra
     if (numGlyphs < length)
@@ -284,16 +285,16 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 
     endSlot = endSlot->next();
     assert(numGlyphs == length);
+    assert(offset + numChars <= m_numCharinfo);
     Slot * indexmap[eMaxSpliceSize*3];
     assert(numGlyphs < sizeof indexmap/sizeof *indexmap);
     Slot * slot = startSlot;
     for (uint16 i=0; i < numGlyphs; slot = slot->next(), ++i)
         indexmap[i] = slot;
 
-    slot = startSlot;
-    for (slot=startSlot; slot != endSlot; slot = slot->next(), srcSlot = srcSlot->next())
+    for (slot = startSlot; slot != endSlot; slot = slot->next(), srcSlot = srcSlot->next())
     {
-        slot->set(*srcSlot, offset, m_silf->numUser(), m_silf->numJustLevels());
+        slot->set(*srcSlot, offset, m_silf->numUser(), m_silf->numJustLevels(), numChars);
         if (srcSlot->attachedTo())  slot->attachTo(indexmap[srcSlot->attachedTo()->index()]);
         if (srcSlot->nextSibling()) slot->m_sibling = indexmap[srcSlot->nextSibling()->index()];
         if (srcSlot->firstChild())  slot->m_child = indexmap[srcSlot->firstChild()->index()];
@@ -361,18 +362,38 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd)
 
 void Segment::associateChars()
 {
-    int i = 0;
+    int i = 0, j = 0;
+    int len = charInfoCount();
+    CharInfo *c, *cend;
+    for (c = m_charinfo, cend = m_charinfo + len; c != cend; ++c)
+    {
+        c->before(-1);
+        c->after(-1);
+    }
     for (Slot * s = m_first; s; s->index(i++), s = s->next())
     {
-        int j = s->before();
+        j = s->before();
         if (j < 0)  continue;
 
         for (const int after = s->after(); j <= after; ++j)
         {
-            CharInfo & c = *charinfo(j);
-            if (c.before() == -1 || i < c.before())     c.before(i);
-            if (c.after() < i)                          c.after(i);
+            c = charinfo(j);
+            if (c->before() == -1 || i < c->before())   c->before(i);
+            if (c->after() < i)                         c->after(i);
         }
+    }
+    for (Slot *s = m_first; s; s = s->next())
+    {
+        int a;
+        for (a = s->after() + 1; a < len && charinfo(a)->after() < 0; ++a)
+        { charinfo(a)->after(s->index()); }
+        --a;
+        s->after(a);
+
+        for (a = s->before() - 1; a >=0 && charinfo(a)->before() < 0; --a)
+        { charinfo(a)->before(s->index()); }
+        ++a;
+        s->before(a);
     }
 }
 

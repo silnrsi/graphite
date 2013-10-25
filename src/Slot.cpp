@@ -46,14 +46,20 @@ Slot::Slot() :
 }
 
 // take care, this does not copy any of the GrSlot pointer fields
-void Slot::set(const Slot & orig, int charOffset, size_t numUserAttr, size_t justLevels)
+void Slot::set(const Slot & orig, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars)
 {
     // leave m_next and m_prev unchanged
     m_glyphid = orig.m_glyphid;
     m_realglyphid = orig.m_realglyphid;
     m_original = orig.m_original + charOffset;
-    m_before = orig.m_before + charOffset;
-    m_after = orig.m_after + charOffset;
+    if (charOffset + int(orig.m_before) < 0)
+        m_before = 0;
+    else
+        m_before = orig.m_before + charOffset;
+    if (charOffset <= 0 && orig.m_after + charOffset >= numChars)
+        m_after = numChars - 1;
+    else
+        m_after = orig.m_after + charOffset;
     m_parent = NULL;
     m_child = NULL;
     m_sibling = NULL;
@@ -67,13 +73,9 @@ void Slot::set(const Slot & orig, int charOffset, size_t numUserAttr, size_t jus
     m_bidiCls = orig.m_bidiCls;
     m_bidiLevel = orig.m_bidiLevel;
     if (m_userAttr && orig.m_userAttr)
-    {
         memcpy(m_userAttr, orig.m_userAttr, numUserAttr * sizeof(*m_userAttr));
-    }
     if (m_justs && orig.m_justs)
-    {
         memcpy(m_justs, orig.m_justs, SlotJustify::size_of(justLevels));
-    }
 }
 
 void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
