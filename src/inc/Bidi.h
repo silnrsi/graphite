@@ -58,7 +58,7 @@ private:
 class BracketPairStack
 {
 public:
-    BracketPairStack(uint s) : _stack(grzeroalloc<BracketPair>(s)), _ip(_stack - 1), _top(0), _last(0), _lastclose(0), _size(s) {}
+    BracketPairStack(unsigned int s) : _stack(grzeroalloc<BracketPair>(s)), _ip(_stack - 1), _top(0), _last(0), _lastclose(0), _size(s) {}
     ~BracketPairStack() { free(_stack); }
 
 public:
@@ -67,7 +67,7 @@ public:
     BracketPair *push(uint16 gid, Slot *pos, uint8 before, int prevopen);
     void orin(uint8 mask);
     void clear() { _ip = _stack - 1; _top = 0; _last = 0; _lastclose = 0; }
-    uint size() const { return _size; }
+    unsigned int size() const { return _size; }
     BracketPair *start() const { return _stack; }
 
     CLASS_NEW_DELETE
@@ -79,7 +79,7 @@ private:
     BracketPair *_top;          // current parent
     BracketPair *_last;         // end of next() chain
     BracketPair *_lastclose;    // last pair to close
-    uint         _size;         // capacity
+    unsigned int _size;         // capacity
 };
 
 inline BracketPair *BracketPairStack::scan(uint16 gid)
