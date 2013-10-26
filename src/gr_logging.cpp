@@ -114,7 +114,7 @@ void gr_stop_logging(GR_MAYBE_UNUSED gr_face * face)
         face->setLogger(0);
         fclose(log);
     }
-    else if (!face and global_log)
+    else if (!face && global_log)
     {
         FILE * log = global_log->stream();
         delete global_log;
