@@ -102,6 +102,7 @@ public:
     size_t offset;
     FILE * log;
     char * trace;
+    char * alltrace;
     int codesize;
     gr_face_options opts;
     
@@ -146,6 +147,7 @@ void Parameters::clear()
     offset = 0;
     log = stdout;
     trace = NULL;
+    alltrace = NULL;
     opts = gr_face_preloadAll;
 }
 
@@ -211,6 +213,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         FEAT,
         LOG,
         TRACE,
+        ALLTRACE,
         SIZE
     } TestOptions;
     TestOptions option = NONE;
@@ -293,6 +296,10 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             trace = argv[a];
             option = NONE;
             break;
+        case ALLTRACE:
+            alltrace = argv[a];
+            option = NONE;
+            break;
         case SIZE :
             pIntEnd = NULL;
             codesize = strtol(argv[a],&pIntEnd, 10);
@@ -373,6 +380,10 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 else if (strcmp(argv[a], "-trace") == 0)
                 {
                     option = TRACE;
+                }
+                else if (strcmp(argv[a], "-alltrace") == 0)
+                {
+                    option = ALLTRACE;
                 }
                 else if (strcmp(argv[a], "-demand") == 0)
                 {
@@ -600,6 +611,7 @@ int Parameters::testFileFont() const
 //    try
     {
         gr_face *face = NULL;
+        if (alltrace) gr_start_logging(NULL, alltrace);
         if (enableCache)
             face = gr_make_file_face_with_seg_cache(fileName, 1000, opts | gr_face_dumbRendering);
         else
@@ -623,48 +635,7 @@ int Parameters::testFileFont() const
 
         gr_font *sizedFont = gr_make_font(pointSize * dpi / 72, face);
         gr_feature_val * featureList = NULL;
-#if 0
-        layout.setStartOfLine(parameters.lineStart);
-        layout.setEndOfLine(parameters.lineEnd);
-        layout.setDumbFallback(true);
-        if (parameters.justification)
-            layout.setJustifier(&justifier);
-        else
-            layout.setJustifier(NULL);
-        layout.setRightToLeft(parameters.rtl);
-        if (parameters.ws) layout.setTrailingWs(gr::ktwshAll);
-
-        std::ofstream logStream("grSegmentLog.txt");
-        assert(logStream.is_open());
-        layout.setLoggingStream(&logStream);
-        gr::Segment * pSegment = NULL;
-        //try
-        //{
-          if (parameters.useLineFill)
-          {
-              pSegment = new gr::LineFillSegment(fileFont, &textSrc, &layout, 
-                                                 0, parameters.charLength, 
-                                                 parameters.width);
-              printf("LineFillSegment line start=%d line end=%d\n", 
-                     parameters.lineStart, parameters.lineEnd);
-              if (parameters.justification && pSegment)
-              {
-                  printf("max shrink %f max stretch %f\n", pSegment->maxShrink(),
-                      pSegment->maxShrink());
-              }
-          }
-          else
-          {
-              pSegment = new gr::RangeSegment(fileFont, &textSrc, &layout, 
-                                   0, parameters.charLength);
-              if (pSegment)
-                printf("RangeSegment line start=%d line end=%d rtl=%d\n", 
-                       parameters.lineStart, parameters.lineEnd,
-                       pSegment->rightToLeft());
-          }
-#endif
-       Gr2TextSrc textSrc(pText32, charLength);
-       {
+        Gr2TextSrc textSrc(pText32, charLength);
         gr_segment* pSeg = NULL;
         if (features)
             featureList = parseFeatures(face);
@@ -736,27 +707,6 @@ int Parameters::testFileFont() const
                         pText32[gr_slot_before(slot) + offset],
                         pText32[gr_slot_after(slot) + offset]);
                 }
-    #if 0
-                if (parameters.justification)
-                {
-                    // only level 0 seems to be supported without an assertion
-                    for (int level = 0; level < 1; level++)
-                    {
-                        printf("\t% 2d %6.1f %6.1f %6.1f %d", level,
-                            info.maxShrink(level),
-                            info.maxStretch(level), info.stretchStep(level),
-                            info.justWeight(level));
-                        if (info.maxShrink(level) == 0.0f &&
-                            info.maxStretch(level) == 0.0f &&
-                            info.stretchStep(level) == 0.0f &&
-                            info.justWeight(level) == 0)
-                            break;
-                    }
-                }
-                printf("\n");
-                ++i;
-                ++gi;
-    #endif
                 fprintf(log, "\n");
             }
             assert(i == numSlots);
@@ -773,11 +723,11 @@ int Parameters::testFileFont() const
             free(map);
             gr_seg_destroy(pSeg);
         }
-       }
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
         if (trace) gr_stop_logging(face);
         gr_face_destroy(face);
+        if (alltrace) gr_stop_logging(NULL);
     }
     return returnCode;
 }
