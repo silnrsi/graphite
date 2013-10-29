@@ -1,11 +1,15 @@
 1.2.4
     . Face failure now has error code reporting
+        . gr2fonttest --alltrace added
     . Format 14 table support
         . Not done. To be handled entirely in the compiler
     . Bidi support for Unicode 6.3 Isolating direction controls
+    . Fonts no longer require a glyf/loca table. In such cases the bounding box is always 0.
     . Bug fixes:
-        . zeropadding was not getting called
+        . zeropadding was not getting called on feature tags
+        . automatic associations for unassociate characters
         . use direct engine on Mac
+        . remove tabs from sources so that it becomes readable again
 
 1.2.3
     . Bug fixes only:
