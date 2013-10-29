@@ -40,6 +40,19 @@ GRAPHITE2_NTRACING::
 GRAPHITE2_CUSTOM_HEADER::
     If set, then the value of this macro will be included as a header in Main.h (in effect, all source files). See Main.h for details.
 
+=== Thread Safety ===
+
+The Graphite engine has no locking or thread safe storage. But it is possible to use the Graphite engine in a thread safe manner.
+Face creation must be done in one thread and if +gr_face_preloadAll+ is set, all font table interaction will occur while the face is being created. That is no calls will be made to the +get_table+ function or the +release_table+ function during segment creation. References to the name table, made during calls to +gr_fref_label+ use an internal copy of that table to ensure that all table interaction is completed after +gr_make_face+ is called. Note that none of this precludes an application handling thread issues around font table querying and releasing and graphite being used in a lazy table query manner.
+Font objects must be created without hinted advances otherwise the application is responsible for handling the shared +AppHandle+ resource during segment creation.
+Following this, the face is a read only object and can be shared across different threads, and so segment creation is thread safe. Following creation, segments may be shared across threads so long as they are not modified (using +gr_seg_justify+ or +gr_slot_linebreak_before+).
+
+Any use of logging will break thread safety. Face specific logging involves holding a file open for as long as logging is active,
+and so segments cannot be made from a shared face across different threads.
+Further, if gr_start_logging is called with NULL for the face, a non locked global library variable is written to which will impact across threads and all face creation. Logging should therefore only be used in a single threaded context.
+
+Any other use of the graphite engine in a multithreaded context will involve the application in doing its own locking.
+
 === Memory Allocation ===
 
 +++While GraphiteNG is written in C++, it is targetted at environments where
@@ -53,14 +66,6 @@ types that are not classes we use malloc() or the type safe version gralloc().++
 === Missing Features ===
 
 There are various facilities that silgraphite provides that graphite2 as yet does not. The primary motivation in developing graphite2 is that it be use case driven. Thus only those facilities that have a proven use case in the target applications into which graphite is to be integrated will be implemented.
-
-Justification::
-    Silgraphite has the ability to handle complex justification. This is not
-    part of graphite2 yet. But then neither were any external applications making use
-    of this facility within silgraphite.
-
-Line End Contextuals::
-    The cost of implementing line end contextuals is high and no fonts actually make use of it or need to make use of it. If the need were to rearise, line end contextuals could be integrated with a justification pass.
 
 Ligature Components::
     Graphite has the ability to track ligature components and this feature is used in some fonts. But application support has yet to be proven and this is an issue looking for a use case and appropriate API.
@@ -77,7 +82,7 @@ Hinted Attachment Points::
 
 === Hunting Speed ===
 
-Graphite2 is written based on experience of using SilGraphite. SilGraphite was written primarily to be feature complete in terms of all features that may be needed. Graphite2 takes the experience of using SilGraphite and starts from a use case requirement before a feature is added to the engine. Thus a number of features that have not been used in SilGraphite have been removed, although the design is such that they can be replaced in future.
+Graphite2 is written based on the experience of using SilGraphite. SilGraphite was written primarily to be feature complete in terms of all features that may be needed. Graphite2 takes the experience of using SilGraphite and starts from a use case requirement before a feature is added to the engine. Thus a number of features that have not been used in SilGraphite have been removed, although the design is such that they can be replaced in future.
 
 In addition, a number of techniques were used to speed up the engine. Some of these are discussed here.
 
