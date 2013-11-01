@@ -333,7 +333,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
 
-        if (glyph.attrs().capacity() > _num_attrs)
+        if ((glocs != gloce && !glyph.attrs().capacity()) || glyph.attrs().capacity() > _num_attrs)
             return 0;
     }
 

@@ -240,6 +240,7 @@ if __name__ == '__main__':
     if '{}' not in args: args += ['{}']
      
     try:
+        exitrv = 0
         log = open(opts.logfile, "at") if opts.logfile else sys.stdout     
         with closing(font(opts.font, opts.include, opts.exclude)) as fnt:        
             if   opts.input:    cs = fnt.input(opts.input)
@@ -266,6 +267,8 @@ if __name__ == '__main__':
                             pc =  100*count // total_tests
                             sys.stdout.write("{0: 3d}%\t\t{1: 8.2f}\t\t{2}\r".format(pc, sam[0], sam[1]))
                             sys.stdout.flush()
+                    if rv < 0 or errlog :
+                        exitrv = 1
                     if rv < 0 :
                         (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
                         log.write("{0:d},{1[0]:#010X},{1[1]: >3d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
@@ -286,3 +289,4 @@ if __name__ == '__main__':
         sys.exit(0)
     if opts.status :
         sys.stdout.write("Finished at {0}\n".format(time.ctime()))
+    sys.exit(exitrv)

@@ -99,9 +99,17 @@ sparse::sparse(I attr, const I last)
 
     // Find the maximum extent of the key space.
     size_t n_values=0;
+    key_type lastkey = key_type(-1);
     for (I i = attr; i != last; ++i, ++n_values)
     {
-        const key_type k = (*i).first / SIZEOF_CHUNK;
+        if ((*i).first < lastkey)
+        {
+            m_nchunks = 0;
+            return;
+        }
+        else
+            lastkey = (*i).first;
+        const key_type k = lastkey / SIZEOF_CHUNK;
         if (k >= m_nchunks) m_nchunks = k+1;
     }
     if (m_nchunks == 0)     return;
