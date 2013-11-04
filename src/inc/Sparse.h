@@ -102,7 +102,7 @@ sparse::sparse(I attr, const I last)
     key_type lastkey = key_type(-1);
     for (I i = attr; i != last; ++i, ++n_values)
     {
-        if ((*i).first < lastkey)
+        if ((*i).first < lastkey && lastkey != key_type(-1))
         {
             m_nchunks = 0;
             return;
