@@ -57,21 +57,52 @@ namespace
             v(467), v(479), v(487), v(491), v(499), v(503), v(509), v(521), v(523), v(541)
     };
     const sparse::value_type * const data_end = data+sizeof(data)/sizeof(sparse::value_type);
+
+    const sparse::value_type bad_keys[] =
+    {
+            v(2),   v(3),   v(13),  v(7),   v(11),  v(17),  v(5),   v(19),  v(23),  v(29)
+    };
+    const sparse::value_type * const bad_keys_end = bad_keys+sizeof(bad_keys)/sizeof(sparse::value_type);
+
+    const sparse::value_type dup_keys[] =
+    {
+            v(2),   v(3),   v(3),   v(7),   v(11),  v(17),  v(17),  v(19),  v(23),  v(29)
+    };
+    const sparse::value_type * const dup_keys_end = dup_keys+sizeof(dup_keys)/sizeof(sparse::value_type);
+
+    const sparse::value_type no_zero[] =
+    {
+            sparse::value_type(2, 0),   sparse::value_type(3, 0),   sparse::value_type(7, 0),   sparse::value_type(11, 0),
+            v(17),                      v(19),                      v(23),                      v(29)
+    };
+    const sparse::value_type * const no_zero_end = no_zero+sizeof(no_zero)/sizeof(sparse::value_type);
 }
 
 int main(int argc , char *argv[])
 {
     sparse sp(data, data_end);
 
+    // Check monotonicity is enforced. Array should be invalid
+    if (sparse(bad_keys, bad_keys_end) == true)
+        return 1;
+
+    // Check duplicate key detection is enforced. Array should be invalid
+    if (sparse(dup_keys, dup_keys_end) == true)
+        return 2;
+
+    // Check zero values are not stored
+    if (sparse(no_zero, no_zero_end).capacity() != 4)
+        return 3;
+
     // Check all values are stored
     if (sp.capacity() != sizeof(data)/sizeof(sparse::value_type))
-        return 1;
+        return 4;
 
     // Check the values we put in are coming out again
     for (int i = 0; i != sizeof(data)/sizeof(sparse::value_type); ++i)
     {
         if (sp[data[i].first] != data[i].second)
-            return 2;
+            return 5;
     }
 
     // Check the "missing" values return 0
@@ -81,12 +112,12 @@ int main(int argc , char *argv[])
         if (i == (*d).first)
         {
             if (sp[i] != (*d++).second)
-                return 3;
+                return 6;
         }
         else
         {
             if (sp[i] != 0)
-                return 4;
+                return 7;
         }
     }
 
@@ -104,7 +135,22 @@ int main(int argc , char *argv[])
               << "\tfill ratio:     " << 100.0f << "%" << std::endl
               << "\tsize:           " << sp._sizeof() << std::endl;
 
-    // Check indexing and empty sparse array doesn't crash
+    // Check indexing an default sparse array doesn't crash
+    sparse def;
+    for (int i = 0; i != 100; ++i)
+    {
+        if (def[i] != 0)
+            return 8;
+    }
+
+    // Check indexing an empty sparse array doesn't crash
+    sparse empty(data,data);
+    for (int i = 0; i != 100; ++i)
+    {
+        if (empty[i] != 0)
+            return 9;
+    }
+
     return 0;
 }
 

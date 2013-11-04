@@ -56,6 +56,7 @@ private:
         key_type        offset;
     };
 
+    static chunk  empty_chunk;
     sparse(const sparse &);
     sparse & operator = (const sparse &);
 
@@ -87,7 +88,7 @@ private:
 inline
 sparse::sparse() throw() : m_nchunks(0)
 {
-    m_array.map = 0;
+    m_array.map = &empty_chunk;
 }
 
 
@@ -99,20 +100,22 @@ sparse::sparse(I attr, const I last)
 
     // Find the maximum extent of the key space.
     size_t n_values=0;
-    key_type lastkey = key_type(-1);
+    long lastkey = -1;
     for (I i = attr; i != last; ++i, ++n_values)
     {
-        if ((*i).first < lastkey && lastkey != key_type(-1))
-        {
-            m_nchunks = 0;
-            return;
-        }
-        else
-            lastkey = (*i).first;
-        const key_type k = lastkey / SIZEOF_CHUNK;
+        const typename std::iterator_traits<I>::value_type v = *i;
+        if (v.second == 0)      { --n_values; continue; }
+        if (v.first <= lastkey) { m_nchunks = 0; return; }
+
+        lastkey = v.first;
+        const key_type k = v.first / SIZEOF_CHUNK;
         if (k >= m_nchunks) m_nchunks = k+1;
     }
-    if (m_nchunks == 0)     return;
+    if (m_nchunks == 0)
+    {
+        m_array.map=&empty_chunk;
+        return;
+    }
 
     m_array.values = grzeroalloc<mapped_type>((m_nchunks*sizeof(chunk) + sizeof(mapped_type)-1)
                                                  / sizeof(mapped_type)
@@ -130,6 +133,8 @@ sparse::sparse(I attr, const I last)
     for (; attr != last; ++attr, ++vi)
     {
         const typename std::iterator_traits<I>::value_type v = *attr;
+        if (v.second == 0)  { --vi; continue; }
+
         chunk * const ci_ = m_array.map + v.first/SIZEOF_CHUNK;
 
         if (ci != ci_)
