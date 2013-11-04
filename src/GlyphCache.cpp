@@ -36,45 +36,45 @@ using namespace graphite2;
 
 namespace
 {
-    class glat_iterator : public std::iterator<std::input_iterator_tag, std::pair<sparse::key_type, sparse::mapped_type> >
+    // Iterator over version 1 or 2 glat entries which consist of a series of
+    //    +-+-+-+-+-+-+-+-+-+-+                +-+-+-+-+-+-+-+-+-+-+-+-+
+    // v1 |k|n|v1 |v2 |...|vN |     or    v2   | k | n |v1 |v2 |...|vN |
+    //    +-+-+-+-+-+-+-+-+-+-+                +-+-+-+-+-+-+-+-+-+-+-+-+
+    // variable length structures.
+
+    template<typename W>
+    class _glat_iterator : public std::iterator<std::input_iterator_tag, std::pair<sparse::key_type, sparse::mapped_type> >
     {
+        unsigned short  key() const             { return be::peek<W>(_e) + _n; }
+        unsigned int    run() const             { return be::peek<W>(_e+sizeof(W)); }
+        void            advance_entry()         { _n = 0; _e = _v; be::skip<W>(_v,2); }
     public:
-        glat_iterator(const void * glat=0) : _p(reinterpret_cast<const byte *>(glat)), _n(0) {}
+        _glat_iterator(const void * glat=0) : _e(reinterpret_cast<const byte *>(glat)), _v(_e+2*sizeof(W)), _n(0) {}
 
-        glat_iterator & operator ++ ()      { ++_v.first; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= 2; _v.first = *_p++; _n = *_p++; } return *this; }
-        glat_iterator   operator ++ (int)   { glat_iterator tmp(*this); operator++(); return tmp; }
+        _glat_iterator<W> & operator ++ () {
+            ++_n; be::skip<uint16>(_v);
+            if (_n == run()) advance_entry();
+            return *this;
+        }
+        _glat_iterator<W>   operator ++ (int)   { _glat_iterator<W> tmp(*this); operator++(); return tmp; }
 
-        bool operator == (const glat_iterator & rhs) { return _p >= rhs._p || _p + _n*sizeof(uint16) > rhs._p; }
-        bool operator != (const glat_iterator & rhs) { return !operator==(rhs); }
+        // This is strictly a >= operator. A true == operator could be
+        // implemented that test for overlap but it would be more expensive a
+        // test.
+        bool operator == (const _glat_iterator<W> & rhs) { return _v >= rhs._e; }
+        bool operator != (const _glat_iterator<W> & rhs) { return !operator==(rhs); }
 
         value_type          operator * () const {
-            if (_n==0) { _v.first = *_p++; _n = *_p++; }
-            _v.second = be::peek<uint16>(_p);
-            return _v;
+            return value_type(key(), be::peek<uint16>(_v));
         }
-        const value_type *  operator ->() const { operator * (); return &_v; }
 
     protected:
-        mutable const byte * _p;
-        mutable value_type  _v;
-        mutable int         _n;
+        const byte     * _e, * _v;
+        ptrdiff_t        _n;
     };
 
-    class glat2_iterator : public glat_iterator
-    {
-    public:
-        glat2_iterator(const void * glat) : glat_iterator(glat) {}
-
-        glat2_iterator & operator ++ ()      { ++_v.first; --_n; _p += sizeof(uint16); if (_n == -1) { _p -= sizeof(uint16)*2; _v.first = be::read<uint16>(_p); _n = be::read<uint16>(_p); } return *this; }
-        glat2_iterator   operator ++ (int)   { glat2_iterator tmp(*this); operator++(); return tmp; }
-
-        value_type          operator * () const {
-            if (_n==0) { _v.first = be::read<uint16>(_p); _n = be::read<uint16>(_p); }
-            _v.second = be::peek<uint16>(_p);
-            return _v;
-        }
-        const value_type *  operator ->() const { operator * (); return &_v; }
-    };
+    typedef _glat_iterator<uint8>   glat_iterator;
+    typedef _glat_iterator<uint16>  glat2_iterator;
 }
 
 
@@ -333,7 +333,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
 
-        if ((glocs != gloce && !glyph.attrs().capacity()) || glyph.attrs().capacity() > _num_attrs)
+        if (!glyph.attrs() || glyph.attrs().capacity() > _num_attrs)
             return 0;
     }
 
