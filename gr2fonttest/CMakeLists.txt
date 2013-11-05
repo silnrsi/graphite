@@ -13,10 +13,14 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 add_executable(gr2fonttest gr2FontTest.cpp UtfCodec.cpp)
 target_link_libraries(gr2fonttest graphite2)
 
+if (GRAPHITE2_ASAN)
+    set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
+endif (GRAPHITE2_ASAN)
+
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     # -lgcc LINKER_LANGUAGE C
     add_definitions(-fno-rtti -fno-exceptions)
-    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nodefaultlibs" LINKER_LANGUAGE C)
+    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" LINKER_LANGUAGE C)
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     # This script just fails
     nolib_test(stdc++ $<TARGET_FILE:gr2fonttest>)

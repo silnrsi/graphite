@@ -8,7 +8,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif (NOT CMAKE_BUILD_TYPE)
 #if (CMAKE_BUILD_TYPE STREQUAL ClangASN)
-#    add_definitions(-faddress-sanitizer -fno-omit-frame-pointer)
+#    add_definitions(-fsanitize=address -fno-omit-frame-pointer)
 #    set_property(CACHE CMAKE_C_COMPILER PROPERTY VALUE clang)
 #    set_property(CACHE CMAKE_CXX_COMPILER PROPERTY VALUE clang)
 #endif (CMAKE_BUILD_TYPE STREQUAL ClangASN)
@@ -16,9 +16,6 @@ endif (NOT CMAKE_BUILD_TYPE)
 enable_language(CXX C)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-if (CMAKE_BUILD_TYPE STREQUAL ClangASN)
-    add_definitions(-faddress-sanitizer -fno-omit-frame-pointer)
-endif (CMAKE_BUILD_TYPE STREQUAL ClangASN)
 
 enable_testing()
 
@@ -27,6 +24,7 @@ option(GRAPHITE2_NSEGCACHE "Compile out the gr_*_with_seg_cache APIs")
 option(GRAPHITE2_NFILEFACE "Compile out the gr_make_file_face* APIs")
 option(GRAPHITE2_NTRACING "Compile out log segment tracing capability")
 option(GRAPHITE2_TELEMETRY "Add memory usage telemetry")
+option(GRAPHITE2_ASAN "Enable Address Sanitizing")
 
 
 message(STATUS "Build: " ${CMAKE_BUILD_TYPE})
@@ -39,6 +37,13 @@ string(REPLACE "OFF" "enabled" _TRACING_SUPPORT ${_TRACING_SUPPORT})
 message(STATUS "Segment Cache support: " ${_SEGCACHE_SUPPORT})
 message(STATUS "File Face support: " ${_FILEFACE_SUPPORT})
 message(STATUS "Tracing support: " ${_TRACING_SUPPORT})
+
+if (GRAPHITE2_ASAN)
+    add_definitions(-fsanitize=address -fno-omit-frame-pointer -g)
+    find_program(ASAN_SYMBOLIZER llvm-symbolizer
+            PATHS "/usr/lib" "/usr/local/lib"
+            PATH_SUFFIXES "llvm-3.3/bin" "llvm-3.4/bin" "llvm-3.5/bin")
+endif (GRAPHITE2_ASAN)
 
 string(TOLOWER ${GRAPHITE2_VM_TYPE} GRAPHITE2_VM_TYPE)
 if (NOT GRAPHITE2_VM_TYPE MATCHES "auto|direct|call")

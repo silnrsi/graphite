@@ -59,6 +59,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif (${GR_FOUND})
     set(RT_LDFLAGS "rt")
 
+    if (GRAPHITE2_ASAN)
+        set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
+    endif (GRAPHITE2_ASAN)
+
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -86,7 +90,7 @@ add_executable(comparerenderer
     )
 
 # rt is for timing
-target_link_libraries(comparerenderer graphite2-base graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
+target_link_libraries(comparerenderer graphite2-base graphite2 ${GRAPHITE_LINK_FLAGS} ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	find_file(USP10_H NAMES Usp10.h)
@@ -117,6 +121,9 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
     # comparision tests between old and new graphite
         add_test(NAME ${TESTNAME}_comparison COMMAND $<TARGET_FILE:comparerenderer>
         -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_comparison.log -c -g -n --tolerance 0.0001 ${ARGN})
+        if (GRAPHITE2_ASAN)
+            set_property(TEST ${TESTNAME}_comparison APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
+        endif (GRAPHITE2_ASAN)
         add_test(NAME ${TESTNAME}_cached_comparison COMMAND $<TARGET_FILE:comparerenderer>
         -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -l ${PROJECT_BINARY_DIR}/${TESTNAME}_cached_comparison.log -c -g -n --seg-cache 4096 --tolerance 0.0001 ${ARGN})
         set_tests_properties(${TESTNAME}_comparison PROPERTIES TIMEOUT 3)

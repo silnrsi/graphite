@@ -136,7 +136,7 @@ public:
     }
     ~FeatureParser()
     {
-        delete m_settings;
+        delete[] m_settings;
         m_settings = NULL;
     }
     int swap32(int x)

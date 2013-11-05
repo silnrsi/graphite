@@ -10,10 +10,17 @@ if [ "z$RTL" = "z-r" ] ; then
 else
     RTL= ;
 fi
+NLIM=$1
+if [ "z$NLIM" = "z--nolimit" ] ; then
+    shift ;
+    NLIM="" ;
+else
+    NLIM= "-t 10 --memory=200";
+fi
 ${TESTSDIR}/fuzztest \
     -l fuzzfont-${FONT##**/}-${TEXT##**/}.log \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
-    -t 10 -s 60 \
+    ${NLIM} -s 60 \
     --memory=200 \
     --include=required,graphite \
     --exclude=fontdir,opentype,volt,advtypo,post \

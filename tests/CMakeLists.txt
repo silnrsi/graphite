@@ -38,6 +38,12 @@ if (GRAPHITE2_TELEMETRY)
     set(TELEMETRY ";GRAPHITE2_TELEMETRY")
 endif (GRAPHITE2_TELEMETRY)
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "ClangASN")
+    set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
+else (${CMAKE_BUILD_TYPE} STREQUAL "ClangASN")
+    set(GRAPHITE_LINK_FLAGS "")
+endif (${CMAKE_BUILD_TYPE} STREQUAL "ClangASN")
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
@@ -47,12 +53,12 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
         COMPILE_DEFINITIONS "GRAPHITE2_STATIC"
-        LINK_FLAGS          "-nodefaultlibs" 
+        LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" 
         LINKER_LANGUAGE     C)
     set_target_properties(graphite2-segcache PROPERTIES 
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
         COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING${TELEMETRY}"
-        LINK_FLAGS          "-nodefaultlibs" 
+        LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" 
         LINKER_LANGUAGE     C)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
@@ -71,7 +77,9 @@ if (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
     add_subdirectory(segcache)
 endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
 add_subdirectory(sparsetest)
-add_subdirectory(utftest)
+if (NOT GRAPHITE2_ASAN)
+    add_subdirectory(utftest)
+endif (NOT GRAPHITE2_ASAN)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(vm)
 endif (NOT GRAPHITE2_NFILEFACE)

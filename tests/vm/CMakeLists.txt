@@ -34,6 +34,9 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
 	target_link_libraries(vm-test-direct vm-test-common)
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
 
+if (GRAPHITE2_ASAN)
+    set_target_properties(vm-test-call PROPERTIES LINK_FLAGS "-fsanitize=address")
+endif (GRAPHITE2_ASAN)
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	add_definitions(-fno-rtti -fno-exceptions)

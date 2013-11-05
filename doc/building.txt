@@ -22,6 +22,17 @@ This will do a default build of Graphite with minimal dependencies on other
 packages. There are various option settings see 
 <<X1,Generator configuration options>>>.
 
+It is possible to use clang and also the addresss sanitizer (in clang 3.3 or later)
+to build and test Graphite. Use this build command:
+
+----
+C=clang CXX=clang cmake .. -DGRAPHITE2_ASAN:BOOL=True
+make
+----
+
+Bear in mind that ASAN will not work with ulimit constraints so running the fuzztest
+may result in problems.
+
 === Windows ===
 
 1. Create your build directory 

@@ -13,5 +13,8 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(utftest utftest.cpp)
 target_link_libraries(utftest graphite2)
+if (GRAPHITE2_ASAN)
+    set_target_properties(utftest PROPERTIES LINK_FLAGS "-fsanitize=address")
+endif (GRAPHITE2_ASAN)
 
 add_test(NAME utftest COMMAND $<TARGET_FILE:utftest>)

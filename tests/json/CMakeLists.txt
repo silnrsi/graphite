@@ -9,6 +9,9 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 
 add_executable(jsontest jsontest.cpp ${graphite2_core_SOURCE_DIR}/json.cpp)
+if (GRAPHITE2_ASAN)
+    set_target_properties(jsontest PROPERTIES LINK_FLAGS "-fsanitize=address")
+endif (GRAPHITE2_ASAN)
 
 add_test(NAME jsontest COMMAND $<TARGET_FILE:jsontest> jsontest.log)
 add_test(NAME jsontestOutput COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/jsontest.log ${testing_SOURCE_DIR}/standards/jsontest.log)
