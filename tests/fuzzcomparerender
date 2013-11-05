@@ -15,13 +15,12 @@ if [ "z$NLIM" = "z--nolimit" ] ; then
     shift ;
     NLIM="" ;
 else
-    NLIM= "-t 10 --memory=200";
+    NLIM="-t 10 --memory=200";
 fi
 ${TESTSDIR}/fuzztest \
     -l fuzzfont-${FONT##**/}-${TEXT##**/}.log \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
     ${NLIM} -s 60 \
-    --memory=200 \
     --include=required,graphite \
     --exclude=fontdir,opentype,volt,advtypo,post \
     "$@" -- comparerenderer/comparerenderer \
