@@ -139,6 +139,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
     Slot *aSlot = newSlot();
     
+    if (!aSlot) return;
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
     m_charinfo[id].base(coffset);
@@ -169,6 +170,7 @@ Slot *Segment::newSlot()
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
+        if (!newSlots || !newAttrs) return NULL;
         for (size_t i = 0; i < m_bufSize; i++)
         {
             newSlots[i].next(newSlots + i + 1);
@@ -221,6 +223,7 @@ SlotJustify *Segment::newJustify()
     {
         const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
         byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
+        if (!justs) return NULL;
         for (int i = m_bufSize - 2; i >= 0; --i)
         {
             SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
@@ -271,6 +274,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
         while (numGlyphs > length)
         {
             Slot * extra = newSlot();
+            if (!extra) return;
             extra->prev(endSlot);
             extra->next(endSlot->next());
             endSlot->next(extra);
@@ -414,17 +418,20 @@ inline void process_utf_data(Segment & seg, const Face & face, const int fid, ut
 }
 
 
-void Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
+bool Segment::read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars)
 {
     assert(face);
     assert(pFeats);
+    if (!m_charinfo) return false;
 
+    // utf iterator is self recovering so we don't care about the error state of the iterator.
     switch (enc)
     {
     case gr_utf8:   process_utf_data(*this, *face, addFeatures(*pFeats), utf8::const_iterator(pStart), nChars); break;
     case gr_utf16:  process_utf_data(*this, *face, addFeatures(*pFeats), utf16::const_iterator(pStart), nChars); break;
     case gr_utf32:  process_utf_data(*this, *face, addFeatures(*pFeats), utf32::const_iterator(pStart), nChars); break;
     }
+    return true;
 }
 
 void Segment::prepare_pos(const Font * /*font*/)

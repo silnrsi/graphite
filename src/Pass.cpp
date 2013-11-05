@@ -224,6 +224,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     // Load the rule entries map
     face.error_context((face.error_context() & 0xFFFF00) + EC_APASS);
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
+    if (e.test(!re, E_OUTOFMEM)) return face.error(e);
     for (size_t n = num_entries; n; --n, ++re)
     {
         const ptrdiff_t rn = be::read<uint16>(rule_map);
@@ -302,6 +303,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 {
     m_cols = gralloc<uint16>(m_numGlyphs);
+    if (e.test(!m_cols, E_OUTOFMEM)) return false;
     memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
     for (size_t n = num_ranges; n; --n)
     {

@@ -323,6 +323,7 @@ void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
     if (!m_justs)
     {
         SlotJustify *j = seg->newJustify();
+        if (!j) return;
         j->LoadSlot(this, seg);
         m_justs = j;
     }

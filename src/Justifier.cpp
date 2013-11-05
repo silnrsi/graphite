@@ -117,6 +117,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 
     JustifyTotal *stats = new JustifyTotal[numLevels];
+    if (!stats) return -1.0;
     for (s = pFirst; s != end; s = s->nextSibling())
     {
         float w = s->origin().x / scale + s->advance() - base;
@@ -179,6 +180,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     {
         m_first = pSlot = addLineEnd(pSlot);
         m_last = pLast = addLineEnd(end);
+        if (!m_first || !m_last) return -1.0;
     }
     else
     {
@@ -226,6 +228,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 Slot *Segment::addLineEnd(Slot *nSlot)
 {
     Slot *eSlot = newSlot();
+    if (!eSlot) return NULL;
     const uint16 gid = silf()->endLineGlyphid();
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     eSlot->setGlyph(this, gid, theGlyph);

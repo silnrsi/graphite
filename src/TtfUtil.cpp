@@ -911,7 +911,6 @@ gid16 CmapSubtable4Lookup(const void * pCmapSubtabel4, unsigned int nUnicodeId, 
     {
         pMid = &(pTable->end_code[rangeKey]);
         chEnd = be::peek<uint16>(pMid);
-        n = rangeKey;
     }
     else
     {

@@ -5,9 +5,11 @@
         . Not done. To be handled entirely in the compiler
     . Bidi support for Unicode 6.3 Isolating direction controls
     . Fonts no longer require a glyf/loca table. In such cases the bounding box is always 0.
+    . Clang ASAN build support added for testing.
     . Bug fixes:
+        . Enforce fonts having to store glyph attributes by monotonically increasing attribute number
         . zeropadding was not getting called on feature tags
-        . automatic associations for unassociate characters
+        . automatic associations for unassociated characters
         . use direct engine on Mac
         . remove tabs from sources so that it becomes readable again
 

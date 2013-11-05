@@ -42,8 +42,8 @@ namespace
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
 
-      pRes->read_text(face, pFeats, enc, pStart, nChars);
-      if (!pRes->runGraphite())
+      
+      if (!pRes->read_text(face, pFeats, enc, pStart, nChars) || !pRes->runGraphite())
       {
         delete pRes;
         return NULL;

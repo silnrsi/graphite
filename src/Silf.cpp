@@ -124,11 +124,16 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         releaseBuffers(); return face.error(e);
     }
 
-    m_justs = gralloc<Justinfo>(m_numJusts);
-    for (uint8 i = 0; i < m_numJusts; i++)
+    if (m_numJusts)
     {
-        ::new(m_justs + i) Justinfo(p[0], p[1], p[2], p[3]);
-        be::skip<byte>(p,8);
+        m_justs = gralloc<Justinfo>(m_numJusts);
+        if (e.test(!m_justs, E_OUTOFMEM)) return face.error(e);
+
+        for (uint8 i = 0; i < m_numJusts; i++)
+        {
+            ::new(m_justs + i) Justinfo(p[0], p[1], p[2], p[3]);
+            be::skip<byte>(p,8);
+        }
     }
 
     if (e.test(p + sizeof(uint16) + sizeof(uint8)*8 >= silf_end, E_BADENDJUSTS)) { releaseBuffers(); return face.error(e); }
@@ -215,6 +220,7 @@ template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t
 
     // Read in all the offsets.
     m_classOffsets = gralloc<uint32>(m_nClass+1);
+    if (e.test(!m_classOffsets, E_OUTOFMEM)) return ERROROFFSET;
     for (uint32 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
     {
         *o = (be::read<T>(p) - cls_off)/sizeof(uint16);
@@ -252,6 +258,7 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version, Error 
 
     // Fortunately the class data is all uint16s so we can decode these now
     m_classData = gralloc<uint16>(max_off);
+    if (e.test(!m_classData, E_OUTOFMEM)) return ERROROFFSET;
     for (uint16 *d = m_classData, * const d_end = d + max_off; d != d_end; ++d)
         *d = be::read<uint16>(p);
 

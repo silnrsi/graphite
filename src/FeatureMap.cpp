@@ -122,6 +122,7 @@ bool FeatureMap::readFeats(const Face & face)
 
     m_feats = new FeatureRef [m_numFeats];
     uint16 * const  defVals = gralloc<uint16>(m_numFeats);
+    if (!defVals || !m_feats) return false;
     unsigned short bits = 0;     //to cause overflow on first Feature
 
     for (int i = 0, ie = m_numFeats; i != ie; i++)
@@ -145,6 +146,11 @@ bool FeatureMap::readFeats(const Face & face)
         if (num_settings != 0)
         {
             uiSet = gralloc<FeatureSetting>(num_settings);
+            if (!uiSet)
+            {
+                free(defVals);
+                return false;
+            }
             maxVal = readFeatureSettings(feat_setts, uiSet, num_settings);
             defVals[i] = uiSet[0].value();
         }
@@ -161,6 +167,11 @@ bool FeatureMap::readFeats(const Face & face)
     }
     m_defaultFeatures = new Features(bits/(sizeof(uint32)*8) + 1, *this);
     m_pNamedFeats = new NameAndFeatureRef[m_numFeats];
+    if (!m_defaultFeatures || !m_pNamedFeats)
+    {
+        free(defVals);
+        return false;
+    }
     for (int i = 0; i < m_numFeats; ++i)
     {
         m_feats[i].applyValToFeature(defVals[i], *m_defaultFeatures);
@@ -204,6 +215,7 @@ bool SillMap::readSill(const Face & face)
         uint16 offset = be::read<uint16>(p);
         if (offset + 8U * numSettings > sill.size() && numSettings > 0) return false;
         Features* feats = new Features(*m_FeatureMap.m_defaultFeatures);
+        if (!feats) return false;
         const byte *pLSet = sill + offset;
 
         // Apply langauge specific settings

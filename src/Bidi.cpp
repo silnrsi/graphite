@@ -296,7 +296,6 @@ Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dir
                 {
                     scurr->prev(0);
                     do_resolves(slast, level, prelevel & 1, level & 1, bmask, seg, aMirror, bstack);
-                    empty = 0;
                 }
                 --cisol;                // pop the isol sequence from the stack
                 return s;

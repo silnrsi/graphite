@@ -56,6 +56,7 @@ bool gr_start_logging(GR_MAYBE_UNUSED gr_face * face, const char *log_path)
     if (n == 0 || n > MAX_PATH - 12) return false;
 
     LPWSTR wlog_path = gralloc<WCHAR>(n);
+    if (!wlog_path) return false;
     FILE *log = 0;
     if (wlog_path && MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, log_path, -1, wlog_path, n))
         log = _wfopen(wlog_path, L"wt");

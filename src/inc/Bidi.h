@@ -106,7 +106,7 @@ inline void BracketPairStack::close(BracketPair *tos, Slot *s)
 
 inline BracketPair *BracketPairStack::push(uint16 gid, Slot *pos, uint8 before, int prevopen)
 {
-    if (++_ip - _stack < _size)
+    if (++_ip - _stack < _size && _stack)
     {
         ::new (_ip) BracketPair(gid, pos, before, _top, prevopen ? _last : _lastclose);
         if (_last) _last->next(_ip);

@@ -263,6 +263,7 @@ ENDOP
 
 STARTOP(insert)
     Slot *newSlot = seg.newSlot();
+    if (!newSlot) DIE;
     Slot *iss = is;
     while (iss && iss->isDeleted()) iss = iss->next();
     if (!iss)
@@ -284,7 +285,7 @@ STARTOP(insert)
     {
         iss->prev()->next(newSlot);
         newSlot->prev(iss->prev());
-    newSlot->before(iss->prev()->after());
+        newSlot->before(iss->prev()->after());
     }
     else
     {
@@ -297,12 +298,12 @@ STARTOP(insert)
     {
         iss->prev(newSlot);
         newSlot->originate(iss->original());
-    newSlot->after(iss->before());
+        newSlot->after(iss->before());
     }
     else if (newSlot->prev())
     {
         newSlot->originate(newSlot->prev()->original());
-    newSlot->after(newSlot->prev()->after());
+        newSlot->after(newSlot->prev()->after());
     }
     else
     {
@@ -635,6 +636,7 @@ ENDOP
 
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
+    if (!newSlot) DIE;
     int16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
