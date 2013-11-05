@@ -37,7 +37,7 @@ Font::Font(float ppm, const Face & f, const void * appFontHandle, const gr_font_
   m_hinted(appFontHandle && ops && (ops->glyph_advance_x || ops->glyph_advance_y))
 {
     memset(&m_ops, 0, sizeof m_ops);
-    if (m_hinted)
+    if (m_hinted && ops)
         memcpy(&m_ops, ops, min(sizeof m_ops, ops->size));
     else
         m_ops.glyph_advance_x = &Face::default_glyph_advance;

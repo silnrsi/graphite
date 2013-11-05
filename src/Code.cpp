@@ -215,7 +215,10 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
 
     if (!_code)
+    {
         failure(alloc_failed);
+        return;
+    }
 
     // Make this RET_ZERO, we should never reach this but just in case ...
     _code[_instr_count] = op_to_fn[RET_ZERO].impl[_constraint];
