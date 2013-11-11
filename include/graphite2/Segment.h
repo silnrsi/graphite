@@ -125,6 +125,8 @@ enum gr_attrCode {
     gr_slatSegSplit = gr_slatJStretch + 29,
     /// User defined attribute, see subattr for user attr number
     gr_slatUserDefn,
+    /// Bidi level
+    gr_slatBidiLevel,
                             
     /// not implemented
     gr_slatMax,             
