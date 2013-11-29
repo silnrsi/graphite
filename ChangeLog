@@ -1,16 +1,20 @@
 1.2.4
-    . Face failure now has error code reporting
+    . Face failure now has error code reporting via debug logging
+        . can now call gr_start_logging(NULL, fname)
         . gr2fonttest --alltrace added
     . Format 14 table support
         . Not done. To be handled entirely in the compiler
     . Bidi support for Unicode 6.3 Isolating direction controls
     . Fonts no longer require a glyf/loca table. In such cases the bounding box is always 0.
     . Clang ASAN build support added for testing.
+    . Handle out of memory sanely.
+    . Dcoumentation improvements
     . Bug fixes:
         . Enforce fonts having to store glyph attributes by monotonically increasing attribute number
         . zeropadding was not getting called on feature tags
         . automatic associations for unassociated characters
         . use direct engine on Mac
+        . various extreme case reading 1 past the end errors fixed
         . remove tabs from sources so that it becomes readable again
 
 1.2.3
