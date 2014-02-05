@@ -8,7 +8,7 @@
     . Fonts no longer require a glyf/loca table. In such cases the bounding box is always 0.
     . Clang ASAN build support added for testing.
     . Handle out of memory sanely.
-    . Dcoumentation improvements
+    . Documentation improvements
     . Bug fixes:
         . Enforce fonts having to store glyph attributes by monotonically increasing attribute number
         . zeropadding was not getting called on feature tags
