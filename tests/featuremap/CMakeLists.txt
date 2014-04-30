@@ -11,7 +11,10 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 set(S ${graphite2_core_SOURCE_DIR})
 add_executable(featuremaptest featuremaptest.cpp)
-set_target_properties(featuremaptest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+#    set_target_properties(featuremaptest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+
 if (GRAPHITE2_ASAN)
     set_target_properties(featuremaptest PROPERTIES LINK_FLAGS "-fsanitize=address")
 endif (GRAPHITE2_ASAN)
