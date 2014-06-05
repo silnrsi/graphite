@@ -116,8 +116,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         ++numLevels;
     }
 
-    JustifyTotal *stats = new JustifyTotal[numLevels];
-    if (!stats) return -1.0;
+    Vector<JustifyTotal> stats(numLevels);
     for (s = pFirst; s != end; s = s->nextSibling())
     {
         float w = s->origin().x / scale + s->advance() - base;
