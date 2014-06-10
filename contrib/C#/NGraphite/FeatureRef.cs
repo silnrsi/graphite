@@ -50,6 +50,8 @@ namespace NGraphite
 			UInt32 length;
 			ushort langId = (ushort)Graphite2Api.StrToTag(langid);
 			IntPtr labelPtr = Graphite2Api.FrefValueLabel(_featureRef, settingsno, ref langId, utf, out length);
+			if (labelPtr == IntPtr.Zero)
+				return String.Empty;
 			string retLabel = ConvertGraphiteLabelToString(labelPtr, utf, length);			
 			Graphite2Api.LabelDestroy(labelPtr);
 			return retLabel;
