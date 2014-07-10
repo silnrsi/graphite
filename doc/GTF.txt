@@ -1,7 +1,6 @@
 = Graphite Table Format =
-Martin Hosken <martin_hosken@sil.org>
-v5.0, July 2014
 
+:docinfo:
 :numbered:
 
 == Introduction ==
@@ -883,27 +882,4 @@ Notice that the requirement that any tables declared in an external
 binary description override the corresponding font table in the font,
 means that a name table in an external binary description must be
 complete, including all the strings from the original font.
-
-== Changes ==
-
-[cols="2,9",frame="topbot",grid="none"]
-|======================================================================
-|18 March 2003 |Changed unicode field of PseudoMap class to ULONG.
-
-|22 July 2003 |Added fields for critical features.
-
-|Sometime |Added pass constraints.
-
-|20 August 2003 |Added Sile table; changed title to Graphite Table Format.
-
-|January 2004 |Added justification levels.
-
-|10 February 2004 |Added description of Feat table.
-
-|31 January 2006 |Added Sill table
-
-|25 February 2011 |Added version 2.0 of Glat table
-
-|31 May 2012 |Added version annotations
-|======================================================================
 
