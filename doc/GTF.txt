@@ -93,13 +93,13 @@ bounding box rectangle is stored elsewhere in the font.
 |SHORT |subbox_bitmap |Which subboxes exist on 4x4 grid;bit-index =
 (y-index * 4) + x-index |
 
-|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal |
-
-|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal |
-
 |BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal |
 
 |BYTE |diag_neg_max |Defines maximum  negatively -sloped diagonal |
+
+|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal |
+
+|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal |
 
 |Subbox_entry[] |subboxes |One entry per bit in subbox_bitmap |
 |=======================================================================
