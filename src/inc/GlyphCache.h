@@ -29,6 +29,7 @@ of the License or (at your option) any later version.
 
 #include "graphite2/Font.h"
 #include "inc/Main.h"
+#include "inc/Position.h"
 
 namespace graphite2 {
 
@@ -36,6 +37,7 @@ class Face;
 class FeatureVal;
 class GlyphFace;
 class Segment;
+class GlyphBox;
 
 class GlyphCache
 {
@@ -60,6 +62,7 @@ public:
 private:
     const Loader        * _glyph_loader;
     const GlyphFace *   * _glyphs;
+    GlyphBox        *   * _boxes;
     unsigned short        _num_glyphs,
                           _num_attrs,
                           _upem;
@@ -88,5 +91,20 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 {
     return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
 }
+
+class GlyphBox
+{
+public:
+    GlyphBox(uint8 numsubs, ushort bitmap, Rect *slant) : _num(numsubs), _bitmap(bitmap), _slant(*slant) {}; 
+
+    void addSubBox(int subindex, int boundary, Rect *val) { _subs[subindex * 2 + boundary] = *val; }
+    Rect &subVal(int subindex, int boundary) { return _subs[subindex * 2 + boundary]; }
+
+private:
+    uint8   _num;
+    ushort  _bitmap;
+    Rect    _slant;
+    Rect    _subs[0];
+};
 
 } // namespace graphite2
