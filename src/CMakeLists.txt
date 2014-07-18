@@ -86,6 +86,7 @@ add_library(graphite2 SHARED
     Justifier.cpp
     NameTable.cpp
     Pass.cpp
+    Position.cpp
     Rule.cpp
     Segment.cpp
     Silf.cpp
