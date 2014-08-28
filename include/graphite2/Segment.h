@@ -141,6 +141,8 @@ enum gr_attrCode {
     gr_colShiftx,
     /// Collision shift y
     gr_colShifty,
+    /// Collision margin
+    gr_colMargin,
                             
     /// not implemented
     gr_slatMax,             

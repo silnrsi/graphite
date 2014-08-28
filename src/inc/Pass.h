@@ -39,6 +39,7 @@ struct RuleEntry;
 struct State;
 class FiniteStateMachine;
 class Error;
+class Collider;
 
 class Pass
 {   
@@ -69,6 +70,9 @@ private:
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
+    bool    collisionAvoidance(Segment *seg) const;
+    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, bool isfirst) const;
+
     const Silf* m_silf;
     uint16    * m_cols;
     Rule      * m_rules; // rules

@@ -184,6 +184,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     assert(ds.second);
     const Segment & seg = *ds.first;
     const Slot & s = *ds.second;
+    const SlotCollision *cslot = seg.collisionInfo(ds.second);
 
     j << json::object
         << "id"             << objectid(ds)
@@ -219,6 +220,15 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
             j   << objectid(dslot(&seg, c));
         j       << json::close;
+    }
+    if (cslot)
+    {
+        j << "collision" << json::flat << json::object
+              << "shift" << cslot->shift()
+              << "limit" << cslot->limit()
+              << "flags" << cslot->flags()
+              << "margin" << cslot->margin()
+              << json::close;
     }
     return j << json::close;
 }

@@ -501,7 +501,7 @@ void Segment::initCollisions()
     m_collisions = gralloc<SlotCollision>(slotCount());
     for (unsigned short i = 0; i < slotCount(); ++i)
     {
-        ::new (m_collisions + i) SlotCollision(this, p);
+        ::new (m_collisions + p->index()) SlotCollision(this, p);
         p = p->next();
     }
 }

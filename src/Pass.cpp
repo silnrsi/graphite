@@ -35,6 +35,7 @@ of the License or (at your option) any later version.
 #include "inc/Code.h"
 #include "inc/Rule.h"
 #include "inc/Error.h"
+#include "inc/Collider.h"
 
 using namespace graphite2;
 using vm::Machine;
@@ -329,6 +330,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
+    if ((m_flags & 7) > 0 && collisionAvoidance(&m.slotMap().segment)) return;
     Slot *currHigh = s->next();
 
 #if !defined GRAPHITE2_NTRACING
@@ -340,13 +342,13 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
     int lc = m_iMaxLoop;
     do
     {
-        findNDoRule(s, m, fsm);
-        if (s && (m.slotMap().highpassed() || s == m.slotMap().highwater() || --lc == 0)) {
+        if (!(m_flags & 7) || m.slotMap().segment.collisionInfo(s)->flags() & SlotCollision::COLL_ISCOL)
+            findNDoRule(s, m, fsm);
+        else
+            s = s->next();
+        if (s && (s == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
             if (!lc)
-            {
-//              if (dbgout) *dbgout << json::item << json::flat << rule_event(-1, s, 1);
                 s = m.slotMap().highwater();
-            }
             lc = m_iMaxLoop;
             if (s)
                 m.slotMap().highwater(s->next());
@@ -618,3 +620,66 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
     }
 }
 
+bool Pass::collisionAvoidance(Segment *seg) const
+{
+    Collider coll;
+    bool isfirst = true;
+    uint8 numPasses = m_flags & 7;
+    bool hasCollisions = false;
+    Slot *start;
+    for (int i = 0; i < numPasses; ++i)
+    {
+        hasCollisions = false;
+        for (Slot *s = seg->first(); s != seg->last(); s = s->next())
+        {
+            const SlotCollision *c = seg->collisionInfo(s);
+            if (c->flags() & SlotCollision::COLL_START)
+                start = s;
+            if (c->flags() & SlotCollision::COLL_TEST &&
+                    (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
+                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst);
+        }
+        if (!hasCollisions)
+            return false;
+        else
+            isfirst = false;
+    }
+    return true;
+}
+
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, bool isfirst) const
+{
+    Slot *s;
+    bool passed_slot = false;
+    SlotCollision *cslot = seg->collisionInfo(slot);
+    uint8 priority = cslot->flags() & SlotCollision::COLL_PRIORITY;
+    coll->initSlot(slot, cslot->limit());
+    bool collides = false;
+    for (s = start; s != seg->last() && !(seg->collisionInfo(s)->flags() & SlotCollision::COLL_END); s = s->next())
+    {
+        const SlotCollision *c = seg->collisionInfo(s);
+        if (s == slot)
+        {
+            passed_slot = true;
+            continue;
+        }
+        else if ((c->flags() & SlotCollision::COLL_IGNORE) || 
+                 ((c->flags() & SlotCollision::COLL_PRIORITY) > priority) ||
+                 (((c->flags() & SlotCollision::COLL_PRIORITY) == priority) && (!isfirst || passed_slot)))
+            continue;
+        collides |= coll->mergeSlot(seg, s);
+    }
+    bool isCol;
+    if (collides)
+    {
+        Position shift = coll->resolve(seg, isCol, cslot->shift());
+        cslot->shift(shift);
+    }
+    else
+        isCol = false;
+    if (isCol)
+    { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
+    else
+    { cslot->flags((cslot->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
+    return isCol;
+}
