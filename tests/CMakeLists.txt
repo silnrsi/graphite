@@ -18,6 +18,7 @@ add_library(graphite2-segcache STATIC
     ${S}/Bidi.cpp
     ${S}/call_machine.cpp
     ${S}/Code.cpp
+    ${S}/Collider.cpp
     ${S}/CmapCache.cpp
     ${S}/Face.cpp
     ${S}/FileFace.cpp

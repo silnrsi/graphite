@@ -40,6 +40,7 @@ of the License or (at your option) any later version.
 #include "inc/Position.h"
 #include "inc/List.h"
 #include "inc/Bidi.h"
+#include "inc/Collider.h"
 
 #define MAX_SEG_GROWTH_FACTOR  256
 
@@ -56,6 +57,7 @@ class SegmentScopeState;
 class Font;
 class Segment;
 class Silf;
+class SlotCollision;
 
 enum SpliceParam {
 /** sub-Segments longer than this are not cached
@@ -149,6 +151,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     void prepare_pos(const Font *font);
     void finalise(const Font *font);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
+    void initCollisions();
   
 private:
     Position        m_advance;          // whole segment advance
@@ -159,6 +162,7 @@ private:
     Slot          * m_freeSlots;        // linked list of free slots
     SlotJustify   * m_freeJustifies;    // Slot justification blocks free list
     CharInfo      * m_charinfo;         // character info, one per input character
+    SlotCollision * m_collisions;       // Array of SlotCollisions for each slot
     const Face    * m_face;             // GrFace
     const Silf    * m_silf;
     Slot          * m_first;            // first slot in segment
@@ -179,7 +183,7 @@ void Segment::finalise(const Font *font)
     if (!m_first) return;
 
     m_advance = positionSlots(font);
-    associateChars(0, m_numCharinfo);
+    //associateChars(0, m_numCharinfo);
     linkClusters(m_first, m_last);
 }
 

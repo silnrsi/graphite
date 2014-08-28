@@ -355,7 +355,8 @@ pseudo-glyphs) |
 |BYTE |iBidi |Index of first pass after the bidi pass(must be <= iPos);
 0xFF implies no bidi pass |
 
-|BYTE |flags | |4.0 – added Bit 1
+|BYTE |flags | 0 - has line end contextuals, 1-3 - space contextuals,
+4 - collision avoidance |4.0 – added Bit 1
 
 |BYTE |maxPreContext |Max range for preceding cross-line-boundary
 contextualization |
@@ -392,7 +393,7 @@ ligature components |
 
 |BYTE |direction |Supported direction(s) |
 
-|BYTE |reserved | |
+|BYTE |attCollisions | First of a set of attributes that hold collision flags and constraint box | 5.0 - added
 
 |BYTE |reserved | |
 

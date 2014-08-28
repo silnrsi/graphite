@@ -140,7 +140,9 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     m_aLig      = be::read<uint16>(p);
     m_aUser     = be::read<uint8>(p);
     m_iMaxComp  = be::read<uint8>(p);
-    be::skip<byte>(p,5);                        // direction and 4 reserved bytes
+    be::skip<byte>(p);                          // direction
+    m_aCollision = be::read<uint8>(p);
+    be::skip<byte>(p,3);
     be::skip<uint16>(p, be::read<uint8>(p));    // don't need critical features yet
     be::skip<byte>(p);                          // reserved
     if (e.test(p >= silf_end, E_BADCRITFEATURES))   { releaseBuffers(); return face.error(e); }
@@ -155,6 +157,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         || e.test(m_aBreak >= num_attrs, E_BADABREAK)
         || e.test(m_aBidi  >= num_attrs, E_BADABIDI)
         || e.test(m_aMirror>= num_attrs, E_BADAMIRROR)
+        || e.test(m_aCollision >= num_attrs - 4, E_BADACOLLISION)
         || e.test(m_numPasses > 128, E_BADNUMPASSES) || e.test(passes_start >= silf_end, E_BADPASSESSTART)
         || e.test(m_pPass < m_sPass, E_BADPASSBOUND) || e.test(m_pPass > m_numPasses, E_BADPPASS) || e.test(m_sPass > m_numPasses, E_BADSPASS)
         || e.test(m_jPass < m_pPass, E_BADJPASSBOUND) || e.test(m_jPass > m_numPasses, E_BADJPASS)

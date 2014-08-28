@@ -37,6 +37,7 @@ of the License or (at your option) any later version.
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
 #include "inc/Bidi.h"
+#include "inc/Collider.h"
 #include "graphite2/Segment.h"
 
 
@@ -46,6 +47,7 @@ Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int tex
 : m_freeSlots(NULL),
   m_freeJustifies(NULL),
   m_charinfo(new CharInfo[numchars]),
+  m_collisions(NULL),
   m_face(face),
   m_silf(face->chooseSilf(script)),
   m_first(NULL),
@@ -492,3 +494,14 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     }
 }
 
+void Segment::initCollisions()
+{
+    if (m_collisions) free(m_collisions);
+    Slot *p = m_first;
+    m_collisions = gralloc<SlotCollision>(slotCount());
+    for (unsigned short i = 0; i < slotCount(); ++i)
+    {
+        ::new (m_collisions + i) SlotCollision(this, p);
+        p = p->next();
+    }
+}

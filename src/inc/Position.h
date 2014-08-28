@@ -56,6 +56,7 @@ public :
 
     // returns Position(overlapx, overlapy) where overlap<0 if overlapping else positive)
     Position overlap(Position &offset, Rect &other, Position &otherOffset);
+    //Position constrainedAvoid(Position &offset, Rect &box, Rect &sdbox, Position &other, Rect &obox, Rect &osdbox);
 
     Position bl;
     Position tr;

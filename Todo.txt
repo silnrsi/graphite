@@ -1,3 +1,4 @@
 Expected changes to come:
 
-* None
+* Ensure that action code can't insert or delete slots in a positioning pass
+

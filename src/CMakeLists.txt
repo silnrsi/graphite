@@ -78,6 +78,7 @@ add_library(graphite2 SHARED
     CachedFace.cpp
     CmapCache.cpp
     Code.cpp
+    Collider.cpp
     Face.cpp
     FeatureMap.cpp
     Font.cpp

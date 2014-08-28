@@ -160,7 +160,12 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 
     bool res = aSilf->runGraphite(seg, 0, aSilf->justificationPass(), true);
     if (res)
+    {
+        seg->associateChars(0, seg->charInfoCount());
+        if (aSilf->flags() & 0x10)
+        { } // set up for collision avoidance
         res = aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
+    }
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
