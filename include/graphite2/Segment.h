@@ -128,21 +128,21 @@ enum gr_attrCode {
     /// Bidi level
     gr_slatBidiLevel = 60,
     /// Collision flags
-    gr_colFlags,
+    gr_slatcolFlags,
     /// Collision constraint rectangle left (bl.x)
-    gr_colLimitblx,
+    gr_slatcolLimitblx,
     /// Collision constraint rectangle lower (bl.y)
-    gr_colLimitbly,
+    gr_slatcolLimitbly,
     /// Collision constraint rectangle right (tr.x)
-    gr_colLimittrx,
+    gr_slatcolLimittrx,
     /// Collision constraing rectangle upper (tr.y)
-    gr_colLimittry,
+    gr_slatcolLimittry,
     /// Collision shift x
-    gr_colShiftx,
+    gr_slatcolShiftx,
     /// Collision shift y
-    gr_colShifty,
+    gr_slatcolShifty,
     /// Collision margin
-    gr_colMargin,
+    gr_slatcolMargin,
                             
     /// not implemented
     gr_slatMax,             

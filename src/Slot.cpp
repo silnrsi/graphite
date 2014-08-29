@@ -89,6 +89,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 {
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
+    // [TODO] Add collision shift support
     Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
@@ -224,6 +225,14 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatUserDefn :  return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
+    case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->flags() : 0; }
+    case gr_slatcolLimitblx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.x : 0; }
+    case gr_slatcolLimitbly : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.y : 0; }
+    case gr_slatcolLimittrx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.x : 0; }
+    case gr_slatcolLimittry : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.y : 0; }
+    case gr_slatcolShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->shift().x : 0; }
+    case gr_slatcolShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->shift().y : 0; }
+    case gr_slatcolMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
     default :               return 0;
     }
 }
@@ -293,6 +302,41 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJWidth :    just(value); break;
     case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
+    // [TODO] Add collision attributes support
+    case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); if (c) c->flags(value); break; }
+    case gr_slatcolLimitblx :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Rect &r = c->limit();
+            c->limit(Rect(Position(value, r.bl.y), r.tr));
+        }
+        break; }
+    case gr_slatcolLimitbly :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Rect &r = c->limit();
+            c->limit(Rect(Position(r.bl.x, value), r.tr));
+        }
+        break; }
+    case gr_slatcolLimittrx :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Rect &r = c->limit();
+            c->limit(Rect(r.bl, Position(value, r.tr.y)));
+        }
+        break; }
+    case gr_slatcolLimittry :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Rect &r = c->limit();
+            c->limit(Rect(r.bl, Position(r.tr.x, value)));
+        }
+        break; }
+    case gr_slatcolMargin : { SlotCollision *c = seg->collisionInfo(this); if (c) c->margin(value); break; }
     default :
         break;
     }

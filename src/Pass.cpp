@@ -652,7 +652,6 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     Slot *s;
     bool passed_slot = false;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    uint8 priority = cslot->flags() & SlotCollision::COLL_PRIORITY;
     coll->initSlot(slot, cslot->limit());
     bool collides = false;
     for (s = start; s != seg->last() && !(seg->collisionInfo(s)->flags() & SlotCollision::COLL_END); s = s->next())
@@ -664,8 +663,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
             continue;
         }
         else if ((c->flags() & SlotCollision::COLL_IGNORE) || 
-                 ((c->flags() & SlotCollision::COLL_PRIORITY) > priority) ||
-                 (((c->flags() & SlotCollision::COLL_PRIORITY) == priority) && (!isfirst || passed_slot)))
+                 ((c->flags() & SlotCollision::COLL_TEST) && isfirst && passed_slot))
             continue;
         collides |= coll->mergeSlot(seg, s);
     }

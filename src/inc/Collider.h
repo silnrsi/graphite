@@ -60,21 +60,20 @@ class SlotCollision
 {
 public:
     enum {
-        COLL_PRIORITY = 7,  // lower the more important - e.g. base=0
-        COLL_TEST = 8,
-        COLL_ISCOL = 16,
-        COLL_KNOWN = 32,
-        COLL_START = 64,
-        COLL_END = 128,
-        COLL_IGNORE = 256,
-        COLL_KERN = 512
+        COLL_TEST = 1,
+        COLL_IGNORE = 2,
+        COLL_START = 4,
+        COLL_END = 8,
+        COLL_KERN = 16,
+        COLL_ISCOL = 32,
+        COLL_KNOWN = 64,
     };
         
     SlotCollision(Segment *seg, Slot *slot);
     const Rect &limit() const { return _limit; }
-    void limit(Rect &r) { _limit = r; }
+    void limit(const Rect &r) { _limit = r; }
     const Position &shift() const { return _shift; }
-    void shift(Position &s) { _shift = s; }
+    void shift(const Position &s) { _shift = s; }
     uint16 margin() const { return _margin; }
     void margin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
