@@ -302,7 +302,6 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJWidth :    just(value); break;
     case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
-    // [TODO] Add collision attributes support
     case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); if (c) c->flags(value); break; }
     case gr_slatcolLimitblx :  {
         SlotCollision *c = seg->collisionInfo(this);
@@ -310,6 +309,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(Position(value, r.bl.y), r.tr));
+            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimitbly :  {
@@ -318,6 +318,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(Position(r.bl.x, value), r.tr));
+            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimittrx :  {
@@ -326,6 +327,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(r.bl, Position(value, r.tr.y)));
+            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimittry :  {
@@ -334,9 +336,17 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(r.bl, Position(r.tr.x, value)));
+            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
-    case gr_slatcolMargin : { SlotCollision *c = seg->collisionInfo(this); if (c) c->margin(value); break; }
+    case gr_slatcolMargin : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->margin(value);
+            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
     default :
         break;
     }
