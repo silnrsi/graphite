@@ -30,7 +30,7 @@ namespace graphite2
 {
 
 
-#if defined __GNUC__ || defined __clang__
+#if defined GRAPHITE2_BUILTINS && (defined __GNUC__ || defined __clang__)
 
 template<typename T>
 inline unsigned int bit_set_count(T v)

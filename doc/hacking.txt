@@ -24,6 +24,13 @@ GRAPHITE2_STATIC::
     If set removes all dllimport or dllexport declspecs on the Graphtie2 API functions and makes them 
     exportable for a clean static library build on Windows. 
 
+GRAPHITE2_BUILTINS::
+    If set this will use gcc or clang __builtin intrinsics where appropriate when compilling for 
+    some architectures (Intel with SSE4.2 or later and ARMv7a with a NEON capable FPU) this
+    will cause the compiler to emit specialised instructions where it can or fall back to library code.  
+    Currently this is only used for __builtin_popcount and should only be turned when you know the instruction 
+    will be emitted as the gcc __builtin_popcount is 2x slower on Intel than Graphite's own version.
+
 GRAPHITE2_NSEGCACHE::
     If set, the segment caching code is not compiled into the library. This can be used to save space
     if the engine is under space constraints both for code and memory. The default is that this is not
