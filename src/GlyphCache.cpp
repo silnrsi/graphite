@@ -376,7 +376,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         {
             const byte * p = m_pGlat + glocs;
             uint16 bmap = be::read<uint16>(p);
-            int num = bit_set_count(bmap);
+            int num = bit_set_count((uint32)bmap);
             if (numsubs) *numsubs += num;
             glocs += 6 + 8 * num;
             if (glocs > gloce)

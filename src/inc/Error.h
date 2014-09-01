@@ -112,6 +112,7 @@ enum errors {
     E_BADRANGE = 51,        // Bad column range structure including a glyph in more than one column
     E_BADRULENUM = 52,      // A reference to a rule is out of range (too high)
     E_BADACOLLISION = 53,   // Bad Silf table collision attribute number (too high)
+    E_BADEMPTYPASS = 54,    // Can't have empty passes (no rules) except for collision passes
 // Code errors
     E_CODEFAILURE = 60,     // Base code error. The following subcodes must align with Machine::Code::status_t in Code.h
         E_CODEALLOC = 61,       // Out of memory

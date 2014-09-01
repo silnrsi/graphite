@@ -86,6 +86,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_iMaxLoop = be::read<byte>(p);
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);
+    if (e.test(!m_numRules && !(m_flags & 7), E_BADEMPTYPASS)) return face.error(e);
     be::skip<uint16>(p);   // fsmOffset - not sure why we would want this
     const byte * const pcCode = pass_start + be::read<uint32>(p) - subtable_base,
                * const rcCode = pass_start + be::read<uint32>(p) - subtable_base,
@@ -165,13 +166,16 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
             return face.error(e);
         face.error_context(face.error_context() - 1);
     }
-    if (!readRanges(ranges, numRanges, e)) return face.error(e);
-    if (!readRules(rule_map, numEntries,  precontext, sort_keys,
+    if (m_numRules)
+    {
+        if (!readRanges(ranges, numRanges, e)) return face.error(e);
+        if (!readRules(rule_map, numEntries,  precontext, sort_keys,
                    o_constraint, rcCode, o_actions, aCode, face, e)) return false;
+    }
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.states);
 #endif
-    return readStates(start_states, states, o_rule_map, face, e);
+    return m_numRules ? readStates(start_states, states, o_rule_map, face, e) : true;
 }
 
 
@@ -330,7 +334,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
-    if ((m_flags & 7) > 0 && collisionAvoidance(&m.slotMap().segment)) return;
+    if ((m_flags & 7) > 0 && (collisionAvoidance(&m.slotMap().segment) || !m_numRules)) return;
     Slot *currHigh = s->next();
 
 #if !defined GRAPHITE2_NTRACING
