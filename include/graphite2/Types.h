@@ -64,8 +64,9 @@ enum gr_encform {
   #else
     #define GR2_API      __attribute__ ((visibility("default")))
   #endif
-  #define GR2_LOCAL       __attribute__ ((visibility("hidden")))
+  #define GR2_LOCAL      __attribute__ ((visibility("hidden")))
 #else
   #define GR2_API
   #define GR2_LOCAL
 #endif
+
