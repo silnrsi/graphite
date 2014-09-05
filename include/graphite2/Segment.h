@@ -126,7 +126,7 @@ enum gr_attrCode {
     /// User defined attribute, see subattr for user attr number
     gr_slatUserDefn,
     /// Bidi level
-    gr_slatBidiLevel = 60,
+    gr_slatBidiLevel = 56,
     /// Collision flags
     gr_slatcolFlags,
     /// Collision constraint rectangle left (bl.x)

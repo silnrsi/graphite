@@ -85,13 +85,21 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool isFinal)
 {
+    SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
     // [TODO] Add collision shift support
     Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
+    if (isFinal && (coll = seg->collisionInfo(this)))
+    {
+        const Position &collshift = coll->shift();
+        shift = shift + collshift;
+        if (coll->flags() & SlotCollision::COLL_KERN)
+            tAdvance += collshift.x;
+    }
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
     {
@@ -127,13 +135,13 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin);
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, isFinal);
         if ((!m_parent || m_advance.x >= 0.5) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, isFinal);
         if (tRes.x > res.x) res = tRes;
     }
     
@@ -152,7 +160,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     Position base;
     Rect bbox = seg->theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin);
+    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, false);
 
     switch (metrics(metric))
     {

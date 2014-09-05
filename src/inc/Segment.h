@@ -88,6 +88,11 @@ class Segment
     Segment& operator=(const Segment&);
 
 public:
+
+    enum {
+        SEG_INITCOLLISIONS = 1
+    };
+
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
@@ -109,6 +114,8 @@ public:
             Slot * endSlot, const Slot * srcSlot,
             const size_t numGlyphs);
 #endif
+    uint8 flags() const { return m_flags; }
+    void flags(uint8 f) { m_flags = f; }
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
@@ -118,7 +125,7 @@ public:
     void freeSlot(Slot *);
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
-    Position positionSlots(const Font *font, Slot *first=0, Slot *last=0);
+    Position positionSlots(const Font *font, Slot *first=0, Slot *last=0, bool isFinal = true);
     void associateChars(int offset, int num);
     void linkClusters(Slot *first, Slot *last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
@@ -174,6 +181,7 @@ private:
                     m_passBits;         // if bit set then skip pass
     int             m_defaultOriginal;  // number of whitespace chars in the string
     int8            m_dir;
+    uint8           m_flags;            // General purpose flags
 };
 
 

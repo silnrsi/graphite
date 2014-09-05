@@ -51,74 +51,139 @@ bool cmpfpair(float a, const Collider::fpair &b)
 bool Collider::mergeSlot(Segment *seg, Slot *slot)
 {
     bool isCol = true;
-    float vmin, vmax, vbase;
+    const float bx = _base->origin().x;
+    const float by = _base->origin().y;
+    const float bd = bx - by;
+    const float bs = bx + by;
+    const float sx = slot->origin().x;
+    const float sy = slot->origin().y;
+    const float sd = sx - sy;
+    const float ss = sx + sy;
+    float vmin, vmax;
+    float omin, omax, obmin, obmax;
     float cmin, cmax;
     const GlyphCache &gc = seg->getFace()->glyphs();
-    unsigned short gid = slot->gid();
+    const unsigned short gid = slot->gid();
+    const unsigned short bgid = _base->gid();
+    const uint16 m = seg->collisionInfo(_base)->margin();
     for (int i = 0; i < 4; ++i)
     {
         switch (i) {
             case 0 :
-                vbase = slot->origin().x;
-                vmin = gc.getBoundingMetric(gid, 0) + vbase;
-                vmax = gc.getBoundingMetric(gid, 2) + vbase;
-                cmin = _limit.bl.x;
-                cmax = _limit.tr.x;
+                vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
+                                gc.getBoundingMetric(gid, 5) + sd + gc.getBoundingMetric(bgid, 1) + by),
+                                gc.getBoundingMetric(gid, 4) + ss - gc.getBoundingMetric(bgid, 3) - by);
+                vmax = std::min(std::min(gc.getBoundingMetric(gid, 2) + sx,
+                                gc.getBoundingMetric(gid, 7) + sd + gc.getBoundingMetric(bgid, 3) + by),
+                                gc.getBoundingMetric(gid, 6) + ss - gc.getBoundingMetric(bgid, 1) - by);
+                obmin = gc.getBoundingMetric(bgid, 1) + bx;
+                obmax = gc.getBoundingMetric(bgid, 3) + bx;
+                omin = gc.getBoundingMetric(gid, 1) + sy;
+                omax = gc.getBoundingMetric(gid, 3) + sy;
+                cmin = _limit.bl.x + bx;
+                cmax = _limit.tr.x + bx;
                 break;
             case 1 :
-                vbase = slot->origin().y;
-                vmin = gc.getBoundingMetric(gid, 1) + vbase;
-                vmax = gc.getBoundingMetric(gid, 3) + vbase;
-                cmin = _limit.bl.y;
-                cmax = _limit.tr.y;
+                vmin = std::max(std::max(gc.getBoundingMetric(gid, 1) + sy,
+                                gc.getBoundingMetric(bgid, 0) + bx - gc.getBoundingMetric(gid, 7) - sd),
+                                gc.getBoundingMetric(gid, 4) + ss - gc.getBoundingMetric(bgid, 2) - bx);
+                vmax = std::min(std::min(gc.getBoundingMetric(gid, 3) + sy,
+                                gc.getBoundingMetric(bgid, 2) + bx - gc.getBoundingMetric(gid, 5) - sd),
+                                gc.getBoundingMetric(gid, 6) + ss - gc.getBoundingMetric(bgid, 0) - bx);
+                obmin = gc.getBoundingMetric(bgid, 0) + bx;
+                obmax = gc.getBoundingMetric(bgid, 2) + bx;
+                omin = gc.getBoundingMetric(gid, 0) + sx;
+                omax = gc.getBoundingMetric(gid, 2) + sx;
+                cmin = _limit.bl.y + by;
+                cmax = _limit.tr.y + by;
                 break;
-            case 2 :
-                vbase = slot->origin().x + slot->origin().y;
-                vmin = gc.getBoundingMetric(gid, 4) + vbase;
-                vmax = gc.getBoundingMetric(gid, 6) + vbase;
-                cmin = _limit.bl.x + _limit.bl.y;
-                cmax = _limit.tr.x + _limit.tr.y;
+            case 2 :    // s
+                vmin = std::max(std::max(gc.getBoundingMetric(gid, 4) + ss,
+                                2 * gc.getBoundingMetric(gid, 1) + 2 * sy + gc.getBoundingMetric(bgid, 5) + bd),
+                                2 * gc.getBoundingMetric(gid, 0) + 2 * sx - gc.getBoundingMetric(bgid, 7) - bd);
+                vmax = std::min(std::min(gc.getBoundingMetric(gid, 6) + ss,
+                                2 * gc.getBoundingMetric(gid, 3) + 2 * sy + gc.getBoundingMetric(bgid, 7) + bd),
+                                2 * gc.getBoundingMetric(gid, 2) + 2 * sx - gc.getBoundingMetric(bgid, 5) - bd);
+                obmin = gc.getBoundingMetric(bgid, 5) + bd;
+                obmax = gc.getBoundingMetric(bgid, 7) + bd;
+                omin = gc.getBoundingMetric(gid, 5) + sd;
+                omax = gc.getBoundingMetric(gid, 7) + sd;
+                cmin = _limit.bl.x + _limit.bl.y + bs;
+                cmax = _limit.tr.x + _limit.tr.y + bs;
                 break;
-            case 3 :
-                vbase = slot->origin().x - slot->origin().y;
-                vmin = gc.getBoundingMetric(gid, 5) + vbase;
-                vmax = gc.getBoundingMetric(gid, 7) + vbase;
-                cmin = _limit.bl.x - _limit.tr.y;
-                cmax = _limit.tr.x - _limit.bl.y;
+            case 3 :    // d
+                vmin = std::max(std::max(gc.getBoundingMetric(gid, 5) + sd,
+                                2 * gc.getBoundingMetric(gid, 0) + 2 * sx - gc.getBoundingMetric(bgid, 6) - bs),
+                                gc.getBoundingMetric(bgid, 4) + bs - 2 * gc.getBoundingMetric(gid, 3) - 2 * sy);
+                vmax = std::min(std::min(gc.getBoundingMetric(gid, 7) + sd,
+                                2 * gc.getBoundingMetric(gid, 2) + 2 * sx - gc.getBoundingMetric(bgid, 4) - bs),
+                                gc.getBoundingMetric(bgid, 6) + bs - 2 * gc.getBoundingMetric(gid, 1) - 2 * sy);
+                obmin = gc.getBoundingMetric(bgid, 4) + bs;
+                obmax = gc.getBoundingMetric(bgid, 6) + bs;
+                omin = gc.getBoundingMetric(gid, 4) + ss;
+                omax = gc.getBoundingMetric(gid, 6) + ss;
+                cmin = _limit.bl.x - _limit.tr.y + bd;
+                cmax = _limit.tr.x - _limit.bl.y + bd;
                 break;
             default :
                 continue;
         }
-        if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax))
+        if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
+            || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
         {
             isCol = false;
             continue;
         }
-        uint8 numsub = gc.numSubBounds(slot->gid());
+        uint8 numsub = gc.numSubBounds(gid);
         if (numsub > 0)
         {
             bool anyhits = false;
             for (int j = 0; j < numsub; ++j)
             {
                 switch (i) {
-                    case 0 :
-                        vmin = gc.getSubBoundingMetric(gid, j, 0) + vbase;
-                        vmax = gc.getSubBoundingMetric(gid, j, 2) + vbase;
+                    case 0 :    // x
+                        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, j, 0) + sx,
+                                        gc.getSubBoundingMetric(gid, j, 5) + sd + gc.getBoundingMetric(bgid, 1) + by),
+                                        gc.getSubBoundingMetric(gid, j, 4) + ss - gc.getBoundingMetric(bgid, 3) - by);
+                        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, j, 2) + sx,
+                                        gc.getSubBoundingMetric(gid, j, 7) + sd + gc.getBoundingMetric(bgid, 3) + by),
+                                        gc.getSubBoundingMetric(gid, j, 6) + ss - gc.getBoundingMetric(bgid, 1) - by);
+                        omin = gc.getSubBoundingMetric(gid, j, 1) + sy;
+                        omax = gc.getSubBoundingMetric(gid, j, 3) + sy;
                         break;
-                    case 1 :
-                        vmin = gc.getSubBoundingMetric(gid, j, 1) + vbase;
-                        vmax = gc.getSubBoundingMetric(gid, j, 3) + vbase;
+                    case 1 :    // y
+                        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, j, 1) + sy,
+                                        gc.getBoundingMetric(bgid, 0) + bx - gc.getSubBoundingMetric(gid, j, 7) - sd),
+                                        gc.getSubBoundingMetric(gid, j, 4) + ss - gc.getBoundingMetric(bgid, 2) - bx);
+                        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, j, 3) + sy,
+                                        gc.getBoundingMetric(bgid, 2) + bx - gc.getSubBoundingMetric(gid, j, 5) - sd),
+                                        gc.getSubBoundingMetric(gid, j, 6) + ss - gc.getBoundingMetric(bgid, 0) - bx);
+                        omin = gc.getSubBoundingMetric(gid, j, 0) + sx;
+                        omax = gc.getSubBoundingMetric(gid, j, 2) + sx;
                         break;
-                    case 2 :
-                        vmin = gc.getSubBoundingMetric(gid, j, 4) + vbase;
-                        vmax = gc.getSubBoundingMetric(gid, j, 6) + vbase;
+                    case 2 :    // s
+                        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, j, 4) + ss,
+                                        2 * gc.getSubBoundingMetric(gid, j, 1) + 2 * sy + gc.getBoundingMetric(bgid, 5) + bd),
+                                        2 * gc.getSubBoundingMetric(gid, j, 0) + 2 * sx - gc.getBoundingMetric(bgid, 7) - bd);
+                        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, j, 6) + ss,
+                                        2 * gc.getSubBoundingMetric(gid, j, 3) + 2 * sy + gc.getBoundingMetric(bgid, 7) + bd),
+                                        2 * gc.getSubBoundingMetric(gid, j, 2) + 2 * sx - gc.getBoundingMetric(bgid, 5) - bd);
+                        omin = gc.getSubBoundingMetric(gid, j, 5) + sd;
+                        omax = gc.getSubBoundingMetric(gid, j, 7) + sd;
                         break;
-                    case 3 :
-                        vmin = gc.getSubBoundingMetric(gid, j, 5) + vbase;
-                        vmax = gc.getSubBoundingMetric(gid, j, 7) + vbase;
+                    case 3 :    // d
+                        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, j, 5) + sd,
+                                        2 * gc.getSubBoundingMetric(gid, j, 0) + 2 * sx - gc.getBoundingMetric(bgid, 6) - bs),
+                                        gc.getBoundingMetric(bgid, 4) + bs - 2 * gc.getSubBoundingMetric(gid, j, 3) - 2 * sy);
+                        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, j, 7) + sd,
+                                        2 * gc.getSubBoundingMetric(gid, j, 2) + 2 * sx - gc.getBoundingMetric(bgid, 4) - bs),
+                                        gc.getBoundingMetric(bgid, 6) + bs - 2 * gc.getSubBoundingMetric(gid, j, 1) - 2 * sy);
+                        omin = gc.getSubBoundingMetric(gid, j, 4) + ss;
+                        omax = gc.getSubBoundingMetric(gid, j, 6) + ss;
                         break;
                 }
-                if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax))
+                if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
+                    || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
                     continue;
                 ivfpairs ind = std::upper_bound(_colQueues[i].begin(), _colQueues[i].end(), vmin, cmpfpair);
                 _colQueues[i].insert(ind, fpair(vmin, vmax));
@@ -158,8 +223,8 @@ void Collider::testloc(float start, ivfpairs ind, ivfpairs begin, ivfpairs end,
     {
         if (kind->second < start)
             continue;
-        float left = (kind->first < start + margin) ? start + margin : kind->first;
-        float right = (kind->second > start + tlen + margin) ? start + tlen + margin : kind->second;
+        float left = (kind->first < start) ? start : kind->first;
+        float right = (kind->second > start + tlen) ? start + tlen : kind->second;
         tover += (right - left) / tlen;
         oover += (right - left) / (kind->second - kind->first);
     }
@@ -189,27 +254,27 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
         switch (i) {
             case 0 :
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
-                torig = _base->origin().x + currshift.x;
-                cmin = _limit.bl.x;
-                cmax = _limit.tr.x;
+                torig = _base->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
+                cmin = _limit.bl.x + torig;
+                cmax = _limit.tr.x + torig;
                 break;
             case 1 :
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
-                torig = _base->origin().y + currshift.y;
-                cmin = _limit.bl.y;
-                cmax = _limit.tr.y;
+                torig = _base->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
+                cmin = _limit.bl.y + torig;
+                cmax = _limit.tr.y + torig;
                 break;
             case 2 :
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
-                torig = _base->origin().x + _base->origin().y + currshift.x + currshift.y;
-                cmin = _limit.bl.x + _limit.bl.y;
-                cmax = _limit.tr.x + _limit.tr.y;
+                torig = _base->origin().x + _base->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
+                cmin = std::max(_limit.bl.x, _limit.bl.y) + torig;
+                cmax = std::min(_limit.tr.x, _limit.tr.y) + torig;
                 break;
             case 3 :
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
-                torig = _base->origin().x - _base->origin().y + currshift.x - currshift.y;
-                cmin = _limit.bl.x - _limit.bl.y;
-                cmax = _limit.tr.x - _limit.tr.y;
+                torig = _base->origin().x - _base->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
+                cmin = std::max(_limit.bl.x, -_limit.tr.y) + torig;
+                cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
                 break;
         }
         // O(N^2) :(
@@ -222,15 +287,15 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
             if (p > cmin && p < cmax)
                 testloc(p, jind, _colQueues[i].begin(), jend, torig, tlen, margin, bestc, bestd);
         }
-        if (bestc < totalc || (bestc == totalc && fabs(bestd) * (i > 1 ? ISQRT2 : 1.) < totald))
+        if (bestc < totalc || (bestc == totalc && bestc < std::numeric_limits<float>::max() / 10 &&  fabs(bestd) * (i > 1 ? ISQRT2 : 1.) < totald))
         {
             totalc = bestc;
             totald = fabs(bestd) * (i > 1 ? ISQRT2 : 1.);
             switch (i) {
-                case 0 : totalp = Position(torig + bestd, 0.); break;
-                case 1 : totalp = Position(0., torig + bestd); break;
-                case 2 : totalp = Position(_base->origin().x + bestd, _base->origin().y + bestd); break;
-                case 3 : totalp = Position(_base->origin().x + bestd, _base->origin().y - bestd); break;
+                case 0 : totalp = Position(bestd, 0.); break;
+                case 1 : totalp = Position(0., bestd); break;
+                case 2 : totalp = Position(bestd, bestd); break;
+                case 3 : totalp = Position(bestd, -bestd); break;
             }
         }
     }

@@ -103,7 +103,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     if ( e.test(m_numTransition > m_numStates, E_BADNUMTRANS)
             || e.test(m_numSuccess > m_numStates, E_BADNUMSUCCESS)
             || e.test(m_numSuccess + m_numTransition < m_numStates, E_BADNUMSTATES)
-            || e.test(numRanges == 0, E_NORANGES))
+            || e.test(m_numRules && numRanges == 0, E_NORANGES))
         return face.error(e);
 
     m_successStart = m_numStates - m_numSuccess;
@@ -144,12 +144,12 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     const byte * const states = p;
     be::skip<int16>(p, m_numTransition*m_numColumns);
     be::skip<byte>(p);          // skip reserved byte
-    if (e.test(p != pcCode, E_BADPASSCCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)) return face.error(e);
+    if (e.test(p != pcCode, E_BADPASSCCODEPTR)) return face.error(e);
     be::skip<byte>(p, pass_constraint_len);
-    if (e.test(p != rcCode, E_BADRULECCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)
+    if (e.test(p != rcCode, E_BADRULECCODEPTR)
         || e.test(size_t(rcCode - pcCode) != pass_constraint_len, E_BADCCODELEN)) return face.error(e);
     be::skip<byte>(p, be::peek<uint16>(o_constraint + m_numRules));
-    if (e.test(p != aCode, E_BADACTIONCODEPTR) || e.test(p >= pass_end, E_BADPASSLENGTH)) return face.error(e);
+    if (e.test(p != aCode, E_BADACTIONCODEPTR)) return face.error(e);
     be::skip<byte>(p, be::peek<uint16>(o_actions + m_numRules));
 
     // We should be at the end or within the pass
@@ -334,7 +334,16 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
-    if ((m_flags & 7) > 0 && (collisionAvoidance(&m.slotMap().segment) || !m_numRules)) return;
+    if ((m_flags & 7))
+    {
+        if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
+        {
+            m.slotMap().segment.positionSlots(0, 0, 0, false);
+            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
+        }
+        if (collisionAvoidance(&m.slotMap().segment)) return;
+    }
+    else if (!m_numRules) return;
     Slot *currHigh = s->next();
 
 #if !defined GRAPHITE2_NTRACING
@@ -658,7 +667,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     SlotCollision *cslot = seg->collisionInfo(slot);
     coll->initSlot(slot, cslot->limit());
     bool collides = false;
-    for (s = start; s != seg->last() && !(seg->collisionInfo(s)->flags() & SlotCollision::COLL_END); s = s->next())
+    for (s = start; s; s = s->next())
     {
         const SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
@@ -666,10 +675,11 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
             passed_slot = true;
             continue;
         }
-        else if ((c->flags() & SlotCollision::COLL_IGNORE) || 
-                 ((c->flags() & SlotCollision::COLL_TEST) && isfirst && passed_slot))
+        else if ((c->flags() & SlotCollision::COLL_IGNORE) || (c->flags() & SlotCollision::COLL_TEST))
             continue;
         collides |= coll->mergeSlot(seg, s);
+        if (s != start && (c->flags() & SlotCollision::COLL_END))
+            break;
     }
     bool isCol;
     if (collides)

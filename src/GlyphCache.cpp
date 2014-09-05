@@ -281,7 +281,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
                                    - sizeof(uint16)*(flags & 0x2 ? _num_attrs : 0))
                                        / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
 
-        if (version != 0x00010000
+        if (version >= 0x00020000
             || _num_attrs == 0 || _num_attrs > 0x3000  // is this hard limit appropriate?
             || _num_glyphs_graphics > _num_glyphs_attributes)
         {
@@ -291,6 +291,11 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 
         p = m_pGlat;
         version = be::read<uint32>(p);
+        if (version >= 0x00040000)       // reject Glat tables that are too new
+        {
+            _head = Face::Table();
+            return;
+        }
         _has_boxes = (version == 0x00030000);
     }
 }
@@ -440,7 +445,7 @@ GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphF
 
     const byte * p = m_pGlat + glocs;
     uint16 bmap = be::read<uint16>(p);
-    int num = bit_set_count(bmap);
+    int num = bit_set_count((uint32)bmap);
 
     Rect bbox = glyph.theBBox();
     Rect diamax(Position(bbox.bl.x + bbox.bl.y, bbox.bl.x - bbox.tr.y),
