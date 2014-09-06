@@ -30,15 +30,146 @@ of the License or (at your option) any later version.
 #include "inc/Collider.h"
 #include "inc/Segment.h"
 
-#define ISQRT2 0.707106781
+#define ISQRT2 0.707106781f
 
 using namespace graphite2;
+
+void BoundedGapList::reset(float min, float max)
+{
+    _min = min;
+    _max = max;
+    _list.assign(1, fpair(_min, _max));
+    _isLenSorted = false;
+}
+
+static bool _byfirst(const BoundedGapList::fpair &a, const BoundedGapList::fpair &b)
+{
+    return (a.first < b.first);
+}
+
+static bool _bylen(const BoundedGapList::fpair &a, const BoundedGapList::fpair &b)
+{
+    return (a.second - a.first < b.second - b.first ||
+            (a.second - a.first == b.second - b.first && a.first < b.first));
+}
+
+void BoundedGapList::add(float min, float max)
+{
+    ivfpairs kind, kend;
+
+    if (max < _min || min > _max) return;
+
+    if (_isLenSorted)
+    { 
+        std::sort(_list.begin(), _list.end(), _byfirst);
+        _isLenSorted = false;
+    }
+
+    // need code here and above to keep the n best pairs rather than all of them.
+    for (kind = _list.begin(), kend = _list.end(); kind != kend; ++kind)
+    {    
+        if (kind->second < min) continue;
+        else if (kind->first > max) 
+        {
+            _list.insert(kind, fpair(max, kind->first));
+            if (_isLenSorted) continue;
+            else break;
+        }
+        else if (kind->first > min && kind->second < max)
+        {
+            _list.erase(kind);
+            --kind;
+        }
+        if (kind->first < min && kind->second > max) // need to split and add a range
+        {
+            _list.insert(kind, fpair(kind->first, min));
+            kind->first = max;
+            if (!_isLenSorted) break;
+        }
+        else if (kind->second < min)
+            kind->second = min;
+        else
+            kind->first = max;
+    }
+}
+
+static bool _cmplen(const BoundedGapList::fpair &t, const BoundedGapList::fpair &a)
+{
+    return (t.second - t.first < a.second - a.first);
+}
+
+float BoundedGapList::bestfit(float min, float max, bool &isGapFit)
+{
+    ivfpairs kstart, kend = _list.end();
+    float res = std::numeric_limits<float>::max();
+
+    if (!_isLenSorted)
+    {
+        std::sort(_list.begin(), _list.end(), _bylen);
+        _isLenSorted = true;
+    }
+    
+    kstart = std::upper_bound(_list.begin(), _list.end(), fpair(min, max), _cmplen);
+    if (kstart != kend)
+    {
+        isGapFit = true;
+        for ( ; kstart != kend; ++kstart)
+        {
+            float ires = kstart->first - min;
+            if (ires < 0.f && kstart->second > max)  // no collision, return no movement
+                return 0.f;
+            else if (ires < 0.f)
+                ires = kstart->second - max;
+            if (fabs(res) > fabs(ires))
+                res = ires;
+        }
+    }
+    else
+    {
+        ivfpairs kind = --kstart;
+        isGapFit = false;
+        kend = _list.begin();
+        --kend;
+        for ( ; kind != kend; --kind)
+        {
+            if (kind->second - kind->first != kstart->second - kstart->first)
+                break;
+            //float ires = 0.5 * (max - min) - 0.5 * (kind->second - kind->first) + min;
+            float ires = 0.5 * (max - min - kind->second + kind->first);
+            if (fabs(ires) < fabs(res))
+                res = ires;
+        }
+    }
+    return res;
+}
+
 
 void Collider::initSlot(Slot *aSlot, const Rect &limit)
 {
     int i;
+    float max, min;
     for (i = 0; i < 4; ++i)
-        _colQueues[i].clear();
+    {
+        switch (i) {
+            case 0 :
+                min = limit.bl.x;
+                max = limit.tr.x;
+                break;
+            case 1 :
+                min = limit.bl.y;
+                max = limit.tr.y;
+                break;
+            case 2 :
+                min = 2.f * std::max(limit.bl.x, -limit.tr.y);
+                max = 2.f * std::min(limit.tr.x, -limit.bl.y);
+                break;
+            case 3 :
+                min = 2.f * std::max(limit.bl.x, limit.bl.y);
+                max = 2.f * std::min(limit.tr.x, limit.tr.y);
+                break;
+        } 
+        _ranges[i].reset(min, max);
+    }
     _base = aSlot;
     _limit = limit;
 }
@@ -185,112 +316,66 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
                     || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
                     continue;
-                ivfpairs ind = std::upper_bound(_colQueues[i].begin(), _colQueues[i].end(), vmin, cmpfpair);
-                _colQueues[i].insert(ind, fpair(vmin, vmax));
+                _ranges[i].add(vmin, vmax);
                 anyhits = true;
             }
             if (!anyhits)
                 isCol = false;
         }
         else
-        {
-            // need code here and above to keep the n best pairs rather than all of them.
-            ivfpairs ind = std::upper_bound(_colQueues[i].begin(), _colQueues[i].end(), vmin, cmpfpair);
-            _colQueues[i].insert(ind, fpair(vmin, vmax));
-        }
+            _ranges[i].add(vmin, vmax);
     }
     return isCol;
 }
 
-float Collider::cost(GR_MAYBE_UNUSED float distance, float oover, float tover)
-{
-    if (tover < .0001) return 0.;
-    return tover + oover;
-}
-
-void Collider::testloc(float start, ivfpairs ind, ivfpairs begin, ivfpairs end,
-                        float torig, float tlen, uint16 margin, float &bestc, float &bestd)
-{
-    float oover = 0.;
-    float tover = 0.;
-    ivfpairs kind, kend;
-    for (kend = ind; kend != end; ++kend)
-    {
-        if (kend->first > start + tlen)
-            break;
-    }
-    for (kind = begin; kind != kend; ++kind)
-    {
-        if (kind->second < start)
-            continue;
-        float left = (kind->first < start) ? start : kind->first;
-        float right = (kind->second > start + tlen) ? start + tlen : kind->second;
-        tover += (right - left) / tlen;
-        oover += (right - left) / (kind->second - kind->first);
-    }
-    float c = cost(fabs(torig - start), oover, tover);
-    if (c < bestc || (c == bestc && fabs(start - torig) < fabs(bestd)))
-    {
-        bestc = c;
-        bestd = start - torig;
-    }
-}
 
 Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     int gid = _base->gid();
-    int margin = seg->collisionInfo(_base)->margin();
+    float margin;
     float tlen, torig;
-    ivfpairs jind, jend;
-    float totalc = std::numeric_limits<float>::max();
-    float totald = totalc;
+    float totald = std::numeric_limits<float>::max();
     Position totalp;
-    float cmax, cmin;
+    // float cmax, cmin;
+    bool isGoodFit, tIsGoodFit = false;
     for (int i = 0; i < 4; ++i)
     {
         float bestc = std::numeric_limits<float>::max();
         float bestd = bestc;
+        margin = seg->collisionInfo(_base)->margin() * (i > 1 ? ISQRT2 : 1.f);
         switch (i) {
             case 0 :
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
                 torig = _base->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
-                cmin = _limit.bl.x + torig;
-                cmax = _limit.tr.x + torig;
+                // cmin = _limit.bl.x + torig;
+                // cmax = _limit.tr.x + torig;
                 break;
             case 1 :
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
                 torig = _base->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
-                cmin = _limit.bl.y + torig;
-                cmax = _limit.tr.y + torig;
+                // cmin = _limit.bl.y + torig;
+                // cmax = _limit.tr.y + torig;
                 break;
             case 2 :
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
                 torig = _base->origin().x + _base->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
-                cmin = std::max(_limit.bl.x, _limit.bl.y) + torig;
-                cmax = std::min(_limit.tr.x, _limit.tr.y) + torig;
+                // cmin = std::max(_limit.bl.x, _limit.bl.y) + torig;
+                // cmax = std::min(_limit.tr.x, _limit.tr.y) + torig;
                 break;
             case 3 :
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
                 torig = _base->origin().x - _base->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
-                cmin = std::max(_limit.bl.x, -_limit.tr.y) + torig;
-                cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
+                // cmin = std::max(_limit.bl.x, -_limit.tr.y) + torig;
+                // cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
                 break;
         }
-        // O(N^2) :(
-        for (jind = _colQueues[i].begin(), jend = _colQueues[i].end(); jind != jend; ++jind)
+        bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
+        bestd += bestd > 0.f ? -margin : margin;
+        if ((isGoodFit && !tIsGoodFit) || fabs(bestd) * (i > 1 ? ISQRT2 : 1.f) < totald)
         {
-            float p = jind->first - tlen - margin;
-            if (p > cmin && p < cmax)
-                testloc(p, jind, _colQueues[i].begin(), jend, torig, tlen, margin, bestc, bestd);
-            p = jind->second + margin;
-            if (p > cmin && p < cmax)
-                testloc(p, jind, _colQueues[i].begin(), jend, torig, tlen, margin, bestc, bestd);
-        }
-        if (bestc < totalc || (bestc == totalc && bestc < std::numeric_limits<float>::max() / 10 &&  fabs(bestd) * (i > 1 ? ISQRT2 : 1.) < totald))
-        {
-            totalc = bestc;
             totald = fabs(bestd) * (i > 1 ? ISQRT2 : 1.);
+            tIsGoodFit = isGoodFit;
             switch (i) {
                 case 0 : totalp = Position(bestd, 0.); break;
                 case 1 : totalp = Position(0., bestd); break;
@@ -299,7 +384,7 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
             }
         }
     }
-    isCol = (totalc > 0.);
+    isCol = !tIsGoodFit;
     return totalp;
 }
 

@@ -35,6 +35,24 @@ namespace graphite2 {
 
 class Segment;
 
+class BoundedGapList
+{
+public:
+    typedef std::pair<float, float> fpair;
+    typedef Vector<fpair> vfpairs;
+    typedef vfpairs::iterator ivfpairs;
+
+    void reset(float min, float max);
+    void add(float min, float max);
+    float bestfit(float min, float max, bool &isGapFit);
+
+private:
+    float _min;
+    float _max;
+    vfpairs _list;
+    bool _isLenSorted;
+};
+
 class Collider
 {
 public:
@@ -47,11 +65,7 @@ public:
     Position resolve(Segment *seg, bool &isCol, const Position &currshift);
 
 private:
-    float cost(float distance, float oover, float tover);
-    void testloc(float start, ivfpairs ind, ivfpairs begin, ivfpairs end,
-                float torig, float tlen, uint16 margin, float &bestc, float &bestd);
-
-    vfpairs _colQueues[4];
+    BoundedGapList _ranges[4];
     Slot *  _base;
     Rect    _limit;
 };
