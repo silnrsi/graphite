@@ -47,7 +47,7 @@ cd build
 You need to specify the CMAKE_BUILD_TYPE as some Windows generators require it.
 +
 ----
-cmake -DCMAKE_BUILD_TYPE:STRING=Release
+cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
 ----
 +
 CMake will automatically detect your build system and generate a project for 
@@ -60,13 +60,13 @@ the `-G <generator name>` option to the initial cmake configuration call, for
 example for Visual Studio 8:
 +
 ----
-cmake -G "Visual Studio 8 2005" -DCMAKE_BUILD_TYPE:STRING=Release
+cmake -G "Visual Studio 8 2005" -DCMAKE_BUILD_TYPE:STRING=Release ..
 ----
 +
 or for MinGW
 +
 ----
-cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release ..
 ----
 +
 TIP: You can get a list of generators CMakes supports with `cmake --help`.
