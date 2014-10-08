@@ -392,10 +392,12 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
 {
     uint16 gid = slot->gid();
     uint16 aCol = seg->silf()->aCollision();
-    _limit = Rect(Position(seg->glyphAttr(gid, aCol+1) + slot->origin().x,
+/*    _limit = Rect(Position(seg->glyphAttr(gid, aCol+1) + slot->origin().x,
                            seg->glyphAttr(gid, aCol+2) + slot->origin().y),
                   Position(seg->glyphAttr(gid, aCol+3) + slot->origin().x,
-                           seg->glyphAttr(gid, aCol+4) + slot->origin().y));
+                           seg->glyphAttr(gid, aCol+4) + slot->origin().y)); */
+    _limit = Rect(Position(seg->glyphAttr(gid, aCol+1), seg->glyphAttr(gid, aCol+2)),
+                  Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
     _flags = seg->glyphAttr(gid, aCol);
 }
