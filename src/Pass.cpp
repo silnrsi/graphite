@@ -639,7 +639,7 @@ bool Pass::collisionAvoidance(Segment *seg) const
     bool isfirst = true;
     uint8 numPasses = m_flags & 7;
     bool hasCollisions = false;
-    Slot *start;
+    Slot *start = seg->first();
     for (int i = 0; i < numPasses; ++i)
     {
         hasCollisions = false;
