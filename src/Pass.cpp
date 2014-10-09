@@ -646,9 +646,11 @@ bool Pass::collisionAvoidance(Segment *seg) const
         for (Slot *s = seg->first(); s != seg->last(); s = s->next())
         {
             const SlotCollision *c = seg->collisionInfo(s);
+            if (c->flags() & SlotCollision::COLL_END)
+                start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
-            if (c->flags() & SlotCollision::COLL_TEST &&
+            if (start && c->flags() & SlotCollision::COLL_TEST &&
                     (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
                 hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst);
         }
@@ -660,10 +662,9 @@ bool Pass::collisionAvoidance(Segment *seg) const
     return true;
 }
 
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, bool isfirst) const
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst) const
 {
     Slot *s;
-    bool passed_slot = false;
     SlotCollision *cslot = seg->collisionInfo(slot);
     coll->initSlot(slot, cslot->limit());
     bool collides = false;
@@ -671,10 +672,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     {
         const SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
-        {
-            passed_slot = true;
             continue;
-        }
         else if ((c->flags() & SlotCollision::COLL_IGNORE) || (c->flags() & SlotCollision::COLL_TEST))
             continue;
         collides |= coll->mergeSlot(seg, s);
