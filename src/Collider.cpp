@@ -80,6 +80,7 @@ void BoundedGapList::add(float min, float max)
             _list.erase(kind);
             kend = _list.end();
             --kind;
+            continue;
         }
         if (kind->first < min && kind->second > max) // need to split and add a range
         {
