@@ -71,20 +71,23 @@ void BoundedGapList::add(float min, float max)
         if (kind->second < min) continue;
         else if (kind->first > max) 
         {
-            _list.insert(kind, fpair(max, kind->first));
-            if (_isLenSorted) continue;
-            else break;
+            kind = _list.insert(kind, fpair(max, kind->first));
+            //kend = _list.end();
+            break;
         }
         else if (kind->first > min && kind->second < max)
         {
             _list.erase(kind);
+            kend = _list.end();
             --kind;
         }
         if (kind->first < min && kind->second > max) // need to split and add a range
         {
-            _list.insert(kind, fpair(kind->first, min));
+            kind = _list.insert(kind, fpair(kind->first, min));
+            //kend = _list.end();
+            ++kind;
             kind->first = max;
-            if (!_isLenSorted) break;
+            break;
         }
         else if (kind->second < min)
             kind->second = min;
