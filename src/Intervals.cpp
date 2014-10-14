@@ -128,7 +128,7 @@ void IntervalSet::remove(IntervalSet &is)
 
 float IntervalSet::findClosestCoverage(float val)
 {
-    float best = std::numeric_limits<float>::min();
+    float best = -std::numeric_limits<float>::max();
     // Better to use a binary search here
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {

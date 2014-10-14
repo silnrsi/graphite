@@ -67,6 +67,11 @@ int doTest(const char *pref, gr2::IntervalSet &is, fvector &fv)
     return pass ? 0 : 1;
 }
 
+void printFloat(const char *pref, float val)
+{
+    printf ("%s: [ %.1f ]\n", pref, val);
+}
+
 int doFloatTest(const char *pref, float test, float base)
 {
     bool pass = (test == base);
@@ -169,6 +174,13 @@ int main(int /*argc*/, char ** /*argv*/)
     base.clear();
     base.push_back(fpair(10., 100.));
     res += doTest("Slow add 10-100", test, base);
+
+    test.clear();
+    test.add(fpair(-447.149, 121.39));
+    testl = test.locate(fpair(-487.753, -106.255));
+    printRanges("locate(-487,-186) in (-447,121)", testl);
+    fres = testl.findClosestCoverage(0.);
+    printFloat("bestfit(0)", fres);
 
     return res;
 }
