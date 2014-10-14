@@ -9,6 +9,7 @@ set(S ${graphite2_core_SOURCE_DIR})
 
 add_library(graphite2-base STATIC
     ${S}/FeatureMap.cpp
+    ${S}/Intervals.cpp
     ${S}/NameTable.cpp
     ${S}/Sparse.cpp
     ${S}/TtfUtil.cpp
