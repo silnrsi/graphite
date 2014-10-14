@@ -37,18 +37,19 @@ typedef std::pair<float, float> fpair;
 typedef std::vector<fpair> fvector;
 typedef fvector::iterator ifvector;
 
+static int testCount = 0;
+
 void printRanges(const char *pref, gr2::IntervalSet &is)
 {
     printf ("%s: [ ", pref);
     for (gr2::IntervalSet::ivtpair s = is.begin(), end = is.end(); s != end; ++s)
         printf("(%.1f, %.1f) ", s->first, s->second);
-    printf ("]");
+    printf ("]\n");
 }
 
 int doTest(const char *pref, gr2::IntervalSet &is, fvector &fv)
 {
     bool pass = true;
-    printRanges(pref, is);
     gr2::IntervalSet::ivtpair s = is.begin(), e = is.end();
     ifvector bs = fv.begin(), be = fv.end();
     for ( ; s != e && bs != be; ++s, ++bs)
@@ -61,22 +62,23 @@ int doTest(const char *pref, gr2::IntervalSet &is, fvector &fv)
     }
     if (bs != be || s != e)
         pass = false;
-    if (pass)
-    {
-        printf ("\t- pass\n");
-        return 0;
-    }
-    else
-    {
-        printf ("\t- *** FAIL ***\n");
-        return 1;
-    }
+    printf("%d %s) ", ++testCount, pass ? "pass" : "FAIL");
+    printRanges(pref, is);
+    return pass ? 0 : 1;
+}
+
+int doFloatTest(const char *pref, float test, float base)
+{
+    bool pass = (test == base);
+    printf ("%d %s) %s: [ %.1f == %.1f ]\n", ++testCount, (pass ? "pass" : "FAIL"), pref, test, base);
+    return (pass ? 0 : 1);
 }
 
 int main(int /*argc*/, char ** /*argv*/)
 {
     int res = 0;
     fvector base;
+    float fres;
     gr2::IntervalSet test, test2, testl;
 
     test.clear();
@@ -147,6 +149,10 @@ int main(int /*argc*/, char ** /*argv*/)
     base.push_back(fpair(20., 25.));
     base.push_back(fpair(40., 45.));
     res += doTest("locate(30,35)", testl, base);
+    fres = testl.findClosestCoverage(0.);
+    res += doFloatTest("Cover(0)", fres, -15.);
+    fres = testl.findClosestCoverage(23.);
+    res += doFloatTest("Cover(23)", fres, 23.);
 
     test.clear();
     test.remove(fpair(10., 20.));

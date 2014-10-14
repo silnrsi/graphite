@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "inc/Intervals.h"
+#include <limits>
 
 using namespace graphite2;
 
@@ -125,4 +126,22 @@ void IntervalSet::remove(IntervalSet &is)
     }
 }
 
-
+float IntervalSet::findClosestCoverage(float val)
+{
+    float best = std::numeric_limits<float>::min();
+    // Better to use a binary search here
+    for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
+    {
+        if (s->second < val)
+            best = s->second - val;
+        else if (s->first > val)
+        {
+            if (val - s->first > best)
+                best = s->first - val;
+            return best;
+        }
+        else
+            return val;
+    }
+    return best;
+}

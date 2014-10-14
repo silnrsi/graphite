@@ -41,6 +41,7 @@ public:
     void add(tpair interval);
     void remove(tpair interval);
     void remove(IntervalSet &is);
+    float findClosestCoverage(float val);
 
 // private:
     ivtpair begin() { return _v.begin(); }
