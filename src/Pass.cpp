@@ -341,7 +341,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
             m.slotMap().segment.positionSlots(0, 0, 0, false);
             m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
-        if (collisionAvoidance(&m.slotMap().segment)) return;
+        if (collisionAvoidance(&m.slotMap().segment, fsm.dbgout)) return;
     }
     else if (!m_numRules) return;
     Slot *currHigh = s->next();
@@ -633,13 +633,17 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
     }
 }
 
-bool Pass::collisionAvoidance(Segment *seg) const
+bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
 {
     Collider coll;
     bool isfirst = true;
     uint8 numPasses = m_flags & 7;
     bool hasCollisions = false;
     Slot *start = seg->first();
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)  *dbgout << "collisions" << json::array;
+    json::closer collisions_array_closer(dbgout);
+#endif
     for (int i = 0; i < numPasses; ++i)
     {
         hasCollisions = false;
@@ -652,7 +656,7 @@ bool Pass::collisionAvoidance(Segment *seg) const
                 start = s;
             if (start && c->flags() & SlotCollision::COLL_TEST &&
                     (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
-                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst);
+                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst, dbgout);
         }
         if (!hasCollisions)
             return false;
@@ -662,7 +666,7 @@ bool Pass::collisionAvoidance(Segment *seg) const
     return true;
 }
 
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst) const
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
@@ -682,7 +686,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     bool isCol;
     if (collides)
     {
-        Position shift = coll->resolve(seg, isCol, cslot->shift());
+        Position shift = coll->resolve(seg, isCol, cslot->shift(), dbgout);
         cslot->shift(shift);
     }
     else

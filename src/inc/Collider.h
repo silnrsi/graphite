@@ -30,10 +30,13 @@ of the License or (at your option) any later version.
 #include "inc/List.h"
 #include "inc/Slot.h"
 #include "inc/Position.h"
+#include "inc/Intervals.h"
 
 namespace graphite2 {
 
 class Segment;
+class json;
+class Slot;
 
 class BoundedGapList
 {
@@ -62,10 +65,10 @@ public:
 
     void initSlot(Slot *aSlot, const Rect &constraint);
     bool mergeSlot(Segment *seg, Slot *slot);
-    Position resolve(Segment *seg, bool &isCol, const Position &currshift);
+    Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
 private:
-    BoundedGapList _ranges[4];
+    IntervalSet _ranges[4];
     Slot *  _base;
     Rect    _limit;
 };

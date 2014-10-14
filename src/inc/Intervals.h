@@ -36,12 +36,16 @@ public:
     typedef Vector<tpair> vtpair;
     typedef vtpair::iterator ivtpair;
 
+    IntervalSet locate(float min, float max) { return locate(tpair(min, max)); }
     IntervalSet locate(tpair interval);
     void clear() { _v.clear(); }
+    void add(float min, float max) { add(tpair(min, max)); }
     void add(tpair interval);
+    void remove(float min, float max) { remove(tpair(min, max)); }
     void remove(tpair interval);
     void remove(IntervalSet &is);
     float findClosestCoverage(float val);
+    size_t size() const { return _v.size(); }
 
 // private:
     ivtpair begin() { return _v.begin(); }

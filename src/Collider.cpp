@@ -27,8 +27,10 @@ of the License or (at your option) any later version.
 #include <algorithm>
 #include <limits>
 #include <math.h>
+#include "inc/debug.h"
 #include "inc/Collider.h"
 #include "inc/Segment.h"
+#include "inc/Slot.h"
 
 #define ISQRT2 0.707106781f
 
@@ -171,8 +173,9 @@ void Collider::initSlot(Slot *aSlot, const Rect &limit)
                 min = 2.f * std::max(limit.bl.x, limit.bl.y);
                 max = 2.f * std::min(limit.tr.x, limit.tr.y);
                 break;
-        } 
-        _ranges[i].reset(min, max);
+        }
+        _ranges[i].clear();
+        _ranges[i].add(min, max);
     }
     _base = aSlot;
     _limit = limit;
@@ -320,20 +323,20 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
                     || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
                     continue;
-                _ranges[i].add(vmin, vmax);
+                _ranges[i].remove(vmin, vmax);
                 anyhits = true;
             }
             if (!anyhits)
                 isCol = false;
         }
         else
-            _ranges[i].add(vmin, vmax);
+            _ranges[i].remove(vmin, vmax);
     }
     return isCol;
 }
 
 
-Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
+Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     int gid = _base->gid();
@@ -343,6 +346,12 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
     Position totalp;
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
+    IntervalSet aFit;
+#if !defined GRAPHITE2_NTRACING
+    *dbgout << json::object
+                << "slot" << objectid(dslot(seg, _base)) 
+                << "ranges" << json::array;
+#endif
     for (int i = 0; i < 4; ++i)
     {
         float bestc = std::numeric_limits<float>::max();
@@ -374,8 +383,30 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
                 // cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
                 break;
         }
-        bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
-        bestd += bestd > 0.f ? -margin : margin;
+        isGoodFit = true;
+        aFit = _ranges[i].locate(torig - margin, torig + tlen + margin);
+        if (aFit.size() == 0)
+        {
+            aFit = _ranges[i].locate(torig, torig + tlen);
+            isGoodFit = false;
+        }
+        bestd = aFit.findClosestCoverage(0.);
+#if !defined GRAPHITE2_NTRACING
+        *dbgout << json::object
+                    << "testorigin" << torig
+                    << "testlen" << tlen
+                    << "bestfit" << bestd
+                    << "ranges" << json::flat << json::array;
+        for (IntervalSet::ivtpair s = _ranges[i].begin(), e = _ranges[i].end(); s != e; ++s)
+            *dbgout << Position(s->first, s->second);
+        *dbgout << json::close
+                    << "fits" << json::flat << json::array;
+        for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
+            *dbgout << Position(s->first, s->second);
+        *dbgout << json::close << json::close;
+#endif
+        //bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
+        // bestd += bestd > 0.f ? -margin : margin;
         if ((isGoodFit && !tIsGoodFit) || fabs(bestd) * (i > 1 ? ISQRT2 : 1.f) < totald)
         {
             totald = fabs(bestd) * (i > 1 ? ISQRT2 : 1.);
@@ -388,6 +419,9 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift)
             }
         }
     }
+#if !defined GRAPHITE2_NTRACING
+    *dbgout << json::close << json::close;
+#endif
     isCol = !tIsGoodFit;
     return totalp;
 }
