@@ -98,7 +98,7 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 class GlyphBox
 {
 public:
-    GlyphBox(uint8 numsubs, ushort bitmap, Rect *slanted) : _num(numsubs), _bitmap(bitmap), _slant(*slanted) {}; 
+    GlyphBox(uint8 numsubs, unsigned short bitmap, Rect *slanted) : _num(numsubs), _bitmap(bitmap), _slant(*slanted) {}; 
 
     void addSubBox(int subindex, int boundary, Rect *val) { _subs[subindex * 2 + boundary] = *val; }
     Rect &subVal(int subindex, int boundary) { return _subs[subindex * 2 + boundary]; }
@@ -107,7 +107,7 @@ public:
 
 private:
     uint8   _num;
-    ushort  _bitmap;
+    unsigned short  _bitmap;
     Rect    _slant;
     Rect    _subs[0];
 };

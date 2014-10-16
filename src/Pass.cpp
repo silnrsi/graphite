@@ -637,9 +637,9 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
 {
     Collider coll;
     bool isfirst = true;
-    uint8 numPasses = m_flags & 7;
+    uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
     bool hasCollisions = false;
-    Slot *start = seg->first();
+    Slot *start = seg->first();      // turn on collision fixing for the first slot
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)  *dbgout << "collisions" << json::array;
     json::closer collisions_array_closer(dbgout);
@@ -666,6 +666,8 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     return true;
 }
 
+// Fix collisions for the given slot.
+// Return true if everything was fixed, false if there are still collisions remaining.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
     Slot *s;
@@ -676,7 +678,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     {
         const SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
-            continue;
+            continue;	// don't test a slot against itself
         else if ((c->flags() & SlotCollision::COLL_IGNORE) || (c->flags() & SlotCollision::COLL_TEST))
             continue;
         collides |= coll->mergeSlot(seg, s);
@@ -691,6 +693,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     }
     else
         isCol = false;
+        
     if (isCol)
     { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else

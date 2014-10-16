@@ -29,6 +29,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+
 IntervalSet IntervalSet::locate(IntervalSet::tpair interval)
 {
     IntervalSet res;
@@ -40,6 +41,9 @@ IntervalSet IntervalSet::locate(IntervalSet::tpair interval)
     return res;
 }
 
+// Add this interval to the list of possible range(s), merging elements of the list as necessary.
+// Eg, if the ranges are [{100..200), (500..700)], adding (150..300) will result in
+// [{100..300), (500..700)].
 void IntervalSet::add(IntervalSet::tpair interval)
 {
     IntervalSet::ivtpair slast = _v.end();
@@ -66,6 +70,10 @@ void IntervalSet::add(IntervalSet::tpair interval)
         append(interval);    // The added range is off to the far right
 }
 
+// Remove the range represented by the interval from the possible range(s), splitting elements of
+// the list as necessary.
+// Eg, if the ranges are [{100..200), (500..700)], removing (550..600) will result in
+// [{100..300), (500..550), (600..700)].
 void IntervalSet::remove(IntervalSet::tpair interval)
 {
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
@@ -126,6 +134,7 @@ void IntervalSet::remove(IntervalSet &is)
     }
 }
 
+// Find a legal interval corresponding to val. Return how much off val is?????????????
 float IntervalSet::findClosestCoverage(float val)
 {
     float best = -std::numeric_limits<float>::max();

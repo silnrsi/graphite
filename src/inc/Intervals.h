@@ -27,6 +27,11 @@ of the License or (at your option) any later version.
 #include <utility>
 #include "inc/List.h"
 
+// An IntervalSet represents the possible movement of a given glyph in a given direction
+// (horizontally, vertically, or diagonally).
+// A vector is needed to represent disjoint ranges, eg, -300..-150, 20..200, 500..750.
+// Each pair represents the min/max of a sub-range.
+
 namespace graphite2 {
 
 class IntervalSet
@@ -53,6 +58,8 @@ public:
 
 private:
     void append(tpair interval) { _v.push_back(interval); }
+    
+    // Ranges of movements in a specific direction; a vector is need to represent disjoint ranges.
     vtpair _v;
 };
 

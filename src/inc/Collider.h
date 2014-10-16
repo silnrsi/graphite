@@ -68,8 +68,8 @@ public:
     Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
 private:
-    IntervalSet _ranges[4];
-    Slot *  _target;
+    IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
+    Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
 };
