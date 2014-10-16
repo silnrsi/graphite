@@ -150,7 +150,7 @@ float BoundedGapList::bestfit(float min, float max, bool &isGapFit)
 }
 
 
-void Collider::initSlot(Slot *aSlot, const Rect &limit)
+void Collider::initSlot(Slot *aSlot, const Rect &limit, float margin)
 {
     int i;
     float max, min;
@@ -158,27 +158,28 @@ void Collider::initSlot(Slot *aSlot, const Rect &limit)
     {
         switch (i) {
             case 0 :
-                min = limit.bl.x;
-                max = limit.tr.x;
+                min = limit.bl.x + aSlot->origin().x;
+                max = limit.tr.x + aSlot->origin().x;
                 break;
             case 1 :
-                min = limit.bl.y;
-                max = limit.tr.y;
+                min = limit.bl.y + aSlot->origin().y;
+                max = limit.tr.y + aSlot->origin().y;
                 break;
             case 2 :
-                min = 2.f * std::max(limit.bl.x, -limit.tr.y);
-                max = 2.f * std::min(limit.tr.x, -limit.bl.y);
+                min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y;
+                max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y;
                 break;
             case 3 :
-                min = 2.f * std::max(limit.bl.x, limit.bl.y);
-                max = 2.f * std::min(limit.tr.x, limit.tr.y);
+                min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y;
+                max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y;
                 break;
         }
         _ranges[i].clear();
         _ranges[i].add(min, max);
     }
-    _base = aSlot;
+    _target = aSlot;
     _limit = limit;
+    _margin = margin;
 }
 
 bool cmpfpair(float a, const Collider::fpair &b)
@@ -189,8 +190,8 @@ bool cmpfpair(float a, const Collider::fpair &b)
 bool Collider::mergeSlot(Segment *seg, Slot *slot)
 {
     bool isCol = true;
-    const float bx = _base->origin().x;
-    const float by = _base->origin().y;
+    const float bx = _target->origin().x;
+    const float by = _target->origin().y;
     const float bd = bx - by;
     const float bs = bx + by;
     const float sx = slot->origin().x;
@@ -202,10 +203,10 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
     float cmin, cmax;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
-    const unsigned short bgid = _base->gid();
-    const uint16 m = seg->collisionInfo(_base)->margin();
+    const unsigned short bgid = _target->gid();
     for (int i = 0; i < 4; ++i)
     {
+        uint16 m = _margin * (i > 1 ? ISQRT2 : 1.);
         switch (i) {
             case 0 :
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
@@ -266,7 +267,7 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
             default :
                 continue;
         }
-        if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
+        if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
             || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
         {
             isCol = false;
@@ -320,7 +321,7 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                         omax = gc.getSubBoundingMetric(gid, j, 6) + ss;
                         break;
                 }
-                if ((vmin < cmin && vmax < cmin) || (vmin > cmax && vmax > cmax)
+                if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                     || (omin < obmin - m && omax < obmin - m) || (omin > obmax + m && omax > obmax + m))
                     continue;
                 _ranges[i].remove(vmin, vmax);
@@ -339,7 +340,7 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
 Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
-    int gid = _base->gid();
+    int gid = _target->gid();
     float margin;
     float tlen, torig;
     float totald = std::numeric_limits<float>::max();
@@ -349,36 +350,36 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
     IntervalSet aFit;
 #if !defined GRAPHITE2_NTRACING
     *dbgout << json::object
-                << "slot" << objectid(dslot(seg, _base)) 
+                << "slot" << objectid(dslot(seg, _target)) 
                 << "ranges" << json::array;
 #endif
     for (int i = 0; i < 4; ++i)
     {
         float bestc = std::numeric_limits<float>::max();
         float bestd = bestc;
-        margin = seg->collisionInfo(_base)->margin() * (i > 1 ? ISQRT2 : 1.f);
+        margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         switch (i) {
             case 0 :
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
-                torig = _base->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
+                torig = _target->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
                 // cmin = _limit.bl.x + torig;
                 // cmax = _limit.tr.x + torig;
                 break;
             case 1 :
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
-                torig = _base->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
+                torig = _target->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
                 // cmin = _limit.bl.y + torig;
                 // cmax = _limit.tr.y + torig;
                 break;
             case 2 :
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
-                torig = _base->origin().x + _base->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
+                torig = _target->origin().x + _target->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
                 // cmin = std::max(_limit.bl.x, _limit.bl.y) + torig;
                 // cmax = std::min(_limit.tr.x, _limit.tr.y) + torig;
                 break;
             case 3 :
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
-                torig = _base->origin().x - _base->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
+                torig = _target->origin().x - _target->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
                 // cmin = std::max(_limit.bl.x, -_limit.tr.y) + torig;
                 // cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
                 break;

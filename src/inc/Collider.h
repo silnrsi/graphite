@@ -63,14 +63,15 @@ public:
     typedef Vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
-    void initSlot(Slot *aSlot, const Rect &constraint);
+    void initSlot(Slot *aSlot, const Rect &constraint, float margin);
     bool mergeSlot(Segment *seg, Slot *slot);
     Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
 private:
     IntervalSet _ranges[4];
-    Slot *  _base;
+    Slot *  _target;
     Rect    _limit;
+    float   _margin;
 };
 
 class SlotCollision
