@@ -27,7 +27,6 @@ of the License or (at your option) any later version.
 #include <algorithm>
 #include <limits>
 #include <math.h>
-#include "inc/debug.h"
 #include "inc/Collider.h"
 #include "inc/Segment.h"
 #include "inc/Slot.h"
@@ -221,8 +220,8 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 vmax = std::min(std::min(gc.getBoundingMetric(gid, 2) + sx,
                                 gc.getBoundingMetric(gid, 7) + sd + gc.getBoundingMetric(tgid, 3) + ty),
                                 gc.getBoundingMetric(gid, 6) + ss - gc.getBoundingMetric(tgid, 1) - ty);
-                otmin = gc.getBoundingMetric(tgid, 1) + tx;
-                otmax = gc.getBoundingMetric(tgid, 3) + tx;
+                otmin = gc.getBoundingMetric(tgid, 1) + ty;
+                otmax = gc.getBoundingMetric(tgid, 3) + ty;
                 omin = gc.getBoundingMetric(gid, 1) + sy;
                 omax = gc.getBoundingMetric(gid, 3) + sy;
                 cmin = _limit.bl.x + tx;
@@ -358,9 +357,12 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
     bool isGoodFit, tIsGoodFit = false;
     IntervalSet aFit;
 #if !defined GRAPHITE2_NTRACING
-    *dbgout << json::object
+    if (dbgout)
+    {
+        *dbgout << json::object
                 << "slot" << objectid(dslot(seg, _target)) 
                 << "ranges" << json::array;
+    }
 #endif
     for (int i = 0; i < 4; ++i)
     {
@@ -403,18 +405,19 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
         }
         bestd = aFit.findClosestCoverage(0.);
 #if !defined GRAPHITE2_NTRACING
-        *dbgout << json::object
-                    << "testorigin" << torig
-                    << "testlen" << tlen
-                    << "bestfit" << bestd
-                    << "ranges" << json::flat << json::array;
-        for (IntervalSet::ivtpair s = _ranges[i].begin(), e = _ranges[i].end(); s != e; ++s)
-            *dbgout << Position(s->first, s->second);
-        *dbgout << json::close
-                    << "fits" << json::flat << json::array;
-        for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
-            *dbgout << Position(s->first, s->second);
-        *dbgout << json::close << json::close;
+        if (dbgout)
+        {
+            *dbgout << json::object
+                        << "testorigin" << torig
+                        << "testlen" << tlen
+                        << "bestfit" << bestd
+                        << "ranges";
+            debug(dbgout, seg, i);
+            *dbgout << "fits" << json::flat << json::array;
+            for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
+                *dbgout << Position(s->first, s->second);
+            *dbgout << json::close << json::close;
+        }
 #endif
         //bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
         // bestd += bestd > 0.f ? -margin : margin;
@@ -431,7 +434,8 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
         }
     }
 #if !defined GRAPHITE2_NTRACING
-    *dbgout << json::close << json::close;
+    if (dbgout)
+        *dbgout << json::close << json::close;
 #endif
     isCol = !tIsGoodFit;
     return totalp;

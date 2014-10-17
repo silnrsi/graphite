@@ -37,7 +37,23 @@ namespace graphite2 {
 class Face;
 class FeatureVal;
 class Segment;
-class GlyphBox;
+
+class GlyphBox
+{
+public:
+    GlyphBox(uint8 numsubs, unsigned short bitmap, Rect *slanted) : _num(numsubs), _bitmap(bitmap), _slant(*slanted) {}; 
+
+    void addSubBox(int subindex, int boundary, Rect *val) { _subs[subindex * 2 + boundary] = *val; }
+    Rect &subVal(int subindex, int boundary) { return _subs[subindex * 2 + boundary]; }
+    const Rect &slant() const { return _slant; }
+    uint8 num() const { return _num; }
+
+private:
+    uint8   _num;
+    unsigned short  _bitmap;
+    Rect    _slant;
+    Rect    _subs[0];
+};
 
 class GlyphCache
 {
@@ -45,6 +61,8 @@ class GlyphCache
 
     GlyphCache(const GlyphCache&);
     GlyphCache& operator=(const GlyphCache&);
+
+    static const Rect nullRect;
 
 public:
     GlyphCache(const Face & face, const uint32 face_options);
@@ -59,6 +77,7 @@ public:
     float            getBoundingMetric(unsigned short glyphid, uint8 metric) const;
     uint8            numSubBounds(unsigned short glyphid) const;
     float            getSubBoundingMetric(unsigned short glyphid, uint8 subindex, uint8 metric) const;
+    const Rect &     slant(unsigned short glyphid) const { return _boxes[glyphid] ? _boxes[glyphid]->slant() : nullRect; }
 
     CLASS_NEW_DELETE;
     
@@ -94,23 +113,6 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 {
     return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
 }
-
-class GlyphBox
-{
-public:
-    GlyphBox(uint8 numsubs, unsigned short bitmap, Rect *slanted) : _num(numsubs), _bitmap(bitmap), _slant(*slanted) {}; 
-
-    void addSubBox(int subindex, int boundary, Rect *val) { _subs[subindex * 2 + boundary] = *val; }
-    Rect &subVal(int subindex, int boundary) { return _subs[subindex * 2 + boundary]; }
-    const Rect &slant() const { return _slant; }
-    uint8 num() const { return _num; }
-
-private:
-    uint8   _num;
-    unsigned short  _bitmap;
-    Rect    _slant;
-    Rect    _subs[0];
-};
 
 inline
 float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const

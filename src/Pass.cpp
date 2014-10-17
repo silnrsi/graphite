@@ -650,13 +650,13 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
         for (Slot *s = seg->first(); s != seg->last(); s = s->next())
         {
             const SlotCollision *c = seg->collisionInfo(s);
+            if (start && c->flags() & SlotCollision::COLL_TEST &&
+                    (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
+                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
-            if (start && c->flags() & SlotCollision::COLL_TEST &&
-                    (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
-                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst, dbgout);
         }
         if (!hasCollisions)
             return false;
@@ -666,8 +666,6 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     return true;
 }
 
-// Fix collisions for the given slot.
-// Return true if everything was fixed, false if there are still collisions remaining.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
     Slot *s;
@@ -679,7 +677,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
         const SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
             continue;	// don't test a slot against itself
-        else if ((c->flags() & SlotCollision::COLL_IGNORE) || (c->flags() & SlotCollision::COLL_TEST))
+        else if ((c->flags() & SlotCollision::COLL_IGNORE)) // || (c->flags() & SlotCollision::COLL_TEST))
             continue;
         collides |= coll->mergeSlot(seg, s);
         if (s != start && (c->flags() & SlotCollision::COLL_END))
@@ -689,10 +687,22 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     if (collides)
     {
         Position shift = coll->resolve(seg, isCol, cslot->shift(), dbgout);
-        cslot->shift(shift);
+        if (shift.x > -1e38 && shift.y > -1e38)
+            cslot->shift(shift);
     }
     else
+    {
         isCol = false;
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+        {
+            *dbgout << json::object 
+                            << "missed" << objectid(dslot(seg, slot));
+            coll->debug(dbgout, seg, -1);
+            *dbgout << json::close;
+        }
+#endif
+    }
         
     if (isCol)
     { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
@@ -700,3 +710,5 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
     { cslot->flags((cslot->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
+// Fix collisions for the given slot.
+// Return true if everything was fixed, false if there are still collisions remaining.

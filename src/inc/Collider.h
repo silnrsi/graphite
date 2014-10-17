@@ -31,10 +31,11 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Position.h"
 #include "inc/Intervals.h"
+#include "inc/debug.h"
+#include "inc/Segment.h"
 
 namespace graphite2 {
 
-class Segment;
 class json;
 class Slot;
 
@@ -66,6 +67,34 @@ public:
     void initSlot(Slot *aSlot, const Rect &constraint, float margin);
     bool mergeSlot(Segment *seg, Slot *slot);
     Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+#if !defined GRAPHITE2_NTRACING
+    void debug(json * const dbgout, Segment *seg, int i) {
+//        if (!dbgout) return;
+        int imax = i;
+        if (i < 0)
+        {
+            *dbgout << "margin" << _margin
+                << "limit" << _limit
+                << "target" << json::object
+                    << "origin" << _target->origin()
+                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
+                    << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << json::close
+                << "ranges" << json::array;
+            i = 0;
+            imax = 3;
+        }
+        for (int j = i; j <= imax; ++j)
+        {
+            *dbgout << json::flat << json::array;
+            for (IntervalSet::ivtpair s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
+                *dbgout << Position(s->first, s->second);
+            *dbgout << json::close;
+        }
+        if (i < imax)
+            *dbgout << json::close;
+    }
+#endif
 
 private:
     IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);

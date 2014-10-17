@@ -142,11 +142,11 @@ float IntervalSet::findClosestCoverage(float val)
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {
         if (s->second < val)
-            best = s->second - val;
+            best = s->second;
         else if (s->first > val)
         {
             if (val - s->first > best)
-                best = s->first - val;
+                best = s->first;
             return best;
         }
         else

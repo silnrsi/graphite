@@ -32,6 +32,7 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Segment.h"
 #include "inc/json.h"
+#include "inc/Collider.h"
 
 #if defined _WIN32
 #include "windows.h"

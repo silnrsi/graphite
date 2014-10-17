@@ -29,6 +29,7 @@ of the License or (at your option) any later version.
 #include "inc/Silf.h"
 #include "inc/CharInfo.h"
 #include "inc/Rule.h"
+#include "inc/Collider.h"
 
 
 using namespace graphite2;
