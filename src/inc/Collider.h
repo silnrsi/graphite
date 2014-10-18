@@ -64,7 +64,7 @@ public:
     typedef Vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
-    void initSlot(Slot *aSlot, const Rect &constraint, float margin);
+    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
     bool mergeSlot(Segment *seg, Slot *slot);
     Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 #if !defined GRAPHITE2_NTRACING

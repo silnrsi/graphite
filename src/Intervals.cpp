@@ -154,3 +154,38 @@ float IntervalSet::findClosestCoverage(float val)
     }
     return best;
 }
+
+float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vmin, float vmax, bool &isGood)
+{
+    float best = -std::numeric_limits<float>::max();
+    float sbest = best;
+    isGood = false;
+    for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
+    {
+        if (s->second < val)
+        {
+            if (s->second - s->first > 2 * margin && s->second - margin > vmin && s->second - margin < vmax)
+            {
+                isGood = true;
+                best = s->second - margin;
+            }
+            else if (s->first > sbest && (s->first + s->second) / 2 > vmin && (s->first + s->second) / 2 < vmax)
+                sbest = (s->first + s->second) / 2;  // midway between the two for maximum margin
+        }
+        else if ((s->second - s->first) > 2 * margin)
+        {
+            if ((!isGood || s->first + margin > -best) && (s->first + margin > vmin && s->first + margin < vmax))
+                best = s->first + margin;
+            isGood = true;
+            return best;
+        }
+        else if (!isGood && (s->first + s->second) / 2 < -sbest && (s->first + s->second) / 2 > vmin && (s->first + s->second) / 2 < vmax)
+        {
+            sbest = (s->first + s->second) / 2;
+        }
+    }
+    if (isGood)
+        return best;
+    else
+        return sbest;
+}

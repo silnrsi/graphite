@@ -670,7 +670,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *co
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll->initSlot(slot, cslot->limit(), cslot->margin());
+    coll->initSlot(seg, slot, cslot->limit(), cslot->margin());
     bool collides = false;
     for (s = start; s; s = s->next())
     {

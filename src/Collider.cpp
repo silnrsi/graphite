@@ -150,28 +150,30 @@ float BoundedGapList::bestfit(float min, float max, bool &isGapFit)
 
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
-void Collider::initSlot(Slot *aSlot, const Rect &limit, float margin)
+void Collider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
 {
     int i;
     float max, min;
+    const GlyphCache &gc = seg->getFace()->glyphs();
+    unsigned short gid = aSlot->gid();
     for (i = 0; i < 4; ++i)
     {
         switch (i) {
             case 0 :	// x direction
-                min = limit.bl.x + aSlot->origin().x;
-                max = limit.tr.x + aSlot->origin().x;
+                min = limit.bl.x + aSlot->origin().x + gc.getBoundingMetric(gid, 0);
+                max = limit.tr.x + aSlot->origin().x + gc.getBoundingMetric(gid, 2);
                 break;
             case 1 :	// y direction
-                min = limit.bl.y + aSlot->origin().y;
-                max = limit.tr.y + aSlot->origin().y;
+                min = limit.bl.y + aSlot->origin().y + gc.getBoundingMetric(gid, 1);
+                max = limit.tr.y + aSlot->origin().y + gc.getBoundingMetric(gid, 3);
                 break;
             case 2 :	// sum (negatively sloped diagonal)
-                min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y;
-                max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y;
+                min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + gc.getBoundingMetric(gid, 4);
+                max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + gc.getBoundingMetric(gid, 6);
                 break;
             case 3 :	// diff (positively sloped diagonal)
-                min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y;
-                max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y;
+                min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + gc.getBoundingMetric(gid, 5);
+                max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + gc.getBoundingMetric(gid, 7);
                 break;
         }
         _ranges[i].clear();
@@ -224,8 +226,8 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 otmax = gc.getBoundingMetric(tgid, 3) + ty;
                 omin = gc.getBoundingMetric(gid, 1) + sy;
                 omax = gc.getBoundingMetric(gid, 3) + sy;
-                cmin = _limit.bl.x + tx;
-                cmax = _limit.tr.x + tx;
+                cmin = _limit.bl.x + tx + gc.getBoundingMetric(tgid, 0);
+                cmax = _limit.tr.x + tx + gc.getBoundingMetric(tgid, 2);
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 1) + sy,
@@ -238,8 +240,8 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 otmax = gc.getBoundingMetric(tgid, 2) + tx;
                 omin = gc.getBoundingMetric(gid, 0) + sx;
                 omax = gc.getBoundingMetric(gid, 2) + sx;
-                cmin = _limit.bl.y + ty;
-                cmax = _limit.tr.y + ty;
+                cmin = _limit.bl.y + ty + gc.getBoundingMetric(tgid, 1);
+                cmax = _limit.tr.y + ty + gc.getBoundingMetric(tgid, 3);
                 break;
             case 2 :    // sum
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 4) + ss,
@@ -252,8 +254,8 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 otmax = gc.getBoundingMetric(tgid, 7) + td;
                 omin = gc.getBoundingMetric(gid, 5) + sd;
                 omax = gc.getBoundingMetric(gid, 7) + sd;
-                cmin = _limit.bl.x + _limit.bl.y + ts;
-                cmax = _limit.tr.x + _limit.tr.y + ts;
+                cmin = _limit.bl.x + _limit.bl.y + ts + gc.getBoundingMetric(tgid, 4);
+                cmax = _limit.tr.x + _limit.tr.y + ts + gc.getBoundingMetric(tgid, 6);
                 break;
             case 3 :    // diff
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 5) + sd,
@@ -266,8 +268,8 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
                 otmax = gc.getBoundingMetric(tgid, 6) + ts;
                 omin = gc.getBoundingMetric(gid, 4) + ss;
                 omax = gc.getBoundingMetric(gid, 6) + ss;
-                cmin = _limit.bl.x - _limit.tr.y + td;
-                cmax = _limit.tr.x - _limit.bl.y + td;
+                cmin = _limit.bl.x - _limit.tr.y + td + gc.getBoundingMetric(tgid, 5);
+                cmax = _limit.tr.x - _limit.bl.y + td + gc.getBoundingMetric(tgid, 7);
                 break;
             default :
                 continue;
@@ -368,42 +370,38 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
     {
         float bestc = std::numeric_limits<float>::max();
         float bestd = bestc;
+        float cmin, cmax;
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         switch (i) {
             case 0 :	// x direction
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
                 torig = _target->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
-                // cmin = _limit.bl.x + torig;
-                // cmax = _limit.tr.x + torig;
+                cmin = _limit.bl.x + torig;
+                cmax = _limit.tr.x + torig;
                 break;
             case 1 :	// y direction
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
                 torig = _target->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
-                // cmin = _limit.bl.y + torig;
-                // cmax = _limit.tr.y + torig;
+                cmin = _limit.bl.y + torig;
+                cmax = _limit.tr.y + torig;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
                 torig = _target->origin().x + _target->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
-                // cmin = std::max(_limit.bl.x, _limit.bl.y) + torig;
-                // cmax = std::min(_limit.tr.x, _limit.tr.y) + torig;
+                cmin = _limit.bl.x + _limit.bl.y + torig;
+                cmax = _limit.tr.x + _limit.tr.y + torig;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
                 torig = _target->origin().x - _target->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
-                // cmin = std::max(_limit.bl.x, -_limit.tr.y) + torig;
-                // cmax = std::min(_limit.tr.x, -_limit.bl.y) + torig;
+                cmin = _limit.bl.x - _limit.tr.y + torig;
+                cmax = _limit.tr.x - _limit.bl.y + torig;
                 break;
         }
         isGoodFit = true;
-        aFit = _ranges[i].locate(torig - margin, torig + tlen + margin);
-        if (aFit.size() == 0)
-        {
-            aFit = _ranges[i].locate(torig, torig + tlen);
-            isGoodFit = false;
-        }
-        bestd = aFit.findClosestCoverage(0.);
+        aFit = _ranges[i].locate(torig, torig + tlen);
+        bestd = aFit.findBestWithMarginAndLimits(0., margin, cmin - torig, cmax - torig, isGoodFit);
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
@@ -421,7 +419,7 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
 #endif
         //bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
         // bestd += bestd > 0.f ? -margin : margin;
-        if ((isGoodFit && !tIsGoodFit) || fabs(bestd) * (i > 1 ? ISQRT2 : 1.f) < totald)
+        if ((isGoodFit && !tIsGoodFit) || ((isGoodFit || !tIsGoodFit) && fabs(bestd) * (i > 1 ? ISQRT2 : 1.f) < totald))
         {
             totald = fabs(bestd) * (i > 1 ? ISQRT2 : 1.);
             tIsGoodFit = isGoodFit;

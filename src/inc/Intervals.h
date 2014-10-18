@@ -50,6 +50,7 @@ public:
     void remove(tpair interval);
     void remove(IntervalSet &is);
     float findClosestCoverage(float val);
+    float findBestWithMarginAndLimits(float val, float margin, float vmin, float vmax, bool &isGood);
     size_t size() const { return _v.size(); }
 
 // private:
