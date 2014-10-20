@@ -112,6 +112,7 @@ public:
     CLASS_NEW_DELETE;
 
 private:
+    bool removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty, int it, int ig, IntervalSet &range);
     float _miny;
     float _maxy;
 };

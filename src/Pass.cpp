@@ -652,7 +652,7 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
             const SlotCollision *c = seg->collisionInfo(s);
             if (start && c->flags() & SlotCollision::COLL_TEST &&
                     (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
-                hasCollisions |= resolveShiftCollisions(seg, s, start, &shiftcoll, isfirst, dbgout);
+                hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, isfirst, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
@@ -666,11 +666,11 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     return true;
 }
 
-bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider &coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll->initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift());
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift());
     bool collides = false;
     for (s = start; s; s = s->next())
     {
@@ -679,14 +679,14 @@ bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCo
             continue;	// don't test a slot against itself
         else if ((c->flags() & SlotCollision::COLL_IGNORE)) // || (c->flags() & SlotCollision::COLL_TEST))
             continue;
-        collides |= coll->mergeSlot(seg, s, cslot->shift());
+        collides |= coll.mergeSlot(seg, s, cslot->shift());
         if (s != start && (c->flags() & SlotCollision::COLL_END))
             break;
     }
     bool isCol;
     if (collides)
     {
-        Position shift = coll->resolve(seg, isCol, cslot->shift(), dbgout);
+        Position shift = coll.resolve(seg, isCol, cslot->shift(), dbgout);
         if (shift.x > -1e38 && shift.y > -1e38)
             cslot->shift(shift);
     }
@@ -698,7 +698,7 @@ bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCo
         {
             *dbgout << json::object 
                             << "missed" << objectid(dslot(seg, slot));
-            coll->debug(dbgout, seg, -1);
+            coll.debug(dbgout, seg, -1);
             *dbgout << json::close;
         }
 #endif

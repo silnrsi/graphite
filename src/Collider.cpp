@@ -157,8 +157,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshif
             default :
                 continue;
         }
-        if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
-            || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
+        // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
+        //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
+        if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
         {
             isCol = false;
             continue;
@@ -214,8 +215,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshif
                         omax = gc.getSubBoundingMetric(gid, j, 6) + ss;
                         break;
                 }
-                if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
-                    		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
+                // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
+                //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
+                if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
                     continue;
                 _ranges[i].remove(vmin, vmax);
                 anyhits = true;
@@ -341,12 +343,121 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _margin = margin;
     _miny = aSlot->origin().y + gc.getBoundingMetric(gid, 1);
     _maxy = aSlot->origin().y + gc.getBoundingMetric(gid, 3);
+    _currshift = currshift;
+}
+
+bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty, int it, int ig, IntervalSet &range)
+{
+    float vmin, vmax, omin, omax;
+    float otmin, otmax, cmin, cmax; 
+    float ss = sx + sy;
+    float sd = sx - sd;
+    if (ig < 0 && it < 0)
+    {
+        vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
+                                 gc.getBoundingMetric(gid, 5) + sd + gc.getBoundingMetric(tgid, 1) + ty),
+                        gc.getBoundingMetric(gid, 4) + ss - gc.getBoundingMetric(tgid, 3) - ty);
+        vmax = std::min(std::min(gc.getBoundingMetric(gid, 2) + sx,
+                                 gc.getBoundingMetric(gid, 7) + sd + gc.getBoundingMetric(tgid, 3) + ty),
+                        gc.getBoundingMetric(gid, 6) + ss - gc.getBoundingMetric(tgid, 1) - ty);
+        omin = gc.getBoundingMetric(gid, 1) + sy;
+        omax = gc.getBoundingMetric(gid, 3) + sy;
+        otmin = gc.getBoundingMetric(tgid, 1) + ty;
+        otmax = gc.getBoundingMetric(tgid, 3) + ty;
+        cmin = _limit.bl.x + tx + gc.getBoundingMetric(tgid, 0);
+        cmax = _limit.tr.x + tx + gc.getBoundingMetric(tgid, 2);
+    }
+    else if (it < 0)
+    {
+        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, ig, 0) + sx,
+                        gc.getSubBoundingMetric(gid, ig, 5) + sd + gc.getBoundingMetric(tgid, 1) + ty),
+                        gc.getSubBoundingMetric(gid, ig, 4) + ss - gc.getBoundingMetric(tgid, 3) - ty);
+        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, ig, 2) + sx,
+                        gc.getSubBoundingMetric(gid, ig, 7) + sd + gc.getBoundingMetric(tgid, 3) + ty),
+                        gc.getSubBoundingMetric(gid, ig, 6) + ss - gc.getBoundingMetric(tgid, 1) - ty);
+        omin = gc.getSubBoundingMetric(gid, ig, 1) + sy;
+        omax = gc.getSubBoundingMetric(gid, ig, 3) + sy;
+        otmin = gc.getBoundingMetric(tgid, 1) + ty;
+        otmax = gc.getBoundingMetric(tgid, 3) + ty;
+        cmin = _limit.bl.x + tx + gc.getBoundingMetric(tgid, 0);
+        cmax = _limit.tr.x + tx + gc.getBoundingMetric(tgid, 2);
+    }
+    else if (ig < 0)
+    {
+        vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
+                                 gc.getBoundingMetric(gid, 5) + sd + gc.getSubBoundingMetric(tgid, it, 1) + ty),
+                        gc.getBoundingMetric(gid, 4) + ss - gc.getSubBoundingMetric(tgid, it, 3) - ty);
+        vmax = std::min(std::min(gc.getBoundingMetric(gid, 2) + sx,
+                                 gc.getBoundingMetric(gid, 7) + sd + gc.getSubBoundingMetric(tgid, it, 3) + ty),
+                        gc.getBoundingMetric(gid, 6) + ss - gc.getSubBoundingMetric(tgid, it, 1) - ty);
+        omin = gc.getBoundingMetric(gid, 1) + sy;
+        omax = gc.getBoundingMetric(gid, 3) + sy;
+        otmin = gc.getSubBoundingMetric(tgid, it, 1) + ty;
+        otmax = gc.getSubBoundingMetric(tgid, it, 3) + ty;
+        cmin = _limit.bl.x + tx + gc.getSubBoundingMetric(tgid, it, 0);
+        cmax = _limit.tr.x + tx + gc.getSubBoundingMetric(tgid, it, 2);
+    }
+    else
+    {
+        vmin = std::max(std::max(gc.getSubBoundingMetric(gid, ig, 0) + sx,
+                        gc.getSubBoundingMetric(gid, ig, 5) + sd + gc.getSubBoundingMetric(tgid, it, 1) + ty),
+                        gc.getSubBoundingMetric(gid, ig, 4) + ss - gc.getSubBoundingMetric(tgid, it, 3) - ty);
+        vmax = std::min(std::min(gc.getSubBoundingMetric(gid, ig, 2) + sx,
+                        gc.getSubBoundingMetric(gid, ig, 7) + sd + gc.getSubBoundingMetric(tgid, it, 3) + ty),
+                        gc.getSubBoundingMetric(gid, ig, 6) + ss - gc.getSubBoundingMetric(tgid, it, 1) - ty);
+        omin = gc.getSubBoundingMetric(gid, ig, 1) + sy;
+        omax = gc.getSubBoundingMetric(gid, ig, 3) + sy;
+        otmin = gc.getSubBoundingMetric(tgid, it, 1) + ty;
+        otmax = gc.getSubBoundingMetric(tgid, it, 3) + ty;
+        cmin = _limit.bl.x + tx + gc.getSubBoundingMetric(tgid, it, 0);
+        cmax = _limit.tr.x + tx + gc.getSubBoundingMetric(tgid, it, 2);
+    }
+
+    if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
+        return false;
+    range.remove(vmin, vmax);
+    return true;
 }
 
 bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
-    
+    uint16 gid = slot->gid();
+    uint16 tgid = _target->gid();
+    const float sx = slot->origin().x + currshift.x;
+    const float sy = slot->origin().y + currshift.y;
+    const float smin = sy + gc.getBoundingMetric(gid, 1);
+    const float smax = sy + gc.getBoundingMetric(gid, 3);
+    const float step = (_maxy - _miny) / 4;
+    const float tx = _target->origin().x + _currshift.x;
+    const float ty = _target->origin().y + _currshift.y;
+    int numtsub = gc.numSubBounds(tgid);
+    int numsub = gc.numSubBounds(gid);
+    int i, j;
+    bool res = false;
+
+    if (smin > _maxy || smax < _miny) return false;
+    if (numtsub > 0)
+    {
+        for (i = 0; i < numtsub; ++i)
+        {
+            int level = int((gc.getSubBoundingMetric(tgid, i, 1) + ty - _miny) / step - 0.5);
+            if (numsub > 0)
+                for (j = 0; j < numsub; ++j)
+                    res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, i, j, _ranges[level]);
+            else
+                res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, i, -1, _ranges[level]);
+        }
+    }
+    else
+    {
+        if (numsub > 0)
+            for (j = 0; j < numsub; ++j)
+                res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, -1, j, _ranges[0]);
+        else
+            res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, -1, -1, _ranges[0]);
+    }
+    return res;
 }
 
 Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
