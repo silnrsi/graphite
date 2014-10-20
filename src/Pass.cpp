@@ -646,13 +646,19 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
 #endif
     for (int i = 0; i < numPasses; ++i)
     {
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+            *dbgout << json::flat << json::object << "loop" << i << json::close;
+#endif
         hasCollisions = false;
         for (Slot *s = seg->first(); s != seg->last(); s = s->next())
         {
             const SlotCollision *c = seg->collisionInfo(s);
-            if (start && c->flags() & SlotCollision::COLL_TEST &&
-                    (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
+            if (start && (c->flags() & SlotCollision::COLL_TEST)
+                    && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
+            {
                 hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, isfirst, dbgout);
+            }
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)

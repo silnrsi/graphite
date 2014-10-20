@@ -57,9 +57,10 @@ public:
     ivtpair begin() { return _v.begin(); }
     ivtpair end() { return _v.end(); }
 
-private:
+//private:
+public: // debugging
     void append(tpair interval) { _v.push_back(interval); }
-    
+private:
     // Ranges of movements in a specific direction; a vector is need to represent disjoint ranges.
     vtpair _v;
 };

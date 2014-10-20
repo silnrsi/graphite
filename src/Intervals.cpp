@@ -30,12 +30,17 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 
+// If the given interval (the current location/size of a glyph) will fit in a legal range,
+// return the minmum and maximum offsets that will make the interval legal.
+// We might return several of these if there are several viable ranges.
+// Eg, if the ranges are [(200,300), (450, 525)] and interval = [150,200], 
+// return [(50,100), (300,325)]
 IntervalSet IntervalSet::locate(IntervalSet::tpair interval)
 {
     IntervalSet res;
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; s++)
     {
-        if (s->second - s->first > (interval.second - interval.first))
+        if (s->second - s->first >= (interval.second - interval.first))
             res.append(IntervalSet::tpair(s->first - interval.first, s->second - interval.second));
     }
     return res;
@@ -128,9 +133,9 @@ void IntervalSet::remove(IntervalSet &is)
             e = _v.end();
         }
         if (s->first < t->second && s->first >= t->first)
-            s->first = t->second;       // overlap on one side
+            s->first = t->second;       // overlap beginning of existing range
         if (s->second > t->first && s->second <= t->second)
-            s->second = t->first;       // overlap on other side
+            s->second = t->first;       // overlap end of existing range
         if (s->first >= s->second)      // remove duplicates
         {
             _v.erase(s);
@@ -148,7 +153,7 @@ void IntervalSet::remove(IntervalSet &is)
     }
 }
 
-// Find a legal interval corresponding to val. Return how much off val is?????????????
+// Find a legal interval corresponding to val. Return the closest legal value.
 float IntervalSet::findClosestCoverage(float val)
 {
     float best = -std::numeric_limits<float>::max();

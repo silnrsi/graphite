@@ -34,6 +34,8 @@ of the License or (at your option) any later version.
 #include "inc/debug.h"
 #include "inc/Segment.h"
 
+#include <vector>
+
 namespace graphite2 {
 
 class json;
@@ -87,6 +89,13 @@ protected:
     Rect    _limit;
     float   _margin;
     Position _currshift;
+    
+    // Debugging
+    IntervalSet _rawRanges[4];
+    IntervalSet _removals[4];
+    std::vector<int> _gidNear[4];
+    std::vector<int> _subNear[4];
+
 };
 
 class ShiftCollider : public Collider
