@@ -82,6 +82,12 @@ void IntervalSet::remove(IntervalSet::tpair interval)
             continue;
         if (s->first > interval.second)
             break;          // This interval is outside what we can handle
+        if (interval.first <= s->first && interval.second >= s->second)
+        {
+            _v.erase(s);
+            --s;
+            continue;
+        }
         if (s->first < interval.first && s->second > interval.second)
         {                   // Need to split this range since overlap on both sides
             s = _v.insert(s, tpair(s->first, interval.first));
@@ -107,6 +113,12 @@ void IntervalSet::remove(IntervalSet &is)
         {
             ++s;
             continue;                   // scan to find first overlap
+        }
+        if (s->first >= t->first && s->second <= t->second)
+        {
+            _v.erase(s);
+            e = _v.end();
+            continue;
         }
         if (s->first < t->first && s->second > t->second)
         {                               // overlap on both sides

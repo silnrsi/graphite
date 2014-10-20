@@ -207,6 +207,24 @@ int main(int /*argc*/, char ** /*argv*/)
     base.push_back(fpair(40., 90.));
     res += doTest("(10,90)-[(20,30),(25,40)]", test, base);
 
+    test.clear();
+    test.add(fpair(10., 30.));
+    test.add(fpair(40., 50.));
+    test.add(fpair(60., 90.));
+    test2.clear();
+    test2.add(fpair(20., 80.));
+    test.remove(test2);
+    base.clear();
+    base.push_back(fpair(10., 20.));
+    base.push_back(fpair(80., 90.));
+    res += doTest("Test 4 remove spans", test, base);
+    test.clear();
+    test.add(fpair(10., 30.));
+    test.add(fpair(40., 50.));
+    test.add(fpair(60., 90.));
+    test.remove(fpair(20., 80.));
+    res += doTest("Test 5 remove pair", test, base);
+
     return res;
 }
 
