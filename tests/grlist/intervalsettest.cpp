@@ -182,6 +182,31 @@ int main(int /*argc*/, char ** /*argv*/)
     fres = testl.findClosestCoverage(0.);
     printFloat("bestfit(0)", fres);
 
+    test.clear();
+    test.add(fpair(10., 90.));
+    test2.clear();
+    test2.add(fpair(50., 60.));
+    test.remove(test2);
+    test2.clear();
+    test2.add(fpair(30., 40.));
+    test.remove(test2);
+    base.clear();
+    base.push_back(fpair(10., 30.));
+    base.push_back(fpair(40., 50.));
+    base.push_back(fpair(60., 90.));
+    res += doTest("(10,90)-[(50,60)]-[(30,40)]", test, base);
+
+    test.clear();
+    test.add(fpair(10., 90.));
+    test2.clear();
+    test2.add(fpair(20., 30.));
+    test2.add(fpair(25., 40.));
+    test.remove(test2);
+    base.clear();
+    base.push_back(fpair(10., 20.));
+    base.push_back(fpair(40., 90.));
+    res += doTest("(10,90)-[(20,30),(25,40)]", test, base);
+
     return res;
 }
 

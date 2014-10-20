@@ -35,122 +35,9 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-void BoundedGapList::reset(float min, float max)
-{
-    _min = min;
-    _max = max;
-    _list.assign(1, fpair(_min, _max));
-    _isLenSorted = false;
-}
-
-static bool _byfirst(const BoundedGapList::fpair &a, const BoundedGapList::fpair &b)
-{
-    return (a.first < b.first);
-}
-
-static bool _bylen(const BoundedGapList::fpair &a, const BoundedGapList::fpair &b)
-{
-    return (a.second - a.first < b.second - b.first ||
-            (a.second - a.first == b.second - b.first && a.first < b.first));
-}
-
-void BoundedGapList::add(float min, float max)
-{
-    ivfpairs kind, kend;
-
-    if (max < _min || min > _max) return;
-
-    if (_isLenSorted)
-    { 
-        std::sort(_list.begin(), _list.end(), _byfirst);
-        _isLenSorted = false;
-    }
-
-    // need code here and above to keep the n best pairs rather than all of them.
-    for (kind = _list.begin(), kend = _list.end(); kind != kend; ++kind)
-    {    
-        if (kind->second < min) continue;
-        else if (kind->first > max) 
-        {
-            kind = _list.insert(kind, fpair(max, kind->first));
-            //kend = _list.end();
-            break;
-        }
-        else if (kind->first > min && kind->second < max)
-        {
-            _list.erase(kind);
-            kend = _list.end();
-            --kind;
-            continue;
-        }
-        if (kind->first < min && kind->second > max) // need to split and add a range
-        {
-            kind = _list.insert(kind, fpair(kind->first, min));
-            //kend = _list.end();
-            ++kind;
-            kind->first = max;
-            break;
-        }
-        else if (kind->second < min)
-            kind->second = min;
-        else
-            kind->first = max;
-    }
-}
-
-static bool _cmplen(const BoundedGapList::fpair &t, const BoundedGapList::fpair &a)
-{
-    return (t.second - t.first < a.second - a.first);
-}
-
-float BoundedGapList::bestfit(float min, float max, bool &isGapFit)
-{
-    ivfpairs kstart, kend = _list.end();
-    float res = std::numeric_limits<float>::max();
-
-    if (!_isLenSorted)
-    {
-        std::sort(_list.begin(), _list.end(), _bylen);
-        _isLenSorted = true;
-    }
-    
-    kstart = std::upper_bound(_list.begin(), _list.end(), fpair(min, max), _cmplen);
-    if (kstart != kend)
-    {
-        isGapFit = true;
-        for ( ; kstart != kend; ++kstart)
-        {
-            float ires = kstart->first - min;
-            if (ires < 0.f && kstart->second > max)  // no collision, return no movement
-                return 0.f;
-            else if (ires < 0.f)
-                ires = kstart->second - max;
-            if (fabs(res) > fabs(ires))
-                res = ires;
-        }
-    }
-    else
-    {
-        ivfpairs kind = --kstart;
-        isGapFit = false;
-        kend = _list.begin();
-        --kend;
-        for ( ; kind != kend; --kind)
-        {
-            if (kind->second - kind->first != kstart->second - kstart->first)
-                break;
-            //float ires = 0.5 * (max - min) - 0.5 * (kind->second - kind->first) + min;
-            float ires = 0.5 * (max - min - kind->second + kind->first);
-            if (fabs(ires) < fabs(res))
-                res = ires;
-        }
-    }
-    return res;
-}
-
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
-void Collider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
+void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
 {
     int i;
     float max, min;
@@ -184,15 +71,10 @@ void Collider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float marg
     _margin = margin;
 }
 
-bool cmpfpair(float a, const Collider::fpair &b)
-{
-    return a < b.first;
-}
-
 // Adjust the movement limits for the target to avoid having it collide
 // with the given slot. Also determine if there is in fact a
 // collision between the target and the given slot.
-bool Collider::mergeSlot(Segment *seg, Slot *slot)
+bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot)
 {
     bool isCol = true;
     const float tx = _target->origin().x;
@@ -347,7 +229,7 @@ bool Collider::mergeSlot(Segment *seg, Slot *slot)
 }
 
 
-Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
+Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     int gid = _target->gid();
@@ -437,6 +319,35 @@ Position Collider::resolve(Segment *seg, bool &isCol, const Position &currshift,
 #endif
     isCol = !tIsGoodFit;
     return totalp;
+}
+
+
+
+void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
+{
+    const GlyphCache &gc = seg->getFace()->glyphs();
+    unsigned short gid = aSlot->gid();
+    float min = limit.bl.x + aSlot->origin().x + gc.getBoundingMetric(gid, 0);
+    float max = limit.tr.x + aSlot->origin().x + gc.getBoundingMetric(gid, 2);
+    int i;
+    for (i = 0; i < 4; ++i)
+    {
+        _ranges[i].clear();
+        _ranges[i].add(min, max);
+    }
+    _target = aSlot;
+    _limit = limit;
+    _margin = margin;
+}
+
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot)
+{
+    
+}
+
+Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
+{
+
 }
 
 // Initialize the structure for the given slot.

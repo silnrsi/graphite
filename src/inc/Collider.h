@@ -39,24 +39,6 @@ namespace graphite2 {
 class json;
 class Slot;
 
-class BoundedGapList
-{
-public:
-    typedef std::pair<float, float> fpair;
-    typedef Vector<fpair> vfpairs;
-    typedef vfpairs::iterator ivfpairs;
-
-    void reset(float min, float max);
-    void add(float min, float max);
-    float bestfit(float min, float max, bool &isGapFit);
-
-private:
-    float _min;
-    float _max;
-    vfpairs _list;
-    bool _isLenSorted;
-};
-
 class Collider
 {
 public:
@@ -64,9 +46,10 @@ public:
     typedef Vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
-    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
-    bool mergeSlot(Segment *seg, Slot *slot);
-    Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+    virtual ~Collider() throw() { };
+    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint, GR_MAYBE_UNUSED float margin) { };
+    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot) { return false; }
+    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED json * const dbgout) { return Position(); }
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
 //        if (!dbgout) return;
@@ -96,12 +79,39 @@ public:
     }
 #endif
 
-private:
+    CLASS_NEW_DELETE;
+
+protected:
     IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
 };
+
+class ShiftCollider : public Collider
+{
+public:
+    virtual ~ShiftCollider() throw() { };
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
+    virtual bool mergeSlot(Segment *seg, Slot *slot);
+    virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+
+    CLASS_NEW_DELETE;
+
+};
+
+class KernCollider : public Collider
+{
+public:
+    virtual ~KernCollider() throw() { };
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
+    virtual bool mergeSlot(Segment *seg, Slot *slot);
+    virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+
+    CLASS_NEW_DELETE;
+
+};
+
 
 class SlotCollision
 {

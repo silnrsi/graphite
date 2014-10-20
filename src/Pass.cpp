@@ -635,7 +635,7 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
 
 bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
 {
-    Collider coll;
+    ShiftCollider shiftcoll;
     bool isfirst = true;
     uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
     bool hasCollisions = false;
@@ -652,7 +652,7 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
             const SlotCollision *c = seg->collisionInfo(s);
             if (start && c->flags() & SlotCollision::COLL_TEST &&
                     (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
-                hasCollisions |= resolveCollisions(seg, s, start, &coll, isfirst, dbgout);
+                hasCollisions |= resolveShiftCollisions(seg, s, start, &shiftcoll, isfirst, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
@@ -666,7 +666,7 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     return true;
 }
 
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
+bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider *coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);

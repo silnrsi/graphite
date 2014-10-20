@@ -96,6 +96,8 @@ void IntervalSet::remove(IntervalSet::tpair interval)
     }
 }
 
+// Remove one interval set from another. Akin to removing each of the pairs in one set from
+// this, in sequence. It works faster because we know that interval sets are ordered.
 void IntervalSet::remove(IntervalSet &is)
 {
     IntervalSet::ivtpair t = is.begin(), tend = is.end();
@@ -117,18 +119,18 @@ void IntervalSet::remove(IntervalSet &is)
             s->first = t->second;       // overlap on one side
         if (s->second > t->first && s->second <= t->second)
             s->second = t->first;       // overlap on other side
+        if (s->first >= s->second)      // remove duplicates
+        {
+            _v.erase(s);
+            e = _v.end();
+            --s;
+        }
         if (t->second < s->second)
         {
             if (++t == tend)
                 break;
             else
                 continue;
-        }
-        if (s->first >= s->second)
-        {
-            _v.erase(s);
-            e = _v.end();
-            --s;
         }
         ++s;
     }
