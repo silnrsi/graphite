@@ -37,7 +37,7 @@ using namespace graphite2;
 
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
-void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
+void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currshift)
 {
     int i;
     float max, min;
@@ -69,20 +69,21 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _target = aSlot;
     _limit = limit;
     _margin = margin;
+    _currshift = currshift;
 }
 
 // Adjust the movement limits for the target to avoid having it collide
 // with the given slot. Also determine if there is in fact a
 // collision between the target and the given slot.
-bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot)
+bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift)
 {
     bool isCol = true;
-    const float tx = _target->origin().x;
-    const float ty = _target->origin().y;
+    const float tx = _target->origin().x + _currshift.x;
+    const float ty = _target->origin().y + _currshift.y;
     const float td = tx - ty;
     const float ts = tx + ty;
-    const float sx = slot->origin().x;
-    const float sy = slot->origin().y;
+    const float sx = slot->origin().x + currshift.x;
+    const float sy = slot->origin().y + currshift.y;
     const float sd = sx - sy;
     const float ss = sx + sy;
     float vmin, vmax;
@@ -323,7 +324,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
 
 
 
-void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin)
+void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currshift)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
@@ -338,10 +339,13 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _target = aSlot;
     _limit = limit;
     _margin = margin;
+    _miny = aSlot->origin().y + gc.getBoundingMetric(gid, 1);
+    _maxy = aSlot->origin().y + gc.getBoundingMetric(gid, 3);
 }
 
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot)
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift)
 {
+    const GlyphCache &gc = seg->getFace()->glyphs();
     
 }
 

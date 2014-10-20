@@ -670,7 +670,7 @@ bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCo
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll->initSlot(seg, slot, cslot->limit(), cslot->margin());
+    coll->initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift());
     bool collides = false;
     for (s = start; s; s = s->next())
     {
@@ -679,7 +679,7 @@ bool Pass::resolveShiftCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCo
             continue;	// don't test a slot against itself
         else if ((c->flags() & SlotCollision::COLL_IGNORE)) // || (c->flags() & SlotCollision::COLL_TEST))
             continue;
-        collides |= coll->mergeSlot(seg, s);
+        collides |= coll->mergeSlot(seg, s, cslot->shift());
         if (s != start && (c->flags() & SlotCollision::COLL_END))
             break;
     }

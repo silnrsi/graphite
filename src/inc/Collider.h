@@ -47,8 +47,8 @@ public:
     typedef vfpairs::iterator ivfpairs;
 
     virtual ~Collider() throw() { };
-    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint, GR_MAYBE_UNUSED float margin) { };
-    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot) { return false; }
+    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint, GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currshift) { };
+    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, GR_MAYBE_UNUSED const Position &currshift) { return false; }
     virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED json * const dbgout) { return Position(); }
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
@@ -86,14 +86,15 @@ protected:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
+    Position _currshift;
 };
 
 class ShiftCollider : public Collider
 {
 public:
     virtual ~ShiftCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
-    virtual bool mergeSlot(Segment *seg, Slot *slot);
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift);
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift);
     virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
     CLASS_NEW_DELETE;
@@ -104,12 +105,15 @@ class KernCollider : public Collider
 {
 public:
     virtual ~KernCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin);
-    virtual bool mergeSlot(Segment *seg, Slot *slot);
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift);
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift);
     virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
     CLASS_NEW_DELETE;
 
+private:
+    float _miny;
+    float _maxy;
 };
 
 
