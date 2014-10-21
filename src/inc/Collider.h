@@ -34,8 +34,6 @@ of the License or (at your option) any later version.
 #include "inc/debug.h"
 #include "inc/Segment.h"
 
-#include <vector>
-
 namespace graphite2 {
 
 class json;
@@ -93,8 +91,8 @@ protected:
     // Debugging
     IntervalSet _rawRanges[4];
     IntervalSet _removals[4];
-    std::vector<int> _gidNear[4];
-    std::vector<int> _subNear[4];
+    Vector<int> _gidNear[4];
+    Vector<int> _subNear[4];
 
 };
 

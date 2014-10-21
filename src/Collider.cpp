@@ -402,7 +402,7 @@ bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc
     float vmin, vmax, omin, omax;
     float otmin, otmax, cmin, cmax; 
     float ss = sx + sy;
-    float sd = sx - sd;
+    float sd = sx - sy;
     if (ig < 0 && it < 0)
     {
         vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
