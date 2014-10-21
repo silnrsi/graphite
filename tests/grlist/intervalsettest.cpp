@@ -178,9 +178,9 @@ int main(int /*argc*/, char ** /*argv*/)
     test.clear();
     test.add(fpair(-447.149, 121.39));
     testl = test.locate(fpair(-487.753, -106.255));
-    printRanges("locate(-487,-186) in (-447,121)", testl);
+    printRanges("          locate(-487,-186) in (-447,121)", testl);
     fres = testl.findClosestCoverage(0.);
-    printFloat("bestfit(0)", fres);
+    printFloat("          bestfit(0)", fres);
 
     test.clear();
     test.add(fpair(10., 90.));
@@ -224,6 +224,29 @@ int main(int /*argc*/, char ** /*argv*/)
     test.add(fpair(60., 90.));
     test.remove(fpair(20., 80.));
     res += doTest("Test 5 remove pair", test, base);
+
+    test.clear();
+    test.add(fpair(10., 30.));
+    test.add(fpair(40., 50.));
+    test.add(fpair(60., 90.));
+    test2.clear();
+    test2.add(15., 45.);
+    test2.add(65., 70.);
+    test2.add(75., 80.);
+    test.intersect(test2);
+    base.clear();
+    base.push_back(fpair(15., 30.));
+    base.push_back(fpair(40., 45.));
+    base.push_back(fpair(65., 70.));
+    base.push_back(fpair(75., 80.));
+    res += doTest("Test 6 intersection", test, base);
+
+    test.clear();
+    test.add(1332, 1433);
+    test.remove(1356, 1627);
+    base.clear();
+    base.push_back(fpair(1332, 1356));
+    res += doTest("Test 7 right overlap removal", test, base);
 
     return res;
 }

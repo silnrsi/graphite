@@ -46,6 +46,20 @@ IntervalSet IntervalSet::locate(IntervalSet::tpair interval)
     return res;
 }
 
+IntervalSet IntervalSet::locate(IntervalSet &is)
+{
+    IntervalSet res;
+    for (IntervalSet::ivtpair s = is.begin(), e = is.end(); s != e; )
+    {
+        IntervalSet temp = locate(*s);
+        if (s == is.begin())
+            res = temp;
+        else
+            res.intersect(temp);
+    }
+    return res;
+}
+
 // Add this interval to the list of possible range(s), merging elements of the list as necessary.
 // Eg, if the ranges are [{100..200), (500..700)], adding (150..300) will result in
 // [{100..300), (500..700)].
@@ -91,6 +105,7 @@ void IntervalSet::remove(IntervalSet::tpair interval)
         {
             _v.erase(s);
             --s;
+            e = _v.end();
             continue;
         }
         if (s->first < interval.first && s->second > interval.second)
@@ -153,6 +168,42 @@ void IntervalSet::remove(IntervalSet &is)
     }
 }
 
+void IntervalSet::intersect(IntervalSet &is)
+{
+    IntervalSet::ivtpair t = is.begin(), tend = is.end();
+    for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; )
+    {
+        if (s->second < t->first)
+        {
+            _v.erase(s);
+            e = _v.end();
+            continue;
+        }
+        if (s->first < t->first)
+            s->first = t->first;
+        if (t->second < s->second)
+        {
+            s = _v.insert(s, *s);
+            s->second = t->second;
+            ++s;
+            s->first = t->second;
+            e = _v.end();
+
+            if (++t == tend)
+            {
+                while (s != e)
+                {
+                    _v.erase(s);
+                    e = _v.end();
+                }
+                break;
+            }
+            continue;
+        }
+        ++s;
+    }
+}
+
 // Find a legal interval corresponding to val. Return the closest legal value.
 float IntervalSet::findClosestCoverage(float val)
 {
@@ -208,3 +259,4 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vm
     else
         return sbest;
 }
+

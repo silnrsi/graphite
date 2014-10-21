@@ -326,18 +326,17 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
                         << "testlen" << tlen
                         << "bestfit" << bestd
                         << "ranges";
+            debug(dbgout, seg, i);
+            *dbgout << "rawRanges" << json::flat << json::array;
             for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
-            *dbgout << json::close << "removals" << json::flat << json::array;
+            
+            *dbgout << json::close << "removals" << json::array;
   						
-  				  int gi = 0;
-            for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end();
-                    s != e; ++s, ++gi) {
-                *dbgout << _gidNear[i][gi] << _subNear[i][gi] << Position(s->first, s->second);
-            }
+  			int gi = 0;
+            for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
+                *dbgout << json::flat << json::array << _gidNear[i][gi] << _subNear[i][gi] << Position(s->first, s->second) << json::close;
             *dbgout << json::close;
-            *dbgout << "ranges";
-            debug(dbgout, seg, i);
             *dbgout << "fits" << json::flat << json::array;
             for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
@@ -494,7 +493,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
         {
             int level = int((gc.getSubBoundingMetric(tgid, i, 1) + ty - _miny) / step - 0.5);
             if (numsub > 0)
-                for (j = 0; j < numsub; ++j)
+                for (j = 0; j < numsub; ++j)        // O(N^2) don't use subboxes unless you really need them
                     res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, i, j, _ranges[level]);
             else
                 res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, i, -1, _ranges[level]);
@@ -515,7 +514,49 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
 Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currshift,
     GR_MAYBE_UNUSED json * const dbgout)
 {
-    return Position(0,0);
+    const GlyphCache &gc = seg->getFace()->glyphs();
+    uint16 tgid = _target->gid();
+    int numtsub = gc.numSubBounds(tgid);
+    float tx = _target->origin().x + currshift.x;
+    IntervalSet target[4];
+    IntervalSet res;
+    float step = (_maxy - _miny) / 4;
+    int i;
+    bool isGood = false;
+    float shiftx;
+
+
+    if (numtsub > 0)
+    {
+        for (i = 0; i < numtsub; ++i)
+        {
+            float yi = tx + gc.getSubBoundingMetric(tgid, i, 1);
+            int level = int((yi - _miny) / step - 0.5);
+            target[level].add(gc.getSubBoundingMetric(tgid, i, 0) + tx, gc.getSubBoundingMetric(tgid, i, 2));
+        }
+    }
+    else
+    {
+        target[0].add(gc.getBoundingMetric(tgid, 0) + tx, gc.getBoundingMetric(tgid, 2) + tx);
+    }
+
+    for (i = 0; i < (numtsub ? 4 : 0); ++i)
+    {
+        IntervalSet temp = _ranges[i].locate(target[i]);
+        if (i == 0)
+            res = temp;
+        else
+            res.intersect(temp);
+    }
+    shiftx = res.findBestWithMarginAndLimits(0., _margin, _limit.bl.x, _limit.tr.x, isGood);
+    if (shiftx > -1e38)
+        isCol = false;
+    else
+    {
+        shiftx = 0.,
+        isCol = true;
+    }
+    return Position(shiftx, 0);
 }
 
 // Initialize the structure for the given slot.
