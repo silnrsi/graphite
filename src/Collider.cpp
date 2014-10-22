@@ -317,7 +317,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
         }
         isGoodFit = true;
         aFit = _ranges[i].locate(torig, torig + tlen);
-        bestd = aFit.findBestWithMarginAndLimits(0., margin, cmin - torig, cmax - torig, isGoodFit);
+        bestd = aFit.findBestWithMarginAndLimits(0., margin / (i > 1 ? ISQRT2 : 1.), cmin - torig, cmax - torig, isGoodFit);
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
@@ -348,15 +348,15 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
         
         // See if this direction is the best one so far to move in.
         // Don't replace a good-fit move with a bad-fit move.
-        if ((isGoodFit && !tIsGoodFit) || ((isGoodFit || !tIsGoodFit) && fabs(bestd) * (i > 1 ? ISQRT2 : 1.f) < totald))
+        if ((isGoodFit && !tIsGoodFit) || ((isGoodFit || !tIsGoodFit) && fabs(bestd) < totald))
         {
-            totald = fabs(bestd) * (i > 1 ? ISQRT2 : 1.);
+            totald = fabs(bestd);
             tIsGoodFit = isGoodFit;
             switch (i) {
                 case 0 : totalp = Position(bestd, 0.); break;
                 case 1 : totalp = Position(0., bestd); break;
-                case 2 : totalp = Position(bestd, bestd); break;
-                case 3 : totalp = Position(bestd, -bestd); break;
+                case 2 : totalp = Position(bestd * ISQRT2, bestd * ISQRT2); break;
+                case 3 : totalp = Position(bestd * ISQRT2, -bestd * ISQRT2); break;
             }
         }
     }  // end of loop over 4 directions
