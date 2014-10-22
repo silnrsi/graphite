@@ -262,24 +262,28 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
     const GlyphCache &gc = seg->getFace()->glyphs();
     int gid = _target->gid();
     float margin;
-    float tlen, torig;
+    float tlen, tleft;
     float totald = std::numeric_limits<float>::max();
     Position totalp;
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
     IntervalSet aFit;
+    int flags = seg->collisionInfo(_target)->flags();
+    int kernFlag = flags & SlotCollision::COLL_KERN;
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-        *dbgout << json::object
+        *dbgout << json::object // slot
                 << "slot" << objectid(dslot(seg, _target)) 
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
-                    << json::close
-                << "ranges" << json::array;
+                    << "fix" << "shift";
+//        tempDebug(dbgout);
+        *dbgout     << json::close // target object
+        	      << "vectors" << json::array;
     }
 #endif
     for (int i = 0; i < 4; ++i)
@@ -292,58 +296,61 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
         switch (i) {
             case 0 :	// x direction
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
-                torig = _target->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
-                cmin = _limit.bl.x + torig;
-                cmax = _limit.tr.x + torig;
+                tleft = _target->origin().x + currshift.x + gc.getBoundingMetric(gid, 0);
+                cmin = _limit.bl.x + tleft;
+                cmax = _limit.tr.x + tleft;
                 break;
             case 1 :	// y direction
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
-                torig = _target->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
-                cmin = _limit.bl.y + torig;
-                cmax = _limit.tr.y + torig;
+                tleft = _target->origin().y + currshift.y + gc.getBoundingMetric(gid, 1);
+                cmin = _limit.bl.y + tleft;
+                cmax = _limit.tr.y + tleft;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
-                torig = _target->origin().x + _target->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
-                cmin = _limit.bl.x + _limit.bl.y + torig;
-                cmax = _limit.tr.x + _limit.tr.y + torig;
+                tleft = _target->origin().x + _target->origin().y + currshift.x + currshift.y + gc.getBoundingMetric(gid, 4);
+                cmin = _limit.bl.x + _limit.bl.y + tleft;
+                cmax = _limit.tr.x + _limit.tr.y + tleft;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
-                torig = _target->origin().x - _target->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
-                cmin = _limit.bl.x - _limit.tr.y + torig;
-                cmax = _limit.tr.x - _limit.bl.y + torig;
+                tleft = _target->origin().x - _target->origin().y + currshift.x - currshift.y + gc.getBoundingMetric(gid, 5);
+                cmin = _limit.bl.x - _limit.tr.y + tleft;
+                cmax = _limit.tr.x - _limit.bl.y + tleft;
                 break;
         }
         isGoodFit = true;
-        aFit = _ranges[i].locate(torig, torig + tlen);
-        bestd = aFit.findBestWithMarginAndLimits(0., margin / (i > 1 ? ISQRT2 : 1.), cmin - torig, cmax - torig, isGoodFit);
+        aFit = _ranges[i].locate(tleft, tleft + tlen);
+        bestd = aFit.findBestWithMarginAndLimits(0., margin / (i > 1 ? ISQRT2 : 1.), cmin - tleft, cmax - tleft, isGoodFit);
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
-            *dbgout << json::object
-                        << "testorigin" << torig
-                        << "testlen" << tlen
-                        << "bestfit" << bestd
-                        << "ranges";
-            debug(dbgout, seg, i);
+            *dbgout << json::object // vector
+                    << "testleft" << tleft
+                    << "testlen" << tlen;
+            
             *dbgout << "rawRanges" << json::flat << json::array;
             for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
-            
-            *dbgout << json::close << "removals" << json::array;
-  						
-  			int gi = 0;
+            *dbgout << json::close // rawRanges array
+                << "removals" << json::array;  						
+            int gi = 0;
             for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
                 *dbgout << json::flat << json::array << _gidNear[i][gi] << _subNear[i][gi] << Position(s->first, s->second) << json::close;
-            *dbgout << json::close;
+            *dbgout << json::close; // removals array
+            	
+            *dbgout << "ranges";
+            debug(dbgout, seg, i);
+
             *dbgout << "fits" << json::flat << json::array;
             for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
-            *dbgout << json::close << json::close;
+            *dbgout << json::close // fits array
+                    << "bestfit" << bestd
+                << json::close; // vectors object
         }
 #endif
-        //bestd = _ranges[i].bestfit(torig - margin, torig + tlen + margin, isGoodFit);
+        //bestd = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
         // bestd += bestd > 0.f ? -margin : margin;
         
         // See if this direction is the best one so far to move in.
@@ -362,7 +369,10 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, const Position &currs
     }  // end of loop over 4 directions
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
-        *dbgout << json::close << "result" << totalp << json::close;
+    {
+        *dbgout << json::close // vectors array
+            << "result" << totalp << json::close; // slot object
+    }
 #endif
     isCol = !tIsGoodFit;
     return totalp;
@@ -396,7 +406,8 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _subNear[i].clear();
 }
 
-bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty, int it, int ig, IntervalSet &range)
+bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, 
+        float sx, float sy, float tx, float ty, int it, int ig, IntervalSet &range)
 {
     float vmin, vmax, omin, omax;
     float otmin, otmax, cmin, cmax; 
@@ -525,6 +536,24 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currsh
     bool isGood = false;
     float shiftx;
 
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+    {
+        *dbgout << json::object // slot
+                << "slot" << objectid(dslot(seg, _target)) 
+                << "limit" << _limit
+                << "target" << json::object
+                    << "origin" << _target->origin()
+                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
+                    << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "fix" << "kern";
+//        tempDebug(dbgout);
+        *dbgout     << json::close // target object
+                << "ranges";
+        debug(dbgout, seg, -1);        	
+ 
+    }
+#endif
 
     if (numtsub > 0)
     {
@@ -556,6 +585,15 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currsh
         shiftx = 0.,
         isCol = true;
     }
+    
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+    {
+        *dbgout << "result" << shiftx
+            << json::close;
+    }
+#endif
+   
     return Position(shiftx, 0);
 }
 
@@ -574,3 +612,29 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
     _flags = seg->glyphAttr(gid, aCol);
 }
 
+
+#if !defined GRAPHITE2_NTRACING
+
+void Collider::tempDebug(json * const dbgout)
+{
+    *dbgout << "cclass" << "collider";
+}
+
+void ShiftCollider::tempDebug(json * const dbgout)
+{
+    *dbgout << "cclass" << "shiftcollider";
+}
+
+void KernCollider::tempDebug(json * const dbgout)
+{
+    *dbgout << "cclass" << "kerncollider";
+}
+#else
+
+void Collider::tempDebug(json * const dbgout) {}
+
+void ShiftCollider::tempDebug(json * const dbgout) {}
+
+void KernCollider::tempDebug(json * const dbgout) {}
+
+#endif

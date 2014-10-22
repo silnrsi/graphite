@@ -642,7 +642,7 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     bool hasCollisions = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)  *dbgout << "collisions" << json::array;
+    if (dbgout)  *dbgout << "collisions" << json::array; // (1)
     json::closer collisions_array_closer(dbgout);
 #endif
     for (int i = 0; i < numPasses; ++i)
@@ -659,8 +659,16 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
                     && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
             {
                 Collider &coll = shiftcoll;
+                bool fShift = true;
                 if ((c->flags() & SlotCollision::COLL_KERN) != 0)
+                {
                     coll = kerncoll;
+                    fShift = false;
+                }
+#if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+            *dbgout << json::flat << json::object << "shift" << fShift << json::close;
+#endif
                 hasCollisions |= resolveCollisions(seg, s, start, coll, isfirst, dbgout);
             }
             if (c->flags() & SlotCollision::COLL_END)
@@ -673,11 +681,20 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
         else
             isfirst = false;
     }
+//#if !defined GRAPHITE2_NTRACING
+//    if (dbgout) *dbgout << json::close; // (1)
+//#endif
+
     return true;
 }
 
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider &coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
+        Collider &coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
 {
+//#if !defined GRAPHITE2_NTRACING
+//        if (dbgout)
+//            coll.tempDebug(dbgout);
+//#endif
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
     coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift());
