@@ -390,6 +390,12 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     {
         _ranges[i].clear();
         _ranges[i].add(min, max);
+        // Debugging:
+        _rawRanges[i].clear();
+        _rawRanges[i].add(min, max);
+        _removals[i].clear();
+        _gidNear[i].clear();
+        _subNear[i].clear();
     }
     _target = aSlot;
     _limit = limit;
@@ -398,12 +404,6 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _maxy = aSlot->origin().y + gc.getBoundingMetric(gid, 3);
     _currshift = currshift;
     
-    // Debugging:
-    _rawRanges[i].clear();
-    _rawRanges[i].add(min, max);
-    _removals[i].clear();
-    _gidNear[i].clear();
-    _subNear[i].clear();
 }
 
 bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, 
@@ -560,8 +560,11 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currsh
         for (i = 0; i < numtsub; ++i)
         {
             float yi = tx + gc.getSubBoundingMetric(tgid, i, 1);
-            int level = int((yi - _miny) / step - 0.5);
-            target[level].add(gc.getSubBoundingMetric(tgid, i, 0) + tx, gc.getSubBoundingMetric(tgid, i, 2));
+            if (yi < _maxy && yi >= _miny)
+            {
+                int level = int((yi - _miny) / step - 0.5);
+                target[level].add(gc.getSubBoundingMetric(tgid, i, 0) + tx, gc.getSubBoundingMetric(tgid, i, 2));
+            }
         }
     }
     else

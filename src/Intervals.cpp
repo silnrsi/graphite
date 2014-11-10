@@ -49,7 +49,7 @@ IntervalSet IntervalSet::locate(IntervalSet::tpair interval)
 IntervalSet IntervalSet::locate(IntervalSet &is)
 {
     IntervalSet res;
-    for (IntervalSet::ivtpair s = is.begin(), e = is.end(); s != e; )
+    for (IntervalSet::ivtpair s = is.begin(), e = is.end(); s != e; ++s)
     {
         IntervalSet temp = locate(*s);
         if (s == is.begin())

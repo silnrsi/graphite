@@ -658,18 +658,18 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
             if (start && (c->flags() & SlotCollision::COLL_TEST)
                     && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
             {
-                Collider &coll = shiftcoll;
+                Collider *coll = &shiftcoll;
                 bool fShift = true;
                 if ((c->flags() & SlotCollision::COLL_KERN) != 0)
                 {
-                    coll = kerncoll;
+                    coll = &kerncoll;
                     fShift = false;
                 }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
             *dbgout << json::flat << json::object << "shift" << fShift << json::close;
 #endif
-                hasCollisions |= resolveCollisions(seg, s, start, coll, isfirst, dbgout);
+                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dbgout);
             }
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
