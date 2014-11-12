@@ -548,8 +548,7 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, const Position &currsh
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern";
 //        tempDebug(dbgout);
-        *dbgout     << json::close // target object
-                << "ranges";
+        *dbgout     << json::close; // target object
         debug(dbgout, seg, -1);        	
  
     }
