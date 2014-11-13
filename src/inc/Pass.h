@@ -71,8 +71,9 @@ private:
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
-    bool    collisionAvoidance(Segment *seg, json * const dbgout) const;
-    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider &coll, bool isfirst, json * const dbgout) const;
+    bool    collisionAvoidance(Segment *seg, int dir, json * const dbgout) const;
+    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider &coll, bool isfirst, 
+                     int dir, float & currKern, json * const dbgout) const;
 
     const Silf* m_silf;
     uint16    * m_cols;

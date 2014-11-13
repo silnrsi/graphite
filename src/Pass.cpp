@@ -333,6 +333,7 @@ bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
+    int dir = m.slotMap().segment.dir();
     if (!s || !testPassConstraint(m)) return;
     if ((m_flags & 7))
     {
@@ -341,7 +342,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
             m.slotMap().segment.positionSlots(0, 0, 0, false);
             m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
-        if (collisionAvoidance(&m.slotMap().segment, fsm.dbgout)) return;
+        if (collisionAvoidance(&m.slotMap().segment, dir, fsm.dbgout)) return;
     }
     else if (!m_numRules) return;
     Slot *currHigh = s->next();
@@ -633,7 +634,7 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
     }
 }
 
-bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
+bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 {
     ShiftCollider shiftcoll;
     KernCollider kerncoll;
@@ -652,9 +653,10 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
             *dbgout << json::flat << json::object << "loop" << i << json::close;
 #endif
         hasCollisions = false;
+        float currKern = 0;
         for (Slot *s = seg->first(); s != seg->last(); s = s->next())
         {
-            const SlotCollision *c = seg->collisionInfo(s);
+            const SlotCollision * c = seg->collisionInfo(s);
             if (start && (c->flags() & SlotCollision::COLL_TEST)
                     && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
             {
@@ -665,16 +667,15 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
                     coll = &kerncoll;
                     fShift = false;
                 }
-#if !defined GRAPHITE2_NTRACING
-        if (dbgout)
-            *dbgout << json::flat << json::object << "shift" << fShift << json::close;
-#endif
-                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dbgout);
+                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dir, currKern, dbgout);
             }
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
+                
+            float x = c->getKern(dir);
+            currKern += x;
         }
         if (!hasCollisions)
             return false;
@@ -688,27 +689,36 @@ bool Pass::collisionAvoidance(Segment *seg, json * const dbgout) const
     return true;
 }
 
+// Fix collisions for the given slot.
+// Return true if everything was fixed, false if there are still collisions remaining.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
-        Collider &coll, GR_MAYBE_UNUSED bool isfirst, json * const dbgout) const
+        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float & currKern, json * const dbgout) const
 {
-//#if !defined GRAPHITE2_NTRACING
-//        if (dbgout)
-//            coll.tempDebug(dbgout);
-//#endif
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift());
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir);
     bool collides = false;
+    bool ignoreForKern = true;
+    float loopKern = 0; // keep track of kerning through the loop
     for (s = start; s; s = s->next())
     {
         const SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
-            continue;	// don't test a slot against itself
+        {
+            // For kernable glyphs, ignore collisions for any glyphs that come before;
+            // only consider glyphs that come after.
+            ignoreForKern = false;
+            // Don't test a slot against itself.
+        }
         else if ((c->flags() & SlotCollision::COLL_IGNORE)) // || (c->flags() & SlotCollision::COLL_TEST))
-            continue;
-        collides |= coll.mergeSlot(seg, s, cslot->shift());
-        if (s != start && (c->flags() & SlotCollision::COLL_END))
-            break;
+        {} // Skip
+        else
+        {            
+            collides |= coll.mergeSlot(seg, s, cslot->shift(), loopKern, ignoreForKern, dbgout);
+            if (s != start && (c->flags() & SlotCollision::COLL_END))
+                break;
+        }
+        loopKern += c->getKern(dir);
     }
     bool isCol;
     if (collides)
@@ -737,5 +747,3 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     { cslot->flags((cslot->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
-// Fix collisions for the given slot.
-// Return true if everything was fixed, false if there are still collisions remaining.

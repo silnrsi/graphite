@@ -47,9 +47,17 @@ public:
     typedef vfpairs::iterator ivfpairs;
 
     virtual ~Collider() throw() { };
-    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint, GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currshift) { };
-    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, GR_MAYBE_UNUSED const Position &currshift) { return false; }
-    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED json * const dbgout) { return Position(); }
+    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
+                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED float currKern,
+                GR_MAYBE_UNUSED int dir)
+        { };
+    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
+                GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
+                GR_MAYBE_UNUSED json * const dbgout)
+        { return false; }
+    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, 
+                GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
+        { return Position(); }
     
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
@@ -64,7 +72,6 @@ public:
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
                     << json::close; // target object
-            ////tempDebug(dbgout);
             *dbgout << "ranges" << json::array;
             i = 0;
             imax = 3;
@@ -81,8 +88,6 @@ public:
     }
 #endif
 
-    virtual void tempDebug(json * const dbgout);
-
     CLASS_NEW_DELETE;
 
 protected:
@@ -91,6 +96,7 @@ protected:
     Rect    _limit;
     float   _margin;
     Position _currshift;
+    float   _kern;  // kerning that has happened in previous glyphs
     
     // Debugging
     IntervalSet _rawRanges[4];
@@ -104,12 +110,12 @@ class ShiftCollider : public Collider
 {
 public:
     virtual ~ShiftCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift);
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift, 
+                float currKern, int dir);
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
+                json * const dbgout);
     virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
 
-    virtual void tempDebug(json * const dbgout);
-    
     CLASS_NEW_DELETE;
 
 };
@@ -118,17 +124,19 @@ class KernCollider : public Collider
 {
 public:
     virtual ~KernCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift);
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift, 
+                float currKern, int dir);
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
+                json * const dbgout);
     virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
-
-    virtual void tempDebug(json * const dbgout);
 
     CLASS_NEW_DELETE;
 
 private:
-    bool removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty, int it, int ig, IntervalSet &range);
-    float _miny;
+    bool removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty,
+    		int it, int ig, IntervalSet &range,
+    		int row);
+    float _miny;	// y-coordinates offset by global slot position
     float _maxy;
 };
 
@@ -155,7 +163,9 @@ public:
     void margin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
     void flags(uint16 f) { _flags = f; }
-
+    
+    const float getKern(int dir) const;
+    
 private:
     Rect        _limit;
     Position    _shift;
