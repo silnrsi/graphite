@@ -83,7 +83,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     }
     _target = aSlot;
     _limit = limit;
-    if (dir & 1 == 0)
+    if ((dir & 1) == 0)
     {
         // For LTR, switch and negate x limits.
         _limit.bl.x = -1 * limit.tr.x;
@@ -402,8 +402,8 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
-    float minx = limit.bl.x + aSlot->origin().x + currKern + gc.getBoundingMetric(gid, 0);
-    float maxx = limit.tr.x + aSlot->origin().x + currKern + gc.getBoundingMetric(gid, 2);
+    float minx = limit.bl.x + aSlot->origin().x + currKern; + gc.getBoundingMetric(gid, 0);
+    float maxx = limit.tr.x + aSlot->origin().x + currKern; + gc.getBoundingMetric(gid, 2);
     _miny = aSlot->origin().y + gc.getBoundingMetric(gid, 1);
     _maxy = aSlot->origin().y + gc.getBoundingMetric(gid, 3);
     int i;
@@ -414,10 +414,10 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         for (i = 0; i < 4; ++i)
         {
             _ranges[i].clear();
-            _ranges[i].add(minx, maxx);
+            _ranges[i].add(minx + gc.getBoundingMetric(gid, 0), maxx + gc.getBoundingMetric(gid, 2));
             // Debugging:
             _rawRanges[i].clear();
-            _rawRanges[i].add(minx, maxx);
+            _rawRanges[i].add(minx + gc.getBoundingMetric(gid, 0), maxx + gc.getBoundingMetric(gid, 2));
             _removals[i].clear();
             _gidNear[i].clear();
             _subNear[i].clear();
@@ -435,15 +435,15 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             _subNear[i].clear();
         }
         const float step = (_maxy - _miny) / 4; // height of subboxes
-        const float bbBottom = gc.getBoundingMetric(gid, 1);
+        const float bbBottom = _miny - aSlot->origin().y;
         for (i = 0; i < numtsub; ++i) // loop over subboxes
         {
         	// which row the sub-box is on (0= bottom, 3 = top)
-            int row = floor((gc.getSubBoundingMetric(gid, i, 1) - bbBottom) / step);
-            minx = limit.bl.x + aSlot->origin().x + currKern + gc.getSubBoundingMetric(gid, i, 0);  // left
-            maxx = limit.tr.x + aSlot->origin().x + currKern + gc.getSubBoundingMetric(gid, i, 2);  // right
-            _ranges[row].add(minx, maxx);
-            _rawRanges[row].add(minx, maxx);
+            int row = int((gc.getSubBoundingMetric(gid, i, 1) - bbBottom) / step);
+            float ix = minx + gc.getSubBoundingMetric(gid, i, 0);  // left
+            float ax = maxx + gc.getSubBoundingMetric(gid, i, 2);  // right
+            _ranges[row].add(ix, ax);
+            _rawRanges[row].add(ix, ax);
         }
     }
     _target = aSlot;
@@ -563,13 +563,19 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
     {
         for (ti = 0; ti < numtsub; ++ti) // loop over subboxes
         {
-        	  // which row the sub-box is on (0= bottom, 3 = top)
-            int level = floor((gc.getSubBoundingMetric(tgid, ti, 1) + ty - _miny) / step);
             if (numsub > 0)
                 for (gi = 0; gi < numsub; ++gi)        // O(N^2) don't use subboxes unless you really need them
-                    res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, gi, _ranges[level], level);
+                {
+                    int level = int((gc.getSubBoundingMetric(gid, gi, 1) + sy - _miny - _currshift.y) / step);
+                    if (level >=0 && level < 4)
+                        res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, gi, _ranges[level], level);
+                }
             else
-                res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, -1, _ranges[level], level);
+            {
+                int level = int((smin - _miny - _currshift.y) / step);
+                if (level >= 0 && level < 4)
+                    res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, -1, _ranges[level], level);
+            }
         }
     }
     else
