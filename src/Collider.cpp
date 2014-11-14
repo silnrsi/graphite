@@ -40,7 +40,7 @@ using namespace graphite2;
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
 void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
-    const Position &currshift, float currKern, int dir, json * const dbgout)
+    const Position &currShift, float currKern, int dir, json * const dbgout)
 {
     int i;
     float max, min;
@@ -58,13 +58,13 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = limit.bl.y + aSlot->origin().y + gc.getBoundingMetric(gid, 1);
                 max = limit.tr.y + aSlot->origin().y + gc.getBoundingMetric(gid, 3);
                 break;
-            case 2 :	// sum (negatively sloped diagonal)
+            case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + currKern + aSlot->origin().y
                     + gc.getBoundingMetric(gid, 4);
                 max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + currKern + aSlot->origin().y
                     + gc.getBoundingMetric(gid, 6);
                 break;
-            case 3 :	// diff (positively sloped diagonal)
+            case 3 :	// diff (positively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x + currKern - aSlot->origin().y
                     + gc.getBoundingMetric(gid, 5);
                 max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x + currKern - aSlot->origin().y
@@ -90,27 +90,23 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
         _limit.tr.x = -1 * limit.bl.x;
     }
     _margin = margin;
-    _currshift = currshift;
-    _kern = currKern; // should be integrated into _currshift
+    _currShift = currShift;
+    _kern = currKern; // should be integrated into _currShift
 }
 
 // Adjust the movement limits for the target to avoid having it collide
 // with the given slot. Also determine if there is in fact a collision
 // between the target and the given slot.
-bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern,
+bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern,
     GR_MAYBE_UNUSED bool ignoreForKern, GR_MAYBE_UNUSED json * const dbgout )
 {
-
-//if (ignoreForKern)
-//	return false;
-	
     bool isCol = true;
-    const float tx = _target->origin().x + _kern + _currshift.x;
-    const float ty = _target->origin().y         + _currshift.y;
+    const float tx = _target->origin().x + _kern + _currShift.x;
+    const float ty = _target->origin().y         + _currShift.y;
     const float td = tx - ty;
     const float ts = tx + ty;
-    const float sx = slot->origin().x + currKern + currshift.x;
-    const float sy = slot->origin().y            + currshift.y;
+    const float sx = slot->origin().x + currKern + currShift.x;
+    const float sy = slot->origin().y            + currShift.y;
     const float sd = sx - sy;
     const float ss = sx + sy;
     float vmin, vmax;
@@ -153,7 +149,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshif
                 cmin = _limit.bl.y + ty + gc.getBoundingMetric(tgid, 1);
                 cmax = _limit.tr.y + ty + gc.getBoundingMetric(tgid, 3);
                 break;
-            case 2 :    // sum
+            case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
+                        // negatively-sloped boundaries.
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 4) + ss,
                                 2 * gc.getBoundingMetric(gid, 1) + 2 * sy + gc.getBoundingMetric(tgid, 5) + td),
                                 2 * gc.getBoundingMetric(gid, 0) + 2 * sx - gc.getBoundingMetric(tgid, 7) - td);
@@ -167,7 +164,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshif
                 cmin = _limit.bl.x + _limit.bl.y + ts + gc.getBoundingMetric(tgid, 4);
                 cmax = _limit.tr.x + _limit.tr.y + ts + gc.getBoundingMetric(tgid, 6);
                 break;
-            case 3 :    // diff
+            case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
+                        // positively-sloped boundaries.
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 5) + sd,
                                 2 * gc.getBoundingMetric(gid, 0) + 2 * sx - gc.getBoundingMetric(tgid, 6) - ts),
                                 gc.getBoundingMetric(tgid, 4) + ts - 2 * gc.getBoundingMetric(gid, 3) - 2 * sy);
@@ -294,7 +292,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 << "target" << json::object
                     << "origin" << _target->origin()
                     << "kern" << _kern
-                    << "currshift" << _currshift
+                    << "currShift" << _currShift
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "shift";
@@ -312,25 +310,25 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         switch (i) {
             case 0 :	// x direction
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
-                tleft = _target->origin().x + _kern + _currshift.x + gc.getBoundingMetric(gid, 0);
+                tleft = _target->origin().x + _kern + _currShift.x + gc.getBoundingMetric(gid, 0);
                 cmin = _limit.bl.x + tleft;
                 cmax = _limit.tr.x + tleft;
                 break;
             case 1 :	// y direction
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
-                tleft = _target->origin().y + _currshift.y + gc.getBoundingMetric(gid, 1);
+                tleft = _target->origin().y + _currShift.y + gc.getBoundingMetric(gid, 1);
                 cmin = _limit.bl.y + tleft;
                 cmax = _limit.tr.y + tleft;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
-                tleft = _target->origin().x + _kern + _target->origin().y + _currshift.x + _currshift.y + gc.getBoundingMetric(gid, 4);
+                tleft = _target->origin().x + _kern + _target->origin().y + _currShift.x + _currShift.y + gc.getBoundingMetric(gid, 4);
                 cmin = _limit.bl.x + _limit.bl.y + tleft;
                 cmax = _limit.tr.x + _limit.tr.y + tleft;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
-                tleft = _target->origin().x + _kern - _target->origin().y + _currshift.x - _currshift.y + gc.getBoundingMetric(gid, 5);
+                tleft = _target->origin().x + _kern - _target->origin().y + _currShift.x - _currShift.y + gc.getBoundingMetric(gid, 5);
                 cmin = _limit.bl.x - _limit.tr.y + tleft;
                 cmax = _limit.tr.x - _limit.bl.y + tleft;
                 break;
@@ -396,7 +394,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 
 ////    KERN-COLLIDER    ////
 
-void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currshift,
+void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currShift,
     float currKern, int dir, json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
@@ -460,7 +458,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _target = aSlot;
     _limit = limit;
     _margin = margin;
-    _currshift = currshift;
+    _currShift = currShift;
     _kern = currKern;
 }
 
@@ -547,7 +545,7 @@ bool KernCollider::removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc
     return true;
 }
 
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool ignoreForKern,
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern, bool ignoreForKern,
     json * const dbgout)
 {
     if (ignoreForKern)
@@ -556,13 +554,13 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
     const GlyphCache &gc = seg->getFace()->glyphs();
     uint16 gid = slot->gid();
     uint16 tgid = _target->gid();
-    const float sx = slot->origin().x + currKern + currshift.x;
-    const float sy = slot->origin().y + currshift.y;
+    const float sx = slot->origin().x + currKern + currShift.x;
+    const float sy = slot->origin().y + currShift.y;
     const float smin = sy + gc.getBoundingMetric(gid, 1);
     const float smax = sy + gc.getBoundingMetric(gid, 3);
     const float step = (_maxy - _miny) / 4; // height of subboxes
-    const float tx = _target->origin().x + _kern + _currshift.x;
-    const float ty = _target->origin().y + _currshift.y; // _currshift.y should always be 0
+    const float tx = _target->origin().x + _kern + _currShift.x;
+    const float ty = _target->origin().y + _currShift.y; // _currShift.y should always be 0
     int numtsub = gc.numSubBounds(tgid);
     int numsub = gc.numSubBounds(gid);
     int ti, gi;
@@ -579,7 +577,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
                 {
                     // Determine which level (row of the target's subbox grid) corresponds most closely
                     // to the neighboring glyph's subbox.
-                    int level = int((gc.getSubBoundingMetric(gid, gi, 1) + sy - _miny - _currshift.y) / step);
+                    int level = int((gc.getSubBoundingMetric(gid, gi, 1) + sy - _miny - _currShift.y) / step);
                     if (level >=0 && level < 4)
                         res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, gi, _ranges[level], level);
                     // otherwise neighboring subbox is offset vertically enough not to worry about it.
@@ -588,7 +586,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
             {
                 // Determine which level (row of the target's subbox grid) corresponds most closely
                 // to the neighboring glyph.
-                int level = int((smin - _miny - _currshift.y) / step);
+                int level = int((smin - _miny - _currShift.y) / step);
                 if (level >= 0 && level < 4)
                     res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, -1, _ranges[level], level);
                 // otherwise neighboring glyph is offset vertically enough not to worry about it.
@@ -622,8 +620,8 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
     const GlyphCache &gc = seg->getFace()->glyphs();
     uint16 tgid = _target->gid();
     int numtsub = gc.numSubBounds(tgid);
-    float tx = _target->origin().x + _kern + _currshift.x;
-    float ty = _target->origin().y + _currshift.y;
+    float tx = _target->origin().x + _kern + _currShift.x;
+    float ty = _target->origin().y + _currShift.y;
     IntervalSet targetRanges[4];
     IntervalSet aFit;
     float step = (_maxy - _miny) / 4;
@@ -640,7 +638,7 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
                 << "target" << json::object
                     << "origin" << _target->origin()
                     << "kern" << _kern
-                    << "currshift" << _currshift
+                    << "currShift" << _currShift
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern"

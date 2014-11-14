@@ -48,11 +48,11 @@ public:
 
     virtual ~Collider() throw() { };
     virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
-                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED float currKern,
+                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED float currKern,
                 GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout)
         { };
     virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-                const Position &currshift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
+                const Position &currShift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
                 GR_MAYBE_UNUSED json * const dbgout)
         { return false; }
     virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
@@ -94,7 +94,7 @@ protected:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
-    Position _currshift;
+    Position _currShift;
     float   _kern;  // kerning that has happened in previous glyphs
     
     // Debugging
@@ -109,9 +109,9 @@ class ShiftCollider : public Collider
 {
 public:
     virtual ~ShiftCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift, 
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
                 float currKern, int dir, json * const dbgout);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern, bool fIgnoreForKern,
                 json * const dbgout);
     virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
 
@@ -123,9 +123,9 @@ class KernCollider : public Collider
 {
 public:
     virtual ~KernCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currshift, 
+    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
                 float currKern, int dir, json * const dbgout);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
+    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern, bool fIgnoreForKern,
                 json * const dbgout);
     virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
 
