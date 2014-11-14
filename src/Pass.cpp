@@ -692,7 +692,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 // Fix collisions for the given slot.
 // Return true if everything was fixed, false if there are still collisions remaining.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
-        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float & currKern, json * const dbgout) const
+        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float currKern, json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
@@ -714,7 +714,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         {} // Skip
         else
         {            
-            collides |= coll.mergeSlot(seg, s, cslot->shift(), loopKern, ignoreForKern, dbgout);
+            collides |= coll.mergeSlot(seg, s, c->shift(), loopKern, ignoreForKern, dbgout);
             if (s != start && (c->flags() & SlotCollision::COLL_END))
                 break;
         }
@@ -723,7 +723,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     bool isCol;
     if (collides)
     {
-        Position shift = coll.resolve(seg, isCol, cslot->shift(), dbgout);
+        Position shift = coll.resolve(seg, isCol, dbgout);
         if (shift.x > -1e38 && shift.y > -1e38)
             cslot->shift(shift);
     }

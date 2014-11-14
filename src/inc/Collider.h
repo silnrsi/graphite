@@ -52,11 +52,10 @@ public:
                 GR_MAYBE_UNUSED int dir)
         { };
     virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-                GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
+                const Position &currshift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
                 GR_MAYBE_UNUSED json * const dbgout)
         { return false; }
-    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, 
-                GR_MAYBE_UNUSED const Position &currshift, GR_MAYBE_UNUSED json * const dbgout)
+    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
         { return Position(); }
     
 #if !defined GRAPHITE2_NTRACING
@@ -114,7 +113,7 @@ public:
                 float currKern, int dir);
     virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
                 json * const dbgout);
-    virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+    virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
 
     CLASS_NEW_DELETE;
 
@@ -128,7 +127,7 @@ public:
                 float currKern, int dir);
     virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currshift, const float currKern, bool fIgnoreForKern,
                 json * const dbgout);
-    virtual Position resolve(Segment *seg, bool &isCol, const Position &currshift, json * const dbgout);
+    virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
 
     CLASS_NEW_DELETE;
 
