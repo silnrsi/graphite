@@ -696,7 +696,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir);
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir, dbgout);
     bool collides = false;
     bool ignoreForKern = true;
     float loopKern = 0; // keep track of kerning through the loop

@@ -40,7 +40,7 @@ using namespace graphite2;
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
 void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
-    const Position &currshift, float currKern, int dir)
+    const Position &currshift, float currKern, int dir, json * const dbgout)
 {
     int i;
     float max, min;
@@ -397,7 +397,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 ////    KERN-COLLIDER    ////
 
 void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currshift,
-    float currKern, int dir)
+    float currKern, int dir, json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
@@ -435,15 +435,26 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         }
         const float step = (_maxy - _miny) / 4; // height of subboxes
         const float bbBottom = _miny - aSlot->origin().y;
+//#if !defined GRAPHITE2_NTRACING
+//*dbgout << json::flat << json::object <<"bbTop" << gc.getBoundingMetric(gid, 3) << "bbBottom" << bbBottom 
+//    << json::close;
+//#endif
         for (i = 0; i < numtsub; ++i) // loop over subboxes
         {
         	// which row the sub-box is on (0= bottom, 3 = top)
-            // 0.016 is 1/64 (ish) which corresponds to rounding error (_maxy - _miny)/256.
+            // 0.016 = 1/64 = (1/256)*4 which corresponds to possible rounding error (_maxy - _miny)/256.
             int row = int((gc.getSubBoundingMetric(gid, i, 1) - bbBottom) / step + 0.016);
             float ix = minx + gc.getSubBoundingMetric(gid, i, 0);  // left
             float ax = maxx + gc.getSubBoundingMetric(gid, i, 2);  // right
-            _ranges[row].add(ix, ax);
+            _ranges[row].add(ix, ax); // TODO: don't just add - extend endpoints so we have a single range
             _rawRanges[row].add(ix, ax);
+#if !defined GRAPHITE2_NTRACING
+            *dbgout << json::object << "subbox" << i << "row" << row
+                << "left" << gc.getSubBoundingMetric(gid, i, 0) << "right" << gc.getSubBoundingMetric(gid, i, 2)
+                << "top" << gc.getSubBoundingMetric(gid, i, 3) << "bottom" << gc.getSubBoundingMetric(gid, i, 1) 
+                << "minx" << minx << "maxx" << maxx 
+                << json::close;
+#endif
         }
     }
     _target = aSlot;
@@ -564,17 +575,23 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currshift
         for (ti = 0; ti < numtsub; ++ti) // loop over subboxes
         {
             if (numsub > 0)
-                for (gi = 0; gi < numsub; ++gi)        // O(N^2) don't use subboxes unless you really need them
+                for (gi = 0; gi < numsub; ++gi)  // this branch is O(N^2) - so don't use subboxes unless you really need them
                 {
+                    // Determine which level (row of the target's subbox grid) corresponds most closely
+                    // to the neighboring glyph's subbox.
                     int level = int((gc.getSubBoundingMetric(gid, gi, 1) + sy - _miny - _currshift.y) / step);
                     if (level >=0 && level < 4)
                         res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, gi, _ranges[level], level);
+                    // otherwise neighboring subbox is offset vertically enough not to worry about it.
                 }
             else
             {
+                // Determine which level (row of the target's subbox grid) corresponds most closely
+                // to the neighboring glyph.
                 int level = int((smin - _miny - _currshift.y) / step);
                 if (level >= 0 && level < 4)
                     res |= removeXCovering(gid, tgid, gc, sx, sy, tx, ty, ti, -1, _ranges[level], level);
+                // otherwise neighboring glyph is offset vertically enough not to worry about it.
             }
         }
     }
@@ -606,6 +623,7 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
     uint16 tgid = _target->gid();
     int numtsub = gc.numSubBounds(tgid);
     float tx = _target->origin().x + _kern + _currshift.x;
+    float ty = _target->origin().y + _currshift.y;
     IntervalSet targetRanges[4];
     IntervalSet aFit;
     float step = (_maxy - _miny) / 4;
@@ -658,11 +676,13 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
     {
         for (i = 0; i < numtsub; ++i)
         {
-            float yi = tx + gc.getSubBoundingMetric(tgid, i, 1);
-            if (yi < _maxy && yi >= _miny)
+            float yi = ty + gc.getSubBoundingMetric(tgid, i, 1);
+            if (_miny <= yi && yi < _maxy )
             {
-                int level = float((yi - _miny) / step);
-                targetRanges[level].add(gc.getSubBoundingMetric(tgid, i, 0) + tx, gc.getSubBoundingMetric(tgid, i, 2));
+                // 0.016 = 1/64 = (1/256)*4 which corresponds to possible rounding error (_maxy - _miny)/256.
+                int level = int((yi - _miny) / step + 0.016);
+                targetRanges[level].add(gc.getSubBoundingMetric(tgid, i, 0) + tx,
+                            gc.getSubBoundingMetric(tgid, i, 2) + tx);
             }
         }
     }
@@ -681,10 +701,10 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
     }
     
 #if !defined GRAPHITE2_NTRACING
-		*dbgout << "targetRanges" << json::flat << json::array;
-		for (i = 0; i < 4; ++i) {
-		    for (IntervalSet::ivtpair s = targetRanges[i].begin(), e = targetRanges[i].end(); s != e; ++s) {
-            *dbgout << Position(s->first, s->second);
+	*dbgout << "targetRanges" << json::flat << json::array;
+	for (i = 0; i < 4; ++i) {
+		for (IntervalSet::ivtpair s = targetRanges[i].begin(), e = targetRanges[i].end(); s != e; ++s) {
+            *dbgout << i << Position(s->first, s->second);
         }
     }
     *dbgout << json::close; // targetRanges array
