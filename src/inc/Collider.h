@@ -57,7 +57,7 @@ public:
         { return false; }
     virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
         { return Position(); }
-    
+        
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
 //        if (!dbgout) return;
@@ -91,17 +91,19 @@ public:
 
 protected:
     IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
+                            // for KernColliders these are 4 horizontal strata across the target glyph
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
     Position _currShift;
-    float   _kern;  // kerning that has happened in previous glyphs
+    float   _kern;          // kerning that has happened in previous glyphs
     
     // Debugging
     IntervalSet _rawRanges[4];
     IntervalSet _removals[4];
     Vector<int> _gidNear[4];
     Vector<int> _subNear[4];
+    Vector<int> _subTarget[4];
 
 };
 
@@ -135,7 +137,8 @@ private:
     bool removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty,
     		int it, int ig, IntervalSet &range,
     		int row);
-    float _miny;	// y-coordinates offset by global slot position
+    Rect _limitSpec;  // limits specified, as opposed to practical limits for determining possible movement
+    float _miny;	  // y-coordinates offset by global slot position
     float _maxy;
 };
 
