@@ -52,7 +52,7 @@ public:
                 GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout)
         { };
     virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-                const Position &currShift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
+                GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
                 GR_MAYBE_UNUSED json * const dbgout)
         { return false; }
     virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
@@ -166,7 +166,7 @@ public:
     uint16 flags() const { return _flags; }
     void flags(uint16 f) { _flags = f; }
     
-    const float getKern(int dir) const;
+    float getKern(int dir) const;
     
 private:
     Rect        _limit;

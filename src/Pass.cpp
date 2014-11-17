@@ -661,11 +661,11 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
             {
                 Collider *coll = &shiftcoll;
-                bool fShift = true;
+                // bool fShift = true;
                 if ((c->flags() & SlotCollision::COLL_KERN) != 0)
                 {
                     coll = &kerncoll;
-                    fShift = false;
+                    // fShift = false;
                 }
                 hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dir, currKern, dbgout);
             }

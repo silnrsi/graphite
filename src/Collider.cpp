@@ -770,12 +770,12 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
     _flags = seg->glyphAttr(gid, aCol);
 }
 
-const float SlotCollision::getKern(int dir) const
+float SlotCollision::getKern(int dir) const
 {
     if ((_flags & SlotCollision::COLL_KERN) != 0)
         return float(_shift.x * ((dir & 1) ? -1 : 1));
     else
-    	  return 0;
+    	return 0;
 }
 
 
