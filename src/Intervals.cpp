@@ -115,9 +115,9 @@ void IntervalSet::remove(IntervalSet::tpair interval)
             s->first = interval.second;
             e = _v.end();
         }
-        if (s->first < interval.second && s->first > interval.first)
+        if (s->first < interval.second && s->first >= interval.first)
             s->first = interval.second;     // overlap one side
-        if (s->second > interval.first && s->second < interval.second)
+        if (s->second > interval.first && s->second <= interval.second)
             s->second = interval.first;     // overlap other side
     }
 }
