@@ -333,7 +333,6 @@ bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
-    int dir = m.slotMap().segment.dir();
     if (!s || !testPassConstraint(m)) return;
     if ((m_flags & 7))
     {
@@ -342,7 +341,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
             m.slotMap().segment.positionSlots(0, 0, 0, false);
             m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
-        if (collisionAvoidance(&m.slotMap().segment, dir, fsm.dbgout)) return;
+        if (!collisionAvoidance(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout)) return;
     }
     else if (!m_numRules) return;
     Slot *currHigh = s->next();

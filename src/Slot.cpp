@@ -91,7 +91,6 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
-    // [TODO] Add collision shift support
     Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
@@ -100,7 +99,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         if (coll->flags() & SlotCollision::COLL_KERN)
         {
             tAdvance += collshift.x;
-            if ((seg->dir() & 1)
+            if (seg->dir() & 1)
                 shift = shift + collshift;
             // For LTR fonts, don't also shift when kerning.
         }

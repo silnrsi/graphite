@@ -441,11 +441,6 @@ bool Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
     return true;
 }
 
-void Segment::prepare_pos(const Font * /*font*/)
-{
-    // copy key changeable metrics into slot (if any);
-}
-
 Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror, BracketPairStack &stack);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Slot *s);
