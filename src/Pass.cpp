@@ -343,7 +343,7 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
         }
         if (!collisionAvoidance(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout)) return;
     }
-    else if (!m_numRules) return;
+    if (!m_numRules) return;
     Slot *currHigh = s->next();
 
 #if !defined GRAPHITE2_NTRACING

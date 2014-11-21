@@ -719,18 +719,19 @@ Position KernCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json *
     }
     
 #if !defined GRAPHITE2_NTRACING
-	*dbgout << "targetRanges" << json::flat << json::array;
-	for (i = 0; i < 4; ++i) {
-		for (IntervalSet::ivtpair s = targetRanges[i].begin(), e = targetRanges[i].end(); s != e; ++s) {
-            *dbgout << i << Position(s->first, s->second);
-        }
-    }
-    *dbgout << json::close; // targetRanges array
+    if (dbgout)
+    {
+        *dbgout << "targetRanges" << json::flat << json::array;
+        for (i = 0; i < 4; ++i)
+            for (IntervalSet::ivtpair s = targetRanges[i].begin(), e = targetRanges[i].end(); s != e; ++s)
+                *dbgout << i << Position(s->first, s->second);
+        *dbgout << json::close; // targetRanges array
 
-    *dbgout << "fits" << json::flat << json::array;
-    for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
-                *dbgout << Position(s->first, s->second);
-    *dbgout << json::close; // fits array
+        *dbgout << "fits" << json::flat << json::array;
+        for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
+            *dbgout << Position(s->first, s->second);
+        *dbgout << json::close; // fits array
+    }
 #endif
 
     shiftx = aFit.findBestWithMarginAndLimits(0., _margin, _limit.bl.x, _limit.tr.x, isGood);
