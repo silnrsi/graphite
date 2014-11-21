@@ -701,7 +701,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     float loopKern = 0; // keep track of kerning through the loop
     for (s = start; s; s = s->next())
     {
-        const SlotCollision *c = seg->collisionInfo(s);
+        SlotCollision *c = seg->collisionInfo(s);
         if (s == slot)
         {
             // For kernable glyphs, ignore collisions for any glyphs that come before;
@@ -717,7 +717,11 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
             if (s != start && (c->flags() & SlotCollision::COLL_END))
                 break;
         }
-        loopKern += c->getKern(dir);
+        if (c->getKern(dir) != 0.)
+        {
+            loopKern += c->getKern(dir);
+            c->shift(Position(0., c->shift().y));
+        }
     }
     bool isCol;
     if (collides)
