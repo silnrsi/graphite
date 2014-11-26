@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <math.h>
 #include "inc/Segment.h"
 #include "inc/Code.h"
 #include "inc/Rule.h"
@@ -724,7 +725,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     if (collides)
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
-        if (shift.x > -1e38 && shift.y > -1e38)
+        if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
             cslot->shift(shift);
     }
     else
