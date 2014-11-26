@@ -227,8 +227,8 @@ float IntervalSet::findClosestCoverage(float val)
 
 float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vmin, float vmax, bool &isGood)
 {
-    float best = -std::numeric_limits<float>::max();
-    float sbest = best;
+    float best = std::numeric_limits<float>::max();
+    float sbest = -best;
     isGood = false;
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {

@@ -124,7 +124,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
     {
-        uint16 m = _margin * (i > 1 ? ISQRT2 : 1.);  // adjusted margin by depending on whether the vector is diagonal
+        uint16 m = _margin / (i > 1 ? ISQRT2 : 1.);  // adjusted margin by depending on whether the vector is diagonal
         switch (i) {
             case 0 :	// x direction
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 0) + sx,
