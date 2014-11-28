@@ -641,6 +641,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     bool isfirst = true;
     uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
     bool hasCollisions = false;
+    bool adjustmentMade = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)  *dbgout << "collisions" << json::array; // (1)
@@ -653,6 +654,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             *dbgout << json::flat << json::object << "loop" << i << json::close;
 #endif
         hasCollisions = false;
+        adjustmentMade = false;
+        
         float currKern = 0;
         for (Slot *s = seg->first(); s != seg->last(); s = s->next())
         {
@@ -667,7 +670,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     coll = &kerncoll;
                     // fShift = false;
                 }
-                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dir, currKern, dbgout);
+                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dir, currKern, adjustmentMade, dbgout);
             }
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
@@ -679,6 +682,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         }
         if (!hasCollisions)
             return false;
+        else if (!adjustmentMade)
+            return true;    // still collisions that can't be fixed
         else
             isfirst = false;
     }
@@ -686,13 +691,14 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 //    if (dbgout) *dbgout << json::close; // (1)
 //#endif
 
-    return true;
+    return true;    // still collisions
 }
 
 // Fix collisions for the given slot.
 // Return true if everything was fixed, false if there are still collisions remaining.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
-        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float currKern, json * const dbgout) const
+        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float currKern, bool & adjustmentMade,
+        json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
@@ -726,7 +732,11 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
         if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
+        {
             cslot->shift(shift);
+            if (fabs(shift.x) > 0 || fabs(shift.y) > 0)
+                adjustmentMade = true;
+        }
     }
     else
     {
@@ -741,7 +751,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         }
 #endif
     }
-        
+            
     if (isCol)
     { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
