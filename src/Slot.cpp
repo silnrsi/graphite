@@ -91,21 +91,22 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
-    Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
-    float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
     {
         const Position &collshift = coll->shift();
         if (coll->flags() & SlotCollision::COLL_KERN)
         {
-            tAdvance += collshift.x;
+            m_advance = m_advance + collshift;
             if (seg->dir() & 1)
-                shift = shift + collshift;
+                m_shift = m_shift + collshift;
             // For LTR fonts, don't also shift when kerning.
         }
         else
-            shift = shift + collshift;
+            m_shift = m_shift + collshift;
+        coll->shift(Position(0, 0));
     }
+    Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
+    float tAdvance = m_advance.x + m_just;
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
     {
@@ -492,4 +493,20 @@ void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
         v[2] = seg->glyphAttr(s->gid(), justs->attrStep());
         v[3] = seg->glyphAttr(s->gid(), justs->attrWeight());
     }
+}
+
+Slot * Slot::nextInCluster(const Slot *s) const
+{
+    Slot *base;
+    if (s->firstChild())
+        return s->firstChild();
+    else if (s->nextSibling())
+        return s->nextSibling();
+    while (base = s->attachedTo())
+    {
+        if (base->firstChild() == s && base->nextSibling())
+            return base->nextSibling();
+        s = base;
+    }
+    return NULL;
 }

@@ -39,25 +39,21 @@ namespace graphite2 {
 class json;
 class Slot;
 
-class Collider
+class ShiftCollider
 {
 public:
     typedef std::pair<float, float> fpair;
     typedef Vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
-    virtual ~Collider() throw() { };
-    virtual void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
-                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED float currKern,
-                GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout)
-        { };
-    virtual bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-                GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED const float currKern, GR_MAYBE_UNUSED bool ignoreForKern,
-                GR_MAYBE_UNUSED json * const dbgout)
-        { return false; }
-    virtual Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
-        { return Position(); }
-        
+    ~ShiftCollider() throw() { };
+    void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
+                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currShift,
+                GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
+    bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
+                GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED json * const dbgout);
+    Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
+
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
 //        if (!dbgout) return;
@@ -96,7 +92,6 @@ protected:
     Rect    _limit;
     float   _margin;
     Position _currShift;
-    float   _kern;          // kerning that has happened in previous glyphs
     
     // Debugging
     IntervalSet _rawRanges[4];
@@ -107,39 +102,29 @@ protected:
 
 };
 
-class ShiftCollider : public Collider
+class KernCollider
 {
 public:
-    virtual ~ShiftCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
+    ~KernCollider() throw() { };
+    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
                 float currKern, int dir, json * const dbgout);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern, bool fIgnoreForKern,
-                json * const dbgout);
-    virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
-
-    CLASS_NEW_DELETE;
-
-};
-
-class KernCollider : public Collider
-{
-public:
-    virtual ~KernCollider() throw() { };
-    virtual void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
-                float currKern, int dir, json * const dbgout);
-    virtual bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, const float currKern, bool fIgnoreForKern,
-                json * const dbgout);
-    virtual Position resolve(Segment *seg, bool &isCol, json * const dbgout);
+    bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, int dir, json * const dbgout);
+    Position resolve(Segment *seg, int dir, json * const dbgout);
 
     CLASS_NEW_DELETE;
 
 private:
-    bool removeXCovering(uint16 gid, uint16 tgid, const GlyphCache &gc, float sx, float sy, float tx, float ty,
-    		int it, int ig, IntervalSet &range,
-    		int row);
+    Slot *  _target;        // the glyph to fix
+    Rect    _limit;
+    float   _margin;
+    Position _currShift;
     Rect _limitSpec;  // limits specified, as opposed to practical limits for determining possible movement
     float _miny;	  // y-coordinates offset by global slot position
     float _maxy;
+    Vector<float> _edges;
+    int   _numSlices;
+    float _mingap;
+    float _xbound;
 };
 
 
