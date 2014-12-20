@@ -132,6 +132,7 @@ public:
     void floodShift(Position adj);
     float just() const { return m_just; }
     void just(float j) { m_just = j; }
+    Slot *nextInCluster(const Slot *s) const;
 
     CLASS_NEW_DELETE
 

@@ -529,7 +529,7 @@ a fast binary search engine:
 Each element in the lookup consists of a glyphId and the corresponding
 index in the original ordered list.
 
-.ookupPair
+.LookupPair
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
 |Type |Name |Description |Version notes
@@ -624,7 +624,8 @@ precedence of rules |
 number of items in the context before the first modified item, one for
 each rule |
 
-|BYTE |reserved | |2.0 – inserted
+|BYTE |numColStrata | Number of stripes to analyse a run into for collision
+kerning purposes |2.0 – inserted, 5.0 – added
 
 |USHORT |pConstraint |Length of passConstraint block |2.0 – added
 

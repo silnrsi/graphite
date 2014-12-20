@@ -493,3 +493,19 @@ void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
         v[3] = seg->glyphAttr(s->gid(), justs->attrWeight());
     }
 }
+
+Slot * Slot::nextInCluster(const Slot *s) const
+{
+    Slot *base;
+    if (s->firstChild())
+        return s->firstChild();
+    else if (s->nextSibling())
+        return s->nextSibling();
+    while (base = s->attachedTo())
+    {
+        if (base->firstChild() == s && base->nextSibling())
+            return base->nextSibling();
+        s = base;
+    }
+    return NULL;
+}

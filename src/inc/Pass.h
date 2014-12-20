@@ -39,12 +39,13 @@ struct RuleEntry;
 struct State;
 class FiniteStateMachine;
 class Error;
-class Collider;
+class ShiftCollider;
+class KernCollider;
 class json;
 
 class Pass
 {   
-public:
+public
     Pass();
     ~Pass();
     
@@ -54,7 +55,7 @@ public:
     byte flags() const { return m_flags; }
 
     CLASS_NEW_DELETE
-private:
+private
     void    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
     int     doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
     bool    testPassConstraint(vm::Machine & m) const;
@@ -96,7 +97,7 @@ private:
     byte m_maxPreCtxt;
     vm::Machine::Code m_cPConstraint;
     
-private:        //defensive
+private        //defensive
     Pass(const Pass&);
     Pass& operator=(const Pass&);
 };

@@ -244,10 +244,17 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vm
         }
         else if ((s->second - s->first) > 2 * margin)
         {
-            if ((!isGood || s->first + margin > -best) && (s->first + margin > vmin && s->first + margin < vmax))
-                best = s->first + margin;
-            isGood = true;
-            return best;
+            if (s->first + margin > vmin && s->first + margin < vmax)
+            {
+                if (!isGood || s->first + margin > -best)
+                {
+                    best = s->first + margin;
+                    isGood = true;
+                    return best;
+                }
+                else
+                    sbest = s->first + margin;
+            }
         }
         else if (!isGood && (s->first + s->second) / 2 < -sbest && (s->first + s->second) / 2 > vmin && (s->first + s->second) / 2 < vmax)
         {
