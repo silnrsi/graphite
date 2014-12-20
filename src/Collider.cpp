@@ -59,24 +59,24 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     {
         switch (i) {
             case 0 :	// x direction
-                min = limit.bl.x + aSlot->origin().x + gc.getBoundingMetric(gid, 0);
-                max = limit.tr.x + aSlot->origin().x + gc.getBoundingMetric(gid, 2);
+                min = limit.bl.x + aSlot->origin().x - currShift.x + gc.getBoundingMetric(gid, 0);
+                max = limit.tr.x + aSlot->origin().x - currShift.x + gc.getBoundingMetric(gid, 2);
                 break;
             case 1 :	// y direction
-                min = limit.bl.y + aSlot->origin().y + gc.getBoundingMetric(gid, 1);
-                max = limit.tr.y + aSlot->origin().y + gc.getBoundingMetric(gid, 3);
+                min = limit.bl.y + aSlot->origin().y - currShift.y + gc.getBoundingMetric(gid, 1);
+                max = limit.tr.y + aSlot->origin().y - currShift.y + gc.getBoundingMetric(gid, 3);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y
-                    + gc.getBoundingMetric(gid, 4);
+                    - currShift.x - currShift.y + gc.getBoundingMetric(gid, 4);
                 max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y
-                    + gc.getBoundingMetric(gid, 6);
+                    - currShift.x - currShift.y + gc.getBoundingMetric(gid, 6);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x + aSlot->origin().y
-                    + gc.getBoundingMetric(gid, 5);
+                    - currShift.x + currShift.y + gc.getBoundingMetric(gid, 5);
                 max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x + aSlot->origin().y
-                    + gc.getBoundingMetric(gid, 7);
+                    - currShift.x + currShift.y + gc.getBoundingMetric(gid, 7);
                 break;
         }
         _ranges[i].clear();
