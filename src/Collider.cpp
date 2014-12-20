@@ -50,9 +50,9 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     float max, min;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
-    if (currShift.x != 0. || currShift.y != 0.)
-        _limit = Rect(limit.bl - currShift, limit.tr - currShift);
-    else
+//    if (currShift.x != 0. || currShift.y != 0.)
+//        _limit = Rect(limit.bl - currShift, limit.tr - currShift);
+//    else
         _limit = limit;
     // For a ShiftCollider, these indices indicate which vector we are moving by:
     for (i = 0; i < 4; ++i)
@@ -350,7 +350,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             case 0 : testp = Position(bestd, _currShift.y); break;
             case 1 : testp = Position(_currShift.x, bestd); break;
             case 2 : testp = Position(0.5 * (bestd + _currShift.x - _currShift.y), 0.5 * (bestd - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestd + _currShift.x + _currShift.y), 0.5 * (_currShift.x - _currShift.y - bestd)); break;
+            case 3 : testp = Position(0.5 * (bestd + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestd)); break;
         }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)

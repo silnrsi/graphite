@@ -91,22 +91,21 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = 1.0;
+    Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
+    float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
     {
         const Position &collshift = coll->shift();
         if (coll->flags() & SlotCollision::COLL_KERN)
         {
-            m_advance = m_advance + collshift;
+            tAdvance += collshift.x;
             if (seg->dir() & 1)
-                m_shift = m_shift + collshift;
+                shift = shift + collshift;
             // For LTR fonts, don't also shift when kerning.
         }
         else
-            m_shift = m_shift + collshift;
-        coll->shift(Position(0, 0));
+            shift = shift + collshift;
     }
-    Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
-    float tAdvance = m_advance.x + m_just;
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
     {
