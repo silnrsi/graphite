@@ -639,9 +639,9 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     ShiftCollider shiftcoll;
     KernCollider kerncoll;
     bool isfirst = true;
-    uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
+    const uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
     bool hasCollisions = false;
-    bool adjustmentMade = false;
+    bool hasKerns = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)  *dbgout << "collisions" << json::array; // (1)
@@ -717,6 +717,42 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     }
     seg->positionSlots();
     return hasCollisions;   // but this isn't accurate if we have kerning
+}
+
+// Fix collisions for the given slot.
+// Return true if everything was fixed, false if there are still collisions remaining.
+bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
+        ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, json * const dbgout) const
+{
+    Slot *s;
+    SlotCollision *cslot = seg->collisionInfo(slot);
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), dir, dbgout);
+    bool collides = false;
+    bool ignoreForKern = !isRev;
+    float loopKern = 0; // keep track of kerning through the loop
+    Position zero(0., 0.);
+    for (s = start; s; s = isRev ? s->prev() : s->next())
+    {
+        SlotCollision *c = seg->collisionInfo(s);
+        if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) 
+                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN))
+                      && (!isRev || !ignoreForKern || !(c->flags() & SlotCollision::COLL_TEST) || (c->flags() & SlotCollision::COLL_KERN)))
+            collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
+        else if (s == slot)
+            ignoreForKern = !ignoreForKern;
+        if (s != start && (c->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
+            break;
+    }
+    bool isCol;
+    if (collides || cslot->shift().x != 0. || cslot->shift().y != 0.)
+    {
+        Position shift = coll.resolve(seg, isCol, dbgout);
+        if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
+            cslot->shift(shift);
+    }
+    else
+    {
+        isCol = false;
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
@@ -726,101 +762,15 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             *dbgout << json::close;
         }
 #endif
-        hasCollisions = false;
-        adjustmentMade = false;
-        
-        float currKern = 0;
-        for (Slot *s = seg->first(); s != seg->last(); s = s->next())
-        {
-            const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & SlotCollision::COLL_TEST)
-                    && (!(c->flags() & SlotCollision::COLL_KNOWN) || (c->flags() & SlotCollision::COLL_ISCOL)))
-            {
-                Collider *coll = &shiftcoll;
-                // bool fShift = true;
-                if ((c->flags() & SlotCollision::COLL_KERN) != 0)
-                {
-                    coll = &kerncoll;
-                    // fShift = false;
-                }
-                hasCollisions |= resolveCollisions(seg, s, start, *coll, isfirst, dir, currKern, adjustmentMade, dbgout);
-            }
-            if (c->flags() & SlotCollision::COLL_END)
-                start = NULL;
-            if (c->flags() & SlotCollision::COLL_START)
-                start = s;
-                
-            float x = c->getKern(dir);
-            currKern += x;
-        }
-        if (!hasCollisions)
-            return false;
-        else if (!adjustmentMade)
-            return true;    // still collisions that can't be fixed
-        else
-            isfirst = false;
     }
-//#endif
 
-    return true;    // still collisions
-}
-
-// Fix collisions for the given slot.
-// Return true if everything was fixed, false if there are still collisions remaining.
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
-        Collider &coll, GR_MAYBE_UNUSED bool isfirst, int dir, float currKern, bool & adjustmentMade,
-        json * const dbgout) const
-{
-    Slot *s;
-    SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir, dbgout);
-    bool collides = false;
-    bool ignoreForKern = true;
-    float loopKern = 0; // keep track of kerning through the loop
-    Position zero(0., 0.);
-    for (s = start; s; s = s->next())
-    {
-        SlotCollision *c = seg->collisionInfo(s);
-        if (s == slot)
-        {
-            // For kernable glyphs, ignore collisions for any glyphs that come before;
-            // only consider glyphs that come after.
-            ignoreForKern = false;
-            // Don't test a slot against itself.
-        }
-        else if ((c->flags() & SlotCollision::COLL_IGNORE)) // || (c->flags() & SlotCollision::COLL_TEST))
-        {} // Skip
-        else
-        {            
-            collides |= coll.mergeSlot(seg, s, c->flags() & SlotCollision::COLL_KERN ? zero : c->shift(), loopKern, ignoreForKern, dbgout);
-            if (s != start && (c->flags() & SlotCollision::COLL_END))
-                break;
-        }
-        loopKern += c->getKern(dir);
-    }
-    bool isCol;
-    if (collides)
-    {
-        Position shift = coll.resolve(seg, isCol, dbgout);
-        if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
-        {
-            cslot->shift(shift);
-            if (fabs(shift.x) > 0 || fabs(shift.y) > 0)
-                adjustmentMade = true;
-        }
-    }
-    else
-    {
-        isCol = false;
-#endif
-    }
-            
     if (isCol)
     { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
     { cslot->flags((cslot->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
+
 float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir, float currKern, json *const dbgout) const
 {
     Slot *s;
@@ -854,3 +804,5 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
     // test each box/subbox against slice value in x
         // if possible test slice+1 and slice-1 at angle
         // if OK, perahps update mindiff
+// return mindiff + currKern and update advance or whatever
+

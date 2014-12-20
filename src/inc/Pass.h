@@ -45,7 +45,7 @@ class json;
 
 class Pass
 {   
-public
+public:
     Pass();
     ~Pass();
     
@@ -55,7 +55,7 @@ public
     byte flags() const { return m_flags; }
 
     CLASS_NEW_DELETE
-private
+private:
     void    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
     int     doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
     bool    testPassConstraint(vm::Machine & m) const;
@@ -73,8 +73,10 @@ private
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
     bool    collisionAvoidance(Segment *seg, int dir, json * const dbgout) const;
-    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, Collider &coll, bool isfirst, 
-                     int dir, float currKern, bool & adjustmentMade, json * const dbgout) const;
+    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
+                     int dir, json * const dbgout) const;
+    float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
+                     float currKern, json *const dbgout) const;
 
     const Silf* m_silf;
     uint16    * m_cols;
@@ -97,7 +99,7 @@ private
     byte m_maxPreCtxt;
     vm::Machine::Code m_cPConstraint;
     
-private        //defensive
+private:        //defensive
     Pass(const Pass&);
     Pass& operator=(const Pass&);
 };
