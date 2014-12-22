@@ -95,7 +95,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
     {
-        const Position &collshift = coll->shift();
+        const Position &collshift = coll->offset();
         if (coll->flags() & SlotCollision::COLL_KERN)
         {
             tAdvance += collshift.x;

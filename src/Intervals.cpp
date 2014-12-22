@@ -246,7 +246,7 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vm
         {
             if (s->first + margin > vmin && s->first + margin < vmax)
             {
-                if (!isGood || s->first + margin > -best)
+                if (!isGood || s->first + margin < -best)
                 {
                     best = s->first + margin;
                     isGood = true;

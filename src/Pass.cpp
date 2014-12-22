@@ -715,6 +715,14 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                 start = s;
         }
     }
+    for (Slot *s = seg->first(); s; s = s->next())
+    {
+        SlotCollision *c = seg->collisionInfo(s);
+        const Position newOffset = c->offset() + c->shift();
+        const Position nullPosition(0, 0);
+        c->offset(newOffset);
+        c->shift(nullPosition);
+    }
     seg->positionSlots();
     return hasCollisions;   // but this isn't accurate if we have kerning
 }
@@ -726,7 +734,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), dir, dbgout);
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->offset(), dir, dbgout);
     bool collides = false;
     bool ignoreForKern = !isRev;
     float loopKern = 0; // keep track of kerning through the loop

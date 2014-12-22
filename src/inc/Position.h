@@ -50,6 +50,7 @@ public :
     Rect(const Position& botLeft, const Position& topRight): bl(botLeft), tr(topRight) {}
     Rect widen(const Rect& other) { return Rect(Position(bl.x > other.bl.x ? other.bl.x : bl.x, bl.y > other.bl.y ? other.bl.y : bl.y), Position(tr.x > other.tr.x ? tr.x : other.tr.x, tr.y > other.tr.y ? tr.y : other.tr.y)); }
     Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
+    Rect operator - (const Position &a) const { return Rect(Position(bl.x - a.x, bl.y - a.y), Position(tr.x - a.x, tr.y - a.y)); }
     Rect operator * (float m) const { return Rect(Position(bl.x, bl.y) * m, Position(tr.x, tr.y) * m); }
 
     bool hitTest(Position &offset, Rect &other, Position &otherOffset, float margin = 0.);

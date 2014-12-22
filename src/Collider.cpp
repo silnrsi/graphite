@@ -50,33 +50,33 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     float max, min;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
-//    if (currShift.x != 0. || currShift.y != 0.)
-//        _limit = Rect(limit.bl - currShift, limit.tr - currShift);
-//    else
+    if (currShift.x != 0. || currShift.y != 0.)
+        _limit = Rect(limit.bl - currShift, limit.tr - currShift);
+    else
         _limit = limit;
     // For a ShiftCollider, these indices indicate which vector we are moving by:
     for (i = 0; i < 4; ++i)
     {
         switch (i) {
             case 0 :	// x direction
-                min = limit.bl.x + aSlot->origin().x - currShift.x + gc.getBoundingMetric(gid, 0);
-                max = limit.tr.x + aSlot->origin().x - currShift.x + gc.getBoundingMetric(gid, 2);
+                min = limit.bl.x + aSlot->origin().x + gc.getBoundingMetric(gid, 0);
+                max = limit.tr.x + aSlot->origin().x + gc.getBoundingMetric(gid, 2);
                 break;
             case 1 :	// y direction
-                min = limit.bl.y + aSlot->origin().y - currShift.y + gc.getBoundingMetric(gid, 1);
-                max = limit.tr.y + aSlot->origin().y - currShift.y + gc.getBoundingMetric(gid, 3);
+                min = limit.bl.y + aSlot->origin().y + gc.getBoundingMetric(gid, 1);
+                max = limit.tr.y + aSlot->origin().y + gc.getBoundingMetric(gid, 3);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y
-                    - currShift.x - currShift.y + gc.getBoundingMetric(gid, 4);
+                    + gc.getBoundingMetric(gid, 4);
                 max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y
-                    - currShift.x - currShift.y + gc.getBoundingMetric(gid, 6);
+                    + gc.getBoundingMetric(gid, 6);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x + aSlot->origin().y
-                    - currShift.x + currShift.y + gc.getBoundingMetric(gid, 5);
+                    + gc.getBoundingMetric(gid, 5);
                 max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x + aSlot->origin().y
-                    - currShift.x + currShift.y + gc.getBoundingMetric(gid, 7);
+                    + gc.getBoundingMetric(gid, 7);
                 break;
         }
         _ranges[i].clear();
@@ -138,8 +138,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 otmax = gc.getBoundingMetric(tgid, 3) + ty;
                 omin = gc.getBoundingMetric(gid, 1) + sy;
                 omax = gc.getBoundingMetric(gid, 3) + sy;
-                cmin = _limit.bl.x + tx + gc.getBoundingMetric(tgid, 0);
-                cmax = _limit.tr.x + tx + gc.getBoundingMetric(tgid, 2);
+                cmin = _limit.bl.x + _target->origin().x + gc.getBoundingMetric(tgid, 0);
+                cmax = _limit.tr.x + _target->origin().x + gc.getBoundingMetric(tgid, 2);
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(gc.getBoundingMetric(gid, 1) + sy,
@@ -152,8 +152,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 otmax = gc.getBoundingMetric(tgid, 2) + tx;
                 omin = gc.getBoundingMetric(gid, 0) + sx;
                 omax = gc.getBoundingMetric(gid, 2) + sx;
-                cmin = _limit.bl.y + ty + gc.getBoundingMetric(tgid, 1);
-                cmax = _limit.tr.y + ty + gc.getBoundingMetric(tgid, 3);
+                cmin = _limit.bl.y + _target->origin().y + gc.getBoundingMetric(tgid, 1);
+                cmax = _limit.tr.y + _target->origin().y + gc.getBoundingMetric(tgid, 3);
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -167,8 +167,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 otmax = gc.getBoundingMetric(tgid, 7) + td;
                 omin = gc.getBoundingMetric(gid, 5) + sd;
                 omax = gc.getBoundingMetric(gid, 7) + sd;
-                cmin = _limit.bl.x + _limit.bl.y + ts + gc.getBoundingMetric(tgid, 4);
-                cmax = _limit.tr.x + _limit.tr.y + ts + gc.getBoundingMetric(tgid, 6);
+                cmin = _limit.bl.x + _limit.bl.y + _target->origin().x + _target->origin().y + gc.getBoundingMetric(tgid, 4);
+                cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + gc.getBoundingMetric(tgid, 6);
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -182,8 +182,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 otmax = gc.getBoundingMetric(tgid, 6) + ts;
                 omin = gc.getBoundingMetric(gid, 4) + ss;
                 omax = gc.getBoundingMetric(gid, 6) + ss;
-                cmin = _limit.bl.x - _limit.tr.y + td + gc.getBoundingMetric(tgid, 5);
-                cmax = _limit.tr.x - _limit.bl.y + td + gc.getBoundingMetric(tgid, 7);
+                cmin = _limit.bl.x - _limit.tr.y + _target->origin().x - _target->origin().y + gc.getBoundingMetric(tgid, 5);
+                cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + gc.getBoundingMetric(tgid, 7);
                 break;
             default :
                 continue;
@@ -282,13 +282,14 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     const GlyphCache &gc = seg->getFace()->glyphs();
     int gid = _target->gid();
     float margin;
-    float tlen, tleft, tbase;
+    float tlen, tleft, tbase, tval;
     float totald = std::numeric_limits<float>::max() / 2.;
     Position totalp = _currShift;
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
     IntervalSet aFit;
     int flags = seg->collisionInfo(_target)->flags();
+    Position currOffset = seg->collisionInfo(_target)->offset();
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
@@ -317,34 +318,38 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 tlen = gc.getBoundingMetric(gid, 2) - gc.getBoundingMetric(gid, 0);
                 tleft = _target->origin().x + _currShift.x + gc.getBoundingMetric(gid, 0);
                 tbase = tleft - _currShift.x;
-                cmin = _limit.bl.x + tleft;
-                cmax = _limit.tr.x + tleft;
+                tval = -currOffset.x;
+                cmin = _limit.bl.x + tbase;
+                cmax = _limit.tr.x + tbase;
                 break;
             case 1 :	// y direction
                 tlen = gc.getBoundingMetric(gid, 3) - gc.getBoundingMetric(gid, 1);
                 tleft = _target->origin().y + _currShift.y + gc.getBoundingMetric(gid, 1);
                 tbase = tleft - _currShift.y;
-                cmin = _limit.bl.y + tleft;
-                cmax = _limit.tr.y + tleft;
+                tval = -currOffset.y;
+                cmin = _limit.bl.y + tbase;
+                cmax = _limit.tr.y + tbase;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 6) - gc.getBoundingMetric(gid, 4);
                 tleft = _target->origin().x + _target->origin().y + _currShift.x + _currShift.y + gc.getBoundingMetric(gid, 4);
                 tbase = tleft - _currShift.x - _currShift.y;
-                cmin = _limit.bl.x + _limit.bl.y + tleft;
-                cmax = _limit.tr.x + _limit.tr.y + tleft;
+                tval = -currOffset.x - currOffset.y;
+                cmin = _limit.bl.x + _limit.bl.y + tbase;
+                cmax = _limit.tr.x + _limit.tr.y + tbase;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = gc.getBoundingMetric(gid, 7) - gc.getBoundingMetric(gid, 5);
                 tleft = _target->origin().x - _target->origin().y + _currShift.x - _currShift.y + gc.getBoundingMetric(gid, 5);
                 tbase = tleft - _currShift.x + _currShift.y;
-                cmin = _limit.bl.x - _limit.tr.y + tleft;
-                cmax = _limit.tr.x - _limit.bl.y + tleft;
+                tval = currOffset.y - currOffset.x;
+                cmin = _limit.bl.x - _limit.tr.y + tbase;
+                cmax = _limit.tr.x - _limit.bl.y + tbase;
                 break;
         }
         isGoodFit = true;
         aFit = _ranges[i].locate(tbase, tbase + tlen);
-        bestd = aFit.findBestWithMarginAndLimits(0., margin / (i > 1 ? ISQRT2 : 1.), cmin - tbase, cmax - tbase, isGoodFit);
+        bestd = aFit.findBestWithMarginAndLimits(tval, margin / (i > 1 ? ISQRT2 : 1.), cmin, cmax, isGoodFit);
         Position testp;
         switch (i) {
             case 0 : testp = Position(bestd, _currShift.y); break;

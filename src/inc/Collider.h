@@ -146,6 +146,8 @@ public:
     void limit(const Rect &r) { _limit = r; }
     const Position &shift() const { return _shift; }
     void shift(const Position &s) { _shift = s; }
+    const Position &offset() const { return _offset; }
+    void offset(const Position &o) { _offset = o; }
     uint16 margin() const { return _margin; }
     void margin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
@@ -156,6 +158,7 @@ public:
 private:
     Rect        _limit;
     Position    _shift;
+    Position    _offset;
     uint16      _margin;
     uint16      _flags;
 };
