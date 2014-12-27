@@ -734,7 +734,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->offset(), dir, dbgout);
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), cslot->offset(), dir, dbgout);
     bool collides = false;
     bool ignoreForKern = !isRev;
     float loopKern = 0; // keep track of kerning through the loop
@@ -790,14 +790,14 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
     for (s = slot->next(); s; s = s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
-        if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE))
+        if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
             collides |= coll.mergeSlot(seg, s, c->shift(), dir, dbgout);
         if (s != start && (c->flags() & SlotCollision::COLL_END))
             break;
     }
     if (collides)
     {
-        Position mv = coll.resolve(seg, dir, dbgout);
+        Position mv = coll.resolve(seg, dir, cslot->margin(), dbgout);
         cslot->shift(mv);
         return mv.x;
     }

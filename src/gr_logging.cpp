@@ -226,6 +226,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     {
         j << "collision" << json::flat << json::object
               << "shift" << cslot->shift()
+              << "offset" << cslot->offset()
               << "limit" << cslot->limit()
               << "flags" << cslot->flags()
               << "margin" << cslot->margin()

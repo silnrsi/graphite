@@ -509,3 +509,13 @@ Slot * Slot::nextInCluster(const Slot *s) const
     }
     return NULL;
 }
+
+bool Slot::isChildOf(const Slot *base) const
+{
+    if (m_parent == base)
+        return true;
+    else if (!m_parent)
+        return false;
+    else
+        return m_parent->isChildOf(base);
+}

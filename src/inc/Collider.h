@@ -49,7 +49,7 @@ public:
     ~ShiftCollider() throw() { };
     void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
                 GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currShift,
-                GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
+                const Position &currOffset, GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
                 GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
@@ -92,6 +92,7 @@ protected:
     Rect    _limit;
     float   _margin;
     Position _currShift;
+    Position _currOffset;
     
     // Debugging
     IntervalSet _rawRanges[4];
@@ -109,7 +110,7 @@ public:
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
                 float currKern, int dir, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, int dir, json * const dbgout);
-    Position resolve(Segment *seg, int dir, json * const dbgout);
+    Position resolve(Segment *seg, int dir, float margin, json * const dbgout);
 
     CLASS_NEW_DELETE;
 

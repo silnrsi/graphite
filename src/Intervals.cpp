@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include "inc/Intervals.h"
 #include <limits>
+#include <math.h>
 
 using namespace graphite2;
 
@@ -242,6 +243,31 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vm
             else if (s->first > sbest && (s->first + s->second) / 2 > vmin && (s->first + s->second) / 2 < vmax)
                 sbest = (s->first + s->second) / 2;  // midway between the two for maximum margin
         }
+        else if (s->first < val)
+        {
+            if (val > s->first + margin)
+            {
+                if (val < s->second - margin)
+                {
+                    isGood = true;
+                    return val;
+                }
+                else if (s->second - s->first > 2 * margin)
+                {
+                    isGood = true;
+                    return s->second - margin;
+                }
+                else
+                    sbest = (s->first + s->second) / 2;
+            }
+            else if (s->second - s->first > 2 * margin)
+            {
+                isGood = true;
+                return s->first + margin;
+            }
+            else
+                sbest = (s->first + s->second) / 2;
+        }
         else if ((s->second - s->first) > 2 * margin)
         {
             if (s->first + margin > vmin && s->first + margin < vmax)
@@ -252,8 +278,8 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float vm
                     isGood = true;
                     return best;
                 }
-                else
-                    sbest = s->first + margin;
+                else if (fabs(sbest) < (s->first + s->second) / 2)
+                    sbest = (s->first + s->second) / 2;
             }
         }
         else if (!isGood && (s->first + s->second) / 2 < -sbest && (s->first + s->second) / 2 > vmin && (s->first + s->second) / 2 < vmax)

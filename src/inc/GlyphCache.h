@@ -38,6 +38,31 @@ class Face;
 class FeatureVal;
 class Segment;
 
+
+class SlantBox
+{
+public:
+    SlantBox(float psi = 0., float pdi = 0., float psa = 0., float pda = 0.) : si(psi), di(pdi), sa(psa), da(pda) {}; 
+    float si;
+    float di;
+    float sa;
+    float da;
+};
+
+static SlantBox nullSlant(0, 0, 0, 0);
+
+class BBox
+{
+public:
+    BBox(float pxi = 0, float pyi = 0., float pxa = 0., float pya = 0.) : xi(pxi), yi(pyi), xa(pxa), ya(pya) {};
+    float xi;
+    float yi;
+    float xa;
+    float ya;
+};
+
+static BBox nullBBox(0, 0, 0, 0);
+
 class GlyphBox
 {
 public:
@@ -47,6 +72,7 @@ public:
     Rect &subVal(int subindex, int boundary) { return _subs[subindex * 2 + boundary]; }
     const Rect &slant() const { return _slant; }
     uint8 num() const { return _num; }
+    const Rect *subs() const { return _subs; }
 
 private:
     uint8   _num;
@@ -78,6 +104,10 @@ public:
     uint8            numSubBounds(unsigned short glyphid) const;
     float            getSubBoundingMetric(unsigned short glyphid, uint8 subindex, uint8 metric) const;
     const Rect &     slant(unsigned short glyphid) const { return _boxes[glyphid] ? _boxes[glyphid]->slant() : nullRect; }
+    const SlantBox & getBoundingSlantBox(unsigned short glyphid) const;
+    const BBox &     getBoundingBBox(unsigned short glyphid) const;
+    const SlantBox &getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const;
+    const BBox &    getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const;
 
     CLASS_NEW_DELETE;
     
@@ -131,6 +161,18 @@ float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const
     }
 }
 
+inline const SlantBox &GlyphCache::getBoundingSlantBox(unsigned short glyphid) const
+{
+    if (glyphid >= _num_glyphs || !_boxes[glyphid]) return nullSlant;
+    return *(SlantBox *)(&(_boxes[glyphid]->slant()));
+}
+
+inline const BBox &GlyphCache::getBoundingBBox(unsigned short glyphid) const
+{
+    if (glyphid >= _num_glyphs) return nullBBox;
+    return *(BBox *)(&(glyph(glyphid)->theBBox()));
+}
+
 inline
 float GlyphCache::getSubBoundingMetric(unsigned short glyphid, uint8 subindex, uint8 metric) const
 {
@@ -149,6 +191,22 @@ float GlyphCache::getSubBoundingMetric(unsigned short glyphid, uint8 subindex, u
         case 7: return b->subVal(subindex, 1).tr.y;
         default: return 0.;
     }
+}
+
+inline const SlantBox &GlyphCache::getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const
+{
+    if (glyphid >= _num_glyphs) return nullSlant;
+    GlyphBox *b = _boxes[glyphid];
+    if (b == NULL || subindex >= b->num()) return nullSlant;
+    return *(SlantBox *)(b->subs() + 2 * subindex + 1);
+}
+
+inline const BBox &GlyphCache::getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const
+{
+    if (glyphid >= _num_glyphs) return nullBBox;
+    GlyphBox *b = _boxes[glyphid];
+    if (b == NULL || subindex >= b->num()) return nullBBox;
+    return *(BBox *)(b->subs() + 2 * subindex);
 }
 
 inline
