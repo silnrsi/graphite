@@ -670,6 +670,11 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         if (hasCollisions)
         {
             hasCollisions = false;
+            for (Slot *s = seg->first(); s; s = s->next())
+            {
+                SlotCollision * c = seg->collisionInfo(s);
+                c->shift(Position(0, 0));
+            }
             start = seg->last();
             for (Slot *s = seg->last(); s; s = s->prev())
             {

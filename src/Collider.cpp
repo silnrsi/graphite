@@ -118,6 +118,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;
+    float pmin, pmax;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
     const unsigned short tgid = _target->gid();
@@ -125,6 +126,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     const BBox &tbb = gc.getBoundingBBox(tgid);
     const SlantBox &tsb = gc.getBoundingSlantBox(tgid);
+    bool isAttached = (_target->attachedTo() == slot);
     
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
@@ -140,6 +142,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.ya + sy;
                 cmin = _limit.bl.x + _target->origin().x + tbb.xi;
                 cmax = _limit.tr.x + _target->origin().x + tbb.xa;
+                pmin = _target->origin().x + tbb.xi;
+                pmax = _target->origin().x + tbb.xa;
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(bb.yi + sy, tbb.xi + tx - sb.da - sd), sb.si + ss - tbb.xa - tx);
@@ -150,6 +154,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.xa + sx;
                 cmin = _limit.bl.y + _target->origin().y + tbb.yi;
                 cmax = _limit.tr.y + _target->origin().y + tbb.ya;
+                pmin = _target->origin().y + tbb.yi;
+                pmax = _target->origin().y + tbb.ya;
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -161,6 +167,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.da + sd;
                 cmin = _limit.bl.x + _limit.bl.y + _target->origin().x + _target->origin().y + tsb.si; 
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa;
+                pmin = _target->origin().x + _target->origin().y + tsb.si; 
+                pmax = _target->origin().x + _target->origin().y + tsb.sa;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -172,10 +180,17 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.sa + ss;
                 cmin = _limit.bl.x - _limit.tr.y + _target->origin().x - _target->origin().y + tsb.di;
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da;
+                pmin = _target->origin().x - _target->origin().y + tsb.di;
+                pmax = _target->origin().x - _target->origin().y + tsb.da;
                 break;
             default :
                 continue;
         }
+        // don't cross what we are attached to.
+        if (isAttached && vmax < pmax && vmin < pmin)
+            vmin = -1e38;
+        else if (isAttached && vmin > pmin && vmax > pmax)
+            vmax = 1e38;
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -221,6 +236,10 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omax = ssb.sa + ss;
                         break;
                 }
+                if (isAttached && vmax < pmax && vmin < pmin)
+                    vmin = -1e38;
+                else if (isAttached && vmin > pmin && vmax > pmax)
+                    vmax = 1e38;
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
@@ -391,7 +410,7 @@ static float get_left(Segment *seg, const Slot *s, float shift, float y)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
-    float sx = s->origin().x;
+    float sx = s->origin().x + shift;
     float sy = s->origin().y;
     uint8 numsub = gc.numSubBounds(gid);
     float res = 1e38;
@@ -477,13 +496,15 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _xbound = (dir & 1) ? 1e38 : -1e38;
     for (s = base; s; s = s->nextInCluster(s))
     {
+        SlotCollision *c = seg->collisionInfo(s);
         if (s->index() > maxid)
         {
             last = s;
             maxid = s->index();
         }
-        _maxy = std::max(_maxy, s->origin().y + bb.ya);
-        _miny = std::min(_miny, s->origin().y + bb.yi);
+        float y = s->origin().y + c->shift().y;
+        _maxy = std::max(_maxy, y + bb.ya);
+        _miny = std::min(_miny, y + bb.yi);
     }
     _numSlices = int((_maxy - _miny) / margin + 1.);
     sliceWidth = (_maxy - _miny) / _numSlices;
@@ -492,9 +513,10 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 
     for (s = base; s; s = s->nextInCluster(s))
     {
-        float x = s->origin().x + currShift.x + (dir & 1 ? bb.xi : bb.xa);
-        int smin = std::max(0, int((s->origin().y + bb.yi - _miny) / (_maxy - _miny) * _numSlices));
-        int smax = std::min(_numSlices - 1, int((s->origin().y + bb.ya - _miny) / (_maxy - _miny) * _numSlices + 1));
+        SlotCollision *c = seg->collisionInfo(s);
+        float x = s->origin().x + c->shift().x + currShift.x + (dir & 1 ? bb.xi : bb.xa);
+        int smin = std::max(0, int((s->origin().y + c->shift().y + bb.yi - _miny) / (_maxy - _miny) * _numSlices));
+        int smax = std::min(_numSlices - 1, int((s->origin().y + c->shift().y + bb.ya - _miny) / (_maxy - _miny) * _numSlices + 1));
         for (int i = smin; i < smax; ++i)
         {
             float t;
