@@ -339,8 +339,8 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
         {
-            m.slotMap().segment.positionSlots(0, 0, 0, false);
-            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
+            m.slotMap().segment.positionSlots(0, 0, 0, true);
+//            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
         if (!collisionAvoidance(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout)) return;
     }
@@ -701,8 +701,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
         }
-        if (!hasCollisions)
-            break;
+//        if (!hasCollisions)
+//            break;
     }
 
     // phase 3 : handle kerning of clusters
@@ -723,9 +723,9 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     for (Slot *s = seg->first(); s; s = s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
-        const Position newOffset = c->offset() + c->shift();
+        const Position newOffset = c->shift();
         const Position nullPosition(0, 0);
-        c->offset(newOffset);
+        c->offset(newOffset + c->offset());
         c->shift(nullPosition);
     }
     seg->positionSlots();

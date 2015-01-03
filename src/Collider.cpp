@@ -53,6 +53,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     unsigned short gid = aSlot->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
+    float sx = aSlot->origin().x + currShift.x;
+    float sy = aSlot->origin().y + currShift.y;
     if (currOffset.x != 0. || currOffset.y != 0.)
         _limit = Rect(limit.bl - currOffset, limit.tr - currOffset);
     else
@@ -62,20 +64,24 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     {
         switch (i) {
             case 0 :	// x direction
-                min = limit.bl.x + aSlot->origin().x + bb.xi;
-                max = limit.tr.x + aSlot->origin().x + bb.xa;
+                min = _limit.bl.x + aSlot->origin().x + bb.xi;
+                max = _limit.tr.x + aSlot->origin().x + bb.xa;
                 break;
             case 1 :	// y direction
-                min = limit.bl.y + aSlot->origin().y + bb.yi;
-                max = limit.tr.y + aSlot->origin().y + bb.ya;
+                min = _limit.bl.y + aSlot->origin().y + bb.yi;
+                max = _limit.tr.y + aSlot->origin().y + bb.ya;
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
-                min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
-                max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
+                min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
+                max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
+                //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
+                //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
-                min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
-                max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
+                min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
+                max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
+                // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
+                // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
         }
         _ranges[i].clear();
@@ -279,7 +285,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     float margin;
     float tlen, tleft, tbase, tval;
     float totald = std::numeric_limits<float>::max() / 2.;
-    Position totalp = _currShift;
+    Position totalp = Position(0, 0);
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
     IntervalSet aFit;
@@ -406,12 +412,12 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 
 ////    KERN-COLLIDER    ////
 
-static float get_left(Segment *seg, const Slot *s, float shift, float y)
+static float get_left(Segment *seg, const Slot *s, const Position &shift, float y)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
-    float sx = s->origin().x + shift;
-    float sy = s->origin().y;
+    float sx = s->origin().x + shift.x;
+    float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
     float res = 1e38;
 
@@ -441,12 +447,12 @@ static float get_left(Segment *seg, const Slot *s, float shift, float y)
     return res;
 }
 
-static float get_right(Segment *seg, const Slot *s, float shift, float y)
+static float get_right(Segment *seg, const Slot *s, const Position &shift, float y)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
-    float sx = s->origin().x + shift;
-    float sy = s->origin().y;
+    float sx = s->origin().x + shift.x;
+    float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
     float res = -1e38;
 
@@ -506,24 +512,24 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         _maxy = std::max(_maxy, y + bb.ya);
         _miny = std::min(_miny, y + bb.yi);
     }
-    _numSlices = int((_maxy - _miny) / margin + 1.);
-    sliceWidth = (_maxy - _miny) / _numSlices;
+    _numSlices = int((_maxy - _miny + 2) / margin + 1.);
+    sliceWidth = (_maxy - _miny + 2) / _numSlices;
     _edges.clear();
     _edges.insert(_edges.begin(), _numSlices, dir & 1 ? 1e38 : -1e38);
 
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
-        float x = s->origin().x + c->shift().x + currShift.x + (dir & 1 ? bb.xi : bb.xa);
-        int smin = std::max(0, int((s->origin().y + c->shift().y + bb.yi - _miny) / (_maxy - _miny) * _numSlices));
-        int smax = std::min(_numSlices - 1, int((s->origin().y + c->shift().y + bb.ya - _miny) / (_maxy - _miny) * _numSlices + 1));
-        for (int i = smin; i < smax; ++i)
+        float x = s->origin().x + c->shift().x + (dir & 1 ? bb.xi : bb.xa);
+        int smin = std::max(0, int((s->origin().y + c->shift().y + bb.yi - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
+        int smax = std::min(_numSlices - 1, int((s->origin().y + c->shift().y + bb.ya - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
+        for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny + (i + .5) * sliceWidth;
+            float y = _miny - 1 + (i + .5) * sliceWidth;
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_left(seg, s, currShift.x, y);
+                t = get_left(seg, s, currShift, y);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -533,7 +539,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_right(seg, s, currShift.x, y);
+                t = get_right(seg, s, currShift, y);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
@@ -557,9 +563,9 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     const BBox &bb = gc.getBoundingBBox(gid);
     const float sx = slot->origin().x + currShift.x;
     const float sy = slot->origin().y + currShift.y;
-    int smin = std::max(0, int((sy + bb.yi - _miny) / (_maxy - _miny) * _numSlices));
-    int smax = std::min(_numSlices - 1, int((sy + bb.ya - _miny) / (_maxy - _miny) * _numSlices + 1));
-    float sliceWidth = (_maxy - _miny) / _numSlices;
+    int smin = std::max(0, int((sy + bb.yi - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
+    int smax = std::min(_numSlices - 1, int((sy + bb.ya - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
+    float sliceWidth = (_maxy - _miny + 2) / _numSlices;
     bool res = false;
 
     if (dir & 1)
@@ -567,13 +573,13 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         float x = sx + bb.xa;
         if (x < _xbound)
             return false;
-        for (int i = smin; i < smax; ++i)
+        for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny + (i + .5) * sliceWidth;
+            float y = _miny - 1 + (i + .5) * sliceWidth;
             if (x > _edges[i] - _mingap)
             {
-                float m = get_right(seg, slot, currShift.x, y);
+                float m = get_right(seg, slot, currShift, y);
                 t = _edges[i] - m;
                 if (i < _numSlices - 1) t = std::min(t, _edges[i+1] - m);
                 if (i > 0) t = std::min(t, _edges[i-1] - m);
@@ -593,10 +599,10 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         for (int i = smin; i < smax; ++i)
         {
             float t;
-            float y = _miny + (i + .5) * sliceWidth;
+            float y = _miny - 1 + (i + .5) * sliceWidth;
             if (x < _edges[i] + _mingap)
             {
-                float m = get_left(seg, slot, currShift.x, y);
+                float m = get_left(seg, slot, currShift, y);
                 t = m - _edges[i];
                 if (i < _numSlices - 1) t = std::min(t, m - _edges[i+1]);
                 if (i > 0) t = std::min(t, m - _edges[i-1]);
