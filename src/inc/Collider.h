@@ -133,13 +133,14 @@ class SlotCollision
 {
 public:
     enum {
-        COLL_TEST = 1,
-        COLL_IGNORE = 2,
-        COLL_START = 4,
-        COLL_END = 8,
-        COLL_KERN = 16,
-        COLL_ISCOL = 32,
-        COLL_KNOWN = 64,
+    //  COLL_TESTONLY = 0,  // default - test other glyphs for collision with this one, but don't move this one
+        COLL_FIX = 1,       // fix collisions involving this glyph
+        COLL_IGNORE = 2,    // ignore this glyph altogether
+        COLL_START = 4,     // start of range of possible collisions
+        COLL_END = 8,       // end of range of possible collisions
+        COLL_KERN = 16,     // collisions with this glyph are fixed by adding kerning space after it
+        COLL_ISCOL = 32,    // this glyph has a collision
+        COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
     };
         
     SlotCollision(Segment *seg, Slot *slot);

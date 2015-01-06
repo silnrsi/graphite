@@ -653,7 +653,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     for (Slot *s = seg->first(); s; s = s->next())
     {
         const SlotCollision * c = seg->collisionInfo(s);
-        if (start && (c->flags() & SlotCollision::COLL_TEST) && !(c->flags() & SlotCollision::COLL_KERN))
+        if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
             hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, dbgout);
         else if (c->flags() & SlotCollision::COLL_KERN)
             hasKerns = true;
@@ -679,7 +679,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             for (Slot *s = seg->last(); s; s = s->prev())
             {
                 const SlotCollision * c = seg->collisionInfo(s);
-                if (start && (c->flags() & SlotCollision::COLL_TEST) && !(c->flags() & SlotCollision::COLL_KERN)
+                if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
                         && (c->flags() & SlotCollision::COLL_ISCOL))
                     hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, true, dir, dbgout);
                 if (c->flags() & SlotCollision::COLL_START)
@@ -694,7 +694,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         for (Slot *s = seg->first(); s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & SlotCollision::COLL_TEST) && !(c->flags() & SlotCollision::COLL_KERN))
+            if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
                 hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
@@ -741,18 +741,19 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     SlotCollision *cslot = seg->collisionInfo(slot);
     coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), cslot->offset(), dir, dbgout);
     bool collides = false;
-    bool ignoreForKern = !isRev;
-    float loopKern = 0; // keep track of kerning through the loop
+    bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
+    //////float loopKern = 0; // keep track of kerning through the loop
     Position zero(0., 0.);
     for (s = start; s; s = isRev ? s->prev() : s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
         if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) 
                       && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN))
-                      && (!isRev || !ignoreForKern || !(c->flags() & SlotCollision::COLL_TEST) || (c->flags() & SlotCollision::COLL_KERN)))
+                      && (!isRev || !ignoreForKern || !(c->flags() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
         else if (s == slot)
             ignoreForKern = !ignoreForKern;
+            
         if (s != start && (c->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
             break;
     }
