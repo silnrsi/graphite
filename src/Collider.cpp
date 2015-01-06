@@ -72,14 +72,14 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = _limit.tr.y + aSlot->origin().y + bb.ya;
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
-                min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
-                max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
+                min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.si;
+                max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.sa;
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
-                min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
-                max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
+                min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.di;
+                max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.da;
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
@@ -192,6 +192,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             default :
                 continue;
         }
+        if (vmin > vmax)
+        {
+            float t = vmin;
+            vmin = vmax;
+            vmax = t;
+        }
         // don't cross what we are attached to.
         if (isAttached && vmax < pmax && vmin < pmin)
             vmin = -1e38;
@@ -241,6 +247,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
                         break;
+                }
+                if (vmin > vmax)
+                {
+                    float t = vmin;
+                    vmin = vmax;
+                    vmax = t;
                 }
                 if (isAttached && vmax < pmax && vmin < pmin)
                     vmin = -1e38;
@@ -572,7 +584,11 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     {
         float x = sx + bb.xa;
         if (x < _xbound)
+        {
+            if (_xbound - x < _mingap)
+                _mingap = _xbound - x;
             return false;
+        }
         for (int i = smin; i <= smax; ++i)
         {
             float t;
@@ -595,7 +611,11 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     {
         float x = sx + bb.xi;
         if (x > _xbound)
+        {
+            if (x - _xbound < _mingap)
+                _mingap = x - _xbound;
             return false;
+        }
         for (int i = smin; i < smax; ++i)
         {
             float t;
