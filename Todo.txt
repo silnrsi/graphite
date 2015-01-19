@@ -1,4 +1,8 @@
 Expected changes to come:
 
-* Ensure that action code can't insert or delete slots in a positioning pass
+* Collision avoidance
+* FSM compression
+* Setting segment feature values in action code, for pass constraint testing
 
+Questions:
+* Do we support glyphid as a slot attribute?
