@@ -785,7 +785,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     return isCol;
 }
 
-float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir, float currKern, json *const dbgout) const
+float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir, float currKern,
+    json *const dbgout) const
 {
     Slot *s;
     float currGap = 0.;

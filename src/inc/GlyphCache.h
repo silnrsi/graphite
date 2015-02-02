@@ -43,10 +43,10 @@ class SlantBox
 {
 public:
     SlantBox(float psi = 0., float pdi = 0., float psa = 0., float pda = 0.) : si(psi), di(pdi), sa(psa), da(pda) {}; 
-    float si;
-    float di;
-    float sa;
-    float da;
+    float si; // min
+    float di; // min
+    float sa; // max
+    float da; // max
 };
 
 static SlantBox nullSlant(0, 0, 0, 0);
@@ -55,10 +55,10 @@ class BBox
 {
 public:
     BBox(float pxi = 0, float pyi = 0., float pxa = 0., float pya = 0.) : xi(pxi), yi(pyi), xa(pxa), ya(pya) {};
-    float xi;
-    float yi;
-    float xa;
-    float ya;
+    float xi; // min
+    float yi; // min
+    float xa; // max
+    float ya; // max
 };
 
 static BBox nullBBox(0, 0, 0, 0);

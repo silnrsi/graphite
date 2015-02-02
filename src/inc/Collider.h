@@ -122,10 +122,10 @@ private:
     Rect _limitSpec;  // limits specified, as opposed to practical limits for determining possible movement
     float _miny;	  // y-coordinates offset by global slot position
     float _maxy;
-    Vector<float> _edges;
-    int   _numSlices;
+    Vector<float> _edges; // edges of horizontal slices
+    int   _numSlices;     // number of slices
     float _mingap;
-    float _xbound;
+    float _xbound;        // max or min edge
 };
 
 
