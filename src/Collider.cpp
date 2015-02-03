@@ -137,7 +137,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
     {
-        uint16 m = _margin / (i > 1 ? ISQRT2 : 1.);  // adjusted margin by depending on whether the vector is diagonal
+        uint16 m = (uint16)(_margin / (i > 1 ? ISQRT2 : 1.));  // adjusted margin depending on whether the vector is diagonal
         switch (i) {
             case 0 :	// x direction
                 vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.yi + ty), sb.si + ss - tbb.ya - ty);
@@ -200,9 +200,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
         // don't cross what we are attached to.
         if (isAttached && vmax < pmax && vmin < pmin)
-            vmin = -1e38;
+            vmin = (float)-1e38;
         else if (isAttached && vmin > pmin && vmax > pmax)
-            vmax = 1e38;
+            vmax = (float)1e38;
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -255,9 +255,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     vmax = t;
                 }
                 if (isAttached && vmax < pmax && vmin < pmin)
-                    vmin = -1e38;
+                    vmin = (float)-1e38;
                 else if (isAttached && vmin > pmin && vmax > pmax)
-                    vmax = 1e38;
+                    vmax = (float)1e38;
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
@@ -296,7 +296,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     float margin;
     float tlen, tleft, tbase, tval;
-    float totald = std::numeric_limits<float>::max() / 2.;
+    float totald = (float)(std::numeric_limits<float>::max() / 2.);
     Position totalp = Position(0, 0);
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
@@ -362,7 +362,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         }
         isGoodFit = true;
         aFit = _ranges[i].locate(tbase, tbase + tlen);
-        bestd = aFit.findBestWithMarginAndLimits(tval, margin / (i > 1 ? /*ISQRT2*/ 0.5 : 1.), cmin, cmax, isGoodFit);
+        bestd = aFit.findBestWithMarginAndLimits(tval, (margin / (i > 1 ? /*ISQRT2*/ 0.5 : 1.)), cmin, cmax, isGoodFit);
         Position testp;
         switch (i) {
             case 0 : testp = Position(bestd, _currShift.y); break;
@@ -411,6 +411,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             totalp = testp;
         }
     }  // end of loop over 4 directions
+    
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
@@ -418,6 +419,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             << "result" << totalp << json::close; // slot object
     }
 #endif
+
     isCol = !tIsGoodFit;
     return totalp;
 }
@@ -432,7 +434,7 @@ static float get_left(Segment *seg, const Slot *s, const Position &shift, float 
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = 1e38;
+    float res = (float)1e38;
 
     if (numsub > 0)
     {
@@ -468,7 +470,7 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = -1e38;
+    float res = (float)-1e38;
 
     if (numsub > 0)
     {
@@ -513,9 +515,9 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         base = base->attachedTo();
 
     // Calculate the height of the glyph and how many horizontal slices to use.
-    _maxy = -1e38;
-    _miny = 1e38;
-    _xbound = (dir & 1) ? 1e38 : -1e38;
+    _maxy = (float)-1e38;
+    _miny = (float)1e38;
+    _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
@@ -568,13 +570,16 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
         }
     }
-    _mingap = 1e38;
+    _mingap = (float)1e38;
     _target = aSlot;
     _margin = margin;
     _currShift = currShift;
 }
 
 
+// Determine how much the target slot needs to kern away from the given slot.
+// In other words, merge the given slot's position with what the target slot knows
+// about how it can kern.
 bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, int dir, json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
@@ -587,8 +592,6 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     float sliceWidth = (_maxy - _miny + 2) / _numSlices;
     bool res = false;
 
-    
-    
     if (dir & 1)
     {
         float x = sx + bb.xa;
@@ -601,7 +604,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
+            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
             if (x > _edges[i] - _mingap)
             {
                 float m = get_right(seg, slot, currShift, y);
@@ -629,7 +632,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         for (int i = smin; i < smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
+            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
             if (x < _edges[i] + _mingap)
             {
                 float m = get_left(seg, slot, currShift, y);

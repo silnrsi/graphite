@@ -480,9 +480,10 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
     *fsm.dbgout << "considered" << json::array;
     for (const RuleEntry *r = fsm.rules.begin(); r != &re; ++r)
     {
-        if (r->rule->preContext > fsm.slots.context())  continue;
-    *fsm.dbgout << json::flat << json::object
-                    << "id"     << r->rule - m_rules
+        if (r->rule->preContext > fsm.slots.context())
+            continue;
+        *fsm.dbgout << json::flat << json::object
+                    << "id" << r->rule - m_rules
                     << "failed" << true
                     << "input" << json::flat << json::object
                         << "start" << objectid(dslot(&fsm.slots.segment, input_slot(fsm.slots, -r->rule->preContext)))
@@ -639,17 +640,21 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     ShiftCollider shiftcoll;
     KernCollider kerncoll;
     bool isfirst = true;
-    const uint8 numPasses = m_flags & 7;   // number of loops permitted to fix collisions
+    const uint8 numLoops = m_flags & 7;   // number of loops permitted to fix collisions; does not include kerning
     bool hasCollisions = false;
     bool hasKerns = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
+    
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)  *dbgout << "collisions" << json::array; // (1)
+    if (dbgout)  *dbgout << "collisions" << json::array // (1)
+        << "num-loops" << numLoops;
     json::closer collisions_array_closer(dbgout);
+    if (dbgout)  *dbgout << json::object << "phase" << "1" << "moves" << json::array;
 #endif
+
     hasCollisions = false;
     float currKern = 0;
-    // phase 1 : position diacritics, ignoring kerned glyphs
+    // phase 1 : position shiftable glyphs, ignoring kernable glyphs
     for (Slot *s = seg->first(); s; s = s->next())
     {
         const SlotCollision * c = seg->collisionInfo(s);
@@ -663,10 +668,23 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             start = s;
     }
 
-    // phase 2 : loop until happy
-    for (int i = 0; i < numPasses - 1; ++i)
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::close << json::close; // phase-1
+#endif
+
+    // phase 2 : loop until happy. 
+    for (int i = 0; i < numLoops - 1; ++i)
     {
-        // phase 2.1 : if any diacritics in collision, iterate backwards fixing them ignoring other non-collided diacritics
+
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::object << "phase" << "2.1" << "loop" << i << "moves" << json::array;
+#endif
+        // phase 2.1 : if any shiftable glyphs are in collision, iterate backwards,
+        // fixing them and ignoring other non-collided glyphs. Note that this handles ONLY
+        // glyphs that are actually in collision from phases 1 or 2.2, and working backwards
+        // has the intended effect of breaking logjams.
         if (hasCollisions)
         {
             hasCollisions = false;
@@ -680,7 +698,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             {
                 const SlotCollision * c = seg->collisionInfo(s);
                 if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
-                        && (c->flags() & SlotCollision::COLL_ISCOL))
+                        && (c->flags() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
                     hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, true, dir, dbgout);
                 if (c->flags() & SlotCollision::COLL_START)
                     start = NULL;
@@ -689,7 +707,17 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             }
         }
 
-        // phase 2.2 : do basic diacritic positioning pass to improve diacritic positions
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::close << json::close // phase 2a
+            << json::object << "phase" << "2.2" << "loop" << i << "moves" << json::array;
+#endif
+
+        // phase 2.2 : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
+        // glyphs from their current adjusted position, which has the effect of gradually minimizing the  
+        // resulting adjustment; ie, the final result will be gradually closer to the original location.  
+        // Also it allows more flexibility in the final adjustment, since it is moving along the  
+        // possible 8 vectors from successively different starting locations.
         start = seg->first();
         for (Slot *s = seg->first(); s; s = s->next())
         {
@@ -701,11 +729,19 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
         }
-//        if (!hasCollisions)
-//            break;
+//      if (!hasCollisions) // no, don't leave yet because phase 2.2 will continue to improve things
+//          break;
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::close << json::close; // phase 2
+#endif
     }
 
     // phase 3 : handle kerning of clusters
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::object << "phase" << "3" << "moves" << json::array;
+#endif
     if (hasKerns)
     {
         start = seg->first();
@@ -729,11 +765,18 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         c->shift(nullPosition);
     }
     seg->positionSlots();
+    
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        *dbgout << json::close << json::close; // phase 3
+#endif
+    
     return hasCollisions;   // but this isn't accurate if we have kerning
 }
 
 // Fix collisions for the given slot.
 // Return true if everything was fixed, false if there are still collisions remaining.
+// isRev means be we are processing backwards.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, json * const dbgout) const
 {
@@ -744,6 +787,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
     //////float loopKern = 0; // keep track of kerning through the loop
     Position zero(0., 0.);
+    
+    // Look for collisions with the neighboring glyphs.
     for (s = start; s; s = isRev ? s->prev() : s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
@@ -761,12 +806,15 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     if (collides || cslot->shift().x != 0. || cslot->shift().y != 0.)
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
+        // isCol has been set to true if a collision remains.
         if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
             cslot->shift(shift);
     }
     else
     {
+        // This glyph is not colliding with anything.
         isCol = false;
+        
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
