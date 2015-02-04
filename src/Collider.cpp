@@ -427,14 +427,14 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 ////    KERN-COLLIDER    ////
 
 // Return the left edge of the glyph at height y, taking any slant box into account.
-static float get_left(Segment *seg, const Slot *s, const Position &shift, float y)
+static float get_left(Segment *seg, const Slot *s, const Position &shift, float y, float width)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = (float)1e38;
+    float res = 1e38;
 
     if (numsub > 0)
     {
@@ -442,7 +442,7 @@ static float get_left(Segment *seg, const Slot *s, const Position &shift, float 
         {
             const BBox &sbb = gc.getSubBoundingBBox(gid, i);
             const SlantBox &ssb = gc.getSubBoundingSlantBox(gid, i);
-            if (sy + sbb.yi > y || sy + sbb.ya < y)
+            if (sy + sbb.yi > y + width / 2 || sy + sbb.ya < y - width / 2)
                 continue;
             float x = sx + sbb.xi;
             if (x < res)
@@ -463,14 +463,14 @@ static float get_left(Segment *seg, const Slot *s, const Position &shift, float 
 }
 
 // Return the right edge of the glyph at height y, taking any slant boxes into account.
-static float get_right(Segment *seg, const Slot *s, const Position &shift, float y)
+static float get_right(Segment *seg, const Slot *s, const Position &shift, float y, float width)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = (float)-1e38;
+    float res = -1e38;
 
     if (numsub > 0)
     {
@@ -478,7 +478,7 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
         {
             const BBox &sbb = gc.getSubBoundingBBox(gid, i);
             const SlantBox &ssb = gc.getSubBoundingSlantBox(gid, i);
-            if (sy + sbb.yi > y || sy + sbb.ya < y)
+            if (sy + sbb.yi > y + width / 2 || sy + sbb.ya < y - width / 2)
                 continue;
             float x = sx + sbb.xa;
             if (x > res)
@@ -515,20 +515,21 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         base = base->attachedTo();
 
     // Calculate the height of the glyph and how many horizontal slices to use.
-    _maxy = (float)-1e38;
-    _miny = (float)1e38;
-    _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
+    _maxy = -1e38;
+    _miny = 1e38;
+    _xbound = (dir & 1) ? 1e38 : -1e38;
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
+        const BBox &bs = gc.getBoundingBBox(s->gid());
         if (s->index() > maxid)
         {
             last = s;
             maxid = s->index();
         }
         float y = s->origin().y + c->shift().y;
-        _maxy = std::max(_maxy, y + bb.ya);
-        _miny = std::min(_miny, y + bb.yi);
+        _maxy = std::max(_maxy, y + bs.ya);
+        _miny = std::min(_miny, y + bs.yi);
     }
     _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
     sliceWidth = (_maxy - _miny + 2) / _numSlices;
@@ -539,18 +540,19 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
-        float x = s->origin().x + c->shift().x + (dir & 1 ? bb.xi : bb.xa);
+        const BBox &bs = gc.getBoundingBBox(s->gid());
+        float x = s->origin().x + c->shift().x + (dir & 1 ? bs.xi : bs.xa);
         // Loop over slices.
         // Note smin might not be zero if glyph s is not at the bottom of the cluster; similarly for smax.
-        int smin = std::max(0, int((s->origin().y + c->shift().y + bb.yi - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
-        int smax = std::min(_numSlices - 1, int((s->origin().y + c->shift().y + bb.ya - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
+        int smin = std::max(0, int((s->origin().y + c->shift().y + bs.yi - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
+        int smax = std::min(_numSlices - 1, int((s->origin().y + c->shift().y + bs.ya - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
         for (int i = smin; i <= smax; ++i)
         {
             float t;
             float y = _miny - 1 + (i + .5) * sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_left(seg, s, currShift, y);
+                t = get_left(seg, s, currShift, y, sliceWidth);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -560,7 +562,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_right(seg, s, currShift, y);
+                t = get_right(seg, s, currShift, y, sliceWidth);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
@@ -570,44 +572,36 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
         }
     }
-    _mingap = (float)1e38;
+    _mingap = 1e38;
     _target = aSlot;
     _margin = margin;
     _currShift = currShift;
 }
 
 
-// Determine how much the target slot needs to kern away from the given slot.
-// In other words, merge the given slot's position with what the target slot knows
-// about how it can kern.
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, int dir, json * const dbgout)
 {
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    uint16 gid = slot->gid();
-    const BBox &bb = gc.getBoundingBBox(gid);
+    const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
     const float sy = slot->origin().y + currShift.y;
-    int smin = std::max(0, int((sy + bb.yi - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
-    int smax = std::min(_numSlices - 1, int((sy + bb.ya - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
+    int smin = std::max(0, int((sy + bb.bl.y - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
+    int smax = std::min(_numSlices - 1, int((sy + bb.tr.y - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
     float sliceWidth = (_maxy - _miny + 2) / _numSlices;
     bool res = false;
 
+    
+    
     if (dir & 1)
     {
-        float x = sx + bb.xa;
-        if (x < _xbound) // no horizontal overlap - TODO: HANDLE MARGIN
-        {
-            if (_xbound - x < _mingap)
-                _mingap = _xbound - x;
+        float x = sx + bb.tr.x;
+        if (x < _xbound - _mingap) // no horizontal overlap - TODO: HANDLE MARGIN
             return false;
-        }
         for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
+            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
             if (x > _edges[i] - _mingap)
             {
-                float m = get_right(seg, slot, currShift, y);
+                float m = get_right(seg, slot, currShift, y, sliceWidth) + currSpace;
                 t = _edges[i] - m;
                 // Check slices above and below (if any).
                 if (i < _numSlices - 1) t = std::min(t, _edges[i+1] - m);
@@ -622,20 +616,16 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     }
     else
     {
-        float x = sx + bb.xi;
-        if (x > _xbound)
-        {
-            if (x - _xbound < _mingap)
-                _mingap = x - _xbound;
+        float x = sx + bb.bl.x;
+        if (x > _xbound + _mingap + currSpace)
             return false;
-        }
         for (int i = smin; i < smax; ++i)
         {
             float t;
-            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
+            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
             if (x < _edges[i] + _mingap)
             {
-                float m = get_left(seg, slot, currShift, y);
+                float m = get_left(seg, slot, currShift, y, sliceWidth) + currSpace;
                 t = m - _edges[i];
                 if (i < _numSlices - 1) t = std::min(t, m - _edges[i+1]);
                 if (i > 0) t = std::min(t, m - _edges[i-1]);
@@ -680,3 +670,7 @@ float SlotCollision::getKern(int dir) const
 }
 
 
+// Determine how much the target slot needs to kern away from the given slot.
+// In other words, merge the given slot's position with what the target slot knows
+// about how it can kern.
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout)

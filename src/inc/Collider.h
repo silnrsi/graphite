@@ -109,7 +109,7 @@ public:
     ~KernCollider() throw() { };
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
                 float currKern, int dir, json * const dbgout);
-    bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, int dir, json * const dbgout);
+    bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
     Position resolve(Segment *seg, int dir, float margin, json * const dbgout);
 
     CLASS_NEW_DELETE;

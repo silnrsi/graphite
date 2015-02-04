@@ -98,9 +98,10 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         const Position &collshift = coll->offset();
         if (coll->flags() & SlotCollision::COLL_KERN)
         {
-            tAdvance += collshift.x;
             if (seg->dir() & 1)
-                shift = shift + collshift;
+                base = Position(base.x + collshift.x, base.y + collshift.y);
+            else
+                tAdvance += collshift.x;
             // For LTR fonts, don't also shift when kerning.
         }
         else
@@ -501,7 +502,7 @@ Slot * Slot::nextInCluster(const Slot *s) const
         return s->firstChild();
     else if (s->nextSibling())
         return s->nextSibling();
-    while (base = s->attachedTo())
+    while ((base = s->attachedTo()))
     {
         if (base->firstChild() == s && base->nextSibling())
             return base->nextSibling();

@@ -1145,6 +1145,7 @@ size_t LocaLookup(gid16 nGlyphId,
         const void * pHead) // throw (std::out_of_range)
 {
     const Sfnt::FontHeader * pTable = reinterpret_cast<const Sfnt::FontHeader *>(pHead);
+    size_t res = -2;
 
     // CheckTable verifies the index_to_loc_format is valid
     if (be::swap(pTable->index_to_loc_format) == Sfnt::FontHeader::ShortIndexLocFormat)
@@ -1152,21 +1153,24 @@ size_t LocaLookup(gid16 nGlyphId,
         if (nGlyphId < (lLocaSize >> 1) - 1) // allow sentinel value to be accessed
         {
             const uint16 * pShortTable = reinterpret_cast<const uint16 *>(pLoca);
-            return (be::peek<uint16>(pShortTable + nGlyphId) << 1);
+            res = be::peek<uint16>(pShortTable + nGlyphId) << 1;
+            if (res == static_cast<size_t>(be::peek<uint16>(pShortTable + nGlyphId + 1) << 1))
+                return -1;
         }
     }
-    
-    if (be::swap(pTable->index_to_loc_format) == Sfnt::FontHeader::LongIndexLocFormat)
+    else if (be::swap(pTable->index_to_loc_format) == Sfnt::FontHeader::LongIndexLocFormat)
     { // loca entries are four bytes
         if (nGlyphId < (lLocaSize >> 2) - 1)
         {
             const uint32 * pLongTable = reinterpret_cast<const uint32 *>(pLoca);
-            return be::peek<uint32>(pLongTable + nGlyphId);
+            res = be::peek<uint32>(pLongTable + nGlyphId);
+            if (res == static_cast<size_t>(be::peek<uint32>(pLongTable + nGlyphId + 1)))
+                return -1;
         }
     }
 
     // only get here if glyph id was bad
-    return -1;
+    return res;
     //throw std::out_of_range("glyph id out of range for font");
 }
 
@@ -1177,7 +1181,7 @@ size_t LocaLookup(gid16 nGlyphId,
 void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
 {
     const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
-        if (nGlyfOffset == size_t(-1) || nGlyfOffset >= nTableLen)
+        if (nGlyfOffset == size_t(-1) || nGlyfOffset == size_t(-2) || nGlyfOffset >= nTableLen)
             return NULL;
     return const_cast<uint8 *>(pByte + nGlyfOffset);
 }

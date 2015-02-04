@@ -254,7 +254,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 
     _num_glyphs_graphics = TtfUtil::GlyphCount(maxp);
     // This will fail if the number of glyphs is wildly out of range.
-    if (_glyf && TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-1))
+    if (_glyf && TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-2))
     {
         _head = Face::Table();
         return;

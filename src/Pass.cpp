@@ -838,17 +838,27 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
 {
     Slot *s;
     float currGap = 0.;
+    float currSpace = 0.;
     bool collides = false;
     SlotCollision *cslot = seg->collisionInfo(slot);
+    bool seenEnd = cslot->flags() & SlotCollision::COLL_END;
     coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir, dbgout);
 
     for (s = slot->next(); s; s = s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
-        if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
-            collides |= coll.mergeSlot(seg, s, c->shift(), dir, dbgout);
-        if (s != start && (c->flags() & SlotCollision::COLL_END))
-            break;
+        const Rect &bb = seg->theGlyphBBoxTemporary(s->gid());
+        if (bb.bl.y == 0. && bb.tr.y == 0.)
+        { } //    currSpace += s->advance();
+        else if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
+            collides |= coll.mergeSlot(seg, s, c->shift(), currSpace, dir, dbgout);
+        if (c->flags() & SlotCollision::COLL_END)
+        {
+            if (seenEnd)
+                break;
+            else
+                seenEnd = true;
+        }
     }
     if (collides)
     {
