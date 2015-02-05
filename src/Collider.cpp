@@ -671,8 +671,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
     float result = (1 - 2 * (dir & 1)) * (_mingap - margin);
-    
-    
+
 #if !defined GRAPHITE2_NTRACING
     float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above
     if (dbgout)
@@ -736,5 +735,4 @@ float SlotCollision::getKern(int dir) const
     else
     	return 0;
 }
-
 
