@@ -786,7 +786,6 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), cslot->offset(), dir, dbgout);
     bool collides = false;
     bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
-    //////float loopKern = 0; // keep track of kerning through the loop
     Position zero(0., 0.);
     
     // Look for collisions with the neighboring glyphs.
@@ -827,6 +826,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 #endif
     }
 
+    // Set the is-collision flag bit.
     if (isCol)
     { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
@@ -843,7 +843,7 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
     bool collides = false;
     SlotCollision *cslot = seg->collisionInfo(slot);
     bool seenEnd = cslot->flags() & SlotCollision::COLL_END;
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), currKern, dir, dbgout);
+    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->shift(), cslot->offset(), dir, dbgout);
 
     for (s = slot->next(); s; s = s->next())
     {

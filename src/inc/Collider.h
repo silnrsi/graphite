@@ -108,7 +108,7 @@ class KernCollider
 public:
     ~KernCollider() throw() { };
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
-                float currKern, int dir, json * const dbgout);
+                const Position &offsetPrev, int dir, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
     Position resolve(Segment *seg, int dir, float margin, json * const dbgout);
 
@@ -118,8 +118,9 @@ private:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
-    Position _currShift;
-    float _miny;	  // y-coordinates offset by global slot position
+    Position _offsetPrev; // kern from a previous pass
+    Position _currShift;   // NOT USED??
+    float _miny;	       // y-coordinates offset by global slot position
     float _maxy;
     Vector<float> _edges; // edges of horizontal slices
     int   _numSlices;     // number of slices

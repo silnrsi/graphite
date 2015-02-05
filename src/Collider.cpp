@@ -415,15 +415,18 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         }
     }  // end of loop over 4 directions
     
+    isCol = !tIsGoodFit;
+
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
         *dbgout << json::close // vectors array
-            << "result" << totalp << json::close; // slot object
+            << "result" << totalp 
+            << "stillBad" << isCol
+            << json::close; // slot object
     }
 #endif
 
-    isCol = !tIsGoodFit;
     return totalp;
 }
 
@@ -504,7 +507,7 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
      
 
 void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currShift,
-    float currKern, int dir, json * const dbgout)
+    const Position &offsetPrev, int dir, json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
@@ -517,6 +520,9 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     while (base->attachedTo())
         base = base->attachedTo();
 
+    _limit = limit;
+    _offsetPrev = offsetPrev; // kern from a previous pass
+    
     // Calculate the height of the glyph and how many horizontal slices to use.
     _maxy = (float)-1e38;
     _miny = (float)1e38;
@@ -670,7 +676,8 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 // Return the amount to kern by.
 Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
-    float result = (1 - 2 * (dir & 1)) * (_mingap - margin);
+    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
+    float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
 
 #if !defined GRAPHITE2_NTRACING
     float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above
@@ -682,7 +689,8 @@ Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNU
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
-//                    << "currShift" << _currShift
+                    //<< "currShift" << _currShift
+                    << "offsetPrev" << _offsetPrev
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern"
@@ -705,7 +713,9 @@ Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNU
         *dbgout
             << "xbound" << _xbound
             << "minGap" << _mingap
+            << "needed" << resultNeeded
             << "result" << result
+            << "stillBad" << (result != resultNeeded)
             << json::close; // slot object
     }
 #endif
