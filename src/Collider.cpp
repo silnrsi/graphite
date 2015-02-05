@@ -91,10 +91,10 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
         _rawRanges[i].clear();
         _rawRanges[i].add(min, max);
         _removals[i].clear();
-        _gidNear[i].clear();
+        _slotNear[i].clear();
         _subNear[i].clear();
-        _subTarget[i].clear();
     }
+    _seg = seg; // debugging
     _target = aSlot;
     if ((dir & 1) == 0)
     {
@@ -267,7 +267,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 
                 IntervalSet::tpair dbg(vmin, vmax); // debugging
                 _removals[i].append(dbg);           // debugging
-                _gidNear[i].push_back(gid);       // debugging
+                _slotNear[i].push_back(slot);     // debugging
                 _subNear[i].push_back(j);         // debugging
             }
             if (!anyhits)
@@ -279,7 +279,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
             IntervalSet::tpair dbg(vmin, vmax); // debugging
             _removals[i].append(dbg);           // debugging
-            _gidNear[i].push_back(gid);       // debugging
+            _slotNear[i].push_back(slot);     // debugging
             _subNear[i].push_back(-1);        // debugging
         }
     }
@@ -313,7 +313,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                     << "origin" << _target->origin()
                     << "currShift" << _currShift
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                    << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "shift";
         *dbgout     << json::close // target object
         	      << "vectors" << json::array;
@@ -374,8 +374,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         if (dbgout)
         {
             *dbgout << json::object // vector
-                    << "testleft" << tleft
-                    << "testlen" << tlen;
+                    << "testLeft" << tleft
+                    << "testLen" << tlen;
             
             *dbgout << "rawRanges" << json::flat << json::array;
             for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
@@ -384,7 +384,10 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 << "removals" << json::array;  						
             int gi = 0;
             for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
-                *dbgout << json::flat << json::array << _gidNear[i][gi] << _subNear[i][gi] << Position(s->first, s->second) << json::close;
+            {   //Slot & slotNear = *(_slotNear[i][gi]);
+                *dbgout << json::flat << json::array 
+                    << objectid(dslot(_seg,_slotNear[i][gi])) << _subNear[i][gi] << Position(s->first, s->second) << json::close;
+            }
             *dbgout << json::close; // removals array
             	
             *dbgout << "ranges";
@@ -394,7 +397,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
             *dbgout << json::close // fits array
-                    << "bestfit" << bestd
+                    << "bestFit" << bestd
                 << json::close; // vectors object
         }
 #endif
@@ -434,7 +437,7 @@ static float get_left(Segment *seg, const Slot *s, const Position &shift, float 
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = 1e38;
+    float res = (float)1e38;
 
     if (numsub > 0)
     {
@@ -470,7 +473,7 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
     float sx = s->origin().x + shift.x;
     float sy = s->origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
-    float res = -1e38;
+    float res = (float)-1e38;
 
     if (numsub > 0)
     {
@@ -515,9 +518,9 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         base = base->attachedTo();
 
     // Calculate the height of the glyph and how many horizontal slices to use.
-    _maxy = -1e38;
-    _miny = 1e38;
-    _xbound = (dir & 1) ? 1e38 : -1e38;
+    _maxy = (float)-1e38;
+    _miny = (float)1e38;
+    _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
@@ -534,8 +537,15 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
     sliceWidth = (_maxy - _miny + 2) / _numSlices;
     _edges.clear();
-    _edges.insert(_edges.begin(), _numSlices, dir & 1 ? 1e38 : -1e38);
-
+    _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);
+        
+    // Debugging
+    _seg = seg;
+    _slotNear.clear();
+    _slotNear.insert(_slotNear.begin(), _numSlices, NULL);
+    _nearEdges.clear();
+    _nearEdges.insert(_nearEdges.begin(), _numSlices, (dir & 1) ? -1e38 : +1e38);
+    
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
     for (s = base; s; s = s->nextInCluster(s))
     {
@@ -572,13 +582,18 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
         }
     }
-    _mingap = 1e38;
+    _mingap = (float)1e38;
     _target = aSlot;
     _margin = margin;
     _currShift = currShift;
 }
 
 
+// Determine how much the target slot needs to kern away from the given slot.
+// In other words, merge information from given slot's position with what the target slot knows
+// about how it can kern.
+// Return false if we know there is no collision, true if we think there might be one.
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout)
 {
     const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
@@ -586,19 +601,17 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     int smin = std::max(0, int((sy + bb.bl.y - _miny + 1) / (_maxy - _miny + 2) * _numSlices));
     int smax = std::min(_numSlices - 1, int((sy + bb.tr.y - _miny + 1) / (_maxy - _miny + 2) * _numSlices + 1));
     float sliceWidth = (_maxy - _miny + 2) / _numSlices;
-    bool res = false;
+    bool collides = false;
 
-    
-    
     if (dir & 1)
     {
         float x = sx + bb.tr.x;
-        if (x < _xbound - _mingap) // no horizontal overlap - TODO: HANDLE MARGIN
+        if (x < _xbound - _mingap)  // no horizontal overlap - TODO: HANDLE MARGIN?
             return false;
         for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
+            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
             if (x > _edges[i] - _mingap)
             {
                 float m = get_right(seg, slot, currShift, y, sliceWidth) + currSpace;
@@ -609,7 +622,14 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
                 if (t < _mingap)
                 {
                     _mingap = t;
-                    res = true;
+                    collides = true;
+                }
+                
+                // Debugging - remember the closest neighboring edge for this slice.
+                if (m > _nearEdges[i])
+                {
+                    _slotNear[i] = slot;
+                    _nearEdges[i] = m;
                 }
             }
         }
@@ -617,12 +637,12 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     else
     {
         float x = sx + bb.bl.x;
-        if (x > _xbound + _mingap + currSpace)
+        if (x > _xbound + _mingap + currSpace)   // no horizontal overlap - TODO: HANDLE MARGIN?
             return false;
         for (int i = smin; i < smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * sliceWidth;  // vertical center of slice
+            float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
             if (x < _edges[i] + _mingap)
             {
                 float m = get_left(seg, slot, currShift, y, sliceWidth) + currSpace;
@@ -632,18 +652,66 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
                 if (t < _mingap)
                 {
                     _mingap = t;
-                    res = true;
+                    collides = true;
+                }
+                
+                // Debugging - remember the closest neighboring edge for this slice.
+                if (m < _nearEdges[1])
+                {
+                    _slotNear[i] = slot;
+                    _nearEdges[i] = m;
                 }
             }
         }
     }
-    return res;   // note that true is not a necessarily reliable value
+    return collides;   // note that true is not a necessarily reliable value
 }
 
 // Return the amount to kern by.
 Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
-    return Position((1 - 2 * (dir & 1)) * (_mingap - margin), 0.);
+    float result = (1 - 2 * (dir & 1)) * (_mingap - margin);
+    
+    
+#if !defined GRAPHITE2_NTRACING
+    float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above
+    if (dbgout)
+    {
+        *dbgout << json::object // slot
+                << "slot" << objectid(dslot(seg, _target))
+                << "margin" << _margin
+                << "limit" << _limit
+                << "target" << json::object
+                    << "origin" << _target->origin()
+//                    << "currShift" << _currShift
+                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
+                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "fix" << "kern"
+                    << "slices" << _numSlices
+                    << "sliceWidth" << sliceWidth
+                    << json::close; // target object
+        
+        *dbgout << "slices" << json::array;
+        for (int is = 0; is < _numSlices; is++)
+        {
+            *dbgout << json::flat << json::object 
+                << "i" << is 
+                << "targetEdge" << _edges[is]
+                << "neighbor" << objectid(dslot(seg, _slotNear[is]))
+                << "nearEdge" << _nearEdges[is] 
+                << json::close;
+        }
+        *dbgout << json::close; // slices array
+            
+        *dbgout
+            << "xbound" << _xbound
+            << "minGap" << _mingap
+            << "result" << result
+            << json::close; // slot object
+    }
+#endif
+
+    return Position(result, 0.);
 }
 
 // Initialize the structure for the given slot.
@@ -670,7 +738,3 @@ float SlotCollision::getKern(int dir) const
 }
 
 
-// Determine how much the target slot needs to kern away from the given slot.
-// In other words, merge the given slot's position with what the target slot knows
-// about how it can kern.
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout)

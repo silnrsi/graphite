@@ -95,11 +95,11 @@ protected:
     Position _currOffset;
     
     // Debugging
+    Segment * _seg;
     IntervalSet _rawRanges[4];
     IntervalSet _removals[4];
-    Vector<int> _gidNear[4];
-    Vector<int> _subNear[4];
-    Vector<int> _subTarget[4];
+    Vector<Slot*>_slotNear[4];
+    Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
 
 };
 
@@ -119,13 +119,17 @@ private:
     Rect    _limit;
     float   _margin;
     Position _currShift;
-    Rect _limitSpec;  // limits specified, as opposed to practical limits for determining possible movement
     float _miny;	  // y-coordinates offset by global slot position
     float _maxy;
     Vector<float> _edges; // edges of horizontal slices
     int   _numSlices;     // number of slices
     float _mingap;
     float _xbound;        // max or min edge
+    
+    // Debugging
+    Segment * _seg;
+    Vector<float> _nearEdges; // closest potential collision in each slice
+    Vector<Slot*> _slotNear;
 };
 
 

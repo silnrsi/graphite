@@ -646,8 +646,9 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     Slot *start = seg->first();      // turn on collision fixing for the first slot
     
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)  *dbgout << "collisions" << json::array // (1)
-        << "num-loops" << numLoops;
+    if (dbgout)
+        *dbgout << "collisions" << json::array
+            << json::flat << json::object << "num-loops" << numLoops << json::close;
     json::closer collisions_array_closer(dbgout);
     if (dbgout)  *dbgout << json::object << "phase" << "1" << "moves" << json::array;
 #endif
@@ -679,11 +680,11 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
-        *dbgout << json::object << "phase" << "2.1" << "loop" << i << "moves" << json::array;
+        *dbgout << json::object << "phase" << "2a" << "loop" << i << "moves" << json::array;
 #endif
-        // phase 2.1 : if any shiftable glyphs are in collision, iterate backwards,
+        // phase 2a : if any shiftable glyphs are in collision, iterate backwards,
         // fixing them and ignoring other non-collided glyphs. Note that this handles ONLY
-        // glyphs that are actually in collision from phases 1 or 2.2, and working backwards
+        // glyphs that are actually in collision from phases 1 or 2b, and working backwards
         // has the intended effect of breaking logjams.
         if (hasCollisions)
         {
@@ -710,10 +711,10 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
         *dbgout << json::close << json::close // phase 2a
-            << json::object << "phase" << "2.2" << "loop" << i << "moves" << json::array;
+            << json::object << "phase" << "2b" << "loop" << i << "moves" << json::array;
 #endif
 
-        // phase 2.2 : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
+        // phase 2b : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
         // glyphs from their current adjusted position, which has the effect of gradually minimizing the  
         // resulting adjustment; ie, the final result will be gradually closer to the original location.  
         // Also it allows more flexibility in the final adjustment, since it is moving along the  
@@ -729,7 +730,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
             if (c->flags() & SlotCollision::COLL_START)
                 start = s;
         }
-//      if (!hasCollisions) // no, don't leave yet because phase 2.2 will continue to improve things
+//      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
 //          break;
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
