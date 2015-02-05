@@ -145,6 +145,7 @@ public:
         COLL_KERN = 16,     // collisions with this glyph are fixed by adding kerning space after it
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
+        COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction
     };
         
     SlotCollision(Segment *seg, Slot *slot);
@@ -158,7 +159,9 @@ public:
     void margin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
     void flags(uint16 f) { _flags = f; }
-    
+    uint16 minxoffset() const { return _minxoffset; }
+    void minxoffset(uint16 m) { _minxoffset = m; }
+
     float getKern(int dir) const;
     
 private:
@@ -167,6 +170,7 @@ private:
     Position    _offset;
     uint16      _margin;
     uint16      _flags;
+    uint16      _minxoffset;
 };
 
 };

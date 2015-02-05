@@ -143,6 +143,8 @@ enum gr_attrCode {
     gr_slatcolShifty,
     /// Collision margin
     gr_slatcolMargin,
+    /// Collision guard space from another diacritic
+    gr_slatcolMinOffsetx,
                             
     /// not implemented
     gr_slatMax,             

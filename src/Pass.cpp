@@ -850,7 +850,7 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
         SlotCollision *c = seg->collisionInfo(s);
         const Rect &bb = seg->theGlyphBBoxTemporary(s->gid());
         if (bb.bl.y == 0. && bb.tr.y == 0.)
-        { } //    currSpace += s->advance();
+            currSpace += s->advance();
         else if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
             collides |= coll.mergeSlot(seg, s, c->shift(), currSpace, dir, dbgout);
         if (c->flags() & SlotCollision::COLL_END)

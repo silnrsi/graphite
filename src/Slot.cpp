@@ -245,8 +245,8 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatcolLimitbly : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.y : 0; }
     case gr_slatcolLimittrx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.x : 0; }
     case gr_slatcolLimittry : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.y : 0; }
-    case gr_slatcolShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->shift().x : 0; }
-    case gr_slatcolShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->shift().y : 0; }
+    case gr_slatcolShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().x : 0; }
+    case gr_slatcolShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().y : 0; }
     case gr_slatcolMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
     default :               return 0;
     }
