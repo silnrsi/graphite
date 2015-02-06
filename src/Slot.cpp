@@ -240,7 +240,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatUserDefn :  return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
-    case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->flags() : 0; }
+    case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); return c ? (c->flags() | c->status()) : 0; }
     case gr_slatcolLimitblx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.x : 0; }
     case gr_slatcolLimitbly : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.y : 0; }
     case gr_slatcolLimittrx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.x : 0; }
@@ -317,14 +317,21 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJWidth :    just(value); break;
     case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
-    case gr_slatcolFlags :  { SlotCollision *c = seg->collisionInfo(this); if (c) c->flags(value); break; }
+    case gr_slatcolFlags :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->status(value);
+            c->flags(c->flags() | value);   // only turn on stuff for now [needs changing]
+        }
+        break; }
     case gr_slatcolLimitblx :  {
         SlotCollision *c = seg->collisionInfo(this);
         if (c)
         {
             const Rect &r = c->limit();
             c->limit(Rect(Position(value, r.bl.y), r.tr));
-            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+            c->status(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimitbly :  {
@@ -333,7 +340,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(Position(r.bl.x, value), r.tr));
-            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+            c->status(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimittrx :  {
@@ -342,7 +349,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(r.bl, Position(value, r.tr.y)));
-            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+            c->status(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolLimittry :  {
@@ -351,7 +358,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         {
             const Rect &r = c->limit();
             c->limit(Rect(r.bl, Position(r.tr.x, value)));
-            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+            c->status(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     case gr_slatcolMargin : { 
@@ -359,7 +366,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (c)
         {
             c->margin(value);
-            c->flags(c->flags() & ~SlotCollision::COLL_KNOWN);
+            c->status(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }
     default :

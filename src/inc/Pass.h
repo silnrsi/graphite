@@ -74,7 +74,7 @@ private:
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
     bool    collisionAvoidance(Segment *seg, int dir, json * const dbgout) const;
     bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
-                     int dir, json * const dbgout) const;
+                     int dir, bool &moved, json * const dbgout) const;
     float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
                      float currKern, json *const dbgout) const;
 

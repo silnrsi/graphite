@@ -125,6 +125,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float omin, omax, otmin, otmax;
     float cmin, cmax;
     float pmin, pmax;
+    float vcmin, vcmax, tempv;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
     const unsigned short tgid = _target->gid();
@@ -132,7 +133,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     const BBox &tbb = gc.getBoundingBBox(tgid);
     const SlantBox &tsb = gc.getBoundingSlantBox(tgid);
-    bool isAttached = (_target->attachedTo() == slot);
+    const SlotCollision *cslot = seg->collisionInfo(slot);
+    bool noJump = !(cslot->flags() & SlotCollision::COLL_JUMPABLE);
+    bool blocking = cslot->flags() & SlotCollision::COLL_BLOCKING;
     
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
@@ -150,6 +153,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.x + _target->origin().x + tbb.xa;
                 pmin = _target->origin().x + tbb.xi;
                 pmax = _target->origin().x + tbb.xa;
+                tempv = 0.5 * (vmax - vmin - pmax + pmin) + cslot->minxoffset();
+                vcmin = 0.5 * (vmax + vmin) - tempv;
+                vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(bb.yi + sy, tbb.xi + tx - sb.da - sd), sb.si + ss - tbb.xa - tx);
@@ -162,6 +168,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.y + _target->origin().y + tbb.ya;
                 pmin = _target->origin().y + tbb.yi;
                 pmax = _target->origin().y + tbb.ya;
+                vcmin = pmin - 100.;        // just make vcmin < pmin
+                vcmax = pmax + 100.;        // just make vcmax > pmax
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -175,6 +183,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa;
                 pmin = _target->origin().x + _target->origin().y + tsb.si; 
                 pmax = _target->origin().x + _target->origin().y + tsb.sa;
+                tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                vcmin = 0.5 * (vmax + vmin) - tempv;
+                vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -188,6 +199,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da;
                 pmin = _target->origin().x - _target->origin().y + tsb.di;
                 pmax = _target->origin().x - _target->origin().y + tsb.da;
+                tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                vcmin = 0.5 * (vmax + vmin) - tempv;
+                vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
             default :
                 continue;
@@ -198,10 +212,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             vmin = vmax;
             vmax = t;
         }
-        // don't cross what we are attached to.
-        if (isAttached && vmax < pmax && vmin < pmin)
+        if (blocking && vcmax < pmax && vcmin < pmin)
             vmin = (float)-1e38;
-        else if (isAttached && vmin > pmin && vmax > pmax)
+        else if (blocking && vcmin > pmin && vcmax > pmax)
+            vmax = (float)1e38;
+        if (noJump && vmax < pmax && vmin < pmin)
+            vmin = (float)-1e38;
+        else if (noJump && vmin > pmin && vmax > pmax)
             vmax = (float)1e38;
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
@@ -228,24 +245,34 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         vmax = std::min(std::min(sbb.xa + sx, ssb.da + sd + tbb.ya + ty), ssb.sa + ss - tbb.yi - ty);
                         omin = sbb.yi + sy;
                         omax = sbb.ya + sy;
+                        tempv = 0.5 * (vmax - vmin - pmax + pmin) + cslot->minxoffset();
+                        vcmin = 0.5 * (vmax + vmin) - tempv;
+                        vcmax = 0.5 * (vmax + vmin) + tempv;
                         break;
                     case 1 :    // y
                         vmin = std::max(std::max(sbb.yi + sy, tbb.xi + tx - ssb.da - sd), ssb.si + ss - tbb.xa - tx);
                         vmax = std::min(std::min(sbb.ya + sy, tbb.xa + tx - ssb.di - sd), ssb.sa + ss - tbb.xi - tx);
                         omin = sbb.xi + sx;
                         omax = sbb.xa + sx;
+                        // vcmin, vcmax not dependent on vmin, vmax for y-direction
                         break;
                     case 2 :    // sum
                         vmin = std::max(std::max(ssb.si + ss, 2 * (sbb.yi + sy) + tsb.di + td), 2 * (sbb.xi + sx) - tsb.da - td);
                         vmax = std::min(std::min(ssb.sa + ss, 2 * (sbb.ya + sy) + tsb.da + td), 2 * (sbb.xa + sx) - tsb.di - td);
                         omin = ssb.di + sd;
                         omax = ssb.da + sd;
+                        tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                        vcmin = 0.5 * (vmax + vmin) - tempv;
+                        vcmax = 0.5 * (vmax + vmin) + tempv;
                         break;
                     case 3 :    // diff
                         vmin = std::max(std::max(ssb.di + sd, 2 * (sbb.xi + sx) - tsb.sa - ts), tsb.si + ts - 2 * (sbb.ya + sy));
                         vmax = std::min(std::min(ssb.da + sd, 2 * (sbb.xa + sx) - tsb.si - ts), tsb.sa + ts - 2 * (sbb.yi + sy));
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
+                        tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                        vcmin = 0.5 * (vmax + vmin) - tempv;
+                        vcmax = 0.5 * (vmax + vmin) + tempv;
                         break;
                 }
                 if (vmin > vmax)
@@ -254,9 +281,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     vmin = vmax;
                     vmax = t;
                 }
-                if (isAttached && vmax < pmax && vmin < pmin)
+                if (blocking && vcmax < pmax && vcmin < pmin)
                     vmin = (float)-1e38;
-                else if (isAttached && vmin > pmin && vmax > pmax)
+                else if (blocking && vcmin > pmin && vcmax > pmax)
+                    vmax = (float)1e38;
+                if (noJump && vmax < pmax && vmin < pmin)
+                    vmin = (float)-1e38;
+                else if (noJump && vmin > pmin && vmax > pmax)
                     vmax = (float)1e38;
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -736,6 +767,7 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
     _flags = seg->glyphAttr(gid, aCol);
+    _status = _flags;
 }
 
 float SlotCollision::getKern(int dir) const

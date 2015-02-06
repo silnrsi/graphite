@@ -644,98 +644,115 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     bool hasCollisions = false;
     bool hasKerns = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
-    
+    Slot *end = NULL;
+    bool moved = false;
+
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
         *dbgout << "collisions" << json::array
             << json::flat << json::object << "num-loops" << numLoops << json::close;
     json::closer collisions_array_closer(dbgout);
-    if (dbgout)  *dbgout << json::object << "phase" << "1" << "moves" << json::array;
 #endif
 
-    hasCollisions = false;
-    float currKern = 0;
-    // phase 1 : position shiftable glyphs, ignoring kernable glyphs
-    for (Slot *s = seg->first(); s; s = s->next())
+    while (start)
     {
-        const SlotCollision * c = seg->collisionInfo(s);
-        if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
-            hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, dbgout);
-        else if (c->flags() & SlotCollision::COLL_KERN)
-            hasKerns = true;
-        if (c->flags() & SlotCollision::COLL_END)
-            start = NULL;
-        if (c->flags() & SlotCollision::COLL_START)
-            start = s;
-    }
-
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-        *dbgout << json::close << json::close; // phase-1
+        if (dbgout)  *dbgout << json::object << "phase" << "1" << "moves" << json::array;
 #endif
-
-    // phase 2 : loop until happy. 
-    for (int i = 0; i < numLoops - 1; ++i)
-    {
-
-#if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-        *dbgout << json::object << "phase" << "2a" << "loop" << i << "moves" << json::array;
-#endif
-        // phase 2a : if any shiftable glyphs are in collision, iterate backwards,
-        // fixing them and ignoring other non-collided glyphs. Note that this handles ONLY
-        // glyphs that are actually in collision from phases 1 or 2b, and working backwards
-        // has the intended effect of breaking logjams.
-        if (hasCollisions)
-        {
-            hasCollisions = false;
-            for (Slot *s = seg->first(); s; s = s->next())
-            {
-                SlotCollision * c = seg->collisionInfo(s);
-                c->shift(Position(0, 0));
-            }
-            start = seg->last();
-            for (Slot *s = seg->last(); s; s = s->prev())
-            {
-                const SlotCollision * c = seg->collisionInfo(s);
-                if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
-                        && (c->flags() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
-                    hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, true, dir, dbgout);
-                if (c->flags() & SlotCollision::COLL_START)
-                    start = NULL;
-                if (c->flags() & SlotCollision::COLL_END)
-                    start = s;
-            }
-        }
-
-#if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-        *dbgout << json::close << json::close // phase 2a
-            << json::object << "phase" << "2b" << "loop" << i << "moves" << json::array;
-#endif
-
-        // phase 2b : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
-        // glyphs from their current adjusted position, which has the effect of gradually minimizing the  
-        // resulting adjustment; ie, the final result will be gradually closer to the original location.  
-        // Also it allows more flexibility in the final adjustment, since it is moving along the  
-        // possible 8 vectors from successively different starting locations.
-        start = seg->first();
-        for (Slot *s = seg->first(); s; s = s->next())
+        hasCollisions = false;
+        end = NULL;
+        // phase 1 : position shiftable glyphs, ignoring kernable glyphs
+        for (Slot *s = start; s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
-                hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, dbgout);
+            if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
+                hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+            else if (c->flags() & SlotCollision::COLL_KERN)
+                hasKerns = true;
             if (c->flags() & SlotCollision::COLL_END)
-                start = NULL;
-            if (c->flags() & SlotCollision::COLL_START)
-                start = s;
+            {
+                end = s->next();
+                break;
+            }
         }
-//      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
-//          break;
+
 #if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-        *dbgout << json::close << json::close; // phase 2
+        if (dbgout)
+            *dbgout << json::close << json::close; // phase-1
 #endif
+
+        // phase 2 : loop until happy. 
+        for (int i = 0; i < numLoops - 1; ++i)
+        {
+            if (hasCollisions || moved)
+            {
+
+#if !defined GRAPHITE2_NTRACING
+                if (dbgout)
+                    *dbgout << json::object << "phase" << "2a" << "loop" << i << "moves" << json::array;
+#endif
+                // phase 2a : if any shiftable glyphs are in collision, iterate backwards,
+                // fixing them and ignoring other non-collided glyphs. Note that this handles ONLY
+                // glyphs that are actually in collision from phases 1 or 2b, and working backwards
+                // has the intended effect of breaking logjams.
+                if (hasCollisions)
+                {
+                    hasCollisions = false;
+                    moved = false;
+                    for (Slot *s = start; s != end; s = s->next())
+                    {
+                        SlotCollision * c = seg->collisionInfo(s);
+                        c->shift(Position(0, 0));
+                    }
+                    end = end ? end->prev() : seg->last();
+                    for (Slot *s = end; s != start; s = s->prev())
+                    {
+                        const SlotCollision * c = seg->collisionInfo(s);
+                        if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
+                                && (c->status() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
+                            hasCollisions |= resolveCollisions(seg, s, end, shiftcoll, true, dir, moved, dbgout);
+                    }
+                    end = end->next();
+                }
+
+#if !defined GRAPHITE2_NTRACING
+                if (dbgout)
+                    *dbgout << json::close << json::close // phase 2a
+                        << json::object << "phase" << "2b" << "loop" << i << "moves" << json::array;
+#endif
+
+                // phase 2b : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
+                // glyphs from their current adjusted position, which has the effect of gradually minimizing the  
+                // resulting adjustment; ie, the final result will be gradually closer to the original location.  
+                // Also it allows more flexibility in the final adjustment, since it is moving along the  
+                // possible 8 vectors from successively different starting locations.
+                if (moved)
+                {
+                    moved = false;
+                    for (Slot *s = start; s != end; s = s->next())
+                    {
+                        const SlotCollision * c = seg->collisionInfo(s);
+                        if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
+                            hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+                    }
+                }
+        //      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
+        //          break;
+#if !defined GRAPHITE2_NTRACING
+                if (dbgout)
+                    *dbgout << json::close << json::close; // phase 2
+#endif
+            }
+        }
+        start = NULL;
+        for (Slot *s = end; s; s = s->next())
+        {
+            if (seg->collisionInfo(s)->flags() & SlotCollision::COLL_START)
+            {
+                start = s;
+                break;
+            }
+        }
     }
 
     // phase 3 : handle kerning of clusters
@@ -745,11 +762,12 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 #endif
     if (hasKerns)
     {
+        float currKern = 0;
         start = seg->first();
         for (Slot *s = seg->first(); s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & SlotCollision::COLL_KERN))
+            if (start && (c->flags() & SlotCollision::COLL_KERN) && (c->status() & SlotCollision::COLL_FIX))
                 currKern = resolveKern(seg, s, start, kerncoll, dir, currKern, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
@@ -779,7 +797,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 // Return true if everything was fixed, false if there are still collisions remaining.
 // isRev means be we are processing backwards.
 bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
-        ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, json * const dbgout) const
+        ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, bool &moved,
+        json * const dbgout) const
 {
     Slot *s;
     SlotCollision *cslot = seg->collisionInfo(slot);
@@ -792,9 +811,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     for (s = start; s; s = isRev ? s->prev() : s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
-        if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) 
+        if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) 
                       && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN))
-                      && (!isRev || !ignoreForKern || !(c->flags() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
+                      && (!isRev || !ignoreForKern || !(c->status() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
         else if (s == slot)
             ignoreForKern = !ignoreForKern;
@@ -808,7 +827,11 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         Position shift = coll.resolve(seg, isCol, dbgout);
         // isCol has been set to true if a collision remains.
         if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
+        {
+            if (shift.x != cslot->shift().x || shift.y != cslot->shift().y)
+                moved = true;
             cslot->shift(shift);
+        }
     }
     else
     {
@@ -828,9 +851,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 
     // Set the is-collision flag bit.
     if (isCol)
-    { cslot->flags(cslot->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
+    { cslot->status(cslot->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
-    { cslot->flags((cslot->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
+    { cslot->status((cslot->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
 
@@ -851,7 +874,7 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
         const Rect &bb = seg->theGlyphBBoxTemporary(s->gid());
         if (bb.bl.y == 0. && bb.tr.y == 0.)
             currSpace += s->advance();
-        else if (s != slot && !(c->flags() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
+        else if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
             collides |= coll.mergeSlot(seg, s, c->shift(), currSpace, dir, dbgout);
         if (c->flags() & SlotCollision::COLL_END)
         {

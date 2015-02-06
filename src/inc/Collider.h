@@ -147,6 +147,7 @@ public:
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
         COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction
+        COLL_BLOCKING = 256,    // Don't allow movement across the centre in x, use minoffsetx
     };
         
     SlotCollision(Segment *seg, Slot *slot);
@@ -160,6 +161,8 @@ public:
     void margin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
     void flags(uint16 f) { _flags = f; }
+    uint16 status() const { return _status; }
+    void status(uint16 f) { _status = f; }
     uint16 minxoffset() const { return _minxoffset; }
     void minxoffset(uint16 m) { _minxoffset = m; }
 
@@ -172,6 +175,7 @@ private:
     uint16      _margin;
     uint16      _flags;
     uint16      _minxoffset;
+    uint16      _status;
 };
 
 };
