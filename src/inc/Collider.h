@@ -152,26 +152,26 @@ public:
         
     SlotCollision(Segment *seg, Slot *slot);
     const Rect &limit() const { return _limit; }
-    void limit(const Rect &r) { _limit = r; }
+    void setLimit(const Rect &r) { _limit = r; }
     const Position &shift() const { return _shift; }
-    void shift(const Position &s) { _shift = s; }
+    void setShift(const Position &s) { _shift = s; }
     const Position &offset() const { return _offset; }
-    void offset(const Position &o) { _offset = o; }
+    void setOffset(const Position &o) { _offset = o; }
     uint16 margin() const { return _margin; }
-    void margin(uint16 m) { _margin = m; }
+    void setMargin(uint16 m) { _margin = m; }
     uint16 flags() const { return _flags; }
-    void flags(uint16 f) { _flags = f; }
+    void setFlags(uint16 f) { _flags = f; }
     uint16 status() const { return _status; }
-    void status(uint16 f) { _status = f; }
+    void setStatus(uint16 f) { _status = f; }
     uint16 minxoffset() const { return _minxoffset; }
-    void minxoffset(uint16 m) { _minxoffset = m; }
+    void setMinxoffset(uint16 m) { _minxoffset = m; }
 
     float getKern(int dir) const;
     
 private:
     Rect        _limit;
-    Position    _shift;
-    Position    _offset;
+    Position    _shift;     // adjustment within the given pass
+    Position    _offset;    // total adjustment for collisions
     uint16      _margin;
     uint16      _flags;
     uint16      _minxoffset;

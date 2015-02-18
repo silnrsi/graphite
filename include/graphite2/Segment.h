@@ -128,23 +128,23 @@ enum gr_attrCode {
     /// Bidi level
     gr_slatBidiLevel = 56,
     /// Collision flags
-    gr_slatcolFlags,
+    gr_slatColFlags,
     /// Collision constraint rectangle left (bl.x)
-    gr_slatcolLimitblx,
+    gr_slatColLimitblx,
     /// Collision constraint rectangle lower (bl.y)
-    gr_slatcolLimitbly,
+    gr_slatColLimitbly,
     /// Collision constraint rectangle right (tr.x)
-    gr_slatcolLimittrx,
+    gr_slatColLimittrx,
     /// Collision constraing rectangle upper (tr.y)
-    gr_slatcolLimittry,
+    gr_slatColLimittry,
     /// Collision shift x
-    gr_slatcolShiftx,
+    gr_slatColShiftx,
     /// Collision shift y
-    gr_slatcolShifty,
+    gr_slatColShifty,
     /// Collision margin
-    gr_slatcolMargin,
+    gr_slatColMargin,
     /// Collision guard space from another diacritic
-    gr_slatcolMinOffsetx,
+    gr_slatColMinOffsetx,
                             
     /// not implemented
     gr_slatMax,             

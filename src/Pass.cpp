@@ -702,7 +702,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     for (Slot *s = start; s != end; s = s->next())
                     {
                         SlotCollision * c = seg->collisionInfo(s);
-                        c->shift(Position(0, 0));
+                        c->setShift(Position(0, 0));
                     }
                     end = end ? end->prev() : seg->last();
                     for (Slot *s = end; s != start; s = s->prev())
@@ -780,8 +780,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         SlotCollision *c = seg->collisionInfo(s);
         const Position newOffset = c->shift();
         const Position nullPosition(0, 0);
-        c->offset(newOffset + c->offset());
-        c->shift(nullPosition);
+        c->setOffset(newOffset + c->offset());
+        c->setShift(nullPosition);
     }
     seg->positionSlots();
     
@@ -830,7 +830,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         {
             if (shift.x != cslot->shift().x || shift.y != cslot->shift().y)
                 moved = true;
-            cslot->shift(shift);
+            cslot->setShift(shift);
         }
     }
     else
@@ -851,9 +851,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 
     // Set the is-collision flag bit.
     if (isCol)
-    { cslot->status(cslot->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
+    { cslot->setStatus(cslot->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
-    { cslot->status((cslot->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
+    { cslot->setStatus((cslot->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
 
@@ -887,11 +887,13 @@ float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &col
     if (collides)
     {
         Position mv = coll.resolve(seg, dir, cslot->margin(), dbgout);
-        cslot->shift(mv);
+        cslot->setShift(mv);
         return mv.x;
     }
     return 0.;
 }
+
+
 // find cluster base
 // find cluster ymin, ymax
 // find bound for each slice (slice being cslot->margin() tall)

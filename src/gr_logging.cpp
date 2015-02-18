@@ -225,7 +225,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     if (cslot)
     {
         j << "collision" << json::flat << json::object
-              << "shift" << cslot->shift()
+//              << "shift" << cslot->shift() -- not used pass level, only within the collision routine itself
               << "offset" << cslot->offset()
               << "limit" << cslot->limit()
               << "flags" << cslot->flags()
