@@ -639,7 +639,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 {
     ShiftCollider shiftcoll;
     KernCollider kerncoll;
-    bool isfirst = true;
+    // bool isfirst = true;
     const uint8 numLoops = m_flags & 7;   // number of loops permitted to fix collisions; does not include kerning
     bool hasCollisions = false;
     bool hasKerns = false;
@@ -764,13 +764,12 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 #endif
     if (hasKerns)
     {
-        float currKern = 0;
         start = seg->first();
         for (Slot *s = seg->first(); s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
             if (start && (c->flags() & SlotCollision::COLL_KERN) && (c->status() & SlotCollision::COLL_FIX))
-                currKern = resolveKern(seg, s, start, kerncoll, dir, currKern, dbgout);
+                resolveKern(seg, s, start, kerncoll, dir, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
@@ -859,11 +858,10 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     return isCol;
 }
 
-float Pass::resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir, float currKern,
+float Pass::resolveKern(Segment *seg, Slot *slot, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
     json *const dbgout) const
 {
     Slot *s;
-    float currGap = 0.;
     float currSpace = 0.;
     bool collides = false;
     SlotCollision *cslot = seg->collisionInfo(slot);

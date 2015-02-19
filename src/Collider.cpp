@@ -45,7 +45,7 @@ using namespace graphite2;
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
 void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
-    const Position &currShift, const Position &currOffset, int dir, json * const dbgout)
+    const Position &currShift, const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int i;
     float max, min;
@@ -53,8 +53,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     unsigned short gid = aSlot->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
-    float sx = aSlot->origin().x + currShift.x;
-    float sy = aSlot->origin().y + currShift.y;
+    //float sx = aSlot->origin().x + currShift.x;
+    //float sy = aSlot->origin().y + currShift.y;
     if (currOffset.x != 0. || currOffset.y != 0.)
         _limit = Rect(limit.bl - currOffset, limit.tr - currOffset);
     else
@@ -183,7 +183,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa;
                 pmin = _target->origin().x + _target->origin().y + tsb.si; 
                 pmax = _target->origin().x + _target->origin().y + tsb.sa;
-                tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
                 vcmin = 0.5 * (vmax + vmin) - tempv;
                 vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
@@ -199,7 +199,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da;
                 pmin = _target->origin().x - _target->origin().y + tsb.di;
                 pmax = _target->origin().x - _target->origin().y + tsb.da;
-                tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
                 vcmin = 0.5 * (vmax + vmin) - tempv;
                 vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
@@ -261,7 +261,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         vmax = std::min(std::min(ssb.sa + ss, 2 * (sbb.ya + sy) + tsb.da + td), 2 * (sbb.xa + sx) - tsb.di - td);
                         omin = ssb.di + sd;
                         omax = ssb.da + sd;
-                        tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                        tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
                         vcmin = 0.5 * (vmax + vmin) - tempv;
                         vcmax = 0.5 * (vmax + vmin) + tempv;
                         break;
@@ -270,7 +270,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         vmax = std::min(std::min(ssb.da + sd, 2 * (sbb.xa + sx) - tsb.si - ts), tsb.sa + ts - 2 * (sbb.yi + sy));
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
-                        tempv = 0.5 * (vmax - vmin - pmax + pmin) + ISQRT2 * cslot->minxoffset();
+                        tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
                         vcmin = 0.5 * (vmax + vmin) - tempv;
                         vcmax = 0.5 * (vmax + vmin) + tempv;
                         break;
@@ -332,7 +332,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     // float cmax, cmin;
     bool isGoodFit, tIsGoodFit = false;
     IntervalSet aFit;
-    int flags = seg->collisionInfo(_target)->flags();
+    // int flags = seg->collisionInfo(_target)->flags();
     Position currOffset = seg->collisionInfo(_target)->offset();
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
@@ -538,15 +538,15 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
      
 
 void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, const Position &currShift,
-    const Position &offsetPrev, int dir, json * const dbgout)
+    const Position &offsetPrev, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
-    unsigned short gid = aSlot->gid();
-    const BBox &bb = gc.getBoundingBBox(gid);
+    // unsigned short gid = aSlot->gid();
+    // const BBox &bb = gc.getBoundingBBox(gid);
     const Slot *base = aSlot;
-    const Slot *last = aSlot;
+    // const Slot *last = aSlot;
     const Slot *s;
-    int maxid = aSlot->index();
+    unsigned int maxid = aSlot->index();
     float sliceWidth;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -564,7 +564,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         const BBox &bs = gc.getBoundingBBox(s->gid());
         if (s->index() > maxid)
         {
-            last = s;
+            // last = s;
             maxid = s->index();
         }
         float y = s->origin().y + c->shift().y;
@@ -630,7 +630,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 // In other words, merge information from given slot's position with what the target slot knows
 // about how it can kern.
 // Return false if we know there is no collision, true if we think there might be one.
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout)
+bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
@@ -705,7 +705,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 }
 
 // Return the amount to kern by.
-Position KernCollider::resolve(Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
+Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
     float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
