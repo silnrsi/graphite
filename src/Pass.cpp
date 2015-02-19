@@ -704,15 +704,15 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                         SlotCollision * c = seg->collisionInfo(s);
                         c->setShift(Position(0, 0));
                     }
-                    end = end ? end->prev() : seg->last();
-                    for (Slot *s = end; s != start; s = s->prev())
+                    Slot *lend = end ? end->prev() : seg->last();
+                    Slot *lstart = start->prev();
+                    for (Slot *s = lend; s != lstart; s = s->prev())
                     {
                         const SlotCollision * c = seg->collisionInfo(s);
                         if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
                                 && (c->status() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
-                            hasCollisions |= resolveCollisions(seg, s, end, shiftcoll, true, dir, moved, dbgout);
+                            hasCollisions |= resolveCollisions(seg, s, lend, shiftcoll, true, dir, moved, dbgout);
                     }
-                    end = end->next();
                 }
 
 #if !defined GRAPHITE2_NTRACING
