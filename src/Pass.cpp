@@ -669,7 +669,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                 hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
             else if (c->flags() & SlotCollision::COLL_KERN)
                 hasKerns = true;
-            if (c->flags() & SlotCollision::COLL_END)
+            if (s != start && c->flags() & SlotCollision::COLL_END)
             {
                 end = s->next();
                 break;
@@ -744,8 +744,10 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 #endif
             }
         }
+        if (!end)
+            break;
         start = NULL;
-        for (Slot *s = end; s; s = s->next())
+        for (Slot *s = end->prev(); s; s = s->next())
         {
             if (seg->collisionInfo(s)->flags() & SlotCollision::COLL_START)
             {
