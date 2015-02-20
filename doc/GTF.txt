@@ -894,3 +894,5 @@ binary description override the corresponding font table in the font,
 means that a name table in an external binary description must be
 complete, including all the strings from the original font.
 
+include::OpCodes.txt[]
+
