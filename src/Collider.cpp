@@ -773,6 +773,7 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
     _limit = Rect(Position(seg->glyphAttr(gid, aCol+1), seg->glyphAttr(gid, aCol+2)),
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
+    _minxoffset = seg->glyphAttr(gid, aCol+6);
     _flags = seg->glyphAttr(gid, aCol);
     _status = _flags;
 }
