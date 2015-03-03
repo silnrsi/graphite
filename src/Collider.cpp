@@ -558,6 +558,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _maxy = (float)-1e38;
     _miny = (float)1e38;
     _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
+    _othermax = -_xbound;
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
@@ -652,6 +653,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             if (x > _edges[i] - _mingap)
             {
                 float m = get_right(seg, slot, currShift, y, sliceWidth) + currSpace;
+                if (_othermax < m) _othermax = m;
                 t = _edges[i] - m;
                 // Check slices above and below (if any).
                 if (i < _numSlices - 1) t = std::min(t, _edges[i+1] - m);
@@ -683,6 +685,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             if (x < _edges[i] + _mingap)
             {
                 float m = get_left(seg, slot, currShift, y, sliceWidth) + currSpace;
+                if (m > _othermax) _othermax = m;
                 t = m - _edges[i];
                 if (i < _numSlices - 1) t = std::min(t, m - _edges[i+1]);
                 if (i > 0) t = std::min(t, m - _edges[i-1]);
@@ -705,10 +708,14 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 }
 
 // Return the amount to kern by.
-Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
+Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, Slot *slot, int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
     float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
+    const SlotCollision *cslot = seg->collisionInfo(slot);
+    if (cslot->flags() & SlotCollision::COLL_BLOCKING && _othermax - _xbound - _mingap > cslot->minxoffset())
+        resultNeeded = (1 - 2 * (dir & 1)) * (_xbound - _othermax - cslot->minxoffset() + margin);
+    
 
 #if !defined GRAPHITE2_NTRACING
     float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above

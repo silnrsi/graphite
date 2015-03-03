@@ -37,7 +37,7 @@ Any opcode with a value outside the range of opcodes listed here (currently 0x00
 |=======================================================================
 
 === Rule processing and constraints ===
-[cols="1,5,3,3,3,18",options="unbreakable,header,compact",width="100%",frame="topbot",grid="none"]
+[cols="1,4,3,3,3,22",options="unbreakable,header,compact",width="100%",frame="topbot",grid="none"]
 |=======================================================================
 |Code |Name |Param |Param |Param |Description
 |19 |Next ||||Move the current slot pointer forward one slot (used after we have finished processing that slot).
@@ -56,13 +56,13 @@ Any opcode with a value outside the range of opcodes listed here (currently 0x00
 |26 |AttrSetSlot |\{slotattr\} |||Pop the stack and set the given attribute to the value, which is a reference to another slot, making an adjustment for the stream position. The value is relative to the current stream position. [Note that corresponding add and subtract operations are not needed since it never makes sense to add slot references.]
 |27 |IAttrSetSlot |\{slotattr\} |\{index\} ||Pop the stack and set the given indexed attribute of the current slot to the value, which is a reference to another slot, making an adjustment for the stream position. The value is relative to the current stream position. [Currently the only indexed slot attributes are component.X.ref.]
 |28 |PushSlotAttr |\{slotattr\} |<offset> ||Look up the value of the given slot attribute of the given slot and push the result on the stack. The slot offset is relative to the current input position.
-|29 |PushGlyphAttr |\{glyphattr\} |<offset> ||Look up the value of the given glyph attribute of the given slot and push the result on the stack. The slot offset is relative to the current input position.
-|2A |PushGlyphMetric |\{glyph-metric\} |<offset> |<level> |Look up the value of the given glyph metric of the given slot and push the result on the stack. The slot offset is relative to the current input position. The level indicates the attachment level for cluster metrics.
+|29 |PushGlyph-Attr |\{glyphattr\} |<offset> ||Look up the value of the given glyph attribute of the given slot and push the result on the stack. The slot offset is relative to the current input position.
+|2A |PushGlyph-Metric |\{glyph-metric\} |<offset> |<level> |Look up the value of the given glyph metric of the given slot and push the result on the stack. The slot offset is relative to the current input position. The level indicates the attachment level for cluster metrics.
 |2B |PushFeat |\{feat\} |||Push the value of the given feature for the current slot onto the stack.
 |2C |PushAttrTo-GlyphAttr |\{glyphattr\} |<offset> ||Look up the value of the given glyph attribute for the slot indicated by the given slot’s attach.to attribute. Push the result on the stack.
 |2D |PushAttTo-GlyphMetric |\{glyph-metric\} |<offset> |<level> |Look up the value of the given glyph metric for the slot indicated by the given slot’s attach.to attribute. Push the result on the stack.
 |2E |PushISlotAttr |\{slotattr\} |<offset> |<index> |Push the value of the indexed slot attribute onto the stack. [The current indexed slot attributes are component.X.ref and userX.]
-|2F |PushIGlyphAttr |\{glyphattr\} |<offset> |<index> |Not Implemented: Push the value of the indexed glyph attribute onto the stack. [Examples of indexed glyph attributes are component.X.box.top, component.X.box.bottom, etc.]
+|2F |PushIGlyph-Attr |\{glyphattr\} |<offset> |<index> |Not Implemented: Push the value of the indexed glyph attribute onto the stack. [Examples of indexed glyph attributes are component.X.box.top, component.X.box.bottom, etc.]
 |30 |PopRet ||||No more processing is needed for this rule. Pop the top of the stack and return that value. For rule action code, the return value is the number of positions to move the stream position forward (or backward, if the number is negative) for the next rule. For constraint code, the return value is a boolean indicating whether the constraint succeeded.
 |31 |RetZero ||||Terminate the processing and return zero.
 |32 |RetTrue ||||Terminate the processing and return true (1).
@@ -77,7 +77,7 @@ Not supported in version 1.0 of the font tables.
 |39 |PutSubs2 ||||Not Implemented
 |3A |PutSubs3 ||||Not Implemented
 |3B |PutGlyph |\{outclass-short\} |||Equivalent to PutGlyph (0x1C) but with 16-bit class identifier.
-|3C |PushGlyphAttr |\{glyphattr-short\} |<offset> ||Equivalent to PushGlyphAttr (0x29) but with 16-bit glyph attribute identifier.
+|3C |PushGlyph-Attr |\{glyphattr-short\} |<offset> ||Equivalent to PushGlyphAttr (0x29) but with 16-bit glyph attribute identifier.
 |3D |PushAttTo-GlyphAttr |\{glyphattr-short\} |<offset> ||Equivalent to PushAttToGlyphAttr (0x2C) but with 16-bit glyph attribute identifier.
 |=======================================================================
 

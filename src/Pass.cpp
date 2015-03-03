@@ -886,7 +886,7 @@ float Pass::resolveKern(Segment *seg, Slot *slot, GR_MAYBE_UNUSED Slot *start, K
     }
     if (collides)
     {
-        Position mv = coll.resolve(seg, dir, cslot->margin(), dbgout);
+        Position mv = coll.resolve(seg, slot, dir, cslot->margin(), dbgout);
         cslot->setShift(mv);
         return mv.x;
     }
