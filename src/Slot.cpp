@@ -322,7 +322,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (c)
         {
             c->setStatus(value);
-            c->setFlags(c->flags() | value);   // only turn on stuff for now [needs changing]
+            c->setFlags(value);
         }
         break; }
     case gr_slatColLimitblx :  {
