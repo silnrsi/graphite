@@ -813,7 +813,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     {
         SlotCollision *c = seg->collisionInfo(s);
         if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) 
-                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN))
+                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN && (c->flags() & SlotCollision::COLL_FIX)))
                       && (!isRev || !ignoreForKern || !(c->status() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
         else if (s == slot)
