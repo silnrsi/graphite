@@ -698,12 +698,14 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                 if (hasCollisions)
                 {
                     hasCollisions = false;
+                    #if 0
                     moved = true;
                     for (Slot *s = start; s != end; s = s->next())
                     {
                         SlotCollision * c = seg->collisionInfo(s);
                         c->setShift(Position(0, 0));
                     }
+                    #endif
                     Slot *lend = end ? end->prev() : seg->last();
                     Slot *lstart = start->prev();
                     for (Slot *s = lend; s != lstart; s = s->prev())
@@ -813,7 +815,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     {
         SlotCollision *c = seg->collisionInfo(s);
         if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) 
-                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN && (c->flags() & SlotCollision::COLL_FIX)))
+                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN && (c->flags() & SlotCollision::COLL_FIX) && !slot->isChildOf(s)))
                       && (!isRev || !ignoreForKern || !(c->status() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
         else if (s == slot)
