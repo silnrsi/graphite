@@ -145,8 +145,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case 0 :	// x direction
                 //vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.yi + ty), sb.si + ss - tbb.ya - ty);
                 //vmax = std::min(std::min(bb.xa + sx, sb.da + sd + tbb.ya + ty), sb.sa + ss - tbb.yi - ty);
-                vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.xa + tx - tsb.da - td), sb.si + ss + tbb.xa + tx - tsb.sa - ts);
-                vmax = std::min(std::min(bb.xa + sx, sb.da + sd + tbb.xi + tx - tsb.di - td), sb.sa + ss + tbb.xi + tx - tsb.si - ts);
+                vmin = std::max(std::max(bb.xi + sx, 
+                            std::min(sb.di + sd + tbb.xa + tx - tsb.da - td, sb.di + sd + bb.ya + sy)),
+                            std::min(sb.si + ss + tbb.xa + tx - tsb.sa - ts, sb.si + ss - bb.yi - sy));
+                vmax = std::min(std::min(bb.xa + sx,
+                            std::max(sb.da + sd + tbb.xi + tx - tsb.di - td, bb.yi + sy - sb.da - sd)),
+                            std::max(sb.sa + ss + tbb.xi + tx - tsb.si - ts, sb.sa + ss - bb.ya - sy));
                 otmin = tbb.yi + ty;
                 otmax = tbb.ya + ty;
                 omin = bb.yi + sy;
@@ -162,8 +166,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case 1 :	// y direction
                 //vmin = std::max(std::max(bb.yi + sy, tbb.xi + tx - sb.da - sd), sb.si + ss - tbb.xa - tx);
                 //vmax = std::min(std::min(bb.ya + sy, tbb.xa + tx - sb.di - sd), sb.sa + ss - tbb.xi - tx);
-                vmin = std::max(std::max(bb.yi + sy, tbb.ya + ty - sb.da - sd + tsb.di + td), sb.si + ss + tbb.ya + ty - tsb.sa - ts);
-                vmax = std::min(std::min(bb.ya + sy, tbb.yi + ty - sb.di - sd + tsb.da + td), sb.sa + ss + tbb.yi + ty - tsb.si - ts);
+                vmin = std::max(std::max(bb.yi + sy,
+                        std::min(tbb.ya + ty - sb.da - sd + tsb.di + td, bb.xa + sx - sb.da - sd)),
+                        std::min(sb.si + ss + tbb.ya + ty - tsb.sa - ts, sb.si + ss - bb.xi - sx));
+                vmax = std::min(std::min(bb.ya + sy,
+                        std::max(tbb.yi + ty - sb.di - sd + tsb.da + td, bb.xi + sx - sb.di - sd)),
+                        std::max(sb.sa + ss + tbb.yi + ty - tsb.si - ts, sb.sa + ss - bb.xa - sx));
                 otmin = tbb.xi + tx;
                 otmax = tbb.xa + tx;
                 omin = bb.xi + sx;
@@ -179,8 +187,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         // negatively-sloped boundaries.
                 //vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy) + tsb.di + td), 2 * (bb.xi + sx) - tsb.da - td);
                 //vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy) + tsb.da + td), 2 * (bb.xa + sx) - tsb.di - td);
-                vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts);
-                vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts);
+                vmin = std::max(std::max(sb.si + ss,
+                        std::min(2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts, 2 * (bb.yi + sy) - sb.da - sd)),
+                        std::min(2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts, 2 * (sb.si + ss) - bb.xi - sx));
+                vmax = std::min(std::min(sb.sa + ss,
+                        std::max(2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts, 2 * (bb.ya + sy) + sb.di + sd)),
+                        std::max(2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts, 2 * (bb.xa + sx) - sb.da - sd));
                 otmin = tsb.di + td;
                 otmax = tsb.da + td;
                 omin = sb.di + sd;
@@ -197,8 +209,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         // positively-sloped boundaries.
                 //vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx) - tsb.sa - ts), tsb.si + ts - 2 * (bb.ya + sy));
                 //vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx) - tsb.si - ts), tsb.sa + ts - 2 * (bb.yi + sy));
-                vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty));
-                vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx - tbb.xi - tx) + tsb.da + td), tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty));
+                vmin = std::max(std::max(sb.di + sd,
+                    std::min(2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td, 2 * (bb.xi + sx) - sb.si - ss)),
+                    std::min(tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty), sb.sa + ss - 2 * (bb.ya + sy)));
+                vmax = std::min(std::min(sb.da + sd,
+                    std::max(2 * (bb.xa + sx - tbb.xi - tx) + tsb.di + td, 2 * (bb.xa + sx) - sb.sa - ss)),
+                    std::max(tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty), sb.si + ss - 2 * (bb.yi + sy)));
                 otmin = tsb.si + ts;
                 otmax = tsb.sa + ts;
                 omin = sb.si + ss;
@@ -214,6 +230,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             default :
                 continue;
         }
+        // this just masks bugs :(
         if (vmin > vmax)
         {
             float t = vmin;
@@ -224,9 +241,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             vmin = (float)-1e38;
         else if (blocking && vcmin > pmin && vcmax > pmax)
             vmax = (float)1e38;
-        if (noJump && vmax < pmax && vmin < pmin)
+        if (noJump && vmax < pmin)
             vmin = (float)-1e38;
-        else if (noJump && vmin > pmin && vmax > pmax)
+        else if (noJump && vmin > pmax)
             vmax = (float)1e38;
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
@@ -251,8 +268,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     case 0 :    // x
                         //vmin = std::max(std::max(sbb.xi + sx, ssb.di + sd + tbb.yi + ty), ssb.si + ss - tbb.ya - ty);
                         //vmax = std::min(std::min(sbb.xa + sx, ssb.da + sd + tbb.ya + ty), ssb.sa + ss - tbb.yi - ty);
-                        vmin = std::max(std::max(sbb.xi + sx, ssb.di + sd + tbb.xa + tx - tsb.da - td), ssb.si + ss + tbb.xa + tx - tsb.sa - ts);
-                        vmax = std::min(std::min(sbb.xa + sx, ssb.da + sd + tbb.xi + tx - tsb.di - td), ssb.sa + ss + tbb.xi + tx - tsb.si - ts);
+                        vmin = std::max(std::max(sbb.xi + sx, 
+                                    std::min(ssb.di + sd + tbb.xa + tx - tsb.da - td, ssb.di + sd + sbb.ya + sy)),
+                                    std::min(ssb.si + ss + tbb.xa + tx - tsb.sa - ts, ssb.si + ss - sbb.yi - sy));
+                        vmax = std::min(std::min(sbb.xa + sx,
+                                    std::max(ssb.da + sd + tbb.xi + tx - tsb.di - td, sbb.yi + sy - ssb.da - sd)),
+                                    std::max(ssb.sa + ss + tbb.xi + tx - tsb.si - ts, ssb.sa + ss - sbb.ya - sy));
                         omin = sbb.yi + sy;
                         omax = sbb.ya + sy;
                         tempv = 0.5 * (vmax - vmin - pmax + pmin) + cslot->minxoffset();
@@ -262,8 +283,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     case 1 :    // y
                         //vmin = std::max(std::max(sbb.yi + sy, tbb.xi + tx - ssb.da - sd), ssb.si + ss - tbb.xa - tx);
                         //vmax = std::min(std::min(sbb.ya + sy, tbb.xa + tx - ssb.di - sd), ssb.sa + ss - tbb.xi - tx);
-                        vmin = std::max(std::max(sbb.yi + sy, tbb.ya + ty - ssb.da - sd + tsb.di + td), ssb.si + ss + tbb.ya + ty - tsb.sa - ts);
-                        vmax = std::min(std::min(sbb.ya + sy, tbb.yi + ty - ssb.di - sd + tsb.da + td), ssb.sa + ss + tbb.yi + ty - tsb.si - ts);
+                        vmin = std::max(std::max(sbb.yi + sy,
+                                std::min(tbb.ya + ty - ssb.da - sd + tsb.di + td, sbb.xa + sx - ssb.da - sd)),
+                                std::min(ssb.si + ss + tbb.ya + ty - tsb.sa - ts, ssb.si + ss - sbb.xi - sx));
+                        vmax = std::min(std::min(sbb.ya + sy,
+                                std::max(tbb.yi + ty - ssb.di - sd + tsb.da + td, sbb.xi + sx - ssb.di - sd)),
+                                std::max(ssb.sa + ss + tbb.yi + ty - tsb.si - ts, ssb.sa + ss - sbb.xa - sx));
                         omin = sbb.xi + sx;
                         omax = sbb.xa + sx;
                         // vcmin, vcmax not dependent on vmin, vmax for y-direction
@@ -271,8 +296,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     case 2 :    // sum
                         //vmin = std::max(std::max(ssb.si + ss, 2 * (sbb.yi + sy) + tsb.di + td), 2 * (sbb.xi + sx) - tsb.da - td);
                         //vmax = std::min(std::min(ssb.sa + ss, 2 * (sbb.ya + sy) + tsb.da + td), 2 * (sbb.xa + sx) - tsb.di - td);
-                        vmin = std::max(std::max(ssb.si + ss, 2 * (sbb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (sbb.xi + sx - tbb.xa - tx) + tsb.sa + ts);
-                        vmax = std::min(std::min(ssb.sa + ss, 2 * (sbb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (sbb.xa + sx - tbb.xi - tx) + tsb.si + ts);
+                        vmin = std::max(std::max(ssb.si + ss,
+                                std::min(2 * (sbb.yi + sy - tbb.ya - ty) + tsb.sa + ts, 2 * (sbb.yi + sy) - ssb.da - sd)),
+                                std::min(2 * (sbb.xi + sx - tbb.xa - tx) + tsb.sa + ts, 2 * (ssb.si + ss) - sbb.xi - sx));
+                        vmax = std::min(std::min(sb.sa + ss,
+                                std::max(2 * (sbb.ya + sy - tbb.yi - ty) + tsb.si + ts, 2 * (sbb.ya + sy) + ssb.di + sd)),
+                                std::max(2 * (sbb.xa + sx - tbb.xi - tx) + tsb.si + ts, 2 * (sbb.xa + sx) - ssb.da - sd));
                         omin = ssb.di + sd;
                         omax = ssb.da + sd;
                         tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
@@ -282,8 +311,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     case 3 :    // diff
                         //vmin = std::max(std::max(ssb.di + sd, 2 * (sbb.xi + sx) - tsb.sa - ts), tsb.si + ts - 2 * (sbb.ya + sy));
                         //vmax = std::min(std::min(ssb.da + sd, 2 * (sbb.xa + sx) - tsb.si - ts), tsb.sa + ts - 2 * (sbb.yi + sy));
-                        vmin = std::max(std::max(ssb.di + sd, 2 * (sbb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (sbb.ya + sy - tbb.yi - ty));
-                        vmax = std::min(std::min(ssb.da + sd, 2 * (sbb.xa + sx - tbb.xi - tx) + tsb.da + td), tsb.di + td - 2 * (sbb.yi + sy - tbb.ya - ty));
+                        vmin = std::max(std::max(ssb.di + sd,
+                            std::min(2 * (sbb.xi + sx - tbb.xa - tx) + tsb.da + td, 2 * (sbb.xi + sx) - ssb.si - ss)),
+                            std::min(tsb.da + td - 2 * (sbb.ya + sy - tbb.yi - ty), ssb.sa + ss - 2 * (sbb.ya + sy)));
+                        vmax = std::min(std::min(ssb.da + sd,
+                            std::max(2 * (sbb.xa + sx - tbb.xi - tx) + tsb.di + td, 2 * (sbb.xa + sx) - ssb.sa - ss)),
+                            std::max(tsb.di + td - 2 * (sbb.yi + sy - tbb.ya - ty), ssb.si + ss - 2 * (sbb.yi + sy)));
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
                         tempv = 0.5 * (vmax - vmin - pmax + pmin + otmin + otmax - omin - omax) + ISQRT2 * cslot->minxoffset();
@@ -301,9 +334,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     vmin = (float)-1e38;
                 else if (blocking && vcmin > pmin && vcmax > pmax)
                     vmax = (float)1e38;
-                if (noJump && vmax < pmax && vmin < pmin)
+                if (noJump && vmax < pmin)
                     vmin = (float)-1e38;
-                else if (noJump && vmin > pmin && vmax > pmax)
+                else if (noJump && vmin > pmax)
                     vmax = (float)1e38;
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
