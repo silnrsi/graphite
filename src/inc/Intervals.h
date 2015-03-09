@@ -63,7 +63,7 @@ public:
     void add(Node interval);
     void remove(float min, float max, float min_len, float max_len) { remove(Node(min, max, min_len, max_len)); }
     void remove(Node interval);
-    float findBestWithMarginAndLimits(float val, float margin, float minmargin, int &isGood);
+    float findBestWithMarginAndLimits(float val, float margin, float minMargin, int &isGood);
     size_t size() const { return _v.size(); }
 
 // private:

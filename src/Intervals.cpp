@@ -202,20 +202,20 @@ void IntervalSet::remove(IntervalSet::Node interval)
 }
 
 
-float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float minmargin, int &foundGood)
+float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float minMargin, int &foundGood)
 {
     float res = std::numeric_limits<float>::max();
     float sres = res;
     float lres = res;
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {
-        if (foundGood and s->left() > res)
+        if (foundGood && s->left() > res)
             break;
         float w = (s->right() - s->left() - std::min(s->right_len(), s->left_len())) / 2;
         float t = (s->left() + s->right() - std::min(s->right_len(), s->left_len()) - 2 * w) / 2 + w;
         if (w < 0)
             continue;
-        else if (w < minmargin)
+        else if (w < minMargin)
         {
             if (fabs(t - val) < lres)
                 lres = t;

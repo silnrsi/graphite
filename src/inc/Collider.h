@@ -48,7 +48,7 @@ public:
 
     ~ShiftCollider() throw() { };
     void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
-                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED const Position &currShift,
+                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED float marginMin, GR_MAYBE_UNUSED const Position &currShift,
                 const Position &currOffset, GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
                 GR_MAYBE_UNUSED const Position &currShift, GR_MAYBE_UNUSED json * const dbgout);
@@ -61,6 +61,7 @@ public:
         if (i < 0)
         {
             *dbgout << "margin" << _margin
+                << "marginMin" << _marginMin
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
@@ -91,6 +92,7 @@ protected:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
+    float   _marginMin;
     Position _currShift;
     Position _currOffset;
     
@@ -107,8 +109,8 @@ class KernCollider
 {
 public:
     ~KernCollider() throw() { };
-    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, const Position &currShift, 
-                const Position &offsetPrev, int dir, json * const dbgout);
+    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, float marginMin,
+            const Position &currShift, const Position &offsetPrev, int dir, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
     Position resolve(Segment *seg, Slot *slot, int dir, float margin, json * const dbgout);
 
@@ -118,6 +120,7 @@ private:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
+    float   _marginMin;
     Position _offsetPrev; // kern from a previous pass
     Position _currShift;   // NOT USED??
     float _miny;	       // y-coordinates offset by global slot position
@@ -148,7 +151,7 @@ public:
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
         COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction
-        COLL_BLOCKING = 256,    // Don't allow movement across the centre in x, use minoffsetx
+        COLL_OVERLAP = 256,    // use maxoverlap to restrict
     };
         
     SlotCollision(Segment *seg, Slot *slot);
@@ -160,12 +163,14 @@ public:
     void setOffset(const Position &o) { _offset = o; }
     uint16 margin() const { return _margin; }
     void setMargin(uint16 m) { _margin = m; }
+    uint16 marginMin() const { return (_marginMin == 0) ? _margin : _marginMin; }
+    void setMarginMin(uint16 m) { _marginMin = m; }
     uint16 flags() const { return _flags; }
     void setFlags(uint16 f) { _flags = f; }
     uint16 status() const { return _status; }
     void setStatus(uint16 f) { _status = f; }
-    uint16 minxoffset() const { return _minxoffset; }
-    void setMinxoffset(uint16 m) { _minxoffset = m; }
+    uint16 maxOverlap() const { return _maxOverlap; }
+    void setMaxOverlap(uint16 m) { _maxOverlap = m; }
 
     float getKern(int dir) const;
     
@@ -174,8 +179,9 @@ private:
     Position    _shift;     // adjustment within the given pass
     Position    _offset;    // total adjustment for collisions
     uint16      _margin;
+    uint16      _marginMin; // not really used, although it is defined in theory
     uint16      _flags;
-    uint16      _minxoffset;
+    uint16      _maxOverlap;
     uint16      _status;
 };
 

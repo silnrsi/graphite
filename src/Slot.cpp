@@ -248,7 +248,8 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatColShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().x : 0; }
     case gr_slatColShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().y : 0; }
     case gr_slatColMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
-    default :               return 0;
+    case gr_slatColMarginMin:{ SlotCollision *c = seg->collisionInfo(this); return c ? c->marginMin() : 0; }
+    default : return 0;
     }
 }
 
@@ -366,6 +367,14 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (c)
         {
             c->setMargin(value);
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColMarginMin : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->setMarginMin(value);
             c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }

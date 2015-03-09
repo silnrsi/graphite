@@ -135,7 +135,7 @@ enum gr_attrCode {
     gr_slatColLimitbly,
     /// Collision constraint rectangle right (tr.x)
     gr_slatColLimittrx,
-    /// Collision constraing rectangle upper (tr.y)
+    /// Collision constraint rectangle upper (tr.y)
     gr_slatColLimittry,
     /// Collision shift x
     gr_slatColShiftx,
@@ -143,8 +143,10 @@ enum gr_attrCode {
     gr_slatColShifty,
     /// Collision margin
     gr_slatColMargin,
+    /// Minimum margin in tight situations
+    gr_slatColMarginMin,
     /// Collision guard space from another diacritic
-    gr_slatColMinOffsetx,
+    gr_slatColMaxOverlap,
                             
     /// not implemented
     gr_slatMax,             

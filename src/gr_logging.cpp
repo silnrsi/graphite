@@ -230,8 +230,9 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
               << "limit" << cslot->limit()
               << "flags" << cslot->flags()
               << "status" << cslot->status()
-              << "margin" << cslot->margin()
-              << "minxoffset" << cslot->minxoffset()
+              << "margin" << cslot->margin();
+        if (cslot->marginMin() > 0 ) { j << "marginMin" << cslot->marginMin(); }
+        j     << "maxOverlap" << cslot->maxOverlap()
               << json::close;
     }
     return j << json::close;
