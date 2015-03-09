@@ -75,7 +75,7 @@ public:
         {
             *dbgout << json::flat << json::array;
             for (IntervalSet::ivtpair s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
-                *dbgout << Position(s->first, s->second);
+                *dbgout << json::flat << json::array << Position(s->left(), s->right()) << Position(s->left_len(), s->right_len()) << json::close;
             *dbgout << json::close;
         }
         if (i < imax) // looped through the _ranges array
