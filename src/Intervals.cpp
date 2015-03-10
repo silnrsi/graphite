@@ -35,26 +35,26 @@ using namespace graphite2;
 // Add this interval to the list of possible range(s), merging elements of the list as necessary.
 // Eg, if the ranges are [{100..200), (500..700)], adding (150..300) will result in
 // [{100..300), (500..700)].
-void IntervalSet::add(IntervalSet::Node interval)
+void IntervalSet::add(IntervalSet::tpair interval)
 {
     IntervalSet::ivtpair slast = _v.end();
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {
-        if (s->left() > interval.right())
+        if (s->first > interval.second)
             break;          // We have passed the end of ranges. No more to be done
-        if (s->left() < interval.right())
+        if (s->second < interval.first)
             continue;       // Skip until we find something
         if (slast != e)
         {                   // We've already modified something, so merge slots
-            s->left(slast->left());
+            s->first = slast->first;
             _v.erase(slast);
             --s;
             e = _v.end();
         }                   // Update current slot to incorporate interval
-        if (s->right() < interval.right())
-            s->right(interval.right());
-        if (s->left() > interval.left())
-            s->left(interval.left());
+        if (s->second < interval.second)
+            s->second = interval.second;
+        if (s->first > interval.first)
+            s->first = interval.first;
         slast = s;
     }
     if (slast == _v.end())  // interval not already added
@@ -65,139 +65,33 @@ void IntervalSet::add(IntervalSet::Node interval)
 // the list as necessary.
 // Eg, if the ranges are [{100..200), (500..700)], removing (550..600) will result in
 // [{100..300), (500..550), (600..700)].
-void IntervalSet::remove(IntervalSet::Node interval)
+void IntervalSet::remove(IntervalSet::tpair interval)
 {
-    if (interval.left() < interval.right())
+    for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {
-        for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
+        if (s->second < interval.first - _len)
+            continue;
+        if (s->first > interval.second)
+            break;
+
+        if (s->first >= interval.first - _len && s->second <= interval.second)
         {
-            if (s->right() < interval.left())
-            {
-                if (s->right() - s->right_len() > interval.left() - interval.left_len())
-                    s->right_len(interval.left_len());
-                continue;
-            }
-            if (s->left() > interval.right())
-            {
-                if (s->left() + s->left_len() < interval.right() + interval.right_len())
-                    s->left_len(interval.right_len());
-                break;          // This interval is outside what we can handle
-            }
-            if (interval.left() - interval.left_len() <= s->left() && interval.right() + interval.right_len() >= s->right())
-            {
-                _v.erase(s);
-                --s;
-                e = _v.end();
-                continue;
-            }
-            if (s->left() < interval.left() - interval.left_len() && s->right() > interval.right() + interval.right_len())
-            {                   // Need to split this range since overlap on both sides
-                s = _v.insert(s, Node(s->left(), interval.left(), s->left_len(), interval.left_len()));
-                ++s;
-                s->left(interval.right());
-                s->left_len(interval.right_len());
-                e = _v.end();
-            }
-            if (s->left() < interval.right() && s->left() >= interval.left() - interval.left_len())
-            {
-                float t = s->left_len() - (interval.right() - s->left());
-                if (t < interval.right_len())
-                    s->left_len(interval.right_len());
-                s->left(interval.right());
-            }
-            if (s->right() > interval.left() && s->right() <= interval.right() + interval.right_len())
-            {
-                float t = interval.right_len() - (s->right() - interval.left());
-                if (t < interval.left_len())
-                    s->right_len(interval.left_len());
-                s->right(interval.left());     // overlap other side
-            }
+            _v.erase(s);
+            --s;
+            e = _v.end();
+            continue;
         }
-    }
-    else
-    {
-        for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
-        {
-            if (s->right() < interval.right())
-            {
-                if (interval.left() - interval.left_len() > s->right() - s->right_len())
-                    s->right_len(s->left_len());
-                continue;
-            }
-            if (s->left() > interval.left())
-            {
-                if (interval.right() + interval.right_len() > s->left() + s->left_len())
-                    s->left_len(interval.right_len());
-                break;
-            }
-            if (interval.right() + interval.right_len() <= s->left() && interval.left() - interval.left_len() >= s->right())
-            {
-                _v.erase(s);
-                --s;
-                e = _v.end();
-                continue;
-            }
-            if (s->left() < interval.right() && s->right() > interval.left())
-            {
-                float new_right = std::min(interval.left() - interval.left_len(), s->right() - s->right_len());
-                float new_left = std::max(interval.right() + interval.right_len(), s->left() + s->left_len());
-                if (new_left > s->left() + s->left_len())
-                {
-                    s = _v.insert(s, Node(s->left(), interval.right(), s->left_len(), new_right >= interval.right() ? 0 : interval.right() - new_right));
-                    ++s;
-                    s->left(interval.right());
-                    s->left_len(interval.right_len());
-                    e = _v.end();
-                }
-                if (new_right < s->right() - s->right_len())
-                {
-                    IntervalSet::ivtpair st = s;
-                    ++st;
-                    s = _v.insert(st, Node(interval.left(), s->right(), new_left <= interval.left() ? 0: new_left - interval.left(), s->right_len()));
-                    --s;
-                    s->right(interval.left());
-                    s->right_len(interval.left_len());
-                    ++s;
-                    e = _v.end();
-                }
-                continue;
-            }
-            if (s->left() < interval.left() && s->left() + s->left_len() >= interval.right())
-            {
-                float t = std::max(s->left() + s->left_len(), interval.right() + interval.right_len());
-                if (interval.left() - interval.left_len() > s->left())
-                {
-                    s = _v.insert(s, Node(s->left(), interval.left(), t - s->left(), interval.left_len()));
-                    ++s;
-                    e = _v.end();
-                }
-                s->left(interval.left());
-                if (t > interval.left())
-                    s->left_len(interval.right_len());
-            }
-            if (s->right() > interval.right())
-            {
-                float t = std::min(s->right() - s->right_len(), interval.left() - interval.left_len());
-                if (interval.right() + interval.right_len() < s->right())
-                {
-                    IntervalSet::ivtpair st = s;
-                    ++st;
-                    s = _v.insert(st, Node(s->right(), interval.right(), interval.right_len(), s->right() - t));
-                    --s;
-                    s->right(interval.right());
-                    if (t < interval.right())
-                        s->right_len(interval.left_len());
-                    ++s;
-                    e = _v.end();
-                }
-                else
-                {
-                    s->right(interval.right());
-                    if (t < interval.right())
-                        s->right_len(interval.left_len());
-                }
-            }
+        if (s->first <= interval.first - _len && s->second >= interval.second)
+        {                   // Need to split this range since overlap on both sides
+            s = _v.insert(s, tpair(s->first, interval.first - _len));
+            ++s;
+            s->first = interval.second;
+            e = _v.end();
         }
+        if (s->first < interval.second && s->first > interval.first - _len)
+            s->first = interval.second;
+        if (s->second < interval.second && s->second > interval.first - _len)
+            s->second = interval.first - _len;
     }
 }
 
@@ -209,10 +103,10 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
     float lres = res;
     for (IntervalSet::ivtpair s = _v.begin(), e = _v.end(); s != e; ++s)
     {
-        if (foundGood && s->left() > res)
+        if (foundGood && s->first > res)
             break;
-        float w = (s->right() - s->left() - std::min(s->right_len(), s->left_len())) / 2;
-        float t = (s->left() + s->right() - std::min(s->right_len(), s->left_len()) - 2 * w) / 2 + w;
+        float w = (s->second - s->first) / 2;
+        float t = (s->second + s->first) / 2;
         if (w < 0)
             continue;
         else if (w < minMargin)
@@ -229,11 +123,8 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
         }
         else
         {
-            float left = s->left() + margin;
-            float right = (s->left() + s->right() - s->right_len() - 2 * margin) / 2 + margin;
-            // what if one of these has less space than margin?
-            if (right < left)
-                std::swap(right, left);
+            float left = s->first + margin;
+            float right = s->second - margin;
             float u = val;
             if (right < val)
                 u = right;

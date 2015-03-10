@@ -89,11 +89,12 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 break;
         }
         _ranges[i].clear();
-        _ranges[i].add(min, max, len, len);
+        _ranges[i].add(min, max - len);
+        _ranges[i].len(len);
 
         // Debugging:
         _rawRanges[i].clear();
-        _rawRanges[i].add(min, max, len, len);
+        _rawRanges[i].add(min, max - len);
         _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
@@ -127,7 +128,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const float sy = slot->origin().y + currShift.y;
     const float sd = sx - sy;
     const float ss = sx + sy;
-    float vmin, vmax, vlen;
+    float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;
     float pmin, pmax;
@@ -151,7 +152,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case 0 :	// x direction
                 vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.xa + tx - tsb.da - td), sb.si + ss + tbb.xa + tx - tsb.sa - ts);
                 vmax = std::min(std::min(bb.xa + sx, sb.da + sd + tbb.xi + tx - tsb.di - td), sb.sa + ss + tbb.xi + tx - tsb.si - ts);
-                vlen = tbb.xa - tbb.xi;
                 otmin = tbb.yi + ty;
                 otmax = tbb.ya + ty;
                 omin = bb.yi + sy;
@@ -167,7 +167,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case 1 :	// y direction
                 vmin = std::max(std::max(bb.yi + sy, tbb.ya + ty - sb.da - sd + tsb.di + td), sb.si + ss + tbb.ya + ty - tsb.sa - ts);
                 vmax = std::min(std::min(bb.ya + sy, tbb.yi + ty - sb.di - sd + tsb.da + td), sb.sa + ss + tbb.yi + ty - tsb.si - ts);
-                vlen = tbb.ya - tbb.yi;
                 otmin = tbb.xi + tx;
                 otmax = tbb.xa + tx;
                 omin = bb.xi + sx;
@@ -183,7 +182,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         // negatively-sloped boundaries.
                 vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts);
                 vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts);
-                vlen = tsb.sa - tsb.si;
                 otmin = tsb.di + td;
                 otmax = tsb.da + td;
                 omin = sb.di + sd;
@@ -200,7 +198,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         // positively-sloped boundaries.
                 vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty));
                 vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx - tbb.xi - tx) + tsb.di + td), tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty));
-                vlen = tsb.da - tsb.di;
                 otmin = tsb.si + ts;
                 otmax = tsb.sa + ts;
                 omin = sb.si + ss;
@@ -297,10 +294,10 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
                     continue;
-                _ranges[i].remove(vmin, vmax, vlen, vlen);
+                _ranges[i].remove(vmin, vmax);
                 anyhits = true;
                 
-                IntervalSet::Node dbg(vmin, vmax, vlen, vlen); // debugging
+                IntervalSet::tpair dbg(vmin, vmax); // debugging
                 _removals[i].append(dbg);         // debugging
                 _slotNear[i].push_back(slot);     // debugging
                 _subNear[i].push_back(j);         // debugging
@@ -310,9 +307,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
         else
         {
-            _ranges[i].remove(vmin, vmax, vlen, vlen);
+            _ranges[i].remove(vmin, vmax);
 
-            IntervalSet::Node dbg(vmin, vmax, vlen, vlen); // debugging
+            IntervalSet::tpair dbg(vmin, vmax); // debugging
             _removals[i].append(dbg);         // debugging
             _slotNear[i].push_back(slot);     // debugging
             _subNear[i].push_back(-1);        // debugging
@@ -359,7 +356,6 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     {
         float bestc = std::numeric_limits<float>::max();
         float bestd = bestc;
-        float cmin, cmax;
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         marginMin = seg->collisionInfo(_target)->marginMin() * (i > 1 ? ISQRT2 : 1.f);
@@ -369,32 +365,24 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 tleft = _target->origin().x + _currShift.x + bb.xi;
                 tbase = tleft - _currShift.x;
                 tval = -currOffset.x;
-                cmin = _limit.bl.x;
-                cmax = _limit.tr.x;
                 break;
             case 1 :	// y direction
                 tlen = bb.ya - bb.yi;
                 tleft = _target->origin().y + _currShift.y + bb.yi;
                 tbase = tleft - _currShift.y;
                 tval = -currOffset.y;
-                cmin = _limit.bl.y;
-                cmax = _limit.tr.y;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = sb.sa - sb.si;
                 tleft = _target->origin().x + _target->origin().y + _currShift.x + _currShift.y + sb.si;
                 tbase = tleft - _currShift.x - _currShift.y;
                 tval = -currOffset.x - currOffset.y;
-                cmin = _limit.bl.x + _limit.bl.y;
-                cmax = _limit.tr.x + _limit.tr.y;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = sb.da - sb.di;
                 tleft = _target->origin().x - _target->origin().y + _currShift.x - _currShift.y + sb.di;
                 tbase = tleft - _currShift.x + _currShift.y;
                 tval = currOffset.y - currOffset.x;
-                cmin = _limit.bl.x - _limit.tr.y;
-                cmax = _limit.tr.x - _limit.bl.y;
                 break;
         }
         isGoodFit = 0;
@@ -415,15 +403,14 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             
             *dbgout << "rawRanges" << json::flat << json::array;
             for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
-                *dbgout << json::flat << json::array << Position(s->left(), s->right()) << Position(s->left_len(), s->right_len()) << json::close;
+                *dbgout << Position(s->first, s->second);
             *dbgout << json::close // rawRanges array
                 << "removals" << json::array;  						
             int gi = 0;
             for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
             {   //Slot & slotNear = *(_slotNear[i][gi]);
                 *dbgout << json::flat << json::array 
-                    << objectid(dslot(_seg,_slotNear[i][gi])) << _subNear[i][gi] << Position(s->left(), s->right())
-                    << Position(s->left_len(), s->right_len()) << json::close;
+                    << objectid(dslot(_seg,_slotNear[i][gi])) << _subNear[i][gi] << Position(s->first, s->second) << json::close;
             }
             *dbgout << json::close; // removals array
             	
@@ -631,7 +618,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _mingap = (float)1e38;
     _target = aSlot;
     _margin = margin;
-    _margin = marginMin;
+    _marginMin = marginMin;
     _currShift = currShift;
     
 }   // end of initSlot
@@ -785,7 +772,7 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
     _marginMin = seg->glyphAttr(gid, aCol+6);
-//  _maxoverlap = seg->glyphAttr(gid, aCol+7);
+    _maxOverlap = seg->glyphAttr(gid, aCol+7);
     _flags = seg->glyphAttr(gid, aCol);
     _status = _flags;
 }

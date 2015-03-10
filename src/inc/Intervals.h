@@ -37,32 +37,17 @@ namespace graphite2 {
 class IntervalSet
 {
 public:
-    class Node {
-    public:
-        Node(float lft, float rght, float lft_len, float rght_len) : _left(lft), _right(rght), _llen(lft_len), _rlen(rght_len) {}
-        float left() const { return _left; }
-        void left(float l) { _left = l; }
-        float right() const { return _right; }
-        void right(float r) { _right = r; }
-        float left_len() const { return _llen; }
-        void left_len(float l) { _llen = l; }
-        float right_len() const { return _rlen; }
-        void right_len(float r) { _rlen = r; }
-    private:
-        float _left;
-        float _right;
-        float _llen;
-        float _rlen;
-    };
-        
-    typedef Vector<Node> vtpair;
+    typedef std::pair<float, float> tpair;
+    typedef Vector<tpair> vtpair;
     typedef vtpair::iterator ivtpair;
 
+    float len() const { return _len; }
+    void len(float l) { _len = l; }
     void clear() { _v.clear(); }
-    void add(float min, float max, float min_len, float max_len) { add(Node(min, max, min_len, max_len)); }
-    void add(Node interval);
-    void remove(float min, float max, float min_len, float max_len) { remove(Node(min, max, min_len, max_len)); }
-    void remove(Node interval);
+    void add(float min, float max) { add(tpair(min, max)); }
+    void add(tpair interval);
+    void remove(float min, float max) { remove(tpair(min, max)); }
+    void remove(tpair interval);
     float findBestWithMarginAndLimits(float val, float margin, float minMargin, int &isGood);
     size_t size() const { return _v.size(); }
 
@@ -72,9 +57,10 @@ public:
 
 //private:
 public: // debugging
-    void append(Node interval) { _v.push_back(interval); }
+    void append(tpair interval) { _v.push_back(interval); }
 private:
     // Ranges of movements in a specific direction; a vector is need to represent disjoint ranges.
+    float _len;
     vtpair _v;
 };
 
