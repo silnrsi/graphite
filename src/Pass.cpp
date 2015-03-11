@@ -796,6 +796,21 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     return hasCollisions;   // but this isn't accurate if we have kerning
 }
 
+static bool isKernFixCluster(Segment *seg, Slot *s)
+{
+    SlotCollision *c = seg->collisionInfo(s);
+    if (c->flags() & SlotCollision::COLL_KERN && c->flags() & SlotCollision::COLL_FIX)
+        return true;
+    while (s->attachedTo())
+    {
+        s = s->attachedTo();
+        c = seg->collisionInfo(s);
+        if (c->flags() & SlotCollision::COLL_KERN && c->flags() & SlotCollision::COLL_FIX)
+            return true;
+    }
+    return false;
+}
+
 // Fix collisions for the given slot.
 // Return true if everything was fixed, false if there are still collisions remaining.
 // isRev means be we are processing backwards.
@@ -809,6 +824,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
             cslot->shift(), cslot->offset(), dir, dbgout);
     bool collides = false;
     bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
+    Slot *base = slot;
+    while (base->attachedTo())
+        base = base->attachedTo();
     Position zero(0., 0.);
     
     // Look for collisions with the neighboring glyphs.
@@ -816,7 +834,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
     {
         SlotCollision *c = seg->collisionInfo(s);
         if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) 
-                      && (!ignoreForKern || !(c->flags() & SlotCollision::COLL_KERN && (c->flags() & SlotCollision::COLL_FIX) && !slot->isChildOf(s)))
+                      && (s == base || s->isChildOf(base) || !isKernFixCluster(seg, s))
                       && (!isRev || !ignoreForKern || !(c->status() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
         else if (s == slot)
@@ -871,14 +889,19 @@ float Pass::resolveKern(Segment *seg, Slot *slot, GR_MAYBE_UNUSED Slot *start, K
     bool seenEnd = cslot->flags() & SlotCollision::COLL_END;
     coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->marginMin(),
             cslot->shift(), cslot->offset(), dir, dbgout);
+    Slot *base = slot;
+    while (base->attachedTo())
+        base = base->attachedTo();
 
     for (s = slot->next(); s; s = s->next())
     {
+        if (s->isChildOf(base))
+            continue;
         SlotCollision *c = seg->collisionInfo(s);
         const Rect &bb = seg->theGlyphBBoxTemporary(s->gid());
         if (bb.bl.y == 0. && bb.tr.y == 0.)
             currSpace += s->advance();
-        else if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) && !s->isChildOf(slot))
+        else if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE))
             collides |= coll.mergeSlot(seg, s, c->shift(), currSpace, dir, dbgout);
         if (c->flags() & SlotCollision::COLL_END)
         {
