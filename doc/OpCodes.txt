@@ -79,5 +79,9 @@ Not supported in version 1.0 of the font tables.
 |3B |PutGlyph |\{outclass-short\} |||Equivalent to PutGlyph (0x1C) but with 16-bit class identifier.
 |3C |PushGlyph-Attr |\{glyphattr-short\} |<offset> ||Equivalent to PushGlyphAttr (0x29) but with 16-bit glyph attribute identifier.
 |3D |PushAttTo-GlyphAttr |\{glyphattr-short\} |<offset> ||Equivalent to PushAttToGlyphAttr (0x2C) but with 16-bit glyph attribute identifier.
+|3E |BitAnd ||||Pop the top two items off the stack, perform a bitwise AND, and push the result.
+|3F |BitOr ||||Pop the top two items off the stack, perform a bitwise OR, and push the result.
+|40 |BitNot ||||Pop the top item off the stack, perform a bitwise NOT, and push the result.
+|41 |SetBits |<mask-short>|<value-short>||Pop the top item off the stack, clear the mask bits, set the value bits, and push the result.
 |=======================================================================
 
