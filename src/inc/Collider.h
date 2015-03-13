@@ -97,12 +97,14 @@ protected:
     Position _currOffset;
     float   _maxOverlap;
     
+#if !defined GRAPHITE2_NTRACING
     // Debugging
     Segment * _seg;
     IntervalSet _rawRanges[4];
     IntervalSet _removals[4];
     Vector<Slot*>_slotNear[4];
     Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
+#endif
 
 };
 
@@ -131,11 +133,13 @@ private:
     float _mingap;
     float _xbound;        // max or min edge
     float _othermax;      // bounding value of tested glyphs
-    
+
+#if !defined GRAPHITE2_NTRACING    
     // Debugging
     Segment * _seg;
     Vector<float> _nearEdges; // closest potential collision in each slice
     Vector<Slot*> _slotNear;
+#endif
 };
 
 

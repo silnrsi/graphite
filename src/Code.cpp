@@ -290,6 +290,10 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case GTR :
         case LESS_EQ :
         case GTR_EQ :
+        case BITOR :
+        case BITAND :
+        case BITNOT :
+        case BITSET :
             break;
         case NEXT :
         case NEXT_N :           // runtime checked

@@ -644,3 +644,25 @@ STARTOP(temp_copy)
     newSlot->markCopied(true);
     *map = newSlot;
 ENDOP
+
+STARTOP(band)
+    binop(&);
+ENDOP
+
+STARTOP(bor)
+    binop(|);
+ENDOP
+
+STARTOP(bnot)
+    *sp = ~*sp;
+ENDOP
+
+STARTOP(setbits)
+    declare_params(4);
+    const uint16 m  = uint16(param[0]) << 8
+                    | uint8(param[1]);
+    const uint16 v  = uint16(param[2]) << 8
+                    | uint8(param[3]);
+    *sp = ((*sp) & ~m) | v;
+ENDOP
+

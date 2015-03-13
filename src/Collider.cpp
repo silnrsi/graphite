@@ -92,14 +92,18 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
         _ranges[i].add(min, max - len);
         _ranges[i].len(len);
 
+#if !defined GRAPHITE2_NTRACING
         // Debugging:
         _rawRanges[i].clear();
         _rawRanges[i].add(min, max - len);
         _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
+#endif
     }
+#if !defined GRAPHITE2_NTRACING
     _seg = seg; // debugging
+#endif
     _target = aSlot;
     if ((dir & 1) == 0)
     {
@@ -297,10 +301,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 _ranges[i].remove(vmin, vmax);
                 anyhits = true;
                 
+#if !defined GRAPHITE2_NTRACING
                 IntervalSet::tpair dbg(vmin, vmax); // debugging
                 _removals[i].append(dbg);         // debugging
                 _slotNear[i].push_back(slot);     // debugging
                 _subNear[i].push_back(j);         // debugging
+#endif
             }
             if (!anyhits)
                 isCol = false;
@@ -309,10 +315,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         {
             _ranges[i].remove(vmin, vmax);
 
+#if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vmin, vmax); // debugging
             _removals[i].append(dbg);         // debugging
             _slotNear[i].push_back(slot);     // debugging
             _subNear[i].push_back(-1);        // debugging
+#endif
         }
     }
     return isCol;
@@ -567,17 +575,19 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         _maxy = std::max(_maxy, y + bs.ya);
         _miny = std::min(_miny, y + bs.yi);
     }
-    _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
+    _numSlices = int((_maxy - _miny + 2) / marginMin + 1.);  // +2 helps with rounding errors
     sliceWidth = (_maxy - _miny + 2) / _numSlices;
     _edges.clear();
     _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);
         
+#if !defined GRAPHITE2_NTRACING
     // Debugging
     _seg = seg;
     _slotNear.clear();
     _slotNear.insert(_slotNear.begin(), _numSlices, NULL);
     _nearEdges.clear();
     _nearEdges.insert(_nearEdges.begin(), _numSlices, (dir & 1) ? -1e38 : +1e38);
+#endif
     
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
     for (s = base; s; s = s->nextInCluster(s))
@@ -641,7 +651,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     if (dir & 1)
     {
         float x = sx + bb.tr.x;
-        if (x < _xbound - _mingap)  // no horizontal overlap - TODO: HANDLE MARGIN?
+        if (x < _xbound - _mingap) // this isn't going to reduce _mingap so skip
             return false;
         for (int i = smin; i <= smax; ++i)
         {
@@ -661,19 +671,21 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
                     collides = true;
                 }
                 
+#if !defined GRAPHITE2_NTRACING
                 // Debugging - remember the closest neighboring edge for this slice.
                 if (m > _nearEdges[i])
                 {
                     _slotNear[i] = slot;
                     _nearEdges[i] = m;
                 }
+#endif
             }
         }
     }
     else
     {
         float x = sx + bb.bl.x;
-        if (x > _xbound + _mingap + currSpace)   // no horizontal overlap - TODO: HANDLE MARGIN?
+        if (x > _xbound + _mingap + currSpace)
             return false;
         for (int i = smin; i < smax; ++i)
         {
@@ -692,12 +704,14 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
                     collides = true;
                 }
                 
+#if !defined GRAPHITE2_NTRACING
                 // Debugging - remember the closest neighboring edge for this slice.
                 if (m < _nearEdges[1])
                 {
                     _slotNear[i] = slot;
                     _nearEdges[i] = m;
                 }
+#endif
             }
         }
     }
