@@ -248,7 +248,10 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatColShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().x : 0; }
     case gr_slatColShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().y : 0; }
     case gr_slatColMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
-    case gr_slatColMarginMin:{ SlotCollision *c = seg->collisionInfo(this); return c ? c->marginMin() : 0; }
+    case gr_slatColMarginMin:   { SlotCollision *c = seg->collisionInfo(this); return c ? c->marginMin() : 0; }
+    case gr_slatColBlockGlyph : { SlotCollision *c = seg->collisionInfo(this); return c ? c->blockGlyph() : 0; }
+    case gr_slatColBlockOffx :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->blockOffset().x : 0; }
+    case gr_slatColBlockOffy :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->blockOffset().y : 0; }
     default : return 0;
     }
 }
@@ -375,6 +378,32 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (c)
         {
             c->setMarginMin(value);
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColBlockGlyph : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->setBlockGlyph(value);
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColBlockOffx : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Position &s = c->blockOffset();
+            c->setBlockOffset(Position(value, s.y));
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColBlockOffy : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            const Position &s = c->blockOffset();
+            c->setBlockOffset(Position(s.x, value));
             c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }

@@ -147,6 +147,10 @@ enum gr_attrCode {
     gr_slatColMarginMin,
     /// Collision guard space from another diacritic
     gr_slatColMaxOverlap,
+    // Additional glyph that blocks movement near this one:
+    gr_slatColBlockGlyph,
+    gr_slatColBlockOffx,
+    gr_slatColBlockOffy,
                             
     /// not implemented
     gr_slatMax,             

@@ -814,45 +814,46 @@ static bool isKernFixCluster(Segment *seg, Slot *s)
 // Fix collisions for the given slot.
 // Return true if everything was fixed, false if there are still collisions remaining.
 // isRev means be we are processing backwards.
-bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
+bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, bool &moved,
         json * const dbgout) const
 {
-    Slot *s;
-    SlotCollision *cslot = seg->collisionInfo(slot);
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->marginMin(),
-            cslot->shift(), cslot->offset(), dir, dbgout);
+    Slot * nbor;  // neighboring slot
+    SlotCollision *cFix = seg->collisionInfo(slotFix);
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginMin(),
+            cFix->shift(), cFix->offset(), dir, dbgout);
     bool collides = false;
     bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
-    Slot *base = slot;
+    Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
     Position zero(0., 0.);
     
     // Look for collisions with the neighboring glyphs.
-    for (s = start; s; s = isRev ? s->prev() : s->next())
+    for (nbor = start; nbor; nbor = isRev ? nbor->prev() : nbor->next())
     {
-        SlotCollision *c = seg->collisionInfo(s);
-        if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE) 
-                      && (s == base || s->isChildOf(base) || !isKernFixCluster(seg, s))
-                      && (!isRev || !ignoreForKern || !(c->status() & SlotCollision::COLL_FIX) || (c->flags() & SlotCollision::COLL_KERN)))
-            collides |= coll.mergeSlot(seg, s, c->shift(), dbgout);
-        else if (s == slot)
+        SlotCollision *cNbor = seg->collisionInfo(nbor);
+        if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE) 
+                      && (nbor == base || nbor->isChildOf(base) || !isKernFixCluster(seg, nbor))
+                      && (!isRev || !ignoreForKern || !(cNbor->status() & SlotCollision::COLL_FIX)
+                                || (cNbor->flags() & SlotCollision::COLL_KERN)))
+            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), false, dbgout);
+        else if (nbor == slotFix)
             ignoreForKern = !ignoreForKern;
             
-        if (s != start && (c->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
+        if (nbor != start && (cNbor->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
             break;
     }
     bool isCol;
-    if (collides || cslot->shift().x != 0. || cslot->shift().y != 0.)
+    if (collides || cFix->shift().x != 0. || cFix->shift().y != 0.)
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
         // isCol has been set to true if a collision remains.
         if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
         {
-            if (shift.x != cslot->shift().x || shift.y != cslot->shift().y)
+            if (shift.x != cFix->shift().x || shift.y != cFix->shift().y)
                 moved = true;
-            cslot->setShift(shift);
+            cFix->setShift(shift);
         }
     }
     else
@@ -864,7 +865,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
         if (dbgout)
         {
             *dbgout << json::object 
-                            << "missed" << objectid(dslot(seg, slot));
+                            << "missed" << objectid(dslot(seg, slotFix));
             coll.debug(dbgout, seg, -1);
             *dbgout << json::close;
         }
@@ -873,37 +874,38 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slot, Slot *start,
 
     // Set the is-collision flag bit.
     if (isCol)
-    { cslot->setStatus(cslot->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
+    { cFix->setStatus(cFix->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
-    { cslot->setStatus((cslot->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
+    { cFix->setStatus((cFix->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
 
-float Pass::resolveKern(Segment *seg, Slot *slot, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
+float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
     json *const dbgout) const
 {
-    Slot *s;
+    Slot *nbor; // neighboring slot
     float currSpace = 0.;
     bool collides = false;
-    SlotCollision *cslot = seg->collisionInfo(slot);
-    bool seenEnd = cslot->flags() & SlotCollision::COLL_END;
-    coll.initSlot(seg, slot, cslot->limit(), cslot->margin(), cslot->marginMin(),
-            cslot->shift(), cslot->offset(), dir, dbgout);
-    Slot *base = slot;
+    SlotCollision *cFix = seg->collisionInfo(slotFix);
+    bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginMin(),
+            cFix->shift(), cFix->offset(), dir, dbgout);
+    Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
 
-    for (s = slot->next(); s; s = s->next())
+    for (nbor = slotFix->next(); nbor; nbor = nbor->next())
     {
-        if (s->isChildOf(base))
+        if (nbor->isChildOf(base))
             continue;
-        SlotCollision *c = seg->collisionInfo(s);
-        const Rect &bb = seg->theGlyphBBoxTemporary(s->gid());
+        SlotCollision *cNbor = seg->collisionInfo(nbor);
+        const Rect &bb = seg->theGlyphBBoxTemporary(nbor->gid());
         if (bb.bl.y == 0. && bb.tr.y == 0.)
-            currSpace += s->advance();
-        else if (s != slot && !(c->status() & SlotCollision::COLL_IGNORE))
-            collides |= coll.mergeSlot(seg, s, c->shift(), currSpace, dir, dbgout);
-        if (c->flags() & SlotCollision::COLL_END)
+            // Add space for a space glyph.
+            currSpace += nbor->advance();
+        else if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE))
+            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);
+        if (cNbor->flags() & SlotCollision::COLL_END)
         {
             if (seenEnd)
                 break;
@@ -913,8 +915,8 @@ float Pass::resolveKern(Segment *seg, Slot *slot, GR_MAYBE_UNUSED Slot *start, K
     }
     if (collides)
     {
-        Position mv = coll.resolve(seg, slot, dir, cslot->margin(), dbgout);
-        cslot->setShift(mv);
+        Position mv = coll.resolve(seg, slotFix, dir, cFix->margin(), dbgout);
+        cFix->setShift(mv);
         return mv.x;
     }
     return 0.;
