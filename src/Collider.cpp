@@ -122,7 +122,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 // Adjust the movement limits for the target to avoid having it collide
 // with the given slot. Also determine if there is in fact a collision
 // between the target and the given slot.
-bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, bool blocker,
+bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, bool exclude,
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = true;
@@ -151,7 +151,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     bool useMaxOverlap = false;
     bool noJump = false;
     SlotCollision * cslot = NULL;
-    if (!blocker)
+    if (!exclude)
     {
         cslot = seg->collisionInfo(slot);
         //bool noJump = !(cslot->flags() & SlotCollision::COLL_JUMPABLE);
@@ -248,7 +248,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         // Process sub-boxes that are defined for this glyph.
         // We only need to do this if there was in fact a collision with the main octabox.
         uint8 numsub = gc.numSubBounds(gid);
-        if (numsub > 0 && !blocker)
+        if (numsub > 0 && !exclude)
         {
             bool anyhits = false;
             for (int j = 0; j < numsub; ++j)
@@ -335,13 +335,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
     }
     
-    if (!blocker && cslot && cslot->blockGlyph() > 0)
+    if (cslot && cslot->exclGlyph() > 0)
     {
         // Set up the bogus slot representing the blocker glyph.
-        blockSlot->setGlyph(seg, cslot->blockGlyph());
-        Position blockOrigin(slot->origin() + cslot->blockOffset());
-        blockSlot->origin(blockOrigin);
-        isCol |= mergeSlot(seg, blockSlot, currShift, true, dbgout );
+        exclSlot->setGlyph(seg, cslot->exclGlyph());
+        Position exclOrigin(slot->origin() + cslot->exclOffset());
+        exclSlot->origin(exclOrigin);
+        isCol |= mergeSlot(seg, exclSlot, currShift, true, dbgout );
     }
         
     return isCol;
@@ -438,10 +438,10 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             int gi = 0;
             for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
             {   //Slot & slotNear = *(_slotNear[i][gi]);
-                if (_slotNear[i][gi] == blockSlot)
+                if (_slotNear[i][gi] == exclSlot)
                 {
                     *dbgout << json::flat << json::array 
-                        << "block-slot" << _subNear[i][gi] << Position(s->first, s->second) << json::close;
+                        << "exclude" << _subNear[i][gi] << Position(s->first, s->second) << json::close;
                 }
                 else
                 {
@@ -829,13 +829,13 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     _marginMin = seg->glyphAttr(gid, aCol+6);
     _maxOverlap = seg->glyphAttr(gid, aCol+7);
     
-    _blockGlyph = 0;
-    _blockOffset = Position(0, 0);
+    _exclGlyph = 0;
+    _exclOffset = Position(0, 0);
     
-    // TODO: do we want to initialize collision.block stuff from the glyph attributes,
+    // TODO: do we want to initialize collision.exclude stuff from the glyph attributes,
     // or make GDL do it explicitly?
-//  _blockGlyph = seg->glyphAttr(gid, aCol+8);
-//  _blockOffset = Position(seg->glyphAttr(gid, aCol+9), seg->glyphAttr(gid, aCol+10));
+//  _exclGlyph = seg->glyphAttr(gid, aCol+8);
+//  _exclOffset = Position(seg->glyphAttr(gid, aCol+9), seg->glyphAttr(gid, aCol+10));
 }
 
 float SlotCollision::getKern(int dir) const

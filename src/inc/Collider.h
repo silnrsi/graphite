@@ -56,7 +56,6 @@ public:
         COLL_OVERLAP = 256,    // use maxoverlap to restrict
     };
     
-    SlotCollision() {} // for initializing data for blocker slot
     SlotCollision(Segment *seg, Slot *slot);
     void initFromSlot(Segment *seg, Slot *slot);
     
@@ -76,10 +75,10 @@ public:
     void setStatus(uint16 f) { _status = f; }
     int16 maxOverlap() const { return _maxOverlap; }
     void setMaxOverlap(int16 m) { _maxOverlap = m; }
-    uint16 blockGlyph() const { return _blockGlyph; }
-    void setBlockGlyph(uint16 g) { _blockGlyph = g; }
-    Position blockOffset() const { return _blockOffset; }
-    void setBlockOffset(const Position &s) { _blockOffset = s; }
+    uint16 exclGlyph() const { return _exclGlyph; }
+    void setExclGlyph(uint16 g) { _exclGlyph = g; }
+    Position exclOffset() const { return _exclOffset; }
+    void setExclOffset(const Position &s) { _exclOffset = s; }
 
     float getKern(int dir) const;
     
@@ -92,8 +91,8 @@ private:
     uint16      _flags;
     int16       _maxOverlap;
     uint16      _status;
-    uint16      _blockGlyph;
-    Position    _blockOffset;
+    uint16      _exclGlyph;
+    Position    _exclOffset;
 };
 
 
@@ -106,17 +105,17 @@ public:
 
     ShiftCollider()
     {
-        blockSlot = new Slot();
+        exclSlot = new Slot();
     }
     ~ShiftCollider() throw()
     {
-        if (blockSlot) delete blockSlot;
+        if (exclSlot) delete exclSlot;
     }
     void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
                 GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED float marginMin, GR_MAYBE_UNUSED const Position &currShift,
                 const Position &currOffset, GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, 
-                GR_MAYBE_UNUSED const Position &currShift, bool blocker, GR_MAYBE_UNUSED json * const dbgout);
+                GR_MAYBE_UNUSED const Position &currShift, bool exclude, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
 
 #if !defined GRAPHITE2_NTRACING
@@ -162,7 +161,7 @@ protected:
     Position _currOffset;
     float   _maxOverlap;
     
-    Slot * blockSlot;   // bogus blocker slot
+    Slot * exclSlot;   // bogus exclude slot
     
 #if !defined GRAPHITE2_NTRACING
     // Debugging
