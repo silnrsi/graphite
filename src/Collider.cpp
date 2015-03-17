@@ -27,6 +27,7 @@ of the License or (at your option) any later version.
 #include <algorithm>
 #include <limits>
 #include <math.h>
+#include <string>
 #include "inc/Collider.h"
 #include "inc/Segment.h"
 #include "inc/Slot.h"
@@ -96,6 +97,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
         // Debugging:
         _rawRanges[i].clear();
         _rawRanges[i].add(min, max - len);
+        _rawRanges[i].len(len);
         _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
@@ -388,30 +390,35 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         marginMin = seg->collisionInfo(_target)->marginMin() * (i > 1 ? ISQRT2 : 1.f);
+        std::string label;
         switch (i) {
             case 0 :	// x direction
                 tlen = bb.xa - bb.xi;
                 tleft = _target->origin().x + _currShift.x + bb.xi;
                 tbase = tleft - _currShift.x;
                 tval = -currOffset.x;
+                label = "x";
                 break;
             case 1 :	// y direction
                 tlen = bb.ya - bb.yi;
                 tleft = _target->origin().y + _currShift.y + bb.yi;
                 tbase = tleft - _currShift.y;
                 tval = -currOffset.y;
+                label = "y";
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = sb.sa - sb.si;
                 tleft = _target->origin().x + _target->origin().y + _currShift.x + _currShift.y + sb.si;
                 tbase = tleft - _currShift.x - _currShift.y;
                 tval = -currOffset.x - currOffset.y;
+                label = "sum (-diag)";
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = sb.da - sb.di;
                 tleft = _target->origin().x - _target->origin().y + _currShift.x - _currShift.y + sb.di;
                 tbase = tleft - _currShift.x + _currShift.y;
                 tval = currOffset.y - currOffset.x;
+                label = "diff (+diag)";
                 break;
         }
         isGoodFit = 0;
@@ -427,14 +434,16 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         if (dbgout)
         {
             *dbgout << json::object // vector
-                    << "testLeft" << tleft
-                    << "testLen" << tlen;
+                    << "direction" << label.c_str()
+                    << "targetMin" << tleft
+                    << "targetSize" << tlen;
             
             *dbgout << "rawRanges" << json::flat << json::array;
             for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
                 *dbgout << Position(s->first, s->second);
-            *dbgout << json::close // rawRanges array
-                << "removals" << json::array;  						
+            *dbgout << _rawRanges[i].len() << json::close // rawRanges array
+                << "removals" << json::array;  
+                    						
             int gi = 0;
             for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
             {   //Slot & slotNear = *(_slotNear[i][gi]);
