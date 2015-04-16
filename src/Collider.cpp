@@ -118,11 +118,15 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _currOffset = currOffset;
     _currShift = currShift;
     
+    SlotCollision *c = seg->collisionInfo(aSlot);
+    _orderClass = c->orderClass();
+    _orderFlags = c->orderFlags();
+    
 }   // end of ShiftCollider::initSlot
 
 
 // Adjust the movement limits for the target to avoid having it collide
-// with the given slot. Also determine if there is in fact a collision
+// with the given neighbor slot. Also determine if there is in fact a collision
 // between the target and the given slot.
 bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, bool exclude,
         GR_MAYBE_UNUSED json * const dbgout )
@@ -138,8 +142,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const float ss = sx + sy;
     float vmin, vmax;
     float omin, omax, otmin, otmax;
-    float cmin, cmax;
-    float pmin, pmax;
+    float cmin, cmax;   // target limits
+    float pmin, pmax;   // target position
     float vcmin, vcmax, tempv;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
@@ -151,22 +155,29 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     
     int maxOverlap = 0;
     bool useMaxOverlap = false;
-    bool noJump = false;
+    bool noJump = false;   // currently not used - always false
     SlotCollision * cslot = NULL;
+    int orderFlags = 0;
     if (!exclude)
     {
         cslot = seg->collisionInfo(slot);
-        //bool noJump = !(cslot->flags() & SlotCollision::COLL_JUMPABLE);
-        bool useMaxOverlap = cslot->flags() & SlotCollision::COLL_OVERLAP;
-        maxOverlap = cslot->maxOverlap();
+        //noJump = !(cslot->flags() & SlotCollision::COLL_JUMPABLE);
+        //useMaxOverlap = cslot->flags() & SlotCollision::COLL_OVERLAP;
+        //maxOverlap = cslot->maxOverlap();
+        
+        if (_orderClass == cslot->orderClass())
+            orderFlags = _orderFlags;
     }
         
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
     {
         uint16 m = (uint16)(_margin / (i > 1 ? ISQRT2 : 1.));  // adjusted margin depending on whether the vector is diagonal
+        int enforceOrder = 0;
         switch (i) {
             case 0 :	// x direction
+                enforceOrder = ((orderFlags & SlotCollision::COLL_ORDER_LEFT) ? -1 : 0) // -1 = force left, 1 = force right
+                        + ((orderFlags & SlotCollision::COLL_ORDER_RIGHT) ? 1 : 0);
                 vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.xa + tx - tsb.da - td), sb.si + ss + tbb.xa + tx - tsb.sa - ts);
                 vmax = std::min(std::min(bb.xa + sx, sb.da + sd + tbb.xi + tx - tsb.di - td), sb.sa + ss + tbb.xi + tx - tsb.si - ts);
                 otmin = tbb.yi + ty;
@@ -182,6 +193,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 vcmax = 0.5 * (vmax + vmin) + tempv;
                 break;
             case 1 :	// y direction
+                enforceOrder = ((orderFlags & SlotCollision::COLL_ORDER_DOWN) ? -1 : 0) // -1 = force down, 1 = force up
+                        + ((orderFlags & SlotCollision::COLL_ORDER_UP) ? 1 : 0);
                 vmin = std::max(std::max(bb.yi + sy, tbb.ya + ty - sb.da - sd + tsb.di + td), sb.si + ss + tbb.ya + ty - tsb.sa - ts);
                 vmax = std::min(std::min(bb.ya + sy, tbb.yi + ty - sb.di - sd + tsb.da + td), sb.sa + ss + tbb.yi + ty - tsb.si - ts);
                 otmin = tbb.xi + tx;
@@ -197,6 +210,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
+                enforceOrder = (((orderFlags & SlotCollision::COLL_ORDER_DOWN) && (orderFlags & SlotCollision::COLL_ORDER_LEFT)) ? -1 : 0)
+                        + (((orderFlags & SlotCollision::COLL_ORDER_UP) && (orderFlags & SlotCollision::COLL_ORDER_RIGHT)) ? 1 : 0);
                 vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts);
                 vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts);
                 otmin = tsb.di + td;
@@ -213,6 +228,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
+                enforceOrder = (((orderFlags & SlotCollision::COLL_ORDER_UP) && (orderFlags & SlotCollision::COLL_ORDER_LEFT)) ? -1 : 0)
+                        + (((orderFlags & SlotCollision::COLL_ORDER_DOWN) && (orderFlags & SlotCollision::COLL_ORDER_RIGHT)) ? 1 : 0);
                 vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty));
                 vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx - tbb.xi - tx) + tsb.di + td), tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty));
                 otmin = tsb.si + ts;
@@ -230,12 +247,15 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             default :
                 continue;
         }
+        
+        // PUT SOMETHING HERE TO MAKE UES OF ENFORCE-ORDER
+        
         if (useMaxOverlap && vcmax < pmax && vcmin < pmin)
             vmin = (float)-1e38;
         else if (useMaxOverlap && vcmin > pmin && vcmax > pmax)
             vmax = (float)1e38;
-        if (noJump && vmax < pmax && vmin < pmin)
-            vmin = (float)-1e38;
+        //if (noJump && vmax < pmax && vmin < pmin)
+        //    vmin = (float)-1e38;
         else if (noJump && vmin > pmin && vmax > pmax)
             vmax = (float)1e38;
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
@@ -299,6 +319,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     vmin = vmax;
                     vmax = t;
                 }
+                
+                // PUT SOME THING HERE TO MAKE USE OF ENFORCE ORDER
+                
                 if (useMaxOverlap && vcmax < pmax && vcmin < pmin)
                     vmin = (float)-1e38;
                 else if (useMaxOverlap && vcmin > pmin && vcmax > pmax)
@@ -767,8 +790,9 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, Slot *slot, int dir
     float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
     const SlotCollision *cslot = seg->collisionInfo(slot);
-    if (cslot->flags() & SlotCollision::COLL_OVERLAP && _othermax - _xbound - _mingap > -1 * cslot->maxOverlap())
-        resultNeeded = (1 - 2 * (dir & 1)) * (_xbound - _othermax + cslot->maxOverlap() + margin);
+    // PUT SOMETHING IN HERE TO HANDLE ORDER-ENFORCEMENT
+//    if (cslot->flags() & SlotCollision::COLL_OVERLAP && _othermax - _xbound - _mingap > -1 * cslot->maxOverlap())
+//        resultNeeded = (1 - 2 * (dir & 1)) * (_xbound - _othermax + cslot->maxOverlap() + margin);
     
 
 #if !defined GRAPHITE2_NTRACING
@@ -828,6 +852,7 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
 
 void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
 {
+    // Initialize slot attributes from glyph attributes:
     uint16 gid = slot->gid();
     uint16 aCol = seg->silf()->aCollision(); // flags attr ID
     _flags = seg->glyphAttr(gid, aCol);
@@ -836,7 +861,8 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
     _marginMin = seg->glyphAttr(gid, aCol+6);
-    _maxOverlap = seg->glyphAttr(gid, aCol+7);
+    _orderClass = seg->glyphAttr(gid, aCol+7); // do we want these?
+    _orderFlags = seg->glyphAttr(gid, aCol+8);
     
     _exclGlyph = 0;
     _exclOffset = Position(0, 0);

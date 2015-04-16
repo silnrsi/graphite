@@ -145,8 +145,9 @@ enum gr_attrCode {
     gr_slatColMargin,
     /// Minimum margin in tight situations
     gr_slatColMarginMin,
-    /// Collision guard space from another diacritic
-    gr_slatColMaxOverlap,
+    /// How to enforce the ordering of a set of moveable glyphs:
+    gr_slatColOrderClass,
+    gr_slatColOrderEnforce,
     // Additional glyph that excludes movement near this one:
     gr_slatColExclGlyph,
     gr_slatColExclOffx,

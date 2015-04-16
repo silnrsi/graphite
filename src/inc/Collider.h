@@ -39,7 +39,7 @@ namespace graphite2 {
 class json;
 class Slot;
 
-
+// Slot attributes related to collision-fixing
 class SlotCollision
 {
 public:
@@ -53,7 +53,15 @@ public:
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
         COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction
-        COLL_OVERLAP = 256,    // use maxoverlap to restrict
+        ////COLL_OVERLAP = 256,    // use maxoverlap to restrict - DELETE
+    };
+    
+    // Behavior for the collision.order attribute:
+    enum {
+        COLL_ORDER_LEFT = 1,
+        COLL_ORDER_RIGHT = 2,
+        COLL_ORDER_DOWN = 4,
+        COLL_ORDER_UP = 8
     };
     
     SlotCollision(Segment *seg, Slot *slot);
@@ -73,8 +81,10 @@ public:
     void setFlags(uint16 f) { _flags = f; }
     uint16 status() const { return _status; }
     void setStatus(uint16 f) { _status = f; }
-    int16 maxOverlap() const { return _maxOverlap; }
-    void setMaxOverlap(int16 m) { _maxOverlap = m; }
+    uint16 orderClass() const { return _orderClass; }
+    void setOrderClass(uint16 n) { _orderClass = n; }
+    uint16 orderFlags() const { return _orderFlags; }
+    void setOrderFlags(uint16 n) { _orderFlags = n; }
     uint16 exclGlyph() const { return _exclGlyph; }
     void setExclGlyph(uint16 g) { _exclGlyph = g; }
     Position exclOffset() const { return _exclOffset; }
@@ -89,7 +99,8 @@ private:
     uint16      _margin;
     uint16      _marginMin;
     uint16      _flags;
-    int16       _maxOverlap;
+    uint16      _orderClass;
+    uint16      _orderFlags;
     uint16      _status;
     uint16      _exclGlyph;
     Position    _exclOffset;
@@ -157,9 +168,10 @@ protected:
     Rect    _limit;
     float   _margin;
     float   _marginMin;
-    Position _currShift;
-    Position _currOffset;
-    float   _maxOverlap;
+    Position  _currShift;
+    Position  _currOffset;
+    uint16  _orderClass;
+    uint16  _orderFlags;
     
     Slot * exclSlot;   // bogus exclude slot
     
