@@ -260,8 +260,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 continue;
         }
         
-        // PUT SOMETHING HERE TO MAKE UES OF ENFORCE-ORDER
-
         if (enforceOrder)
         {
             // swap the vcmin and vcmax as being the end points out to infinity (vcmax->+inf, -inf->vcmin)
@@ -282,9 +280,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
 #if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vcmax, vcmin); // debugging
-            _removals[i].append(dbg);         // debugging
-            _slotNear[i].push_back(slot);     // debugging
-            _subNear[i].push_back(100);        // debugging
+            _removals[i].append(dbg);             // debugging
+            _slotNear[i].push_back(slot);         // debugging
+            _subNear[i].push_back(100);           // debugging
 #endif
         }
 
@@ -390,7 +388,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     
     if (cslot && cslot->exclGlyph() > 0)
     {
-        // Set up the bogus slot representing the blocker glyph.
+        // Set up the bogus slot representing the exclusion glyph.
         exclSlot->setGlyph(seg, cslot->exclGlyph());
         Position exclOrigin(slot->origin() + cslot->exclOffset());
         exclSlot->origin(exclOrigin);

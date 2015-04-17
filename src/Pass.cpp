@@ -796,16 +796,17 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     return hasCollisions;   // but this isn't accurate if we have kerning
 }
 
-static bool isKernFixCluster(Segment *seg, Slot *s)
+// Can slot s be kerned, or is it attached to something that can be kerned?
+static bool isKernCluster(Segment *seg, Slot *s)
 {
     SlotCollision *c = seg->collisionInfo(s);
-    if (c->flags() & SlotCollision::COLL_KERN && c->flags() & SlotCollision::COLL_FIX)
+    if (c->flags() & SlotCollision::COLL_KERN /** && c->flags() & SlotCollision::COLL_FIX **/ )
         return true;
     while (s->attachedTo())
     {
         s = s->attachedTo();
         c = seg->collisionInfo(s);
-        if (c->flags() & SlotCollision::COLL_KERN && c->flags() & SlotCollision::COLL_FIX)
+        if (c->flags() & SlotCollision::COLL_KERN /** && c->flags() & SlotCollision::COLL_FIX **/ )
             return true;
     }
     return false;
@@ -823,7 +824,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginMin(),
             cFix->shift(), cFix->offset(), dir, dbgout);
     bool collides = false;
-    bool ignoreForKern = !isRev; // ignore kernable glyphs that preceed the target glyph
+    // When we're processing forward, ignore kernable glyphs that preceed the target glyph.
+    // When processing backward, don't ignore these until we pass slotFix.
+    bool ignoreForKern = !isRev;
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -834,11 +837,14 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     {
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE) 
-                      && (nbor == base || nbor->isChildOf(base) || !isKernFixCluster(seg, nbor))
-                      && (!isRev || !ignoreForKern || !(cNbor->status() & SlotCollision::COLL_FIX)
-                                || (cNbor->flags() & SlotCollision::COLL_KERN)))
+                      && (nbor == base || nbor->isChildOf(base) || !isKernCluster(seg, nbor))
+                      && (!isRev // when we're processing backwards, we never...do what?
+                            || !ignoreForKern  // 
+                            || !(cNbor->status() & SlotCollision::COLL_FIX)
+                            || (cNbor->flags() & SlotCollision::COLL_KERN)))
             collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, dbgout);
         else if (nbor == slotFix)
+            // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
             ignoreForKern = !ignoreForKern;
             
         if (nbor != start && (cNbor->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
