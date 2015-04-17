@@ -126,7 +126,7 @@ public:
                 GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED float marginMin, GR_MAYBE_UNUSED const Position &currShift,
                 const Position &currOffset, GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, 
-                GR_MAYBE_UNUSED const Position &currShift, bool exclude, GR_MAYBE_UNUSED json * const dbgout);
+                GR_MAYBE_UNUSED const Position &currShift, bool isAfter, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
 
 #if !defined GRAPHITE2_NTRACING

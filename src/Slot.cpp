@@ -248,6 +248,8 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatColShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().x : 0; }
     case gr_slatColShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().y : 0; }
     case gr_slatColMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
+    case gr_slatColOrderClass : { SlotCollision *c = seg->collisionInfo(this); return c ? c->orderClass() : 0; }
+    case gr_slatColOrderEnforce : { SlotCollision *c = seg->collisionInfo(this); return c ? c->orderFlags() : 0; }
     case gr_slatColMarginMin:   { SlotCollision *c = seg->collisionInfo(this); return c ? c->marginMin() : 0; }
     case gr_slatColExclGlyph : { SlotCollision *c = seg->collisionInfo(this); return c ? c->exclGlyph() : 0; }
     case gr_slatColExclOffx :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->exclOffset().x : 0; }
@@ -378,6 +380,22 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (c)
         {
             c->setMarginMin(value);
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColOrderClass : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->setOrderClass(value);
+            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
+        }
+        break; }
+    case gr_slatColOrderEnforce : { 
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+        {
+            c->setOrderFlags(value);
             c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
         }
         break; }

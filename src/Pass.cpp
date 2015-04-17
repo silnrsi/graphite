@@ -837,7 +837,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                       && (nbor == base || nbor->isChildOf(base) || !isKernFixCluster(seg, nbor))
                       && (!isRev || !ignoreForKern || !(cNbor->status() & SlotCollision::COLL_FIX)
                                 || (cNbor->flags() & SlotCollision::COLL_KERN)))
-            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), false, dbgout);
+            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, dbgout);
         else if (nbor == slotFix)
             ignoreForKern = !ignoreForKern;
             
