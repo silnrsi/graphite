@@ -836,13 +836,16 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     for (nbor = start; nbor; nbor = isRev ? nbor->prev() : nbor->next())
     {
         SlotCollision *cNbor = seg->collisionInfo(nbor);
-        if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE) 
-                      && (nbor == base || nbor->isChildOf(base) || !isKernCluster(seg, nbor))
-                      && (!isRev // when we're processing backwards, we never...do what?
-                            || !ignoreForKern  // 
-                            || !(cNbor->status() & SlotCollision::COLL_FIX)
-                            || (cNbor->flags() & SlotCollision::COLL_KERN)))
-            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, dbgout);
+        bool sameCluster = nbor->isChildOf(base);
+        if (nbor != slotFix         // don't process if this is the slot of interest
+                      && !(cNbor->status() & SlotCollision::COLL_IGNORE)    // don't process if ignoring
+                      && (nbor == base || sameCluster       // process if in the same cluster as slotFix
+                            || !isKernCluster(seg, nbor))   // this cluster is not to be kerned (so avoid it)
+                      && (!isRev    // if processing forwards then good to merge otherwise only:
+                            || !ignoreForKern                                   // merge in anything following slotFix in slot stream
+                            || !(cNbor->status() & SlotCollision::COLL_FIX)     // merge in immovable stuff
+                            || (cNbor->flags() & SlotCollision::COLL_KERN)))    // merge in anything kernable (why?)
+            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, dbgout);
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
             ignoreForKern = !ignoreForKern;
