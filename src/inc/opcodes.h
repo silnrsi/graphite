@@ -666,3 +666,15 @@ STARTOP(setbits)
     *sp = ((*sp) & ~m) | v;
 ENDOP
 
+STARTOP(set_feat)
+    declare_params(2);
+    const unsigned int  feat        = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
+    slotref slot = slotat(slot_ref);
+    if (slot)
+    {
+        uint8 fid = seg.charinfo(slot->original())->fid();
+        seg.setFeature(fid, feat, pop());
+    }
+ENDOP
+

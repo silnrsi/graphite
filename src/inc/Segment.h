@@ -131,6 +131,13 @@ public:
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
     uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
+    void setFeature(int index, uint8 findex, uint32 val) {
+        const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); 
+        if (pFR)
+        {
+            if (val > pFR->maxVal()) val = pFR->maxVal();
+            pFR->applyValToFeature(val, m_feats[index]);
+        } }
     void dir(int8 val) { m_dir = val; }
     unsigned int passBits() const { return m_passBits; }
     void mergePassBits(const unsigned int val) { m_passBits &= val; }

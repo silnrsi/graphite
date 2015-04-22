@@ -58,7 +58,7 @@ Any opcode with a value outside the range of opcodes listed here (currently 0x00
 |28 |PushSlotAttr |\{slotattr\} |<offset> ||Look up the value of the given slot attribute of the given slot and push the result on the stack. The slot offset is relative to the current input position.
 |29 |PushGlyph-Attr |\{glyphattr\} |<offset> ||Look up the value of the given glyph attribute of the given slot and push the result on the stack. The slot offset is relative to the current input position.
 |2A |PushGlyph-Metric |\{glyph-metric\} |<offset> |<level> |Look up the value of the given glyph metric of the given slot and push the result on the stack. The slot offset is relative to the current input position. The level indicates the attachment level for cluster metrics.
-|2B |PushFeat |\{feat\} |||Push the value of the given feature for the current slot onto the stack.
+|2B |PushFeat |\{feat\} |<offset> ||Push the value of the given feature for the current slot onto the stack.
 |2C |PushAttrTo-GlyphAttr |\{glyphattr\} |<offset> ||Look up the value of the given glyph attribute for the slot indicated by the given slot’s attach.to attribute. Push the result on the stack.
 |2D |PushAttTo-GlyphMetric |\{glyph-metric\} |<offset> |<level> |Look up the value of the given glyph metric for the slot indicated by the given slot’s attach.to attribute. Push the result on the stack.
 |2E |PushISlotAttr |\{slotattr\} |<offset> |<index> |Push the value of the indexed slot attribute onto the stack. [The current indexed slot attributes are component.X.ref and userX.]
@@ -83,5 +83,6 @@ Not supported in version 1.0 of the font tables.
 |3F |BitOr ||||Pop the top two items off the stack, perform a bitwise OR, and push the result.
 |40 |BitNot ||||Pop the top item off the stack, perform a bitwise NOT, and push the result.
 |41 |SetBits |<mask-short>|<value-short>||Pop the top item off the stack, clear the mask bits, set the value bits, and push the result.
+|42 |SetFeat |\{feat\} |<offset> ||Pop a value off the stack and set the given feature on referenced slot to that value. The value is clipped at the maximum permissible value for that feature.
 |=======================================================================
 

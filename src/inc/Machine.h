@@ -111,7 +111,7 @@ enum opcode {
     PUT_SUBS,                       PUT_SUBS2,          PUT_SUBS3,
     PUT_GLYPH,                      PUSH_GLYPH_ATTR,    PUSH_ATT_TO_GLYPH_ATTR,
     BITOR,                          BITAND,             BITNOT,
-    BITSET,
+    BITSET,                         SET_FEAT,
     MAX_OPCODE,                     
     // private opcodes for internal use only, comes after all other on disk opcodes
     TEMP_COPY = MAX_OPCODE
