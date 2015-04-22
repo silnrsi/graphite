@@ -253,9 +253,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 vcmin = (float)-1e38;
                 vcmax = (float)1e38;
                 if (orderFlags & SlotCollision::COLL_ORDER_LEFT)
-                    vcmin = td - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2;
-                else if (orderFlags & SlotCollision::COLL_ORDER_RIGHT)
                     vcmax = td - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2;
+                else if (orderFlags & SlotCollision::COLL_ORDER_RIGHT)
+                    vcmin = td - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2;
                 if (orderFlags & SlotCollision::COLL_ORDER_DOWN)
                     vcmin = std::max(vcmin, td + (ty - sy) / ISQRT2 + (tbb.yi + tbb.ya - bb.yi - bb.ya) * ISQRT2);
                 else if (orderFlags & SlotCollision::COLL_ORDER_UP)
