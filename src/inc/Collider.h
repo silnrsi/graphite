@@ -52,7 +52,7 @@ public:
         COLL_KERN = 16,     // collisions with this glyph are fixed by adding kerning space after it
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
-        COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction
+        ////COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction - DELETE
         ////COLL_OVERLAP = 256,    // use maxoverlap to restrict - DELETE
     };
     
@@ -91,6 +91,9 @@ public:
     void setExclOffset(const Position &s) { _exclOffset = s; }
 
     float getKern(int dir) const;
+
+	bool canScrape(int axis) { return _canScrape[axis]; }
+	void setCanScrape(int axis, bool f) { _canScrape[axis] = f; }
     
 private:
     Rect        _limit;
@@ -104,6 +107,9 @@ private:
     uint16      _status;
     uint16      _exclGlyph;
     Position    _exclOffset;
+
+	// For use by algorithm:
+	bool _canScrape[4];
 };
 
 
@@ -135,7 +141,8 @@ public:
         int imax = i;
         if (i < 0)
         {
-            *dbgout << "margin" << _margin
+            *dbgout << "gid" << _target->gid()
+				<< "margin" << _margin
                 << "marginmin" << _marginMin
                 << "limit" << _limit
                 << "target" << json::object
@@ -163,7 +170,6 @@ public:
 
 protected:
     IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
-                            // for KernColliders these are 4 horizontal strata across the target glyph
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
@@ -174,6 +180,8 @@ protected:
     uint16  _orderFlags;
     
     Slot * exclSlot;   // bogus exclude slot
+
+	bool _scraping[4];
     
 #if !defined GRAPHITE2_NTRACING
     // Debugging

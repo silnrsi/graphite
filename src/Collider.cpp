@@ -121,6 +121,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     SlotCollision *c = seg->collisionInfo(aSlot);
     _orderClass = c->orderClass();
     _orderFlags = c->orderFlags();
+
+	_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
     
 }   // end of ShiftCollider::initSlot
 
@@ -152,7 +154,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     const BBox &tbb = gc.getBoundingBBox(tgid);
     const SlantBox &tsb = gc.getBoundingSlantBox(tgid);
-    
+
     SlotCollision * cslot = seg->collisionInfo(slot);
     int orderFlags = 0;
     if (sameCluster && _orderClass && _orderClass == cslot->orderClass())
@@ -173,6 +175,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     for (int i = 0; i < 4; ++i)
     {
         uint16 m = (uint16)(_margin / (i > 1 ? ISQRT2 : 1.));  // adjusted margin depending on whether the vector is diagonal
+		//uint16 mMin = (uint16)(_marginMin / (i > 1 ? ISQRT2 : 1.));
         int enforceOrder = 0;
         switch (i) {
             case 0 :	// x direction
@@ -306,6 +309,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
         if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
             continue;
+		if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + m || omin > otmax - m))
+		{
+			_scraping[i] = true;
+			continue;
+		}
 
         // Process sub-boxes that are defined for this glyph.
         // We only need to do this if there was in fact a collision with the main octabox.
@@ -354,6 +362,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - m || vmin > cmax + m || omax < otmin - m || omin > otmax + m)
                     continue;
+				if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + m || omin > otmax - m))
+				{
+					_scraping[i] = true;
+					continue;
+				}
                 _ranges[i].remove(vmin, vmax);
                 anyhits = true;
                 
@@ -406,6 +419,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     float tlen, tleft, tbase, tval;
     float totald = (float)(std::numeric_limits<float>::max() / 2.);
     Position totalp = Position(0, 0);
+	int bestaxis = -1;
     // float cmax, cmin;
     int isGoodFit, tIsGoodFit = 0;
     IntervalSet aFit;
@@ -415,7 +429,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     if (dbgout)
     {
         *dbgout << json::object // slot
-                << "slot" << objectid(dslot(seg, _target)) 
+                << "slot" << objectid(dslot(seg, _target))
+				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
@@ -462,7 +477,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 tbase = tleft - _currShift.x - _currShift.y;
                 tval = -currOffset.x - currOffset.y;
 #if !defined GRAPHITE2_NTRACING
-                label = "sum (-diag)";
+                label = "sum (NE-SW)";
 #endif
                 break;
             case 3 :	// diff (positively-sloped diagonals)
@@ -471,7 +486,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 tbase = tleft - _currShift.x + _currShift.y;
                 tval = currOffset.y - currOffset.x;
 #if !defined GRAPHITE2_NTRACING
-                label = "diff (+diag)";
+                label = "diff (NW-SE)";
 #endif
                 break;
         }
@@ -537,16 +552,24 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             totald = fabs(bestd);
             tIsGoodFit = isGoodFit;
             totalp = testp;
+			bestaxis = i;
         }
     }  // end of loop over 4 directions
     
     isCol = (tIsGoodFit == 0);
+	if (_scraping[bestaxis])
+	{
+		isCol = true;
+		// Only allowed to scrape once.
+		seg->collisionInfo(_target)->setCanScrape(bestaxis, false);
+	}
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
         *dbgout << json::close // vectors array
-            << "result" << totalp 
+            << "result" << totalp
+			<< "scraping" << _scraping[bestaxis]
             << "stillBad" << isCol
             << json::close; // slot object
     }
@@ -831,6 +854,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, Slot *slot, int dir
     {
         *dbgout << json::object // slot
                 << "slot" << objectid(dslot(seg, _target))
+				<< "gid" << _target->gid()
                 << "margin" << _margin
 //              << "marginmin" << _marginMin -- not really used
                 << "limit" << _limit
@@ -901,6 +925,8 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     // or make GDL do it explicitly?
 //  _exclGlyph = seg->glyphAttr(gid, aCol+8);
 //  _exclOffset = Position(seg->glyphAttr(gid, aCol+9), seg->glyphAttr(gid, aCol+10));
+
+	_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
 
 float SlotCollision::getKern(int dir) const
