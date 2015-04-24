@@ -61,7 +61,8 @@ public:
         COLL_ORDER_LEFT = 1,
         COLL_ORDER_RIGHT = 2,
         COLL_ORDER_DOWN = 4,
-        COLL_ORDER_UP = 8
+        COLL_ORDER_UP = 8,
+        COLL_ORDER_XOVERY = 16
     };
     
     SlotCollision(Segment *seg, Slot *slot);
