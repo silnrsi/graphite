@@ -373,7 +373,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
 
             if (!(seg->dir() & 2))
                 seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
-            else if (m_aMirror)
+            else if (m_aMirror && (seg->dir() & 1))
             {
                 Slot * s;
                 for (s = seg->first(); s; s = s->next())
