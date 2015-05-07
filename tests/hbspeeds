@@ -8,8 +8,11 @@ from multiprocessing import Pool
 import re, csv, tempfile, os
 
 p = ArgumentParser()
-p.add_argument('file',help="control file")
+p.add_argument('file',nargs='?',help="control file")
 p.add_argument('-s','--single',action='store_true',help='Do single processing')
+p.add_argument('-f','--font',help='font file to use for a single test')
+p.add_argument('-t','--text',help='text file to use for a single test')
+p.add_argument('-l','--line',help='line in text file for single test')
 args = p.parse_args()
 
 def parsecg(fname) :
@@ -72,18 +75,29 @@ def dorow(x) :
     return outformat.format(**results)
 
 tmpd = tempfile.mkdtemp()
-dumpfh = open(os.path.join(tmpd+'dump.out'), 'w')
-with open(args.file) as fh :
+dumpf = os.path.join(tmpd+'dump.out')
+dumpfh = open(dumpf, "w")
+if args.file :
+    fh = open(args.file)
     c = csv.reader(fh, delimiter=' ', skipinitialspace=True, escapechar='\\')
-    print outtop
-    if args.single :
-        res = map(dorow, enumerate(c))
-    else :
-        pool = Pool()
-        res = list(pool.imap(dorow, enumerate(c)))
-        pool.close()
-        pool.join()
-    for r in res :
-        if r is not None :
-            print r
+else :
+    fh = None
+    c = [[args.font, args.text, args.line]]
+
+print outtop
+if args.single or fh is None :
+    res = map(dorow, enumerate(c))
+else :
+    pool = Pool()
+    res = list(pool.imap(dorow, enumerate(c)))
+    pool.close()
+    pool.join()
+for r in res :
+    if r is not None :
+        print r
+
+if fh is not None:
+    fh.close()
 dumpfh.close()
+os.unlink(dumpf)
+os.rmdir(tmpd)
