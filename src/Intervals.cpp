@@ -149,7 +149,7 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
 //   The return value is the overlapped zone where parameters are merged.
 zones_base::exclusion zones_base::exclusion::overlap_by(exclusion & b)
 {
-    exclusion r(b.x, xm, c+b.c, md+b.md, m+b.m);
+    exclusion r(b.x, xm, c+b.c, sm+b.sm, smx+b.smx, smx2+b.smx2);
     xm = b.x;
     b.x = r.xm;
 
@@ -166,8 +166,9 @@ zones_base::exclusion zones_base::exclusion::covered_by(exclusion & o)
     r.xm = x;
     o.x = xm;
     c  += o.c;
-    md += o.md;
-    m  += o.m;
+    sm += o.sm;
+    smx += o.smx;
+    smx2 += o.smx2;
 
     return r;
 }
@@ -189,6 +190,7 @@ bool zones_base::exclusion::open_zone() const {
 }
 
 
+// hmm how to get the margin weight into here
 void zones_base::exclude(float pos, float len) {
     insert(exclusion(pos-_margin_len, _margin_len, 0, 1));
     insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0));
@@ -265,7 +267,7 @@ zones_base::const_eiter_t zones_base::find_exclusion(float x) const
         }
 
         ++width /= 2;
-    } while (width == 0);
+    } while (width != 0);
 
     return _exclusions.end();
 #else
@@ -336,8 +338,24 @@ template<> float zones<SD>::closest(float origin, float width, float a, float &c
 template<>
 inline
 float zones<XY>::exclusion::test_position() const {
-    // Simple dummy implementation
-    return (x+xm)/2;
+    float d2c = sm
+    if (d2c < 0)
+    {
+        // sigh, test both ends)
+        float cl = cost(x);
+        float cr = cost(xm);
+        if (cl > cr)
+            return xm;
+        else
+            return x;
+    }
+    else
+    {
+        float zerox = smx/sm;
+        if (zerox < x) return x;
+        else if (zerox > xm) return xm;
+        else return zerox;
+    }
 }
 
 template<>
@@ -351,9 +369,7 @@ float zones<SD>::exclusion::test_position() const {
 template<>
 inline
 float zones<XY>::exclusion::cost(float p) const {
-    // Dummy x^2 flat costing model.
-    p -= x;
-    return (p*p)*c;
+    return (sm * x + smx) * x + smx2 + c;
 }
 
 template<>
