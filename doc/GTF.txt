@@ -355,8 +355,8 @@ pseudo-glyphs) |
 |BYTE |iBidi |Index of first pass after the bidi pass(must be <= iPos);
 0xFF implies no bidi pass |
 
-|BYTE |flags | 0 - has line end contextuals, 1-3 - space contextuals,
-4 - collision avoidance |4.0 – added Bit 1
+|BYTE |flags | 0 - has line end contextuals, 1 - contextuals,
+2-4 - space contextuals |4.0 – added Bit 1
 
 |BYTE |maxPreContext |Max range for preceding cross-line-boundary
 contextualization |
