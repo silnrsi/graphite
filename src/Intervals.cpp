@@ -86,7 +86,7 @@ void IntervalSet::remove(IntervalSet::tpair interval)
             s = _v.insert(s, tpair(s->first, interval.first - _len));
             ++s;
             s->first = interval.second;
-            e = _v.end();
+            e = _v.end(); //TODO: ????
         }
         if (s->first < interval.second && s->first > interval.first - _len)
             s->first = interval.second;
@@ -141,4 +141,227 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
         return sres;
     else
         return lres;
+}
+
+// Overlap b on right hand edge of *this.
+//   *this is updated to end at the start of b.
+//   b is truncated to start at the end *this.
+//   The return value is the overlapped zone where parameters are merged.
+zones_base::exclusion zones_base::exclusion::overlap_by(exclusion & b)
+{
+    exclusion r(b.x, xm, c+b.c, md+b.md, m+b.m);
+    xm = b.x;
+    b.x = r.xm;
+
+    return r;
+}
+
+// Cover *this with o
+// Update *this with merged parameters.
+// o is truncated to start at end of *this.
+// Return region over beyond the lhs of *this.
+zones_base::exclusion zones_base::exclusion::covered_by(exclusion & o)
+{
+    exclusion r = o;
+    r.xm = x;
+    o.x = xm;
+    c  += o.c;
+    md += o.md;
+    m  += o.m;
+
+    return r;
+}
+
+
+inline
+uint8 zones_base::exclusion::outcode(float p) const {
+    return ((int8(xm - p) >> 6) & 0x2) | ((int8(p - x) >> 7) & 0x1);
+}
+
+inline
+bool zones_base::exclusion::null_zone() const {
+    return c == std::numeric_limits<float>::infinity();
+}
+
+inline
+bool zones_base::exclusion::open_zone() const {
+    return c == 1 && md == 0;
+}
+
+
+void zones_base::exclude(float pos, float len) {
+    insert(exclusion(pos-_margin_len, _margin_len, 0, 1));
+    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0));
+    insert(exclusion(pos+len, _margin_len, 0, -1));
+}
+
+
+void zones_base::insert(exclusion e)
+{
+    for (eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end && e.x < e.xm; ++i)
+    {
+        const uint8 oca = e.outcode(i->x),
+                    ocb = e.outcode(i->xm);
+        if ((oca & ocb) == 0)     // We have an overlap here
+        {
+            switch (oca ^ ocb)  // What kind of overlap?
+            {
+            case 0:     // e completely covers i
+                // split e at i.x into e1,e2
+                // split e2 at i.mx into e2,e3
+                // i+e2
+                i = _exclusions.insert(i, i->covered_by(e));
+                ++i;
+                break;
+            case 1:     // e overlaps on the rhs of i
+            {
+                // split i at e->x into i1,i2
+                // split e at i.mx into e1,e2
+                // insert i1, i2+e1, insert e2
+                exclusion &l = *i;
+                i = _exclusions.insert(++i, l.overlap_by(e));
+                break;
+            }
+            case 2:     // e overlaps on the lhs of i
+                // split e at i->x into e1,e2
+                // split i at e.mx into i1,i2
+                // insert e1, e2+i1, insert i2
+                i = _exclusions.insert(i, e.overlap_by(*i));
+                i = _exclusions.insert(i, e);
+                return;
+                break;
+            case 3:     // i completely covers e
+                // split i at e.x into i1,i2
+                // split i2 at e.mx into i2,i3
+                // e+i2
+                i = _exclusions.insert(i, e.covered_by(*i));
+                i = _exclusions.insert(++i, e);
+                return;
+                break;
+            }
+
+            end = _exclusions.end();
+        }
+    }
+}
+
+
+zones_base::const_eiter_t zones_base::find_exclusion(float x) const
+{
+#if 1
+    // Binary search
+    int pivot = _exclusions.size()/2,
+        width = _exclusions.size()/4;
+
+    do
+    {
+        const exclusion & e = _exclusions[pivot];
+
+        switch (e.outcode(x))
+        {
+        case 0 : return _exclusions.begin()+pivot;
+        case 1 : pivot -= width; break;
+        case 2 : pivot += width; break;
+        }
+
+        ++width /= 2;
+    } while (width == 0);
+
+    return _exclusions.end();
+#else
+    // Simple linear scan in case binary search is buggy
+    for (const_eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end; ++i)
+        if (i->outcode(x) == 0) return i;
+
+    return _exclusions.end();
+#endif
+}
+
+
+
+template<zones_t O>
+inline
+bool zones<O>::exclusion::track_cost(float & best_cost, float & best_pos) const {
+    const float p = test_position(),
+                c = cost(p);
+    if (open_zone() && c > best_cost) return true;
+
+    if (c < best_cost)
+    {
+        best_cost = c;
+        best_pos = p;
+    }
+    return false;
+}
+
+
+
+template<zones_t O>
+float zones<O>::closest(float origin, float width, float a, float &cost) const
+{
+    float best_c = std::numeric_limits<float>::max(),
+          best_x = 0;
+
+    const eiter_t start = find_exclusion(origin);
+
+    // Forward scan looking for lowest cost
+    for (const_eiter_t i = start, end = _exclusions.end(); i != end; ++i)
+    {
+        if (i->null_zone()) continue;
+        if (i->track_cost(best_c, best_x)) break;
+    }
+
+    // Backward scan looking for lowest cost
+    //  We start from the exclusion to the immediate left of start since we've
+    //  already tested start with the right most scan above.
+    for (const_eiter_t i = start-1, end = _exclusions.begin()-1; i != end; --i)
+    {
+        if (i->null_zone()) continue;
+        if (i->track_cost(best_c, best_x)) break;
+    }
+
+    return best_x;
+}
+
+
+namespace graphite2 {
+
+template<> float zones<XY>::closest(float origin, float width, float a, float &cost) const;
+template<> float zones<SD>::closest(float origin, float width, float a, float &cost) const;
+
+// Cost and test position functions these are the only methods that *need* to
+// be specialised based on template parameter.
+
+// For cartesian
+template<>
+inline
+float zones<XY>::exclusion::test_position() const {
+    // Simple dummy implementation
+    return (x+xm)/2;
+}
+
+template<>
+inline
+float zones<SD>::exclusion::test_position() const {
+    // Simple dummy implementation
+    return (x+xm)/2;
+}
+
+// For diagonal
+template<>
+inline
+float zones<XY>::exclusion::cost(float p) const {
+    // Dummy x^2 flat costing model.
+    p -= x;
+    return (p*p)*c;
+}
+
+template<>
+inline
+float zones<SD>::exclusion::cost(float p) const {
+    // Dummy x^2 flat costing model.
+    p -= x;
+    return (p*p)*c;
+}
+
 }

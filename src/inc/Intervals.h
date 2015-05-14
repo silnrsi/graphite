@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #include <utility>
 #include "inc/List.h"
+#include "inc/Main.h"
 
 // An IntervalSet represents the possible movement of a given glyph in a given direction
 // (horizontally, vertically, or diagonally).
@@ -64,5 +65,102 @@ private:
     vtpair _v;
 };
 
+
+class zones_base
+{
+    struct exclusion
+    {
+        float   x,  // x position
+                xm, // xmax position
+                c,  // flat weighting
+                m;  // marginal x start
+        uint8   md; // margin direction -1, 0 or +1
+
+        exclusion(float x, float w, float c, uint8 d, float mx=0);
+        void operator += (const exclusion & rhs);
+        uint8 outcode(float p) const;
+
+        exclusion   overlap_by(exclusion & rhs);
+        exclusion   covered_by(exclusion & over);
+
+        bool        null_zone() const;
+        bool        open_zone() const;
+    };
+
+    typedef Vector<exclusion>                    exclusions;
+    typedef typename exclusions::iterator        eiter_t;
+    typedef typename exclusions::const_iterator  const_eiter_t;
+
+    exclusions  _exclusions;
+    float       _margin_len,
+                _margin_weight,
+                _pos,
+                _len;
+
+    friend class exclusion;
+
+public:
+    zones_base();
+
+    void initialise(float pos, float len, float margin_len, float margin_weight);
+
+    void exclude(float pos, float len);
+    void weighted(float pos, float len, float weight);
+
+private:
+    void    insert(exclusion e);
+    const_eiter_t find_exclusion(float x) const;
 };
 
+enum zones_t {XY, SD};
+
+template<zones_t O>
+class zones : public zones_base
+{
+    struct exclusion : public zones_base::exclusion
+    {
+        float test_position() const;
+        float cost(float x) const;
+
+        bool track_cost(float & cost, float & x) const;
+    };
+
+    typedef Vector<exclusion> exclusions;
+    exclusions & _exclusions;
+
+    typedef typename exclusions::const_iterator  const_eiter_t;
+
+public:
+    zones() : zones_base(), _exclusions(reinterpret_cast<Vector<exclusion>&>(zones_base::_exclusions)) {}
+
+    float closest( float origin, float width, float a, float &cost) const;
+};
+
+
+inline
+zones_base::zones_base()
+: _margin_len(0), _margin_weight(0),
+  _pos(0), _len(0)
+{
+    _exclusions.reserve(8);
+}
+
+inline
+void zones_base::initialise(float pos, float len, float margin_len, float margin_weight) {
+    _margin_len = margin_len;
+    _margin_weight = margin_weight;
+    _exclusions.clear();
+    weighted(pos, len, 1);
+}
+
+inline
+void zones_base::weighted(float pos, float len, float weight) {
+    insert(exclusion(pos, len, weight, 0));
+}
+
+inline
+zones_base::exclusion::exclusion(float x_, float w_, float c_, uint8 d, float m_)
+: x(x_), xm(x+w_), c(c_), m(m_), md(d)
+{}
+
+} // end of namespace graphite2
