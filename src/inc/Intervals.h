@@ -68,6 +68,7 @@ private:
 
 class zones_base
 {
+protected:
     struct exclusion
     {
         float   x,  // x position
@@ -89,6 +90,7 @@ class zones_base
         bool        open_zone() const;
     };
 
+private:
     typedef Vector<exclusion>                    exclusions;
     typedef typename exclusions::iterator        eiter_t;
     typedef typename exclusions::const_iterator  const_eiter_t;
@@ -107,6 +109,7 @@ public:
     void initialise(float pos, float len, float margin_len, float margin_weight);
 
     void exclude(float pos, float len);
+    void exclude_with_margins(float pos, float len);
     void weighted(float pos, float len, float weight);
 
 private:
@@ -157,11 +160,11 @@ void zones_base::initialise(float pos, float len, float margin_len, float margin
 
 inline
 void zones_base::weighted(float pos, float len, float weight) {
-    insert(exclusion(pos, len, weight, 0));
+    insert(exclusion(pos, len, weight, 0, 0));
 }
 
 inline
-zones_base::exclusion::exclusion(float x, float w, float c, float smi, float smxi, float smxi2)
+zones_base::exclusion::exclusion(float x_, float w_, float c_, float smi, float smxi, float smxi2)
 : x(x_), xm(x+w_), c(c_), sm(smi), smx(smxi), smx2(smxi2)
 {}
 

@@ -186,15 +186,19 @@ bool zones_base::exclusion::null_zone() const {
 
 inline
 bool zones_base::exclusion::open_zone() const {
-    return c == 1 && md == 0;
+    return c == 1 && sm == 0.0f;
+}
+
+void zones_base::exclude(float pos, float len) {
+    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
 }
 
 
 // hmm how to get the margin weight into here
-void zones_base::exclude(float pos, float len) {
-    insert(exclusion(pos-_margin_len, _margin_len, 0, 1));
-    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0));
-    insert(exclusion(pos+len, _margin_len, 0, -1));
+void zones_base::exclude_with_margins(float pos, float len) {
+    insert(exclusion(pos-_margin_len, _margin_len, 1, _margin_weight, pos-_margin_len));
+    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
+    insert(exclusion(pos+len, _margin_len, 1, _margin_weight, pos+len+_margin_len));
 }
 
 
@@ -285,12 +289,12 @@ template<zones_t O>
 inline
 bool zones<O>::exclusion::track_cost(float & best_cost, float & best_pos) const {
     const float p = test_position(),
-                c = cost(p);
-    if (open_zone() && c > best_cost) return true;
+                localc = cost(p);
+    if (open_zone() && localc > best_cost) return true;
 
-    if (c < best_cost)
+    if (localc < best_cost)
     {
-        best_cost = c;
+        best_cost = localc;
         best_pos = p;
     }
     return false;
@@ -338,16 +342,13 @@ template<> float zones<SD>::closest(float origin, float width, float a, float &c
 template<>
 inline
 float zones<XY>::exclusion::test_position() const {
-    float d2c = sm
+    float d2c = sm;
     if (d2c < 0)
     {
         // sigh, test both ends)
         float cl = cost(x);
         float cr = cost(xm);
-        if (cl > cr)
-            return xm;
-        else
-            return x;
+        return cl > cr ? xm : x;
     }
     else
     {
@@ -362,14 +363,14 @@ template<>
 inline
 float zones<SD>::exclusion::test_position() const {
     // Simple dummy implementation
-    return (x+xm)/2;
+    return (x+sm)/2;
 }
 
 // For diagonal
 template<>
 inline
 float zones<XY>::exclusion::cost(float p) const {
-    return (sm * x + smx) * x + smx2 + c;
+    return (sm * p + smx) * p + smx2 + c;
 }
 
 template<>
