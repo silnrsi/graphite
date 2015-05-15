@@ -29,12 +29,12 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-bool Rect::hitTest(Position &offset, Rect &other, Position &othero, float margin)
+bool Rect::hitTest(Rect &other)
 {
-    if (bl.x + offset.x > other.tr.x + othero.x + margin) return false;
-    if (tr.x + offset.x + margin < other.bl.x + othero.x) return false;
-    if (bl.y + offset.y > other.tr.y + othero.y + margin) return false;
-    if (tr.y + offset.y + margin < other.bl.y + othero.y) return false;
+    if (bl.x > other.tr.x) return false;
+    if (tr.x < other.bl.x) return false;
+    if (bl.y > other.tr.y) return false;
+    if (tr.y < other.bl.y) return false;
     return true;
 }
 

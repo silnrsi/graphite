@@ -52,8 +52,10 @@ public :
     Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
     Rect operator - (const Position &a) const { return Rect(Position(bl.x - a.x, bl.y - a.y), Position(tr.x - a.x, tr.y - a.y)); }
     Rect operator * (float m) const { return Rect(Position(bl.x, bl.y) * m, Position(tr.x, tr.y) * m); }
+    float width() const { return this.tr.x - this.bl.x; }
+    float height() const { return this.tr.y - this.bl.y; }
 
-    bool hitTest(Position &offset, Rect &other, Position &otherOffset, float margin = 0.);
+    bool hitTest(Rect &other);
 
     // returns Position(overlapx, overlapy) where overlap<0 if overlapping else positive)
     Position overlap(Position &offset, Rect &other, Position &otherOffset);

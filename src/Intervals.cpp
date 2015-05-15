@@ -149,7 +149,7 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
 //   The return value is the overlapped zone where parameters are merged.
 zones_base::exclusion zones_base::exclusion::overlap_by(exclusion & b)
 {
-    exclusion r(b.x, xm, c+b.c, sm+b.sm, smx+b.smx, smx2+b.smx2);
+    exclusion r(b.x, xm, c+b.c, sm+b.sm, smx+b.smx);
     xm = b.x;
     b.x = r.xm;
 
@@ -168,7 +168,6 @@ zones_base::exclusion zones_base::exclusion::covered_by(exclusion & o)
     c  += o.c;
     sm += o.sm;
     smx += o.smx;
-    smx2 += o.smx2;
 
     return r;
 }
@@ -286,22 +285,10 @@ zones_base::const_eiter_t zones_base::find_exclusion(float x) const
 
 
 inline
-bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) const {
-    const float p = test_position(),
-                localc = cost(p);
-    if (open_zone() && localc > best_cost) return true;
-
-    if (localc < best_cost)
-    {
-        best_cost = localc;
-        best_pos = p;
-    }
-    return false;
 }
 
 
 
-float zones_base::closest(float origin, float width, float & cost) const
 {
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;
@@ -334,6 +321,38 @@ float zones_base::closest(float origin, float width, float & cost) const
 
 // For cartesian
 inline
+float zones<XY>::exclusion::test_position() const {
+    if (sm < 0)     // test 2nd differential
+    {
+        // sigh, test both ends)
+        float cl = cost(x);
+        float cr = cost(xm);
+        return cl > cr ? xm : x;
+    }
+    else
+    {
+        float zerox = smx/sm;       // first differential == 0
+        if (zerox < x) return x;
+        else if (zerox > xm) return xm;
+        else return zerox;
+    }
+}
+
+inline
+// For diagonal
+float zones<XY>::exclusion::cost(float p) const {
+    return (sm * p + smx) * p + c;
+bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) const {
+    const float p = test_position(),
+                localc = cost(p);
+    if (open_zone() && localc > best_cost) return true;
+
+    if (localc < best_cost)
+    {
+        best_cost = localc;
+        best_pos = p;
+    }
+    return false;
 float zones_base::exclusion::test_position() const {
     float d2c = sm;
     if (d2c < 0)
@@ -350,11 +369,7 @@ float zones_base::exclusion::test_position() const {
         else if (zerox > xm) return xm;
         else return zerox;
     }
-}
-
-// For diagonal
-inline
 float zones_base::exclusion::cost(float p) const {
     return (sm * p + smx) * p + smx2 + c;
 }
-
+float zones_base::closest(float origin, float width, float & cost) const
