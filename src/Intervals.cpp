@@ -26,8 +26,8 @@ of the License or (at your option) any later version.
 */
 #include "inc/Intervals.h"
 #include <limits>
-#include <math.h>
-#include <algorithm>
+#include <cmath>
+//#include <algorithm>
 
 using namespace graphite2;
 
@@ -190,7 +190,7 @@ bool zones_base::exclusion::open_zone() const {
 }
 
 void zones_base::exclude(float pos, float len) {
-    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
+    insert(exclusion(pos, len, std::numeric_limits<float>::infinity()));
 }
 
 
@@ -285,9 +285,8 @@ zones_base::const_eiter_t zones_base::find_exclusion(float x) const
 
 
 
-template<zones_t O>
 inline
-bool zones<O>::exclusion::track_cost(float & best_cost, float & best_pos) const {
+bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) const {
     const float p = test_position(),
                 localc = cost(p);
     if (open_zone() && localc > best_cost) return true;
@@ -302,13 +301,12 @@ bool zones<O>::exclusion::track_cost(float & best_cost, float & best_pos) const 
 
 
 
-template<zones_t O>
-float zones<O>::closest(float origin, float width, float a, float &cost) const
+float zones_base::closest(float origin, float width, float & cost) const
 {
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;
 
-    const eiter_t start = find_exclusion(origin);
+    const const_eiter_t start = find_exclusion(origin);
 
     // Forward scan looking for lowest cost
     for (const_eiter_t i = start, end = _exclusions.end(); i != end; ++i)
@@ -326,22 +324,17 @@ float zones<O>::closest(float origin, float width, float a, float &cost) const
         if (i->track_cost(best_c, best_x)) break;
     }
 
+    cost = best_c;
     return best_x;
 }
 
-
-namespace graphite2 {
-
-template<> float zones<XY>::closest(float origin, float width, float a, float &cost) const;
-template<> float zones<SD>::closest(float origin, float width, float a, float &cost) const;
 
 // Cost and test position functions these are the only methods that *need* to
 // be specialised based on template parameter.
 
 // For cartesian
-template<>
 inline
-float zones<XY>::exclusion::test_position() const {
+float zones_base::exclusion::test_position() const {
     float d2c = sm;
     if (d2c < 0)
     {
@@ -359,26 +352,9 @@ float zones<XY>::exclusion::test_position() const {
     }
 }
 
-template<>
-inline
-float zones<SD>::exclusion::test_position() const {
-    // Simple dummy implementation
-    return (x+sm)/2;
-}
-
 // For diagonal
-template<>
 inline
-float zones<XY>::exclusion::cost(float p) const {
+float zones_base::exclusion::cost(float p) const {
     return (sm * p + smx) * p + smx2 + c;
 }
 
-template<>
-inline
-float zones<SD>::exclusion::cost(float p) const {
-    // Dummy x^2 flat costing model.
-    p -= x;
-    return (p*p)*c;
-}
-
-}

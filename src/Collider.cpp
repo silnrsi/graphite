@@ -852,12 +852,12 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
 // Return the amount to kern by.
 // TODO: do we need to make use of marginMin here? Probably not.
-Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, Slot *slot, int dir, float margin,
+Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, int dir, float margin,
         GR_MAYBE_UNUSED json * const dbgout)
 {
     float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
-    const SlotCollision *cslot = seg->collisionInfo(slot);
+//    const SlotCollision *cslot = seg->collisionInfo(slot);
     // PUT SOMETHING IN HERE TO HANDLE ORDER-ENFORCEMENT
 //    if (cslot->flags() & SlotCollision::COLL_OVERLAP && _othermax - _xbound - _mingap > -1 * cslot->maxOverlap())
 //        resultNeeded = (1 - 2 * (dir & 1)) * (_xbound - _othermax + cslot->maxOverlap() + margin);
