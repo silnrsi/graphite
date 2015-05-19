@@ -247,7 +247,16 @@ void zones::insert(exclusion e)
 
             end = _exclusions.end();
         }
+        else if (oca & ocb == 1) // e doesn't overlap i but is completely to it's left
+        {
+            _exclusions.insert(i, e);
+            return;
+        }
     }
+
+    // If there is any exclusion remaining just add it to the end
+    if (e.x != e.xm)
+        _exclusions.push_back(e);
 }
 
 
