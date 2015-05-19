@@ -68,7 +68,9 @@ private:
 
 
 
-class zones_base
+enum zones_t {SD, XY};
+
+class zones
 {
 protected:
     struct exclusion
@@ -96,7 +98,7 @@ protected:
         float cost(float x) const;
      };
  
-    zones_base();
+    zones();
 
     void insert(exclusion e);
 
@@ -114,8 +116,13 @@ private:
     friend class exclusion;
 
 public:
+    template<zones_t O>
+    void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift);
+
     void exclude(float pos, float len);
     void exclude_with_margins(float pos, float len);
+
+    template<zones_t O>
     void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
 
     float closest( float origin, float width, float &cost) const;
@@ -124,20 +131,9 @@ private:
     const_eiter_t find_exclusion(float x) const;
 };
 
-enum zones_t {SD, XY};
-
-template<zones_t O>
-class zones : public zones_base
-{
-    zones();
-
-    void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift);
-    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
-};
-
 
 inline
-zones_base::zones_base()
+zones::zones()
 : _margin_len(0), _margin_weight(0),
   _pos(0), _len(0)
 {
@@ -145,28 +141,28 @@ zones_base::zones_base()
 }
 
 inline
-zones_base::exclusion::exclusion(float x_, float w_, float c_, float smi, float smxi)
+zones::exclusion::exclusion(float x_, float w_, float c_, float smi, float smxi)
 : x(x_), xm(x+w_), c(c_), sm(smi), smx(smxi)
 { }
 
 template<zones_t O>
 inline
-void zones<O>::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift) {
+void zones::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift) {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _exclusions.clear();
-    weighted(pos, len, 1, shift, oshift, 0, 0, 0, 0);
+    weighted<O>(pos, len, 1, shift, oshift, 0, 0, 0, 0);
 }
 
 template<>
 inline
-void zones<XY>::weighted(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
+void zones::weighted<XY>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
     insert(exclusion(pos, len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
 }
 
 template<>
 inline
-void zones<SD>::weighted(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
+void zones::weighted<SD>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
     insert(exclusion(pos, len, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
 }
 

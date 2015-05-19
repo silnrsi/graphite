@@ -147,7 +147,7 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
 //   *this is updated to end at the start of b.
 //   b is truncated to start at the end *this.
 //   The return value is the overlapped zone where parameters are merged.
-zones_base::exclusion zones_base::exclusion::overlap_by(exclusion & b)
+zones::exclusion zones::exclusion::overlap_by(exclusion & b)
 {
     exclusion r(b.x, xm, c+b.c, sm+b.sm, smx+b.smx);
     xm = b.x;
@@ -160,7 +160,7 @@ zones_base::exclusion zones_base::exclusion::overlap_by(exclusion & b)
 // Update *this with merged parameters.
 // o is truncated to start at end of *this.
 // Return region over beyond the lhs of *this.
-zones_base::exclusion zones_base::exclusion::covered_by(exclusion & o)
+zones::exclusion zones::exclusion::covered_by(exclusion & o)
 {
     exclusion r = o;
     r.xm = x;
@@ -174,34 +174,34 @@ zones_base::exclusion zones_base::exclusion::covered_by(exclusion & o)
 
 
 inline
-uint8 zones_base::exclusion::outcode(float p) const {
+uint8 zones::exclusion::outcode(float p) const {
     return ((int8(xm - p) >> 6) & 0x2) | ((int8(p - x) >> 7) & 0x1);
 }
 
 inline
-bool zones_base::exclusion::null_zone() const {
+bool zones::exclusion::null_zone() const {
     return c == std::numeric_limits<float>::infinity();
 }
 
 inline
-bool zones_base::exclusion::open_zone() const {
+bool zones::exclusion::open_zone() const {
     return c == 1 && sm == 0.0f;
 }
 
-void zones_base::exclude(float pos, float len) {
+void zones::exclude(float pos, float len) {
     insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
 }
 
 
 // hmm how to get the margin weight into here
-void zones_base::exclude_with_margins(float pos, float len) {
+void zones::exclude_with_margins(float pos, float len) {
     insert(exclusion(pos-_margin_len, _margin_len, 1, _margin_weight, pos-_margin_len));
     insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
     insert(exclusion(pos+len, _margin_len, 1, _margin_weight, pos+len+_margin_len));
 }
 
 
-void zones_base::insert(exclusion e)
+void zones::insert(exclusion e)
 {
     for (eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end && e.x < e.xm; ++i)
     {
@@ -251,7 +251,7 @@ void zones_base::insert(exclusion e)
 }
 
 
-zones_base::const_eiter_t zones_base::find_exclusion(float x) const
+zones::const_eiter_t zones::find_exclusion(float x) const
 {
 #if 1
     // Binary search
@@ -283,7 +283,7 @@ zones_base::const_eiter_t zones_base::find_exclusion(float x) const
 }
 
 
-float zones_base::closest(float origin, float width, float & cost) const
+float zones::closest(float origin, float width, float & cost) const
 {
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;
@@ -316,7 +316,7 @@ float zones_base::closest(float origin, float width, float & cost) const
 
 // For cartesian
 inline
-bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) const {
+bool zones::exclusion::track_cost(float & best_cost, float & best_pos) const {
     const float p = test_position(),
                 localc = cost(p);
     if (open_zone() && localc > best_cost) return true;
@@ -329,7 +329,7 @@ bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) cons
     return false;
 }
 
-float zones_base::exclusion::test_position() const {
+float zones::exclusion::test_position() const {
     float d2c = sm;
     if (d2c < 0)
     {
@@ -348,7 +348,7 @@ float zones_base::exclusion::test_position() const {
 }
 
 inline
-float zones_base::exclusion::cost(float p) const {
+float zones::exclusion::cost(float p) const {
     return (sm * p + smx) * p + c;
 }
 
