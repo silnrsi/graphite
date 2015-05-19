@@ -160,8 +160,8 @@ public:
         for (int j = i; j <= imax; ++j)
         {
             *dbgout << json::flat << json::array;
-            for (IntervalSet::ivtpair s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
-                *dbgout << Position(s->first, s->second);
+            for (zones::const_eiter_t s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
+                *dbgout << Position(s->x, s->xm);
             *dbgout << json::close;
         }
         if (i < imax) // looped through the _ranges array
@@ -172,7 +172,7 @@ public:
     CLASS_NEW_DELETE;
 
 protected:
-    IntervalSet _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
+    zones _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;

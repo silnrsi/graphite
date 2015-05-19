@@ -98,14 +98,12 @@ protected:
         float cost(float x) const;
      };
  
-    zones();
 
     void insert(exclusion e);
 
 private:
     typedef Vector<exclusion>                    exclusions;
     typedef typename exclusions::iterator        eiter_t;
-    typedef typename exclusions::const_iterator  const_eiter_t;
 
     exclusions  _exclusions;
     float       _margin_len,
@@ -116,6 +114,9 @@ private:
     friend class exclusion;
 
 public:
+    typedef typename exclusions::const_iterator  const_eiter_t;
+
+    zones();
     template<zones_t O>
     void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift);
 
@@ -126,6 +127,10 @@ public:
     void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
 
     float closest( float origin, float width, float &cost) const;
+
+    const_eiter_t begin() const { return _exclusions.begin(); }
+    const_eiter_t end() const { return _exclusions.end(); }
+    
 
 private:
     const_eiter_t find_exclusion(float x) const;

@@ -48,6 +48,7 @@ using namespace graphite2;
 void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, float marginMin,
     const Position &currShift, const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
+    float marginWeight = 100;   // this should be a parameter
     int i;
     float max, min, len;
     const GlyphCache &gc = seg->getFace()->glyphs();
@@ -68,16 +69,19 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.x + aSlot->origin().x + bb.xi;
                 max = _limit.tr.x + aSlot->origin().x + bb.xa;
                 len = bb.xa - bb.xi;
+                _ranges[i].initialise<XY>(min, max - len, margin, marginWeight, currShift.x + bb.xi, currShift.y + bb.yi);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y + bb.yi;
                 max = _limit.tr.y + aSlot->origin().y + bb.ya;
                 len = bb.ya - bb.yi;
+                _ranges[i].initialise<XY>(min, max - len, margin, marginWeight, currShift.y + bb.yi, currShift.x + bb.xi);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.si;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.sa;
                 len = sb.sa - sb.si;
+                _ranges[i].initialise<SD>(min, max - len, margin, marginWeight, currShift.x + currShift.y + sb.si, currShift.x - currShift.y + sb.di);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
@@ -85,13 +89,11 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.di;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.da;
                 len = sb.da - sb.di;
+                _ranges[i].initialise<SD>(min, max - len, margin, marginWeight, currShift.x - currShift.y + sb.di, currShift.x + currShift.y + sb.si);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
         }
-        _ranges[i].clear();
-        _ranges[i].add(min, max - len);
-        _ranges[i].len(len);
 
 #if !defined GRAPHITE2_NTRACING
         // Debugging:
@@ -126,7 +128,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     
 }   // end of ShiftCollider::initSlot
 
-#if 0
 inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int mode)
 {
     float a;
@@ -135,28 +136,28 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted(box.bl.x, box.width(), weight, a * a, m, xi, 0);
+                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, m, xi, 0);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted(box.bl.y, box.height(), weight, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, 0, 0, m * a * a);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi + org.bl.y), 0);
+                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi - org.bl.y), 0);
+                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
             }
             break;
         default :
@@ -173,28 +174,28 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted(box.bl.y, box.height(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted(box.bl.x, box.width(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
+                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
+                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
+                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
             }
             break;
         default :
@@ -202,7 +203,6 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
     }
     return;
 }
-#endif
 
 // Adjust the movement limits for the target to avoid having it collide
 // with the given neighbor slot. Also determine if there is in fact a collision
@@ -357,7 +357,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 isCol = true;
                 if (i == 1 && orderFlags & SlotCollision::COLL_ORDER_XOVERY)
                 {
-                    _ranges[0].remove(sx + bb.xi - (tbb.xa - tbb.xi), sx + bb.xa);
+                    _ranges[0].exclude(sx + bb.xi - (tbb.xa - tbb.xi), sx + bb.xa);
 #if !defined GRAPHITE2_NTRACING
                     IntervalSet::tpair dbg(sx + bb.xi - (tbb.xa - tbb.xi), sx + bb.xa); // debugging
                     _removals[0].append(dbg);             // debugging
@@ -365,18 +365,18 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     _subNear[0].push_back(102);           // debugging
 #endif
                 }
-                else
-                    _ranges[i^1].clear();
+//                else
+//                    _ranges[i^1].clear();
             }
             else if (i > 1 && vcmin > vcmax)
             {
                 isCol = true;
-                _ranges[i].clear();
+//                _ranges[i].clear();
             }
 
             if (vcmin > (float)-1e38)
             {
-                _ranges[i].remove((float)-1e38, vcmin);
+                _ranges[i].exclude((float)-1e38, vcmin);
 #if !defined GRAPHITE2_NTRACING
                 IntervalSet::tpair dbg((float)-1e38, vcmin); // debugging
                 _removals[i].append(dbg);             // debugging
@@ -386,7 +386,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             }
             if (vcmax < (float)1e38)
             {
-                _ranges[i].remove(vcmax, (float)1e38);
+                _ranges[i].exclude(vcmax, (float)1e38);
 #if !defined GRAPHITE2_NTRACING
                 IntervalSet::tpair dbg(vcmax, (float)1e38); // debugging
                 _removals[i].append(dbg);         // debugging
@@ -459,7 +459,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 					_scraping[i] = true;
 					continue;
 				}
-                _ranges[i].remove(vmin, vmax);
+                _ranges[i].exclude_with_margins(vmin, vmax);
                 anyhits = true;
                 
 #if !defined GRAPHITE2_NTRACING
@@ -475,7 +475,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         else // no sub-boxes
         {
             isCol = true;
-            _ranges[i].remove(vmin, vmax);
+            _ranges[i].exclude_with_margins(vmin, vmax);
 
 #if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vmin, vmax); // debugging
@@ -536,8 +536,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 #endif
     for (int i = 0; i < 4; ++i)
     {
-        float bestc = std::numeric_limits<float>::max();
-        float bestd = bestc;
+        float bestd = std::numeric_limits<float>::max();
+        float bestv;
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         marginMin = seg->collisionInfo(_target)->marginMin() * (i > 1 ? ISQRT2 : 1.f);
@@ -583,13 +583,13 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestd = _ranges[i].findBestWithMarginAndLimits(tbase + tval, (margin / (i > 1 ? /*ISQRT2*/ 0.5 : 1.)), (marginMin / (i>1?0.5:1)), isGoodFit) - tbase;
+        bestv = _ranges[i].closest(tbase + tval, tlen, bestd);
         Position testp;
         switch (i) {
-            case 0 : testp = Position(bestd, _currShift.y); break;
-            case 1 : testp = Position(_currShift.x, bestd); break;
-            case 2 : testp = Position(0.5 * (bestd + _currShift.x - _currShift.y), 0.5 * (bestd - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestd + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestd)); break;
+            case 0 : testp = Position(bestv, _currShift.y); break;
+            case 1 : testp = Position(_currShift.x, bestv); break;
+            case 2 : testp = Position(0.5 * (bestv + _currShift.x - _currShift.y), 0.5 * (bestv - _currShift.x + _currShift.y)); break;
+            case 3 : testp = Position(0.5 * (bestv + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestv)); break;
         }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
@@ -633,8 +633,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 << json::close; // vectors object
         }
 #endif
-        bestd = testp.x * testp.x + testp.y * testp.y;
-        //bestd = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
+        // bestd = testp.x * testp.x + testp.y * testp.y;
+        // bestd = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
         // bestd += bestd > 0.f ? -margin : margin;
         
         // See if this direction is the best one so far to move in.
