@@ -52,8 +52,8 @@ public :
     Rect operator + (const Position &a) const { return Rect(Position(bl.x + a.x, bl.y + a.y), Position(tr.x + a.x, tr.y + a.y)); }
     Rect operator - (const Position &a) const { return Rect(Position(bl.x - a.x, bl.y - a.y), Position(tr.x - a.x, tr.y - a.y)); }
     Rect operator * (float m) const { return Rect(Position(bl.x, bl.y) * m, Position(tr.x, tr.y) * m); }
-    float width() const { return this.tr.x - this.bl.x; }
-    float height() const { return this.tr.y - this.bl.y; }
+    float width() const { return tr.x - bl.x; }
+    float height() const { return tr.y - bl.y; }
 
     bool hitTest(Rect &other);
 

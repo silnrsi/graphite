@@ -135,6 +135,8 @@ public:
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, 
                 GR_MAYBE_UNUSED const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
+    void addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
+    void addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
 
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {

@@ -189,7 +189,7 @@ bool zones_base::exclusion::open_zone() const {
 }
 
 void zones_base::exclude(float pos, float len) {
-    insert(exclusion(pos, len, std::numeric_limits<float>::infinity()));
+    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
 }
 
 
@@ -283,12 +283,7 @@ zones_base::const_eiter_t zones_base::find_exclusion(float x) const
 }
 
 
-
-inline
-}
-
-
-
+float zones_base::closest(float origin, float width, float & cost) const
 {
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;
@@ -321,27 +316,6 @@ inline
 
 // For cartesian
 inline
-float zones<XY>::exclusion::test_position() const {
-    if (sm < 0)     // test 2nd differential
-    {
-        // sigh, test both ends)
-        float cl = cost(x);
-        float cr = cost(xm);
-        return cl > cr ? xm : x;
-    }
-    else
-    {
-        float zerox = smx/sm;       // first differential == 0
-        if (zerox < x) return x;
-        else if (zerox > xm) return xm;
-        else return zerox;
-    }
-}
-
-inline
-// For diagonal
-float zones<XY>::exclusion::cost(float p) const {
-    return (sm * p + smx) * p + c;
 bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) const {
     const float p = test_position(),
                 localc = cost(p);
@@ -353,6 +327,8 @@ bool zones_base::exclusion::track_cost(float & best_cost, float & best_pos) cons
         best_pos = p;
     }
     return false;
+}
+
 float zones_base::exclusion::test_position() const {
     float d2c = sm;
     if (d2c < 0)
@@ -369,7 +345,10 @@ float zones_base::exclusion::test_position() const {
         else if (zerox > xm) return xm;
         else return zerox;
     }
-float zones_base::exclusion::cost(float p) const {
-    return (sm * p + smx) * p + smx2 + c;
 }
-float zones_base::closest(float origin, float width, float & cost) const
+
+inline
+float zones_base::exclusion::cost(float p) const {
+    return (sm * p + smx) * p + c;
+}
+

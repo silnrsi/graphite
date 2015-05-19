@@ -126,36 +126,37 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     
 }   // end of ShiftCollider::initSlot
 
+#if 0
 inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int mode)
 {
     float a;
-    switch (i) {
+    switch (mode) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[i].weighted_xy(box.bl.x, box.width(), weight, a * a, m, xi, 0);
+                _ranges[mode].weighted(box.bl.x, box.width(), weight, a * a, m, xi, 0);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[i].weighted_xy(box.bl.y, box.height(), weight, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted(box.bl.y, box.height(), weight, a * a, 0, 0, m * a * a);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[i].weighted_sd(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi + org.bl.y), 0);
+                _ranges[mode].weighted(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi + org.bl.y), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[i].weighted_sd(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi - org.bl.y), 0);
+                _ranges[mode].weighted(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (xi - org.bl.y), 0);
             }
             break;
         default :
@@ -167,33 +168,33 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
 inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int mode)
 {
     float a;
-    switch (i) {
+    switch (mode) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[i].weighted_xy(box.bl.y, box.height(), weight, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted(box.bl.y, box.height(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[i].weighted_xy(box.bl.x, box.width(), weight, a * a, m, yi, 0);
+                _ranges[mode].weighted(box.bl.x, box.width(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[i].weighted_sd(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (yi + org.bl.x), 0);
+                _ranges[mode].weighted(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[i].weighted_sd(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, a, m / 2, (org.bl.x - yi), 0);
+                _ranges[mode].weighted(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
             }
             break;
         default :
@@ -201,7 +202,7 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
     }
     return;
 }
-
+#endif
 
 // Adjust the movement limits for the target to avoid having it collide
 // with the given neighbor slot. Also determine if there is in fact a collision

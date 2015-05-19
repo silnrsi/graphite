@@ -26,9 +26,9 @@ of the License or (at your option) any later version.
 */
 #include <utility>
 
+#include "inc/Main.h"
 #include "inc/List.h"
 
-#include "inc/Main.h"
 // An IntervalSet represents the possible movement of a given glyph in a given direction
 // (horizontally, vertically, or diagonally).
 // A vector is needed to represent disjoint ranges, eg, -300..-150, 20..200, 500..750.
@@ -38,7 +38,7 @@ namespace graphite2 {
 
 class IntervalSet
 {
-public
+public:
     typedef std::pair<float, float> tpair;
     typedef Vector<tpair> vtpair;
     typedef vtpair::iterator ivtpair;
@@ -58,9 +58,9 @@ public
     ivtpair end() { return _v.end(); }
 
 //private
-public // debugging
+public: // debugging
     void append(tpair interval) { _v.push_back(interval); }
-private
+private:
     // Ranges of movements in a specific direction; a vector is need to represent disjoint ranges.
     float _len;
     vtpair _v;
@@ -70,7 +70,7 @@ private
 
 class zones_base
 {
-protected
+protected:
     struct exclusion
     {
         float   x,  // x position
@@ -88,9 +88,19 @@ protected
 
         bool        null_zone() const;
         bool        open_zone() const;
-    };
 
-private
+        bool track_cost(float & cost, float & x) const;
+
+    private:
+        float test_position() const;
+        float cost(float x) const;
+     };
+ 
+    zones_base();
+
+    void insert(exclusion e);
+
+private:
     typedef Vector<exclusion>                    exclusions;
     typedef typename exclusions::iterator        eiter_t;
     typedef typename exclusions::const_iterator  const_eiter_t;
@@ -103,33 +113,28 @@ private
 
     friend class exclusion;
 
-public
-    zones_base();
-
-    void initialise(float pos, float len, float margin_len, float margin_weight);
-
+public:
     void exclude(float pos, float len);
     void exclude_with_margins(float pos, float len);
-    void weighted(float pos, float len, float weight);
-    void weighted_xy(float pos, float len, float weight, shift, oshift, a, m, xi, c);
-    void weighted_sd(float pos, float len, float weight, shift, oshift, a, m, xi, c);
+    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
 
-private
+    float closest( float origin, float width, float &cost) const;
+
+private:
     const_eiter_t find_exclusion(float x) const;
 };
 
+enum zones_t {SD, XY};
 
 template<zones_t O>
 class zones : public zones_base
 {
     zones();
 
-    void initialise(float pos, float len, float margin_len, float margin_weight);
-    void weighted(float pos, float len, float weight, float a=0, float mi=0, float xi=0);
+    void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift);
+    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
 };
 
-
-enum zones_t {SD, XY};
 
 inline
 zones_base::zones_base()
@@ -140,36 +145,29 @@ zones_base::zones_base()
 }
 
 inline
-}
+zones_base::exclusion::exclusion(float x_, float w_, float c_, float smi, float smxi)
+: x(x_), xm(x+w_), c(c_), sm(smi), smx(smxi)
+{ }
 
+template<zones_t O>
 inline
-}
-
-template<>
-template<>
-inline
-zones_base::exclusion::exclusion(float x_, float w_, float smi, float smxi, float c_)
-{}
-
-inline
-void zones<O>::initialise(float pos, float len, float margin_len, float margin_weight) {
+void zones<O>::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift) {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _exclusions.clear();
-    weighted(pos, len, 1);
-void zones<XY>::weighted(float pos, float len, float weight, float a, float mi, float xi) {
-    insert(exclusion(pos, len, weight, 0, mi*xi, mi*xi*xi));
-void zones<SD>::weighted(float pos, float len, float weight, float a, float mi, float xi) {
-    insert(exclusion(pos, len, weight, 0, mi*xi, mi*xi*xi));
+    weighted(pos, len, 1, shift, oshift, 0, 0, 0, 0);
 }
 
-void weighted_xy(float pos, float len, float f, shift, oshift, a, m, xi, c) {
-    insert(exclusion(pos, len, f * a, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c);
-void weighted_sd(float pos, float len, float f, shift, oshift, a, m, xi, c) {
-    insert(exclusion(pos, len, f * a, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c);
-}
-
+template<>
 inline
-: x(x_), xm(x+w_), c(c_), sm(smi), smx(smxi)
-template<zones_t O>
+void zones<XY>::weighted(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
+    insert(exclusion(pos, len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
+}
+
+template<>
+inline
+void zones<SD>::weighted(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
+    insert(exclusion(pos, len, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
+}
+
 } // end of namespace graphite2
