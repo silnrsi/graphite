@@ -267,7 +267,7 @@ zones::const_eiter_t zones::find_exclusion(float x) const
     int pivot = _exclusions.size()/2,
         width = _exclusions.size()/4;
 
-    while (width != 0)
+    do
     {
         const exclusion & e = _exclusions[pivot];
 
@@ -279,7 +279,7 @@ zones::const_eiter_t zones::find_exclusion(float x) const
         }
 
         ++width /= 2;
-    } 
+    } while (width > 1);
 
     return _exclusions.end();
 #else

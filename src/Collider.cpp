@@ -174,14 +174,14 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
+                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
             }
             break;
         case 2 :
@@ -204,6 +204,31 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
     return;
 }
 
+inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int mode)
+{
+    switch (mode) {
+        case 0 :
+            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
+                _ranges[mode].exclude(box.bl.x, box.width());
+            break;
+        case 1 :
+            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
+                _ranges[mode].exclude(box.bl.y, box.height());
+            break;
+        case 2 :
+            if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
+                _ranges[mode].exclude(box.bl.x + box.bl.y, box.height() + box.width());
+            break;
+        case 3 :
+            if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
+                _ranges[mode].exclude(box.bl.x - box.bl.y, box.height() + box.width());
+            break;
+        default :
+            break;
+    }
+    return;
+}
+
 // Adjust the movement limits for the target to avoid having it collide
 // with the given neighbor slot. Also determine if there is in fact a collision
 // between the target and the given slot.
@@ -211,6 +236,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = false;
+    float seq_above_wt = 250;
+    float seq_below_wt = 50;
+    float seq_valign_wt = 500;
     const float tx = _target->origin().x + _currShift.x;
     const float ty = _target->origin().y + _currShift.y;
     const float td = tx - ty;
@@ -241,7 +269,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     // if isAfter, invert orderFlags
 #define COLL_ORDER_X (SlotCollision::COLL_ORDER_LEFT | SlotCollision::COLL_ORDER_RIGHT)
 #define COLL_ORDER_Y (SlotCollision::COLL_ORDER_DOWN | SlotCollision::COLL_ORDER_UP)
-    if (isAfter)
+    if (isAfter)        // _target isAfter slot
     {
         if (orderFlags && COLL_ORDER_X)
             orderFlags = orderFlags ^ COLL_ORDER_X;
@@ -350,50 +378,41 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 continue;
         }
         
-        if (enforceOrder)
+        if (enforceOrder < 0)
         {
-            if (i < 2 && cdiff * enforceOrder < 0 && fabs(cdiff) > orderMargin)
-            {
-                isCol = true;
-                if (i == 1 && orderFlags & SlotCollision::COLL_ORDER_XOVERY)
-                {
-                    _ranges[0].exclude(sx + bb.xi - (tbb.xa - tbb.xi), sx + bb.xa);
-#if !defined GRAPHITE2_NTRACING
-                    IntervalSet::tpair dbg(sx + bb.xi - (tbb.xa - tbb.xi), sx + bb.xa); // debugging
-                    _removals[0].append(dbg);             // debugging
-                    _slotNear[0].push_back(slot);         // debugging
-                    _subNear[0].push_back(102);           // debugging
-#endif
-                }
-//                else
-//                    _ranges[i^1].clear();
-            }
-            else if (i > 1 && vcmin > vcmax)
-            {
-                isCol = true;
-//                _ranges[i].clear();
-            }
-
-            if (vcmin > (float)-1e38)
-            {
-                _ranges[i].exclude((float)-1e38, vcmin);
-#if !defined GRAPHITE2_NTRACING
-                IntervalSet::tpair dbg((float)-1e38, vcmin); // debugging
-                _removals[i].append(dbg);             // debugging
-                _slotNear[i].push_back(slot);         // debugging
-                _subNear[i].push_back(100);           // debugging
-#endif
-            }
-            if (vcmax < (float)1e38)
-            {
-                _ranges[i].exclude(vcmax, (float)1e38);
-#if !defined GRAPHITE2_NTRACING
-                IntervalSet::tpair dbg(vcmax, (float)1e38); // debugging
-                _removals[i].append(dbg);         // debugging
-                _slotNear[i].push_back(slot);     // debugging
-                _subNear[i].push_back(101);        // debugging
-#endif
-            }
+            Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
+            // region 1
+            addBox_slopex(Rect(Position(-1e38, sy + 0.5 * (bb.yi + bb.ya)), Position(sx + 0.5 * (bb.xi + bb.xa), 1e38)),
+                            org, 0, seq_above_wt, sx + 0.5 * (bb.xi + bb.xa), i);
+            // region 2
+            removeBox(Rect(Position(-1e38, -1e38), Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya))), org, i);
+            // region 3
+            addBox_slopex(Rect(Position(-1e38, -1e38), Position(sx + bb.xi, sy + bb.yi)), 
+                            org, seq_below_wt, 0, 0, i);
+            // region 4
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi), Position(1e38, sy + 0.5 * (bb.yi + bb.ya))),
+                            org, 0, seq_valign_wt, sy + 0.5 * (bb.yi + bb.ya), i);
+            // region 5
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - tbb.ya), Position(1e38, sy + bb.yi)),
+                            org, 0, seq_valign_wt, sy + bb.yi, i);
+        }
+        else if (enforceOrder > 0)
+        {
+            Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
+            // region 1
+            addBox_slopex(Rect(Position(sx + 0.5 * (bb.xi + bb.xa), -1e38), Position(1e38, sy + 0.5 * (bb.yi + bb.ya))),
+                            org, 0, seq_above_wt, sx + 0.5 * (bb.xi + bb.xa), i);
+            // region 2
+            removeBox(Rect(Position(sx + bb.xi, sy + bb.yi), Position(1e38, 1e38)), org, i);
+            // region 3
+            addBox_slopex(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, 1e38)),
+                            org, seq_below_wt, 0, 0, i);
+            // region 4
+            addBox_slopey(Rect(Position(-1e38, sy + bb.yi), Position(sx + bb.xa, sy + 0.5 * (bb.yi + bb.ya))),
+                            org, 0, seq_valign_wt, sy + 0.5 * (bb.yi + bb.ya), i);
+            // region 5
+            addBox_slopey(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, sy + bb.yi)),
+                            org, 0, seq_valign_wt, sy + bb.yi, i);
         }
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
