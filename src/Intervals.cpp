@@ -24,10 +24,11 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#include "inc/Intervals.h"
-#include <limits>
+#include <algorithm>
 #include <cmath>
-//#include <algorithm>
+#include <limits>
+
+#include "inc/Intervals.h"
 
 using namespace graphite2;
 
@@ -203,6 +204,9 @@ void zones::exclude_with_margins(float pos, float len) {
 
 void zones::insert(exclusion e)
 {
+    e.x = std::max(e.x, _pos);
+    e.xm = std::min(e.xm, _pos+_len);
+
     for (eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end && e.x < e.xm; ++i)
     {
         const uint8 oca = e.outcode(i->x),
