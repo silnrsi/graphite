@@ -146,8 +146,8 @@ zones::zones()
 }
 
 inline
-zones::exclusion::exclusion(float x_, float w_, float c_, float smi, float smxi)
-: x(x_), xm(x+w_), c(c_), sm(smi), smx(smxi)
+zones::exclusion::exclusion(float x_, float xm_, float c_, float smi, float smxi)
+: x(x_), xm(xm_), c(c_), sm(smi), smx(smxi)
 { }
 
 template<zones_t O>
@@ -164,13 +164,13 @@ void zones::initialise(float pos, float len, float margin_len, float margin_weig
 template<>
 inline
 void zones::weighted<XY>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
-    insert(exclusion(pos, len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
+    insert(exclusion(pos, pos+len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
 }
 
 template<>
 inline
 void zones::weighted<SD>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
-    insert(exclusion(pos, len, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
+    insert(exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
 }
 
 } // end of namespace graphite2

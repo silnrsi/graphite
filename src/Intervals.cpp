@@ -176,7 +176,7 @@ zones::exclusion zones::exclusion::covered_by(exclusion & o)
 
 inline
 uint8 zones::exclusion::outcode(float p) const {
-    return ((int(xm - p) >> (std::numeric_limits<int>::digits - 1)) & 0x2) | ((int(p - x) >> (std::numeric_limits<int>::digits)) & 0x1);
+    return ((int(xm - p - 0.5) >> (std::numeric_limits<int>::digits - 1)) & 0x2) | ((int(p - x) >> (std::numeric_limits<int>::digits)) & 0x1);
 }
 
 inline
@@ -190,15 +190,15 @@ bool zones::exclusion::open_zone() const {
 }
 
 void zones::exclude(float pos, float len) {
-    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
+    insert(exclusion(pos, pos+len, std::numeric_limits<float>::infinity(), 0, 0));
 }
 
 
 // hmm how to get the margin weight into here
 void zones::exclude_with_margins(float pos, float len) {
-    insert(exclusion(pos-_margin_len, _margin_len, 1, _margin_weight, pos-_margin_len));
-    insert(exclusion(pos, len, std::numeric_limits<float>::infinity(), 0, 0));
-    insert(exclusion(pos+len, _margin_len, 1, _margin_weight, pos+len+_margin_len));
+    insert(exclusion(pos-_margin_len, pos, 0, _margin_weight, pos-_margin_len));
+    insert(exclusion(pos, pos+len, std::numeric_limits<float>::infinity(), 0, 0));
+    insert(exclusion(pos+len, pos+len+_margin_len, 0, _margin_weight, pos+len+_margin_len));
 }
 
 
@@ -250,7 +250,7 @@ void zones::insert(exclusion e)
 
             end = _exclusions.end();
         }
-        else if (oca & ocb == 1) // e doesn't overlap i but is completely to it's left
+        else if (oca & ocb == 2) // e doesn't overlap i but is completely to it's left
         {
             _exclusions.insert(i, e);
             return;
@@ -362,6 +362,6 @@ float zones::exclusion::test_position() const {
 
 inline
 float zones::exclusion::cost(float p) const {
-    return (sm * p + smx) * p + c;
+    return (smx * p + sm) * p + c;
 }
 
