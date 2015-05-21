@@ -118,8 +118,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _currShift = currShift;
     
     SlotCollision *c = seg->collisionInfo(aSlot);
-    _orderClass = c->orderClass();
-    _orderFlags = c->orderFlags();
+    _seqClass = c->seqClass();
+    _seqOrder = c->seqOrder();
 
 	_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
     
@@ -259,12 +259,16 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     SlotCollision * cslot = seg->collisionInfo(slot);
     int orderFlags = 0;
     float orderMargin = 0.;     // max of slot and _target's overlapMargins
-    if (sameCluster && _orderClass && _orderClass == cslot->orderClass())
+    if (sameCluster && _seqClass && _seqClass == cslot->seqClass())
 		// Force the target glyph to be in the specified direction from the slot we're testing.
-        orderFlags = _orderFlags;
+        orderFlags = _seqOrder;
     float seq_above_wt = cslot->seqAboveWeight();
     float seq_below_wt = cslot->seqBelowWeight();
     float seq_valign_wt = cslot->seqValignWeight();
+	// TODO: add these
+	//float seq_above_xoff = cslot->seqAboveXoffset();
+	//float seq_below_xlim = cslot->seqBelowXlimit();
+	//float seq_valign_ht = cslot->seqValignHeight();
 
     // if isAfter, invert orderFlags
 #define COLL_ORDER_X (SlotCollision::COLL_ORDER_LEFT | SlotCollision::COLL_ORDER_RIGHT)
@@ -1024,8 +1028,8 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
     _marginWeight = seg->glyphAttr(gid, aCol+6);
-    _orderClass = seg->glyphAttr(gid, aCol+7); // do we want these?
-    _orderFlags = seg->glyphAttr(gid, aCol+8);
+    _seqClass = seg->glyphAttr(gid, aCol+7); // do we want these?
+    _seqOrder = seg->glyphAttr(gid, aCol+8);
     
     _exclGlyph = 0;
     _exclOffset = Position(0, 0);

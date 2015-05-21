@@ -79,11 +79,14 @@ public:
     SLOTCOLSETUINTPROP(marginWeight, setMarginWeight)
     SLOTCOLSETUINTPROP(flags, setFlags)
     SLOTCOLSETUINTPROP(status, setStatus)
-    SLOTCOLSETUINTPROP(orderClass, setOrderClass)
-    SLOTCOLSETUINTPROP(orderFlags, setOrderFlags)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
+    SLOTCOLSETUINTPROP(seqClass, setSeqClass)
+    SLOTCOLSETUINTPROP(seqOrder, setSeqOrder)
+    SLOTCOLSETUINTPROP(seqAboveXoffset, setSeqAboveXoffset)
     SLOTCOLSETUINTPROP(seqAboveWeight, setSeqAboveWeight)
+    SLOTCOLSETUINTPROP(seqBelowXlimit, setSeqBelowXlimit)
     SLOTCOLSETUINTPROP(seqBelowWeight, setSeqBelowWeight)
+    SLOTCOLSETUINTPROP(seqValignHeight, setSeqValignHeight)
     SLOTCOLSETUINTPROP(seqValignWeight, setSeqValignWeight)
 
     float getKern(int dir) const;
@@ -96,16 +99,19 @@ private:
     Position    _shift;     // adjustment within the given pass
     Position    _offset;    // total adjustment for collisions
     Position    _exclOffset;
-    uint16      _margin;
-    uint16      _marginWeight;
-    uint16      _flags;
-    uint16      _orderClass;
-    uint16      _orderFlags;
-    uint16      _status;
-    uint16      _exclGlyph;
-    uint16      _seqAboveWeight;
-    uint16      _seqBelowWeight;
-    uint16      _seqValignWeight;
+    uint16		_margin;
+    uint16		_marginWeight;
+    uint16		_flags;
+    uint16		_status;
+    uint16		_exclGlyph;
+    uint16		_seqClass;
+    uint16		_seqOrder;
+    uint16		_seqAboveXoffset;
+    uint16		_seqAboveWeight;
+    uint16		_seqBelowXlimit;
+    uint16		_seqBelowWeight;
+    uint16		_seqValignHeight;
+    uint16		_seqValignWeight;
 
 	// For use by algorithm:
 	bool _canScrape[4];
@@ -177,8 +183,8 @@ protected:
     Rect    _limit;
     Position  _currShift;
     Position  _currOffset;
-    uint16  _orderClass;
-    uint16  _orderFlags;
+    uint16  _seqClass;
+    uint16  _seqOrder;
     float   _margin;
     float   _len;
     

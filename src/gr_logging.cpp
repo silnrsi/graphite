@@ -232,7 +232,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
               << "status" << cslot->status()
               << "margin" << cslot->margin()
               << "marginweight" << cslot->marginWeight()
-              << "order" << Position(float(cslot->orderClass()), float(cslot->orderFlags()))
+              << "seq" << Position(float(cslot->seqClass()), float(cslot->seqOrder()))
               << "exclude" << cslot->exclGlyph()
               << "excludeoffset" << cslot->exclOffset()
               << json::close;

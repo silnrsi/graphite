@@ -242,23 +242,26 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatUserDefn :  return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
-    case gr_slatColFlags :  { SlotCollision *c = seg->collisionInfo(this); return c ? (c->flags() | c->status()) : 0; }
-    case gr_slatColLimitblx : SLOTGETCOLATTR(limit().bl.x)
-    case gr_slatColLimitbly : SLOTGETCOLATTR(limit().bl.y)
-    case gr_slatColLimittrx : SLOTGETCOLATTR(limit().tr.x)
-    case gr_slatColLimittry : SLOTGETCOLATTR(limit().tr.y)
-    case gr_slatColShiftx : SLOTGETCOLATTR(offset().x)
-    case gr_slatColShifty : SLOTGETCOLATTR(offset().y)
-    case gr_slatColMargin :  SLOTGETCOLATTR(margin())
-    case gr_slatColMarginWeight: SLOTGETCOLATTR(marginWeight())
-    case gr_slatColOrderClass : SLOTGETCOLATTR(orderClass())
-    case gr_slatColOrderEnforce : SLOTGETCOLATTR(orderFlags())
-    case gr_slatColExclGlyph : SLOTGETCOLATTR(exclGlyph())
-    case gr_slatColExclOffx :  SLOTGETCOLATTR(exclOffset().x)
-    case gr_slatColExclOffy :  SLOTGETCOLATTR(exclOffset().y)
-    case gr_slatColSeqAboveWeight : SLOTGETCOLATTR(seqAboveWeight())
-    case gr_slatColSeqBelowWeight : SLOTGETCOLATTR(seqBelowWeight())
-    case gr_slatColSeqValignWeight : SLOTGETCOLATTR(seqValignWeight())
+    case gr_slatColFlags :		{ SlotCollision *c = seg->collisionInfo(this); return c ? (c->flags() | c->status()) : 0; }
+    case gr_slatColLimitblx :	SLOTGETCOLATTR(limit().bl.x)
+    case gr_slatColLimitbly :	SLOTGETCOLATTR(limit().bl.y)
+    case gr_slatColLimittrx :	SLOTGETCOLATTR(limit().tr.x)
+    case gr_slatColLimittry :	SLOTGETCOLATTR(limit().tr.y)
+    case gr_slatColShiftx :		SLOTGETCOLATTR(offset().x)
+    case gr_slatColShifty :		SLOTGETCOLATTR(offset().y)
+    case gr_slatColMargin :		SLOTGETCOLATTR(margin())
+    case gr_slatColMarginWeight:SLOTGETCOLATTR(marginWeight())
+    case gr_slatColExclGlyph :	SLOTGETCOLATTR(exclGlyph())
+    case gr_slatColExclOffx :	SLOTGETCOLATTR(exclOffset().x)
+    case gr_slatColExclOffy :	SLOTGETCOLATTR(exclOffset().y)
+    case gr_slatSeqClass :		SLOTGETCOLATTR(seqClass())
+    case gr_slatSeqOrder :		SLOTGETCOLATTR(seqOrder())
+    case gr_slatSeqAboveXoff :	SLOTGETCOLATTR(seqAboveXoffset())
+    case gr_slatSeqAboveWt :	SLOTGETCOLATTR(seqAboveWeight())
+    case gr_slatSeqBelowXlim :	SLOTGETCOLATTR(seqBelowXlimit())
+    case gr_slatSeqBelowWt :	SLOTGETCOLATTR(seqBelowWeight())
+    case gr_slatSeqValignHt :	SLOTGETCOLATTR(seqValignHeight())
+    case gr_slatSeqValignWt :	SLOTGETCOLATTR(seqValignWeight())
     default : return 0;
     }
 }
@@ -347,20 +350,23 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             c->setFlags(value);
         }
         break; }
-    case gr_slatColLimitblx :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(value, s.bl.y), s.tr)))
-    case gr_slatColLimitbly :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(s.bl.x, value), s.tr)))
-    case gr_slatColLimittrx :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(value, s.tr.y))))
-    case gr_slatColLimittry :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(s.tr.x, value))))
-    case gr_slatColMargin : SLOTCOLSETATTR(setMargin(value))
-    case gr_slatColMarginWeight : SLOTCOLSETATTR(setMarginWeight(value))
-    case gr_slatColOrderClass : SLOTCOLSETATTR(setOrderClass(value))
-    case gr_slatColOrderEnforce : SLOTCOLSETATTR(setOrderFlags(value))
-    case gr_slatColExclGlyph : SLOTCOLSETATTR(setExclGlyph(value))
-    case gr_slatColExclOffx : SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(value, s.y)))
-    case gr_slatColExclOffy : SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(s.x, value)))
-    case gr_slatColSeqAboveWeight : SLOTCOLSETATTR(setSeqAboveWeight(value))
-    case gr_slatColSeqBelowWeight : SLOTCOLSETATTR(setSeqBelowWeight(value))
-    case gr_slatColSeqValignWeight : SLOTCOLSETATTR(setSeqValignWeight(value))
+    case gr_slatColLimitblx :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(value, s.bl.y), s.tr)))
+    case gr_slatColLimitbly :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(s.bl.x, value), s.tr)))
+    case gr_slatColLimittrx :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(value, s.tr.y))))
+    case gr_slatColLimittry :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(s.tr.x, value))))
+    case gr_slatColMargin :		SLOTCOLSETATTR(setMargin(value))
+    case gr_slatColMarginWeight:SLOTCOLSETATTR(setMarginWeight(value))
+    case gr_slatColExclGlyph :	SLOTCOLSETATTR(setExclGlyph(value))
+    case gr_slatColExclOffx :	SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(value, s.y)))
+    case gr_slatColExclOffy :	SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(s.x, value)))
+    case gr_slatSeqClass :		SLOTCOLSETATTR(setSeqClass(value))
+    case gr_slatSeqOrder :		SLOTCOLSETATTR(setSeqOrder(value))
+    case gr_slatSeqAboveXoff :	SLOTCOLSETATTR(setSeqAboveXoffset(value))
+    case gr_slatSeqAboveWt :	SLOTCOLSETATTR(setSeqAboveWeight(value))
+    case gr_slatSeqBelowXlim :	SLOTCOLSETATTR(setSeqBelowXlimit(value))
+    case gr_slatSeqBelowWt :	SLOTCOLSETATTR(setSeqBelowWeight(value))
+    case gr_slatSeqValignHt :	SLOTCOLSETATTR(setSeqValignHeight(value))
+    case gr_slatSeqValignWt :	SLOTCOLSETATTR(setSeqValignWeight(value))
     default :
         break;
     }
