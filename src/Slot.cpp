@@ -197,6 +197,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
 }
 
 #define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? c-> x : 0; }
+
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
     if (!this) return 0;
@@ -262,7 +263,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     }
 }
 
-#define SLOTCOLSETATTR(x) { \ 
+#define SLOTCOLSETATTR(x) { \
         SlotCollision *c = seg->collisionInfo(this); \
         if (c) { c-> x ; c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN); } \
         break; }
