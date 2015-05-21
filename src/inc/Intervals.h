@@ -134,6 +134,8 @@ public:
 
 private:
     const_eiter_t find_exclusion(float x) const;
+    void insert_tripple(exclusion & l, exclusion & m, exclusion & r);
+
 };
 
 

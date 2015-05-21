@@ -176,8 +176,7 @@ zones::exclusion zones::exclusion::covered_by(exclusion & o)
 
 inline
 uint8 zones::exclusion::outcode(float p) const {
-    return ((int(xm - p - 0.5) >> (std::numeric_limits<int>::digits - 1)) & 0x2)
-         | ((int(p - x)  >> (std::numeric_limits<int>::digits)) & 0x1);
+    return ((xm < p) << 1) | (p < x);
 }
 
 inline
@@ -203,6 +202,11 @@ void zones::exclude_with_margins(float pos, float len) {
 }
 
 
+void zones::insert_tripple(exclusion & l, exclusion & m, exclusion & r)
+{
+
+}
+
 void zones::insert(exclusion e)
 {
     e.x = std::max(e.x, _pos);
@@ -212,7 +216,7 @@ void zones::insert(exclusion e)
     for (eiter_t i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
     {
         const uint8 oca = e.outcode(i->x),
-                    ocb = e.outcode(i->xm);
+                    ocb = e.outcode(i->xm-0.5);
         if ((oca & ocb) == 0)     // We have an overlap here
         {
             switch (oca ^ ocb)  // What kind of overlap?
@@ -221,8 +225,13 @@ void zones::insert(exclusion e)
                 // split e at i.x into e1,e2
                 // split e2 at i.mx into e2,e3
                 // i+e2
-                i = _exclusions.insert(i, i->covered_by(e));
-                ++i;
+                if (i->x == e.x)
+                    i->covered_by(e);
+                else
+                {
+                    i = _exclusions.insert(i, i->covered_by(e));
+                    ++i;
+                }
                 break;
             case 1:     // e overlaps on the rhs of i
             {
@@ -230,7 +239,10 @@ void zones::insert(exclusion e)
                 // split e at i.mx into e1,e2
                 // insert i1, i2+e1, insert e2
                 exclusion &l = *i;
-                i = _exclusions.insert(++i, l.overlap_by(e));
+                if (i->x == e.x)
+                    l = l.overlap_by(e);
+                else
+                    i = _exclusions.insert(++i, l.overlap_by(e));
                 break;
             }
             case 2:     // e overlaps on the lhs of i
@@ -244,8 +256,16 @@ void zones::insert(exclusion e)
                 // split i at e.x into i1,i2
                 // split i2 at e.mx into i2,i3
                 // e+i2
-                i = _exclusions.insert(i, e.covered_by(*i));
-                i = _exclusions.insert(++i, e);
+                if (i->x == e.x)
+                {
+                    e.covered_by(*i);
+                    i = _exclusions.insert(i, e);
+                }
+                else
+                {
+                    i = _exclusions.insert(i, e.covered_by(*i));
+                    i = _exclusions.insert(++i, e);
+                }
                 return;
             }
 
