@@ -163,7 +163,7 @@ void zones::initialise(float pos, float len, float margin_len, float margin_weig
 
 template<>
 inline
-void zones::weighted<XY>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
+void zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift, float a, float m, float xi, float c){
     insert(exclusion(pos, pos+len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
 }
 

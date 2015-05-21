@@ -176,7 +176,8 @@ zones::exclusion zones::exclusion::covered_by(exclusion & o)
 
 inline
 uint8 zones::exclusion::outcode(float p) const {
-    return ((int(xm - p - 0.5) >> (std::numeric_limits<int>::digits - 1)) & 0x2) | ((int(p - x) >> (std::numeric_limits<int>::digits)) & 0x1);
+    return ((int(xm - p - 0.5) >> (std::numeric_limits<int>::digits - 1)) & 0x2)
+         | ((int(p - x)  >> (std::numeric_limits<int>::digits)) & 0x1);
 }
 
 inline
@@ -208,7 +209,7 @@ void zones::insert(exclusion e)
     e.xm = std::min(e.xm, _pos+_len);
     if (e.x >= e.xm) return;
 
-    for (eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end && e.x < e.xm; ++i)
+    for (eiter_t i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
     {
         const uint8 oca = e.outcode(i->x),
                     ocb = e.outcode(i->xm);
@@ -248,9 +249,9 @@ void zones::insert(exclusion e)
                 return;
             }
 
-            end = _exclusions.end();
+            ie = _exclusions.end();
         }
-        else if (oca & ocb == 2) // e doesn't overlap i but is completely to it's left
+        else if ((oca & ocb) == 2) // e doesn't overlap i but is completely to it's left
         {
             _exclusions.insert(i, e);
             return;
@@ -304,7 +305,7 @@ float zones::closest(float origin, float width, float & cost) const
     const const_eiter_t start = find_exclusion(origin);
 
     // Forward scan looking for lowest cost
-    for (const_eiter_t i = start, end = _exclusions.end(); i != end; ++i)
+    for (const_eiter_t i = start, ie = _exclusions.end(); i != ie; ++i)
     {
         if (i->null_zone()) continue;
         if (i->track_cost(best_c, best_x)) break;
@@ -313,7 +314,7 @@ float zones::closest(float origin, float width, float & cost) const
     // Backward scan looking for lowest cost
     //  We start from the exclusion to the immediate left of start since we've
     //  already tested start with the right most scan above.
-    for (const_eiter_t i = start-1, end = _exclusions.begin()-1; i != end; --i)
+    for (const_eiter_t i = start-1, ie = _exclusions.begin()-1; i != ie; --i)
     {
         if (i->null_zone()) continue;
         if (i->track_cost(best_c, best_x)) break;
