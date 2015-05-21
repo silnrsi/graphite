@@ -821,7 +821,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
 {
     Slot * nbor;  // neighboring slot
     SlotCollision *cFix = seg->collisionInfo(slotFix);
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginMin(),
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginWeight(),
             cFix->shift(), cFix->offset(), dir, dbgout);
     bool collides = false;
     // When we're processing forward, ignore kernable glyphs that preceed the target glyph.
@@ -897,7 +897,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     bool collides = false;
     SlotCollision *cFix = seg->collisionInfo(slotFix);
     bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginMin(),
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginWeight(),
             cFix->shift(), cFix->offset(), dir, dbgout);
     Slot *base = slotFix;
     while (base->attachedTo())

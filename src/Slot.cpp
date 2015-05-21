@@ -196,6 +196,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     }
 }
 
+#define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? c-> x : 0; }
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
     if (!this) return 0;
@@ -241,22 +242,36 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
     case gr_slatColFlags :  { SlotCollision *c = seg->collisionInfo(this); return c ? (c->flags() | c->status()) : 0; }
-    case gr_slatColLimitblx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.x : 0; }
-    case gr_slatColLimitbly : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().bl.y : 0; }
-    case gr_slatColLimittrx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.x : 0; }
-    case gr_slatColLimittry : { SlotCollision *c = seg->collisionInfo(this); return c ? c->limit().tr.y : 0; }
-    case gr_slatColShiftx : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().x : 0; }
-    case gr_slatColShifty : { SlotCollision *c = seg->collisionInfo(this); return c ? c->offset().y : 0; }
-    case gr_slatColMargin :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->margin() : 0; }
-    case gr_slatColOrderClass : { SlotCollision *c = seg->collisionInfo(this); return c ? c->orderClass() : 0; }
-    case gr_slatColOrderEnforce : { SlotCollision *c = seg->collisionInfo(this); return c ? c->orderFlags() : 0; }
-    case gr_slatColMarginMin:   { SlotCollision *c = seg->collisionInfo(this); return c ? c->marginMin() : 0; }
-    case gr_slatColExclGlyph : { SlotCollision *c = seg->collisionInfo(this); return c ? c->exclGlyph() : 0; }
-    case gr_slatColExclOffx :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->exclOffset().x : 0; }
-    case gr_slatColExclOffy :  { SlotCollision *c = seg->collisionInfo(this); return c ? c->exclOffset().y : 0; }
+    case gr_slatColLimitblx : SLOTGETCOLATTR(limit().bl.x)
+    case gr_slatColLimitbly : SLOTGETCOLATTR(limit().bl.y)
+    case gr_slatColLimittrx : SLOTGETCOLATTR(limit().tr.x)
+    case gr_slatColLimittry : SLOTGETCOLATTR(limit().tr.y)
+    case gr_slatColShiftx : SLOTGETCOLATTR(offset().x)
+    case gr_slatColShifty : SLOTGETCOLATTR(offset().y)
+    case gr_slatColMargin :  SLOTGETCOLATTR(margin())
+    case gr_slatColMarginWeight: SLOTGETCOLATTR(marginWeight())
+    case gr_slatColOrderClass : SLOTGETCOLATTR(orderClass())
+    case gr_slatColOrderEnforce : SLOTGETCOLATTR(orderFlags())
+    case gr_slatColExclGlyph : SLOTGETCOLATTR(exclGlyph())
+    case gr_slatColExclOffx :  SLOTGETCOLATTR(exclOffset().x)
+    case gr_slatColExclOffy :  SLOTGETCOLATTR(exclOffset().y)
+    case gr_slatColSeqAboveWeight : SLOTGETCOLATTR(seqAboveWeight())
+    case gr_slatColSeqBelowWeight : SLOTGETCOLATTR(seqBelowWeight())
+    case gr_slatColSeqValignWeight : SLOTGETCOLATTR(seqValignWeight())
     default : return 0;
     }
 }
+
+#define SLOTCOLSETATTR(x) { \ 
+        SlotCollision *c = seg->collisionInfo(this); \
+        if (c) { c-> x ; c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN); } \
+        break; }
+#define SLOTCOLSETCOMPLEXATTR(t, y, x) { \
+        SlotCollision *c = seg->collisionInfo(this); \
+        if (c) { \
+        const t &s = c-> y; \
+        c-> x ; c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN); } \
+        break; }
 
 void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
 {
@@ -331,100 +346,20 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             c->setFlags(value);
         }
         break; }
-    case gr_slatColLimitblx :  {
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Rect &r = c->limit();
-            c->setLimit(Rect(Position(value, r.bl.y), r.tr));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColLimitbly :  {
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Rect &r = c->limit();
-            c->setLimit(Rect(Position(r.bl.x, value), r.tr));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColLimittrx :  {
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Rect &r = c->limit();
-            c->setLimit(Rect(r.bl, Position(value, r.tr.y)));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColLimittry :  {
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Rect &r = c->limit();
-            c->setLimit(Rect(r.bl, Position(r.tr.x, value)));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColMargin : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            c->setMargin(value);
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColMarginMin : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            c->setMarginMin(value);
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColOrderClass : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            c->setOrderClass(value);
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColOrderEnforce : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            c->setOrderFlags(value);
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColExclGlyph : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            c->setExclGlyph(value);
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColExclOffx : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Position &s = c->exclOffset();
-            c->setExclOffset(Position(value, s.y));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
-    case gr_slatColExclOffy : { 
-        SlotCollision *c = seg->collisionInfo(this);
-        if (c)
-        {
-            const Position &s = c->exclOffset();
-            c->setExclOffset(Position(s.x, value));
-            c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN);
-        }
-        break; }
+    case gr_slatColLimitblx :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(value, s.bl.y), s.tr)))
+    case gr_slatColLimitbly :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(s.bl.x, value), s.tr)))
+    case gr_slatColLimittrx :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(value, s.tr.y))))
+    case gr_slatColLimittry :  SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(s.tr.x, value))))
+    case gr_slatColMargin : SLOTCOLSETATTR(setMargin(value))
+    case gr_slatColMarginWeight : SLOTCOLSETATTR(setMarginWeight(value))
+    case gr_slatColOrderClass : SLOTCOLSETATTR(setOrderClass(value))
+    case gr_slatColOrderEnforce : SLOTCOLSETATTR(setOrderFlags(value))
+    case gr_slatColExclGlyph : SLOTCOLSETATTR(setExclGlyph(value))
+    case gr_slatColExclOffx : SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(value, s.y)))
+    case gr_slatColExclOffy : SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(s.x, value)))
+    case gr_slatColSeqAboveWeight : SLOTCOLSETATTR(setSeqAboveWeight(value))
+    case gr_slatColSeqBelowWeight : SLOTCOLSETATTR(setSeqBelowWeight(value))
+    case gr_slatColSeqValignWeight : SLOTCOLSETATTR(setSeqValignWeight(value))
     default :
         break;
     }

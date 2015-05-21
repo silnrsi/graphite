@@ -39,6 +39,8 @@ namespace graphite2 {
 class json;
 class Slot;
 
+#define SLOTCOLSETUINTPROP(x, y) uint16 x() const { return _ ##x; } void y (uint16 v) { _ ##x = v; }
+#define SLOTCOLSETPOSITIONPROP(x, y) const Position &x() const { return _ ##x; } void y (const Position &v) { _ ##x = v; }
 // Slot attributes related to collision-fixing
 class SlotCollision
 {
@@ -70,26 +72,19 @@ public:
     
     const Rect &limit() const { return _limit; }
     void setLimit(const Rect &r) { _limit = r; }
-    const Position &shift() const { return _shift; }
-    void setShift(const Position &s) { _shift = s; }
-    const Position &offset() const { return _offset; }
-    void setOffset(const Position &o) { _offset = o; }
-    uint16 margin() const { return _margin; }
-    void setMargin(uint16 m) { _margin = m; }
-    uint16 marginMin() const { return (_marginMin == 0) ? _margin : _marginMin; }
-    void setMarginMin(uint16 m) { _marginMin = m; }
-    uint16 flags() const { return _flags; }
-    void setFlags(uint16 f) { _flags = f; }
-    uint16 status() const { return _status; }
-    void setStatus(uint16 f) { _status = f; }
-    uint16 orderClass() const { return _orderClass; }
-    void setOrderClass(uint16 n) { _orderClass = n; }
-    uint16 orderFlags() const { return _orderFlags; }
-    void setOrderFlags(uint16 n) { _orderFlags = n; }
-    uint16 exclGlyph() const { return _exclGlyph; }
-    void setExclGlyph(uint16 g) { _exclGlyph = g; }
-    Position exclOffset() const { return _exclOffset; }
-    void setExclOffset(const Position &s) { _exclOffset = s; }
+    SLOTCOLSETPOSITIONPROP(shift, setShift)
+    SLOTCOLSETPOSITIONPROP(offset, setOffset)
+    SLOTCOLSETUINTPROP(margin, setMargin)
+    SLOTCOLSETUINTPROP(marginWeight, setMarginWeight)
+    SLOTCOLSETUINTPROP(flags, setFlags)
+    SLOTCOLSETUINTPROP(status, setStatus)
+    SLOTCOLSETUINTPROP(orderClass, setOrderClass)
+    SLOTCOLSETUINTPROP(orderFlags, setOrderFlags)
+    SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
+    SLOTCOLSETPOSITIONPROP(exclOffset, setExclOffset)
+    SLOTCOLSETUINTPROP(seqAboveWeight, setSeqAboveWeight)
+    SLOTCOLSETUINTPROP(seqBelowWeight, setSeqBelowWeight)
+    SLOTCOLSETUINTPROP(seqValignWeight, setSeqValignWeight)
 
     float getKern(int dir) const;
 
@@ -101,13 +96,16 @@ private:
     Position    _shift;     // adjustment within the given pass
     Position    _offset;    // total adjustment for collisions
     uint16      _margin;
-    uint16      _marginMin;
+    uint16      _marginWeight;
     uint16      _flags;
     uint16      _orderClass;
     uint16      _orderFlags;
     uint16      _status;
     uint16      _exclGlyph;
     Position    _exclOffset;
+    uint16      _seqAboveWeight;
+    uint16      _seqBelowWeight;
+    uint16      _seqValignWeight;
 
 	// For use by algorithm:
 	bool _canScrape[4];
@@ -146,11 +144,10 @@ public:
         if (i < 0)
         {
             *dbgout << "gid" << _target->gid()
-				<< "margin" << _margin
-                << "marginmin" << _marginMin
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
+                    << "margin" << _margin
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
                     << json::close; // target object
@@ -176,12 +173,11 @@ protected:
     zones _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
-    float   _margin;
-    float   _marginMin;
     Position  _currShift;
     Position  _currOffset;
     uint16  _orderClass;
     uint16  _orderFlags;
+    float   _margin;
     
     Slot * exclSlot;   // bogus exclude slot
 
@@ -213,7 +209,6 @@ private:
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     float   _margin;
-    float   _marginMin;     // not really used, although it is defined in theory
     Position _offsetPrev;   // kern from a previous pass
     Position _currShift;    // NOT USED??
     float _miny;	        // y-coordinates offset by global slot position

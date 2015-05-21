@@ -143,8 +143,8 @@ enum gr_attrCode {
     gr_slatColShifty,
     /// Collision margin
     gr_slatColMargin,
-    /// Minimum margin in tight situations
-    gr_slatColMarginMin,
+    /// Margin cost weight
+    gr_slatColMarginWeight,
     /// How to enforce the ordering of a set of moveable glyphs:
     gr_slatColOrderClass,
     gr_slatColOrderEnforce,
@@ -152,6 +152,10 @@ enum gr_attrCode {
     gr_slatColExclGlyph,
     gr_slatColExclOffx,
     gr_slatColExclOffy,
+    // Collision sequence enforcing attributes
+    gr_slatColSeqAboveWeight,
+    gr_slatColSeqBelowWeight,
+    gr_slatColSeqValignWeight,
                             
     /// not implemented
     gr_slatMax,             
