@@ -190,7 +190,7 @@ protected:
     
     Slot * exclSlot;   // bogus exclude slot
 
-	bool _scraping[4];
+	//bool _scraping[4];
     
 #if !defined GRAPHITE2_NTRACING
     // Debugging

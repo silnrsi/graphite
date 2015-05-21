@@ -121,7 +121,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _seqClass = c->seqClass();
     _seqOrder = c->seqOrder();
 
-	_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
+	//_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
     
 }   // end of ShiftCollider::initSlot
 
@@ -478,11 +478,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
                     continue;
+
 				//if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
 				//{
 				//	_scraping[i] = true;
 				//	continue;
 				//}
+
                 _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
                 anyhits = true;
                 
@@ -685,7 +687,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     {
         *dbgout << json::close // vectors array
             << "result" << totalp
-			<< "scraping" << _scraping[bestaxis]
+			//<< "scraping" << _scraping[bestaxis]
             << "stillBad" << isCol
             << json::close; // slot object
     }
