@@ -74,6 +74,7 @@ public:
     void setLimit(const Rect &r) { _limit = r; }
     SLOTCOLSETPOSITIONPROP(shift, setShift)
     SLOTCOLSETPOSITIONPROP(offset, setOffset)
+    SLOTCOLSETPOSITIONPROP(exclOffset, setExclOffset)
     SLOTCOLSETUINTPROP(margin, setMargin)
     SLOTCOLSETUINTPROP(marginWeight, setMarginWeight)
     SLOTCOLSETUINTPROP(flags, setFlags)
@@ -81,7 +82,6 @@ public:
     SLOTCOLSETUINTPROP(orderClass, setOrderClass)
     SLOTCOLSETUINTPROP(orderFlags, setOrderFlags)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
-    SLOTCOLSETPOSITIONPROP(exclOffset, setExclOffset)
     SLOTCOLSETUINTPROP(seqAboveWeight, setSeqAboveWeight)
     SLOTCOLSETUINTPROP(seqBelowWeight, setSeqBelowWeight)
     SLOTCOLSETUINTPROP(seqValignWeight, setSeqValignWeight)
@@ -95,6 +95,7 @@ private:
     Rect        _limit;
     Position    _shift;     // adjustment within the given pass
     Position    _offset;    // total adjustment for collisions
+    Position    _exclOffset;
     uint16      _margin;
     uint16      _marginWeight;
     uint16      _flags;
@@ -102,7 +103,6 @@ private:
     uint16      _orderFlags;
     uint16      _status;
     uint16      _exclGlyph;
-    Position    _exclOffset;
     uint16      _seqAboveWeight;
     uint16      _seqBelowWeight;
     uint16      _seqValignWeight;
@@ -136,6 +136,8 @@ public:
     void addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
     void addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
+    float len() const { return _len; }
+    void setLen(float v) { _len = v; }
 
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
@@ -178,6 +180,7 @@ protected:
     uint16  _orderClass;
     uint16  _orderFlags;
     float   _margin;
+    float   _len;
     
     Slot * exclSlot;   // bogus exclude slot
 

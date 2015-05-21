@@ -176,7 +176,7 @@ zones::exclusion zones::exclusion::covered_by(exclusion & o)
 
 inline
 uint8 zones::exclusion::outcode(float p) const {
-    return ((int8(xm - p) >> 6) & 0x2) | ((int8(p - x) >> 7) & 0x1);
+    return ((int(xm - p) >> (std::numeric_limits<int>::digits - 1)) & 0x2) | ((int(p - x) >> (std::numeric_limits<int>::digits)) & 0x1);
 }
 
 inline
@@ -206,6 +206,7 @@ void zones::insert(exclusion e)
 {
     e.x = std::max(e.x, _pos);
     e.xm = std::min(e.xm, _pos+_len);
+    if (e.x >= e.xm) return;
 
     for (eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end && e.x < e.xm; ++i)
     {
@@ -238,7 +239,6 @@ void zones::insert(exclusion e)
                 i = _exclusions.insert(i, e.overlap_by(*i));
                 i = _exclusions.insert(i, e);
                 return;
-                break;
             case 3:     // i completely covers e
                 // split i at e.x into i1,i2
                 // split i2 at e.mx into i2,i3
@@ -246,7 +246,6 @@ void zones::insert(exclusion e)
                 i = _exclusions.insert(i, e.covered_by(*i));
                 i = _exclusions.insert(++i, e);
                 return;
-                break;
             }
 
             end = _exclusions.end();
@@ -268,31 +267,32 @@ zones::const_eiter_t zones::find_exclusion(float x) const
 {
 #if 1
     // Binary search
-    int pivot = _exclusions.size()/2,
-        width = _exclusions.size()/4;
-
-    do
+    if (_exclusions.size() > 0)
     {
-        const exclusion & e = _exclusions[pivot];
+        int pivot = _exclusions.size()/2,
+            width = _exclusions.size()/4;
 
-        switch (e.outcode(x))
+        do
         {
-        case 0 : return _exclusions.begin()+pivot;
-        case 1 : pivot -= width; break;
-        case 2 : pivot += width; break;
-        }
+            const exclusion & e = _exclusions[pivot];
 
-        ++width /= 2;
-    } while (width > 1);
+            switch (e.outcode(x))
+            {
+            case 0 : return _exclusions.begin()+pivot;
+            case 1 : pivot -= width; break;
+            case 2 : pivot += width; break;
+            }
 
-    return _exclusions.end();
+            ++width /= 2;
+        } while (width > 1);
+    }
+
 #else
     // Simple linear scan in case binary search is buggy
     for (const_eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end; ++i)
         if (i->outcode(x) == 0) return i;
-
-    return _exclusions.end();
 #endif
+    return _exclusions.end();
 }
 
 

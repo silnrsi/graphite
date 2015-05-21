@@ -49,7 +49,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     const Position &currShift, const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int i;
-    float max, min, len;
+    float max, min;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
@@ -67,28 +67,28 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 0 :	// x direction
                 min = _limit.bl.x + aSlot->origin().x + bb.xi;
                 max = _limit.tr.x + aSlot->origin().x + bb.xa;
-                len = bb.xa - bb.xi;
-                _ranges[i].initialise<XY>(min, max - len, margin, marginWeight, currShift.x + bb.xi, currShift.y + bb.yi);
+                _len = bb.xa - bb.xi;
+                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, currShift.x + bb.xi, currShift.y + bb.yi);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y + bb.yi;
                 max = _limit.tr.y + aSlot->origin().y + bb.ya;
-                len = bb.ya - bb.yi;
-                _ranges[i].initialise<XY>(min, max - len, margin, marginWeight, currShift.y + bb.yi, currShift.x + bb.xi);
+                _len = bb.ya - bb.yi;
+                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, currShift.y + bb.yi, currShift.x + bb.xi);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.si;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.sa;
-                len = sb.sa - sb.si;
-                _ranges[i].initialise<SD>(min, max - len, margin / ISQRT2, marginWeight, currShift.x + currShift.y + sb.si, currShift.x - currShift.y + sb.di);
+                _len = sb.sa - sb.si;
+                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, currShift.x + currShift.y + sb.si, currShift.x - currShift.y + sb.di);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.di;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.da;
-                len = sb.da - sb.di;
-                _ranges[i].initialise<SD>(min, max - len, margin / ISQRT2, marginWeight, currShift.x - currShift.y + sb.di, currShift.x + currShift.y + sb.si);
+                _len = sb.da - sb.di;
+                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, currShift.x - currShift.y + sb.di, currShift.x + currShift.y + sb.si);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
@@ -97,8 +97,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 #if !defined GRAPHITE2_NTRACING
         // Debugging:
         _rawRanges[i].clear();
-        _rawRanges[i].add(min, max - len);
-        _rawRanges[i].len(len);
+        _rawRanges[i].add(min, max - _len);
+        _rawRanges[i].len(_len);
         _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
@@ -374,6 +374,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 continue;
         }
         
+#if 0
         if (enforceOrder < 0)
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
@@ -410,7 +411,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, sy + bb.yi)),
                             org, 0, seq_valign_wt, sy + bb.yi, i);
         }
-
+#endif
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -474,7 +475,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 					_scraping[i] = true;
 					continue;
 				}
-                _ranges[i].exclude_with_margins(vmin, vmax);
+                _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
                 anyhits = true;
                 
 #if !defined GRAPHITE2_NTRACING
@@ -490,7 +491,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         else // no sub-boxes
         {
             isCol = true;
-            _ranges[i].exclude_with_margins(vmin, vmax);
+            _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
 
 #if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vmin, vmax); // debugging
@@ -797,7 +798,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         _maxy = std::max(_maxy, y + bs.ya);
         _miny = std::min(_miny, y + bs.yi);
     }
-    _numSlices = int((_maxy - _miny + 2) / marginMin + 1.);  // +2 helps with rounding errors
+    _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
     sliceWidth = (_maxy - _miny + 2) / _numSlices;
     _edges.clear();
     _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);

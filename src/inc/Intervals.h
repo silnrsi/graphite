@@ -155,6 +155,8 @@ inline
 void zones::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift) {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
+    _pos = pos;
+    _len = len;
     _exclusions.clear();
     weighted<O>(pos, len, 1, shift, oshift, 0, 0, 0, 0);
 }
