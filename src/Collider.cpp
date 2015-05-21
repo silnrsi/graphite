@@ -125,36 +125,41 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     
 }   // end of ShiftCollider::initSlot
 
-inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int mode)
+
+inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int axis)
 {
     float a;
-    switch (mode) {
+    switch (axis) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, m, xi, 0);
+                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight,
+					_currShift.x, _currShift.y, a * a, m, xi, 0);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, 0, 0, m * a * a);
+                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight,
+					_currShift.y, _currShift.x, a * a, 0, 0, m * a * a);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
+                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2,
+					_currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
+                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2,
+					_currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
             }
             break;
         default :
@@ -163,36 +168,36 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
     return;
 }
 
-inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int mode)
+inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int axis)
 {
     float a;
-    switch (mode) {
+    switch (axis) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
+                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
+                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
+                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
+                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
             }
             break;
         default :
@@ -201,24 +206,24 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
     return;
 }
 
-inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int mode)
+inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
 {
-    switch (mode) {
+    switch (axis) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
-                _ranges[mode].exclude(box.bl.x, box.width());
+                _ranges[axis].exclude(box.bl.x, box.width());
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
-                _ranges[mode].exclude(box.bl.y, box.height());
+                _ranges[axis].exclude(box.bl.y, box.height());
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
-                _ranges[mode].exclude(box.bl.x + box.bl.y, box.height() + box.width());
+                _ranges[axis].exclude(box.bl.x + box.bl.y, box.height() + box.width());
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
-                _ranges[mode].exclude(box.bl.x - box.bl.y, box.height() + box.width());
+                _ranges[axis].exclude(box.bl.x - box.bl.y, box.height() + box.width());
             break;
         default :
             break;
@@ -382,7 +387,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
         
 #if 0
-        if (enforceOrder < 0)
+        if (enforceOrder < 0) // enforce neighboring glyph being left /down
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
@@ -400,7 +405,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - tbb.ya), Position(1e38, sy + bb.yi)),
                             org, 0, seq_valign_wt, sy + bb.yi, i);
         }
-        else if (enforceOrder > 0)
+        else if (enforceOrder > 0)  // enforce neighboring glyph being right/up
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
@@ -535,9 +540,9 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     float margin, marginMin;
     float tlen, tleft, tbase, tval;
-    float totald = (float)(std::numeric_limits<float>::max() / 2.);
-    Position totalp = Position(0, 0);
-	int bestaxis = -1;
+    float totalCost = (float)(std::numeric_limits<float>::max() / 2.);
+    Position resultPos = Position(0, 0);
+	int bestAxis = -1;
     // float cmax, cmin;
     int isGoodFit, tIsGoodFit = 0;
     IntervalSet aFit;
@@ -562,8 +567,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 #endif
     for (int i = 0; i < 4; ++i)
     {
-        float bestd = std::numeric_limits<float>::max();
-        float bestv;
+        float bestCost = std::numeric_limits<float>::max();
+        float bestPos;
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
 #if !defined GRAPHITE2_NTRACING
@@ -608,13 +613,13 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestv = _ranges[i].closest(tbase + tval, tlen, bestd);
-        Position testp;
+        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost);
+        Position testPos;
         switch (i) {
-            case 0 : testp = Position(bestv, _currShift.y); break;
-            case 1 : testp = Position(_currShift.x, bestv); break;
-            case 2 : testp = Position(0.5 * (bestv + _currShift.x - _currShift.y), 0.5 * (bestv - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestv + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestv)); break;
+            case 0 : testPos = Position(bestPos, _currShift.y); break;
+            case 1 : testPos = Position(_currShift.x, bestPos); break;
+            case 2 : testPos = Position(0.5 * (bestPos + _currShift.x - _currShift.y), 0.5 * (bestPos - _currShift.x + _currShift.y)); break;
+            case 3 : testPos = Position(0.5 * (bestPos + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
         }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
@@ -654,46 +659,47 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             //for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
             //    *dbgout << Position(s->first, s->second);
             //*dbgout << json::close // fits array
-                *dbgout << "bestFit" << bestd
+                *dbgout << "bestCost" << bestCost
                 << json::close; // vectors object
         }
 #endif
-        // bestd = testp.x * testp.x + testp.y * testp.y;
-        // bestd = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
-        // bestd += bestd > 0.f ? -margin : margin;
+        // bestCost = testPos.x * testPos.x + testPos.y * testPos.y;
+        // bestCost = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
+        // bestCost += bestCost > 0.f ? -margin : margin;
         
         // See if this direction is the best one so far to move in.
         // Don't replace a good-fit move with a bad-fit move.
-        if ((isGoodFit > tIsGoodFit) || ((isGoodFit == tIsGoodFit) && fabs(bestd) < totald))
+        if ((isGoodFit > tIsGoodFit) || ((isGoodFit == tIsGoodFit) && fabs(bestCost) < totalCost))
         {
-            totald = fabs(bestd);
+            totalCost = fabs(bestCost);
             tIsGoodFit = isGoodFit;
-            totalp = testp;
-			bestaxis = i;
+            resultPos = testPos;
+			bestAxis = i;
         }
     }  // end of loop over 4 directions
     
     isCol = (tIsGoodFit == 0);
 
-	//if (_scraping[bestaxis])
+	//if (_scraping[bestAxis])
 	//{
 	//	isCol = true;
 	//	// Only allowed to scrape once.
-	//	seg->collisionInfo(_target)->setCanScrape(bestaxis, false);
+	//	seg->collisionInfo(_target)->setCanScrape(bestAxis, false);
 	//}
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
         *dbgout << json::close // vectors array
-            << "result" << totalp
-			//<< "scraping" << _scraping[bestaxis]
+            << "result" << resultPos
+			//<< "scraping" << _scraping[bestAxis]
+			<< "bestAxis" << bestAxis
             << "stillBad" << isCol
             << json::close; // slot object
     }
 #endif
 
-    return totalp;
+    return resultPos;
 
 }   // end of ShiftCollider::resolve
 

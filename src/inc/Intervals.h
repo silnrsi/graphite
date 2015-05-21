@@ -167,14 +167,22 @@ void Zones::initialise(float pos, float len, float margin_len, float margin_weig
 
 template<>
 inline
-void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift, float a, float m, float xi, float c){
-    insert(Exclusion(pos, pos+len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + c + f * a));
+void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift,
+				float a, float m, float xi, float c){
+    insert(Exclusion(pos, pos+len,
+		m + f,
+		m * xi + f * shift,
+		m * xi * xi + f * shift * shift + c + f * a));
 }
 
 template<>
 inline
-void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift, float a, float m, float xi, float c){
-    insert(Exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift + oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
+void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift,
+				float a, float m, float xi, float c){
+    insert(Exclusion(pos, pos+len,
+		m + f,
+		m * (xi + a) + f * (shift + oshift),
+		m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
 }
 
 } // end of namespace graphite2

@@ -33,6 +33,8 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 
+///  INTERVAL SET  ///
+
 // Add this interval to the list of possible range(s), merging elements of the list as necessary.
 // Eg, if the ranges are [{100..200), (500..700)], adding (150..300) will result in
 // [{100..300), (500..700)].
@@ -143,6 +145,9 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
     else
         return lres;
 }
+
+
+///  ZONES  ///
 
 // Overlap b on right hand edge of *this.
 //   *this is updated to end at the start of b.
@@ -345,8 +350,9 @@ float Zones::closest(float origin, float width, float & cost) const
 }
 
 
-// Cost and test position functions these are the only methods that *need* to
-// be specialised based on template parameter.
+// Cost and test position functions
+// these are the only methods that *need* to be specialised based on
+// template parameter.
 
 // For cartesian
 inline
