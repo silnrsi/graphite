@@ -229,7 +229,9 @@ inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int mode)
 // Adjust the movement limits for the target to avoid having it collide
 // with the given neighbor slot. Also determine if there is in fact a collision
 // between the target and the given slot.
-bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, bool isAfter, bool sameCluster,
+bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift,
+		bool isAfter,  // slot is logically after _target
+		bool sameCluster,
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = false;
@@ -258,6 +260,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     int orderFlags = 0;
     float orderMargin = 0.;     // max of slot and _target's overlapMargins
     if (sameCluster && _orderClass && _orderClass == cslot->orderClass())
+		// Force the target glyph to be in the specified direction from the slot we're testing.
         orderFlags = _orderFlags;
     float seq_above_wt = cslot->seqAboveWeight();
     float seq_below_wt = cslot->seqBelowWeight();
