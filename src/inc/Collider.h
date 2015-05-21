@@ -91,8 +91,8 @@ public:
 
     float getKern(int dir) const;
 
-	bool canScrape(int axis) { return _canScrape[axis]; }
-	void setCanScrape(int axis, bool f) { _canScrape[axis] = f; }
+	//bool canScrape(int axis) { return _canScrape[axis]; }
+	//void setCanScrape(int axis, bool f) { _canScrape[axis] = f; }
     
 private:
     Rect        _limit;
@@ -114,7 +114,7 @@ private:
     uint16		_seqValignWeight;
 
 	// For use by algorithm:
-	bool _canScrape[4];
+	//bool _canScrape[4];
 };
 
 

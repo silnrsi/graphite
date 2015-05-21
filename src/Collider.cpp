@@ -424,11 +424,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
         if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
             continue;
-		if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
-		{
-			_scraping[i] = true;
-			continue;
-		}
+
+		//if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
+		//{
+		//	_scraping[i] = true;
+		//	continue;
+		//}
 
         // Process sub-boxes that are defined for this glyph.
         // We only need to do this if there was in fact a collision with the main octabox.
@@ -477,11 +478,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
                     continue;
-				if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
-				{
-					_scraping[i] = true;
-					continue;
-				}
+				//if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
+				//{
+				//	_scraping[i] = true;
+				//	continue;
+				//}
                 _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
                 anyhits = true;
                 
@@ -671,12 +672,13 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     }  // end of loop over 4 directions
     
     isCol = (tIsGoodFit == 0);
-	if (_scraping[bestaxis])
-	{
-		isCol = true;
-		// Only allowed to scrape once.
-		seg->collisionInfo(_target)->setCanScrape(bestaxis, false);
-	}
+
+	//if (_scraping[bestaxis])
+	//{
+	//	isCol = true;
+	//	// Only allowed to scrape once.
+	//	seg->collisionInfo(_target)->setCanScrape(bestaxis, false);
+	//}
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
@@ -1039,7 +1041,7 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
 //  _exclGlyph = seg->glyphAttr(gid, aCol+8);
 //  _exclOffset = Position(seg->glyphAttr(gid, aCol+9), seg->glyphAttr(gid, aCol+10));
 
-	_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
+	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
 
 float SlotCollision::getKern(int dir) const
