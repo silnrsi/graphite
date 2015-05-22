@@ -317,7 +317,7 @@ Zones::const_eiter_t Zones::find_exclusion(float x) const
 
 #else
     // Simple linear scan in case binary search is buggy
-    for (const_eiter_t i = _exclusions.begin(), end = _exclusions.end(); i != end; ++i)
+    for (const_eiter_t i = _exclusions.begin(), ie = _exclusions.end(); i != ie; ++i)
         if (i->outcode(x) == 0) return i;
 #endif
     return _exclusions.end();
@@ -335,7 +335,7 @@ float Zones::closest(float origin, float width, float & cost) const
     for (const_eiter_t i = start, ie = _exclusions.end(); i != ie; ++i)
     {
         if (i->null_zone()) continue;
-        if (i->track_cost(best_c, best_x)) break;
+        if (i->track_cost(best_c, best_x, origin)) break;
     }
 
     // Backward scan looking for lowest cost
@@ -344,7 +344,7 @@ float Zones::closest(float origin, float width, float & cost) const
     for (const_eiter_t i = start-1, ie = _exclusions.begin()-1; i != ie; --i)
     {
         if (i->null_zone()) continue;
-        if (i->track_cost(best_c, best_x)) break;
+        if (i->track_cost(best_c, best_x, origin)) break;
     }
 
     cost = best_c;
@@ -356,9 +356,9 @@ float Zones::closest(float origin, float width, float & cost) const
 // these are the only methods that *need* to be specialised based on
 // template parameter.
 
-bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos) const {
+bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos, float origin) const {
     const float p = test_position(),
-                localc = cost(p);
+                localc = cost(p - origin);
     if (open_zone() && localc > best_cost) return true;
 
     if (localc < best_cost)
@@ -370,7 +370,7 @@ bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos) const {
 }
 
 float Zones::Exclusion::cost(float p) const {
-    return (sm * p + smx) * p + c;
+    return (sm * p - 2 * smx) * p + c;
 }
 
 
@@ -385,7 +385,7 @@ float Zones::Exclusion::test_position() const {
     }
     else
     {
-        float zerox = smx/sm;
+        float zerox = smx / sm;
         if (zerox < x) return x;
         else if (zerox > xm) return xm;
         else return zerox;

@@ -38,7 +38,7 @@ namespace graphite2 {
 
 class IntervalSet
 {
-public:
+public
     typedef std::pair<float, float> tpair;
     typedef Vector<tpair> vtpair;
     typedef vtpair::iterator ivtpair;
@@ -58,9 +58,9 @@ public:
     ivtpair end() { return _v.end(); }
 
 //private
-public: // debugging
+public // debugging
     void append(tpair interval) { _v.push_back(interval); }
-private:
+private
     // Ranges of movements in a specific direction; a vector is need to represent disjoint ranges.
     float _len;
     vtpair _v;
@@ -72,7 +72,7 @@ enum zones_t {SD, XY};
 
 class Zones
 {
-protected:
+protected
     struct Exclusion
     {
         float   x,  // x position
@@ -81,7 +81,7 @@ protected:
                 sm, // sum(Mi)
                 smx; // sum(MiXi)
 
-        Exclusion(float x, float w, float c, float smi, float smxi);
+        Exclusion(float x, float w, float smi, float smxi, float c);
         void operator += (const Exclusion & rhs);
         uint8 outcode(float p) const;
 
@@ -91,7 +91,7 @@ protected:
         bool        null_zone() const;
         bool        open_zone() const;
 
-        bool track_cost(float & cost, float & x) const;
+        bool track_cost(float & cost, float & x, float origin) const;
 
     private:
         float test_position() const;
@@ -101,7 +101,7 @@ protected:
 
     void insert(Exclusion e);
 
-private:
+private
     typedef Vector<Exclusion>                    exclusions;
     typedef /*typename*/ exclusions::iterator    eiter_t;  // SC: typename does not compile in VisualStudio
 
@@ -113,7 +113,7 @@ private:
 
     friend class Exclusion;
 
-public:
+public
     typedef /*typename*/ exclusions::const_iterator  const_eiter_t;   // SC: typename does not compile in VisualStudio
 
     Zones();
@@ -132,7 +132,7 @@ public:
     const_eiter_t end() const { return _exclusions.end(); }
     
 
-private:
+private
     const_eiter_t find_exclusion(float x) const;
     void insert_triple(Exclusion & l, Exclusion & m, Exclusion & r);
 
@@ -166,23 +166,22 @@ void Zones::initialise(float pos, float len, float margin_len, float margin_weig
 
 template<>
 inline
+void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift, float a, float m, float xi, float c){
+    insert(Exclusion(pos, pos+len, m + f, m * xi + f * shift, m * xi * xi + f * shift * shift + f * a * a + c));
+}
+
+template<>
+inline
 void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift,
 			float a, float m, float xi, float c){
     insert(Exclusion(pos, pos+len,
 		m + f,
 		m * xi + f * shift,
 		m * xi * xi + f * shift * shift + c + f * a));
-}
-
-template<>
-inline
 void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift,
 			float a, float m, float xi, float c)
 {
-    insert(Exclusion(pos, pos+len,
-		m + f,
-		m * (xi + a) + f * (shift + oshift),
-		m * xi * xi + f * (shift + oshift) * (shift + oshift) + c + f * a));
+    insert(Exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift - oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c));
 }
 
 } // end of namespace graphite2
