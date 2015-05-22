@@ -189,12 +189,14 @@ protected:
     float   _len;
     uint16  _seqClass;
     uint16  _seqOrder;
-	uint16	_seqAboveXoff;
-	uint16	_seqAboveWt;
-	uint16	_seqBelowXlim;
-	uint16	_seqBelowWt;
-	uint16	_seqValignHt;
-	uint16	_seqValignWt;
+	// Do we need to store all these in here?
+	// For now we just get them out of the SlotCollision object.
+	//uint16	_seqAboveXoff;
+	//uint16	_seqAboveWt;
+	//uint16	_seqBelowXlim;
+	//uint16	_seqBelowWt;
+	//uint16	_seqValignHt;
+	//uint16	_seqValignWt;
     
     Slot * exclSlot;   // bogus exclude slot
 

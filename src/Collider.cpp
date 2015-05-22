@@ -125,10 +125,20 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     }
     _currOffset = currOffset;
     _currShift = currShift;
+
+	_margin = margin;
+	_marginWt = marginWeight;
     
     SlotCollision *c = seg->collisionInfo(aSlot);
     _seqClass = c->seqClass();
     _seqOrder = c->seqOrder();
+	// For now we just get these out of the SlotCollision object.
+	//_seqAboveXoff = c->seqAboveXoff();
+	//_seqAboveWt = c->seqAboveWt();
+	//_seqBelowXlim = c->seqBelowXlim();
+	//_seqBelowWt = c->seqBelowWt();
+	//_seqValignHt = c->seqValignHt();
+	//_seqValignWt = c->seqValignWt();
 
 	//_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
     
