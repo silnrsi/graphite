@@ -160,7 +160,7 @@ public:
         for (int j = i; j <= imax; ++j)
         {
             *dbgout << json::flat << json::array;
-            for (zones::const_eiter_t s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
+            for (Zones::const_eiter_t s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
                 *dbgout << Position(s->x, s->xm);
             *dbgout << json::close;
         }
@@ -172,7 +172,7 @@ public:
     CLASS_NEW_DELETE;
 
 protected:
-    zones _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
+    Zones _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
     Slot *  _target;        // the glyph to fix
     Rect    _limit;
     Position  _currShift;
