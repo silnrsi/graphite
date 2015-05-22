@@ -144,8 +144,8 @@ enum gr_attrCode {
     /// Collision margin
     gr_slatColMargin,
     /// Margin cost weight
-    gr_slatColMarginWeight,
-	/// TODO: move down with other sequence attributes:
+    gr_slatColMarginWt,
+	/// TODO: move down with other sequence attributes, in sync with compiler:
     gr_slatSeqClass,
     gr_slatSeqOrder,
     // Additional glyph that excludes movement near this one:

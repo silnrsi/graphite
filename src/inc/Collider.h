@@ -41,6 +41,7 @@ class Slot;
 
 #define SLOTCOLSETUINTPROP(x, y) uint16 x() const { return _ ##x; } void y (uint16 v) { _ ##x = v; }
 #define SLOTCOLSETPOSITIONPROP(x, y) const Position &x() const { return _ ##x; } void y (const Position &v) { _ ##x = v; }
+
 // Slot attributes related to collision-fixing
 class SlotCollision
 {
@@ -76,18 +77,18 @@ public:
     SLOTCOLSETPOSITIONPROP(offset, setOffset)
     SLOTCOLSETPOSITIONPROP(exclOffset, setExclOffset)
     SLOTCOLSETUINTPROP(margin, setMargin)
-    SLOTCOLSETUINTPROP(marginWeight, setMarginWeight)
+    SLOTCOLSETUINTPROP(marginWt, setMarginWt)
     SLOTCOLSETUINTPROP(flags, setFlags)
     SLOTCOLSETUINTPROP(status, setStatus)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
     SLOTCOLSETUINTPROP(seqClass, setSeqClass)
     SLOTCOLSETUINTPROP(seqOrder, setSeqOrder)
-    SLOTCOLSETUINTPROP(seqAboveXoffset, setSeqAboveXoffset)
-    SLOTCOLSETUINTPROP(seqAboveWeight, setSeqAboveWeight)
-    SLOTCOLSETUINTPROP(seqBelowXlimit, setSeqBelowXlimit)
-    SLOTCOLSETUINTPROP(seqBelowWeight, setSeqBelowWeight)
-    SLOTCOLSETUINTPROP(seqValignHeight, setSeqValignHeight)
-    SLOTCOLSETUINTPROP(seqValignWeight, setSeqValignWeight)
+    SLOTCOLSETUINTPROP(seqAboveXoff, setSeqAboveXoff)
+    SLOTCOLSETUINTPROP(seqAboveWt, setSeqAboveWt)
+    SLOTCOLSETUINTPROP(seqBelowXlim, setSeqBelowXlim)
+    SLOTCOLSETUINTPROP(seqBelowWt, setSeqBelowWt)
+    SLOTCOLSETUINTPROP(seqValignHt, setSeqValignHt)
+    SLOTCOLSETUINTPROP(seqValignWt, setSeqValignWt)
 
     float getKern(int dir) const;
 
@@ -100,18 +101,18 @@ private:
     Position    _offset;    // total adjustment for collisions
     Position    _exclOffset;
     uint16		_margin;
-    uint16		_marginWeight;
+    uint16		_marginWt;
     uint16		_flags;
     uint16		_status;
     uint16		_exclGlyph;
     uint16		_seqClass;
     uint16		_seqOrder;
-    uint16		_seqAboveXoffset;
-    uint16		_seqAboveWeight;
-    uint16		_seqBelowXlimit;
-    uint16		_seqBelowWeight;
-    uint16		_seqValignHeight;
-    uint16		_seqValignWeight;
+    uint16		_seqAboveXoff;
+    uint16		_seqAboveWt;
+    uint16		_seqBelowXlim;
+    uint16		_seqBelowWt;
+    uint16		_seqValignHt;
+    uint16		_seqValignWt;
 
 	// For use by algorithm:
 	//bool _canScrape[4];
@@ -178,15 +179,22 @@ public:
     CLASS_NEW_DELETE;
 
 protected:
-    Zones _ranges[4]; // possible movements in 4 directions (horizontally, vertically, diagonally);
-    Slot *  _target;        // the glyph to fix
+    Zones _ranges[4];   // possible movements in 4 directions (horizontally, vertically, diagonally);
+    Slot *  _target;    // the glyph to fix
     Rect    _limit;
-    Position  _currShift;
-    Position  _currOffset;
+    Position _currShift;
+    Position _currOffset;
+    float   _margin;
+	float	_marginWt;
+    float   _len;
     uint16  _seqClass;
     uint16  _seqOrder;
-    float   _margin;
-    float   _len;
+	uint16	_seqAboveXoff;
+	uint16	_seqAboveWt;
+	uint16	_seqBelowXlim;
+	uint16	_seqBelowWt;
+	uint16	_seqValignHt;
+	uint16	_seqValignWt;
     
     Slot * exclSlot;   // bogus exclude slot
 

@@ -224,18 +224,25 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     }
     if (cslot)
     {
+		// Note: the reason for using Positions to lump together related attributes is to make the 
+		// JSON output slightly more compact.
         j << "collision" << json::flat << json::object
 //              << "shift" << cslot->shift() -- not used pass level, only within the collision routine itself
               << "offset" << cslot->offset()
               << "limit" << cslot->limit()
               << "flags" << cslot->flags()
               << "status" << cslot->status()
-              << "margin" << cslot->margin()
-              << "marginweight" << cslot->marginWeight()
-              << "seq" << Position(float(cslot->seqClass()), float(cslot->seqOrder()))
+              << "margin" << Position(cslot->margin(), cslot->marginWt())
               << "exclude" << cslot->exclGlyph()
-              << "excludeoffset" << cslot->exclOffset()
-              << json::close;
+              << "excludeoffset" << cslot->exclOffset();
+		if (cslot->seqOrder() != 0)
+		{
+			j << "seq" << Position(cslot->seqClass(), cslot->seqOrder())
+				<< "seqabove" << Position(cslot->seqAboveXoff(), cslot->seqAboveWt())
+				<< "seqbelow" << Position(cslot->seqBelowXlim(), cslot->seqBelowWt())
+				<< "seqvalign" << Position(cslot->seqValignHt(), cslot->seqValignWt());
+		}
+        j << json::close;
     }
     return j << json::close;
 }

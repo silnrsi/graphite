@@ -276,13 +276,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     if (sameCluster && _seqClass && _seqClass == cslot->seqClass())
 		// Force the target glyph to be in the specified direction from the slot we're testing.
         orderFlags = _seqOrder;
-    float seq_above_wt = cslot->seqAboveWeight();
-    float seq_below_wt = cslot->seqBelowWeight();
-    float seq_valign_wt = cslot->seqValignWeight();
+    float seq_above_wt = cslot->seqAboveWt();
+    float seq_below_wt = cslot->seqBelowWt();
+    float seq_valign_wt = cslot->seqValignWt();
 	// TODO: add these
-	//float seq_above_xoff = cslot->seqAboveXoffset();
-	//float seq_below_xlim = cslot->seqBelowXlimit();
-	//float seq_valign_ht = cslot->seqValignHeight();
+	//float seq_above_xoff = cslot->seqAboveXoff();
+	//float seq_below_xlim = cslot->seqBelowXlim();
+	//float seq_valign_ht = cslot->seqValignHt();
 
     // if isAfter, invert orderFlags
 #define COLL_ORDER_X (SlotCollision::COLL_ORDER_LEFT | SlotCollision::COLL_ORDER_RIGHT)
@@ -1039,7 +1039,9 @@ SlotCollision::SlotCollision(Segment *seg, Slot *slot)
 
 void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
 {
-    // Initialize slot attributes from glyph attributes:
+    // Initialize slot attributes from glyph attributes.
+	// The order here must match the order in the grcompiler code, 
+	// GrcSymbolTable::AssignInternalGlyphAttrIDs.
     uint16 gid = slot->gid();
     uint16 aCol = seg->silf()->aCollision(); // flags attr ID
     _flags = seg->glyphAttr(gid, aCol);
@@ -1047,17 +1049,23 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     _limit = Rect(Position(seg->glyphAttr(gid, aCol+1), seg->glyphAttr(gid, aCol+2)),
                   Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
     _margin = seg->glyphAttr(gid, aCol+5);
-    _marginWeight = seg->glyphAttr(gid, aCol+6);
-    _seqClass = seg->glyphAttr(gid, aCol+7); // do we want these?
-    _seqOrder = seg->glyphAttr(gid, aCol+8);
-    
-    _exclGlyph = 0;
-    _exclOffset = Position(0, 0);
-    
+    _marginWt = seg->glyphAttr(gid, aCol+6);
+
     // TODO: do we want to initialize collision.exclude stuff from the glyph attributes,
     // or make GDL do it explicitly?
-//  _exclGlyph = seg->glyphAttr(gid, aCol+8);
-//  _exclOffset = Position(seg->glyphAttr(gid, aCol+9), seg->glyphAttr(gid, aCol+10));
+//  _exclGlyph = seg->glyphAttr(gid, aCol+7);
+//  _exclOffset = Position(seg->glyphAttr(gid, aCol+8), seg->glyphAttr(gid, aCol+9));
+    _exclGlyph = 0;
+    _exclOffset = Position(0, 0);
+
+    _seqClass = seg->glyphAttr(gid, aCol+10);
+    _seqOrder = seg->glyphAttr(gid, aCol+11);
+	_seqAboveXoff = seg->glyphAttr(gid, aCol+12);
+	_seqAboveWt = seg->glyphAttr(gid, aCol+13);
+	_seqBelowXlim = seg->glyphAttr(gid, aCol+14);
+	_seqBelowWt = seg->glyphAttr(gid, aCol+15);
+	_seqValignHt = seg->glyphAttr(gid, aCol+16);
+	_seqValignWt = seg->glyphAttr(gid, aCol+17);    
 
 	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
