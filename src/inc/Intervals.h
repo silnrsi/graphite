@@ -118,15 +118,13 @@ public:
 
     Zones();
     template<zones_t O>
-    void initialise(float pos, float len, float margin_len, float margin_weight,
-		float shift, float oshift);
+    void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift, float a);
 
     void exclude(float pos, float len);
     void exclude_with_margins(float pos, float len);
 
     template<zones_t O>
-    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, 
-		float xi, float c);
+    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
 
     float closest( float origin, float width, float &cost) const;
 
@@ -136,7 +134,7 @@ public:
 
 private:
     const_eiter_t find_exclusion(float x) const;
-    void insert_tripple(Exclusion & l, Exclusion & m, Exclusion & r);
+    void insert_triple(Exclusion & l, Exclusion & m, Exclusion & r);
 
 };
 
@@ -150,25 +148,26 @@ Zones::Zones()
 }
 
 inline
-Zones::Exclusion::Exclusion(float x_, float xm_, float c_, float smi, float smxi)
+Zones::Exclusion::Exclusion(float x_, float xm_, float smi, float smxi, float c_)
 : x(x_), xm(xm_), c(c_), sm(smi), smx(smxi)
 { }
 
 template<zones_t O>
 inline
-void Zones::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift) {
+void Zones::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift, float a)
+{
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _pos = pos;
     _len = len;
     _exclusions.clear();
-    weighted<O>(pos, len, 1, shift, oshift, 0, 0, 0, 0);
+    weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0);
 }
 
 template<>
 inline
 void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift,
-				float a, float m, float xi, float c){
+			float a, float m, float xi, float c){
     insert(Exclusion(pos, pos+len,
 		m + f,
 		m * xi + f * shift,
@@ -178,7 +177,8 @@ void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UN
 template<>
 inline
 void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift,
-				float a, float m, float xi, float c){
+			float a, float m, float xi, float c)
+{
     insert(Exclusion(pos, pos+len,
 		m + f,
 		m * (xi + a) + f * (shift + oshift),

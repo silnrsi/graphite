@@ -50,6 +50,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 {
     int i;
     float max, min;
+	float shift, oshift;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
@@ -68,19 +69,25 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.x + aSlot->origin().x + bb.xi;
                 max = _limit.tr.x + aSlot->origin().x + bb.xa;
                 _len = bb.xa - bb.xi;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, currShift.x + bb.xi, currShift.y + bb.yi);
+                shift = currShift.x + bb.xi;
+                oshift = currShift.y + bb.yi;
+                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift * oshift);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y + bb.yi;
                 max = _limit.tr.y + aSlot->origin().y + bb.ya;
                 _len = bb.ya - bb.yi;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, currShift.y + bb.yi, currShift.x + bb.xi);
+                shift = currShift.y + bb.yi;
+                oshift = currShift.x + bb.xi;
+                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift * oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.si;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.sa;
                 _len = sb.sa - sb.si;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, currShift.x + currShift.y + sb.si, currShift.x - currShift.y + sb.di);
+                shift = currShift.x + currShift.y + sb.si;
+                oshift = currShift.x - currShift.y + sb.di;
+                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
@@ -88,7 +95,9 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.di;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.da;
                 _len = sb.da - sb.di;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, currShift.x - currShift.y + sb.di, currShift.x + currShift.y + sb.si);
+                shift = currShift.x - currShift.y + sb.di;
+                oshift = currShift.x + currShift.y + sb.si;
+                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
@@ -621,6 +630,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             case 2 : testPos = Position(0.5 * (bestPos + _currShift.x - _currShift.y), 0.5 * (bestPos - _currShift.x + _currShift.y)); break;
             case 3 : testPos = Position(0.5 * (bestPos + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
         }
+
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
