@@ -72,7 +72,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len = bb.xa - bb.xi;
                 shift = currShift.x;
                 oshift = currShift.y;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y;
@@ -80,7 +80,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len = bb.ya - bb.yi;
                 shift = currShift.y;
                 oshift = currShift.x;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
@@ -88,7 +88,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len = sb.sa - sb.si;
                 shift = currShift.x + currShift.y;
                 oshift = currShift.x - currShift.y;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
@@ -98,7 +98,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len = sb.da - sb.di;
                 shift = currShift.x - currShift.y;
                 oshift = currShift.x + currShift.y;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
@@ -186,33 +186,33 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
 
 {
     float a;
-    switch (axis) {
+    switch (mode) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a * a, 0, 0, m * a * a);
+                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a * a, m, yi, 0);
+                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, m, yi, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
+                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
+                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
             }
             break;
         default :
@@ -1080,4 +1080,3 @@ float SlotCollision::getKern(int dir) const
 }
 
 inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int axis)
-inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
