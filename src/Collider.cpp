@@ -68,36 +68,36 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 0 :	// x direction
                 min = _limit.bl.x + aSlot->origin().x + bb.xi;
                 max = _limit.tr.x + aSlot->origin().x + bb.xa;
-                _len = bb.xa - bb.xi;
+                _len[i] = bb.xa - bb.xi;
                 shift = currShift.x + bb.xi;
                 oshift = currShift.y + bb.yi;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift * oshift);
+                _ranges[i].initialise<XY>(min, max - min - _len[i], margin, marginWeight, shift, oshift, oshift * oshift);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y + bb.yi;
                 max = _limit.tr.y + aSlot->origin().y + bb.ya;
-                _len = bb.ya - bb.yi;
+                _len[i] = bb.ya - bb.yi;
                 shift = currShift.y + bb.yi;
                 oshift = currShift.x + bb.xi;
-                _ranges[i].initialise<XY>(min, max - min - _len, margin, marginWeight, shift, oshift, oshift * oshift);
+                _ranges[i].initialise<XY>(min, max - min - _len[i], margin, marginWeight, shift, oshift, oshift * oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.si;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y + sb.sa;
-                _len = sb.sa - sb.si;
+                _len[i] = sb.sa - sb.si;
                 shift = currShift.x + currShift.y + sb.si;
                 oshift = currShift.x - currShift.y + sb.di;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min - _len[i], margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.di;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y + sb.da;
-                _len = sb.da - sb.di;
+                _len[i] = sb.da - sb.di;
                 shift = currShift.x - currShift.y + sb.di;
                 oshift = currShift.x + currShift.y + sb.si;
-                _ranges[i].initialise<SD>(min, max - min - _len, margin / ISQRT2, marginWeight, shift, oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min - _len[i], margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
@@ -106,8 +106,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 #if !defined GRAPHITE2_NTRACING
         // Debugging:
         _rawRanges[i].clear();
-        _rawRanges[i].add(min, max - _len);
-        _rawRanges[i].len(_len);
+        _rawRanges[i].add(min, max - _len[i]);
+        _rawRanges[i].len(_len[i]);
         _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
@@ -443,6 +443,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                             org, 0, seq_valign_wt, sy + bb.yi, i);
         }
 #endif
+		if (vmin > vmax) { float t = vmin; vmin = vmax; vmax = t; } // swap
+
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -491,12 +493,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omax = ssb.sa + ss;
                         break;
                 }
-                if (vmin > vmax)
-                {
-                    float t = vmin;
-                    vmin = vmax;
-                    vmax = t;
-                }
+                if (vmin > vmax) { float t = vmin; vmin = vmax; vmax = t; } // swap
                 
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
@@ -509,7 +506,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 				//	continue;
 				//}
 
-                _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
+                _ranges[i].exclude_with_margins(vmin - _len[i], vmax - vmin + _len[i]);
                 anyhits = true;
                 
 #if !defined GRAPHITE2_NTRACING
@@ -525,7 +522,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         else // no sub-boxes
         {
             isCol = true;
-            _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
+            _ranges[i].exclude_with_margins(vmin - _len[i], vmax - vmin + _len[i]);
 
 #if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vmin, vmax); // debugging

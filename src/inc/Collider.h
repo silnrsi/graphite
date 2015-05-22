@@ -143,8 +143,8 @@ public:
     void addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
     void addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
-    float len() const { return _len; }
-    void setLen(float v) { _len = v; }
+//    float len(int i) const { return _len[i]; }
+//    void setLen(int i, float v) { _len[i] = v; }
 
 #if !defined GRAPHITE2_NTRACING
     void debug(json * const dbgout, Segment *seg, int i) {
@@ -186,7 +186,7 @@ protected:
     Position _currOffset;
     float   _margin;
 	float	_marginWt;
-    float   _len;
+    float   _len[4];
     uint16  _seqClass;
     uint16  _seqOrder;
 	// Do we need to store all these in here?
