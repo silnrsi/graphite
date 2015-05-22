@@ -610,13 +610,13 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestv = _ranges[i].closest(tbase + tval, tlen, bestd);
+        bestv = _ranges[i].closest(tbase + tval, tlen, bestd) - tbase;
         Position testp;
         switch (i) {
-            case 0 : testp = Position(bestv - bb.xi, _currShift.y); break;
-            case 1 : testp = Position(_currShift.x, bestv - bb.yi); break;
-            case 2 : testp = Position(0.5 * (bestv - sb.si + _currShift.x - _currShift.y), 0.5 * (bestv - sb.si - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestv - sb.di + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestv + sb.di)); break;
+            case 0 : testp = Position(bestv, _currShift.y); break;
+            case 1 : testp = Position(_currShift.x, bestv); break;
+            case 2 : testp = Position(0.5 * (bestv + _currShift.x - _currShift.y), 0.5 * (bestv - _currShift.x + _currShift.y)); break;
+            case 3 : testp = Position(0.5 * (bestv + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestv)); break;
         }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)

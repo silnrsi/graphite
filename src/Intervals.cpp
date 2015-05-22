@@ -150,7 +150,7 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
 //   The return value is the overlapped zone where parameters are merged.
 Zones::Exclusion Zones::Exclusion::overlap_by(Exclusion & b)
 {
-    Exclusion r(b.x, xm, c+b.c, sm+b.sm, smx+b.smx);
+    Exclusion r(b.x, xm, sm+b.sm, smx+b.smx, c+b.c);
     xm = b.x;
     b.x = r.xm;
 
