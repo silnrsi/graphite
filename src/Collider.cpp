@@ -69,7 +69,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 0 :	// x direction
                 min = _limit.bl.x + aSlot->origin().x;
                 max = _limit.tr.x + aSlot->origin().x;
-                _len = bb.xa - bb.xi;
+                _len[i] = bb.xa - bb.xi;
                 shift = currShift.x;
                 oshift = currShift.y;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
@@ -77,7 +77,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y;
                 max = _limit.tr.y + aSlot->origin().y;
-                _len = bb.ya - bb.yi;
+                _len[i] = bb.ya - bb.yi;
                 shift = currShift.y;
                 oshift = currShift.x;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
@@ -85,7 +85,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
-                _len = sb.sa - sb.si;
+                _len[i] = sb.sa - sb.si;
                 shift = currShift.x + currShift.y;
                 oshift = currShift.x - currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
@@ -95,7 +95,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
-                _len = sb.da - sb.di;
+                _len[i] = sb.da - sb.di;
                 shift = currShift.x - currShift.y;
                 oshift = currShift.x + currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
@@ -149,33 +149,33 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int axis)
 {
     float a;
-    switch (mode) {
+    switch (axis) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, m, xi, 0);
+                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, m, xi, 0);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, 0, 0, m * a * a);
+                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, 0, 0, m * a * a);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
+                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
+                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
             }
             break;
         default :
@@ -184,35 +184,36 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
     return;
 }
 
+inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int axis)
 {
     float a;
-    switch (mode) {
+    switch (axis) {
         case 0 :
             if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[mode].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, 0, 0, m * a * a);
+                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, 0, 0, m * a * a);
             }
             break;
         case 1 :
             if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[mode].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, m, yi, 0);
+                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, m, yi, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
                 a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
+                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
                 a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[mode].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
+                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
             }
             break;
         default :
@@ -221,6 +222,7 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
     return;
 }
 
+inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
 {
     switch (axis) {
         case 0 :
@@ -443,11 +445,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
         if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
             continue;
+#if 0
 		if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
 		{
 			_scraping[i] = true;
 			continue;
 		}
+#endif
 
         // Process sub-boxes that are defined for this glyph.
         // We only need to do this if there was in fact a collision with the main octabox.
@@ -485,23 +489,25 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omax = ssb.sa + ss;
                         break;
                 }
-                if (vmin > vmax)
-                {
-                    float t = vmin;
-                    vmin = vmax;
-                    vmax = t;
-                }
+//                if (vmin > vmax)
+//                {
+//                    float t = vmin;
+//                    vmin = vmax;
+//                    vmax = t;
+//                }
                 
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
                     continue;
+#if 0
 				if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
 				{
 					_scraping[i] = true;
 					continue;
 				}
-                _ranges[i].exclude_with_margins(vmin - _len, vmax - vmin + _len);
+#endif
+                _ranges[i].exclude_with_margins(vmin - _len[i], vmax - vmin + _len[i]);
                 anyhits = true;
                 
 #if !defined GRAPHITE2_NTRACING
@@ -624,13 +630,13 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestv = _ranges[i].closest(tbase, tlen, bestd) - tbase;     // returns absolute, convert to shift.
+        bestPos = _ranges[i].closest(tbase, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
         Position testp;
         switch (i) {
-            case 0 : testp = Position(bestv, _currShift.y); break;
-            case 1 : testp = Position(_currShift.x, bestv); break;
-            case 2 : testp = Position(0.5 * (bestv + _currShift.x - _currShift.y), 0.5 * (bestv - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestv + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestv)); break;
+            case 0 : testp = Position(bestPos, _currShift.y); break;
+            case 1 : testp = Position(_currShift.x, bestPos); break;
+            case 2 : testp = Position(0.5 * (bestPos + _currShift.x - _currShift.y), 0.5 * (bestPos - _currShift.x + _currShift.y)); break;
+            case 3 : testp = Position(0.5 * (bestPos + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
         }
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
@@ -684,7 +690,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         {
             totalCost = fabs(bestCost);
             tIsGoodFit = isGoodFit;
-            resultPos = testPos;
+            resultPos = testp;
 			bestAxis = i;
         }
     }  // end of loop over 4 directions
@@ -1054,14 +1060,6 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
 
     // TODO: do we want to initialize collision.exclude stuff from the glyph attributes,
     // or make GDL do it explicitly?
-}
-
-float SlotCollision::getKern(int dir) const
-{
-    if ((_flags & SlotCollision::COLL_KERN) != 0)
-        return float(_shift.x * ((dir & 1) ? -1 : 1));
-    else
-    	return 0;
 //  _exclGlyph = seg->glyphAttr(gid, aCol+7);
 //  _exclOffset = Position(seg->glyphAttr(gid, aCol+8), seg->glyphAttr(gid, aCol+9));
     _exclGlyph = 0;
@@ -1079,4 +1077,10 @@ float SlotCollision::getKern(int dir) const
 	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
 
-inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int axis)
+float SlotCollision::getKern(int dir) const
+{
+    if ((_flags & SlotCollision::COLL_KERN) != 0)
+        return float(_shift.x * ((dir & 1) ? -1 : 1));
+    else
+    	return 0;
+}
