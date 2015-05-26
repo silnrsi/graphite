@@ -296,9 +296,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #define COLL_ORDER_Y (SlotCollision::COLL_ORDER_DOWN | SlotCollision::COLL_ORDER_UP)
     if (isAfter)        // _target isAfter slot
     {
-        if (orderFlags && COLL_ORDER_X)
+        if (orderFlags & COLL_ORDER_X)
             orderFlags = orderFlags ^ COLL_ORDER_X;
-        if (orderFlags && COLL_ORDER_Y)
+        if (orderFlags & COLL_ORDER_Y)
             orderFlags = orderFlags ^ COLL_ORDER_Y;
     }
 
@@ -402,8 +402,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 continue;
         }
         
-#if 0
-        if (enforceOrder < 0) // enforce neighboring glyph being left /down
+        if (enforceOrder > 0) // enforce neighboring glyph being left /down
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
@@ -421,7 +420,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - tbb.ya), Position(1e38, sy + bb.yi)),
                             org, 0, seq_valign_wt, sy + bb.yi, i);
         }
-        else if (enforceOrder > 0)  // enforce neighboring glyph being right/up
+        else if (enforceOrder < 0)  // enforce neighboring glyph being right/up
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
@@ -439,7 +438,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, sy + bb.yi)),
                             org, 0, seq_valign_wt, sy + bb.yi, i);
         }
-#endif
+
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
         //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
