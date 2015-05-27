@@ -875,7 +875,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         {
             *dbgout << json::object 
                             << "missed" << objectid(dslot(seg, slotFix));
-            coll.debug(dbgout, seg, -1);
+            coll.outputJsonDbg(dbgout, seg, -1);
             *dbgout << json::close;
         }
 #endif

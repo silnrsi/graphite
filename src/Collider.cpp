@@ -146,6 +146,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 }   // end of ShiftCollider::initSlot
 
 
+// Mark an area with a cost that can vary along the x-axis.
 inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, bool minright, int axis)
 {
     float a;
@@ -194,6 +195,7 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
     return;
 }
 
+// Mark an area with a cost that can vary along the y-axis.
 inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, bool mintop, int axis)
 {
     float a;
@@ -242,6 +244,7 @@ inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float
     return;
 }
 
+// Mark an area with an absolute cost, making it completely inaccessible.
 inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
 {
     switch (axis) {
@@ -422,6 +425,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 continue;
         }
         
+		SeqRegions seqReg;
         if (enforceOrder > 0) // enforce neighboring glyph being left /down
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
@@ -443,6 +447,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
                             Position(_limit.tr.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
                             org, 0, seq_valign_wt, false, i);
+#if !defined GRAPHITE2_NTRACING
+			seqReg.r1Xedge = sx + 0.5 * (bb.xi + bb.xa);
+			seqReg.r2Yedge = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+			seqReg.r3Xedge = sx + bb.xa;
+			seqReg.r45Mid  = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+#endif
         }
         else if (enforceOrder < 0)  // enforce neighboring glyph being right/up
         {
@@ -466,6 +476,16 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             addBox_slopey(Rect(Position(_limit.bl.x + _target->origin().x, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
                             Position(sx + bb.xa, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
                             org, 0, seq_valign_wt, true, i);
+#if !defined GRAPHITE2_NTRACING
+			seqReg.r1Xedge = sx + 0.5 * (bb.xi + bb.xa);
+			seqReg.r2Yedge = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+			seqReg.r3Xedge = sx + bb.xa;
+			seqReg.r45Mid  = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+		}
+		else
+		{
+			seqReg.r1Xedge = seqReg.r2Yedge = seqReg.r3Xedge = seqReg.r45Mid = 0.0;
+#endif
         }
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
@@ -539,10 +559,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 anyhits = true;
                 
 #if !defined GRAPHITE2_NTRACING
+				SeqRegions seqRegJ;  // bogus
+				seqRegJ.r1Xedge = seqRegJ.r2Yedge = seqRegJ.r3Xedge = seqRegJ.r45Mid = 0.0;
                 IntervalSet::tpair dbg(vmin, vmax); // debugging
-                _removals[i].append(dbg);         // debugging
-                _slotNear[i].push_back(slot);     // debugging
-                _subNear[i].push_back(j);         // debugging
+                _removals[i].append(dbg);           // debugging
+				_seqRegions[i].push_back(seqRegJ);  // debugging
+                _slotNear[i].push_back(slot);       // debugging
+                _subNear[i].push_back(j);           // debugging
 #endif
             }
             if (anyhits)
@@ -555,9 +578,10 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
 #if !defined GRAPHITE2_NTRACING
             IntervalSet::tpair dbg(vmin, vmax); // debugging
-            _removals[i].append(dbg);         // debugging
-            _slotNear[i].push_back(slot);     // debugging
-            _subNear[i].push_back(-1);        // debugging
+            _removals[i].append(dbg);           // debugging
+			_seqRegions[i].push_back(seqReg);   // debugging
+            _slotNear[i].push_back(slot);       // debugging
+            _subNear[i].push_back(-1);          // debugging
 #endif
         }
     }
@@ -596,18 +620,8 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-        *dbgout << json::object // slot
-                << "slot" << objectid(dslot(seg, _target))
-				<< "gid" << _target->gid()
-                << "limit" << _limit
-                << "target" << json::object
-                    << "origin" << _target->origin()
-                    << "currShift" << _currShift
-                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
-                    << "fix" << "shift";
-        *dbgout     << json::close // target object
-        	      << "vectors" << json::array;
+		outputJsonDbgStartSlot(dbgout, seg);
+        *dbgout << "vectors" << json::array;
     }
 #endif
     for (int i = 0; i < 4; ++i)
@@ -616,45 +630,30 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         float bestPos;
         // Calculate the margin depending on whether we are moving diagonally or not:
         margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
-#if !defined GRAPHITE2_NTRACING
-        const char * label;
-#endif
         switch (i) {
             case 0 :	// x direction
                 tlen = bb.xa - bb.xi;
                 tleft = _target->origin().x + _currShift.x + bb.xi;
                 tbase = _target->origin().x;    // The best place to be for the glyph, its anchor
                 tval = -currOffset.x;
-#if !defined GRAPHITE2_NTRACING
-                label = "x";
-#endif
                 break;
             case 1 :	// y direction
                 tlen = bb.ya - bb.yi;
                 tleft = _target->origin().y + _currShift.y + bb.yi;
                 tbase = _target->origin().y;
                 tval = -currOffset.y;
-#if !defined GRAPHITE2_NTRACING
-                label = "y";
-#endif
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tlen = sb.sa - sb.si;
                 tleft = _target->origin().x + _target->origin().y + _currShift.x + _currShift.y + sb.si;
                 tbase = _target->origin().x + _target->origin().y;
                 tval = -currOffset.x - currOffset.y;
-#if !defined GRAPHITE2_NTRACING
-                label = "sum (NE-SW)";
-#endif
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tlen = sb.da - sb.di;
                 tleft = _target->origin().x - _target->origin().y + _currShift.x - _currShift.y + sb.di;
                 tbase = _target->origin().x - _target->origin().y;
                 tval = currOffset.y - currOffset.x;
-#if !defined GRAPHITE2_NTRACING
-                label = "diff (NW-SE)";
-#endif
                 break;
         }
         isGoodFit = 0;
@@ -669,43 +668,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
-            *dbgout << json::object // vector
-                    << "direction" << label
-                    << "targetMin" << tleft
-                    << "targetSize" << tlen;
-            
-            *dbgout << "rawRanges" << json::flat << json::array;
-            for (IntervalSet::ivtpair s = _rawRanges[i].begin(), e = _rawRanges[i].end(); s != e; ++s)
-                *dbgout << Position(s->first, s->second);
-            *dbgout << _rawRanges[i].len() << json::close // rawRanges array
-                << "removals" << json::array;  
-                    						
-            int gi = 0;
-            for (IntervalSet::ivtpair s = _removals[i].begin(), e = _removals[i].end(); s != e; ++s, ++gi)
-            {   //Slot & slotNear = *(_slotNear[i][gi]);
-                if (_slotNear[i][gi] == exclSlot)
-                {
-                    *dbgout << json::flat << json::array 
-                        << "exclude" << _subNear[i][gi] << Position(s->first, s->second) << json::close;
-                }
-                else
-                {
-                    *dbgout << json::flat << json::array 
-                        << objectid(dslot(_seg,_slotNear[i][gi])) 
-                        << _subNear[i][gi] << Position(s->first, s->second) << json::close;
-                }
-            }
-            *dbgout << json::close; // removals array
-            	
-            *dbgout << "ranges";
-            debug(dbgout, seg, i);
-
-            //*dbgout << "fits" << json::flat << json::array;
-            //for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
-            //    *dbgout << Position(s->first, s->second);
-            //*dbgout << json::close // fits array
-                *dbgout << "bestCost" << bestCost
-                << json::close; // vectors object
+            outputJsonDbgOneVector(dbgout, seg, i, tleft, tlen, bestCost) ;
         }
 #endif
         // bestCost = testPos.x * testPos.x + testPos.y * testPos.y;
@@ -735,18 +698,146 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-        *dbgout << json::close // vectors array
-            << "result" << resultPos
-			//<< "scraping" << _scraping[bestAxis]
-			<< "bestAxis" << bestAxis
-            << "stillBad" << isCol
-            << json::close; // slot object
+        outputJsonDbgEndSlot(dbgout, seg, resultPos, bestAxis, isCol);
     }
 #endif
 
     return resultPos;
 
 }   // end of ShiftCollider::resolve
+
+
+#if !defined GRAPHITE2_NTRACING
+
+void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
+{
+//    if (!dbgout) return;
+
+    int axisMax = axis;
+    if (axis < 0) // output all axes
+    {
+        *dbgout << "gid" << _target->gid()
+            << "limit" << _limit
+            << "target" << json::object
+                << "origin" << _target->origin()
+                << "margin" << _margin
+                << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
+                << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
+                << json::close; // target object
+        *dbgout << "ranges" << json::array;
+        axis = 0;
+        axisMax = 3;
+    }
+    for (int iAxis = axis; iAxis <= axisMax; ++iAxis)
+    {
+        *dbgout << json::flat << json::array;
+        for (Zones::const_eiter_t s = _ranges[iAxis].begin(), e = _ranges[iAxis].end(); s != e; ++s)
+            *dbgout << Position(s->x, s->xm);
+        *dbgout << json::close;
+    }
+    if (axis < axisMax) // looped through the _ranges array for all axes
+        *dbgout << json::close; // ranges array
+}
+
+void ShiftCollider::outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg)
+{
+        *dbgout << json::object // slot - not closed till the end of the caller method
+                << "slot" << objectid(dslot(seg, _target))
+				<< "gid" << _target->gid()
+                << "limit" << _limit
+                << "target" << json::object
+                    << "origin" << _target->origin()
+                    << "currShift" << _currShift
+                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
+                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "fix" << "shift";
+        *dbgout     << json::close; // target object
+}
+
+void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg,
+	 Position resultPos, int bestAxis, bool isCol)
+{
+    *dbgout << json::close // vectors array
+    << "result" << resultPos
+	//<< "scraping" << _scraping[bestAxis]
+	<< "bestAxis" << bestAxis
+    << "stillBad" << isCol
+    << json::close; // slot object
+}
+
+void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
+	float tleft, float tlen, float bestCost) 
+{
+	const char * label;
+	switch (axis)
+	{
+		case 0:	label = "x";			break;
+		case 1:	label = "y";			break;
+		case 2:	label = "sum (NE-SW)";	break;
+		case 3:	label = "diff (NW-SE)";	break;
+		default: label = "???";			break;
+	}
+
+	*dbgout << json::object // vector
+		<< "direction" << label
+		<< "targetMin" << tleft
+		<< "targetSize" << tlen;
+            
+	outputJsonDbgRawRanges(dbgout, axis);
+	outputJsonDbgRemovals(dbgout, axis);
+    	
+    *dbgout << "ranges";
+    outputJsonDbg(dbgout, seg, axis);
+
+    //*dbgout << "fits" << json::flat << json::array;
+    //for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
+    //    *dbgout << Position(s->first, s->second);
+    //*dbgout << json::close // fits array
+    *dbgout << "bestCost" << bestCost
+        << json::close; // vectors object
+}
+
+void ShiftCollider::outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis)
+{
+    *dbgout << "rawRanges" << json::flat << json::array;
+    for (IntervalSet::ivtpair s = _rawRanges[axis].begin(), e = _rawRanges[axis].end(); s != e; ++s)
+        *dbgout << Position(s->first, s->second);
+    *dbgout << _rawRanges[axis].len() << json::close; // rawRanges array
+}
+
+void ShiftCollider::outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis)
+{
+    *dbgout << "removals" << json::array;  
+            						
+    int gi = 0;
+    for (IntervalSet::ivtpair s = _removals[axis].begin(), e = _removals[axis].end(); s != e; ++s, ++gi)
+    {   //Slot & slotNear = *(_slotNear[axis][gi]);
+        if (_slotNear[axis][gi] == exclSlot)
+        {
+            *dbgout << json::flat << json::array 
+                << "exclude" << _subNear[axis][gi] << Position(s->first, s->second) << json::close;
+        }
+        else
+        {
+            *dbgout << json::flat << json::array 
+                << objectid(dslot(_seg,_slotNear[axis][gi])) 
+                << _subNear[axis][gi] << Position(s->first, s->second);
+			if (_seqRegions[axis][gi].isValid())
+			{
+				Rect t(Position(_seqRegions[axis][gi].r1Xedge, _seqRegions[axis][gi].r2Yedge),
+					Position(_seqRegions[axis][gi].r3Xedge, _seqRegions[axis][gi].r45Mid));
+				*dbgout << "seq:" << t;
+			}
+			else
+				*dbgout << "no-seq";
+				
+			*dbgout << json::close;
+        }
+    }
+    *dbgout << json::close; // removals array
+}
+
+#endif // !defined GRAPHITE2_NTRACING
 
 
 ////    KERN-COLLIDER    ////

@@ -116,7 +116,8 @@ private:
 
 	// For use by algorithm:
 	//bool _canScrape[4];
-};
+	
+};  // end of class SlotColllision
 
 
 class ShiftCollider
@@ -146,34 +147,26 @@ public:
 //    float len(int i) const { return _len[i]; }
 //    void setLen(int i, float v) { _len[i] = v; }
 
+	// Keep track of sequence regions for debugging:
+	struct SeqRegions {
+		float	r1Xedge;	// right of region 1
+		float	r2Yedge;	// top of region 2
+		float	r3Xedge;	// left of region 3
+		float	r45Mid;		// line between regions 4 and 5
+
+		bool isValid() { return (int(r1Xedge) != 0 || int(r2Yedge) != 0 || int(r3Xedge) != 0 || int(r45Mid) != 0); }
+	};
+	typedef Vector<SeqRegions> vecseqreg;
+
 #if !defined GRAPHITE2_NTRACING
-    void debug(json * const dbgout, Segment *seg, int i) {
-//        if (!dbgout) return;
-        int imax = i;
-        if (i < 0)
-        {
-            *dbgout << "gid" << _target->gid()
-                << "limit" << _limit
-                << "target" << json::object
-                    << "origin" << _target->origin()
-                    << "margin" << _margin
-                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                    << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
-                    << json::close; // target object
-            *dbgout << "ranges" << json::array;
-            i = 0;
-            imax = 3;
-        }
-        for (int j = i; j <= imax; ++j)
-        {
-            *dbgout << json::flat << json::array;
-            for (Zones::const_eiter_t s = _ranges[j].begin(), e = _ranges[j].end(); s != e; ++s)
-                *dbgout << Position(s->x, s->xm);
-            *dbgout << json::close;
-        }
-        if (i < imax) // looped through the _ranges array
-            *dbgout << json::close; // ranges array
-    }
+	void outputJsonDbg(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis);
+	void outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg);
+	void outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg,
+		Position resultPos, int bestAxis, bool isCol);
+	void outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
+		float tleft, float tlen, float bestCost);
+	void outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis);
+	void outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis);
 #endif
 
     CLASS_NEW_DELETE;
@@ -207,11 +200,12 @@ protected:
     Segment * _seg;
     IntervalSet _rawRanges[4];
     IntervalSet _removals[4];
+    vecseqreg _seqRegions[4];
     Vector<Slot*>_slotNear[4];
     Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
 #endif
 
-};
+};	// end of class ShiftCollider
 
 class KernCollider
 {
@@ -244,8 +238,8 @@ private:
     Vector<float> _nearEdges; // closest potential collision in each slice
     Vector<Slot*> _slotNear;
 #endif
-};
+};	// end of class KernCollider
 
 
 
-};
+};  // end of namespace graphite2
