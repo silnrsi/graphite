@@ -146,19 +146,19 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 }   // end of ShiftCollider::initSlot
 
 
-inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, float xi, int axis)
+inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float weight, float m, bool minright, int axis)
 {
     float a;
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
+            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y && box.width() > 0)
             {
                 a = org.bl.y - box.bl.y;
-                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, m, xi, 0);
+                _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, m, minright ? box.tr.x : box.bl.x, 0);
             }
             break;
         case 1 :
-            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
+            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x && box.height() > 0)
             {
                 a = org.bl.x - box.bl.x;
                 _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, 0, 0, m * a * a);
@@ -167,15 +167,25 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
-                a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (xi + org.bl.y), 0);
+                float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
+                                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
+                float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
+                                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
+                if (smin > smax) return;
+                a = minright ? (2 * org.tr.x - smax) : (2 * org.bl.x - smin);
+                _ranges[axis].weighted<SD>(smin, smax - smin, weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, minright ? smax : smin, 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
-                a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (xi - org.bl.y), 0);
+                float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
+                                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
+                float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
+                                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
+                if (dmin > dmax) return;
+                a = minright ? (2 * org.tr.x - dmax) : (2 * org.bl.x - dmin);
+                _ranges[axis].weighted<SD>(dmin, dmax - dmin, weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, minright ? dmax : dmin, 0);
             }
             break;
         default :
@@ -184,36 +194,46 @@ inline void ShiftCollider::addBox_slopex(const Rect &box, const Rect &org, float
     return;
 }
 
-inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, float yi, int axis)
+inline void ShiftCollider::addBox_slopey(const Rect &box, const Rect &org, float weight, float m, bool mintop, int axis)
 {
     float a;
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
+            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y && box.width() > 0)
             {
                 a = org.bl.y - box.bl.y;
                 _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, _currShift.x, _currShift.y, a, 0, 0, m * a * a);
             }
             break;
         case 1 :
-            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
+            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x && box.height() > 0)
             {
                 a = org.bl.x - box.bl.x;
-                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, m, yi, 0);
+                _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, _currShift.y, _currShift.x, a, m, mintop ? box.tr.y : box.bl.y, 0);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
-                a = org.bl.x - org.bl.y - box.bl.x + box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x + box.bl.y, box.height() + box.width(), weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, (yi + org.bl.x), 0);
+                float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
+                                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
+                float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
+                                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
+                if (smin > smax) return;
+                a = mintop ? smax - 2 * box.tr.y : smin - 2 * box.bl.y;
+                _ranges[axis].weighted<SD>(smin, smax - smin, weight / 2, _currShift.x + _currShift.y, _currShift.x - _currShift.y, a, m / 2, mintop ? smax : smin, 0);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
-                a = org.bl.x + org.bl.y - box.bl.x - box.bl.y;
-                _ranges[axis].weighted<SD>(box.bl.x - box.bl.y, box.height() + box.width(), weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, (org.bl.x - yi), 0);
+                float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
+                                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
+                float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
+                                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
+                if (dmin > dmax) return;
+                a = mintop ? dmin + 2 * box.tr.y : dmax + 2 * box.bl.y;     // swap max min for d
+                _ranges[axis].weighted<SD>(dmin, dmax - dmin, weight / 2, _currShift.x - _currShift.y, _currShift.x + _currShift.y, a, m / 2, mintop ? dmin : dmax, 0);
             }
             break;
         default :
@@ -226,20 +246,20 @@ inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
 {
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y)
-                _ranges[axis].exclude(box.bl.x, box.width());
+            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y && box.width() > 0)
+                _ranges[axis].exclude(box.bl.x , box.width() + _len[axis]);
             break;
         case 1 :
-            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x)
-                _ranges[axis].exclude(box.bl.y, box.height());
+            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x && box.height() > 0)
+                _ranges[axis].exclude(box.bl.y , box.height() + _len[axis]);
             break;
         case 2 :
-            if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
-                _ranges[axis].exclude(box.bl.x + box.bl.y, box.height() + box.width());
+            if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y && box.width() > 0 && box.height() > 0)
+                _ranges[axis].exclude(box.bl.x + box.bl.y , box.height() + box.width() + _len[axis]);
             break;
         case 3 :
-            if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
-                _ranges[axis].exclude(box.bl.x - box.bl.y, box.height() + box.width());
+            if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y && box.width() > 0 && box.height() > 0)
+                _ranges[axis].exclude(box.bl.x - box.bl.y , box.height() + box.width() + _len[axis]);
             break;
         default :
             break;
@@ -406,37 +426,46 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
-            addBox_slopex(Rect(Position(-1e38, sy + 0.5 * (bb.yi + bb.ya)), Position(sx + 0.5 * (bb.xi + bb.xa), 1e38)),
-                            org, 0, seq_above_wt, sx + 0.5 * (bb.xi + bb.xa), i);
+            addBox_slopex(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
+                            Position(sx + 0.5 * (bb.xi + bb.xa), _limit.tr.y + _target->origin().y)),
+                            org, 0, seq_above_wt, true, i);
             // region 2
-            removeBox(Rect(Position(-1e38, -1e38), Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya))), org, i);
+            removeBox(Rect(_limit.bl + _target->origin(), Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))), org, i);
             // region 3
-            addBox_slopex(Rect(Position(-1e38, -1e38), Position(sx + bb.xi, sy + bb.yi)), 
-                            org, seq_below_wt, 0, 0, i);
+            addBox_slopex(Rect(Position(sx + bb.xa, _limit.bl.y + _target->origin().y),
+                                Position(_limit.tr.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))), 
+                            org, seq_below_wt, 0, true, i);
             // region 4
-            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi), Position(1e38, sy + 0.5 * (bb.yi + bb.ya))),
-                            org, 0, seq_valign_wt, sy + 0.5 * (bb.yi + bb.ya), i);
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
+                            Position(_limit.tr.x + _target->origin().x, sy + bb.ya - 0.5 * (tbb.yi + tbb.ya))),
+                            org, 0, seq_valign_wt, true, i);
             // region 5
-            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - tbb.ya), Position(1e38, sy + bb.yi)),
-                            org, 0, seq_valign_wt, sy + bb.yi, i);
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
+                            Position(_limit.tr.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
+                            org, 0, seq_valign_wt, false, i);
         }
         else if (enforceOrder < 0)  // enforce neighboring glyph being right/up
         {
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
-            addBox_slopex(Rect(Position(sx + 0.5 * (bb.xi + bb.xa), -1e38), Position(1e38, sy + 0.5 * (bb.yi + bb.ya))),
-                            org, 0, seq_above_wt, sx + 0.5 * (bb.xi + bb.xa), i);
+            addBox_slopex(Rect(Position(sx + 0.5 * (bb.xi + bb.xa), _limit.bl.y + _target->origin().y),
+                            Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
+                            org, 0, seq_above_wt, false, i);
             // region 2
-            removeBox(Rect(Position(sx + bb.xi, sy + bb.yi), Position(1e38, 1e38)), org, i);
+            removeBox(Rect(Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
+                            _limit.tr + _target->origin()), org, i);
             // region 3
-            addBox_slopex(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, 1e38)),
-                            org, seq_below_wt, 0, 0, i);
+            addBox_slopex(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
+                                Position(sx + bb.xa, _limit.tr.y + _target->origin().y)),
+                            org, seq_below_wt, 0, true, i);
             // region 4
-            addBox_slopey(Rect(Position(-1e38, sy + bb.yi), Position(sx + bb.xa, sy + 0.5 * (bb.yi + bb.ya))),
-                            org, 0, seq_valign_wt, sy + 0.5 * (bb.yi + bb.ya), i);
+            addBox_slopey(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
+                            Position(sx + bb.xa, sy + bb.ya - 0.5 * (tbb.yi + tbb.ya))),
+                            org, 0, seq_valign_wt, true, i);
             // region 5
-            addBox_slopey(Rect(Position(-1e38, sy + bb.yi - tbb.ya), Position(sx + bb.xa, sy + bb.yi)),
-                            org, 0, seq_valign_wt, sy + bb.yi, i);
+            addBox_slopey(Rect(Position(_limit.bl.x + _target->origin().x, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
+                            Position(sx + bb.xa, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
+                            org, 0, seq_valign_wt, true, i);
         }
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
@@ -629,7 +658,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestPos = _ranges[i].closest(tbase, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
+        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - (tbase - tval);     // returns absolute, convert to shift.
         Position testp;
         switch (i) {
             case 0 : testp = Position(bestPos, _currShift.y); break;
@@ -809,6 +838,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     float sliceWidth;
     while (base->attachedTo())
         base = base->attachedTo();
+    if (margin < 10) margin = 10;
 
     _limit = limit;
     _offsetPrev = offsetPrev; // kern from a previous pass

@@ -171,7 +171,7 @@ void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UN
     insert(Exclusion(pos, pos+len,
 		m + f,
 		m * xi + f * shift,
-		m * xi * xi + f * shift * shift + f * a  * a + c));
+		m * xi * xi + f * shift * shift + f * a * a + c));
 }
 
 template<>
