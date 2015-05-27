@@ -657,7 +657,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 break;
         }
         isGoodFit = 0;
-        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - (tbase - tval);     // returns absolute, convert to shift.
+        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
         Position testp;
         switch (i) {
             case 0 : testp = Position(bestPos, _currShift.y); break;
