@@ -71,7 +71,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = _limit.tr.x + aSlot->origin().x;
                 _len[i] = bb.xa - bb.xi;
                 shift = currOffset.x;
-                oshift = currOffset.y;
+                oshift = currOffset.y + currShift.y;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 1 :	// y direction
@@ -79,7 +79,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = _limit.tr.y + aSlot->origin().y;
                 _len[i] = bb.ya - bb.yi;
                 shift = currOffset.y;
-                oshift = currOffset.x;
+                oshift = currOffset.x + currShift.x;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
@@ -87,7 +87,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
                 _len[i] = sb.sa - sb.si;
                 shift = currOffset.x + currOffset.y;
-                oshift = currOffset.x - currOffset.y;
+                oshift = currOffset.x - currOffset.y + currShift.x - currOffset.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
@@ -97,7 +97,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
                 _len[i] = sb.da - sb.di;
                 shift = currOffset.x - currOffset.y;
-                oshift = currOffset.x + currOffset.y;
+                oshift = currOffset.x + currOffset.y + currShift.x + currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
