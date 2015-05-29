@@ -70,24 +70,24 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.x + aSlot->origin().x;
                 max = _limit.tr.x + aSlot->origin().x;
                 _len[i] = bb.xa - bb.xi;
-                shift = currShift.x;
-                oshift = currShift.y;
+                shift = currOffset.x;
+                oshift = currOffset.y;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + aSlot->origin().y;
                 max = _limit.tr.y + aSlot->origin().y;
                 _len[i] = bb.ya - bb.yi;
-                shift = currShift.y;
-                oshift = currShift.x;
+                shift = currOffset.y;
+                oshift = currOffset.x;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, shift, oshift, oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
                 _len[i] = sb.sa - sb.si;
-                shift = currShift.x + currShift.y;
-                oshift = currShift.x - currShift.y;
+                shift = currOffset.x + currOffset.y;
+                oshift = currOffset.x - currOffset.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
                 //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
@@ -96,8 +96,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
                 _len[i] = sb.da - sb.di;
-                shift = currShift.x - currShift.y;
-                oshift = currShift.x + currShift.y;
+                shift = currOffset.x - currOffset.y;
+                oshift = currOffset.x + currOffset.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
                 // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
@@ -426,61 +426,61 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
         
 		SeqRegions seqReg;
-        if (enforceOrder > 0) // enforce neighboring glyph being left /down
+        if (enforceOrder > 0) // enforce neighboring glyph being left /down (diagram 1)
         {
+            float xminf = _limit.bl.x + _target->origin().x;
+            float xpinf = _limit.tr.x + _target->origin().x;
+            float ypinf = _limit.tr.y + _target->origin().y;
+            float yminf = _limit.bl.y + _target->origin().y;
+            float r1Xedge = sx + bb.xa + cslot->seqAboveXoff();
+            float r3Xedge = sx + bb.xa + cslot->seqBelowXlim();
+            float r2Yedge = sy + bb.yi + 0.5 * cslot->seqValignHt();
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
-            addBox_slopex(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
-                            Position(sx + 0.5 * (bb.xi + bb.xa), _limit.tr.y + _target->origin().y)),
-                            org, 0, seq_above_wt, true, i);
+            addBox_slopex(Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), org, 0, seq_above_wt, true, i);
             // region 2
-            removeBox(Rect(_limit.bl + _target->origin(), Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))), org, i);
+            removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), org, i);
             // region 3
-            addBox_slopex(Rect(Position(sx + bb.xa, _limit.bl.y + _target->origin().y),
-                                Position(_limit.tr.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))), 
-                            org, seq_below_wt, 0, true, i);
+            addBox_slopex(Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), org, seq_below_wt, 0, true, i);
             // region 4
-            addBox_slopey(Rect(Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
-                            Position(_limit.tr.x + _target->origin().x, sy + bb.ya - 0.5 * (tbb.yi + tbb.ya))),
-                            org, 0, seq_valign_wt, true, i);
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi), Position(xpinf, r2Yedge)), org, 0, seq_valign_wt, true, i);
             // region 5
-            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
-                            Position(_limit.tr.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
+            addBox_slopey(Rect(Position(sx + bb.xi, sy + bb.yi), Position(xpinf, sy + bb.yi - 0.5 * cslot->seqValignHt())),
                             org, 0, seq_valign_wt, false, i);
 #if !defined GRAPHITE2_NTRACING
-			seqReg.r1Xedge = sx + 0.5 * (bb.xi + bb.xa);
-			seqReg.r2Yedge = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
-			seqReg.r3Xedge = sx + bb.xa;
-			seqReg.r45Mid  = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+			seqReg.r1Xedge = r1Xedge;
+			seqReg.r2Yedge = r2Yedge;
+			seqReg.r3Xedge = r3Xedge;
+			seqReg.r45Mid  = sy + bb.yi;
 #endif
         }
-        else if (enforceOrder < 0)  // enforce neighboring glyph being right/up
+        else if (enforceOrder < 0)  // enforce neighboring glyph being right/up (diagram 2)
         {
+            float xminf = _limit.bl.x + _target->origin().x;
+            float xpinf = _limit.tr.x + _target->origin().x;
+            float ypinf = _limit.tr.y + _target->origin().y;
+            float yminf = _limit.bl.y + _target->origin().y;
+            float r1Xedge = sx + bb.xi - cslot->seqAboveXoff();
+            float r3Xedge = sx + bb.xi - cslot->seqBelowXlim();
+            float r2Yedge = sy + bb.yi + 0.5 * cslot->seqValignHt();
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
-            addBox_slopex(Rect(Position(sx + 0.5 * (bb.xi + bb.xa), _limit.bl.y + _target->origin().y),
-                            Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
-                            org, 0, seq_above_wt, false, i);
+            addBox_slopex(Rect(Position(r1Xedge, yminf), Position(xminf, r2Yedge)), org, 0, seq_above_wt, false, i);
             // region 2
-            removeBox(Rect(Position(sx + bb.xi, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
-                            _limit.tr + _target->origin()), org, i);
+            removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), org, i);
             // region 3
-            addBox_slopex(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
-                                Position(sx + bb.xa, _limit.tr.y + _target->origin().y)),
-                            org, seq_below_wt, 0, true, i);
+            addBox_slopex(Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), org, seq_below_wt, 0, true, i);
             // region 4
-            addBox_slopey(Rect(Position(_limit.bl.x + _target->origin().x, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya)),
-                            Position(sx + bb.xa, sy + bb.ya - 0.5 * (tbb.yi + tbb.ya))),
+            addBox_slopey(Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, sy + bb.yi)),
                             org, 0, seq_valign_wt, true, i);
             // region 5
-            addBox_slopey(Rect(Position(_limit.bl.x + _target->origin().x, sy + bb.yi - 0.5 * (tbb.yi + tbb.ya)),
-                            Position(sx + bb.xa, sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya))),
-                            org, 0, seq_valign_wt, true, i);
+            addBox_slopey(Rect(Position(xminf, sy + bb.yi - 0.5 * cslot->seqValignHt()),
+                            Position(sx + bb.xa, sy + bb.yi)), org, 0, seq_valign_wt, false, i);
 #if !defined GRAPHITE2_NTRACING
-			seqReg.r1Xedge = sx + 0.5 * (bb.xi + bb.xa);
-			seqReg.r2Yedge = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
-			seqReg.r3Xedge = sx + bb.xa;
-			seqReg.r45Mid  = sy + 0.5 * (bb.yi + bb.ya - tbb.yi - tbb.ya);
+			seqReg.r1Xedge = r1Xedge;
+			seqReg.r2Yedge = r2Yedge;
+			seqReg.r3Xedge = r3Xedge;
+			seqReg.r45Mid  = sy + bb.yi;
 		}
 		else
 		{
@@ -607,13 +607,11 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     int gid = _target->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
-    float margin, marginMin;
     float tlen, tleft, tbase, tval;
     float totalCost = (float)(std::numeric_limits<float>::max() / 2.);
     Position resultPos = Position(0, 0);
 	int bestAxis = -1;
     // float cmax, cmin;
-    int isGoodFit, tIsGoodFit = 0;
     IntervalSet aFit;
     // int flags = seg->collisionInfo(_target)->flags();
     Position currOffset = seg->collisionInfo(_target)->offset();
@@ -624,12 +622,12 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         *dbgout << "vectors" << json::array;
     }
 #endif
+    isCol = true;
     for (int i = 0; i < 4; ++i)
     {
-        float bestCost = std::numeric_limits<float>::max();
+        float bestCost = -1;
         float bestPos;
         // Calculate the margin depending on whether we are moving diagonally or not:
-        margin = seg->collisionInfo(_target)->margin() * (i > 1 ? ISQRT2 : 1.f);
         switch (i) {
             case 0 :	// x direction
                 tlen = bb.xa - bb.xi;
@@ -656,44 +654,31 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
                 tval = currOffset.y - currOffset.x;
                 break;
         }
-        isGoodFit = 0;
-        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
         Position testp;
-        switch (i) {
-            case 0 : testp = Position(bestPos, _currShift.y); break;
-            case 1 : testp = Position(_currShift.x, bestPos); break;
-            case 2 : testp = Position(0.5 * (bestPos + _currShift.x - _currShift.y), 0.5 * (bestPos - _currShift.x + _currShift.y)); break;
-            case 3 : testp = Position(0.5 * (bestPos + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
-        }
+        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
-            outputJsonDbgOneVector(dbgout, seg, i, tleft, tlen, bestCost) ;
+            outputJsonDbgOneVector(dbgout, seg, i, tbase, tlen, bestCost, bestPos) ;
         }
 #endif
-        // bestCost = testPos.x * testPos.x + testPos.y * testPos.y;
-        // bestCost = _ranges[i].bestfit(tleft - margin, tleft + tlen + margin, isGoodFit);
-        // bestCost += bestCost > 0.f ? -margin : margin;
-        
-        // See if this direction is the best one so far to move in.
-        // Don't replace a good-fit move with a bad-fit move.
-        if ((isGoodFit > tIsGoodFit) || ((isGoodFit == tIsGoodFit) && fabs(bestCost) < totalCost))
+        if (bestCost >= 0.0)
         {
-            totalCost = fabs(bestCost);
-            tIsGoodFit = isGoodFit;
-            resultPos = testp;
-			bestAxis = i;
+            isCol = false;
+            switch (i) {
+                case 0 : testp = Position(bestPos, _currShift.y); break;
+                case 1 : testp = Position(_currShift.x, bestPos); break;
+                case 2 : testp = Position(0.5 * (bestPos + _currShift.x - _currShift.y), 0.5 * (bestPos - _currShift.x + _currShift.y)); break;
+                case 3 : testp = Position(0.5 * (bestPos + _currShift.x + _currShift.y), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
+            }
+            if (bestCost < totalCost)
+            {
+                totalCost = bestCost;
+                resultPos = testp;
+                bestAxis = i;
+            }
         }
     }  // end of loop over 4 directions
-    
-    isCol = (tIsGoodFit == 0);
-
-	//if (_scraping[bestAxis])
-	//{
-	//	isCol = true;
-	//	// Only allowed to scrape once.
-	//	seg->collisionInfo(_target)->setCanScrape(bestAxis, false);
-	//}
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
@@ -732,7 +717,7 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
     {
         *dbgout << json::flat << json::array;
         for (Zones::const_eiter_t s = _ranges[iAxis].begin(), e = _ranges[iAxis].end(); s != e; ++s)
-            *dbgout << Position(s->x, s->xm);
+            *dbgout << Position(s->x, s->xm) << s->c << s->sm << s->smx;
         *dbgout << json::close;
     }
     if (axis < axisMax) // looped through the _ranges array for all axes
@@ -766,7 +751,7 @@ void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Se
 }
 
 void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
-	float tleft, float tlen, float bestCost) 
+	float tleft, float tlen, float bestCost, float bestVal) 
 {
 	const char * label;
 	switch (axis)
@@ -794,6 +779,7 @@ void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, 
     //    *dbgout << Position(s->first, s->second);
     //*dbgout << json::close // fits array
     *dbgout << "bestCost" << bestCost
+        << "bestVal" << bestVal
         << json::close; // vectors object
 }
 

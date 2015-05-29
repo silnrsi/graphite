@@ -347,7 +347,7 @@ float Zones::closest(float origin, float width, float & cost) const
         if (i->track_cost(best_c, best_x, origin)) break;
     }
 
-    cost = best_c;
+    cost = (best_c == std::numeric_limits<float>::max() ? -1 : best_c);
     return best_x;
 }
 

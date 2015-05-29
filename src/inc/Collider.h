@@ -40,6 +40,7 @@ class json;
 class Slot;
 
 #define SLOTCOLSETUINTPROP(x, y) uint16 x() const { return _ ##x; } void y (uint16 v) { _ ##x = v; }
+#define SLOTCOLSETINTPROP(x, y) int16 x() const { return _ ##x; } void y (int16 v) { _ ##x = v; }
 #define SLOTCOLSETPOSITIONPROP(x, y) const Position &x() const { return _ ##x; } void y (const Position &v) { _ ##x = v; }
 
 // Slot attributes related to collision-fixing
@@ -83,9 +84,9 @@ public:
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
     SLOTCOLSETUINTPROP(seqClass, setSeqClass)
     SLOTCOLSETUINTPROP(seqOrder, setSeqOrder)
-    SLOTCOLSETUINTPROP(seqAboveXoff, setSeqAboveXoff)
+    SLOTCOLSETINTPROP(seqAboveXoff, setSeqAboveXoff)
     SLOTCOLSETUINTPROP(seqAboveWt, setSeqAboveWt)
-    SLOTCOLSETUINTPROP(seqBelowXlim, setSeqBelowXlim)
+    SLOTCOLSETINTPROP(seqBelowXlim, setSeqBelowXlim)
     SLOTCOLSETUINTPROP(seqBelowWt, setSeqBelowWt)
     SLOTCOLSETUINTPROP(seqValignHt, setSeqValignHt)
     SLOTCOLSETUINTPROP(seqValignWt, setSeqValignWt)
@@ -107,9 +108,9 @@ private:
     uint16		_exclGlyph;
     uint16		_seqClass;
     uint16		_seqOrder;
-    uint16		_seqAboveXoff;
+    int16		_seqAboveXoff;
     uint16		_seqAboveWt;
-    uint16		_seqBelowXlim;
+    int16		_seqBelowXlim;
     uint16		_seqBelowWt;
     uint16		_seqValignHt;
     uint16		_seqValignWt;
@@ -164,7 +165,7 @@ public:
 	void outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg,
 		Position resultPos, int bestAxis, bool isCol);
 	void outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
-		float tleft, float tlen, float bestCost);
+		float tleft, float tlen, float bestCost, float bestVal);
 	void outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis);
 	void outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis);
 #endif
