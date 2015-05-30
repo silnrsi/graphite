@@ -179,7 +179,8 @@ inline
 void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift,
 			float a, float m, float xi, float c)
 {
-    insert(Exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift - oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c));
+//    insert(Exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift - oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c));
+    insert(Exclusion(pos, pos+len, 0.25 * (m + 2 * f), -0.5 * (m * (xi + a) + 2 * f * shift), 0.25 * (m * (xi - a) * (xi - a) + 2 * f * (shift * shift + oshift * oshift)) + c));
 }
 
 } // end of namespace graphite2
