@@ -36,6 +36,7 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
+#if 0
 class IntervalSet
 {
 public:
@@ -66,55 +67,52 @@ private:
     vtpair _v;
 };
 
-
+#endif
 
 enum zones_t {SD, XY};
 
 class Zones
 {
-protected:
     struct Exclusion
     {
+        template<zones_t O>
+        static Exclusion weighted(float pos, float len, float f,
+                float shift, float oshift, float a,
+                float m, float xi, float c);
+
         float   x,  // x position
                 xm, // xmax position
                 c,  // constant + sum(MiXi^2)
                 sm, // sum(Mi)
                 smx; // sum(MiXi)
+        bool    open;
 
         Exclusion(float x, float w, float smi, float smxi, float c);
-        void operator += (const Exclusion & rhs);
+        Exclusion & operator += (Exclusion const & rhs);
         uint8 outcode(float p) const;
 
-        Exclusion   overlap_by(Exclusion & rhs);
-        Exclusion   covered_by(Exclusion & over);
+        Exclusion   split_at(float p);
+        void        left_trim(float p);
 
-        bool        null_zone() const;
-        bool        open_zone() const;
-
-        bool track_cost(float & cost, float & x, float origin) const;
+        bool        track_cost(float & cost, float & x, float origin) const;
 
     private:
         float test_position() const;
         float cost(float x) const;
      };
  
+    typedef Vector<Exclusion>                   exclusions;
 
-    void insert(Exclusion e);
-
-private:
-    typedef Vector<Exclusion>                    exclusions;
-    typedef /*typename*/ exclusions::iterator    eiter_t;  // SC: typename does not compile in VisualStudio
-
-    exclusions  _exclusions;
-    float       _margin_len,
-                _margin_weight,
-                _pos,
-                _len;
-
-    friend class Exclusion;
+    typedef exclusions::iterator                iterator;
+    typedef Exclusion *                         pointer;
+    typedef Exclusion &                         reference;
+    typedef std::reverse_iterator<iterator>     reverse_iterator;
 
 public:
-    typedef /*typename*/ exclusions::const_iterator  const_eiter_t;   // SC: typename does not compile in VisualStudio
+    typedef exclusions::const_iterator              const_iterator;
+    typedef Exclusion const *                       const_pointer;
+    typedef Exclusion const &                       const_reference;
+    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
 
     Zones();
     template<zones_t O>
@@ -128,59 +126,86 @@ public:
 
     float closest( float origin, float width, float &cost) const;
 
-    const_eiter_t begin() const { return _exclusions.begin(); }
-    const_eiter_t end() const { return _exclusions.end(); }
-    
+    const_iterator begin() const { return _exclusions.begin(); }
+    const_iterator end() const { return _exclusions.end(); }
 
 private:
-    const_eiter_t find_exclusion(float x) const;
-    void insert_triple(Exclusion & l, Exclusion & m, Exclusion & r);
+    exclusions  _exclusions;
+    float       _margin_len,
+                _margin_weight,
+                _pos,
+                _posm;
 
+    void            insert(Exclusion e);
+    void            remove(float x, float xm);
+    const_iterator  find_exclusion_under(float x) const;
 };
 
 
 inline
 Zones::Zones()
 : _margin_len(0), _margin_weight(0),
-  _pos(0), _len(0)
+  _pos(0), _posm(0)
 {
     _exclusions.reserve(8);
 }
 
 inline
 Zones::Exclusion::Exclusion(float x_, float xm_, float smi, float smxi, float c_)
-: x(x_), xm(xm_), c(c_), sm(smi), smx(smxi)
+: x(x_), xm(xm_), c(c_), sm(smi), smx(smxi), open(false)
 { }
 
 template<zones_t O>
 inline
-void Zones::initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift, float a)
+void Zones::initialise(float pos, float len, float margin_len,
+        float margin_weight, float shift, float oshift, float a)
 {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _pos = pos;
-    _len = len;
+    _posm = pos+len;
     _exclusions.clear();
-    weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0);
+    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0));
+    _exclusions.front().open = true;
+}
+
+inline
+void Zones::exclude(float pos, float len) {
+    remove(pos, pos+len);
+}
+
+template<zones_t O>
+inline
+void Zones::weighted(float pos, float len, float f,
+        float shift, float oshift, float a,
+        float m, float xi, float c) {
+    insert(Exclusion::weighted<O>(pos, len, f, shift, oshift, a, m, xi, c));
 }
 
 template<>
 inline
-void Zones::weighted<XY>(float pos, float len, float f, float shift, GR_MAYBE_UNUSED float oshift,
-			float a, float m, float xi, float c){
-    insert(Exclusion(pos, pos+len,
-		m + f,
-		m * xi + f * shift,
-		m * xi * xi + f * shift * shift + f * a * a + c));
+Zones::Exclusion Zones::Exclusion::weighted<XY>(float pos, float len, float f,
+        float shift, GR_MAYBE_UNUSED float oshift, float a,
+        float m, float xi, float c) {
+    return Exclusion(pos, pos+len,
+            m + f,
+            m * xi + f * shift,
+            m * xi * xi + f * shift * shift + f * a  * a + c);
 }
 
 template<>
 inline
-void Zones::weighted<SD>(float pos, float len, float f, float shift, float oshift,
-			float a, float m, float xi, float c)
-{
-//    insert(Exclusion(pos, pos+len, m + f, m * (xi + a) + f * (shift - oshift), m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c));
-    insert(Exclusion(pos, pos+len, 0.25 * (m + 2 * f), -0.5 * (m * (xi + a) + 2 * f * shift), 0.25 * (m * (xi - a) * (xi - a) + 2 * f * (shift * shift + oshift * oshift)) + c));
+Zones::Exclusion Zones::Exclusion::weighted<SD>(float pos, float len, float f,
+        float shift, float oshift, float a,
+        float m, float xi, float c) {
+//    return Exclusion(pos, pos+len,
+//            m + f,
+//            m * (xi + a) + f * (shift - oshift),
+//            m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c);
+    return Exclusion(pos, pos+len, 
+            0.25 * (m + 2 * f), 
+            -0.5 * (m * (xi + a) + 2 * f * shift), 
+            0.25 * (m * (xi - a) * (xi - a) + 2 * f * (shift * shift + oshift * oshift)) + c);
 }
 
 } // end of namespace graphite2

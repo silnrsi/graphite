@@ -612,7 +612,7 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
     Position resultPos = Position(0, 0);
 	int bestAxis = -1;
     // float cmax, cmin;
-    IntervalSet aFit;
+    // IntervalSet aFit;
     // int flags = seg->collisionInfo(_target)->flags();
     Position currOffset = seg->collisionInfo(_target)->offset();
 #if !defined GRAPHITE2_NTRACING

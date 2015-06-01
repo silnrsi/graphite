@@ -25,13 +25,15 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include <algorithm>
-#include <cmath>
 #include <limits>
 
 #include "inc/Intervals.h"
 
 using namespace graphite2;
 
+#if 0
+
+#include <cmath>
 
 ///  INTERVAL SET  ///
 
@@ -145,57 +147,29 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
     else
         return lres;
 }
+#endif
 
-
-///  ZONES  ///
-
-// Overlap b on right hand edge of *this.
-//   *this is updated to end at the start of b.
-//   b is truncated to start at the end *this.
-//   The return value is the overlapped zone where parameters are merged.
-Zones::Exclusion Zones::Exclusion::overlap_by(Exclusion & b)
-{
-    Exclusion r(b.x, xm, sm+b.sm, smx+b.smx, c+b.c);
-    xm = b.x;
-    b.x = r.xm;
-
+inline
+Zones::Exclusion  Zones::Exclusion::split_at(float p) {
+    Exclusion r(*this);
+    r.xm = x = p;
     return r;
 }
 
-// Cover *this with o
-// Update *this with merged parameters.
-// o is truncated to start at end of *this.
-// Return region over beyond the lhs of *this.
-Zones::Exclusion Zones::Exclusion::covered_by(Exclusion & o)
-{
-    Exclusion r = o;
-    r.xm = x;
-    o.x = xm;
-    c  += o.c;
-    sm += o.sm;
-    smx += o.smx;
-
-    return r;
+inline
+void Zones::Exclusion::left_trim(float p) {
+    x = p;
 }
 
+inline
+Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
+    c += rhs.c; sm += rhs.sm; smx += rhs.smx;
+    return *this;
+}
 
 inline
 uint8 Zones::Exclusion::outcode(float p) const {
-    return ((xm < p) << 1) | (p < x);
-}
-
-inline
-bool Zones::Exclusion::open_zone() const {
-    return c == 1 && sm == 0.0f;
-}
-
-inline
-bool Zones::Exclusion::null_zone() const {
-    return c == std::numeric_limits<float>::infinity();
-}
-
-void Zones::exclude(float pos, float len) {
-    insert(Exclusion(pos, pos+len, 0, 0, std::numeric_limits<float>::infinity()));
+    return ((p >= xm) << 1) | (p < x);
 }
 
 
@@ -203,123 +177,113 @@ void Zones::exclude(float pos, float len) {
 void Zones::exclude_with_margins(float pos, float len) {
     float t = pos - _margin_len;
     insert(Exclusion(pos-_margin_len, pos, _margin_weight, _margin_weight * t, _margin_weight * t * t));
-    insert(Exclusion(pos, pos+len, 0, 0, std::numeric_limits<float>::infinity()));
+    remove(pos, pos+len);
     t = pos + len + _margin_len;
     insert(Exclusion(pos+len, pos+len+_margin_len, _margin_weight, _margin_weight * t, _margin_weight * t * t));
 }
 
 
-void Zones::insert_triple(Exclusion & l, Exclusion & m, Exclusion & r)
-{
-
-}
-
 void Zones::insert(Exclusion e)
 {
     e.x = std::max(e.x, _pos);
-    e.xm = std::min(e.xm, _pos+_len);
+    e.xm = std::min(e.xm, _posm);
     if (e.x >= e.xm) return;
 
-    for (eiter_t i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
+    for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
     {
         const uint8 oca = e.outcode(i->x),
-                    ocb = e.outcode(i->xm-0.5);
-        if ((oca & ocb) == 0)     // We have an overlap here
-        {
-            switch (oca ^ ocb)  // What kind of overlap?
-            {
-            case 0:     // e completely covers i
-                // split e at i.x into e1,e2
-                // split e2 at i.mx into e2,e3
-                // i+e2
-                if (i->x == e.x)
-                    i->covered_by(e);
-                else
-                {
-                    i = _exclusions.insert(i, i->covered_by(e));
-                    ++i;
-                }
-                break;
-            case 1:     // e overlaps on the rhs of i
-            {
-                // split i at e->x into i1,i2
-                // split e at i.mx into e1,e2
-                // insert i1, i2+e1, insert e2
-                Exclusion &l = *i;
-                if (i->x == e.x)
-                    l = l.overlap_by(e);
-                else
-                    i = _exclusions.insert(++i, l.overlap_by(e));
-                break;
-            }
-            case 2:     // e overlaps on the lhs of i
-                // split e at i->x into e1,e2
-                // split i at e.mx into i1,i2
-                // insert e1, e2+i1, insert i2
-                i = _exclusions.insert(i, e.overlap_by(*i));
-                i = _exclusions.insert(i, e);
-                return;
-            case 3:     // i completely covers e
-                // split i at e.x into i1,i2
-                // split i2 at e.mx into i2,i3
-                // e+i2
-                if (i->x == e.x)
-                {
-                    e.covered_by(*i);
-                    i = _exclusions.insert(i, e);
-                }
-                else
-                {
-                    i = _exclusions.insert(i, e.covered_by(*i));
-                    i = _exclusions.insert(++i, e);
-                }
-                return;
-            }
+                    ocb = e.outcode(i->xm);
+        if ((oca & ocb) != 0) continue;
 
-            ie = _exclusions.end();
-        }
-        else if ((oca & ocb) == 2) // e doesn't overlap i but is completely to it's left
+        switch (oca ^ ocb)  // What kind of overlap?
         {
-            _exclusions.insert(i, e);
+        case 0:     // e completely covers i
+            // split e at i.x into e1,e2
+            // split e2 at i.mx into e2,e3
+            // drop e1 ,i+e2, e=e3
+            *i += e;
+            e.left_trim(i->xm);
+            break;
+        case 1:     // e overlaps on the rhs of i
+            // split i at e->x into i1,i2
+            // split e at i.mx into e1,e2
+            // trim i1, insert i2+e1, e=e2
+            if (i->x != e.x)   { i = _exclusions.insert(i,i->split_at(e.x)); ++i; }
+            *i += e;
+            e.left_trim(i->xm);
+            break;
+        case 2:     // e overlaps on the lhs of i
+            // split e at i->x into e1,e2
+            // split i at e.mx into i1,i2
+            // drop e1, insert e2+i1, trim i2
+            if (e.xm != i->xm) i = _exclusions.insert(i,i->split_at(e.xm));
+            *i += e;
+            return;
+        case 3:     // i completely covers e
+            // split i at e.x into i1,i2
+            // split i2 at e.mx into i2,i3
+            // insert i1, insert e+i2
+            if (e.xm != i->xm) i = _exclusions.insert(i,i->split_at(e.xm));
+            i = _exclusions.insert(i, i->split_at(e.x));
+            *++i += e;
             return;
         }
-    }
 
-    // If there is any exclusion remaining just add it to the end
-    if (e.x != e.xm)
-        _exclusions.push_back(e);
+        ie = _exclusions.end();
+    }
 }
 
 
-Zones::const_eiter_t Zones::find_exclusion(float x) const
+void Zones::remove(float x, float xm)
 {
-#if 0
-    // Binary search
-    if (_exclusions.size() > 0)
+    x = std::max(x, _pos);
+    xm = std::min(xm, _posm);
+    if (x >= xm) return;
+
+    for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie; ++i)
     {
-        int pivot = _exclusions.size()/2,
-            width = _exclusions.size()/4;
+        const uint8 oca = i->outcode(x),
+                    ocb = i->outcode(xm);
+        if ((oca & ocb) != 0)   continue;
 
-        do
+        switch (oca ^ ocb)  // What kind of overlap?
         {
-            const exclusion & e = _exclusions[pivot];
+        case 0:     // i completely covers e
+            if (i->x != x)  { i = _exclusions.insert(i,i->split_at(x)); ++i; }
+            // no break
+        case 1:     // i overlaps on the rhs of e
+            i->left_trim(xm);
+            return;
+        case 2:     // i overlaps on the lhs of e
+            i->xm = x;
+            if (i->x != i->xm) break;
+            // no break
+        case 3:     // e completely covers i
+            i = _exclusions.erase(i);
+            --i;
+            break;
+        }
 
-            switch (e.outcode(x))
-            {
-            case 0 : return _exclusions.begin()+pivot;
-            case 1 : pivot -= width; break;
-            case 2 : pivot += width; break;
-            }
+        ie = _exclusions.end();
+    }
+}
 
-            ++width /= 2;
-        } while (width > 1);
+
+Zones::const_iterator Zones::find_exclusion_under(float x) const
+{
+    int l = 0, h = _exclusions.size();
+
+    while (l != h)
+    {
+        int const p = (l+h) >> 1;
+        switch (_exclusions[p].outcode(x))
+        {
+        case 0 : return _exclusions.begin()+p;
+        case 1 : h = p; break;
+        case 2 : l = p+1; break;
+        }
     }
 
-#else
-    // Simple linear scan in case binary search is buggy
-    for (const_eiter_t i = _exclusions.begin(), ie = _exclusions.end(); i != ie; ++i)
-        if (i->outcode(x) == 0) return i;
-#endif
     return _exclusions.end();
 }
 
@@ -329,23 +293,17 @@ float Zones::closest(float origin, float width, float & cost) const
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;
 
-    const const_eiter_t start = find_exclusion(origin);
+    const const_iterator start = find_exclusion_under(origin);
 
     // Forward scan looking for lowest cost
-    for (const_eiter_t i = start, ie = _exclusions.end(); i != ie; ++i)
-    {
-        if (i->null_zone()) continue;
+    for (const_iterator i = start, ie = _exclusions.end(); i != ie; ++i)
         if (i->track_cost(best_c, best_x, origin)) break;
-    }
 
     // Backward scan looking for lowest cost
     //  We start from the exclusion to the immediate left of start since we've
     //  already tested start with the right most scan above.
-    for (const_eiter_t i = start-1, ie = _exclusions.begin()-1; i != ie; --i)
-    {
-        if (i->null_zone()) continue;
+    for (const_iterator i = start-1, ie = _exclusions.begin()-1; i != ie; --i)
         if (i->track_cost(best_c, best_x, origin)) break;
-    }
 
     cost = (best_c == std::numeric_limits<float>::max() ? -1 : best_c);
     return best_x;
@@ -353,13 +311,11 @@ float Zones::closest(float origin, float width, float & cost) const
 
 
 // Cost and test position functions
-// these are the only methods that *need* to be specialised based on
-// template parameter.
 
 bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos, float origin) const {
     const float p = test_position(),
                 localc = cost(p - origin);
-    if (open_zone() && localc > best_cost) return true;
+    if (open && localc > best_cost) return true;
 
     if (localc < best_cost)
     {
@@ -368,6 +324,7 @@ bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos, float ori
     }
     return false;
 }
+
 
 float Zones::Exclusion::cost(float p) const {
     return (sm * p - 2 * smx) * p + c;
