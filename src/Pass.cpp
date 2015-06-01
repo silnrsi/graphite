@@ -897,8 +897,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     bool collides = false;
     SlotCollision *cFix = seg->collisionInfo(slotFix);
     bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginWt(),
-            cFix->shift(), cFix->offset(), dir, dbgout);
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -931,15 +930,4 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     return 0.;
 }
 
-
-// find cluster base
-// find cluster ymin, ymax
-// find bound for each slice (slice being cslot->margin() tall)
-// iterate forward from slot to end + 1 (including slot as possible end)
-    // for each slot is xmax - base.xmin > currmax, then skip
-    // is it a space glyph, then subtract advance from mindiff. If mindiff < 0 then undo subtract, update advance and return
-    // test each box/subbox against slice value in x
-        // if possible test slice+1 and slice-1 at angle
-        // if OK, perahps update mindiff
-// return mindiff + currKern and update advance or whatever
 

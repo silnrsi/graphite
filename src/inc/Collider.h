@@ -145,8 +145,6 @@ public:
     void addBox_slopex(const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
     void addBox_slopey(const Rect &box, const Rect &org, float weight, float m, bool mintop, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
-//    float len(int i) const { return _len[i]; }
-//    void setLen(int i, float v) { _len[i] = v; }
 
 	// Keep track of sequence regions for debugging:
 	struct SeqRegions {
@@ -162,10 +160,10 @@ public:
 #if !defined GRAPHITE2_NTRACING
 	void outputJsonDbg(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis);
 	void outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg);
-	void outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg,
+	void outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout,
 		Position resultPos, int bestAxis, bool isCol);
 	void outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
-		float tleft, float tlen, float bestCost, float bestVal);
+		float tleft, float bestCost, float bestVal);
 	void outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis);
 	void outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis);
 #endif
@@ -183,14 +181,6 @@ protected:
     float   _len[4];
     uint16  _seqClass;
     uint16  _seqOrder;
-	// Do we need to store all these in here?
-	// For now we just get them out of the SlotCollision object.
-	//uint16	_seqAboveXoff;
-	//uint16	_seqAboveWt;
-	//uint16	_seqBelowXlim;
-	//uint16	_seqBelowWt;
-	//uint16	_seqValignHt;
-	//uint16	_seqValignWt;
     
     Slot * exclSlot;   // bogus exclude slot
 
@@ -212,7 +202,7 @@ class KernCollider
 {
 public:
     ~KernCollider() throw() { };
-    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin, float marginMin,
+    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
     Position resolve(Segment *seg, Slot *slot, int dir, float margin, json * const dbgout);
@@ -244,3 +234,4 @@ private:
 
 
 };  // end of namespace graphite2
+

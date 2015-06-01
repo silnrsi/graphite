@@ -89,8 +89,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 shift = currOffset.x + currOffset.y;
                 oshift = currOffset.x - currOffset.y + currShift.x - currOffset.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
-                //min = 2.f * std::max(limit.bl.x, -limit.tr.y) + aSlot->origin().x + aSlot->origin().y + sb.si;
-                //max = 2.f * std::min(limit.tr.x, -limit.bl.y) + aSlot->origin().x + aSlot->origin().y + sb.sa;
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + aSlot->origin().x - aSlot->origin().y + currShift.x - currShift.y;
@@ -99,8 +97,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 shift = currOffset.x - currOffset.y;
                 oshift = currOffset.x + currOffset.y + currShift.x + currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
-                // min = 2.f * std::max(limit.bl.x, limit.bl.y) + aSlot->origin().x - aSlot->origin().y + sb.di;
-                // max = 2.f * std::min(limit.tr.x, limit.tr.y) + aSlot->origin().x - aSlot->origin().y + sb.da;
                 break;
         }
 
@@ -133,17 +129,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     SlotCollision *c = seg->collisionInfo(aSlot);
     _seqClass = c->seqClass();
     _seqOrder = c->seqOrder();
-	// For now we just get these out of the SlotCollision object.
-	//_seqAboveXoff = c->seqAboveXoff();
-	//_seqAboveWt = c->seqAboveWt();
-	//_seqBelowXlim = c->seqBelowXlim();
-	//_seqBelowWt = c->seqBelowWt();
-	//_seqValignHt = c->seqValignHt();
-	//_seqValignWt = c->seqValignWt();
-
-	//_scraping[0] = _scraping[1] = _scraping[2] = _scraping[3] = false;
-    
-}   // end of ShiftCollider::initSlot
+}
 
 
 // Mark an area with a cost that can vary along the x-axis.
@@ -290,8 +276,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;   // target limits
-    float cdiff;        // difference between centres
-    float vcmin, vcmax, tempv;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
     const unsigned short tgid = _target->gid();
@@ -302,17 +286,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
     SlotCollision * cslot = seg->collisionInfo(slot);
     int orderFlags = 0;
-    float orderMargin = 0.;     // max of slot and _target's overlapMargins
     if (sameCluster && _seqClass && _seqClass == cslot->seqClass())
 		// Force the target glyph to be in the specified direction from the slot we're testing.
         orderFlags = _seqOrder;
     float seq_above_wt = cslot->seqAboveWt();
     float seq_below_wt = cslot->seqBelowWt();
     float seq_valign_wt = cslot->seqValignWt();
-	// TODO: add these
-	//float seq_above_xoff = cslot->seqAboveXoff();
-	//float seq_below_xlim = cslot->seqBelowXlim();
-	//float seq_valign_ht = cslot->seqValignHt();
 
     // if isAfter, invert orderFlags
 #define COLL_ORDER_X (SlotCollision::COLL_ORDER_LEFT | SlotCollision::COLL_ORDER_RIGHT)
@@ -342,14 +321,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.ya + sy;
                 cmin = _limit.bl.x + _target->origin().x;
                 cmax = _limit.tr.x + _target->origin().x + tbb.xa - tbb.xi;
-                cdiff = tx + 0.5 * (tbb.xi + tbb.xa) - sx - 0.5 * (bb.xi + bb.xa);
-                tempv = sx + 0.5 * (bb.xi + bb.xa);
-                vcmin = (float)-1e38;
-                vcmax = (float)1e38;
-                if (orderFlags & SlotCollision::COLL_ORDER_LEFT)
-                    vcmax = tempv + 0.5 * (tbb.xa - tbb.xi) + orderMargin;
-                else if (orderFlags & SlotCollision::COLL_ORDER_RIGHT)
-                    vcmin = tempv - 0.5 * (tbb.xa - tbb.xi) - orderMargin;
                 break;
             case 1 :	// y direction
                 enforceOrder = ((orderFlags & SlotCollision::COLL_ORDER_DOWN) ? -1 : 0) // -1 = force down, 1 = force up
@@ -362,14 +333,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.xa + sx;
                 cmin = _limit.bl.y + _target->origin().y;
                 cmax = _limit.tr.y + _target->origin().y + tbb.ya - tbb.yi;
-                cdiff = ty + 0.5 * (tbb.yi + tbb.ya) - sy - 0.5 * (bb.yi + bb.ya);
-                tempv = sy + 0.5 * (bb.yi + bb.ya);
-                vcmin = (float)-1e38;
-                vcmax = (float)1e38;
-                if (orderFlags & SlotCollision::COLL_ORDER_UP)
-                    vcmin = tempv - 0.5 * (tbb.ya - tbb.yi) - orderMargin;
-                else if (orderFlags & SlotCollision::COLL_ORDER_DOWN)
-                    vcmax = tempv + 0.5 * (tbb.ya - tbb.yi) + orderMargin;
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -382,19 +345,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.da + sd;
                 cmin = _limit.bl.x + _limit.bl.y + _target->origin().x + _target->origin().y; 
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa - tsb.si;
-                cdiff = ts + 0.5 * (tsb.si + tsb.sa) - ss - 0.5 * (sb.si + sb.sa);
-                vcmin = (float)-1e38;
-                vcmax = (float)1e38;
-                if (orderFlags & SlotCollision::COLL_ORDER_LEFT)
-                    vcmax = std::min(ts - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2 - orderMargin,
-                                     (orderFlags & SlotCollision::COLL_ORDER_XOVERY) ? ts - (tx - sx + tbb.xi - bb.xa) / ISQRT2 : (float)1e38);
-                else if (orderFlags & SlotCollision::COLL_ORDER_RIGHT)
-                    vcmin = std::max(ts - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2 - orderMargin,
-                                     (orderFlags & SlotCollision::COLL_ORDER_XOVERY) ? ts - (tx - sx + tbb.xa - bb.xi) / ISQRT2 : (float)-1e38);
-                if (orderFlags & SlotCollision::COLL_ORDER_DOWN)
-                    vcmax = std::min(vcmax, ts - (ty - sy) / ISQRT2 + (tbb.yi + tbb.ya - bb.yi - bb.ya) * ISQRT2) + orderMargin;
-                else if (orderFlags & SlotCollision::COLL_ORDER_UP)
-                    vcmin = std::max(vcmin, ts - (ty - sy) / ISQRT2 + (tbb.yi + tbb.ya - bb.yi - bb.ya) * ISQRT2) + orderMargin;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -407,25 +357,14 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.sa + ss;
                 cmin = _limit.bl.x - _limit.tr.y + _target->origin().x - _target->origin().y;
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da - tsb.di;
-                cdiff = td + 0.5 * (tsb.di + tsb.da) - sd - 0.5 * (sb.di + sb.da);
-                vcmin = (float)-1e38;
-                vcmax = (float)1e38;
-                if (orderFlags & SlotCollision::COLL_ORDER_LEFT)
-                    vcmax = std::min(td - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2 - orderMargin,
-                                (orderFlags & SlotCollision::COLL_ORDER_XOVERY) ? ts - (tx - sx + tbb.xi - bb.xa) / ISQRT2 : (float)1e38);
-                else if (orderFlags & SlotCollision::COLL_ORDER_RIGHT)
-                    vcmin = std::max(td - (tx - sx) / ISQRT2 - (tbb.xi + tbb.xa - bb.xi - bb.xa) * ISQRT2 - orderMargin,
-                                (orderFlags & SlotCollision::COLL_ORDER_XOVERY) ? ts - (tx - sx + tbb.xa - bb.xi) / ISQRT2 : (float)-1e38);
-                if (orderFlags & SlotCollision::COLL_ORDER_DOWN)
-                    vcmin = std::max(vcmin, td + (ty - sy) / ISQRT2 + (tbb.yi + tbb.ya - bb.yi - bb.ya) * ISQRT2) + orderMargin;
-                else if (orderFlags & SlotCollision::COLL_ORDER_UP)
-                    vcmax = std::min(vcmax, td + (ty - sy) / ISQRT2 + (tbb.yi + tbb.ya - bb.yi - bb.ya) * ISQRT2) + orderMargin;
                 break;
             default :
                 continue;
         }
         
+#if !defined GRAPHITE2_NTRACING
 		SeqRegions seqReg;
+#endif
         if (enforceOrder > 0) // enforce neighboring glyph being left /down (diagram 1)
         {
             float xminf = _limit.bl.x + _target->origin().x;
@@ -537,13 +476,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omax = ssb.sa + ss;
                         break;
                 }
-//                if (vmin > vmax)
-//                {
-//                    float t = vmin;
-//                    vmin = vmax;
-//                    vmax = t;
-//                }
-                
                 // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
                 //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
@@ -603,19 +535,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 // Figure out where to move the target glyph to, and return the amount to shift by.
 Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
 {
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    int gid = _target->gid();
-    const BBox &bb = gc.getBoundingBBox(gid);
-    const SlantBox &sb = gc.getBoundingSlantBox(gid);
-    float tlen, tleft, tbase, tval;
+    float tbase, tval;
     float totalCost = (float)(std::numeric_limits<float>::max() / 2.);
     Position resultPos = Position(0, 0);
-	int bestAxis = -1;
-    // float cmax, cmin;
-    // IntervalSet aFit;
-    // int flags = seg->collisionInfo(_target)->flags();
     Position currOffset = seg->collisionInfo(_target)->offset();
 #if !defined GRAPHITE2_NTRACING
+	int bestAxis = -1;
     if (dbgout)
     {
 		outputJsonDbgStartSlot(dbgout, seg);
@@ -630,37 +555,27 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         // Calculate the margin depending on whether we are moving diagonally or not:
         switch (i) {
             case 0 :	// x direction
-                tlen = bb.xa - bb.xi;
-                tleft = _target->origin().x + _currShift.x + bb.xi;
                 tbase = _target->origin().x;    // The best place to be for the glyph, its anchor
                 tval = -currOffset.x;
                 break;
             case 1 :	// y direction
-                tlen = bb.ya - bb.yi;
-                tleft = _target->origin().y + _currShift.y + bb.yi;
                 tbase = _target->origin().y;
                 tval = -currOffset.y;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
-                tlen = sb.sa - sb.si;
-                tleft = _target->origin().x + _target->origin().y + _currShift.x + _currShift.y + sb.si;
                 tbase = _target->origin().x + _target->origin().y;
                 tval = -currOffset.x - currOffset.y;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
-                tlen = sb.da - sb.di;
-                tleft = _target->origin().x - _target->origin().y + _currShift.x - _currShift.y + sb.di;
                 tbase = _target->origin().x - _target->origin().y;
                 tval = currOffset.y - currOffset.x;
                 break;
         }
         Position testp;
-        bestPos = _ranges[i].closest(tbase + tval, tlen, bestCost) - tbase;     // returns absolute, convert to shift.
+        bestPos = _ranges[i].closest(tbase + tval, bestCost) - tbase;     // returns absolute, convert to shift.
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
-        {
-            outputJsonDbgOneVector(dbgout, seg, i, tbase, tlen, bestCost, bestPos) ;
-        }
+            outputJsonDbgOneVector(dbgout, seg, i, tbase, bestCost, bestPos) ;
 #endif
         if (bestCost >= 0.0)
         {
@@ -675,16 +590,16 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
             {
                 totalCost = bestCost;
                 resultPos = testp;
+#if !defined GRAPHITE2_NTRACING
                 bestAxis = i;
+#endif
             }
         }
     }  // end of loop over 4 directions
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
-    {
-        outputJsonDbgEndSlot(dbgout, seg, resultPos, bestAxis, isCol);
-    }
+        outputJsonDbgEndSlot(dbgout, resultPos, bestAxis, isCol);
 #endif
 
     return resultPos;
@@ -696,8 +611,6 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
 
 void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
 {
-//    if (!dbgout) return;
-
     int axisMax = axis;
     if (axis < 0) // output all axes
     {
@@ -739,7 +652,7 @@ void ShiftCollider::outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, 
         *dbgout     << json::close; // target object
 }
 
-void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg,
+void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout,
 	 Position resultPos, int bestAxis, bool isCol)
 {
     *dbgout << json::close // vectors array
@@ -751,7 +664,7 @@ void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout, Se
 }
 
 void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
-	float tleft, float tlen, float bestCost, float bestVal) 
+	float tleft, float bestCost, float bestVal) 
 {
 	const char * label;
 	switch (axis)
@@ -765,8 +678,7 @@ void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, 
 
 	*dbgout << json::object // vector
 		<< "direction" << label
-		<< "targetMin" << tleft
-		<< "targetSize" << tlen;
+		<< "targetMin" << tleft;
             
 	outputJsonDbgRawRanges(dbgout, axis);
 	outputJsonDbgRemovals(dbgout, axis);
@@ -774,10 +686,6 @@ void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, 
     *dbgout << "ranges";
     outputJsonDbg(dbgout, seg, axis);
 
-    //*dbgout << "fits" << json::flat << json::array;
-    //for (IntervalSet::ivtpair s = aFit.begin(), e = aFit.end(); s != e; ++s)
-    //    *dbgout << Position(s->first, s->second);
-    //*dbgout << json::close // fits array
     *dbgout << "bestCost" << bestCost
         << "bestVal" << bestVal
         << json::close; // vectors object
@@ -902,12 +810,10 @@ static float get_right(Segment *seg, const Slot *s, const Position &shift, float
 
      
 
-void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,  float marginMin,
+void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
     const Position &currShift, const Position &offsetPrev, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
-    // unsigned short gid = aSlot->gid();
-    // const BBox &bb = gc.getBoundingBBox(gid);
     const Slot *base = aSlot;
     // const Slot *last = aSlot;
     const Slot *s;
@@ -1102,7 +1008,6 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
                 << "slot" << objectid(dslot(seg, _target))
 				<< "gid" << _target->gid()
                 << "margin" << _margin
-//              << "marginmin" << _marginMin -- not really used
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _target->origin()
@@ -1190,3 +1095,4 @@ float SlotCollision::getKern(int dir) const
     else
     	return 0;
 }
+

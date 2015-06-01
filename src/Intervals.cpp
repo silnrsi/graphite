@@ -290,7 +290,7 @@ Zones::const_iterator Zones::find_exclusion_under(float x) const
 }
 
 
-float Zones::closest(float origin, float width, float & cost) const
+float Zones::closest(float origin, float & cost) const
 {
     float best_c = std::numeric_limits<float>::max(),
           best_x = 0;

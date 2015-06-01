@@ -122,7 +122,7 @@ public:
     template<zones_t O>
     void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c, bool nega);
 
-    float closest( float origin, float width, float &cost) const;
+    float closest( float origin, float &cost) const;
 
     const_iterator begin() const { return _exclusions.begin(); }
     const_iterator end() const { return _exclusions.end(); }
