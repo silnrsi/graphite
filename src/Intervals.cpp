@@ -31,8 +31,6 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-#if 0
-
 #include <cmath>
 
 ///  INTERVAL SET  ///
@@ -147,7 +145,6 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
     else
         return lres;
 }
-#endif
 
 inline
 Zones::Exclusion  Zones::Exclusion::split_at(float p) {
@@ -174,12 +171,16 @@ uint8 Zones::Exclusion::outcode(float p) const {
 
 
 // hmm how to get the margin weight into here
-void Zones::exclude_with_margins(float pos, float len) {
-    float t = pos - _margin_len;
-    insert(Exclusion(pos-_margin_len, pos, _margin_weight, _margin_weight * t, _margin_weight * t * t));
+void Zones::exclude_with_margins(float pos, float len, int axis) {
+    if (axis < 2)
+        weighted<XY>(pos-_margin_len, _margin_len, 0, 0, 0, 0, _margin_weight, pos-_margin_len, 0, false);
+    else
+        weighted<SD>(pos-_margin_len, _margin_len, 0, 0, 0, 0, _margin_weight, pos-_margin_len, 0, false);
     remove(pos, pos+len);
-    t = pos + len + _margin_len;
-    insert(Exclusion(pos+len, pos+len+_margin_len, _margin_weight, _margin_weight * t, _margin_weight * t * t));
+    if (axis < 2)
+        weighted<XY>(pos+len, _margin_len, 0, 0, 0, 0, _margin_weight, pos+len+_margin_len, 0, false);
+    else
+        weighted<SD>(pos+len, _margin_len, 0, 0, 0, 0, _margin_weight, pos+len+_margin_len, 0, false);
 }
 
 
@@ -273,14 +274,15 @@ Zones::const_iterator Zones::find_exclusion_under(float x) const
 {
     int l = 0, h = _exclusions.size();
 
-    while (l != h)
+    while (l < h)
     {
         int const p = (l+h) >> 1;
         switch (_exclusions[p].outcode(x))
         {
         case 0 : return _exclusions.begin()+p;
         case 1 : h = p; break;
-        case 2 : l = p+1; break;
+        case 2 : 
+        case 3 : l = p+1; break;
         }
     }
 
@@ -342,7 +344,7 @@ float Zones::Exclusion::test_position() const {
     }
     else
     {
-        float zerox = smx / sm;
+        float zerox = -smx / sm;
         if (zerox < x) return x;
         else if (zerox > xm) return xm;
         else return zerox;

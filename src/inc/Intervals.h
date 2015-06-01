@@ -36,7 +36,6 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-#if 0
 class IntervalSet
 {
 public:
@@ -67,7 +66,6 @@ private:
     vtpair _v;
 };
 
-#endif
 
 enum zones_t {SD, XY};
 
@@ -78,7 +76,7 @@ class Zones
         template<zones_t O>
         static Exclusion weighted(float pos, float len, float f,
                 float shift, float oshift, float a,
-                float m, float xi, float c);
+                float m, float xi, float c, bool nega);
 
         float   x,  // x position
                 xm, // xmax position
@@ -100,7 +98,7 @@ class Zones
         float test_position() const;
         float cost(float x) const;
      };
- 
+
     typedef Vector<Exclusion>                   exclusions;
 
     typedef exclusions::iterator                iterator;
@@ -119,10 +117,10 @@ public:
     void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift, float a);
 
     void exclude(float pos, float len);
-    void exclude_with_margins(float pos, float len);
+    void exclude_with_margins(float pos, float len, int axis);
 
     template<zones_t O>
-    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c);
+    void weighted(float pos, float len, float f, float shift, float oshift, float a, float mi, float xi, float c, bool nega);
 
     float closest( float origin, float width, float &cost) const;
 
@@ -165,7 +163,7 @@ void Zones::initialise(float pos, float len, float margin_len,
     _pos = pos;
     _posm = pos+len;
     _exclusions.clear();
-    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0));
+    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0, false));
     _exclusions.front().open = true;
 }
 
@@ -178,34 +176,35 @@ template<zones_t O>
 inline
 void Zones::weighted(float pos, float len, float f,
         float shift, float oshift, float a,
-        float m, float xi, float c) {
-    insert(Exclusion::weighted<O>(pos, len, f, shift, oshift, a, m, xi, c));
+        float m, float xi, float c, bool nega) {
+    insert(Exclusion::weighted<O>(pos, len, f, shift, oshift, a, m, xi, c, nega));
 }
 
 template<>
 inline
 Zones::Exclusion Zones::Exclusion::weighted<XY>(float pos, float len, float f,
         float shift, GR_MAYBE_UNUSED float oshift, float a,
-        float m, float xi, float c) {
+        float m, float xi, float c, GR_MAYBE_UNUSED bool nega) {
     return Exclusion(pos, pos+len,
             m + f,
             m * xi + f * shift,
-            m * xi * xi + f * shift * shift + f * a  * a + c);
+            m * xi * xi + f * shift * shift + f * a * a + c);
 }
 
 template<>
 inline
 Zones::Exclusion Zones::Exclusion::weighted<SD>(float pos, float len, float f,
         float shift, float oshift, float a,
-        float m, float xi, float c) {
+        float m, float xi, float c, GR_MAYBE_UNUSED bool nega) {
 //    return Exclusion(pos, pos+len,
 //            m + f,
 //            m * (xi + a) + f * (shift - oshift),
 //            m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c);
+    float xia = nega ? xi - a : xi + a;
     return Exclusion(pos, pos+len, 
             0.25 * (m + 2 * f), 
-            -0.5 * (m * (xi + a) + 2 * f * shift), 
-            0.25 * (m * (xi - a) * (xi - a) + 2 * f * (shift * shift + oshift * oshift)) + c);
+            0.25 * (m * (xi + a) + 2 * f * shift), 
+            0.25 * (m * xia * xia + 2 * f * (shift * shift + oshift * oshift)) + c);
 }
 
 } // end of namespace graphite2
