@@ -203,11 +203,11 @@ inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, int axis)
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y && box.width() > 0 && box.height() > 0)
-                _ranges[axis].exclude(box.bl.x + box.bl.y , box.height() + box.width() + _len[axis]);
+                _ranges[axis].exclude(box.bl.x + box.bl.y , box.height() + box.width() - _len[axis]);
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y && box.width() > 0 && box.height() > 0)
-                _ranges[axis].exclude(box.bl.x - box.bl.y , box.height() + box.width() + _len[axis]);
+                _ranges[axis].exclude(box.bl.x - box.bl.y , box.height() + box.width() - _len[axis]);
             break;
         default :
             break;
@@ -235,6 +235,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;   // target limits
+    float vorigin;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
     const unsigned short tgid = _target->gid();
@@ -285,6 +286,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.ya + sy;
                 cmin = _limit.bl.x + _target->origin().x;
                 cmax = _limit.tr.x + _target->origin().x + tbb.xa - tbb.xi;
+                vorigin = _target->origin().x - cslot->offset().x;
                 break;
             case 1 :	// y direction
                 enforceOrder = ((orderFlags & SlotCollision::COLL_ORDER_DOWN) ? -1 : 0) // -1 = force down, 1 = force up
@@ -297,10 +299,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.xa + sx;
                 cmin = _limit.bl.y + _target->origin().y;
                 cmax = _limit.tr.y + _target->origin().y + tbb.ya - tbb.yi;
+                vorigin = _target->origin().y - cslot->offset().y;
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
-                enforceOrder = orderFlags;
+                enforceOrder = (((orderFlags & SlotCollision::COLL_ORDER_DOWN) || (orderFlags & SlotCollision::COLL_ORDER_LEFT)) ? -1 : 0)
+                        + (((orderFlags & SlotCollision::COLL_ORDER_UP) || (orderFlags & SlotCollision::COLL_ORDER_RIGHT)) ? 1 : 0);
                 vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts) - tsb.sa;
                 vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts) - tsb.si;
                 otmin = tsb.di + td;
@@ -309,10 +313,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.da + sd;
                 cmin = _limit.bl.x + _limit.bl.y + _target->origin().x + _target->origin().y; 
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa - tsb.si;
+                vorigin = _target->origin().x + _target->origin().y - cslot->offset().x - cslot->offset().y;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
-                enforceOrder = orderFlags;
+                enforceOrder = (((orderFlags & SlotCollision::COLL_ORDER_UP) || (orderFlags & SlotCollision::COLL_ORDER_RIGHT)) ? 1 : 0)
+                        + (((orderFlags & SlotCollision::COLL_ORDER_DOWN) || (orderFlags & SlotCollision::COLL_ORDER_LEFT)) ? -1 : 0);
                 vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty)) - tsb.da;
                 vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx - tbb.xi - tx) + tsb.di + td), tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty)) - tsb.di;
                 otmin = tsb.si + ts;
@@ -321,6 +327,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.sa + ss;
                 cmin = _limit.bl.x - _limit.tr.y + _target->origin().x - _target->origin().y;
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da - tsb.di;
+                vorigin = _target->origin().x - _target->origin().y - cslot->offset().x + cslot->offset().y;
                 break;
             default :
                 continue;
@@ -463,7 +470,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 _slotNear[i].push_back(slot);       // debugging
                 _subNear[i].push_back(j);           // debugging
 #endif
-                _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+                _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
                 anyhits = true;
             }
             if (anyhits)
@@ -477,7 +484,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             _subNear[i].push_back(-1);          // debugging
 #endif
             isCol = true;
-            _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+            _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
 
         }
     }
@@ -614,6 +621,7 @@ void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment *seg)
                 << "target" << json::object
                     << "origin" << _target->origin()
                     << "currShift" << _currShift
+                    << "currOffset" << seg->collisionInfo(_target)->offset()
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "shift";
