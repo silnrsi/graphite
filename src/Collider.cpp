@@ -337,7 +337,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 		SeqRegions seqReg;
         if (dbgout)
             dbgout->setenv(1, reinterpret_cast<void *>(-1));
+#define DBGTAG(x) if (dbgout) dbgout->setenv(1, reinterpret_cast<void *>(-x));
+#else
+#define DBGTAG(x)
 #endif
+
         if (enforceOrder > 0) // enforce neighboring glyph being left /down (diagram 1)
         {
             float xminf = _limit.bl.x + _target->origin().x;
@@ -349,14 +353,19 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
             Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
             // region 1
+            DBGTAG(11)
             addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), org, 0, seq_above_wt, true, i);
             // region 2
+            DBGTAG(12)
             removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), org, i);
             // region 3
+            DBGTAG(13)
             addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), org, seq_below_wt, 0, true, i);
             // region 4
+            DBGTAG(14)
             addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), org, 0, seq_valign_wt, true, i);
             // region 5
+            DBGTAG(15)
             addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
                             org, 0, seq_valign_wt, false, i);
 #if !defined GRAPHITE2_NTRACING
@@ -377,15 +386,20 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
             Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
             // region 1
+            DBGTAG(21)
             addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), org, 0, seq_above_wt, false, i);
             // region 2
+            DBGTAG(22)
             removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), org, i);
             // region 3
+            DBGTAG(23)
             addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), org, seq_below_wt, 0, true, i);
             // region 4
+            DBGTAG(24)
             addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
                             org, 0, seq_valign_wt, true, i);
             // region 5
+            DBGTAG(25)
             addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
                             Position(sx + bb.xa, r2Yedge)), org, 0, seq_valign_wt, false, i);
 #if !defined GRAPHITE2_NTRACING
@@ -479,6 +493,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         else // no sub-boxes
         {
 #if !defined GRAPHITE2_NTRACING
+                if (dbgout)
+                    dbgout->setenv(1, reinterpret_cast<void *>(-1));
 			_seqRegions[i].push_back(seqReg);   // debugging
             _slotNear[i].push_back(slot);       // debugging
             _subNear[i].push_back(-1);          // debugging
