@@ -151,7 +151,7 @@ enum gr_attrCode {
     gr_slatColExclOffy,
     // Collision sequence enforcing attributes:
     gr_slatSeqClass,
-	gr_slatSeqProxClass,
+    gr_slatSeqProxClass,
     gr_slatSeqOrder,
     gr_slatSeqAboveXoff,
     gr_slatSeqAboveWt,

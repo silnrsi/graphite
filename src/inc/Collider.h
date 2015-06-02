@@ -83,7 +83,7 @@ public:
     SLOTCOLSETUINTPROP(status, setStatus)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
     SLOTCOLSETUINTPROP(seqClass, setSeqClass)
-	SLOTCOLSETUINTPROP(seqProxClass, setSeqProxClass)
+    SLOTCOLSETUINTPROP(seqProxClass, setSeqProxClass)
     SLOTCOLSETUINTPROP(seqOrder, setSeqOrder)
     SLOTCOLSETINTPROP(seqAboveXoff, setSeqAboveXoff)
     SLOTCOLSETUINTPROP(seqAboveWt, setSeqAboveWt)
@@ -148,17 +148,6 @@ public:
     void addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
 
-	// Keep track of sequence regions for debugging:
-	struct SeqRegions {
-		float	r1Xedge;	// right of region 1
-		float	r2Yedge;	// top of region 2
-		float	r3Xedge;	// left of region 3
-		float	r45Mid;		// line between regions 4 and 5
-
-		bool isValid() { return (int(r1Xedge) != 0 || int(r2Yedge) != 0 || int(r3Xedge) != 0 || int(r45Mid) != 0); }
-	};
-	typedef Vector<SeqRegions> vecseqreg;
-
 #if !defined GRAPHITE2_NTRACING
 	void outputJsonDbg(json * const dbgout, Segment *seg, int axis);
 	void outputJsonDbgStartSlot(json * const dbgout, Segment *seg);
@@ -184,14 +173,6 @@ protected:
     uint16  _seqOrder;
     
 	//bool _scraping[4];
-    
-#if !defined GRAPHITE2_NTRACING
-    // Debugging
-//    Segment * _seg;
-//    vecseqreg _seqRegions[4];
-//    Vector<Slot*>_slotNear[4];
-//    Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
-#endif
 
 };	// end of class ShiftCollider
 

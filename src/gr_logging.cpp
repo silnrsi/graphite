@@ -237,7 +237,8 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
               << "excludeoffset" << cslot->exclOffset();
 		if (cslot->seqOrder() != 0)
 		{
-			j << "sequence" << Position(cslot->seqClass(), cslot->seqOrder())
+			j << "seqclass" << Position(cslot->seqClass(), cslot->seqProxClass())
+				<< "seqorder" << cslot->seqOrder()
 				<< "seqabove" << Position(cslot->seqAboveXoff(), cslot->seqAboveWt())
 				<< "seqbelow" << Position(cslot->seqBelowXlim(), cslot->seqBelowWt())
 				<< "seqvalign" << Position(cslot->seqValignHt(), cslot->seqValignWt());

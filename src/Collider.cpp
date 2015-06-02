@@ -99,17 +99,9 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 break;
         }
-
-#if !defined GRAPHITE2_NTRACING
-        // Debugging:
-//        _slotNear[i].clear();
-//        _subNear[i].clear();
-#endif
     }
-#if !defined GRAPHITE2_NTRACING
- //   _seg = seg; // debugging
-#endif
-    _target = aSlot;
+
+	_target = aSlot;
     if ((dir & 1) == 0)
     {
         // For LTR, switch and negate x limits.
@@ -337,7 +329,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
         
 #if !defined GRAPHITE2_NTRACING
-		SeqRegions seqReg;
         if (dbgout)
             dbgout->setenv(1, reinterpret_cast<void *>(-1));
 #define DBGTAG(x) if (dbgout) dbgout->setenv(1, reinterpret_cast<void *>(-x));
@@ -371,12 +362,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             DBGTAG(15)
             addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
                             org, 0, seq_valign_wt, false, i);
-#if !defined GRAPHITE2_NTRACING
-			seqReg.r1Xedge = r1Xedge;
-			seqReg.r2Yedge = r2Yedge;
-			seqReg.r3Xedge = r3Xedge;
-			seqReg.r45Mid  = sy + bb.yi;
-#endif
         }
         else if (enforceOrder < 0)  // enforce neighboring glyph being right/up (diagram 2)
         {
@@ -405,16 +390,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             DBGTAG(25)
             addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
                             Position(sx + bb.xa, r2Yedge)), org, 0, seq_valign_wt, false, i);
-#if !defined GRAPHITE2_NTRACING
-			seqReg.r1Xedge = r1Xedge;
-			seqReg.r2Yedge = r2Yedge;
-			seqReg.r3Xedge = r3Xedge;
-			seqReg.r45Mid  = sy + bb.yi;
-		}
-		else
-		{
-			seqReg.r1Xedge = seqReg.r2Yedge = seqReg.r3Xedge = seqReg.r45Mid = 0.0;
-#endif
         }
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
@@ -481,11 +456,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #if !defined GRAPHITE2_NTRACING
                 if (dbgout)
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
-//				SeqRegions seqRegJ;  // bogus
-//				seqRegJ.r1Xedge = seqRegJ.r2Yedge = seqRegJ.r3Xedge = seqRegJ.r45Mid = 0.0;
-//				_seqRegions[i].push_back(seqRegJ);  // debugging
-//                _slotNear[i].push_back(slot);       // debugging
-//                _subNear[i].push_back(j);           // debugging
 #endif
                 _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
                 anyhits = true;
@@ -498,9 +468,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #if !defined GRAPHITE2_NTRACING
                 if (dbgout)
                     dbgout->setenv(1, reinterpret_cast<void *>(-1));
-//			_seqRegions[i].push_back(seqReg);   // debugging
-//            _slotNear[i].push_back(slot);       // debugging
-//            _subNear[i].push_back(-1);          // debugging
 #endif
             isCol = true;
             _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
