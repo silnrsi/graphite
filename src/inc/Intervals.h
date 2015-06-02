@@ -100,7 +100,7 @@ class Zones
         bool        track_cost(float & cost, float & x, float origin) const;
 
     private:
-        float test_position() const;
+        float test_position(float origin) const;
         float cost(float x) const;
      };
 
@@ -195,6 +195,9 @@ void Zones::initialise(float pos, float len, float margin_len,
     _exclusions.clear();
     _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, shift, oshift, a, 0, 0, 0, false));
     _exclusions.front().open = true;
+#if !defined GRAPHITE2_NTRACING
+    _dbgs.clear();
+#endif
 }
 
 inline

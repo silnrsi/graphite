@@ -327,7 +327,7 @@ float Zones::closest(float origin, float & cost) const
 // Cost and test position functions
 
 bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos, float origin) const {
-    const float p = test_position(),
+    const float p = test_position(origin),
                 localc = cost(p - origin);
     if (open && localc > best_cost) return true;
 
@@ -345,18 +345,28 @@ float Zones::Exclusion::cost(float p) const {
 }
 
 
-float Zones::Exclusion::test_position() const {
+float Zones::Exclusion::test_position(float origin) const {
     float d2c = sm;
     if (d2c < 0)
     {
-        // sigh, test both ends)
+        // sigh, test both ends and perhaps the middle too!
+        float res = x;
         float cl = cost(x);
+        if (x < origin and xm > origin)
+        {
+            float co = cost(origin);
+            if (co < cl)
+            {
+                cl = co;
+                res = origin;
+            }
+        }
         float cr = cost(xm);
-        return cl > cr ? xm : x;
+        return cl > cr ? xm : res;
     }
     else
     {
-        float zerox = -smx / sm;
+        float zerox = smx / sm + origin;
         if (zerox < x) return x;
         else if (zerox > xm) return xm;
         else return zerox;
