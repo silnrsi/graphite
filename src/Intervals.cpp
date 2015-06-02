@@ -28,11 +28,15 @@ of the License or (at your option) any later version.
 #include <limits>
 
 #include "inc/Intervals.h"
+#include "inc/Segment.h"
+#include "inc/Slot.h"
+#include "inc/debug.h"
 
 using namespace graphite2;
 
 #include <cmath>
 
+#if 0
 ///  INTERVAL SET  ///
 
 // Add this interval to the list of possible range(s), merging elements of the list as necessary.
@@ -146,6 +150,8 @@ float IntervalSet::findBestWithMarginAndLimits(float val, float margin, float mi
         return lres;
 }
 
+#endif
+
 inline
 Zones::Exclusion  Zones::Exclusion::split_at(float p) {
     Exclusion r(*this);
@@ -189,6 +195,9 @@ void Zones::insert(Exclusion e)
     e.x = std::max(e.x, _pos);
     e.xm = std::min(e.xm, _posm);
     if (e.x >= e.xm) return;
+#if !defined GRAPHITE2_NTRACING
+    addDebug(&e);
+#endif
 
     for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
     {
@@ -240,6 +249,9 @@ void Zones::remove(float x, float xm)
     x = std::max(x, _pos);
     xm = std::min(xm, _posm);
     if (x >= xm) return;
+#if !defined GRAPHITE2_NTRACING
+    removeDebug(x, xm);
+#endif
 
     for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie; ++i)
     {
@@ -350,4 +362,30 @@ float Zones::Exclusion::test_position() const {
         else return zerox;
     }
 }
+
+
+#if !defined GRAPHITE2_NTRACING
+
+void Zones::jsonDbgOut(Segment *seg) const {
+
+    if (_dbg)
+    {
+        for (Zones::idebugs s = dbgs_begin(), e = dbgs_end(); s != e; ++s)
+        {
+            *_dbg << json::flat << json::array
+                << objectid(dslot(seg, (Slot *)(s->_env[0])))
+                << reinterpret_cast<ptrdiff_t>(s->_env[1]);
+            if (s->_isdel)
+                *_dbg << "remove" << Position(s->_excl.x, s->_excl.xm);
+            else
+                *_dbg << "exclude" << json::flat << json::array
+                    << s->_excl.x << s->_excl.xm << s->_excl.open 
+                    << s->_excl.sm << s->_excl.smx << s->_excl.c
+                    << json::close;
+            *_dbg << json::close;
+        }
+    }
+}
+
+#endif
 

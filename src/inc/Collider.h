@@ -128,20 +128,21 @@ public:
     typedef Vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
-    ShiftCollider()
+    ShiftCollider(GR_MAYBE_UNUSED json *dbgout)
     {
-        exclSlot = new Slot();
+#if !defined GRAPHITE2_NTRACING
+        for (int i = 0; i < 4; ++i)
+            _ranges[i].setdebug(dbgout);
+#endif
     }
-    ~ShiftCollider() throw()
-    {
-        if (exclSlot) delete exclSlot;
-    }
-    void initSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *aSlot, GR_MAYBE_UNUSED const Rect &constraint,
-                GR_MAYBE_UNUSED float margin, GR_MAYBE_UNUSED float marginMin, GR_MAYBE_UNUSED const Position &currShift,
-                const Position &currOffset, GR_MAYBE_UNUSED int dir, GR_MAYBE_UNUSED json * const dbgout);
-    bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, 
-                GR_MAYBE_UNUSED const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
-    Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
+    ~ShiftCollider() throw() { };
+
+    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint,
+                float margin, float marginMin, const Position &currShift,
+                const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout);
+    bool mergeSlot(Segment *seg, Slot *slot, 
+                const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
+    Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
     void addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
 
@@ -157,14 +158,12 @@ public:
 	typedef Vector<SeqRegions> vecseqreg;
 
 #if !defined GRAPHITE2_NTRACING
-	void outputJsonDbg(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis);
-	void outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg);
-	void outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout,
-		Position resultPos, int bestAxis, bool isCol);
-	void outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
-		float tleft, float bestCost, float bestVal);
-	void outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis);
-	void outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis);
+	void outputJsonDbg(json * const dbgout, Segment *seg, int axis);
+	void outputJsonDbgStartSlot(json * const dbgout, Segment *seg);
+	void outputJsonDbgEndSlot(json * const dbgout, Position resultPos, int bestAxis, bool isCol);
+	void outputJsonDbgOneVector(json * const dbgout, Segment *seg, int axis, float tleft, float bestCost, float bestVal);
+	void outputJsonDbgRawRanges(json * const dbgout, int axis);
+	void outputJsonDbgRemovals(json * const dbgout, int axis, Segment *seg);
 #endif
 
     CLASS_NEW_DELETE;
@@ -181,15 +180,11 @@ protected:
     uint16  _seqClass;
     uint16  _seqOrder;
     
-    Slot * exclSlot;   // bogus exclude slot
-
 	//bool _scraping[4];
     
 #if !defined GRAPHITE2_NTRACING
     // Debugging
     Segment * _seg;
-    IntervalSet _rawRanges[4];
-    IntervalSet _removals[4];
     vecseqreg _seqRegions[4];
     Vector<Slot*>_slotNear[4];
     Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
@@ -200,6 +195,7 @@ protected:
 class KernCollider
 {
 public:
+    KernCollider(GR_MAYBE_UNUSED json *dbg) { };
     ~KernCollider() throw() { };
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir, json * const dbgout);

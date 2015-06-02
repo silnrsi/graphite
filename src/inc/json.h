@@ -67,8 +67,9 @@ public:
     typedef bool            boolean;
     static const _null_t    null;
 
-    void setenv(int index, void *val) { _env.reserve(index); _env[index] = val; }
-    void *getenv(int index) const { return _env[index]; }
+    void setenv(unsigned int index, void *val) { _env.reserve(index + 1); if (index >= _env.size()) _env.insert(_env.end(), _env.size() - index + 1, 0); _env[index] = val; }
+    void *getenv(unsigned int index) const { return _env[index]; }
+    const Vector<void *> &getenvs() const { return _env; }
 
     static void flat(json &) throw();
     static void close(json &) throw();

@@ -102,10 +102,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 
 #if !defined GRAPHITE2_NTRACING
         // Debugging:
-        _rawRanges[i].clear();
-        _rawRanges[i].add(min, max - _len[i]);
-        _rawRanges[i].len(_len[i]);
-        _removals[i].clear();
         _slotNear[i].clear();
         _subNear[i].clear();
 #endif
@@ -267,6 +263,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             orderFlags = orderFlags ^ COLL_ORDER_Y;
     }
 
+#if !defined GRAPHITE2_NTRACING
+    if (dbgout)
+        dbgout->setenv(0, slot);
+#endif
+
     // Process main bounding octabox.
     for (int i = 0; i < 4; ++i)
     {
@@ -327,6 +328,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         
 #if !defined GRAPHITE2_NTRACING
 		SeqRegions seqReg;
+        if (dbgout)
+            dbgout->setenv(1, reinterpret_cast<void *>(-1));
 #endif
         if (enforceOrder > 0) // enforce neighboring glyph being left /down (diagram 1)
         {
@@ -450,44 +453,44 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 					continue;
 				}
 #endif
-                _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
-                anyhits = true;
-                
+
 #if !defined GRAPHITE2_NTRACING
+                if (dbgout)
+                    dbgout->setenv(1, reinterpret_cast<void *>(j));
 				SeqRegions seqRegJ;  // bogus
 				seqRegJ.r1Xedge = seqRegJ.r2Yedge = seqRegJ.r3Xedge = seqRegJ.r45Mid = 0.0;
-                IntervalSet::tpair dbg(vmin, vmax); // debugging
-                _removals[i].append(dbg);           // debugging
 				_seqRegions[i].push_back(seqRegJ);  // debugging
                 _slotNear[i].push_back(slot);       // debugging
                 _subNear[i].push_back(j);           // debugging
 #endif
+                _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+                anyhits = true;
             }
             if (anyhits)
                 isCol = true;
         }
         else // no sub-boxes
         {
-            isCol = true;
-            _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
-
 #if !defined GRAPHITE2_NTRACING
-            IntervalSet::tpair dbg(vmin, vmax); // debugging
-            _removals[i].append(dbg);           // debugging
 			_seqRegions[i].push_back(seqReg);   // debugging
             _slotNear[i].push_back(slot);       // debugging
             _subNear[i].push_back(-1);          // debugging
 #endif
+            isCol = true;
+            _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+
         }
     }
     
     if (cslot && cslot->exclGlyph() > 0)
     {
         // Set up the bogus slot representing the exclusion glyph.
+        Slot *exclSlot = seg->newSlot();
         exclSlot->setGlyph(seg, cslot->exclGlyph());
         Position exclOrigin(slot->origin() + cslot->exclOffset());
         exclSlot->origin(exclOrigin);
         isCol |= mergeSlot(seg, exclSlot, currShift, isAfter, sameCluster, dbgout );
+        seg->freeSlot(exclSlot);
     }
         
     return isCol;
@@ -591,16 +594,18 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
     }
     for (int iAxis = axis; iAxis <= axisMax; ++iAxis)
     {
-        *dbgout << json::flat << json::array;
+        *dbgout << json::flat << json::array << _ranges[iAxis].position();
         for (Zones::const_iterator s = _ranges[iAxis].begin(), e = _ranges[iAxis].end(); s != e; ++s)
-            *dbgout << Position(s->x, s->xm) << s->c << s->sm << s->smx;
+            *dbgout << json::flat << json::array 
+                        << Position(s->x, s->xm) << s->sm << s->smx << s->c
+                    << json::close;
         *dbgout << json::close;
     }
     if (axis < axisMax) // looped through the _ranges array for all axes
         *dbgout << json::close; // ranges array
 }
 
-void ShiftCollider::outputJsonDbgStartSlot(GR_MAYBE_UNUSED json * const dbgout, Segment *seg)
+void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment *seg)
 {
         *dbgout << json::object // slot - not closed till the end of the caller method
                 << "slot" << objectid(dslot(seg, _target))
@@ -626,7 +631,7 @@ void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout,
     << json::close; // slot object
 }
 
-void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, Segment *seg, int axis,
+void ShiftCollider::outputJsonDbgOneVector(json * const dbgout, Segment *seg, int axis,
 	float tleft, float bestCost, float bestVal) 
 {
 	const char * label;
@@ -643,8 +648,7 @@ void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, 
 		<< "direction" << label
 		<< "targetMin" << tleft;
             
-	outputJsonDbgRawRanges(dbgout, axis);
-	outputJsonDbgRemovals(dbgout, axis);
+	outputJsonDbgRemovals(dbgout, axis, seg);
     	
     *dbgout << "ranges";
     outputJsonDbg(dbgout, seg, axis);
@@ -654,43 +658,10 @@ void ShiftCollider::outputJsonDbgOneVector(GR_MAYBE_UNUSED json * const dbgout, 
         << json::close; // vectors object
 }
 
-void ShiftCollider::outputJsonDbgRawRanges(GR_MAYBE_UNUSED json * const dbgout, int axis)
+void ShiftCollider::outputJsonDbgRemovals(json * const dbgout, int axis, Segment *seg)
 {
-    *dbgout << "rawRanges" << json::flat << json::array;
-    for (IntervalSet::ivtpair s = _rawRanges[axis].begin(), e = _rawRanges[axis].end(); s != e; ++s)
-        *dbgout << Position(s->first, s->second);
-    *dbgout << _rawRanges[axis].len() << json::close; // rawRanges array
-}
-
-void ShiftCollider::outputJsonDbgRemovals(GR_MAYBE_UNUSED json * const dbgout, int axis)
-{
-    *dbgout << "removals" << json::array;  
-            						
-    int gi = 0;
-    for (IntervalSet::ivtpair s = _removals[axis].begin(), e = _removals[axis].end(); s != e; ++s, ++gi)
-    {   //Slot & slotNear = *(_slotNear[axis][gi]);
-        if (_slotNear[axis][gi] == exclSlot)
-        {
-            *dbgout << json::flat << json::array 
-                << "exclude" << _subNear[axis][gi] << Position(s->first, s->second) << json::close;
-        }
-        else
-        {
-            *dbgout << json::flat << json::array 
-                << objectid(dslot(_seg,_slotNear[axis][gi])) 
-                << _subNear[axis][gi] << Position(s->first, s->second);
-			if (_seqRegions[axis][gi].isValid())
-			{
-				Rect t(Position(_seqRegions[axis][gi].r1Xedge, _seqRegions[axis][gi].r2Yedge),
-					Position(_seqRegions[axis][gi].r3Xedge, _seqRegions[axis][gi].r45Mid));
-				*dbgout << "seq:" << t;
-			}
-			else
-				*dbgout << "no-seq";
-				
-			*dbgout << json::close;
-        }
-    }
+    *dbgout << "removals" << json::array;
+    _ranges[axis].jsonDbgOut(seg);
     *dbgout << json::close; // removals array
 }
 

@@ -28,6 +28,8 @@ of the License or (at your option) any later version.
 
 #include "inc/Main.h"
 #include "inc/List.h"
+#include "inc/json.h"
+#include "inc/Position.h"
 
 // An IntervalSet represents the possible movement of a given glyph in a given direction
 // (horizontally, vertically, or diagonally).
@@ -36,6 +38,7 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
+#if 0
 class IntervalSet
 {
 public:
@@ -65,7 +68,9 @@ private:
     float _len;
     vtpair _v;
 };
+#endif
 
+class Segment;
 
 enum zones_t {SD, XY};
 
@@ -112,6 +117,27 @@ public:
     typedef Exclusion const &                       const_reference;
     typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
 
+#if !defined GRAPHITE2_NTRACING
+    struct Debug
+    {
+        Exclusion       _excl;
+        bool            _isdel;
+        Vector<void *>  _env;
+
+        Debug(Exclusion *e, bool isdel, json *dbg) : _excl(*e), _isdel(isdel), _env(dbg->getenvs()) { };
+    };
+
+    typedef Vector<Debug>                       debugs;
+    typedef debugs::const_iterator                    idebugs;
+    void addDebug(Exclusion *e);
+    void removeDebug(float pos, float posm);
+    void setdebug(json *dbgout) { _dbg = dbgout; }
+    idebugs dbgs_begin() const { return _dbgs.begin(); }
+    idebugs dbgs_end() const { return _dbgs.end(); }
+    void jsonDbgOut(Segment *seg) const;
+    Position position() const { return Position(_pos, _posm); }
+#endif
+
     Zones();
     template<zones_t O>
     void initialise(float pos, float len, float margin_len, float margin_weight, float shift, float oshift, float a);
@@ -129,6 +155,10 @@ public:
 
 private:
     exclusions  _exclusions;
+#if !defined GRAPHITE2_NTRACING
+    json      * _dbg;
+    debugs      _dbgs;
+#endif
     float       _margin_len,
                 _margin_weight,
                 _pos,
@@ -179,6 +209,24 @@ void Zones::weighted(float pos, float len, float f,
         float m, float xi, float c, bool nega) {
     insert(Exclusion::weighted<O>(pos, len, f, shift, oshift, a, m, xi, c, nega));
 }
+
+
+#if !defined GRAPHITE2_NTRACING
+inline
+void Zones::addDebug(Exclusion *e) {
+    if (_dbg)
+        _dbgs.push_back(Debug(e, false, _dbg));
+}
+
+inline
+void Zones::removeDebug(float pos, float posm) {
+    if (_dbg)
+    {
+        Exclusion e(pos, posm, 0, 0, 0);
+        _dbgs.push_back(Debug(&e, true, _dbg));
+    }
+}
+#endif
 
 template<>
 inline
