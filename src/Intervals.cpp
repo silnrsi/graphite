@@ -352,7 +352,7 @@ float Zones::Exclusion::test_position(float origin) const {
         // sigh, test both ends and perhaps the middle too!
         float res = x;
         float cl = cost(x);
-        if (x < origin and xm > origin)
+        if (x < origin && xm > origin)
         {
             float co = cost(origin);
             if (co < cl)
