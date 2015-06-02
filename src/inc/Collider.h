@@ -142,8 +142,7 @@ public:
     bool mergeSlot(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, 
                 GR_MAYBE_UNUSED const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
-    void addBox_slopex(const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
-    void addBox_slopey(const Rect &box, const Rect &org, float weight, float m, bool mintop, int mode);
+    void addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
     void removeBox(const Rect &box, const Rect &org, int mode);
 
 	// Keep track of sequence regions for debugging:

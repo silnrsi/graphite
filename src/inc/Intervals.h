@@ -196,10 +196,6 @@ inline
 Zones::Exclusion Zones::Exclusion::weighted<SD>(float pos, float len, float f,
         float shift, float oshift, float a,
         float m, float xi, float c, GR_MAYBE_UNUSED bool nega) {
-//    return Exclusion(pos, pos+len,
-//            m + f,
-//            m * (xi + a) + f * (shift - oshift),
-//            m * xi * xi + f * (shift + oshift) * (shift + oshift) + 2 * f * a * shift + c);
     float xia = nega ? xi - a : xi + a;
     return Exclusion(pos, pos+len, 
             0.25 * (m + 2 * f), 

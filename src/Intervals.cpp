@@ -160,7 +160,7 @@ void Zones::Exclusion::left_trim(float p) {
 
 inline
 Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
-    c += rhs.c; sm += rhs.sm; smx += rhs.smx;
+    c += rhs.c; sm += rhs.sm; smx += rhs.smx; open = false;
     return *this;
 }
 
@@ -286,7 +286,7 @@ Zones::const_iterator Zones::find_exclusion_under(float x) const
         }
     }
 
-    return _exclusions.end();
+    return _exclusions.begin()+l;
 }
 
 
