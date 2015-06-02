@@ -102,12 +102,12 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 
 #if !defined GRAPHITE2_NTRACING
         // Debugging:
-        _slotNear[i].clear();
-        _subNear[i].clear();
+//        _slotNear[i].clear();
+//        _subNear[i].clear();
 #endif
     }
 #if !defined GRAPHITE2_NTRACING
-    _seg = seg; // debugging
+ //   _seg = seg; // debugging
 #endif
     _target = aSlot;
     if ((dir & 1) == 0)
@@ -124,6 +124,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     
     SlotCollision *c = seg->collisionInfo(aSlot);
     _seqClass = c->seqClass();
+	_seqProxClass = c->seqProxClass();
     _seqOrder = c->seqOrder();
 }
 
@@ -246,7 +247,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
     SlotCollision * cslot = seg->collisionInfo(slot);
     int orderFlags = 0;
-    if (sameCluster && _seqClass && _seqClass == cslot->seqClass())
+    if (sameCluster && _seqClass &&
+		((_seqProxClass != 0 && cslot->seqClass() == _seqProxClass)
+			|| (_seqProxClass == 0 && cslot->seqClass() == _seqClass)))
 		// Force the target glyph to be in the specified direction from the slot we're testing.
         orderFlags = _seqOrder;
     float seq_above_wt = cslot->seqAboveWt();
@@ -478,11 +481,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #if !defined GRAPHITE2_NTRACING
                 if (dbgout)
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
-				SeqRegions seqRegJ;  // bogus
-				seqRegJ.r1Xedge = seqRegJ.r2Yedge = seqRegJ.r3Xedge = seqRegJ.r45Mid = 0.0;
-				_seqRegions[i].push_back(seqRegJ);  // debugging
-                _slotNear[i].push_back(slot);       // debugging
-                _subNear[i].push_back(j);           // debugging
+//				SeqRegions seqRegJ;  // bogus
+//				seqRegJ.r1Xedge = seqRegJ.r2Yedge = seqRegJ.r3Xedge = seqRegJ.r45Mid = 0.0;
+//				_seqRegions[i].push_back(seqRegJ);  // debugging
+//                _slotNear[i].push_back(slot);       // debugging
+//                _subNear[i].push_back(j);           // debugging
 #endif
                 _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
                 anyhits = true;
@@ -495,9 +498,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #if !defined GRAPHITE2_NTRACING
                 if (dbgout)
                     dbgout->setenv(1, reinterpret_cast<void *>(-1));
-			_seqRegions[i].push_back(seqReg);   // debugging
-            _slotNear[i].push_back(slot);       // debugging
-            _subNear[i].push_back(-1);          // debugging
+//			_seqRegions[i].push_back(seqReg);   // debugging
+//            _slotNear[i].push_back(slot);       // debugging
+//            _subNear[i].push_back(-1);          // debugging
 #endif
             isCol = true;
             _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
@@ -1035,13 +1038,14 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     _exclOffset = Position(0, 0);
 
     _seqClass = seg->glyphAttr(gid, aCol+10);
-    _seqOrder = seg->glyphAttr(gid, aCol+11);
-	_seqAboveXoff = seg->glyphAttr(gid, aCol+12);
-	_seqAboveWt = seg->glyphAttr(gid, aCol+13);
-	_seqBelowXlim = seg->glyphAttr(gid, aCol+14);
-	_seqBelowWt = seg->glyphAttr(gid, aCol+15);
-	_seqValignHt = seg->glyphAttr(gid, aCol+16);
-	_seqValignWt = seg->glyphAttr(gid, aCol+17);    
+	_seqProxClass = seg->glyphAttr(gid, aCol+11);
+    _seqOrder = seg->glyphAttr(gid, aCol+12);
+	_seqAboveXoff = seg->glyphAttr(gid, aCol+13);
+	_seqAboveWt = seg->glyphAttr(gid, aCol+14);
+	_seqBelowXlim = seg->glyphAttr(gid, aCol+15);
+	_seqBelowWt = seg->glyphAttr(gid, aCol+16);
+	_seqValignHt = seg->glyphAttr(gid, aCol+17);
+	_seqValignWt = seg->glyphAttr(gid, aCol+18);    
 
 	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }

@@ -83,6 +83,7 @@ public:
     SLOTCOLSETUINTPROP(status, setStatus)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
     SLOTCOLSETUINTPROP(seqClass, setSeqClass)
+	SLOTCOLSETUINTPROP(seqProxClass, setSeqProxClass)
     SLOTCOLSETUINTPROP(seqOrder, setSeqOrder)
     SLOTCOLSETINTPROP(seqAboveXoff, setSeqAboveXoff)
     SLOTCOLSETUINTPROP(seqAboveWt, setSeqAboveWt)
@@ -107,6 +108,7 @@ private:
     uint16		_status;
     uint16		_exclGlyph;
     uint16		_seqClass;
+	uint16		_seqProxClass;
     uint16		_seqOrder;
     int16		_seqAboveXoff;
     uint16		_seqAboveWt;
@@ -178,16 +180,17 @@ protected:
 	float	_marginWt;
     float   _len[4];
     uint16  _seqClass;
+	uint16	_seqProxClass;
     uint16  _seqOrder;
     
 	//bool _scraping[4];
     
 #if !defined GRAPHITE2_NTRACING
     // Debugging
-    Segment * _seg;
-    vecseqreg _seqRegions[4];
-    Vector<Slot*>_slotNear[4];
-    Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
+//    Segment * _seg;
+//    vecseqreg _seqRegions[4];
+//    Vector<Slot*>_slotNear[4];
+//    Vector<int> _subNear[4];    // sub-box of the neighboring glyph; -1 if no sub-boxes
 #endif
 
 };	// end of class ShiftCollider
