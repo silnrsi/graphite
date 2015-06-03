@@ -192,12 +192,12 @@ void Zones::exclude_with_margins(float pos, float len, float origin, int axis) {
 
 void Zones::insert(Exclusion e)
 {
-    e.x = std::max(e.x, _pos);
-    e.xm = std::min(e.xm, _posm);
-    if (e.x >= e.xm) return;
 #if !defined GRAPHITE2_NTRACING
     addDebug(&e);
 #endif
+    e.x = std::max(e.x, _pos);
+    e.xm = std::min(e.xm, _posm);
+    if (e.x >= e.xm) return;
 
     for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie && e.x < e.xm; ++i)
     {
@@ -246,12 +246,12 @@ void Zones::insert(Exclusion e)
 
 void Zones::remove(float x, float xm)
 {
-    x = std::max(x, _pos);
-    xm = std::min(xm, _posm);
-    if (x >= xm) return;
 #if !defined GRAPHITE2_NTRACING
     removeDebug(x, xm);
 #endif
+    x = std::max(x, _pos);
+    xm = std::min(xm, _posm);
+    if (x >= xm) return;
 
     for (iterator i = _exclusions.begin(), ie = _exclusions.end(); i != ie; ++i)
     {
@@ -346,8 +346,7 @@ float Zones::Exclusion::cost(float p) const {
 
 
 float Zones::Exclusion::test_position(float origin) const {
-    float d2c = sm;
-    if (d2c < 0)
+    if (sm < 0)
     {
         // sigh, test both ends and perhaps the middle too!
         float res = x;
@@ -389,7 +388,7 @@ void Zones::jsonDbgOut(Segment *seg) const {
                 *_dbg << "remove" << Position(s->_excl.x, s->_excl.xm);
             else
                 *_dbg << "exclude" << json::flat << json::array
-                    << s->_excl.x << s->_excl.xm << s->_excl.open 
+                    << s->_excl.x << s->_excl.xm 
                     << s->_excl.sm << s->_excl.smx << s->_excl.c
                     << json::close;
             *_dbg << json::close;

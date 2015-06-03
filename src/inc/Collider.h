@@ -145,8 +145,8 @@ public:
     bool mergeSlot(Segment *seg, Slot *slot, 
                 const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
-    void addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, int mode);
-    void removeBox(const Rect &box, const Rect &org, int mode);
+    void addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, Position &offset, int mode);
+    void removeBox(const Rect &box, const Rect &org, Position &offset, int mode);
 
 #if !defined GRAPHITE2_NTRACING
 	void outputJsonDbg(json * const dbgout, Segment *seg, int axis);
