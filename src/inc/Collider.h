@@ -62,11 +62,10 @@ public:
     
     // Behavior for the collision.order attribute:
     enum {
-        COLL_ORDER_LEFT = 1,
-        COLL_ORDER_RIGHT = 2,
-        COLL_ORDER_DOWN = 4,
-        COLL_ORDER_UP = 8,
-        COLL_ORDER_XOVERY = 16
+        SEQ_ORDER_LEFTDOWN = 1,
+        SEQ_ORDER_RIGHTUP = 2,
+        SEQ_ORDER_NOABOVE = 3,
+        SEQ_ORDER_NOBELOW = 4
     };
     
     SlotCollision(Segment *seg, Slot *slot);
