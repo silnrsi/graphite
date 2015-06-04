@@ -350,10 +350,10 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case SlotCollision::SEQ_ORDER_RIGHTUP :
             {
                 Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
-                float xminf = _limit.bl.x + _target->origin().x;
-                float xpinf = _limit.tr.x + _target->origin().x;
-                float ypinf = _limit.tr.y + _target->origin().y;
-                float yminf = _limit.bl.y + _target->origin().y;
+                float xminf = 2 * _limit.bl.x + _target->origin().x;
+                float xpinf = 2 * _limit.tr.x + _target->origin().x;
+                float ypinf = 2 * _limit.tr.y + _target->origin().y;
+                float yminf = 2 * _limit.bl.y + _target->origin().y;
                 float r1Xedge = sx + bb.xa + cslot->seqAboveXoff() - tbb.xa;
                 float r3Xedge = sx + bb.xa + cslot->seqBelowXlim() - tbb.xi;
                 float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
@@ -379,10 +379,10 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             }
             case SlotCollision::SEQ_ORDER_LEFTDOWN :
             {
-                float xminf = _limit.bl.x + _target->origin().x;
-                float xpinf = _limit.tr.x + _target->origin().x;
-                float ypinf = _limit.tr.y + _target->origin().y;
-                float yminf = _limit.bl.y + _target->origin().y;
+                float xminf = 2 * _limit.bl.x + _target->origin().x;
+                float xpinf = 2 * _limit.tr.x + _target->origin().x;
+                float ypinf = 2 * _limit.tr.y + _target->origin().y;
+                float yminf = 2 * _limit.bl.y + _target->origin().y;
                 float r1Xedge = sx + bb.xi - cslot->seqAboveXoff() - tbb.xi;
                 float r3Xedge = sx + bb.xi - cslot->seqBelowXlim() - tbb.xa;
                 float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
