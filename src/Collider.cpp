@@ -87,7 +87,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + aSlot->origin().x + aSlot->origin().y + currShift.x + currShift.y;
                 _len[i] = sb.sa - sb.si;
                 shift = 0; //currOffset.x + currOffset.y;
-                oshift = currOffset.x - currOffset.y + currShift.x - currOffset.y;
+                oshift = currOffset.x - currOffset.y + currShift.x - currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, shift, oshift, oshift);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
@@ -267,13 +267,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float seq_valign_wt = cslot->seqValignWt();
 
     // if isAfter, invert orderFlags
-    if (isAfter)        // _target isAfter slot
-    {
-		if (orderFlags == SlotCollision::SEQ_ORDER_LEFTDOWN)
-			orderFlags = SlotCollision::SEQ_ORDER_RIGHTUP;
-		else if (orderFlags == SlotCollision::SEQ_ORDER_RIGHTUP)
-			orderFlags = SlotCollision::SEQ_ORDER_LEFTDOWN;
-    }
+    if (isAfter && (orderFlags & 0x3) != 0)        // _target isAfter slot and has LEFTDOWN or RIGHTUP
+            orderFlags = orderFlags ^ 0x3;
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
@@ -288,11 +283,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 		int vertOrder = 0;
         switch (i) {
             case 0 :	// x direction
-                diagOrder = ((orderFlags == SlotCollision::SEQ_ORDER_LEFTDOWN) ? -1 : 0) // -1 = force left, 1 = force right
-                        + ((orderFlags == SlotCollision::SEQ_ORDER_RIGHTUP) ? 1 : 0);
-                vertOrder = 0;
-                vmin = std::max(std::max(bb.xi + sx, sb.di + sd + tbb.xa + tx - tsb.da - td), sb.si + ss + tbb.xa + tx - tsb.sa - ts) - tbb.xa;
-                vmax = std::min(std::min(bb.xa + sx, sb.da + sd + tbb.xi + tx - tsb.di - td), sb.sa + ss + tbb.xi + tx - tsb.si - ts) - tbb.xi;
+                vmin = std::max(std::max(bb.xi + sx - tbb.xa, sb.di + sd + tx - tsb.da - td), sb.si + ss + tx - tsb.sa - ts);
+                vmax = std::min(std::min(bb.xa + sx - tbb.xi, sb.da + sd + tx - tsb.di - td), sb.sa + ss + tx - tsb.si - ts);
                 otmin = tbb.yi + ty;
                 otmax = tbb.ya + ty;
                 omin = bb.yi + sy;
@@ -302,13 +294,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 vorigin = _target->origin().x - cslot->offset().x;
                 break;
             case 1 :	// y direction
-				// -1 = force neighboring glyph down; 1 = force neighboring glyph up
-                diagOrder = ((orderFlags == SlotCollision::SEQ_ORDER_LEFTDOWN) ? -1 : 0)
-                        + ((orderFlags == SlotCollision::SEQ_ORDER_RIGHTUP) ? 1 : 0);
-                vertOrder = ((orderFlags == SlotCollision::SEQ_ORDER_NOABOVE) ? 1 : 0)
-                        + ((orderFlags == SlotCollision::SEQ_ORDER_NOBELOW) ? -1 : 0);
-                vmin = std::max(std::max(bb.yi + sy, tbb.ya + ty - sb.da - sd + tsb.di + td), sb.si + ss + tbb.ya + ty - tsb.sa - ts) - tbb.ya;
-                vmax = std::min(std::min(bb.ya + sy, tbb.yi + ty - sb.di - sd + tsb.da + td), sb.sa + ss + tbb.yi + ty - tsb.si - ts) - tbb.yi;
+                vmin = std::max(std::max(bb.yi + sy - tbb.ya, ty - sb.da - sd + tsb.di + td), sb.si + ss + ty - tsb.sa - ts);
+                vmax = std::min(std::min(bb.ya + sy - tbb.yi, ty - sb.di - sd + tsb.da + td), sb.sa + ss + ty - tsb.si - ts);
                 otmin = tbb.xi + tx;
                 otmax = tbb.xa + tx;
                 omin = bb.xi + sx;
@@ -319,12 +306,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
-                diagOrder = ((orderFlags == SlotCollision::SEQ_ORDER_LEFTDOWN) ? -1 : 0) 
-                    + ((orderFlags == SlotCollision::SEQ_ORDER_RIGHTUP) ? 1 : 0);
-                vertOrder = ((orderFlags == SlotCollision::SEQ_ORDER_NOABOVE) ? 1 : 0)	
-                    + ((orderFlags == SlotCollision::SEQ_ORDER_NOBELOW) ? -1 : 0);
-                vmin = std::max(std::max(sb.si + ss, 2 * (bb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (bb.xi + sx - tbb.xa - tx) + tsb.sa + ts) - tsb.sa;
-                vmax = std::min(std::min(sb.sa + ss, 2 * (bb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (bb.xa + sx - tbb.xi - tx) + tsb.si + ts) - tsb.si;
+                vmin = std::max(std::max(sb.si + ss - tsb.sa, 2 * (bb.yi + sy - tbb.ya - ty) + ts), 2 * (bb.xi + sx - tbb.xa - tx) + ts);
+                vmax = std::min(std::min(sb.sa + ss - tsb.si, 2 * (bb.ya + sy - tbb.yi - ty) + ts), 2 * (bb.xa + sx - tbb.xi - tx) + ts);
                 otmin = tsb.di + td;
                 otmax = tsb.da + td;
                 omin = sb.di + sd;
@@ -336,12 +319,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
 				// Note that on the d-axis, 
-                diagOrder = ((orderFlags == SlotCollision::SEQ_ORDER_RIGHTUP) ? -1 : 0) 
-                    + ((orderFlags == SlotCollision::SEQ_ORDER_LEFTDOWN) ? 1 : 0);
-                vertOrder = ((orderFlags == SlotCollision::SEQ_ORDER_NOABOVE) ? -1 : 0)	
-                    + ((orderFlags == SlotCollision::SEQ_ORDER_NOBELOW) ? 1 : 0);
-                vmin = std::max(std::max(sb.di + sd, 2 * (bb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (bb.ya + sy - tbb.yi - ty)) - tsb.da;
-                vmax = std::min(std::min(sb.da + sd, 2 * (bb.xa + sx - tbb.xi - tx) + tsb.di + td), tsb.di + td - 2 * (bb.yi + sy - tbb.ya - ty)) - tsb.di;
+                if ((orderFlags & 0x3) != 0)     // in d up is down, etc. so invert the flags
+                    orderFlags = orderFlags ^ 0x3;
+                else if ((orderFlags & 0xC) != 0)
+                    orderFlags = orderFlags ^ 0xC;
+                vmin = std::max(std::max(sb.di + sd - tsb.da, 2 * (bb.xi + sx - tbb.xa - tx) + td), td - 2 * (bb.ya + sy - tbb.yi - ty));
+                vmax = std::min(std::min(sb.da + sd - tsb.di, 2 * (bb.xa + sx - tbb.xi - tx) + td), td - 2 * (bb.yi + sy - tbb.ya - ty));
                 otmin = tsb.si + ts;
                 otmax = tsb.sa + ts;
                 omin = sb.si + ss;
@@ -363,84 +346,77 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
 
 		Position offset = Position(cslot->offset().x + _currShift.x, cslot->offset().y + _currShift.y);
-        if (diagOrder > 0) // enforce neighboring glyph being left /down (diagram 1)
-        {
-			Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
-            float xminf = _limit.bl.x + _target->origin().x;
-            float xpinf = _limit.tr.x + _target->origin().x;
-            float ypinf = _limit.tr.y + _target->origin().y;
-            float yminf = _limit.bl.y + _target->origin().y;
-            float r1Xedge = sx + bb.xa + cslot->seqAboveXoff() - tbb.xa;
-            float r3Xedge = sx + bb.xa + cslot->seqBelowXlim() - tbb.xi;
-            float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
-            
-            // DBGTAG(1x) means the regions are up and right
-			// region 1
-            DBGTAG(11)
-            addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), org, 0, seq_above_wt, true, offset, i);
-            // region 2
-            DBGTAG(12)
-            removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), org, offset, i);
-            // region 3
-            DBGTAG(13)
-            addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), org, seq_below_wt, 0, true, offset, i);
-            // region 4
-            DBGTAG(14)
-            addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), org, 0, seq_valign_wt, true, offset, i);
-            // region 5
-            DBGTAG(15)
-            addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
-                            org, 0, seq_valign_wt, false, offset, i);
-        }
-        else if (diagOrder < 0)  // enforce neighboring glyph being right/up (diagram 2)
-        {
-            float xminf = _limit.bl.x + _target->origin().x;
-            float xpinf = _limit.tr.x + _target->origin().x;
-            float ypinf = _limit.tr.y + _target->origin().y;
-            float yminf = _limit.bl.y + _target->origin().y;
-            float r1Xedge = sx + bb.xi - cslot->seqAboveXoff() - tbb.xi;
-            float r3Xedge = sx + bb.xi - cslot->seqBelowXlim() - tbb.xa;
-            float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
-            Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
-			// DBGTAG(2x) means the regions are up and right
-            // region 1
-            DBGTAG(21)
-            addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), org, 0, seq_above_wt, false, offset, i);
-            // region 2
-            DBGTAG(22)
-            removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), org, offset, i);
-            // region 3
-            DBGTAG(23)
-            addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), org, seq_below_wt, 0, true, offset, i);
-            // region 4
-            DBGTAG(24)
-            addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
-                            org, 0, seq_valign_wt, true, offset, i);
-            // region 5
-            DBGTAG(25)
-            addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
-                            Position(sx + bb.xa, r2Yedge)), org, 0, seq_valign_wt, false, offset, i);
-        }
-
-		//if (vmax < vmin) { float t = vmax; vmax = vmin; vmin = t; }	// swap to ensure vmin < vmax
-
-		if (vertOrder > 0) // enforce neighboring glyph being above
-		{
-			//float ypinf = _limit.tr.y + _target->origin().y;
-			//Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
-			//// 2x = up and/or right, 9 is absolute region
-			//DBGTAG(29)
-			//removeBox(Rect(Position(sx + bb.xi, sy + bb.yi), Position(sx + bb.xa, ypinf)), org, offset, i);
-			vmax = cmax; // extend neighboring glyph up 
-		}
-		else if (vertOrder < 0)	// enforce neighboring glyph being below
-		{
-			//float yminf = _limit.bl.y + _target->origin().y;
-			//Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
-			//// 1x = down and/or left, 9 is absolute region
-			//DBGTAG(19)
-			//removeBox(Rect(Position(sx + bb.xi, yminf), Position(sx + bb.xa, sy + bb.ya)), org, offset, i);
-			vmin = cmin; // extend neighboring glyph down
+        switch (orderFlags) {
+            case SlotCollision::SEQ_ORDER_RIGHTUP :
+            {
+                Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
+                float xminf = _limit.bl.x + _target->origin().x;
+                float xpinf = _limit.tr.x + _target->origin().x;
+                float ypinf = _limit.tr.y + _target->origin().y;
+                float yminf = _limit.bl.y + _target->origin().y;
+                float r1Xedge = sx + bb.xa + cslot->seqAboveXoff() - tbb.xa;
+                float r3Xedge = sx + bb.xa + cslot->seqBelowXlim() - tbb.xi;
+                float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
+                
+                // DBGTAG(1x) means the regions are up and right
+                // region 1
+                DBGTAG(11)
+                addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), org, 0, seq_above_wt, true, offset, i);
+                // region 2
+                DBGTAG(12)
+                removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), org, offset, i);
+                // region 3
+                DBGTAG(13)
+                addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), org, seq_below_wt, 0, true, offset, i);
+                // region 4
+                DBGTAG(14)
+                addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), org, 0, seq_valign_wt, true, offset, i);
+                // region 5
+                DBGTAG(15)
+                addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
+                                org, 0, seq_valign_wt, false, offset, i);
+                break;
+            }
+            case SlotCollision::SEQ_ORDER_LEFTDOWN :
+            {
+                float xminf = _limit.bl.x + _target->origin().x;
+                float xpinf = _limit.tr.x + _target->origin().x;
+                float ypinf = _limit.tr.y + _target->origin().y;
+                float yminf = _limit.bl.y + _target->origin().y;
+                float r1Xedge = sx + bb.xi - cslot->seqAboveXoff() - tbb.xi;
+                float r3Xedge = sx + bb.xi - cslot->seqBelowXlim() - tbb.xa;
+                float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
+                Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
+                // DBGTAG(2x) means the regions are up and right
+                // region 1
+                DBGTAG(21)
+                addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), org, 0, seq_above_wt, false, offset, i);
+                // region 2
+                DBGTAG(22)
+                removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), org, offset, i);
+                // region 3
+                DBGTAG(23)
+                addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), org, seq_below_wt, 0, true, offset, i);
+                // region 4
+                DBGTAG(24)
+                addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
+                                org, 0, seq_valign_wt, true, offset, i);
+                // region 5
+                DBGTAG(25)
+                addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
+                                Position(sx + bb.xa, r2Yedge)), org, 0, seq_valign_wt, false, offset, i);
+                break;
+            }
+            case SlotCollision::SEQ_ORDER_NOABOVE : // enforce neighboring glyph being above
+                if (i > 0)
+                    vmax = cmax; // extend neighboring glyph up 
+                break;
+		    case SlotCollision::SEQ_ORDER_NOBELOW :	// enforce neighboring glyph being below
+                if (i > 0)
+                    vmin = cmin; // extend neighboring glyph down
+                break;
+            default :
+                break;
 		}
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
@@ -468,26 +444,26 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 const SlantBox &ssb = gc.getSubBoundingSlantBox(gid, j);
                 switch (i) {
                     case 0 :    // x
-                        vmin = std::max(std::max(sbb.xi + sx, ssb.di + sd + tbb.xa + tx - tsb.da - td), ssb.si + ss + tbb.xa + tx - tsb.sa - ts) - tbb.xa;
-                        vmax = std::min(std::min(sbb.xa + sx, ssb.da + sd + tbb.xi + tx - tsb.di - td), ssb.sa + ss + tbb.xi + tx - tsb.si - ts) - tbb.xi;
+                        vmin = std::max(std::max(sbb.xi + sx - tbb.xa, ssb.di + sd + tx - tsb.da - td), ssb.si + ss + tx - tsb.sa - ts);
+                        vmax = std::min(std::min(sbb.xa + sx - tbb.xi, ssb.da + sd + tx - tsb.di - td), ssb.sa + ss + tx - tsb.si - ts);
                         omin = sbb.yi + sy;
                         omax = sbb.ya + sy;
                         break;
                     case 1 :    // y
-                        vmin = std::max(std::max(sbb.yi + sy, tbb.ya + ty - ssb.da - sd + tsb.di + td), ssb.si + ss + tbb.ya + ty - tsb.sa - ts) - tbb.ya;
-                        vmax = std::min(std::min(sbb.ya + sy, tbb.yi + ty - ssb.di - sd + tsb.da + td), ssb.sa + ss + tbb.yi + ty - tsb.si - ts) - tbb.yi;
+                        vmin = std::max(std::max(sbb.yi + sy - tbb.ya, ty - ssb.da - sd + tsb.di + td), ssb.si + ss + ty - tsb.sa - ts);
+                        vmax = std::min(std::min(sbb.ya + sy - tbb.yi, ty - ssb.di - sd + tsb.da + td), ssb.sa + ss + ty - tsb.si - ts);
                         omin = sbb.xi + sx;
                         omax = sbb.xa + sx;
                         break;
                     case 2 :    // sum
-                        vmin = std::max(std::max(ssb.si + ss, 2 * (sbb.yi + sy - tbb.ya - ty) + tsb.sa + ts), 2 * (sbb.xi + sx - tbb.xa - tx) + tsb.sa + ts) - tsb.sa;
-                        vmax = std::min(std::min(ssb.sa + ss, 2 * (sbb.ya + sy - tbb.yi - ty) + tsb.si + ts), 2 * (sbb.xa + sx - tbb.xi - tx) + tsb.si + ts) - tsb.si;
+                        vmin = std::max(std::max(ssb.si + ss - tsb.sa, 2 * (sbb.yi + sy - tbb.ya - ty) + ts), 2 * (sbb.xi + sx - tbb.xa - tx) + ts);
+                        vmax = std::min(std::min(ssb.sa + ss - tsb.si, 2 * (sbb.ya + sy - tbb.yi - ty) + ts), 2 * (sbb.xa + sx - tbb.xi - tx) + ts);
                         omin = ssb.di + sd;
                         omax = ssb.da + sd;
                         break;
                     case 3 :    // diff
-                        vmin = std::max(std::max(ssb.di + sd, 2 * (sbb.xi + sx - tbb.xa - tx) + tsb.da + td), tsb.da + td - 2 * (sbb.ya + sy - tbb.yi - ty)) - tsb.da;
-                        vmax = std::min(std::min(ssb.da + sd, 2 * (sbb.xa + sx - tbb.xi - tx) + tsb.di + td), tsb.di + td - 2 * (sbb.yi + sy - tbb.ya - ty)) - tsb.di;
+                        vmin = std::max(std::max(ssb.di + sd - tsb.da, 2 * (sbb.xi + sx - tbb.xa - tx) + td), td - 2 * (sbb.ya + sy - tbb.yi - ty));
+                        vmax = std::min(std::min(ssb.da + sd - tsb.di, 2 * (sbb.xa + sx - tbb.xi - tx) + td), td - 2 * (sbb.yi + sy - tbb.ya - ty));
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
                         break;

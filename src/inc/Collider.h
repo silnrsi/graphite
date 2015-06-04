@@ -60,12 +60,12 @@ public:
         ////COLL_OVERLAP = 256,    // use maxoverlap to restrict - DELETE
     };
     
-    // Behavior for the collision.order attribute:
+    // Behavior for the collision.order attribute. To GDL this is an enum, to us it's a bitfield, with only 1 bit set.
     enum {
         SEQ_ORDER_LEFTDOWN = 1,
         SEQ_ORDER_RIGHTUP = 2,
-        SEQ_ORDER_NOABOVE = 3,
-        SEQ_ORDER_NOBELOW = 4
+        SEQ_ORDER_NOABOVE = 4,
+        SEQ_ORDER_NOBELOW = 8
     };
     
     SlotCollision(Segment *seg, Slot *slot);
