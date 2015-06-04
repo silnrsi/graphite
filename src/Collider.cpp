@@ -151,10 +151,13 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
         case 2 :
             if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
             {
-                float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
-                                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
-                float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
-                                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
+                // can't get this maths right, fall back to simple safety
+                //float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
+                //                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
+                //float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
+                //                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
+                float smin = box.bl.x + box.bl.y;
+                float smax = box.tr.x + box.tr.y;
                 if (smin > smax) return;
                 float si;
                 a = offset.x - offset.y + _currShift.x - _currShift.y;
@@ -168,10 +171,13 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
         case 3 :
             if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
             {
-                float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
-                                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
-                float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
-                                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
+                // can't get this maths right, fall back to simple safety
+                //float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
+                //                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
+                //float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
+                //                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
+                float dmin = box.bl.x - box.tr.y;
+                float dmax = box.tr.x - box.bl.y;
                 if (dmin > dmax) return;
                 float di;
                 a = offset.x + offset.y + _currShift.x + _currShift.y;
@@ -256,6 +262,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const SlantBox &tsb = gc.getBoundingSlantBox(tgid);
 
     SlotCollision * cslot = seg->collisionInfo(slot);
+    SlotCollision * ctarget = seg->collisionInfo(_target);
     int orderFlags = 0;
     if (sameCluster && _seqClass &&
 		((_seqProxClass != 0 && cslot->seqClass() == _seqProxClass)
@@ -266,7 +273,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float seq_below_wt = cslot->seqBelowWt();
     float seq_valign_wt = cslot->seqValignWt();
 
-    // if isAfter, invert orderFlags
+    // if isAfter, invert orderFlags for diagonal orders.
     if (isAfter && (orderFlags & 0x3) != 0)        // _target isAfter slot and has LEFTDOWN or RIGHTUP
             orderFlags = orderFlags ^ 0x3;
 
@@ -279,8 +286,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     for (int i = 0; i < 4; ++i)
     {
 		//uint16 mMin = (uint16)(_marginMin / (i > 1 ? ISQRT2 : 1.));
-        int diagOrder = 0;
-		int vertOrder = 0;
         switch (i) {
             case 0 :	// x direction
                 vmin = std::max(std::max(bb.xi + sx - tbb.xa, sb.di + sd + tx - tsb.da - td), sb.si + ss + tx - tsb.sa - ts);
@@ -291,7 +296,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.ya + sy;
                 cmin = _limit.bl.x + _target->origin().x;
                 cmax = _limit.tr.x + _target->origin().x + tbb.xa - tbb.xi;
-                vorigin = _target->origin().x - cslot->offset().x;
+                vorigin = _target->origin().x - ctarget->offset().x;
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(bb.yi + sy - tbb.ya, ty - sb.da - sd + tsb.di + td), sb.si + ss + ty - tsb.sa - ts);
@@ -302,7 +307,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = bb.xa + sx;
                 cmin = _limit.bl.y + _target->origin().y;
                 cmax = _limit.tr.y + _target->origin().y + tbb.ya - tbb.yi;
-                vorigin = _target->origin().y - cslot->offset().y;
+                vorigin = _target->origin().y - ctarget->offset().y;
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -314,7 +319,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.da + sd;
                 cmin = _limit.bl.x + _limit.bl.y + _target->origin().x + _target->origin().y; 
                 cmax = _limit.tr.x + _limit.tr.y + _target->origin().x + _target->origin().y + tsb.sa - tsb.si;
-                vorigin = _target->origin().x + _target->origin().y - cslot->offset().x - cslot->offset().y;
+                vorigin = _target->origin().x + _target->origin().y - ctarget->offset().x - ctarget->offset().y;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -331,7 +336,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 omax = sb.sa + ss;
                 cmin = _limit.bl.x - _limit.tr.y + _target->origin().x - _target->origin().y;
                 cmax = _limit.tr.x - _limit.bl.y + _target->origin().x - _target->origin().y + tsb.da - tsb.di;
-                vorigin = _target->origin().x - _target->origin().y - cslot->offset().x + cslot->offset().y;
+                vorigin = _target->origin().x - _target->origin().y - ctarget->offset().x + ctarget->offset().y;
                 break;
             default :
                 continue;
