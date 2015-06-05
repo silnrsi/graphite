@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include <limits>
 #include <math.h>
 #include <string>
+#include <functional>
 #include "inc/Collider.h"
 #include "inc/Segment.h"
 #include "inc/Slot.h"
@@ -120,14 +121,26 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _seqOrder = c->seqOrder();
 }
 
+template <class O>
+float sdm(float vi, float va, float mx, float my, O op)
+{
+    float res = 2 * mx - vi;
+    if (op(res, vi + 2 * my))
+    {
+        res = va + 2 * my;
+        if (op(res, 2 * mx - va))
+            res = mx + my;
+    }
+    return res;
+}
 
 // Mark an area with a cost that can vary along the x-axis.
-inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &org, float weight, float m, bool minright, Position &offset, int axis)
+void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, const Position &offset, int axis)
 {
     float a;
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y && box.width() > 0)
+            if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
             {
                 //a = oorigin; // - box.bl.y;
                 a = offset.y + _currShift.y;
@@ -138,7 +151,7 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
             }
             break;
         case 1 :
-            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x && box.height() > 0)
+            if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
             {
                 //a = oorigin; // - box.bl.x;
                 a = offset.x + _currShift.x;
@@ -149,15 +162,17 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
             }
             break;
         case 2 :
-            if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y)
+            if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di)
             {
                 // can't get this maths right, fall back to simple safety
                 //float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
                 //                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
                 //float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
                 //                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
-                float smin = box.bl.x + box.bl.y;
-                float smax = box.tr.x + box.tr.y;
+                float di = org.x - org.y + sb.di;
+                float da = org.x - org.y + sb.da;
+                float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
+                float smin = sdm(da, di, box.tr.x, box.tr.y, std::less<float>());
                 if (smin > smax) return;
                 float si;
                 a = offset.x - offset.y + _currShift.x - _currShift.y;
@@ -169,15 +184,17 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
             }
             break;
         case 3 :
-            if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y)
+            if (box.bl.x + box.bl.y < org.x + org.y + sb.sa && box.tr.x + box.tr.y > org.x + org.y + sb.si)
             {
                 // can't get this maths right, fall back to simple safety
                 //float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
                 //                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
                 //float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
                 //                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
-                float dmin = box.bl.x - box.tr.y;
-                float dmax = box.tr.x - box.bl.y;
+                float si = org.x + org.y + sb.si;
+                float sa = org.x + org.y + sb.sa;
+                float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
+                float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
                 if (dmin > dmax) return;
                 float di;
                 a = offset.x + offset.y + _currShift.x + _currShift.y;
@@ -195,34 +212,34 @@ inline void ShiftCollider::addBox_slope(bool isx, const Rect &box, const Rect &o
 }
 
 // Mark an area with an absolute cost, making it completely inaccessible.
-inline void ShiftCollider::removeBox(const Rect &box, const Rect &org, Position &offset, int axis)
+inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, int axis)
 {
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.tr.y && box.tr.y > org.bl.y && box.width() > 0)
+            if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
                 _ranges[axis].exclude(box.bl.x, box.width());
             break;
         case 1 :
-            if (box.bl.x < org.tr.x && box.tr.x > org.bl.x && box.height() > 0)
+            if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
                 _ranges[axis].exclude(box.bl.y, box.height());
             break;
         case 2 :
-            if (box.bl.x - box.tr.y < org.tr.x - org.bl.y && box.tr.x - box.bl.y > org.bl.x - org.tr.y && box.width() > 0 && box.height() > 0)
+            if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di && box.width() > 0 && box.height() > 0)
             {
-                float smin = std::max(std::max(box.bl.x + box.bl.y, 2 * (box.bl.y - org.tr.y) + org.tr.x + org.tr.y),
-                                      2 * (box.bl.x - org.tr.x) + org.tr.x + org.tr.y);
-                float smax = std::min(std::min(box.tr.x + box.tr.y, 2 * (box.tr.y - org.bl.y) + org.bl.x + org.bl.y),
-                                      2 * (box.tr.x - org.bl.x) + org.bl.x + org.bl.y);
+                float di = org.x - org.y + sb.di;
+                float da = org.x - org.y + sb.da;
+                float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
+                float smin = sdm(da, di, box.tr.x, box.tr.y, std::less<float>());
                 _ranges[axis].exclude(smin, smax - smin);
             }
             break;
         case 3 :
-            if (box.bl.x + box.bl.y < org.tr.x + org.tr.y && box.tr.x + box.tr.y > org.bl.x + org.bl.y && box.width() > 0 && box.height() > 0)
+            if (box.bl.x + box.bl.y < org.x + org.y + sb.sa && box.tr.x + box.tr.y > org.x + org.y + sb.si && box.width() > 0 && box.height() > 0)
             {
-                float dmin = std::max(std::max(box.bl.x - box.tr.y, 2 * (box.bl.x - org.tr.x) + org.tr.x - org.bl.y),
-                                      org.tr.x - org.bl.y - 2 * (box.tr.y - org.bl.y));
-                float dmax = std::min(std::min(box.tr.x - box.bl.y, 2 * (box.tr.x - org.bl.x) + org.bl.x - org.tr.y),
-                                      org.bl.x - org.tr.y - 2 * (box.bl.y - org.tr.y));
+                float si = org.x + org.y + sb.si;
+                float sa = org.x + org.y + sb.sa;
+                float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
+                float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
                 _ranges[axis].exclude(dmin, dmax - dmin);
             }
             break;
@@ -351,78 +368,74 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
 
 		Position offset = Position(cslot->offset().x + _currShift.x, cslot->offset().y + _currShift.y);
-        switch (orderFlags) {
-            case SlotCollision::SEQ_ORDER_RIGHTUP :
-            {
-                Rect org(Position(tx, ty), Position(tx + tbb.xa - tbb.xi, ty + tbb.ya - tbb.yi));
-                float xminf = _limit.bl.x + _target->origin().x;
-                float xpinf = _limit.tr.x + _target->origin().x;
-                float ypinf = _limit.tr.y + _target->origin().y;
-                float yminf = _limit.bl.y + _target->origin().y;
-                float r1Xedge = sx + bb.xa + cslot->seqAboveXoff() - tbb.xa;
-                float r3Xedge = sx + bb.xa + cslot->seqBelowXlim() - tbb.xi;
-                float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
-                
-                // DBGTAG(1x) means the regions are up and right
-                // region 1
-                DBGTAG(11)
-                addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), org, 0, seq_above_wt, true, offset, i);
-                // region 2
-                DBGTAG(12)
-                removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), org, offset, i);
-                // region 3
-                DBGTAG(13)
-                addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), org, seq_below_wt, 0, true, offset, i);
-                // region 4
-                DBGTAG(14)
-                addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), org, 0, seq_valign_wt, true, offset, i);
-                // region 5
-                DBGTAG(15)
-                addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
-                                org, 0, seq_valign_wt, false, offset, i);
-                break;
+        if (orderFlags)
+        {
+            Position org(tx, ty);
+            float xminf = _limit.bl.x + _target->origin().x;
+            float xpinf = _limit.tr.x + _target->origin().x;
+            float ypinf = _limit.tr.y + _target->origin().y;
+            float yminf = _limit.bl.y + _target->origin().y;
+            switch (orderFlags) {
+                case SlotCollision::SEQ_ORDER_RIGHTUP :
+                {
+                    float r1Xedge = sx + bb.xa + cslot->seqAboveXoff() - tbb.xa;
+                    float r3Xedge = sx + bb.xa + cslot->seqBelowXlim() - tbb.xi;
+                    float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
+                    
+                    // DBGTAG(1x) means the regions are up and right
+                    // region 1
+                    DBGTAG(11)
+                    addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), tbb, tsb, org, 0, seq_above_wt, true, offset, i);
+                    // region 2
+                    DBGTAG(12)
+                    removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), tbb, tsb, org, i);
+                    // region 3
+                    DBGTAG(13)
+                    addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge)), tbb, tsb, org, seq_below_wt, 0, true, offset, i);
+                    // region 4
+                    DBGTAG(14)
+                    addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), tbb, tsb, org, 0, seq_valign_wt, true, offset, i);
+                    // region 5
+                    DBGTAG(15)
+                    addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
+                                    tbb, tsb, org, 0, seq_valign_wt, false, offset, i);
+                    break;
+                }
+                case SlotCollision::SEQ_ORDER_LEFTDOWN :
+                {
+                    float r1Xedge = sx + bb.xi - cslot->seqAboveXoff() - tbb.xi;
+                    float r3Xedge = sx + bb.xi - cslot->seqBelowXlim() - tbb.xa;
+                    float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
+                    // DBGTAG(2x) means the regions are up and right
+                    // region 1
+                    DBGTAG(21)
+                    addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), tbb, tsb, org, 0, seq_above_wt, false, offset, i);
+                    // region 2
+                    DBGTAG(22)
+                    removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), tbb, tsb, org, i);
+                    // region 3
+                    DBGTAG(23)
+                    addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), tbb, tsb, org, seq_below_wt, 0, true, offset, i);
+                    // region 4
+                    DBGTAG(24)
+                    addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
+                                    tbb, tsb, org, 0, seq_valign_wt, true, offset, i);
+                    // region 5
+                    DBGTAG(25)
+                    addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
+                                    Position(sx + bb.xa, r2Yedge)), tbb, tsb, org, 0, seq_valign_wt, false, offset, i);
+                    break;
+                }
+                case SlotCollision::SEQ_ORDER_NOABOVE : // enforce neighboring glyph being above
+                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, sy + bb.ya), Position(sx + bb.xa - tbb.xi, ypinf)), tbb, tsb, org, i);
+                    break;
+                case SlotCollision::SEQ_ORDER_NOBELOW :	// enforce neighboring glyph being below
+                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, yminf), Position(sx + bb.xa - tbb.xi, sy + bb.yi)), tbb, tsb, org, i);
+                    break;
+                default :
+                    break;
             }
-            case SlotCollision::SEQ_ORDER_LEFTDOWN :
-            {
-                float xminf = _limit.bl.x + _target->origin().x;
-                float xpinf = _limit.tr.x + _target->origin().x;
-                float ypinf = _limit.tr.y + _target->origin().y;
-                float yminf = _limit.bl.y + _target->origin().y;
-                float r1Xedge = sx + bb.xi - cslot->seqAboveXoff() - tbb.xi;
-                float r3Xedge = sx + bb.xi - cslot->seqBelowXlim() - tbb.xa;
-                float r2Yedge = sy + 0.5 * (bb.yi + bb.ya + cslot->seqValignHt() - tbb.xi - tbb.xa);
-                Rect org(Position(tx + tbb.xi, ty + tbb.yi), Position(tx + tbb.xa, ty + tbb.ya));
-                // DBGTAG(2x) means the regions are up and right
-                // region 1
-                DBGTAG(21)
-                addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), org, 0, seq_above_wt, false, offset, i);
-                // region 2
-                DBGTAG(22)
-                removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), org, offset, i);
-                // region 3
-                DBGTAG(23)
-                addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r3Xedge, ypinf)), org, seq_below_wt, 0, true, offset, i);
-                // region 4
-                DBGTAG(24)
-                addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
-                                org, 0, seq_valign_wt, true, offset, i);
-                // region 5
-                DBGTAG(25)
-                addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
-                                Position(sx + bb.xa, r2Yedge)), org, 0, seq_valign_wt, false, offset, i);
-                break;
-            }
-            case SlotCollision::SEQ_ORDER_NOABOVE : // enforce neighboring glyph being above
-                if (i > 0)
-                    vmax = cmax; // extend neighboring glyph up 
-                break;
-		    case SlotCollision::SEQ_ORDER_NOBELOW :	// enforce neighboring glyph being below
-                if (i > 0)
-                    vmin = cmin; // extend neighboring glyph down
-                break;
-            default :
-                break;
-		}
+        }
 
         // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
         //    // or it is offset in the opposite dimension:
