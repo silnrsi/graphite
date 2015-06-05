@@ -43,6 +43,8 @@ class SlantBox
 {
 public:
     SlantBox(float psi = 0., float pdi = 0., float psa = 0., float pda = 0.) : si(psi), di(pdi), sa(psa), da(pda) {}; 
+    float width() const { return sa - si; }
+    float height() const { return da - di; }
     float si; // min
     float di; // min
     float sa; // max
@@ -55,6 +57,8 @@ class BBox
 {
 public:
     BBox(float pxi = 0, float pyi = 0., float pxa = 0., float pya = 0.) : xi(pxi), yi(pyi), xa(pxa), ya(pya) {};
+    float width() const { return xa - xi; }
+    float height() const { return ya - yi; }
     float xi; // min
     float yi; // min
     float xa; // max
