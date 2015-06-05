@@ -418,10 +418,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     break;
                 }
                 case SlotCollision::SEQ_ORDER_NOABOVE : // enforce neighboring glyph being above
-                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, sy + bb.ya), Position(sx + bb.xa - tbb.xi, _target->origin().y + 10 * _limit.tr.y)), tbb, tsb, org, i);
+                    DBGTAG(31);
+                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, sy + bb.ya), Position(sx + bb.xa - tbb.xi, _target->origin().y + _limit.tr.y)), tbb, tsb, org, i);
                     break;
                 case SlotCollision::SEQ_ORDER_NOBELOW :	// enforce neighboring glyph being below
-                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, _target->origin().y + 10 * _limit.bl.y), Position(sx + bb.xa - tbb.xi, sy + bb.yi)), tbb, tsb, org, i);
+                    DBGTAG(32);
+                    removeBox(Rect(Position(sx + bb.xi - tbb.xa, _target->origin().y + _limit.bl.y), Position(sx + bb.xa - tbb.xi, sy + bb.yi)), tbb, tsb, org, i);
                     break;
                 default :
                     break;
