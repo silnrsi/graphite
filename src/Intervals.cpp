@@ -218,7 +218,7 @@ void Zones::insert(Exclusion e)
             // split i at e->x into i1,i2
             // split e at i.mx into e1,e2
             // trim i1, insert i2+e1, e=e2
-            if (i->x != e.x)   { i = _exclusions.insert(i,i->split_at(e.x)); ++i; }
+            if (i->x != e.x && i->xm != e.x)   { i = _exclusions.insert(i,i->split_at(e.x)); ++i; }
             *i += e;
             e.left_trim(i->xm);
             break;
