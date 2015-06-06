@@ -220,7 +220,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float di = org.x - org.y + sb.di;
                 float da = org.x - org.y + sb.da;
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
-                float smin = sdm(da, di, box.tr.x, box.tr.y, std::less<float>());
+                float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
                 _ranges[axis].exclude(smin, smax - smin);
             }
             break;
