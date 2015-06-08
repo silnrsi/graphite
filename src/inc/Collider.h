@@ -56,6 +56,7 @@ public:
         COLL_KERN = 16,     // collisions with this glyph are fixed by adding kerning space after it
         COLL_ISCOL = 32,    // this glyph has a collision
         COLL_KNOWN = 64,    // we've figured out what's happening with this glyph
+        COLL_TEMPLOCK = 128,    // Lock glyphs that have been given priority positioning
         ////COLL_JUMPABLE = 128,    // moving glyphs may jump this stationary glyph in any direction - DELETE
         ////COLL_OVERLAP = 256,    // use maxoverlap to restrict - DELETE
     };

@@ -710,10 +710,13 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     Slot *lstart = start->prev();
                     for (Slot *s = lend; s != lstart; s = s->prev())
                     {
-                        const SlotCollision * c = seg->collisionInfo(s);
+                        SlotCollision * c = seg->collisionInfo(s);
                         if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
                                 && (c->status() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
+                        {
                             hasCollisions |= resolveCollisions(seg, s, lend, shiftcoll, true, dir, moved, dbgout);
+                            c->setStatus(c->status() | SlotCollision::COLL_TEMPLOCK);
+                        }
                     }
                 }
 
@@ -733,9 +736,14 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     moved = false;
                     for (Slot *s = start; s != end; s = s->next())
                     {
-                        const SlotCollision * c = seg->collisionInfo(s);
-                        if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
+                        SlotCollision * c = seg->collisionInfo(s);
+                        if (start && (c->status() & SlotCollision::COLL_FIX) 
+                                  && !(c->status() & SlotCollision::COLL_TEMPLOCK)
+                                  && !(c->flags() & SlotCollision::COLL_KERN))
+                        {
                             hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+                            c->setStatus(c->status() & ~SlotCollision::COLL_TEMPLOCK);
+                        }
                     }
                 }
         //      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
@@ -842,9 +850,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
                             || !isKernCluster(seg, nbor))   // this cluster is not to be kerned (so avoid it)
                       && (!isRev    // if processing forwards then good to merge otherwise only:
-                            || !ignoreForKern                                   // merge in anything following slotFix in slot stream
                             || !(cNbor->status() & SlotCollision::COLL_FIX)     // merge in immovable stuff
-                            || (cNbor->flags() & SlotCollision::COLL_KERN)))    // merge in anything kernable (why?)
+                            || (cNbor->flags() & SlotCollision::COLL_KERN && !sameCluster)     // ignore other kernable clusters
+                            || (cNbor->status() & SlotCollision::COLL_ISCOL)))  // test against other collided glyphs
             collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, dbgout);
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
@@ -863,6 +871,13 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
             if (fabs(shift.x-cFix->shift().x) >= 1.0 || fabs(shift.y-cFix->shift().y) >= 1.0)
                 moved = true;
             cFix->setShift(shift);
+            if (slotFix->firstChild())
+            {
+                Rect bbox;
+                Position here = slotFix->origin() + shift;
+                float clusterMin = here.x;
+                slotFix->firstChild()->finalise(seg, NULL, here, bbox, 0, clusterMin, false);
+            }
         }
     }
     else
@@ -897,10 +912,10 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     bool collides = false;
     SlotCollision *cFix = seg->collisionInfo(slotFix);
     bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
+    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
 
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())
     {
