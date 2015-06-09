@@ -23,12 +23,12 @@ import ctypes.util
 import sys, os
 
 if getattr(sys, 'frozen', None) :
-    basedir = sys._MEIPASS
+    basedir = [sys._MEIPASS]
 #elif sys.platform == 'win32' :
 #    basedir = os.path.join(os.path.dirname(__file__), '..', 'dll')
 else :
     #basedir = os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'src')
-    basedir = os.path.join('..', '..', 'src')
+    basedirs = [os.path.join('..', '..', 'src'), os.path.join('..', 'src')]
 
 grfiles = {
     'darwin' : 'libgraphite2.dylib',
@@ -37,16 +37,18 @@ grfiles = {
     'win64' : 'graphite2-x64.dll'
 }
 gr2 = None
-try :
-    if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
-        grfile = grfiles['win64']
-    else :
-        grfile = grfiles[sys.platform]
-    grfile = os.path.join(basedir, grfile)
-    print "Trying " + grfile
-    gr2 = CDLL(grfile)
-except OSError :
-    gr2 = None
+if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
+    grfile = grfiles['win64']
+else :
+    grfile = grfiles[sys.platform]
+for b in basedirs :
+    testfile = os.path.join(b, grfile)
+    print "Trying " + testfile
+    try :
+        gr2 = CDLL(testfile)
+    except OSError :
+        gr2 = None
+    if gr2 is not None : break
 
 if not gr2 :
     print "Trying general library"
