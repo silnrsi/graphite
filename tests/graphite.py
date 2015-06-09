@@ -73,6 +73,11 @@ def fn(name, res, *params) :
     f.restype = res
     f.argtypes = params
 
+class FaceInfo(Structure) :
+    _fields_ = [("extra_ascent", c_ushort),
+                ("extra_descent", c_ushort),
+                ("upem", c_ushort)]
+
 tablefn = CFUNCTYPE(c_void_p, c_void_p, c_uint, POINTER(c_size_t))
 advfn = CFUNCTYPE(c_float, c_void_p, c_ushort)
 
@@ -89,6 +94,8 @@ fn('gr_face_n_languages', c_ushort, c_void_p)
 fn('gr_face_lang_by_index', c_uint32, c_void_p, c_uint16)
 fn('gr_face_destroy', None, c_void_p)
 fn('gr_face_n_glyphs', c_ushort, c_void_p)
+fn('gr_face_info', POINTER(FaceInfo), c_void_p)
+fn('gr_face_is_char_supported', c_int, c_void_p, c_uint32, c_uint32)
 fn('gr_make_file_face', c_void_p, c_char_p, c_uint)
 fn('gr_make_file_face_with_seg_cache', c_void_p, c_char_p, c_uint, c_uint)
 fn('gr_make_font', c_void_p, c_float, c_void_p)
@@ -219,6 +226,10 @@ class Face(object) :
 
     def __del__(self) :
         gr2.gr_face_destroy(self.face)
+
+    def get_upem(self) :
+        finfo = gr2.gr_face_info(self.face)
+        return finfo.contents.upem
 
     def num_glyphs(self) :
         return gr2.fr_face_n_glyphs(self.face)

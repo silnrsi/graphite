@@ -13,7 +13,7 @@ class GrFont(object) :
     def __init__(self, fname, size, rtl, feats = {}, script = 0, lang = 0) :
         self.fname = fname
         self.size = size
-        self.rtl = rel
+        self.rtl = rtl
         self.grface = gr.Face(fname)
         self.feats = self.grface.get_featureval(lang)
         self.script = script
@@ -109,14 +109,10 @@ class JsonLog(object) :
     def logentry(self, label, linenumber, wordnumber, string, gglyphs, bases) :
         s = makelabel(label, linenumber, wordnumber)
         self.out.write('{ \"'+s+'\" : ')
-        if len(gglyphs) > 1 :
-            self.out.write("[")
         # have to use iterencode here to get json.encoder.FLOAT_REP to work
         #res = "\n".join(map(lambda x : "".join(self.encoder.iterencode([(g[0], roundpt(g[1], 0.01)) for g in x])), gglyphs))
         res = "".join(self.encoder.iterencode(gglyphs))
         self.out.write(res)
-        if len(gglyphs) > 1 :
-            self.out.write("]")
         self.out.write('},\n')
 
     def logend(self) :
@@ -190,7 +186,7 @@ origargs = []
 fpaths = map(lambda x:os.path.relpath(x, start=(os.path.dirname(opts.output) if opts.output else '.')), args)
 
 font = GrFont(args[0], 0, opts.rtl, feats, opts.script, opts.lang)
-tt = TTFont(args[i])
+tt = TTFont(args[0])
 
 reader = texttypes[opts.texttype](opts.text, spliton)
 
@@ -204,7 +200,7 @@ for label, words in reader :
     for s in words :
         wcount += 1
         gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
-        if gls[-1][-1][0] is None : gls[-1][-1] = ('_adv_', gls[-1][-1][1])
+        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][-1][1])
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
         bases = map(lambda x: (cmaplookup(tt, x), (0,0)), s)

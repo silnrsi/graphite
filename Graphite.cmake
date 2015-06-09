@@ -105,3 +105,16 @@ function(feattest TESTNAME FONTFILE)
     endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
 endfunction(feattest)
 
+function(cmptest TESTNAME FONTFILE TEXTFILE)
+    if (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
+        set(PLATFORM_TEST_SUFFIX ${CMAKE_SYSTEM_NAME})
+    endif (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
+    if (NOT (GRAPHITE2_NFILEFACE))
+        add_test(NAME ${TESTNAME} COMMAND python ${PROJECT_SOURCE_DIR}/fnttxtrender -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
+        set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
+        add_test(NAME ${TESTNAME}Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.json ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json)
+        set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
+    endif (NOT (GRAPHITE2_NFILEFACE))
+endfunction(cmptest)
+
+
