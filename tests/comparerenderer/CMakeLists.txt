@@ -48,4 +48,4 @@ comparetest(piglatin PigLatinBenchmark_v3.ttf udhr_eng.txt)
 comparetest(annapurna_nep Annapurnarc2.ttf udhr_nep.txt)
 
 # comparerenderer can also be used for font testing
-install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
+# install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
