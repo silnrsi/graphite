@@ -32,14 +32,9 @@
 
 class Gr2Face : private std::auto_ptr<gr_face>
 {
-	bool m_cached;
-
 public:
-	Gr2Face(const char * fontFile, int cache, const std::string & logPath, const bool demand_load)
-    :  std::auto_ptr<gr_face>(cache == 0
-          ? gr_make_file_face(fontFile, !demand_load ? gr_face_preloadGlyphs : gr_face_default)
-          : gr_make_file_face_with_seg_cache(fontFile, cache, (!demand_load ? gr_face_preloadGlyphs : gr_face_default) | gr_face_cacheCmap)),
-       m_cached(cache > 0)
+	Gr2Face(const char * fontFile, const std::string & logPath, const bool demand_load)
+    :  std::auto_ptr<gr_face>(gr_make_file_face(fontFile, !demand_load ? gr_face_preloadGlyphs : gr_face_default))
 	{
         if (!get()) return;
 
@@ -53,7 +48,6 @@ public:
         release();
 	}
 
-	bool cached() const 		{ return m_cached; }
 	operator bool () const		{ return get() != 0; }
 	operator gr_face* () const	{ return get(); }
 };
@@ -86,7 +80,7 @@ public:
                 m_grFeatures = gr_face_featureval_for_lang(m_grFace, 0);
             }
         }
-        m_name = !m_grFace.cached() ? "graphite2 (uncached)" : "graphite2 (cached)";
+        m_name = "graphite2";
     }
     virtual ~Gr2Renderer()
     {
