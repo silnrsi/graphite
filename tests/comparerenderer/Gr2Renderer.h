@@ -107,7 +107,8 @@ public:
             new(result) RenderedLine(0, .0f);
             return;
         }
-        RenderedLine * renderedLine = new(result) RenderedLine(gr_seg_n_slots(pSeg),
+        std::string *s = new std::string(utf8, length);
+        RenderedLine * renderedLine = new(result) RenderedLine(s, gr_seg_n_slots(pSeg),
                                                                gr_seg_advance_X(pSeg));
         int i = 0;
         for (const gr_slot* s = gr_seg_first_slot(pSeg); s;

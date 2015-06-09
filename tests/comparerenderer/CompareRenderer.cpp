@@ -124,7 +124,7 @@ public:
             {
                 for (int i = 0; i < repeat; i++)
                     m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r], log);
-                fprintf(log, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
+                fprintf(stdout, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
             }
         }
     }
@@ -192,16 +192,17 @@ protected:
             lfLength = 2;
         if (m_verbose)
         {
+            fprintf(log, "[\n");
             while (i < m_numLines)
             {
-                fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i, log);
-                pLineResult[i].dump(stdout);
+                pLineResult[i].dump(log);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }
+            fprintf(log, "]\n");
         }
         else
         {
