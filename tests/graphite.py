@@ -355,7 +355,7 @@ class Segment(object) :
             length = len(string)
         if isinstance(scriptid, basestring) :
             scriptid = gr2.gr_str_to_tag(scriptid)
-        self.seg = gr2.gr_make_seg(font.font, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
+        self.seg = gr2.gr_make_seg(font.font if font is not None else 0, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
 
     def __del__(self) :
         gr2.gr_seg_destroy(self.seg)

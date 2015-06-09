@@ -22,30 +22,9 @@ class GrFont(object) :
             self.feats.set(fref, v)
         if size > 0 :
             size = size * 96 / 72.
+            self.font = gr.Font(self.grface, size)
         else :
-            size = float(self.grface.get_upem())
-        self.font = gr.Font(self.grface, size)
-
-    def measure(self, text, after) :
-        """Returns a list of x positions for before/after the indexth character and
-        a list of breakweights"""
-        seg = gr.Segment(self.font, self.grface, self.script, text, self.rtl, feats = self.feats)
-        num = seg.num_cinfo()
-        pos = []
-        bw = []
-        for i in range(num) :
-            c = seg.cinfo(i)
-            bw.append(c.breakweight)
-            if after :
-                s = c.slots[c.after]
-            else :
-                s = c.slots[c.before]
-            pos.append(s.origin[0])
-        return (pos, bw)
-
-    def width(self, text) :
-        seg = gr.Segment(self.font, self.grface, self.script, text, self.rtl, feats = self.feats)
-        return seg.advance[0]
+            self.font = None
 
     def glyphs(self, text, includewidth = False) :
         seg = gr.Segment(self.font, self.grface, self.script, text, self.rtl, feats = self.feats)
@@ -53,6 +32,7 @@ class GrFont(object) :
         for s in seg.slots :
             res.append((s.gid, s.origin))
         if includewidth : res.append((None, seg.advance))
+        del seg
         return res
 
 tables = {
@@ -200,7 +180,7 @@ for label, words in reader :
     for s in words :
         wcount += 1
         gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
-        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][-1][1])
+        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1])
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
         bases = map(lambda x: (cmaplookup(tt, x), (0,0)), s)
