@@ -171,7 +171,8 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
                 if (smin > smax) return;
                 float si;
-                a = offset.x - offset.y + _currShift.x - _currShift.y;
+                //a = offset.x - offset.y + _currShift.x - _currShift.y;
+                a = offset.x - offset.y;
                 if (isx)
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
