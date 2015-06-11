@@ -915,7 +915,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
+    bool isInit = false;
 
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())
     {
@@ -927,7 +927,14 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
             // Add space for a space glyph.
             currSpace += nbor->advance();
         else if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE))
+        {
+            if (!isInit)
+            {
+                coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
+                isInit = true;
+            }
             collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);
+        }
         if (cNbor->flags() & SlotCollision::COLL_END)
         {
             if (seenEnd)
