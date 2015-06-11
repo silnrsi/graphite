@@ -149,6 +149,7 @@ public:
     Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
     void addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, const Position &offset, int mode);
     void removeBox(const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, int mode);
+    const Position &origin() const { return _origin; }
 
 #if !defined GRAPHITE2_NTRACING
 	void outputJsonDbg(json * const dbgout, Segment *seg, int axis);
@@ -167,6 +168,7 @@ protected:
     Rect    _limit;
     Position _currShift;
     Position _currOffset;
+    Position _origin;   // Base for all relative calculations
     float   _margin;
 	float	_marginWt;
     float   _len[4];

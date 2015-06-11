@@ -740,10 +740,9 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                         if (start && (c->status() & SlotCollision::COLL_FIX) 
                                   && !(c->status() & SlotCollision::COLL_TEMPLOCK)
                                   && !(c->flags() & SlotCollision::COLL_KERN))
-                        {
                             hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+                        else if (c->status() & SlotCollision::COLL_TEMPLOCK)
                             c->setStatus(c->status() & ~SlotCollision::COLL_TEMPLOCK);
-                        }
                     }
                 }
         //      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
