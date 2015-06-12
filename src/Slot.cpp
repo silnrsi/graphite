@@ -96,15 +96,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (isFinal && (coll = seg->collisionInfo(this)))
     {
         const Position &collshift = coll->offset();
-        if (coll->flags() & SlotCollision::COLL_KERN)
-        {
-            if (seg->dir() & 1)
-                base = Position(base.x + collshift.x * scale, base.y + collshift.y * scale);
-            else
-                tAdvance += collshift.x;
-            // For LTR fonts, don't also shift when kerning.
-        }
-        else
+        if (!(coll->flags() & SlotCollision::COLL_KERN) || (seg->dir() & 1))
             shift = shift + collshift;
     }
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
@@ -113,7 +105,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         scale = font->scale();
         shift *= scale;
         if (font->isHinted() && glyphFace)
-            tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(m_glyphid);
+            tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(glyph());
         else
             tAdvance *= scale;
     }    

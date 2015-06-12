@@ -75,6 +75,7 @@ public:
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
     float advance() const { return m_advance.x; }
+    void advance(Position &val) { m_advance = val; }
     Position advancePos() const { return m_advance; }
     int before() const { return m_before; }
     int after() const { return m_after; }
