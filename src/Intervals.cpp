@@ -180,14 +180,14 @@ uint8 Zones::Exclusion::outcode(float p) const {
 void Zones::exclude_with_margins(float pos, float len, float origin, int axis) {
     origin = 0;
     if (axis < 2)
-        weighted<XY>(pos-_margin_len, _margin_len, 0, 0, 0, _margin_weight, pos-_margin_len - origin, 0, 0, false);
+        weighted<XY>(pos-_margin_len, _margin_len, 0, 0, _margin_weight, pos-_margin_len - origin, 0, 0, false);
     else
-        weighted<SD>(pos-_margin_len, _margin_len, 0, 0, 0, _margin_weight, pos-_margin_len - origin, 0, 0, false);
+        weighted<SD>(pos-_margin_len, _margin_len, 0, 0, _margin_weight, pos-_margin_len - origin, 0, 0, false);
     remove(pos, pos+len);
     if (axis < 2)
-        weighted<XY>(pos+len, _margin_len, 0, 0, 0, _margin_weight, pos+len+_margin_len - origin, 0, 0, false);
+        weighted<XY>(pos+len, _margin_len, 0, 0, _margin_weight, pos+len+_margin_len - origin, 0, 0, false);
     else
-        weighted<SD>(pos+len, _margin_len, 0, 0, 0, _margin_weight, pos+len+_margin_len - origin, 0, 0, false);
+        weighted<SD>(pos+len, _margin_len, 0, 0, _margin_weight, pos+len+_margin_len - origin, 0, 0, false);
 }
 
 

@@ -73,7 +73,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len[i] = bb.xa - bb.xi;
                 shift = -currOffset.x;
                 oshift = currOffset.y + currShift.y;
-                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, 0, oshift, oshift);
+                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, oshift, oshift);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + currOffset.y;
@@ -81,7 +81,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len[i] = bb.ya - bb.yi;
                 shift = -currOffset.y;
                 oshift = currOffset.x + currShift.x;
-                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, 0, -oshift, oshift);
+                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, -oshift, oshift);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 // pick closest x,y limit boundaries in s direction
@@ -90,7 +90,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len[i] = sb.sa - sb.si;
                 shift = -currOffset.x - currOffset.y;
                 oshift = currOffset.x - currOffset.y + currShift.x - currShift.y;
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, 0, -oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 // pick closest x,y limit boundaries in d direction
@@ -99,7 +99,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 _len[i] = sb.da - sb.di;
                 shift = currOffset.y - currOffset.x;
                 oshift = currOffset.x + currOffset.y + currShift.x + currShift.y;
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, 0, -oshift, oshift);
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
                 break;
         }
     }
@@ -141,7 +141,7 @@ inline
 float sqr(float x) { return x * x; }
 
 // Mark an area with a cost that can vary along the x-axis.
-void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, const Position &offset, int axis)
+void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int axis)
 {
     float a;
     switch (axis) {
@@ -150,9 +150,10 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
             {
                 a = org.y;
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, offset.x, a, m, (minright ? box.tr.x : box.bl.x), org.y + offset.y, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, m, (minright ? box.tr.x : box.bl.x), org.y, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, offset.x, a, 0, 0, offset.y + org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - offset.y)), false);
+                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, 0, 0, org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y))), false);
+                    //_ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, 0, 0, org.y, 0, false);
             }
             break;
         case 1 :
@@ -160,9 +161,10 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
             {
                 a = org.x;
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, offset.y, a, 0, 0, offset.x + org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - offset.x)), false);
+                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, 0, 0, org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x))), false);
+                    //_ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, 0, 0, org.x, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, offset.y, a, m, (minright ? box.tr.y : box.bl.y), offset.x + org.x, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, m, (minright ? box.tr.y : box.bl.y), org.x, 0, false);
             }
             break;
         case 2 :
@@ -180,7 +182,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     si = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(smin, smax - smin, weight / 2, offset.x + offset.y, a, m / 2, si, 0, 0, isx);
+                _ranges[axis].weighted<SD>(smin, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
             }
             break;
         case 3 :
@@ -197,7 +199,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     di = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     di = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(dmin, dmax - dmin, weight / 2, offset.x - offset.y, a, m / 2, di, 0, 0, !isx);
+                _ranges[axis].weighted<SD>(dmin, dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
             }
             break;
         default :
@@ -368,9 +370,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
         if (orderFlags)
         {
-            //Position offset = Position(cslot->offset().x + _currShift.x - _currOffset.x, cslot->offset().y + _currShift.y - _currOffset.y);
-            //Position offset = Position(sx, sy);
-            Position offset = Position(0, 0);
             Position org(tx, ty);
             float xminf = _limit.bl.x + _currOffset.x;
             float xpinf = _limit.tr.x + _currOffset.x;
@@ -386,20 +385,20 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     // DBGTAG(1x) means the regions are up and right
                     // region 1
                     DBGTAG(11)
-                    addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), tbb, tsb, org, 0, seq_above_wt, true, offset, i);
+                    addBox_slope(true, Rect(Position(xminf, r2Yedge), Position(r1Xedge, ypinf)), tbb, tsb, org, 0, seq_above_wt, true, i);
                     // region 2
                     DBGTAG(12)
                     removeBox(Rect(Position(xminf, yminf), Position(r3Xedge, r2Yedge)), tbb, tsb, org, i);
                     // region 3, which end is zero is irrelevant since m weight is 0
                     DBGTAG(13)
-                    addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge - cslot->seqValignHt())), tbb, tsb, org, seq_below_wt, 0, true, offset, i);
+                    addBox_slope(true, Rect(Position(r3Xedge, yminf), Position(xpinf, r2Yedge - cslot->seqValignHt())), tbb, tsb, org, seq_below_wt, 0, true, i);
                     // region 4
                     DBGTAG(14)
-                    addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), tbb, tsb, org, 0, seq_valign_wt, true, offset, i);
+                    addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge), Position(xpinf, r2Yedge + cslot->seqValignHt())), tbb, tsb, org, 0, seq_valign_wt, true, i);
                     // region 5
                     DBGTAG(15)
                     addBox_slope(false, Rect(Position(sx + bb.xi, r2Yedge - cslot->seqValignHt()), Position(xpinf, r2Yedge)),
-                                    tbb, tsb, org, seq_below_wt, seq_valign_wt, false, offset, i);
+                                    tbb, tsb, org, seq_below_wt, seq_valign_wt, false, i);
                     break;
                 }
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
@@ -410,21 +409,21 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
                     DBGTAG(21)
-                    addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), tbb, tsb, org, 0, seq_above_wt, false, offset, i);
+                    addBox_slope(true, Rect(Position(r1Xedge, yminf), Position(xpinf, r2Yedge)), tbb, tsb, org, 0, seq_above_wt, false, i);
                     // region 2
                     DBGTAG(22)
                     removeBox(Rect(Position(r3Xedge, r2Yedge), Position(xpinf, ypinf)), tbb, tsb, org, i);
                     // region 3
                     DBGTAG(23)
-                    addBox_slope(true, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()), Position(r3Xedge, ypinf)), tbb, tsb, org, seq_below_wt, 0, false, offset, i);
+                    addBox_slope(true, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()), Position(r3Xedge, ypinf)), tbb, tsb, org, seq_below_wt, 0, false, i);
                     // region 4
                     DBGTAG(24)
                     addBox_slope(false, Rect(Position(xminf, r2Yedge), Position(sx + bb.xa, r2Yedge + cslot->seqValignHt())),
-                                    tbb, tsb, org, 0, seq_valign_wt, true, offset, i);
+                                    tbb, tsb, org, 0, seq_valign_wt, true, i);
                     // region 5
                     DBGTAG(25)
                     addBox_slope(false, Rect(Position(xminf, r2Yedge - cslot->seqValignHt()),
-                                    Position(sx + bb.xa, r2Yedge)), tbb, tsb, org, seq_below_wt, seq_valign_wt, false, offset, i);
+                                    Position(sx + bb.xa, r2Yedge)), tbb, tsb, org, seq_below_wt, seq_valign_wt, false, i);
                     break;
                 }
                 case SlotCollision::SEQ_ORDER_NOABOVE : // enforce neighboring glyph being above

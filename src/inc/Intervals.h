@@ -79,9 +79,8 @@ class Zones
     struct Exclusion
     {
         template<zones_t O>
-        static Exclusion weighted(float pos, float len, float f,
-                float shift, float oshift, float a,
-                float m, float xi, float c, bool nega);
+        static Exclusion weighted(float pos, float len, float f, float a0,
+                float m, float xi, float ai, float c, bool nega);
 
         float   x,  // x position
                 xm, // xmax position
@@ -140,13 +139,13 @@ public:
 
     Zones();
     template<zones_t O>
-    void initialise(float pos, float len, float margin_len, float margin_weight, float x0, float ao, float ai);
+    void initialise(float pos, float len, float margin_len, float margin_weight, float ao, float ai);
 
     void exclude(float pos, float len);
     void exclude_with_margins(float pos, float len, float origin, int axis);
 
     template<zones_t O>
-    void weighted(float pos, float len, float f, float x0, float a0, float mi, float xi, float ai, float c, bool nega);
+    void weighted(float pos, float len, float f, float a0, float mi, float xi, float ai, float c, bool nega);
 
     float closest( float origin, float &cost) const;
 
@@ -186,14 +185,14 @@ Zones::Exclusion::Exclusion(float x_, float xm_, float smi, float smxi, float c_
 template<zones_t O>
 inline
 void Zones::initialise(float pos, float len, float margin_len,
-        float margin_weight, float x0, float a0, float ai)
+        float margin_weight, float a0, float ai)
 {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _pos = pos;
     _posm = pos+len;
     _exclusions.clear();
-    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, x0, a0, 0, 0, ai, 0, false));
+    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, a0, 0, 0, ai, 0, false));
     _exclusions.front().open = true;
 #if !defined GRAPHITE2_NTRACING
     _dbgs.clear();
@@ -207,9 +206,9 @@ void Zones::exclude(float pos, float len) {
 
 template<zones_t O>
 inline
-void Zones::weighted(float pos, float len, float f, float x0, float a0,
+void Zones::weighted(float pos, float len, float f, float a0,
         float m, float xi, float ai, float c, bool nega) {
-    insert(Exclusion::weighted<O>(pos, len, f, x0, a0, m, xi, ai, c, nega));
+    insert(Exclusion::weighted<O>(pos, len, f, a0, m, xi, ai, c, nega));
 }
 
 
@@ -232,23 +231,23 @@ void Zones::removeDebug(float pos, float posm) {
 
 template<>
 inline
-Zones::Exclusion Zones::Exclusion::weighted<XY>(float pos, float len, float f, float x0, float a0,
+Zones::Exclusion Zones::Exclusion::weighted<XY>(float pos, float len, float f, float a0,
         float m, float xi, GR_MAYBE_UNUSED float ai, float c, GR_MAYBE_UNUSED bool nega) {
     return Exclusion(pos, pos+len,
             m + f,
-            m * xi + f * x0,
-            m * xi * xi + f * (x0 * x0 + a0 * a0) + c);
+            m * xi, 
+            m * xi * xi + f * a0 * a0 + c);
 }
 
 template<>
 inline
-Zones::Exclusion Zones::Exclusion::weighted<SD>(float pos, float len, float f, float x0, float a0,
+Zones::Exclusion Zones::Exclusion::weighted<SD>(float pos, float len, float f, float a0,
         float m, float xi, float ai,float c, bool nega) {
     float xia = nega ? xi - ai : xi + ai;
     return Exclusion(pos, pos+len, 
             0.25 * (m + 2 * f), 
-            0.25 * (m * xia + 2 * f * x0), 
-            0.25 * (m * xia * xia + 2 * f * (x0 * x0 + a0 * a0)) + c);
+            0.25 * m * xia, 
+            0.25 * (m * xia * xia + 2 * f * a0 * a0) + c);
 }
 
 } // end of namespace graphite2
