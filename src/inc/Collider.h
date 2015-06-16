@@ -204,7 +204,6 @@ private:
     int   _numSlices;     // number of slices
     float _mingap;
     float _xbound;        // max or min edge
-    float _othermax;      // bounding value of tested glyphs
 
 #if !defined GRAPHITE2_NTRACING    
     // Debugging

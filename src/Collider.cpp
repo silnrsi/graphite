@@ -51,7 +51,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
 {
     int i;
     float max, min;
-    float shift, oshift;
+    float oshift;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
@@ -71,7 +71,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.x + currOffset.x;
                 max = _limit.tr.x + currOffset.x;
                 _len[i] = bb.xa - bb.xi;
-                shift = -currOffset.x;
                 oshift = currOffset.y + currShift.y;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, oshift, oshift);
                 break;
@@ -79,7 +78,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.y + currOffset.y;
                 max = _limit.tr.y + currOffset.y;
                 _len[i] = bb.ya - bb.yi;
-                shift = -currOffset.y;
                 oshift = currOffset.x + currShift.x;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, -oshift, oshift);
                 break;
@@ -88,7 +86,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + currOffset.x + currOffset.y + currShift.x + currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + currOffset.x + currOffset.y + currShift.x + currShift.y;
                 _len[i] = sb.sa - sb.si;
-                shift = -currOffset.x - currOffset.y;
                 oshift = currOffset.x - currOffset.y + currShift.x - currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
                 break;
@@ -97,7 +94,6 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + currOffset.x - currOffset.y + currShift.x - currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + currOffset.x - currOffset.y + currShift.x - currShift.y;
                 _len[i] = sb.da - sb.di;
-                shift = currOffset.y - currOffset.x;
                 oshift = currOffset.x + currOffset.y + currShift.x + currShift.y;
                 _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
                 break;
@@ -504,7 +500,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 if (dbgout)
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
 #endif
-                _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
+                if (omin > otmax)
+                    _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+                else if (omax < otmin)
+                    _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+                else
+                    _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
                 anyhits = true;
             }
             if (anyhits)
@@ -517,7 +518,12 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     dbgout->setenv(1, reinterpret_cast<void *>(-1));
 #endif
             isCol = true;
-            _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
+            if (omin > otmax)
+                _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+            else if (omax < otmin)
+                _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+            else
+                _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
 
         }
     }
@@ -539,12 +545,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
 
 // Figure out where to move the target glyph to, and return the amount to shift by.
-Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
+Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
 {
-    float tbase, tval;
+    float tbase;
     float totalCost = (float)(std::numeric_limits<float>::max() / 2.);
     Position resultPos = Position(0, 0);
-    Position currOffset = seg->collisionInfo(_target)->offset();
 #if !defined GRAPHITE2_NTRACING
 	int bestAxis = -1;
     if (dbgout)
@@ -562,19 +567,15 @@ Position ShiftCollider::resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json 
         switch (i) {
             case 0 :	// x direction
                 tbase = _currOffset.x;
-                tval = currOffset.x;
                 break;
             case 1 :	// y direction
                 tbase = _currOffset.y;
-                tval = currOffset.y;
                 break;
             case 2 :	// sum (negatively-sloped diagonals)
                 tbase = _currOffset.x + _currOffset.y;
-                tval = currOffset.x + currOffset.y;
                 break;
             case 3 :	// diff (positively-sloped diagonals)
                 tbase = _currOffset.x - _currOffset.y;
-                tval = currOffset.x - currOffset.y;
                 break;
         }
         Position testp;
@@ -783,7 +784,6 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _maxy = (float)-1e38;
     _miny = (float)1e38;
     _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
-    _othermax = -_xbound;
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
@@ -875,7 +875,6 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         if (x * rtl > _edges[i] * rtl - _mingap)
         {
             float m = get_edge(seg, slot, currShift, y, sliceWidth, rtl > 0) + currSpace;
-            if (_othermax < m) _othermax = m;
             t = rtl * (_edges[i] - m);
             // Check slices above and below (if any).
             if (i < _numSlices - 1) t = std::min(t, rtl * (_edges[i+1] - m));

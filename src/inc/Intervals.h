@@ -146,6 +146,7 @@ public:
 
     template<zones_t O>
     void weighted(float pos, float len, float f, float a0, float mi, float xi, float ai, float c, bool nega);
+    void weightedAxis(int axis, float pos, float len, float f, float a0, float mi, float xi, float ai, float c, bool nega);
 
     float closest( float origin, float &cost) const;
 
@@ -211,6 +212,14 @@ void Zones::weighted(float pos, float len, float f, float a0,
     insert(Exclusion::weighted<O>(pos, len, f, a0, m, xi, ai, c, nega));
 }
 
+inline
+void Zones::weightedAxis(int axis, float pos, float len, float f, float a0,
+        float m, float xi, float ai, float c, bool nega) {
+    if (axis < 2)
+        weighted<XY>(pos, len, f, a0, m, xi, ai, c, nega);
+    else
+        weighted<SD>(pos, len, f, a0, m, xi, ai, c, nega);
+}
 
 #if !defined GRAPHITE2_NTRACING
 inline
