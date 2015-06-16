@@ -177,7 +177,7 @@ uint8 Zones::Exclusion::outcode(float p) const {
 
 
 // hmm how to get the margin weight into here
-void Zones::exclude_with_margins(float pos, float len, float origin, int axis) {
+void Zones::exclude_with_margins(float pos, float len, int axis) {
     weightedAxis(axis, pos-_margin_len, _margin_len, 0, 0, _margin_weight, pos-_margin_len, 0, 0, false);
     remove(pos, pos+len);
     weightedAxis(axis, pos+len, _margin_len, 0, 0, _margin_weight, pos+len+_margin_len, 0, 0, false);

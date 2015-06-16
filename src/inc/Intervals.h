@@ -142,7 +142,7 @@ public:
     void initialise(float pos, float len, float margin_len, float margin_weight, float ao, float ai);
 
     void exclude(float pos, float len);
-    void exclude_with_margins(float pos, float len, float origin, int axis);
+    void exclude_with_margins(float pos, float len, int axis);
 
     template<zones_t O>
     void weighted(float pos, float len, float f, float a0, float mi, float xi, float ai, float c, bool nega);

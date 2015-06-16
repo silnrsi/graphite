@@ -262,7 +262,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;   // target limits
-    float vorigin, torg;
+    float torg;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
     const unsigned short tgid = _target->gid();
@@ -272,7 +272,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     const SlantBox &tsb = gc.getBoundingSlantBox(tgid);
 
     SlotCollision * cslot = seg->collisionInfo(slot);
-    SlotCollision * ctarget = seg->collisionInfo(_target);
     int orderFlags = 0;
     if (sameCluster && _seqClass &&
 		((_seqProxClass != 0 && cslot->seqClass() == _seqProxClass)
@@ -307,7 +306,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 torg = _currOffset.x;
                 cmin = _limit.bl.x + torg;
                 cmax = _limit.tr.x - tbb.xi + tbb.xa + torg;
-                vorigin = -ctarget->offset().x + torg;
                 break;
             case 1 :	// y direction
                 vmin = std::max(std::max(bb.yi - tbb.ya + sy, tsb.di - sb.da + tx - sd), sb.si - tsb.sa - tx + ss);
@@ -319,7 +317,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 torg = _currOffset.y;
                 cmin = _limit.bl.y + torg;
                 cmax = _limit.tr.y - tbb.yi + tbb.ya + torg;
-                vorigin = -ctarget->offset().y + torg;
                 break;
             case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                         // negatively-sloped boundaries.
@@ -332,7 +329,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 torg = _currOffset.x + _currOffset.y;
                 cmin = _limit.bl.x + _limit.bl.y + torg;
                 cmax = _limit.tr.x + _limit.tr.y - tsb.si + tsb.sa + torg;
-                vorigin = -ctarget->offset().x - ctarget->offset().y + torg;
                 break;
             case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                         // positively-sloped boundaries.
@@ -350,7 +346,6 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 torg = _currOffset.x - _currOffset.y;
                 cmin = _limit.bl.x - _limit.tr.y + torg;
                 cmax = _limit.tr.x - _limit.bl.y - tsb.di + tsb.da + torg;
-                vorigin = ctarget->offset().y - ctarget->offset().x + torg;
                 break;
             default :
                 continue;
@@ -505,7 +500,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 else if (omax < otmin)
                     _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
                 else
-                    _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
+                    _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
                 anyhits = true;
             }
             if (anyhits)
@@ -523,7 +518,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             else if (omax < otmin)
                 _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
             else
-                _ranges[i].exclude_with_margins(vmin, vmax - vmin, vorigin, i);
+                _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
 
         }
     }
