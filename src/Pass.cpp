@@ -909,11 +909,17 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     Slot *nbor; // neighboring slot
     float currSpace = 0.;
     bool collides = false;
-    SlotCollision *cFix = seg->collisionInfo(slotFix);
-    bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
+    SlotCollision *cFix = seg->collisionInfo(base);
+    if (base != slotFix)
+    {
+        cFix->setFlags(cFix->flags() | SlotCollision::COLL_KERN);
+        cFix->setStatus(cFix->status() | SlotCollision::COLL_FIX);
+        return 0;
+    }
+    bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
     bool isInit = false;
 
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())

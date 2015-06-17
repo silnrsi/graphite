@@ -1,0 +1,103 @@
+#!/usr/bin/python
+
+"""Tool to read callgrind output and return the net cost of the first call to a given function"""
+
+from argparse import ArgumentParser
+from subprocess import call
+from multiprocessing import Pool
+import re, csv, tempfile, os
+
+p = ArgumentParser()
+p.add_argument('file',nargs='?',help="control file")
+p.add_argument('-s','--single',action='store_true',help='Do single processing')
+p.add_argument('-f','--font',help='font file to use for a single test')
+p.add_argument('-t','--text',help='text file to use for a single test')
+p.add_argument('-l','--line',help='line in text file for single test')
+args = p.parse_args()
+
+def parsecg(fname) :
+    idcache = {}
+
+    def parseline(l) :
+        (_, s) = l.split('=', 1)
+        s = s.lstrip()
+        m = re.match(r'(?:\((\d+)\))?\s*(.*)$', s)
+        ident = m.group(1)
+        name = m.group(2)
+        if ident and name : idcache[ident] = name
+        if ident : return (ident, idcache[ident])
+        else : return (None, name)
+            
+    fncosts = {}
+    with open(fname) as fh :
+        incfn = False
+        currfn = ''
+        for l in fh.readlines() :
+            l = l.strip()
+            if incfn :
+                if l.startswith('calls') : continue
+                cost = l.split(' ')[1]
+                fncosts[currfn] = cost
+                incfn = False
+            elif l.startswith('cfn') :
+                (ident, name) = parseline(l)
+                incfn = True
+                currfn = name
+            elif l.startswith('fn') :
+                (id, name) = parseline(l)
+    return fncosts
+
+modes = {
+    'ot' : ('ot', {'ot' : 'hb_shape_plan_execute'}),
+    'gr' : ('graphite2', {'hbgr' : 'hb_shape_plan_execute', 'gr' : 'gr_make_seg'})
+}
+outtop = 'name,ot,hbgr,gr'
+outformat = '{font}+{text}, {ot}, {hbgr}, {gr}' 
+
+def dorow(x) :
+    (c, r) = x
+    if len(r) < 3 : return None
+    (font, text, line) = r[:3]
+    results = {'font' : font, 'text' : text, 'line' : line}
+    for k, job in modes.items() :
+        resf = os.path.join(tmpd, 'callgrind_'+k+'_'+str(c)+'.out')
+        ft = open(text)
+        t = ft.readlines()[int(line)].strip()
+        ft.close()
+        cmd = ['valgrind', '-q', '--tool=callgrind', '--callgrind-out-file='+resf, 'hb-shape', '--font-file='+font, '--text='+t, '--shapers='+job[0]]
+        if len(r) > 3 and r[3] == 'r' :
+            cmd.append('--direction=rtl')
+        call(cmd, stdout=dumpfh)
+        cfns = parsecg(resf)
+        for rk, rf in job[1].items() :
+            results[rk] = cfns.get(rf, 0)
+        os.remove(resf)
+    return outformat.format(**results)
+
+tmpd = tempfile.mkdtemp()
+dumpf = os.path.join(tmpd+'dump.out')
+dumpfh = open(dumpf, "w")
+if args.file :
+    fh = open(args.file)
+    c = csv.reader(fh, delimiter=' ', skipinitialspace=True, escapechar='\\')
+else :
+    fh = None
+    c = [[args.font, args.text, args.line]]
+
+print outtop
+if args.single or fh is None :
+    res = map(dorow, enumerate(c))
+else :
+    pool = Pool()
+    res = list(pool.imap(dorow, enumerate(c)))
+    pool.close()
+    pool.join()
+for r in res :
+    if r is not None :
+        print r
+
+if fh is not None:
+    fh.close()
+dumpfh.close()
+os.unlink(dumpf)
+os.rmdir(tmpd)

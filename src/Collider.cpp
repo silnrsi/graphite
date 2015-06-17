@@ -33,6 +33,7 @@ of the License or (at your option) any later version.
 #include "inc/Segment.h"
 #include "inc/Slot.h"
 #include "inc/GlyphCache.h"
+#include "inc/Sparse.h"
 
 #define ISQRT2 0.707106781f
 
@@ -851,18 +852,19 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 // Return false if we know there is no collision, true if we think there might be one.
 bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
+    int rtl = (dir & 1) * 2 - 1;
     const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
+    float x = sx + (rtl > 0 ? bb.tr.x : bb.bl.x);
+    if ((rtl > 0 && x < _xbound - _mingap) || (rtl <= 0 && x > _xbound + _mingap + currSpace)) // this isn't going to reduce _mingap so skip
+        return false;
+
     const float sy = slot->origin().y + currShift.y;
     int smin = std::max(0, int((bb.bl.y + (1 - _miny + sy)) / (_maxy - _miny + 2) * _numSlices));
     int smax = std::min(_numSlices - 1, int((bb.tr.y + (1 - _miny + sy)) / (_maxy - _miny + 2) * _numSlices + 1));
     float sliceWidth = (_maxy - _miny + 2) / _numSlices;
     bool collides = false;
-    int rtl = (dir & 1) * 2 - 1;
 
-    float x = sx + (rtl > 0 ? bb.tr.x : bb.bl.x);
-    if ((rtl > 0 && x < _xbound - _mingap) || (rtl <= 0 && x > _xbound + _mingap + currSpace)) // this isn't going to reduce _mingap so skip
-        return false;
     for (int i = smin; i <= smax; ++i)
     {
         float t;
@@ -874,6 +876,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             // Check slices above and below (if any).
             if (i < _numSlices - 1) t = std::min(t, rtl * (_edges[i+1] - m));
             if (i > 0) t = std::min(t, rtl * (_edges[i-1] - m));
+            // _mingap is positive
             if (t < _mingap)
             {
                 _mingap = t;
@@ -901,11 +904,6 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
 {
     float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
-//    const SlotCollision *cslot = seg->collisionInfo(slot);
-    // PUT SOMETHING IN HERE TO HANDLE ORDER-ENFORCEMENT
-//    if (cslot->flags() & SlotCollision::COLL_OVERLAP && _othermax - _xbound - _mingap > -1 * cslot->maxOverlap())
-//        resultNeeded = (1 - 2 * (dir & 1)) * (_xbound - _othermax + cslot->maxOverlap() + margin);
-    
 
 #if !defined GRAPHITE2_NTRACING
     float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above
@@ -969,29 +967,33 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
 	// GrcSymbolTable::AssignInternalGlyphAttrIDs.
     uint16 gid = slot->gid();
     uint16 aCol = seg->silf()->aCollision(); // flags attr ID
-    _flags = seg->glyphAttr(gid, aCol);
+    const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(gid);
+    if (!glyphFace)
+        return;
+    const sparse &p = glyphFace->attrs();
+    _flags = p[aCol];
     _status = _flags;
-    _limit = Rect(Position(seg->glyphAttr(gid, aCol+1), seg->glyphAttr(gid, aCol+2)),
-                  Position(seg->glyphAttr(gid, aCol+3), seg->glyphAttr(gid, aCol+4)));
-    _margin = seg->glyphAttr(gid, aCol+5);
-    _marginWt = seg->glyphAttr(gid, aCol+6);
+    _limit = Rect(Position(p[aCol+1], p[aCol+2]),
+                  Position(p[aCol+3], p[aCol+4]));
+    _margin = p[aCol+5];
+    _marginWt = p[aCol+6];
 
     // TODO: do we want to initialize collision.exclude stuff from the glyph attributes,
     // or make GDL do it explicitly?
-//  _exclGlyph = seg->glyphAttr(gid, aCol+7);
-//  _exclOffset = Position(seg->glyphAttr(gid, aCol+8), seg->glyphAttr(gid, aCol+9));
+//  _exclGlyph = p[aCol+7];
+//  _exclOffset = Position(p[aCol+8], seg->glyphAttr(gid, aCol+9));
     _exclGlyph = 0;
     _exclOffset = Position(0, 0);
 
-    _seqClass = seg->glyphAttr(gid, aCol+10);
-	_seqProxClass = seg->glyphAttr(gid, aCol+11);
-    _seqOrder = seg->glyphAttr(gid, aCol+12);
-	_seqAboveXoff = seg->glyphAttr(gid, aCol+13);
-	_seqAboveWt = seg->glyphAttr(gid, aCol+14);
-	_seqBelowXlim = seg->glyphAttr(gid, aCol+15);
-	_seqBelowWt = seg->glyphAttr(gid, aCol+16);
-	_seqValignHt = seg->glyphAttr(gid, aCol+17);
-	_seqValignWt = seg->glyphAttr(gid, aCol+18);    
+    _seqClass = p[aCol+10];
+	_seqProxClass = p[aCol+11];
+    _seqOrder = p[aCol+12];
+	_seqAboveXoff = p[aCol+13];
+	_seqAboveWt = p[aCol+14];
+	_seqBelowXlim = p[aCol+15];
+	_seqBelowWt = p[aCol+16];
+	_seqValignHt = p[aCol+17];
+	_seqValignWt = p[aCol+18];    
 
 	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
