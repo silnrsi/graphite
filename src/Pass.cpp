@@ -335,6 +335,30 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return;
+    if (m_numRules)
+    {
+        Slot *currHigh = s->next();
+
+#if !defined GRAPHITE2_NTRACING
+        if (fsm.dbgout)  *fsm.dbgout << "rules" << json::array;
+        json::closer rules_array_closer(fsm.dbgout);
+#endif
+
+        m.slotMap().highwater(currHigh);
+        int lc = m_iMaxLoop;
+        do
+        {
+            findNDoRule(s, m, fsm);
+            if (s && (s == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
+                if (!lc)
+                    s = m.slotMap().highwater();
+                lc = m_iMaxLoop;
+                if (s)
+                    m.slotMap().highwater(s->next());
+            }
+        } while (s);
+    }
+
     if ((m_flags & 7))
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
@@ -344,30 +368,6 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
         }
         if (!collisionAvoidance(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout)) return;
     }
-    if (!m_numRules) return;
-    Slot *currHigh = s->next();
-
-#if !defined GRAPHITE2_NTRACING
-    if (fsm.dbgout)  *fsm.dbgout << "rules" << json::array;
-    json::closer rules_array_closer(fsm.dbgout);
-#endif
-
-    m.slotMap().highwater(currHigh);
-    int lc = m_iMaxLoop;
-    do
-    {
-        if (!(m_flags & 7) || m.slotMap().segment.collisionInfo(s)->flags() & SlotCollision::COLL_ISCOL)
-            findNDoRule(s, m, fsm);
-        else
-            s = s->next();
-        if (s && (s == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
-            if (!lc)
-                s = m.slotMap().highwater();
-            lc = m_iMaxLoop;
-            if (s)
-                m.slotMap().highwater(s->next());
-        }
-    } while (s);
 }
 
 bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const

@@ -32,12 +32,13 @@ of the License or (at your option) any later version.
 #include "inc/Position.h"
 #include "inc/Intervals.h"
 #include "inc/debug.h"
-#include "inc/Segment.h"
+//#include "inc/Segment.h"
 
 namespace graphite2 {
 
 class json;
 class Slot;
+class Segment;
 
 #define SLOTCOLSETUINTPROP(x, y) uint16 x() const { return _ ##x; } void y (uint16 v) { _ ##x = v; }
 #define SLOTCOLSETINTPROP(x, y) int16 x() const { return _ ##x; } void y (int16 v) { _ ##x = v; }

@@ -73,11 +73,6 @@ Segment::~Segment()
     delete[] m_charinfo;
 }
 
-SlotCollision *Segment::collisionInfo(const Slot *s) const
-{
-    return m_collisions ? m_collisions + s->index() : NULL;
-}
-
 #ifndef GRAPHITE2_NSEGCACHE
 SegmentScopeState Segment::setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength)
 {

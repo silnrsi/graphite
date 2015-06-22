@@ -431,18 +431,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             }
         }
 
-        // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
-        //    // or it is offset in the opposite dimension:
-        //    || (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
         if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
             continue;
-#if 0
-		if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
-		{
-			_scraping[i] = true;
-			continue;
-		}
-#endif
 
         // Process sub-boxes that are defined for this glyph.
         // We only need to do this if there was in fact a collision with the main octabox.
@@ -480,17 +470,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         omax = ssb.sa + ss;
                         break;
                 }
-                // if ((vmin < cmin - m && vmax < cmin - m) || (vmin > cmax + m && vmax > cmax + m)
-                //     		|| (omin < otmin - m && omax < otmin - m) || (omin > otmax + m && omax > otmax + m))
                 if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
                     continue;
-#if 0
-				if (seg->collisionInfo(_target)->canScrape(i) && (omax < otmin + _margin || omin > otmax - _margin))
-				{
-					_scraping[i] = true;
-					continue;
-				}
-#endif
 
 #if !defined GRAPHITE2_NTRACING
                 if (dbgout)
@@ -708,6 +689,26 @@ void ShiftCollider::outputJsonDbgRemovals(json * const dbgout, int axis, Segment
 
 ////    KERN-COLLIDER    ////
 
+inline
+static float localmin (float a, float b, float x)
+{
+    if (x > a && x > b) return x;
+    if (a < b)
+        return x < a ? x : a;
+    else
+        return x < b ? x : b;
+}
+
+inline
+static float localmax(float a, float b, float x)
+{
+    if (x < a && x < b) return x;
+    if (a > b) 
+        return x > a ? x : a;
+    else
+        return x > b ? x : b;
+}
+
 // Return the given edge of the glyph at height y, taking any slant box into account.
 static float get_edge(Segment *seg, const Slot *s, const Position &shift, float y, float width, bool isRight)
 {
@@ -731,7 +732,7 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
                 float x = sx + sbb.xa;
                 if (x > res)
                 {
-                    x = std::min(sx - sy + y + ssb.da, std::min(sx + sy - y + ssb.sa, x));
+                    x = localmin(sx - sy + y + ssb.da, sx + sy - y + ssb.sa, x);
                     if (x > res)
                         res = x;
                 }
@@ -741,7 +742,7 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
                 float x = sx + sbb.xi;
                 if (x < res)
                 {
-                    x = std::max(sx - sy + y + ssb.di, std::max(sx + sy - y + ssb.si, x));
+                    x = localmax(sx - sy + y + ssb.di, sx + sy - y + ssb.si, x);
                     if (x < res)
                         res = x;
                 }
@@ -753,9 +754,9 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
         const BBox &bb = gc.getBoundingBBox(gid);
         const SlantBox &sb = gc.getBoundingSlantBox(gid);
         if (isRight)
-            res = std::min(sx + bb.xa, std::min(sb.da + y - sy + sx, sb.sa - y + sx + sy));
+            res = localmin(sb.da + y - sy + sx, sb.sa - y + sx + sy, sx + bb.xa);
         else
-            res = std::max(sx + bb.xi, std::max(sb.di + y - sy + sx, sb.si - y + sx + sy));
+            res = localmax(sb.di + y - sy + sx, sb.si - y + sx + sy, sx + bb.xi);
     }
     return res;
 }
@@ -810,8 +811,10 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         float x = s->origin().x + c->shift().x + ((dir & 1) ? bs.xi : bs.xa);
         // Loop over slices.
         // Note smin might not be zero if glyph s is not at the bottom of the cluster; similarly for smax.
-        int smin = std::max(0, int((c->shift().y + bs.yi - _miny + 1 + s->origin().y) / (_maxy - _miny + 2) * _numSlices));
-        int smax = std::min(_numSlices - 1, int((c->shift().y + bs.ya - _miny + 1 + s->origin().y) / (_maxy - _miny + 2) * _numSlices + 1));
+        float tfactor = _numSlices / (_maxy - _miny + 2);
+        float toffset = c->shift().y - _miny + 1 + s->origin().y;
+        int smin = std::max(0, int((bs.yi + toffset) * tfactor));
+        int smax = std::min(_numSlices - 1, int((bs.ya + toffset) * tfactor + 1));
         for (int i = smin; i <= smax; ++i)
         {
             float t;
@@ -869,14 +872,14 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     {
         float t;
         float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
-        if (x * rtl > _edges[i] * rtl - _mingap)
+        if (x * rtl > _edges[i] * rtl - _mingap - currSpace)
         {
             float m = get_edge(seg, slot, currShift, y, sliceWidth, rtl > 0) + currSpace;
             t = rtl * (_edges[i] - m);
             // Check slices above and below (if any).
             if (i < _numSlices - 1) t = std::min(t, rtl * (_edges[i+1] - m));
             if (i > 0) t = std::min(t, rtl * (_edges[i-1] - m));
-            // _mingap is positive
+            // _mingap is positive to shrink
             if (t < _mingap)
             {
                 _mingap = t;
