@@ -665,7 +665,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         for (Slot *s = start; s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN))
+            if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN)) == SlotCollision::COLL_FIX)
                 hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
             else if (c->flags() & SlotCollision::COLL_KERN)
                 hasKerns = true;
@@ -711,11 +711,11 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     for (Slot *s = lend; s != lstart; s = s->prev())
                     {
                         SlotCollision * c = seg->collisionInfo(s);
-                        if (start && (c->status() & SlotCollision::COLL_FIX) && !(c->flags() & SlotCollision::COLL_KERN)
-                                && (c->status() & SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
+                        if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN | SlotCollision::COLL_ISCOL))
+                                        == (SlotCollision::COLL_FIX | SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
                         {
                             hasCollisions |= resolveCollisions(seg, s, lend, shiftcoll, true, dir, moved, dbgout);
-                            c->setStatus(c->status() | SlotCollision::COLL_TEMPLOCK);
+                            c->setFlags(c->flags() | SlotCollision::COLL_TEMPLOCK);
                         }
                     }
                 }
@@ -737,12 +737,11 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
                     for (Slot *s = start; s != end; s = s->next())
                     {
                         SlotCollision * c = seg->collisionInfo(s);
-                        if (start && (c->status() & SlotCollision::COLL_FIX) 
-                                  && !(c->status() & SlotCollision::COLL_TEMPLOCK)
-                                  && !(c->flags() & SlotCollision::COLL_KERN))
+                        if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_TEMPLOCK | SlotCollision::COLL_KERN))
+                                                == SlotCollision::COLL_FIX)
                             hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
-                        else if (c->status() & SlotCollision::COLL_TEMPLOCK)
-                            c->setStatus(c->status() & ~SlotCollision::COLL_TEMPLOCK);
+                        else if (c->flags() & SlotCollision::COLL_TEMPLOCK)
+                            c->setFlags(c->flags() & ~SlotCollision::COLL_TEMPLOCK);
                     }
                 }
         //      if (!hasCollisions) // no, don't leave yet because phase 2b will continue to improve things
@@ -777,7 +776,8 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
         for (Slot *s = seg->first(); s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & SlotCollision::COLL_KERN) && (c->status() & SlotCollision::COLL_FIX))
+            if (start && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
+                            == (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
                 resolveKern(seg, s, start, kerncoll, dir, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
@@ -788,10 +788,13 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
     for (Slot *s = seg->first(); s; s = s->next())
     {
         SlotCollision *c = seg->collisionInfo(s);
-        const Position newOffset = c->shift();
-        const Position nullPosition(0, 0);
-        c->setOffset(newOffset + c->offset());
-        c->setShift(nullPosition);
+        if (c->shift().x != 0 || c->shift().y != 0)
+        {
+            const Position newOffset = c->shift();
+            const Position nullPosition(0, 0);
+            c->setOffset(newOffset + c->offset());
+            c->setShift(nullPosition);
+        }
     }
     seg->positionSlots();
     
@@ -804,7 +807,7 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 }
 
 // Can slot s be kerned, or is it attached to something that can be kerned?
-static bool isKernCluster(Segment *seg, Slot *s)
+static bool inKernCluster(Segment *seg, Slot *s)
 {
     SlotCollision *c = seg->collisionInfo(s);
     if (c->flags() & SlotCollision::COLL_KERN /** && c->flags() & SlotCollision::COLL_FIX **/ )
@@ -845,13 +848,13 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         bool sameCluster = nbor->isChildOf(base);
         if (nbor != slotFix         // don't process if this is the slot of interest
-                      && !(cNbor->status() & SlotCollision::COLL_IGNORE)    // don't process if ignoring
+                      && !(cNbor->flags() & SlotCollision::COLL_IGNORE)    // don't process if ignoring
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
-                            || !isKernCluster(seg, nbor))   // this cluster is not to be kerned (so avoid it)
+                            || !inKernCluster(seg, nbor))   // this cluster is not to be kerned (so avoid it)
                       && (!isRev    // if processing forwards then good to merge otherwise only:
-                            || !(cNbor->status() & SlotCollision::COLL_FIX)     // merge in immovable stuff
+                            || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
                             || (cNbor->flags() & SlotCollision::COLL_KERN && !sameCluster)     // ignore other kernable clusters
-                            || (cNbor->status() & SlotCollision::COLL_ISCOL)))  // test against other collided glyphs
+                            || (cNbor->flags() & SlotCollision::COLL_ISCOL)))  // test against other collided glyphs
             collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, dbgout);
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
@@ -897,9 +900,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
 
     // Set the is-collision flag bit.
     if (isCol)
-    { cFix->setStatus(cFix->status() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
+    { cFix->setFlags(cFix->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
-    { cFix->setStatus((cFix->status() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
+    { cFix->setFlags((cFix->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
     return isCol;
 }
 
@@ -915,8 +918,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     SlotCollision *cFix = seg->collisionInfo(base);
     if (base != slotFix)
     {
-        cFix->setFlags(cFix->flags() | SlotCollision::COLL_KERN);
-        cFix->setStatus(cFix->status() | SlotCollision::COLL_FIX);
+        cFix->setFlags(cFix->flags() | SlotCollision::COLL_KERN | SlotCollision::COLL_FIX);
         return 0;
     }
     bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
@@ -931,7 +933,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         if (bb.bl.y == 0. && bb.tr.y == 0.)
             // Add space for a space glyph.
             currSpace += nbor->advance();
-        else if (nbor != slotFix && !(cNbor->status() & SlotCollision::COLL_IGNORE))
+        else if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
         {
             if (!isInit)
             {

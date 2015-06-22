@@ -81,7 +81,6 @@ public:
     SLOTCOLSETUINTPROP(margin, setMargin)
     SLOTCOLSETUINTPROP(marginWt, setMarginWt)
     SLOTCOLSETUINTPROP(flags, setFlags)
-    SLOTCOLSETUINTPROP(status, setStatus)
     SLOTCOLSETUINTPROP(exclGlyph, setExclGlyph)
     SLOTCOLSETUINTPROP(seqClass, setSeqClass)
     SLOTCOLSETUINTPROP(seqProxClass, setSeqProxClass)
@@ -106,7 +105,6 @@ private:
     uint16		_margin;
     uint16		_marginWt;
     uint16		_flags;
-    uint16		_status;
     uint16		_exclGlyph;
     uint16		_seqClass;
 	uint16		_seqProxClass;

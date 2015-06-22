@@ -234,7 +234,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatUserDefn :  return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
-    case gr_slatColFlags :		{ SlotCollision *c = seg->collisionInfo(this); return c ? (c->flags() | c->status()) : 0; }
+    case gr_slatColFlags :		{ SlotCollision *c = seg->collisionInfo(this); return c ? c->flags() : 0; }
     case gr_slatColLimitblx :	SLOTGETCOLATTR(limit().bl.x)
     case gr_slatColLimitbly :	SLOTGETCOLATTR(limit().bl.y)
     case gr_slatColLimittrx :	SLOTGETCOLATTR(limit().tr.x)
@@ -261,13 +261,13 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 
 #define SLOTCOLSETATTR(x) { \
         SlotCollision *c = seg->collisionInfo(this); \
-        if (c) { c-> x ; c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN); } \
+        if (c) { c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
         break; }
 #define SLOTCOLSETCOMPLEXATTR(t, y, x) { \
         SlotCollision *c = seg->collisionInfo(this); \
         if (c) { \
         const t &s = c-> y; \
-        c-> x ; c->setStatus(c->status() & ~SlotCollision::COLL_KNOWN); } \
+        c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
         break; }
 
 void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
@@ -338,10 +338,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatColFlags :  {
         SlotCollision *c = seg->collisionInfo(this);
         if (c)
-        {
-            c->setStatus(value);
             c->setFlags(value);
-        }
         break; }
     case gr_slatColLimitblx :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(value, s.bl.y), s.tr)))
     case gr_slatColLimitbly :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(s.bl.x, value), s.tr)))

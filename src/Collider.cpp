@@ -975,7 +975,6 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
         return;
     const sparse &p = glyphFace->attrs();
     _flags = p[aCol];
-    _status = _flags;
     _limit = Rect(Position(p[aCol+1], p[aCol+2]),
                   Position(p[aCol+3], p[aCol+4]));
     _margin = p[aCol+5];
