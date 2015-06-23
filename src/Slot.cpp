@@ -115,7 +115,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (!m_parent)
     {
         res = base + Position(tAdvance, m_advance.y * scale);
-        clusterMin = base.x;
+        clusterMin = m_position.x;
     }
     else
     {
@@ -146,7 +146,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     
     if (!m_parent && clusterMin < base.x)
     {
-        Position adj = Position(base.x - clusterMin, 0.);
+        Position adj = Position(m_position.x - clusterMin, 0.);
         res += adj;
         m_position += adj;
         if (m_child) m_child->floodShift(adj);
