@@ -62,7 +62,8 @@ public:
         ////COLL_OVERLAP = 256,    // use maxoverlap to restrict - DELETE
     };
     
-    // Behavior for the collision.order attribute. To GDL this is an enum, to us it's a bitfield, with only 1 bit set.
+    // Behavior for the collision.order attribute. To GDL this is an enum, to us it's a bitfield, with only 1 bit set
+    // Allows for easier inversion.
     enum {
         SEQ_ORDER_LEFTDOWN = 1,
         SEQ_ORDER_RIGHTUP = 2,

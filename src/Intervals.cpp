@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/Segment.h"
 #include "inc/Slot.h"
 #include "inc/debug.h"
+#include "inc/bits.h"
 
 using namespace graphite2;
 
@@ -54,9 +55,12 @@ Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
     return *this;
 }
 
+#define FLOATMASK 0xFFFFFFFC
+
 inline
-uint8 Zones::Exclusion::outcode(float p) const {
-    return ((p >= xm) << 1) | (p < x);
+uint8 Zones::Exclusion::outcode(float val) const {
+    float p = float_round(val, FLOATMASK);
+    return ((p >= float_round(xm, FLOATMASK)) << 1) | (p < float_round(x, FLOATMASK));
 }
 
 

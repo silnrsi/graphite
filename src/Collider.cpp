@@ -145,58 +145,64 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
         case 0 :
              if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
             {
-                a = org.y;
+                a = org.y + 0.5 * (bb.yi + bb.ya);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, m, (minright ? box.tr.x : box.bl.x), org.y, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.x - bb.xi, box.width(), weight, a, m, (minright ? box.tr.x : box.bl.x) - bb.xi, org.y, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, 0, 0, org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y))), false);
+                    _ranges[axis].weighted<XY>(box.bl.x - bb.xi, box.width(), weight, a, 0, 0, org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - bb.yi)), false);
                     //_ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, 0, 0, org.y, 0, false);
             }
             break;
         case 1 :
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
             {
-                a = org.x;
+                a = org.x + 0.5 * (bb.xi + bb.xa);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, 0, 0, org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x))), false);
+                    _ranges[axis].weighted<XY>(box.bl.y - bb.yi, box.height(), weight, a, 0, 0, org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - bb.xi)), false);
                     //_ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, 0, 0, org.x, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, m, (minright ? box.tr.y : box.bl.y), org.x, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.y - bb.yi, box.height(), weight, a, m, (minright ? box.tr.y : box.bl.y) - bb.yi, org.x, 0, false);
             }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di)
             {
-                float di = org.x - org.y + sb.di;
-                float da = org.x - org.y + sb.da;
-                float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
-                float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
+                //float di = org.x - org.y + sb.di;
+                //float da = org.x - org.y + sb.da;
+                float d = org.x - org.y + 0.5 * (sb.di + sb.da);
+                float smax = std::min(2 * box.tr.x - d, 2 * box.tr.y + d);
+                float smin = std::max(2 * box.bl.x - d, 2 * box.bl.y + d);
+                //float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
+                //float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
                 if (smin > smax) return;
                 float si;
                 //a = offset.x - offset.y + _currShift.x - _currShift.y;
-                a = org.x - org.y;
+                a = d; //org.x - org.y;
                 if (isx)
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     si = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(smin, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
+                _ranges[axis].weighted<SD>(smin - sb.si, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
             }
             break;
         case 3 :
             if (box.bl.x + box.bl.y < org.x + org.y + sb.sa && box.tr.x + box.tr.y > org.x + org.y + sb.si)
             {
-                float si = org.x + org.y + sb.si;
-                float sa = org.x + org.y + sb.sa;
-                float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
-                float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
+                //float si = org.x + org.y;
+                //float sa = org.x + org.y + sb.width();
+                float s = org.x + org.y + 0.5 * (sb.si + sb.sa);
+                float dmax = std::min(2 * box.tr.x - s, s - 2 * box.bl.y);
+                float dmin = std::max(2 * box.bl.x - s, s - 2 * box.tr.y);
+                //float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
+                //float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
                 if (dmin > dmax) return;
                 float di;
-                a = org.x + org.y;
+                a = s; //org.x + org.y;
                 if (isx)
                     di = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     di = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(dmin, dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
+                _ranges[axis].weighted<SD>(dmin - (isx ? sb.di : sb.da), dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
             }
             break;
         default :
@@ -210,31 +216,31 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
 {
     switch (axis) {
         case 0 :
-            if (box.bl.y < org.y + bb.height() && box.tr.y > org.y && box.width() > 0)
-                _ranges[axis].exclude(box.bl.x, box.width());
+            if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
+                _ranges[axis].exclude(box.bl.x - bb.xi, box.width());
             break;
         case 1 :
-            if (box.bl.x < org.x + bb.width() && box.tr.x > org.x && box.height() > 0)
-                _ranges[axis].exclude(box.bl.y, box.height());
+            if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
+                _ranges[axis].exclude(box.bl.y - bb.yi, box.height());
             break;
         case 2 :
-            if (box.bl.x - box.tr.y < org.x - org.y + sb.height() && box.tr.x - box.bl.y > org.x - org.y && box.width() > 0 && box.height() > 0)
+            if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di && box.width() > 0 && box.height() > 0)
             {
                 float di = org.x - org.y + sb.di;
                 float da = org.x - org.y + sb.da;
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
-                _ranges[axis].exclude(smin, smax - smin);
+                _ranges[axis].exclude(smin - sb.si, smax - smin - sb.height());
             }
             break;
         case 3 :
-            if (box.bl.x + box.bl.y < org.x + org.y + sb.width() && box.tr.x + box.tr.y > org.x + org.y && box.width() > 0 && box.height() > 0)
+            if (box.bl.x + box.bl.y < org.x + org.y + sb.sa && box.tr.x + box.tr.y > org.x + org.y + sb.si && box.width() > 0 && box.height() > 0)
             {
                 float si = org.x + org.y + sb.si;
                 float sa = org.x + org.y + sb.sa;
                 float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
                 float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
-                _ranges[axis].exclude(dmin, dmax - dmin);
+                _ranges[axis].exclude(dmin - sb.di, dmax - dmin - sb.height());
             }
             break;
         default :
@@ -363,16 +369,16 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         if (orderFlags)
         {
             Position org(tx, ty);
-            float xminf = _limit.bl.x + _currOffset.x;
-            float xpinf = _limit.tr.x + _currOffset.x;
-            float ypinf = _limit.tr.y + _currOffset.y;
-            float yminf = _limit.bl.y + _currOffset.y;
+            float xminf = _limit.bl.x + _currOffset.x + tbb.xi;
+            float xpinf = _limit.tr.x + _currOffset.x + tbb.xa;
+            float ypinf = _limit.tr.y + _currOffset.y + tbb.ya;
+            float yminf = _limit.bl.y + _currOffset.y + tbb.yi;
             switch (orderFlags) {
                 case SlotCollision::SEQ_ORDER_RIGHTUP :
                 {
-                    float r1Xedge = cslot->seqAboveXoff() + bb.xa - 0.5 * (tbb.xi + tbb.xa) + sx;
-                    float r3Xedge = cslot->seqBelowXlim() + bb.xa - tbb.xi + sx;
-                    float r2Yedge = 0.5 * (cslot->seqValignHt() - tbb.xi + bb.yi - tbb.xa + bb.ya) + sy;
+                    float r1Xedge = cslot->seqAboveXoff() + bb.xa - 0.5 * (tbb.xa - tbb.xi) + sx;
+                    float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx;
+                    float r2Yedge = 0.5 * (bb.yi + bb.ya + tbb.yi - tbb.ya) + sy;
                     
                     // DBGTAG(1x) means the regions are up and right
                     // region 1
@@ -395,9 +401,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 }
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
                 {
-                    float r1Xedge = bb.xi + cslot->seqAboveXoff() - 0.5 * (tbb.xi + tbb.xa) + sx;
-                    float r3Xedge = bb.xi + cslot->seqBelowXlim() - tbb.xa + sx;
-                    float r2Yedge = 0.5 * (cslot->seqValignHt() - tbb.xi + bb.yi - tbb.xa + bb.ya) + sy;
+                    float r1Xedge = bb.xi + cslot->seqAboveXoff() - 0.5 * (tbb.xa - tbb.xa) + sx;
+                    float r3Xedge = bb.xi + cslot->seqBelowXlim() + sx;
+                    float r2Yedge = 0.5 * (bb.yi + bb.ya + tbb.yi - tbb.ya) + sy;
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
                     DBGTAG(21)

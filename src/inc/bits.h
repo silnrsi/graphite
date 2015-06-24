@@ -87,4 +87,10 @@ inline T zero_bytes(const T x, unsigned char n)
     return T((has_zero(x^t) >> 7)*n);
 }
 
+inline float float_round(float x, uint32 m)
+{
+    *reinterpret_cast<unsigned int *>(&x) &= m;
+    return *reinterpret_cast<float *>(&x);
+}
+
 }
