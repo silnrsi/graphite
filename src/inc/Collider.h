@@ -214,6 +214,9 @@ private:
 };	// end of class KernCollider
 
 
+inline
+float sqr(float x) { return x * x; }
+
 
 };  // end of namespace graphite2
 

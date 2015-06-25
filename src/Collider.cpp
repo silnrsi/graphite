@@ -134,9 +134,6 @@ float sdm(float vi, float va, float mx, float my, O op)
     return res;
 }
 
-inline
-float sqr(float x) { return x * x; }
-
 // Mark an area with a cost that can vary along the x-axis.
 void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int axis)
 {
@@ -182,7 +179,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     si = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(smin - sb.si, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
+                _ranges[axis].weighted<SD>(smin - (bb.xi + bb.yi), smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
             }
             break;
         case 3 :
@@ -202,7 +199,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     di = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     di = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(dmin - (isx ? sb.di : sb.da), dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
+                _ranges[axis].weighted<SD>(dmin - (isx ? bb.xi - bb.ya : bb.xa - bb.yi), dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
             }
             break;
         default :

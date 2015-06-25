@@ -870,7 +870,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         // isCol has been set to true if a collision remains.
         if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
         {
-            if (fabs(shift.x-cFix->shift().x) >= 1.0 || fabs(shift.y-cFix->shift().y) >= 1.0)
+            if (sqr(shift.x-cFix->shift().x) + sqr(shift.y-cFix->shift().y) >= 100)
                 moved = true;
             cFix->setShift(shift);
             if (slotFix->firstChild())
