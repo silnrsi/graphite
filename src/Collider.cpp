@@ -134,19 +134,20 @@ float sdm(float vi, float va, float mx, float my, O op)
     return res;
 }
 
-// Mark an area with a cost that can vary along the x-axis.
+// Mark an area with a cost that can vary along the x or y axis. The region is expressed in terms of the centre of the target glyph in each axis
 void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int axis)
 {
-    float a;
+    float a, c;
     switch (axis) {
         case 0 :
              if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
             {
                 a = org.y + 0.5 * (bb.yi + bb.ya);
+                c = 0.5 * (bb.xi + bb.xa);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.x - bb.xi, box.width(), weight, a, m, (minright ? box.tr.x : box.bl.x) - bb.xi, org.y, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.x - c, box.width(), weight, a, m, (minright ? box.tr.x : box.bl.x) - c, a, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.x - bb.xi, box.width(), weight, a, 0, 0, org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - bb.yi)), false);
+                    _ranges[axis].weighted<XY>(box.bl.x - c, box.width(), weight, a, 0, 0, org.y, m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - 0.5 * (bb.yi + bb.ya))), false);
                     //_ranges[axis].weighted<XY>(box.bl.x, box.width(), weight, a, 0, 0, org.y, 0, false);
             }
             break;
@@ -154,11 +155,12 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
             {
                 a = org.x + 0.5 * (bb.xi + bb.xa);
+                c = 0.5 * (bb.yi + bb.ya);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.y - bb.yi, box.height(), weight, a, 0, 0, org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - bb.xi)), false);
+                    _ranges[axis].weighted<XY>(box.bl.y - c, box.height(), weight, a, 0, 0, org.x, m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - 0.5 * (bb.xi + bb.xa))), false);
                     //_ranges[axis].weighted<XY>(box.bl.y, box.height(), weight, a, 0, 0, org.x, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.y - bb.yi, box.height(), weight, a, m, (minright ? box.tr.y : box.bl.y) - bb.yi, org.x, 0, false);
+                    _ranges[axis].weighted<XY>(box.bl.y - c, box.height(), weight, a, m, (minright ? box.tr.y : box.bl.y) - c, a, 0, false);
             }
             break;
         case 2 :
@@ -167,6 +169,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                 //float di = org.x - org.y + sb.di;
                 //float da = org.x - org.y + sb.da;
                 float d = org.x - org.y + 0.5 * (sb.di + sb.da);
+                c = 0.5 * (sb.si + sb.sa);
                 float smax = std::min(2 * box.tr.x - d, 2 * box.tr.y + d);
                 float smin = std::max(2 * box.bl.x - d, 2 * box.bl.y + d);
                 //float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
@@ -179,7 +182,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     si = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(smin - (bb.xi + bb.yi), smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
+                _ranges[axis].weighted<SD>(smin - c, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
             }
             break;
         case 3 :
@@ -188,6 +191,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                 //float si = org.x + org.y;
                 //float sa = org.x + org.y + sb.width();
                 float s = org.x + org.y + 0.5 * (sb.si + sb.sa);
+                c = 0.5 * (sb.di + sb.da);
                 float dmax = std::min(2 * box.tr.x - s, s - 2 * box.bl.y);
                 float dmin = std::max(2 * box.bl.x - s, s - 2 * box.tr.y);
                 //float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
@@ -199,7 +203,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     di = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     di = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(dmin - (isx ? bb.xi - bb.ya : bb.xa - bb.yi), dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
+                _ranges[axis].weighted<SD>(dmin - c, dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
             }
             break;
         default :
@@ -373,9 +377,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             switch (orderFlags) {
                 case SlotCollision::SEQ_ORDER_RIGHTUP :
                 {
-                    float r1Xedge = cslot->seqAboveXoff() + bb.xa - 0.5 * (tbb.xa - tbb.xi) + sx;
+                    float r1Xedge = cslot->seqAboveXoff() + bb.xa + sx;
                     float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx;
-                    float r2Yedge = 0.5 * (bb.yi + bb.ya + tbb.yi - tbb.ya) + sy;
+                    float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     
                     // DBGTAG(1x) means the regions are up and right
                     // region 1
@@ -398,9 +402,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 }
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
                 {
-                    float r1Xedge = bb.xi + cslot->seqAboveXoff() - 0.5 * (tbb.xa - tbb.xa) + sx;
+                    float r1Xedge = bb.xi + cslot->seqAboveXoff() + sx;
                     float r3Xedge = bb.xi + cslot->seqBelowXlim() + sx;
-                    float r2Yedge = 0.5 * (bb.yi + bb.ya + tbb.yi - tbb.ya) + sy;
+                    float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
                     DBGTAG(21)
