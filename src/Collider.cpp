@@ -378,7 +378,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 case SlotCollision::SEQ_ORDER_RIGHTUP :
                 {
                     float r1Xedge = cslot->seqAboveXoff() + 0.5 * (bb.xi + bb.xa) + sx;
-                    float r3Xedge = -cslot->seqBelowXlim() + bb.xa + sx + 0.5 * (tbb.xa - tbb.xi);
+                    float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx + 0.5 * (tbb.xa - tbb.xi);
                     float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     
                     // DBGTAG(1x) means the regions are up and right
@@ -403,7 +403,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
                 {
                     float r1Xedge = 0.5 * (bb.xi + bb.xa) + cslot->seqAboveXoff() + sx;
-                    float r3Xedge = bb.xi + cslot->seqBelowXlim() + sx - 0.5 * (tbb.xa - tbb.xi);
+                    float r3Xedge = bb.xi - cslot->seqBelowXlim() + sx - 0.5 * (tbb.xa - tbb.xi);
                     float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
@@ -485,9 +485,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
 #endif
                 if (omin > otmax)
-                    _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
                 else if (omax < otmin)
-                    _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
                 else
                     _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
                 anyhits = true;
@@ -503,9 +503,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
             isCol = true;
             if (omin > otmax)
-                _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
             else if (omax < otmin)
-                _ranges[i].weightedAxis(i, vmin, vmax - vmin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
             else
                 _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
 

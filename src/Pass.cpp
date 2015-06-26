@@ -837,6 +837,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     // When we're processing forward, ignore kernable glyphs that preceed the target glyph.
     // When processing backward, don't ignore these until we pass slotFix.
     bool ignoreForKern = !isRev;
+    bool rtl = dir & 1;
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -850,7 +851,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         if (nbor != slotFix         // don't process if this is the slot of interest
                       && !(cNbor->flags() & SlotCollision::COLL_IGNORE)    // don't process if ignoring
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
-                            || !inKernCluster(seg, nbor))   // this cluster is not to be kerned (so avoid it)
+                            || !inKernCluster(seg, nbor)    // or this cluster is not to be kerned
+                            || (rtl ^ ignoreForKern))       // or it comes before(ltr) or after(rtl)
                       && (!isRev    // if processing forwards then good to merge otherwise only:
                             || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
                             || (cNbor->flags() & SlotCollision::COLL_KERN && !sameCluster)     // ignore other kernable clusters
