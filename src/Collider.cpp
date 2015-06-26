@@ -218,11 +218,11 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
     switch (axis) {
         case 0 :
             if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
-                _ranges[axis].exclude(box.bl.x - bb.xi, box.width());
+                _ranges[axis].exclude(box.bl.x - 0.5 * (bb.xi + bb.xa), box.width());
             break;
         case 1 :
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
-                _ranges[axis].exclude(box.bl.y - bb.yi, box.height());
+                _ranges[axis].exclude(box.bl.y - 0.5 * (bb.yi + bb.ya), box.height());
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di && box.width() > 0 && box.height() > 0)
@@ -231,7 +231,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float da = org.x - org.y + sb.da;
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
-                _ranges[axis].exclude(smin - sb.si, smax - smin - sb.height());
+                _ranges[axis].exclude(smin - 0.5 * (sb.si + sb.sa), smax - smin - sb.height());
             }
             break;
         case 3 :
@@ -241,7 +241,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float sa = org.x + org.y + sb.sa;
                 float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
                 float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
-                _ranges[axis].exclude(dmin - sb.di, dmax - dmin - sb.height());
+                _ranges[axis].exclude(dmin - 0.5 * (sb.di + sb.da), dmax - dmin - sb.height());
             }
             break;
         default :
@@ -377,8 +377,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             switch (orderFlags) {
                 case SlotCollision::SEQ_ORDER_RIGHTUP :
                 {
-                    float r1Xedge = cslot->seqAboveXoff() + bb.xa + sx;
-                    float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx;
+                    float r1Xedge = cslot->seqAboveXoff() + 0.5 * (bb.xi + bb.xa) + sx;
+                    float r3Xedge = -cslot->seqBelowXlim() + bb.xa + sx + 0.5 * (tbb.xa - tbb.xi);
                     float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     
                     // DBGTAG(1x) means the regions are up and right
@@ -402,8 +402,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 }
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
                 {
-                    float r1Xedge = bb.xi + cslot->seqAboveXoff() + sx;
-                    float r3Xedge = bb.xi + cslot->seqBelowXlim() + sx;
+                    float r1Xedge = 0.5 * (bb.xi + bb.xa) + cslot->seqAboveXoff() + sx;
+                    float r3Xedge = bb.xi + cslot->seqBelowXlim() + sx - 0.5 * (tbb.xa - tbb.xi);
                     float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
