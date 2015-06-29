@@ -72,7 +72,9 @@ private:
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
-    bool    collisionAvoidance(Segment *seg, int dir, json * const dbgout) const;
+    void    collisionShift(Segment *seg, int dir, json * const dbgout) const;
+    void    collisionKern(Segment *seg, int dir, json * const dbgout) const;
+    void    collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const;
     bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
                      int dir, bool &moved, json * const dbgout) const;
     float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
@@ -97,6 +99,7 @@ private:
     uint16 m_numColumns;
     byte m_minPreCtxt;
     byte m_maxPreCtxt;
+    byte m_colThreshold;
     vm::Machine::Code m_cPConstraint;
     
 private:        //defensive
