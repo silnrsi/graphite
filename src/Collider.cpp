@@ -770,7 +770,8 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
 
 
 void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
-    const Position &currShift, const Position &offsetPrev, int dir, GR_MAYBE_UNUSED json * const dbgout)
+    const Position &currShift, const Position &offsetPrev, int dir,
+    float ymin, float ymax, GR_MAYBE_UNUSED json * const dbgout)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     const Slot *base = aSlot;
@@ -785,21 +786,45 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _offsetPrev = offsetPrev; // kern from a previous pass
     
     // Calculate the height of the glyph and how many horizontal slices to use.
-    _maxy = (float)-1e38;
-    _miny = (float)1e38;
-    _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
-    for (s = base; s; s = s->nextInCluster(s))
+    if (_maxy >= 1e37)
     {
-        SlotCollision *c = seg->collisionInfo(s);
-        const BBox &bs = gc.getBoundingBBox(s->gid());
-        float y = s->origin().y + c->shift().y;
-        _maxy = std::max(_maxy, y + bs.ya);
-        _miny = std::min(_miny, y + bs.yi);
+        _maxy = ymax;
+        _miny = ymin;
+        _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
+        _edges.clear();
+        _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);
+        _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
     }
-    _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
+    else if (_maxy != ymax || _miny != ymin)
+    {
+        sliceWidth = (_maxy - _miny + 2) / _numSlices;
+        if (_maxy != ymax)
+        {
+            int newslices = int((ymax - _maxy) / sliceWidth + 1);
+            _maxy += newslices * sliceWidth;
+            if (newslices > 0)
+                _edges.insert(_edges.end(), newslices, (dir & 1) ? 1e38 : -1e38);
+            else if (-newslices < _numSlices)   // this shouldn't fire since we always grow the range
+                while (newslices++)
+                    _edges.pop_back();
+        }
+        if (_miny != ymin)
+        {
+            int newslices = int((ymin - _miny) / sliceWidth + 1);
+            _miny += newslices * sliceWidth;
+            if (newslices < 0)
+                _edges.insert(_edges.begin(), -newslices, (dir & 1) ? 1e38 : -1e38);
+            else if (newslices < _numSlices)    // this shouldn't fire since we always grow the range
+            {
+                Vector<float>::iterator e = _edges.begin();
+                while (newslices--)
+                    ++e;
+                _edges.erase(_edges.begin(), e);
+            }
+        _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
+        }
+    }
     sliceWidth = (_maxy - _miny + 2) / _numSlices;
-    _edges.clear();
-    _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);
         
 #if !defined GRAPHITE2_NTRACING
     // Debugging
@@ -881,7 +906,8 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
         if (x * rtl > _edges[i] * rtl - _mingap - currSpace)
         {
-            float m = get_edge(seg, slot, currShift, y, sliceWidth, rtl > 0) + currSpace;
+            // 2 * currSpace to account for the space that is already separating them and the space we want to add
+            float m = get_edge(seg, slot, currShift, y, sliceWidth, rtl > 0) + 2 * rtl * currSpace;
             t = rtl * (_edges[i] - m);
             // Check slices above and below (if any).
             if (i < _numSlices - 1) t = std::min(t, rtl * (_edges[i+1] - m));
@@ -910,9 +936,9 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 // Return the amount to kern by.
 // TODO: do we need to make use of marginMin here? Probably not.
 Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-        int dir, float margin, float currspace, GR_MAYBE_UNUSED json * const dbgout)
+        int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {
-    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin - currspace);
+    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
 
 #if !defined GRAPHITE2_NTRACING
@@ -961,6 +987,12 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
     
 }   // end of KernCollider::resolve
 
+void KernCollider::shift(const Position &mv, int dir)
+{
+    for (Vector<float>::iterator e = _edges.begin(); e != _edges.end(); ++e)
+        *e += mv.x;
+    _xbound += (1 - 2 * (dir & 1)) * mv.x;
+}
 
 ////    SLOT-COLLISION    ////
 

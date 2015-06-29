@@ -183,12 +183,14 @@ protected:
 class KernCollider
 {
 public:
-    KernCollider(GR_MAYBE_UNUSED json *dbg) { };
+    KernCollider(GR_MAYBE_UNUSED json *dbg) : _miny(-1e38), _maxy(1e38) { };
     ~KernCollider() throw() { };
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
-            const Position &currShift, const Position &offsetPrev, int dir, json * const dbgout);
+            const Position &currShift, const Position &offsetPrev, int dir,
+            float ymin, float ymax, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
-    Position resolve(Segment *seg, Slot *slot, int dir, float margin, float currspace, json * const dbgout);
+    Position resolve(Segment *seg, Slot *slot, int dir, float margin, json * const dbgout);
+    void shift(const Position &mv, int dir);
 
     CLASS_NEW_DELETE;
 

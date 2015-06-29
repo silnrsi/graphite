@@ -772,13 +772,19 @@ bool Pass::collisionAvoidance(Segment *seg, int dir, json * const dbgout) const
 #endif
     if (hasKerns)
     {
+        float ymin = 1e38;
+        float ymax = -1e38;
         start = seg->first();
         for (Slot *s = seg->first(); s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
+            const Rect &bbox = seg->theGlyphBBoxTemporary(s->gid());
+            float y = s->origin().y + c->shift().y;
+            ymax = std::max(y + bbox.tr.y, ymax);
+            ymin = std::min(y + bbox.bl.y, ymin);
             if (start && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
                             == (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
-                resolveKern(seg, s, start, kerncoll, dir, dbgout);
+                resolveKern(seg, s, start, kerncoll, dir, ymin, ymax, dbgout);
             if (c->flags() & SlotCollision::COLL_END)
                 start = NULL;
             if (c->flags() & SlotCollision::COLL_START)
@@ -909,7 +915,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
 }
 
 float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
-    json *const dbgout) const
+    float ymin, float ymax, json *const dbgout) const
 {
     Slot *nbor; // neighboring slot
     float currSpace = 0.;
@@ -946,7 +952,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
             {
                 if (!isInit)
                 {
-                    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
+                    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(),
+                                    cFix->shift(), cFix->offset(), dir, ymin, ymax, dbgout);
                     isInit = true;
                 }
                 collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);
@@ -962,7 +969,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     }
     if (collides)
     {
-        Position mv = coll.resolve(seg, slotFix, dir, cFix->margin(), currSpace, dbgout);
+        Position mv = coll.resolve(seg, slotFix, dir, cFix->margin(), dbgout);
+        coll.shift(mv, dir);
         Position delta = slotFix->advancePos() + mv - cFix->shift();
         slotFix->advance(delta);
         cFix->setShift(mv);

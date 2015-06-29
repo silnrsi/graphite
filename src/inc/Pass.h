@@ -76,7 +76,7 @@ private:
     bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
                      int dir, bool &moved, json * const dbgout) const;
     float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
-                     json *const dbgout) const;
+                     float ymin, float ymax, json *const dbgout) const;
 
     const Silf* m_silf;
     uint16    * m_cols;
