@@ -909,10 +909,10 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
 // Return the amount to kern by.
 // TODO: do we need to make use of marginMin here? Probably not.
-Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot, int dir, float margin,
-        GR_MAYBE_UNUSED json * const dbgout)
+Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
+        int dir, float margin, float currspace, GR_MAYBE_UNUSED json * const dbgout)
 {
-    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
+    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin - currspace);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
 
 #if !defined GRAPHITE2_NTRACING

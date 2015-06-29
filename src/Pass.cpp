@@ -914,6 +914,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     Slot *nbor; // neighboring slot
     float currSpace = 0.;
     bool collides = false;
+    unsigned int space_count = 0;
     Slot *base = slotFix;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -933,20 +934,27 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         const Rect &bb = seg->theGlyphBBoxTemporary(nbor->gid());
         if (bb.bl.y == 0. && bb.tr.y == 0.)
+        {
             // Add space for a space glyph.
             currSpace += nbor->advance();
-        else if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
+            ++space_count;
+        }
+        else
         {
-            if (!isInit)
+            space_count = 0; 
+            if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
             {
-                coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
-                isInit = true;
+                if (!isInit)
+                {
+                    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->shift(), cFix->offset(), dir, dbgout);
+                    isInit = true;
+                }
+                collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);
             }
-            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);
         }
         if (cNbor->flags() & SlotCollision::COLL_END)
         {
-            if (seenEnd)
+            if (seenEnd && space_count < 2)
                 break;
             else
                 seenEnd = true;
@@ -954,7 +962,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     }
     if (collides)
     {
-        Position mv = coll.resolve(seg, slotFix, dir, cFix->margin(), dbgout);
+        Position mv = coll.resolve(seg, slotFix, dir, cFix->margin(), currSpace, dbgout);
         Position delta = slotFix->advancePos() + mv - cFix->shift();
         slotFix->advance(delta);
         cFix->setShift(mv);

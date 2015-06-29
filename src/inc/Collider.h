@@ -188,7 +188,7 @@ public:
     void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
-    Position resolve(Segment *seg, Slot *slot, int dir, float margin, json * const dbgout);
+    Position resolve(Segment *seg, Slot *slot, int dir, float margin, float currspace, json * const dbgout);
 
     CLASS_NEW_DELETE;
 
