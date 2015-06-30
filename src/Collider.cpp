@@ -1040,8 +1040,6 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     // These attributes do not have corresponding glyph attribute:
     _exclGlyph = 0;
     _exclOffset = Position(0, 0);
-
-	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }
 
 float SlotCollision::getKern(int dir) const
