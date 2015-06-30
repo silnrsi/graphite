@@ -927,7 +927,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
 }
 
 float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
-    float ymin, float ymax, json *const dbgout) const
+    float &ymin, float &ymax, json *const dbgout) const
 {
     Slot *nbor; // neighboring slot
     float currSpace = 0.;
@@ -960,8 +960,12 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         else
         {
             space_count = 0; 
+            float y = nbor->origin().y + cNbor->shift().y;
+            ymax = std::max(y + bb.tr.y, ymax);
+            ymin = std::min(y + bb.bl.y, ymin);
             if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
             {
+                seenEnd = true;
                 if (!isInit)
                 {
                     coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(),
