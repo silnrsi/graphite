@@ -72,14 +72,14 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = _limit.bl.x + currOffset.x;
                 max = _limit.tr.x + currOffset.x;
                 _len[i] = bb.xa - bb.xi;
-                oshift = currOffset.y + currShift.y + 0.5 * (bb.yi + bb.ya);
+                oshift = currOffset.y + currShift.y;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, oshift, 0);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + currOffset.y;
                 max = _limit.tr.y + currOffset.y;
                 _len[i] = bb.ya - bb.yi;
-                oshift = currOffset.x + currShift.x + 0.5 * (bb.xi + bb.xa);
+                oshift = currOffset.x + currShift.x;
                 _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, oshift, 0);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
@@ -87,16 +87,16 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 min = -2 * std::min(currShift.x - _limit.bl.x, currShift.y - _limit.bl.y) + currOffset.x + currOffset.y + currShift.x + currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + currOffset.x + currOffset.y + currShift.x + currShift.y;
                 _len[i] = sb.sa - sb.si;
-                oshift = currOffset.x - currOffset.y + currShift.x - currShift.y + 0.5 * (sb.di + sb.da);
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
+                oshift = currOffset.x - currOffset.y + currShift.x - currShift.y;
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, oshift, 0);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 // pick closest x,y limit boundaries in d direction
                 min = -2 * std::min(currShift.x - _limit.bl.x, _limit.tr.y - currShift.y) + currOffset.x - currOffset.y + currShift.x - currShift.y;
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + currOffset.x - currOffset.y + currShift.x - currShift.y;
                 _len[i] = sb.da - sb.di;
-                oshift = currOffset.x + currOffset.y + currShift.x + currShift.y + 0.5 * (sb.si + sb.sa);
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, -oshift, oshift);
+                oshift = currOffset.x + currOffset.y + currShift.x + currShift.y;
+                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, oshift, 0);
                 break;
         }
     }
