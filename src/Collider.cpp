@@ -1027,22 +1027,19 @@ void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
     _margin = p[aCol+5];
     _marginWt = p[aCol+6];
 
-    // TODO: do we want to initialize collision.exclude stuff from the glyph attributes,
-    // or make GDL do it explicitly?
-//  _exclGlyph = p[aCol+7];
-//  _exclOffset = Position(p[aCol+8], seg->glyphAttr(gid, aCol+9));
+    _seqClass = p[aCol+7];
+	_seqProxClass = p[aCol+8];
+    _seqOrder = p[aCol+9];
+	_seqAboveXoff = p[aCol+10];
+	_seqAboveWt = p[aCol+11];
+	_seqBelowXlim = p[aCol+12];
+	_seqBelowWt = p[aCol+13];
+	_seqValignHt = p[aCol+14];
+	_seqValignWt = p[aCol+15];    
+
+    // These attributes do not have corresponding glyph attribute:
     _exclGlyph = 0;
     _exclOffset = Position(0, 0);
-
-    _seqClass = p[aCol+10];
-	_seqProxClass = p[aCol+11];
-    _seqOrder = p[aCol+12];
-	_seqAboveXoff = p[aCol+13];
-	_seqAboveWt = p[aCol+14];
-	_seqBelowXlim = p[aCol+15];
-	_seqBelowWt = p[aCol+16];
-	_seqValignHt = p[aCol+17];
-	_seqValignWt = p[aCol+18];    
 
 	//_canScrape[0] = _canScrape[1] = _canScrape[2] = _canScrape[3] = true;
 }

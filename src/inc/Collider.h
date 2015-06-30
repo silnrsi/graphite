@@ -94,9 +94,6 @@ public:
     SLOTCOLSETUINTPROP(seqValignWt, setSeqValignWt)
 
     float getKern(int dir) const;
-
-	//bool canScrape(int axis) { return _canScrape[axis]; }
-	//void setCanScrape(int axis, bool f) { _canScrape[axis] = f; }
     
 private:
     Rect        _limit;
@@ -116,9 +113,6 @@ private:
     uint16		_seqBelowWt;
     uint16		_seqValignHt;
     uint16		_seqValignWt;
-
-	// For use by algorithm:
-	//bool _canScrape[4];
 	
 };  // end of class SlotColllision
 
