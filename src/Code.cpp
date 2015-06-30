@@ -158,10 +158,10 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
+
     _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
-                                             * sizeof(instr)));
-    _data = static_cast<byte *>(malloc((bytecode_end - bytecode_begin)
-                                             * sizeof(byte)));
+                                             * (sizeof(instr)+sizeof(byte))));
+    _data = reinterpret_cast<byte *>(_code + (bytecode_end - bytecode_begin));
     
     if (!_code || !_data) {
         failure(alloc_failed);
@@ -211,10 +211,10 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     // memory.
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
-    _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr)));
-    _data = static_cast<byte *>(realloc(_data, _data_size*sizeof(byte)));
+    _data = static_cast<byte *>(memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte)));
+    _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr) + _data_size*sizeof(byte)));
 
-    if (!_code)
+    if (!_code || (_data_size != 0 && !_data))
     {
         failure(alloc_failed);
         return;
@@ -595,7 +595,6 @@ void Machine::Code::decoder::analysis::set_changed(const int index) throw() {
 void Machine::Code::release_buffers() throw()
 {
     free(_code);
-    free(_data);
     _code = 0;
     _data = 0;
     _own  = false;
@@ -610,7 +609,6 @@ int32 Machine::Code::run(Machine & m, slotref * & map) const
     if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context()))
     {
         m._status = Machine::slot_offset_out_bounds;
-//        return (m.slotMap().end() - map);
         return 1;
     }
 
