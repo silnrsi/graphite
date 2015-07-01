@@ -462,26 +462,26 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 const SlantBox &ssb = gc.getSubBoundingSlantBox(gid, j);
                 switch (i) {
                     case 0 :    // x
-                        vmin = std::max(std::max(sbb.xi - tbb.xa + sx, ssb.di - tsb.da + sd + ty), ssb.si - tsb.sa + ss - ty);
-                        vmax = std::min(std::min(sbb.xa - tbb.xi + sx, ssb.da - tsb.di + sd + ty), ssb.sa - tsb.si + ss - ty);
+                        vmin = std::max(std::max(sbb.xi-tbb.xa+sx, ssb.di-tsb.da+sd+ty), ssb.si-tsb.sa+ss-ty);
+                        vmax = std::min(std::min(sbb.xa-tbb.xi+sx, ssb.da-tsb.di+sd+ty), ssb.sa-tsb.si+ss-ty);
                         omin = sbb.yi + sy;
                         omax = sbb.ya + sy;
                         break;
                     case 1 :    // y
-                        vmin = std::max(std::max(sbb.yi - tbb.ya + sy, tsb.di - ssb.da - sd + tx), ssb.si - tsb.sa + ss - tx);
-                        vmax = std::min(std::min(sbb.ya - tbb.yi + sy, tsb.da - ssb.di - sd + tx), ssb.sa - tsb.si + ss - tx);
+                        vmin = std::max(std::max(sbb.yi-tbb.ya+sy, tsb.di-ssb.da-sd+tx), ssb.si-tsb.sa+ss-tx);
+                        vmax = std::min(std::min(sbb.ya-tbb.yi+sy, tsb.da-ssb.di-sd+tx), ssb.sa-tsb.si+ss-tx);
                         omin = sbb.xi + sx;
                         omax = sbb.xa + sx;
                         break;
                     case 2 :    // sum
-                        vmin = std::max(std::max(ssb.si - tsb.sa + ss, 2 * (sbb.yi - tbb.ya + sy) + td), 2 * (sbb.xi - tbb.xa + sx) - td);
-                        vmax = std::min(std::min(ssb.sa - tsb.si + ss, 2 * (sbb.ya - tbb.yi + sy) + td), 2 * (sbb.xa - tbb.xi + sx) - td);
+                        vmin = std::max(std::max(ssb.si-tsb.sa+ss, 2*(sbb.yi-tbb.ya+sy)+td), 2*(sbb.xi-tbb.xa+sx)-td);
+                        vmax = std::min(std::min(ssb.sa-tsb.si+ss, 2*(sbb.ya-tbb.yi+sy)+td), 2*(sbb.xa-tbb.xi+sx)-td);
                         omin = ssb.di + sd;
                         omax = ssb.da + sd;
                         break;
                     case 3 :    // diff
-                        vmin = std::max(std::max(ssb.di - tsb.da + sd, 2 * (sbb.xi - tbb.xa + sx) - ts), -2 * (sbb.ya - tbb.yi + sy) + ts);
-                        vmax = std::min(std::min(ssb.da - tsb.di + sd, 2 * (sbb.xa - tbb.xi + sx) - ts), -2 * (sbb.yi - tbb.ya + sy) + ts);
+                        vmin = std::max(std::max(ssb.di-tsb.da+sd, 2*(sbb.xi-tbb.xa+sx)-ts), -2*(sbb.ya-tbb.yi+sy)+ts);
+                        vmax = std::min(std::min(ssb.da-tsb.di+sd, 2*(sbb.xa-tbb.xi+sx)-ts), -2*(sbb.yi-tbb.ya+sy)+ts);
                         omin = ssb.si + ss;
                         omax = ssb.sa + ss;
                         break;
@@ -494,9 +494,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
 #endif
                 if (omin > otmax)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                                            sqr(_margin - omin + otmax) * _marginWt, false);
                 else if (omax < otmin)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                                            sqr(_margin - otmin + omax) * _marginWt, false);
                 else
                     _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
                 anyhits = true;
@@ -512,9 +514,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
             isCol = true;
             if (omin > otmax)
-                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - omin + otmax) * _marginWt, false);
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                                        sqr(_margin - omin + otmax) * _marginWt, false);
             else if (omax < otmin)
-                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0, sqr(_margin - otmin + omax) * _marginWt, false);
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                                        sqr(_margin - otmin + omax) * _marginWt, false);
             else
                 _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
 
@@ -709,9 +713,7 @@ inline
 static float localmax (float al, float au, float bl, float bu, float x)
 {
     if (al < bl)
-    {
-        if (au < bu) return au < x ? au : x;
-    }
+    { if (au < bu) return au < x ? au : x; }
     else if (au > bu) return bl < x ? bl : x;
     return x;
 }
@@ -720,9 +722,7 @@ inline
 static float localmin(float al, float au, float bl, float bu, float x)
 {
     if (bl > al)
-    {
-        if (bu > au) return bl > x ? bl : x;
-    }
+    { if (bu > au) return bl > x ? bl : x; }
     else if (au > bu) return al > x ? al : x;
     return x;        
 }
