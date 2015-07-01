@@ -278,9 +278,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
     SlotCollision * cslot = seg->collisionInfo(slot);
     int orderFlags = 0;
-    if (sameCluster && _seqClass &&
-		((_seqProxClass != 0 && cslot->seqClass() == _seqProxClass)
-			|| (_seqProxClass == 0 && cslot->seqClass() == _seqClass)))
+    bool sameClass = _seqProxClass == 0 && cslot->seqClass() == _seqClass;
+    if (sameCluster && _seqClass 
+        && (sameClass || (_seqProxClass != 0 && cslot->seqClass() == _seqProxClass)))
 		// Force the target glyph to be in the specified direction from the slot we're testing.
         orderFlags = _seqOrder;
     float seq_above_wt = cslot->seqAboveWt();
@@ -288,9 +288,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float seq_valign_wt = cslot->seqValignWt();
 
     // if isAfter, invert orderFlags for diagonal orders.
-    if (isAfter && (orderFlags & 0x3) != 0)        // _target isAfter slot and has LEFTDOWN or RIGHTUP
-            orderFlags = orderFlags ^ 0x3;
-    // x = (orderFlags ^ ~0); orderFlags = x ^ ((((x >> 1) & x) & 0x55555555) * 3)
+    if (isAfter)
+    {
+        // invert appropriate bits
+        orderFlags ^= (sameClass ? 0x3F : 0x3);
+        // consider 2 bits at a time, non overlapping. If both bits set, clear them
+        orderFlags = orderFlags ^ ((((orderFlags >> 1) & orderFlags) & 0x15) * 3);
+    }
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
