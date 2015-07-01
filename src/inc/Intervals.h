@@ -141,7 +141,7 @@ public:
 
     Zones();
     template<zones_t O>
-    void initialise(float pos, float len, float margin_len, float margin_weight, float ao, float ai);
+    void initialise(float pos, float len, float margin_len, float margin_weight, float ao);
 
     void exclude(float pos, float len);
     void exclude_with_margins(float pos, float len, int axis);
@@ -188,14 +188,14 @@ Zones::Exclusion::Exclusion(float x_, float xm_, float smi, float smxi, float c_
 template<zones_t O>
 inline
 void Zones::initialise(float pos, float len, float margin_len,
-        float margin_weight, float a0, float ai)
+        float margin_weight, float a0)
 {
     _margin_len = margin_len;
     _margin_weight = margin_weight;
     _pos = pos;
     _posm = pos+len;
     _exclusions.clear();
-    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, a0, 0, 0, ai, 0, false));
+    _exclusions.push_back(Exclusion::weighted<O>(pos, len, 1, a0, 0, 0, 0, 0, false));
     _exclusions.front().open = true;
 #if !defined GRAPHITE2_NTRACING
     _dbgs.clear();

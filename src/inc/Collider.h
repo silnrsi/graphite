@@ -68,7 +68,9 @@ public:
         SEQ_ORDER_LEFTDOWN = 1,
         SEQ_ORDER_RIGHTUP = 2,
         SEQ_ORDER_NOABOVE = 4,
-        SEQ_ORDER_NOBELOW = 8
+        SEQ_ORDER_NOBELOW = 8,
+        SEQ_ORDER_NOLEFT = 16,
+        SEQ_ORDER_NORIGHT = 32
     };
     
     SlotCollision(Segment *seg, Slot *slot);

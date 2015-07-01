@@ -55,13 +55,21 @@ Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
     return *this;
 }
 
-#define FLOATMASK 0xFFFFFFFC
+#if 0
+#define FLOATMASK 0xFFFFFFFF
 
 inline
 uint8 Zones::Exclusion::outcode(float val) const {
     float p = float_round(val, FLOATMASK);
     return ((p >= float_round(xm, FLOATMASK)) << 1) | (p < float_round(x, FLOATMASK));
 }
+#else
+inline
+uint8 Zones::Exclusion::outcode(float val) const {
+    float p = val;
+    return ((p >= xm) << 1) | (p < x);
+}
+#endif
 
 
 // hmm how to get the margin weight into here
@@ -221,7 +229,7 @@ bool Zones::Exclusion::track_cost(float & best_cost, float & best_pos, float ori
     return false;
 }
 
-
+inline
 float Zones::Exclusion::cost(float p) const {
     return (sm * p - 2 * smx) * p + c;
 }
