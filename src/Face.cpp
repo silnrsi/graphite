@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include "graphite2/Segment.h"
 #include "inc/CmapCache.h"
 #include "inc/debug.h"
+#include "inc/Decompressor.h"
 #include "inc/Endian.h"
 #include "inc/Face.h"
 #include "inc/FileFace.h"
@@ -39,6 +40,16 @@ of the License or (at your option) any later version.
 #include "inc/Error.h"
 
 using namespace graphite2;
+
+namespace
+{
+enum compression
+{
+    NONE,
+    SHRINKER
+};
+
+}
 
 Face::Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops)
 : m_appFaceHandle(appFaceHandle),
@@ -119,7 +130,33 @@ bool Face::readGraphite(const Table & silf)
     if (version >= 0x00030000)
         be::skip<uint32>(p);        // compilerVersion
     m_numSilf = be::read<uint16>(p);
-    be::skip<uint16>(p);            // reserved
+
+    byte * uncompressed_silfs = 0;
+    if (version < 0x00060000)
+        be::skip<uint16>(p);            // reserved
+    else
+    {
+        // The scheme is in the 1st byte of the reserved uint16,
+        // so an uncompressed Silf will look identical to a version 4 table.
+        compression const scheme = compression(be::read<uint8>(p));
+        be::skip<uint8>(p);
+        switch(scheme)
+        {
+        case NONE: break;
+        case SHRINKER:
+        {
+            size_t const decomp_size = be::read<uint32>(p);
+            uncompressed_silfs = gralloc<byte>(decomp_size);
+            if (e.test(!uncompressed_silfs, E_OUTOFMEM)
+             || e.test(shrinker::decompress(p, uncompressed_silfs, decomp_size) == signed(decomp_size), E_SHRINKERFAILED))
+                    return error(e);
+            break;
+        }
+        default:
+            e.error(E_BADSCHEME);
+            return error(e);
+        };
+    }
 
     bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
@@ -137,6 +174,10 @@ bool Face::readGraphite(const Table & silf)
         if (m_silfs[i].numPasses())
             havePasses = true;
     }
+
+    // Free the decompression buffer, if no compression was used this will be a
+    //  0 pointer.
+    free(uncompressed_silfs);
 
     return havePasses;
 }

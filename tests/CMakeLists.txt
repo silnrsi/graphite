@@ -19,6 +19,7 @@ add_library(graphite2-segcache STATIC
     ${S}/call_machine.cpp
     ${S}/Code.cpp
     ${S}/CmapCache.cpp
+    ${S}/Decompressor.cpp
     ${S}/Face.cpp
     ${S}/FileFace.cpp
     ${S}/GlyphCache.cpp
