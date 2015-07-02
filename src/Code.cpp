@@ -77,6 +77,7 @@ struct context
 
 } // end namespace
 
+byte * Machine::Code::local_memory = 0;
 
 class Machine::Code::decoder
 {
@@ -140,9 +141,9 @@ inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
+           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face, byte * & _out)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
-    _constraint(is_constraint), _modify(false), _delete(false), _own(true)
+    _constraint(is_constraint), _modify(false), _delete(false), _own(_out==0)
 {
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _code_cat(face.tele.code);
@@ -158,8 +159,8 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
-
-    _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
+    if (_out)   _code = reinterpret_cast<instr *>(_out);
+    else        _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
                                              * (sizeof(instr)+sizeof(byte))));
     _data = reinterpret_cast<byte *>(_code + (bytecode_end - bytecode_begin));
     
@@ -212,10 +213,14 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
     memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte));
-    _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr) + _data_size*sizeof(byte)));
-    _data = reinterpret_cast<byte *>(_code + (_instr_count+1));
+    size_t const total_sz = ((_instr_count+1) + (_data_size + sizeof(instr)-1)/sizeof(instr))*sizeof(instr);
+    if (_out)
+        _out += total_sz;
+    else
+        _code = static_cast<instr *>(realloc(_code, total_sz));
+   _data = reinterpret_cast<byte *>(_code + (_instr_count+1));
 
-    if (!_code || (_data_size != 0 && !_data))
+    if (!_code)
     {
         failure(alloc_failed);
         return;
@@ -604,7 +609,7 @@ void Machine::Code::release_buffers() throw()
 
 int32 Machine::Code::run(Machine & m, slotref * & map) const
 {
-    assert(_own);
+//    assert(_own);
     assert(*this);          // Check we are actually runnable
 
     if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context()))

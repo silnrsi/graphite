@@ -49,6 +49,8 @@ Pass::Pass()
   m_startStates(0),
   m_transitions(0),
   m_states(0),
+  m_codes(0),
+  m_progs(0),
   m_flags(0),
   m_iMaxLoop(0),
   m_numGlyphs(0),
@@ -71,6 +73,8 @@ Pass::~Pass()
     free(m_ruleMap);
 
     delete [] m_rules;
+    delete [] m_codes;
+    free(m_progs);
 }
 
 bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, Error &e)
@@ -183,7 +187,6 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
     const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);
 
-    if (e.test(!(m_rules = new Rule [m_numRules]), E_OUTOFMEM)) return face.error(e);
     precontext += m_numRules;
     sort_key   += m_numRules;
     o_constraint += m_numRules;
@@ -193,6 +196,15 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     const byte * ac_begin = 0, * rc_begin = 0,
                * ac_end = ac_data + be::peek<uint16>(o_action),
                * rc_end = rc_data + be::peek<uint16>(o_constraint);
+
+    // Allocate pools
+    m_rules = new Rule [m_numRules];
+    m_codes = new Code [m_numRules*2];
+    m_progs = static_cast<byte *>(malloc((ac_end - ac_data + rc_end - rc_data)
+                                    *(sizeof(vm::instr)+sizeof(byte))));
+    byte * prog_pool_free = m_progs;
+    if (e.test(!(m_rules && m_codes && m_progs), E_OUTOFMEM)) return face.error(e);
+
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; n; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
@@ -211,14 +223,25 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
-        r->constraint = new vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
+        r->action     = new (m_codes+n*2-2) vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face, prog_pool_free);
+        r->constraint = new (m_codes+n*2-1) vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, prog_pool_free);
 
         if (e.test(!r->action || !r->constraint, E_OUTOFMEM)
                 || e.test(r->action->status() != Code::loaded, r->action->status() + E_CODEFAILURE)
                 || e.test(r->constraint->status() != Code::loaded, r->constraint->status() + E_CODEFAILURE)
                 || e.test(!r->constraint->immutable(), E_MUTABLECCODE))
             return face.error(e);
+    }
+
+    // Shrink the program pool
+    ptrdiff_t const delta = m_progs - static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs));
+    if (delta)
+    {
+        for (Code * c = m_codes, * const ce = c + m_numRules*2; c != ce; ++c)
+        {
+            c->externalProgramMoved(delta);
+            c->externalProgramMoved(delta);
+        }
     }
 
     // Load the rule entries map
