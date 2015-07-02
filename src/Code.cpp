@@ -211,8 +211,9 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     // memory.
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
-    _data = static_cast<byte *>(memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte)));
+    memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte));
     _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr) + _data_size*sizeof(byte)));
+    _data = reinterpret_cast<byte *>(_code + (_instr_count+1));
 
     if (!_code || (_data_size != 0 && !_data))
     {
