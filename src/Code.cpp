@@ -94,7 +94,7 @@ public:
 
     };
     
-    decoder(const limits & lims, Code &code) throw();
+    decoder(const limits & lims, Code &code, enum passtype pt) throw();
     
     bool        load(const byte * bc_begin, const byte * bc_end);
     void        apply_analysis(instr * const code, instr * code_end);
@@ -116,6 +116,7 @@ private:
     byte              * _data;
     const limits      & _max;
     analysis            _analysis;
+    enum passtype       _passtype;
 };
 
 
@@ -130,17 +131,17 @@ struct Machine::Code::decoder::limits
   const byte         attrid[gr_slatMax];
 };
    
-inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
+inline Machine::Code::decoder::decoder(const limits & lims, Code &code, enum passtype pt) throw()
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
-  _instr(code._code), _data(code._data), _max(lims)
+  _instr(code._code), _data(code._data), _max(lims), _passtype(pt)
 { }
     
 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
+           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face, enum passtype pt)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(true)
 {
@@ -184,7 +185,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
          0,0,0,0,0,0,0, silf.numUser()}
     };
     
-    decoder dec(lims, *this);
+    decoder dec(lims, *this, pt);
     if(!dec.load(bytecode_begin, bytecode_end))
        return;
     
@@ -312,9 +313,14 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
             break;
         case INSERT :
-            --_pre_context;
+            if (_passtype >= PASS_TYPE_POSITIONING)
+                failure(invalid_opcode);
+            else
+                --_pre_context;
             break;
         case DELETE :
+            if (_passtype >= PASS_TYPE_POSITIONING)
+                failure(invalid_opcode);
             break;
         case ASSOC :
             for (uint8 num = bc[0]; num; --num)

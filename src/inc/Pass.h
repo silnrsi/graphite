@@ -42,6 +42,7 @@ class Error;
 class ShiftCollider;
 class KernCollider;
 class json;
+enum passtype;
 
 class Pass
 {   
@@ -49,7 +50,7 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face, Error &e);
+    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face, enum passtype pt, Error &e);
     bool runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
     byte flags() const { return m_flags; }
@@ -64,7 +65,7 @@ private:
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *constraint_data, 
                      const uint16 * o_action, const byte * action_data,
-                     Face &, Error &e);
+                     Face &, enum passtype pt, Error &e);
     bool    readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
     bool    readRanges(const byte * ranges, size_t num_ranges, Error &e);
     uint16  glyphToCol(const uint16 gid) const;

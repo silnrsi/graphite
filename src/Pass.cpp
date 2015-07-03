@@ -75,7 +75,7 @@ Pass::~Pass()
     delete [] m_rules;
 }
 
-bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, Error &e)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, passtype pt, Error &e)
 {
     const byte *                p = pass_start,
                * const pass_end   = p + pass_length;
@@ -84,6 +84,8 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e); 
     // Read in basic values
     m_flags = be::read<byte>(p);
+    if (e.test((m_flags & 15) && pt < PASS_TYPE_POSITIONING, E_BADCOLLISIONPASS))
+        return face.error(e);
     m_iMaxLoop = be::read<byte>(p);
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);
@@ -162,7 +164,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     {
         face.error_context(face.error_context() + 1);
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
-                                  precontext[0], be::peek<uint16>(sort_keys), *m_silf, face);
+                                  precontext[0], be::peek<uint16>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
         if (e.test(!m_cPConstraint, E_OUTOFMEM)
                 || e.test(m_cPConstraint.status(), m_cPConstraint.status() + E_CODEFAILURE))
             return face.error(e);
@@ -172,7 +174,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     {
         if (!readRanges(ranges, numRanges, e)) return face.error(e);
         if (!readRules(rule_map, numEntries,  precontext, sort_keys,
-                   o_constraint, rcCode, o_actions, aCode, face, e)) return false;
+                   o_constraint, rcCode, o_actions, aCode, face, pt, e)) return false;
     }
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.states);
@@ -185,7 +187,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
                      const byte *precontext, const uint16 * sort_key,
                      const uint16 * o_constraint, const byte *rc_data,
                      const uint16 * o_action,     const byte * ac_data,
-                     Face & face, Error &e)
+                     Face & face, passtype pt, Error &e)
 {
     const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
     const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);
@@ -218,8 +220,8 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face);
-        r->constraint = new vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face);
+        r->action     = new vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face, pt);
+        r->constraint = new vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, pt);
 
         if (e.test(!r->action || !r->constraint, E_OUTOFMEM)
                 || e.test(r->action->status() != Code::loaded, r->action->status() + E_CODEFAILURE)
@@ -887,8 +889,9 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                       && (!isRev    // if processing forwards then good to merge otherwise only:
                             || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
                             || (cNbor->flags() & SlotCollision::COLL_KERN && !sameCluster)     // ignore other kernable clusters
-                            || (cNbor->flags() & SlotCollision::COLL_ISCOL)))  // test against other collided glyphs
-            collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, dbgout);
+                            || (cNbor->flags() & SlotCollision::COLL_ISCOL))   // test against other collided glyphs
+                      && !coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, collides, dbgout))
+            return false;
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
             ignoreForKern = !ignoreForKern;
@@ -949,6 +952,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     while (base->attachedTo())
         base = base->attachedTo();
     SlotCollision *cFix = seg->collisionInfo(base);
+    const GlyphCache &gc = seg->getFace()->glyphs();
+
     if (base != slotFix)
     {
         cFix->setFlags(cFix->flags() | SlotCollision::COLL_KERN | SlotCollision::COLL_FIX);
@@ -961,8 +966,10 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     {
         if (nbor->isChildOf(base))
             continue;
-        SlotCollision *cNbor = seg->collisionInfo(nbor);
+        if (!gc.check(nbor->gid()))
+            return 0.;
         const Rect &bb = seg->theGlyphBBoxTemporary(nbor->gid());
+        SlotCollision *cNbor = seg->collisionInfo(nbor);
         if (bb.bl.y == 0. && bb.tr.y == 0.)
         {
             // Add space for a space glyph.

@@ -255,7 +255,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
 // between the target and the given slot.
 bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift,
 		bool isAfter,  // slot is logically after _target
-		bool sameCluster,
+		bool sameCluster, bool &hasCol,
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = false;
@@ -273,6 +273,8 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
     float torg;
     const GlyphCache &gc = seg->getFace()->glyphs();
     const unsigned short gid = slot->gid();
+    if (!gc.check(gid))
+        return false;
     const unsigned short tgid = _target->gid();
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
@@ -531,7 +533,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 
         }
     }
-    
+    bool res = true;
     if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()))
     {
         // Set up the bogus slot representing the exclusion glyph.
@@ -539,11 +541,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         exclSlot->setGlyph(seg, cslot->exclGlyph());
         Position exclOrigin(slot->origin() + cslot->exclOffset());
         exclSlot->origin(exclOrigin);
-        isCol |= mergeSlot(seg, exclSlot, currShift, isAfter, sameCluster, dbgout );
+        res &= mergeSlot(seg, exclSlot, currShift, isAfter, sameCluster, isCol, dbgout );
         seg->freeSlot(exclSlot);
     }
-        
-    return isCol;
+    hasCol |= isCol;
+    return res;
     
 }   // end of ShiftCollider::mergeSlot
 

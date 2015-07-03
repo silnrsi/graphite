@@ -891,6 +891,7 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4, unsigned int maxgid)
     uint16 chEnd = be::peek<uint16>(pTable4->end_code + nRanges - 1);
     if (chEnd != 0xFFFF)
         return false;
+#if 0
     int lastend = -1;
     for (int i = 0; i < nRanges; ++i)
     {
@@ -917,6 +918,7 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4, unsigned int maxgid)
             return false;
         lastend = end;
     }
+#endif
     return true;;
 }
 
@@ -1073,6 +1075,7 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12, unsigned int maxgid)
     uint32 num_groups = be::swap(pTable12->num_groups);
     if (length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32) * 3))
         return false;
+#if 0
     for (unsigned int i = 0; i < num_groups; ++i)
     {
         if (be::swap(pTable12->group[i].end_char_code)  - be::swap(pTable12->group[i].start_char_code) + be::swap(pTable12->group[i].start_glyph_id) > maxgid)
@@ -1080,6 +1083,7 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12, unsigned int maxgid)
         if (i > 0 && be::swap(pTable12->group[i].start_char_code) <= be::swap(pTable12->group[i-1].end_char_code))
             return false;
     }
+#endif
     return true;
 }
 

@@ -141,7 +141,7 @@ public:
                 float margin, float marginMin, const Position &currShift,
                 const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, 
-                const Position &currShift, bool isAfter, bool sameCluster, GR_MAYBE_UNUSED json * const dbgout);
+                const Position &currShift, bool isAfter, bool sameCluster, bool &hasCol, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
     void addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int mode);
     void removeBox(const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, int mode);

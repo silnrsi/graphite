@@ -158,6 +158,7 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 inline
 float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const
 {
+    if (glyphid >= _num_glyphs) return 0.;
     switch (metric) {
         case 0: return (float)(glyph(glyphid)->theBBox().bl.x);                          // x_min
         case 1: return (float)(glyph(glyphid)->theBBox().bl.y);                          // y_min
@@ -203,14 +204,14 @@ float GlyphCache::getSubBoundingMetric(unsigned short glyphid, uint8 subindex, u
 inline const SlantBox &GlyphCache::getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const
 {
     GlyphBox *b = _boxes[glyphid];
-    if (b == NULL || subindex >= b->num()) return nullSlant;
+//    if (b == NULL || subindex >= b->num()) return nullSlant;
     return *(SlantBox *)(b->subs() + 2 * subindex + 1);
 }
 
 inline const BBox &GlyphCache::getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const
 {
     GlyphBox *b = _boxes[glyphid];
-    if (b == NULL || subindex >= b->num()) return nullBBox;
+//    if (b == NULL || subindex >= b->num()) return nullBBox;
     return *(BBox *)(b->subs() + 2 * subindex);
 }
 

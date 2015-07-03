@@ -199,8 +199,14 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
             releaseBuffers(); return face.error(e);
         }
 
+        enum passtype pt = PASS_TYPE_UNKNOWN;
+        if (i >= m_jPass) pt = PASS_TYPE_JUSTIFICATION;
+        else if (i >= m_pPass) pt = PASS_TYPE_POSITIONING;
+        else if (i >= m_sPass) pt = PASS_TYPE_SUBSTITUTE;
+        else pt = PASS_TYPE_LINEBREAK;
+
         m_passes[i].init(this);
-        if (!m_passes[i].readPass(pass_start, pass_end - pass_start, pass_start - silf_start, face, e))
+        if (!m_passes[i].readPass(pass_start, pass_end - pass_start, pass_start - silf_start, face, pt, e))
         {
             releaseBuffers();
             return false;

@@ -41,6 +41,14 @@ namespace graphite2 {
 class Silf;
 class Face;
 
+enum passtype {
+    PASS_TYPE_UNKNOWN = 0,
+    PASS_TYPE_LINEBREAK,
+    PASS_TYPE_SUBSTITUTE,
+    PASS_TYPE_POSITIONING,
+    PASS_TYPE_JUSTIFICATION
+};
+
 namespace vm {
 
 class Machine::Code
@@ -79,7 +87,7 @@ private:
 public:
     Code() throw();
     Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-         uint8 pre_context, uint16 rule_length, const Silf &, const Face &);
+         uint8 pre_context, uint16 rule_length, const Silf &, const Face &, enum passtype pt);
     Code(const Machine::Code &) throw();
     ~Code() throw();
     
