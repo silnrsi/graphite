@@ -873,11 +873,11 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft Unicode subtable for expected values
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable4(const void * pCmapSubtable4)
+bool CheckCmapSubtable4(const void * pCmapSubtable4, unsigned int maxgid)
 {
     if (!pCmapSubtable4) return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
-    // Bob H says ome freeware TT fonts have version 1 (eg, CALIGULA.TTF) 
+    // Bob H say some freeware TT fonts have version 1 (eg, CALIGULA.TTF) 
     // so don't check subtable version. 21 Mar 2002 spec changes version to language.
     if (be::swap(pTable->format) != 4) return false;
     const Sfnt::CmapSubTableFormat4 * pTable4 = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmapSubtable4);
@@ -889,7 +889,35 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4)
         return false;
     // check last range is properly terminated
     uint16 chEnd = be::peek<uint16>(pTable4->end_code + nRanges - 1);
-    return (chEnd == 0xFFFF);
+    if (chEnd != 0xFFFF)
+        return false;
+    int lastend = -1;
+    for (int i = 0; i < nRanges; ++i)
+    {
+        uint16 end = be::peek<uint16>(pTable4->end_code + i);
+        uint16 start = be::peek<uint16>(pTable4->end_code + nRanges + 1 + i);
+        int16 delta = be::peek<int16>(pTable4->end_code + 2*nRanges + 1 + i);
+        uint16 offset = be::peek<uint16>(pTable4->end_code + 3*nRanges + 1 + i);
+        if (lastend >= end || lastend >= start)
+            return false;
+        if (offset)
+        {
+            const uint16 *gstart = pTable4->end_code + 3*nRanges + 1 + i + (offset >> 1);
+            const uint16 *gend = gstart + end - start;
+            if ((char *)gend >= (char *)pCmapSubtable4 + length)
+                return false;
+            while (gstart <= gend)
+            {
+                uint16 g = be::peek<uint16>(gstart++);
+                if (g && ((g + delta) & 0xFFFF) > maxgid)
+                    return false;
+            }
+        }
+        else if (((delta + end) & 0xFFFF) > maxgid)
+            return false;
+        lastend = end;
+    }
+    return true;;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1032,7 +1060,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft UCS-4 subtable for expected values.
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable12(const void *pCmapSubtable12)
+bool CheckCmapSubtable12(const void *pCmapSubtable12, unsigned int maxgid)
 {
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
@@ -1042,9 +1070,17 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12)
     uint32 length = be::swap(pTable12->length);
     if (length < sizeof(Sfnt::CmapSubTableFormat12))
         return false;
-    
-    return (length == (sizeof(Sfnt::CmapSubTableFormat12) + (be::swap(pTable12->num_groups) - 1)
-        * sizeof(uint32) * 3));
+    uint32 num_groups = be::swap(pTable12->num_groups);
+    if (length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32) * 3))
+        return false;
+    for (unsigned int i = 0; i < num_groups; ++i)
+    {
+        if (be::swap(pTable12->group[i].end_char_code)  - be::swap(pTable12->group[i].start_char_code) + be::swap(pTable12->group[i].start_glyph_id) > maxgid)
+            return false;
+        if (i > 0 && be::swap(pTable12->group[i].start_char_code) <= be::swap(pTable12->group[i-1].end_char_code))
+            return false;
+    }
+    return true;
 }
 
 /*----------------------------------------------------------------------------------------------

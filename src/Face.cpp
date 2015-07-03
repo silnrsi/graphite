@@ -84,19 +84,21 @@ bool Face::readGlyphs(uint32 faceOptions)
     telemetry::category _glyph_cat(tele.glyph);
 #endif
     error_context(EC_READGLYPHS);
-    if (faceOptions & gr_face_cacheCmap)
-        m_cmap = new CachedCmap(*this);
-    else
-        m_cmap = new DirectCmap(*this);
-
     m_pGlyphFaceCache = new GlyphCache(*this, faceOptions);
+
     if (e.test(!m_pGlyphFaceCache, E_OUTOFMEM)
         || e.test(m_pGlyphFaceCache->numGlyphs() == 0, E_NOGLYPHS)
-        || e.test(m_pGlyphFaceCache->unitsPerEm() == 0, E_BADUPEM)
-        || e.test(!m_cmap, E_OUTOFMEM) || e.test(!*m_cmap, E_BADCMAP))
+        || e.test(m_pGlyphFaceCache->unitsPerEm() == 0, E_BADUPEM))
     {
         return error(e);
     }
+
+    if (faceOptions & gr_face_cacheCmap)
+        m_cmap = new CachedCmap(*this, m_pGlyphFaceCache->numGlyphs() - 1);
+    else
+        m_cmap = new DirectCmap(*this, m_pGlyphFaceCache->numGlyphs() - 1);
+    if (e.test(!m_cmap, E_OUTOFMEM) || e.test(!*m_cmap, E_BADCMAP))
+        return error(e);
 
     if (faceOptions & gr_face_preloadGlyphs)
         nameTable();        // preload the name table along with the glyphs.

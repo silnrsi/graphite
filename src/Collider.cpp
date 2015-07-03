@@ -47,7 +47,7 @@ using namespace graphite2;
 
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
-void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, float marginWeight,
+bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, float marginWeight,
     const Position &currShift, const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int i;
@@ -55,6 +55,8 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     float a, shift;
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = aSlot->gid();
+    if (!gc.check(gid))
+        return false;
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     //float sx = aSlot->origin().x + currShift.x;
@@ -121,6 +123,7 @@ void ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     _seqClass = c->seqClass();
 	_seqProxClass = c->seqProxClass();
     _seqOrder = c->seqOrder();
+    return true;
 }
 
 template <class O>
@@ -529,7 +532,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
     }
     
-    if (cslot && cslot->exclGlyph() > 0)
+    if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()))
     {
         // Set up the bogus slot representing the exclusion glyph.
         Slot *exclSlot = seg->newSlot();
@@ -790,7 +793,7 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
 }
 
 
-void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
+bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
     const Position &currShift, const Position &offsetPrev, int dir,
     float ymin, float ymax, GR_MAYBE_UNUSED json * const dbgout)
 {
@@ -798,7 +801,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     const Slot *base = aSlot;
     // const Slot *last = aSlot;
     const Slot *s;
-    float sliceWidth;
+    int numSlices;
     while (base->attachedTo())
         base = base->attachedTo();
     if (margin < 10) margin = 10;
@@ -811,70 +814,72 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     {
         _maxy = ymax;
         _miny = ymin;
-        _numSlices = int((_maxy - _miny + 2) / (margin / 1.5) + 1.);  // +2 helps with rounding errors
+        _sliceWidth = margin / 1.5;
+        numSlices = int((_maxy - _miny + 2) / (_sliceWidth / 1.5) + 1.);  // +2 helps with rounding errors
         _edges.clear();
-        _edges.insert(_edges.begin(), _numSlices, (dir & 1) ? 1e38 : -1e38);
+        _edges.insert(_edges.begin(), numSlices, (dir & 1) ? 1e38 : -1e38);
         _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
     }
     else if (_maxy != ymax || _miny != ymin)
     {
-        sliceWidth = (_maxy - _miny + 2) / _numSlices;
-        if (_maxy != ymax)
-        {
-            int newslices = int((ymax - _maxy) / sliceWidth + 1);
-            _maxy += newslices * sliceWidth;
-            if (newslices > 0)
-                _edges.insert(_edges.end(), newslices, (dir & 1) ? 1e38 : -1e38);
-            else if (-newslices < _numSlices)   // this shouldn't fire since we always grow the range
-                while (newslices++)
-                    _edges.pop_back();
-        }
         if (_miny != ymin)
         {
-            int newslices = int((ymin - _miny) / sliceWidth + 1);
-            _miny += newslices * sliceWidth;
-            if (newslices < 0)
-                _edges.insert(_edges.begin(), -newslices, (dir & 1) ? 1e38 : -1e38);
-            else if (newslices < _numSlices)    // this shouldn't fire since we always grow the range
+            numSlices = int((ymin - _miny) / _sliceWidth - 1);
+            _miny += numSlices * _sliceWidth;
+            if (numSlices < 0)
+                _edges.insert(_edges.begin(), -numSlices, (dir & 1) ? 1e38 : -1e38);
+            else if ((unsigned)numSlices < _edges.size())    // this shouldn't fire since we always grow the range
             {
                 Vector<float>::iterator e = _edges.begin();
-                while (newslices--)
+                while (numSlices--)
                     ++e;
                 _edges.erase(_edges.begin(), e);
             }
-        _numSlices = int((_maxy - _miny + 2) / margin + 1.);  // +2 helps with rounding errors
+        }
+        if (_maxy != ymax)
+        {
+            numSlices = int((ymax - _miny) / _sliceWidth + 1);
+            _maxy = numSlices * _sliceWidth + _miny;
+            if (numSlices > (int)_edges.size())
+                _edges.insert(_edges.end(), numSlices - _edges.size(), (dir & 1) ? 1e38 : -1e38);
+            else if (numSlices < (int)_edges.size())   // this shouldn't fire since we always grow the range
+            {
+                while ((int)_edges.size() > numSlices)
+                    _edges.pop_back();
+            }
         }
     }
-    sliceWidth = (_maxy - _miny + 2) / _numSlices;
-        
+    numSlices = _edges.size();
+
 #if !defined GRAPHITE2_NTRACING
     // Debugging
     _seg = seg;
     _slotNear.clear();
-    _slotNear.insert(_slotNear.begin(), _numSlices, NULL);
+    _slotNear.insert(_slotNear.begin(), numSlices, NULL);
     _nearEdges.clear();
-    _nearEdges.insert(_nearEdges.begin(), _numSlices, (dir & 1) ? -1e38 : +1e38);
+    _nearEdges.insert(_nearEdges.begin(), numSlices, (dir & 1) ? -1e38 : +1e38);
 #endif
     
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
     for (s = base; s; s = s->nextInCluster(s))
     {
         SlotCollision *c = seg->collisionInfo(s);
+        if (!gc.check(s->gid()))
+            return false;
         const BBox &bs = gc.getBoundingBBox(s->gid());
         float x = s->origin().x + c->shift().x + ((dir & 1) ? bs.xi : bs.xa);
         // Loop over slices.
         // Note smin might not be zero if glyph s is not at the bottom of the cluster; similarly for smax.
-        float tfactor = _numSlices / (_maxy - _miny + 2);
         float toffset = c->shift().y - _miny + 1 + s->origin().y;
-        int smin = std::max(0, int((bs.yi + toffset) * tfactor));
-        int smax = std::min(_numSlices - 1, int((bs.ya + toffset) * tfactor + 1));
+        int smin = std::max(0, int((bs.yi + toffset) / _sliceWidth));
+        int smax = std::min(numSlices - 1, int((bs.ya + toffset) / _sliceWidth + 1));
         for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * sliceWidth; // vertical center of slice
+            float y = _miny - 1 + (i + .5) * _sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_edge(seg, s, currShift, y, sliceWidth, false);
+                t = get_edge(seg, s, currShift, y, _sliceWidth, false);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -884,7 +889,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_edge(seg, s, currShift, y, sliceWidth, true);
+                t = get_edge(seg, s, currShift, y, _sliceWidth, true);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
@@ -898,7 +903,7 @@ void KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _target = aSlot;
     _margin = margin;
     _currShift = currShift;
-    
+    return true;
 }   // end of KernCollider::initSlot
 
 
@@ -912,26 +917,26 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
     float x = sx + (rtl > 0 ? bb.tr.x : bb.bl.x);
-    if ((rtl > 0 && x < _xbound - _mingap - currSpace) || (rtl <= 0 && x > _xbound + _mingap + currSpace)) // this isn't going to reduce _mingap so skip
+    // this isn't going to reduce _mingap so skip
+    if ((rtl > 0 && x < _xbound - _mingap - currSpace) || (rtl <= 0 && x > _xbound + _mingap + currSpace))
         return false;
 
     const float sy = slot->origin().y + currShift.y;
-    int smin = std::max(0, int((bb.bl.y + (1 - _miny + sy)) / (_maxy - _miny + 2) * _numSlices));
-    int smax = std::min(_numSlices - 1, int((bb.tr.y + (1 - _miny + sy)) / (_maxy - _miny + 2) * _numSlices + 1));
-    float sliceWidth = (_maxy - _miny + 2) / _numSlices;
+    int smin = std::max(0, int((bb.bl.y + (1 - _miny + sy)) / _sliceWidth + 1));
+    int smax = std::min((int)_edges.size() - 1, int((bb.tr.y + (1 - _miny + sy)) / _sliceWidth + 1));
     bool collides = false;
 
     for (int i = smin; i <= smax; ++i)
     {
         float t;
-        float y = (float)(_miny - 1 + (i + .5) * sliceWidth);  // vertical center of slice
+        float y = (float)(_miny - 1 + (i + .5) * _sliceWidth);  // vertical center of slice
         if (x * rtl > _edges[i] * rtl - _mingap - currSpace)
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
-            float m = get_edge(seg, slot, currShift, y, sliceWidth, rtl > 0) + 2 * rtl * currSpace;
+            float m = get_edge(seg, slot, currShift, y, _sliceWidth, rtl > 0) + 2 * rtl * currSpace;
             t = rtl * (_edges[i] - m);
             // Check slices above and below (if any).
-            if (i < _numSlices - 1) t = std::min(t, rtl * (_edges[i+1] - m));
+            if (i < (int)_edges.size() - 1) t = std::min(t, rtl * (_edges[i+1] - m));
             if (i > 0) t = std::min(t, rtl * (_edges[i-1] - m));
             // _mingap is positive to shrink
             if (t < _mingap)
@@ -963,7 +968,6 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
 
 #if !defined GRAPHITE2_NTRACING
-    float sliceWidth = (_maxy - _miny + 2) / _numSlices; // copied from above
     if (dbgout)
     {
         *dbgout << json::object // slot
@@ -978,12 +982,12 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern"
-                    << "slices" << _numSlices
-                    << "sliceWidth" << sliceWidth
+                    << "slices" << _edges.size()
+                    << "sliceWidth" << _sliceWidth
                     << json::close; // target object
         
         *dbgout << "slices" << json::array;
-        for (int is = 0; is < _numSlices; is++)
+        for (int is = 0; is < (int)_edges.size(); is++)
         {
             *dbgout << json::flat << json::object 
                 << "i" << is 

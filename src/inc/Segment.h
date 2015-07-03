@@ -156,6 +156,7 @@ public:
     bool hasJustification() const { return m_justifies.size() != 0; }
 
     bool isWhitespace(const int cid) const;
+    bool hasCollisionInfo() const { return m_collisions != 0; }
     SlotCollision *collisionInfo(const Slot *s) const { return m_collisions ? m_collisions + s->index() : NULL; }
 
     CLASS_NEW_DELETE

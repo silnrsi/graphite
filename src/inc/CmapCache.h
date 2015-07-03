@@ -52,7 +52,7 @@ class DirectCmap : public Cmap
     DirectCmap & operator = (const DirectCmap &);
 
 public:
-    DirectCmap(const Face &);
+    DirectCmap(const Face &, uint maxgid);
     virtual uint16 operator [] (const uint32 usv) const throw();
     virtual operator bool () const throw();
 
@@ -69,7 +69,7 @@ class CachedCmap : public Cmap
     CachedCmap & operator = (const CachedCmap &);
 
 public:
-    CachedCmap(const Face &);
+    CachedCmap(const Face &, uint maxgid);
     virtual ~CachedCmap() throw();
     virtual uint16 operator [] (const uint32 usv) const throw();
     virtual operator bool () const throw();

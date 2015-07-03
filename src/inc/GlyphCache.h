@@ -110,8 +110,9 @@ public:
     const Rect &     slant(unsigned short glyphid) const { return _boxes[glyphid] ? _boxes[glyphid]->slant() : nullRect; }
     const SlantBox & getBoundingSlantBox(unsigned short glyphid) const;
     const BBox &     getBoundingBBox(unsigned short glyphid) const;
-    const SlantBox &getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const;
-    const BBox &    getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const;
+    const SlantBox & getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const;
+    const BBox &     getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const;
+    bool             check(unsigned short glyphid) const;
 
     CLASS_NEW_DELETE;
     
@@ -143,6 +144,12 @@ unsigned short  GlyphCache::unitsPerEm() const throw()
 }
 
 inline
+bool GlyphCache::check(unsigned short glyphid) const
+{
+    return glyphid < _num_glyphs;
+}
+
+inline
 const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 {
     return glyphid < _num_glyphs ? glyph(glyphid) : NULL;
@@ -151,7 +158,6 @@ const GlyphFace *GlyphCache::glyphSafe(unsigned short glyphid) const
 inline
 float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const
 {
-    if (glyphid >= _num_glyphs) return 0.;
     switch (metric) {
         case 0: return (float)(glyph(glyphid)->theBBox().bl.x);                          // x_min
         case 1: return (float)(glyph(glyphid)->theBBox().bl.y);                          // y_min
@@ -167,20 +173,17 @@ float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const
 
 inline const SlantBox &GlyphCache::getBoundingSlantBox(unsigned short glyphid) const
 {
-    if (glyphid >= _num_glyphs || !_boxes[glyphid]) return nullSlant;
-    return *(SlantBox *)(&(_boxes[glyphid]->slant()));
+    return _boxes[glyphid] ? *(SlantBox *)(&(_boxes[glyphid]->slant())) : nullSlant;
 }
 
 inline const BBox &GlyphCache::getBoundingBBox(unsigned short glyphid) const
 {
-    if (glyphid >= _num_glyphs) return nullBBox;
     return *(BBox *)(&(glyph(glyphid)->theBBox()));
 }
 
 inline
 float GlyphCache::getSubBoundingMetric(unsigned short glyphid, uint8 subindex, uint8 metric) const
 {
-    if (glyphid >= _num_glyphs) return 0.;
     GlyphBox *b = _boxes[glyphid];
     if (b == NULL || subindex >= b->num()) return 0;
 
@@ -199,7 +202,6 @@ float GlyphCache::getSubBoundingMetric(unsigned short glyphid, uint8 subindex, u
 
 inline const SlantBox &GlyphCache::getSubBoundingSlantBox(unsigned short glyphid, uint8 subindex) const
 {
-    if (glyphid >= _num_glyphs) return nullSlant;
     GlyphBox *b = _boxes[glyphid];
     if (b == NULL || subindex >= b->num()) return nullSlant;
     return *(SlantBox *)(b->subs() + 2 * subindex + 1);
@@ -207,7 +209,6 @@ inline const SlantBox &GlyphCache::getSubBoundingSlantBox(unsigned short glyphid
 
 inline const BBox &GlyphCache::getSubBoundingBBox(unsigned short glyphid, uint8 subindex) const
 {
-    if (glyphid >= _num_glyphs) return nullBBox;
     GlyphBox *b = _boxes[glyphid];
     if (b == NULL || subindex >= b->num()) return nullBBox;
     return *(BBox *)(b->subs() + 2 * subindex);
@@ -216,8 +217,7 @@ inline const BBox &GlyphCache::getSubBoundingBBox(unsigned short glyphid, uint8 
 inline
 uint8 GlyphCache::numSubBounds(unsigned short glyphid) const
 {
-    if (glyphid >= _num_glyphs) return 0;
-    return _boxes[glyphid]->num();
+    return _boxes[glyphid] ? _boxes[glyphid]->num() : 0;
 }
 
 } // namespace graphite2

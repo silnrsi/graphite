@@ -137,7 +137,7 @@ public:
     }
     ~ShiftCollider() throw() { };
 
-    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint,
+    bool initSlot(Segment *seg, Slot *aSlot, const Rect &constraint,
                 float margin, float marginMin, const Position &currShift,
                 const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, 
@@ -181,7 +181,7 @@ class KernCollider
 public:
     KernCollider(GR_MAYBE_UNUSED json *dbg) : _miny(-1e38), _maxy(1e38) { };
     ~KernCollider() throw() { };
-    void initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
+    bool initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir,
             float ymin, float ymax, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
@@ -198,8 +198,8 @@ private:
     Position _currShift;    // NOT USED??
     float _miny;	        // y-coordinates offset by global slot position
     float _maxy;
-    Vector<float> _edges; // edges of horizontal slices
-    int   _numSlices;     // number of slices
+    Vector<float> _edges;   // edges of horizontal slices
+    float _sliceWidth;      // width of each slice
     float _mingap;
     float _xbound;        // max or min edge
 

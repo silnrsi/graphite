@@ -332,10 +332,10 @@ bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 }
 
 
-void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
+bool Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
 {
     Slot *s = m.slotMap().segment.first();
-    if (!s || !testPassConstraint(m)) return;
+    if (!s || !testPassConstraint(m)) return true;
     if (m_numRules)
     {
         Slot *currHigh = s->next();
@@ -360,6 +360,9 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
         } while (s);
     }
 
+    if (!(m_flags & 15) || !m.slotMap().segment.hasCollisionInfo())
+        return true;
+
     if (m_flags & 7)
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
@@ -367,13 +370,14 @@ void Pass::runGraphite(Machine & m, FiniteStateMachine & fsm) const
             m.slotMap().segment.positionSlots(0, 0, 0, true);
 //            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
-        collisionShift(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout);
+        if (!collisionShift(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
+            return false;
     }
-    if (m_flags & 7 /*8*/)
-        collisionKern(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout);
-    if (m_flags & 15)
-        collisionFinish(&m.slotMap().segment, fsm.dbgout);
-    return;
+    if ((m_flags & 8) && !collisionKern(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
+        return false;
+    if ((m_flags & 15) && !collisionFinish(&m.slotMap().segment, fsm.dbgout))
+        return false;
+    return true;
 }
 
 bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
@@ -641,7 +645,7 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
     }
 }
 
-void Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
+bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
 {
     ShiftCollider shiftcoll(dbgout);
     // bool isfirst = true;
@@ -668,8 +672,9 @@ void Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
         for (Slot *s = start; s; s = s->next())
         {
             const SlotCollision * c = seg->collisionInfo(s);
-            if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN)) == SlotCollision::COLL_FIX)
-                hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+            if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN)) == SlotCollision::COLL_FIX
+                      && !resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, hasCollisions, dbgout))
+                return false;
             if (s != start && c->flags() & SlotCollision::COLL_END)
             {
                 end = s->next();
@@ -715,7 +720,8 @@ void Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
                         if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN | SlotCollision::COLL_ISCOL))
                                         == (SlotCollision::COLL_FIX | SlotCollision::COLL_ISCOL)) // ONLY if this glyph is still colliding
                         {
-                            hasCollisions |= resolveCollisions(seg, s, lend, shiftcoll, true, dir, moved, dbgout);
+                            if (!resolveCollisions(seg, s, lend, shiftcoll, true, dir, moved, hasCollisions, dbgout))
+                                return false;
                             c->setFlags(c->flags() | SlotCollision::COLL_TEMPLOCK);
                         }
                     }
@@ -738,9 +744,10 @@ void Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
                     for (Slot *s = start; s != end; s = s->next())
                     {
                         SlotCollision * c = seg->collisionInfo(s);
-                        if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_TEMPLOCK | SlotCollision::COLL_KERN))
-                                                == SlotCollision::COLL_FIX)
-                            hasCollisions |= resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, dbgout);
+                        if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_TEMPLOCK
+                                                        | SlotCollision::COLL_KERN)) == SlotCollision::COLL_FIX
+                                  && !resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, hasCollisions, dbgout))
+                            return false;
                         else if (c->flags() & SlotCollision::COLL_TEMPLOCK)
                             c->setFlags(c->flags() & ~SlotCollision::COLL_TEMPLOCK);
                     }
@@ -765,15 +772,16 @@ void Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
             }
         }
     }
-
+    return true;
 }
 
-void Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
+bool Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
 {
     KernCollider kerncoll(dbgout);
     Slot *start = seg->first();
     float ymin = 1e38;
     float ymax = -1e38;
+    const GlyphCache &gc = seg->getFace()->glyphs();
 
     // phase 3 : handle kerning of clusters
 #if !defined GRAPHITE2_NTRACING
@@ -783,6 +791,8 @@ void Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
 
     for (Slot *s = seg->first(); s; s = s->next())
     {
+        if (!gc.check(s->gid()))
+            return false;
         const SlotCollision * c = seg->collisionInfo(s);
         const Rect &bbox = seg->theGlyphBBoxTemporary(s->gid());
         float y = s->origin().y + c->shift().y;
@@ -801,9 +811,10 @@ void Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
     if (dbgout)
         *dbgout << json::close << json::close; // phase 3
 #endif
+    return true;
 }
 
-void Pass::collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const
+bool Pass::collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const
 {
     for (Slot *s = seg->first(); s; s = s->next())
     {
@@ -822,6 +833,7 @@ void Pass::collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) co
         if (dbgout)
             *dbgout << json::close;
 #endif
+    return true;
 }
 
 // Can slot s be kerned, or is it attached to something that can be kerned?
@@ -844,13 +856,14 @@ static bool inKernCluster(Segment *seg, Slot *s)
 // Return true if everything was fixed, false if there are still collisions remaining.
 // isRev means be we are processing backwards.
 bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
-        ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, bool &moved,
+        ShiftCollider &coll, GR_MAYBE_UNUSED bool isRev, int dir, bool &moved, bool &hasCol,
         json * const dbgout) const
 {
     Slot * nbor;  // neighboring slot
     SlotCollision *cFix = seg->collisionInfo(slotFix);
-    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginWt(),
-            cFix->shift(), cFix->offset(), dir, dbgout);
+    if (!coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(), cFix->marginWt(),
+            cFix->shift(), cFix->offset(), dir, dbgout))
+        return false;
     bool collides = false;
     // When we're processing forward, ignore kernable glyphs that preceed the target glyph.
     // When processing backward, don't ignore these until we pass slotFix.
@@ -883,7 +896,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         if (nbor != start && (cNbor->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
             break;
     }
-    bool isCol;
+    bool isCol = false;
     if (collides || cFix->shift().x != 0. || cFix->shift().y != 0.)
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
@@ -905,8 +918,6 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     else
     {
         // This glyph is not colliding with anything.
-        isCol = false;
-        
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
@@ -923,7 +934,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     { cFix->setFlags(cFix->flags() | SlotCollision::COLL_ISCOL | SlotCollision::COLL_KNOWN); }
     else
     { cFix->setFlags((cFix->flags() & ~SlotCollision::COLL_ISCOL) | SlotCollision::COLL_KNOWN); }
-    return isCol;
+    hasCol |= isCol;
+    return true;
 }
 
 float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
@@ -968,8 +980,9 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
                 seenEnd = true;
                 if (!isInit)
                 {
-                    coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(),
-                                    cFix->shift(), cFix->offset(), dir, ymin, ymax, dbgout);
+                    if (!coll.initSlot(seg, slotFix, cFix->limit(), cFix->margin(),
+                                    cFix->shift(), cFix->offset(), dir, ymin, ymax, dbgout))
+                        return 0.;
                     isInit = true;
                 }
                 collides |= coll.mergeSlot(seg, nbor, cNbor->shift(), currSpace, dir, dbgout);

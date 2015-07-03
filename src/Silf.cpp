@@ -411,7 +411,8 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
 
         // test whether to reorder, prepare for positioning
         if (i >= 32 || (seg->passBits() & (1 << i)) == 0 || (m_passes[i].flags() & 7))
-            m_passes[i].runGraphite(m, fsm);
+            if (!m_passes[i].runGraphite(m, fsm))
+                return false;
         // only subsitution passes can change segment length, cached subsegments are short for their text
         if (m.status() != vm::Machine::finished
             || (i < m_pPass && (seg->slotCount() > initSize * MAX_SEG_GROWTH_FACTOR

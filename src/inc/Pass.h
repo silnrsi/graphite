@@ -50,7 +50,7 @@ public:
     ~Pass();
     
     bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face, Error &e);
-    void runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
+    bool runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
     byte flags() const { return m_flags; }
 
@@ -72,11 +72,11 @@ private:
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
     void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
-    void    collisionShift(Segment *seg, int dir, json * const dbgout) const;
-    void    collisionKern(Segment *seg, int dir, json * const dbgout) const;
-    void    collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const;
+    bool    collisionShift(Segment *seg, int dir, json * const dbgout) const;
+    bool    collisionKern(Segment *seg, int dir, json * const dbgout) const;
+    bool    collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const;
     bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
-                     int dir, bool &moved, json * const dbgout) const;
+                     int dir, bool &moved, bool &hasCol, json * const dbgout) const;
     float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
                      float &ymin, float &ymax, json *const dbgout) const;
 

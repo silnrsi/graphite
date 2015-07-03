@@ -150,7 +150,7 @@ public:
 
     SlotMap   & slotMap() const throw();
     status_t    status() const throw();
-    operator bool () const throw();
+//    operator bool () const throw();
 
 private:
     void    check_final_stack(const stack_t * const sp);
