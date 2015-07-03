@@ -255,7 +255,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
 // between the target and the given slot.
 bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift,
 		bool isAfter,  // slot is logically after _target
-		bool sameCluster, bool &hasCol,
+		bool sameCluster, bool &hasCol, bool isExclusion,
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = false;
@@ -534,14 +534,14 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
     }
     bool res = true;
-    if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()))
+    if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
     {
         // Set up the bogus slot representing the exclusion glyph.
         Slot *exclSlot = seg->newSlot();
         exclSlot->setGlyph(seg, cslot->exclGlyph());
         Position exclOrigin(slot->origin() + cslot->exclOffset());
         exclSlot->origin(exclOrigin);
-        res &= mergeSlot(seg, exclSlot, currShift, isAfter, sameCluster, isCol, dbgout );
+        res &= mergeSlot(seg, exclSlot, currShift, isAfter, sameCluster, isCol, true, dbgout );
         seg->freeSlot(exclSlot);
     }
     hasCol |= isCol;
