@@ -60,6 +60,7 @@ $(_NS)_SOURCES = \
     $($(_NS)_BASE)/src/Justifier.cpp \
     $($(_NS)_BASE)/src/NameTable.cpp \
     $($(_NS)_BASE)/src/Pass.cpp \
+    $($(_NS)_BASE)/src/Position.cpp \
     $($(_NS)_BASE)/src/SegCache.cpp \
     $($(_NS)_BASE)/src/SegCacheEntry.cpp \
     $($(_NS)_BASE)/src/SegCacheStore.cpp \

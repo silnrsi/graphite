@@ -153,15 +153,6 @@ python::
 
 Other configuration related dependencies:
 
-silgraphite::
-    Required to build the comparerender test and benchmarking tool and in turn
-    to allow extra tests to be run which check graphite2's rendering against 
-    silgraphite.
-
-freetype::
-    Also required by comparerender
-
-harfbuzz, harfbuzng, icule::
-    If found comparerenderer will be built with support for these but they are 
-    not required to build or run any tests
+fonttools::
+    This python library supports truetype font reading.
 

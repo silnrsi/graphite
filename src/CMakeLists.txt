@@ -78,15 +78,18 @@ add_library(graphite2 SHARED
     CachedFace.cpp
     CmapCache.cpp
     Code.cpp
+    Collider.cpp
     Decompressor.cpp
     Face.cpp
     FeatureMap.cpp
     Font.cpp
     GlyphFace.cpp
     GlyphCache.cpp
+    Intervals.cpp
     Justifier.cpp
     NameTable.cpp
     Pass.cpp
+    Position.cpp
     Rule.cpp
     Segment.cpp
     Silf.cpp

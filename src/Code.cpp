@@ -77,6 +77,7 @@ struct context
 
 } // end namespace
 
+byte * Machine::Code::local_memory = 0;
 
 class Machine::Code::decoder
 {
@@ -94,7 +95,7 @@ public:
 
     };
     
-    decoder(const limits & lims, Code &code) throw();
+    decoder(const limits & lims, Code &code, enum passtype pt) throw();
     
     bool        load(const byte * bc_begin, const byte * bc_end);
     void        apply_analysis(instr * const code, instr * code_end);
@@ -116,6 +117,7 @@ private:
     byte              * _data;
     const limits      & _max;
     analysis            _analysis;
+    enum passtype       _passtype;
 };
 
 
@@ -130,19 +132,20 @@ struct Machine::Code::decoder::limits
   const byte         attrid[gr_slatMax];
 };
    
-inline Machine::Code::decoder::decoder(const limits & lims, Code &code) throw()
+inline Machine::Code::decoder::decoder(const limits & lims, Code &code, enum passtype pt) throw()
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
-  _instr(code._code), _data(code._data), _max(lims)
+  _instr(code._code), _data(code._data), _max(lims), _passtype(pt)
 { }
     
 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face)
+           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face,
+           enum passtype pt, byte * & _out)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
-    _constraint(is_constraint), _modify(false), _delete(false), _own(true)
+    _constraint(is_constraint), _modify(false), _delete(false), _own(_out==0)
 {
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _code_cat(face.tele.code);
@@ -158,8 +161,8 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
-
-    _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
+    if (_out)   _code = reinterpret_cast<instr *>(_out);
+    else        _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
                                              * (sizeof(instr)+sizeof(byte))));
     _data = reinterpret_cast<byte *>(_code + (bytecode_end - bytecode_begin));
     
@@ -184,7 +187,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
          0,0,0,0,0,0,0, silf.numUser()}
     };
     
-    decoder dec(lims, *this);
+    decoder dec(lims, *this, pt);
     if(!dec.load(bytecode_begin, bytecode_end))
        return;
     
@@ -211,10 +214,15 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     // memory.
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_instr_count));
     assert((bytecode_end - bytecode_begin) >= std::ptrdiff_t(_data_size));
-    _data = static_cast<byte *>(memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte)));
-    _code = static_cast<instr *>(realloc(_code, (_instr_count+1)*sizeof(instr) + _data_size*sizeof(byte)));
+    memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte));
+    size_t const total_sz = ((_instr_count+1) + (_data_size + sizeof(instr)-1)/sizeof(instr))*sizeof(instr);
+    if (_out)
+        _out += total_sz;
+    else
+        _code = static_cast<instr *>(realloc(_code, total_sz));
+   _data = reinterpret_cast<byte *>(_code + (_instr_count+1));
 
-    if (!_code || (_data_size != 0 && !_data))
+    if (!_code)
     {
         failure(alloc_failed);
         return;
@@ -290,6 +298,10 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case GTR :
         case LESS_EQ :
         case GTR_EQ :
+        case BITOR :
+        case BITAND :
+        case BITNOT :
+        case BITSET :
             break;
         case NEXT :
         case NEXT_N :           // runtime checked
@@ -308,9 +320,14 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
             break;
         case INSERT :
-            --_pre_context;
+            if (_passtype >= PASS_TYPE_POSITIONING)
+                failure(invalid_opcode);
+            else
+                --_pre_context;
             break;
         case DELETE :
+            if (_passtype >= PASS_TYPE_POSITIONING)
+                failure(invalid_opcode);
             break;
         case ASSOC :
             for (uint8 num = bc[0]; num; --num)
@@ -603,7 +620,7 @@ void Machine::Code::release_buffers() throw()
 
 int32 Machine::Code::run(Machine & m, slotref * & map) const
 {
-    assert(_own);
+//    assert(_own);
     assert(*this);          // Check we are actually runnable
 
     if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context()))

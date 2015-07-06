@@ -124,7 +124,7 @@ typename Vector<T>::iterator Vector<T>::_insert_default(iterator p, size_t n)
 {
     assert(begin() <= p && p <= end());
     const ptrdiff_t i = p - begin();
-    reserve((size() + n + 7) >> 3 << 3);
+    reserve(((size() + n + 7) >> 3) << 3);
     p = begin() + i;
     // Move tail if there is one
     if (p != end()) memmove(p + n, p, distance(p,end())*sizeof(T));

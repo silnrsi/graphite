@@ -90,7 +90,7 @@ bounding box rectangle is stored elsewhere in the font.
 |=======================================================================
 |Type |Name |Description |Version notes
 
-|SHORT |subbox_bitmap |Which subboxes exist on 4x4 grid;bit-index =
+|USHORT |subbox_bitmap |Which subboxes exist on 4x4 grid;bit-index =
 (y-index * 4) + x-index |
 
 |BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal |
@@ -105,7 +105,16 @@ bounding box rectangle is stored elsewhere in the font.
 |=======================================================================
 
 Note that in the subbox bitmap, bit 3 indicates the presence of the
-lower right cell, and bit 12 the upper left cell.
+lower right cell, and bit 12 the upper left cell as per this diagram.
+
+.subbox_bitmap
+[cols=",,,",width="20%",grid="all"]
+|=======================================
+|12 |13 |14 |15
+| 8 | 9 |10 |11
+| 4 | 5 | 6 | 7
+| 0 | 1 | 2 | 3
+|=======================================
 
 .Subbox_entry
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
@@ -346,7 +355,8 @@ pseudo-glyphs) |
 |BYTE |iBidi |Index of first pass after the bidi pass(must be <= iPos);
 0xFF implies no bidi pass |
 
-|BYTE |flags | |4.0 – added Bit 1
+|BYTE |flags | 0 - has line end contextuals, 1 - contextuals,
+2-4 - space contextuals |4.0 – added Bit 1
 
 |BYTE |maxPreContext |Max range for preceding cross-line-boundary
 contextualization |
@@ -383,7 +393,7 @@ ligature components |
 
 |BYTE |direction |Supported direction(s) |
 
-|BYTE |reserved | |
+|BYTE |attCollisions | First of a set of attributes that hold collision flags and constraint box | 5.0 - added
 
 |BYTE |reserved | |
 
@@ -519,7 +529,7 @@ a fast binary search engine:
 Each element in the lookup consists of a glyphId and the corresponding
 index in the original ordered list.
 
-.ookupPair
+.LookupPair
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
 |Type |Name |Description |Version notes
@@ -539,7 +549,7 @@ rule finding, and the actions that are executed when a rule is matched.
 |=======================================================================
 |Type |Name |Description |Version notes
 
-|BYTE |flags |not used |
+|BYTE |flags |0-2 - number of collision runs; 3 - kerning collisions | 5.0 - added bits 0-3
 
 |BYTE |maxRuleLoop |MaxRuleLoop for this pass |
 
@@ -614,7 +624,8 @@ precedence of rules |
 number of items in the context before the first modified item, one for
 each rule |
 
-|BYTE |reserved | |2.0 – inserted
+|BYTE |numColStrata | Number of stripes to analyse a run into for collision
+kerning purposes |2.0 – inserted, 5.0 – added
 
 |USHORT |pConstraint |Length of passConstraint block |2.0 – added
 
@@ -627,7 +638,7 @@ relative to *aCode* and start of subtable |
 |USHORT |stateTrans[ ][ ] |Array of *numTransitional* rows of
 *numColumns* state transitions. |
 
-|BYTE |reserved | |2.0 – inserted
+|BYTE |collisionThreshold | |2.0 – inserted, 5.0 – added
 
 |BYTE |passConstraints[ ] |Sequences of constraint code for pass-level
 constraints |2.0 – added
@@ -882,4 +893,6 @@ Notice that the requirement that any tables declared in an external
 binary description override the corresponding font table in the font,
 means that a name table in an external binary description must be
 complete, including all the strings from the original font.
+
+include::OpCodes.txt[]
 

@@ -60,7 +60,7 @@ void JustifyTotal::accumulate(Slot *s, Segment *seg, int level)
     m_tWeight += s->getJustify(seg, level, 3);
 }
 
-float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags flags, Slot *pFirst, Slot *pLast)
+float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags jflags, Slot *pFirst, Slot *pLast)
 {
     Slot *s, *end;
     float currWidth = 0.0;
@@ -76,7 +76,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     while (!pLast->isBase()) pLast = pLast->attachedTo();
     const float base = pFirst->origin().x / scale;
     width = width / scale;
-    if ((flags & gr_justEndInline) == 0)
+    if ((jflags & gr_justEndInline) == 0)
     {
         do {
             Rect bbox = theGlyphBBoxTemporary(pLast->glyph());

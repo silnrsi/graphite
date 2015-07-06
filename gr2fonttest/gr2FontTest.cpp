@@ -761,7 +761,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"\nIf a font, but no text is specified, then a list of features will be shown.\n");
         fprintf(stderr,"-feat f=g\tSet feature f to value g. Separate multiple features with ,\n");
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
-        fprintf(stderr,"-trace trace.xml\tDefine a file for the XML trace log\n");
+        fprintf(stderr,"-trace trace.json\tDefine a file for the JSON trace log\n");
         fprintf(stderr,"-demand\tDemand load glyphs and cmap cache\n");
         fprintf(stderr,"-cache\tEnable Segment Cache\n");
         fprintf(stderr,"-bytes\tword size for character transfer [1,2,4] defaults to 4\n");

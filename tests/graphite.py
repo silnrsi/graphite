@@ -23,12 +23,12 @@ import ctypes.util
 import sys, os
 
 if getattr(sys, 'frozen', None) :
-    basedir = sys._MEIPASS
+    basedir = [sys._MEIPASS]
 #elif sys.platform == 'win32' :
 #    basedir = os.path.join(os.path.dirname(__file__), '..', 'dll')
 else :
     #basedir = os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'src')
-    basedir = os.path.join('..', '..', 'src')
+    basedirs = [os.path.join('..', '..', 'src'), os.path.join('..', 'src')]
 
 grfiles = {
     'darwin' : 'libgraphite2.dylib',
@@ -37,16 +37,18 @@ grfiles = {
     'win64' : 'graphite2-x64.dll'
 }
 gr2 = None
-try :
-    if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
-        grfile = grfiles['win64']
-    else :
-        grfile = grfiles[sys.platform]
-    grfile = os.path.join(basedir, grfile)
-    print "Trying " + grfile
-    gr2 = CDLL(grfile)
-except OSError :
-    gr2 = None
+if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
+    grfile = grfiles['win64']
+else :
+    grfile = grfiles[sys.platform]
+for b in basedirs :
+    testfile = os.path.join(b, grfile)
+    print "Trying " + testfile
+    try :
+        gr2 = CDLL(testfile)
+    except OSError :
+        gr2 = None
+    if gr2 is not None : break
 
 if not gr2 :
     print "Trying general library"
@@ -71,12 +73,17 @@ def fn(name, res, *params) :
     f.restype = res
     f.argtypes = params
 
+class FaceInfo(Structure) :
+    _fields_ = [("extra_ascent", c_ushort),
+                ("extra_descent", c_ushort),
+                ("upem", c_ushort)]
+
 tablefn = CFUNCTYPE(c_void_p, c_void_p, c_uint, POINTER(c_size_t))
 advfn = CFUNCTYPE(c_float, c_void_p, c_ushort)
 
 fn('gr_engine_version', None, POINTER(c_int), POINTER(c_int), POINTER(c_int))
 fn('gr_make_face', c_void_p, c_void_p, tablefn, c_uint)
-fn('gr_make_face_with_seg_cache', c_void_p, c_void_p, tablefn, c_uint, c_uint)
+#fn('gr_make_face_with_seg_cache', c_void_p, c_void_p, tablefn, c_uint, c_uint)
 fn('gr_str_to_tag', c_uint32, c_char_p)
 fn('gr_tag_to_str', None, c_uint32, POINTER(c_char))
 fn('gr_face_featureval_for_lang', c_void_p, c_void_p, c_uint32)
@@ -87,8 +94,10 @@ fn('gr_face_n_languages', c_ushort, c_void_p)
 fn('gr_face_lang_by_index', c_uint32, c_void_p, c_uint16)
 fn('gr_face_destroy', None, c_void_p)
 fn('gr_face_n_glyphs', c_ushort, c_void_p)
+fn('gr_face_info', POINTER(FaceInfo), c_void_p)
+fn('gr_face_is_char_supported', c_int, c_void_p, c_uint32, c_uint32)
 fn('gr_make_file_face', c_void_p, c_char_p, c_uint)
-fn('gr_make_file_face_with_seg_cache', c_void_p, c_char_p, c_uint, c_uint)
+#fn('gr_make_file_face_with_seg_cache', c_void_p, c_char_p, c_uint, c_uint)
 fn('gr_make_font', c_void_p, c_float, c_void_p)
 fn('gr_make_font_with_advance_fn', c_void_p, c_float, c_void_p, advfn, c_void_p)
 fn('gr_font_destroy', None, c_void_p)
@@ -218,6 +227,10 @@ class Face(object) :
     def __del__(self) :
         gr2.gr_face_destroy(self.face)
 
+    def get_upem(self) :
+        finfo = gr2.gr_face_info(self.face)
+        return finfo.contents.upem
+
     def num_glyphs(self) :
         return gr2.fr_face_n_glyphs(self.face)
 
@@ -342,7 +355,7 @@ class Segment(object) :
             length = len(string)
         if isinstance(scriptid, basestring) :
             scriptid = gr2.gr_str_to_tag(scriptid)
-        self.seg = gr2.gr_make_seg(font.font, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
+        self.seg = gr2.gr_make_seg(font.font if font is not None else 0, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
 
     def __del__(self) :
         gr2.gr_seg_destroy(self.seg)

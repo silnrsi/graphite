@@ -29,6 +29,7 @@ of the License or (at your option) any later version.
 #include "inc/Silf.h"
 #include "inc/CharInfo.h"
 #include "inc/Rule.h"
+#include "inc/Collider.h"
 
 
 using namespace graphite2;
@@ -85,12 +86,19 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool isFinal)
 {
+    SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
-    float scale = 1.0;
+    float scale = font ? font->scale() : 1.0;
     Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
+    if (isFinal && (coll = seg->collisionInfo(this)))
+    {
+        const Position &collshift = coll->offset();
+        if (!(coll->flags() & SlotCollision::COLL_KERN) || (seg->dir() & 1))
+            shift = shift + collshift;
+    }
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
     if (font)
     {
@@ -107,7 +115,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (!m_parent)
     {
         res = base + Position(tAdvance, m_advance.y * scale);
-        clusterMin = base.x;
+        clusterMin = m_position.x;
     }
     else
     {
@@ -126,19 +134,19 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin);
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, isFinal);
         if ((!m_parent || m_advance.x >= 0.5) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, isFinal);
         if (tRes.x > res.x) res = tRes;
     }
     
     if (!m_parent && clusterMin < base.x)
     {
-        Position adj = Position(base.x - clusterMin, 0.);
+        Position adj = Position(m_position.x - clusterMin, 0.);
         res += adj;
         m_position += adj;
         if (m_child) m_child->floodShift(adj);
@@ -151,7 +159,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     Position base;
     Rect bbox = seg->theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin);
+    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, false);
 
     switch (metrics(metric))
     {
@@ -179,6 +187,8 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
         return 0;
     }
 }
+
+#define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? c-> x : 0; }
 
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
@@ -224,9 +234,41 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatUserDefn :  return m_userAttr[subindex];
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
-    default :               return 0;
+    case gr_slatColFlags :		{ SlotCollision *c = seg->collisionInfo(this); return c ? c->flags() : 0; }
+    case gr_slatColLimitblx :	SLOTGETCOLATTR(limit().bl.x)
+    case gr_slatColLimitbly :	SLOTGETCOLATTR(limit().bl.y)
+    case gr_slatColLimittrx :	SLOTGETCOLATTR(limit().tr.x)
+    case gr_slatColLimittry :	SLOTGETCOLATTR(limit().tr.y)
+    case gr_slatColShiftx :		SLOTGETCOLATTR(offset().x)
+    case gr_slatColShifty :		SLOTGETCOLATTR(offset().y)
+    case gr_slatColMargin :		SLOTGETCOLATTR(margin())
+    case gr_slatColMarginWt :	SLOTGETCOLATTR(marginWt())
+    case gr_slatColExclGlyph :	SLOTGETCOLATTR(exclGlyph())
+    case gr_slatColExclOffx :	SLOTGETCOLATTR(exclOffset().x)
+    case gr_slatColExclOffy :	SLOTGETCOLATTR(exclOffset().y)
+    case gr_slatSeqClass :		SLOTGETCOLATTR(seqClass())
+	case gr_slatSeqProxClass :	SLOTGETCOLATTR(seqProxClass())
+    case gr_slatSeqOrder :		SLOTGETCOLATTR(seqOrder())
+    case gr_slatSeqAboveXoff :	SLOTGETCOLATTR(seqAboveXoff())
+    case gr_slatSeqAboveWt :	SLOTGETCOLATTR(seqAboveWt())
+    case gr_slatSeqBelowXlim :	SLOTGETCOLATTR(seqBelowXlim())
+    case gr_slatSeqBelowWt :	SLOTGETCOLATTR(seqBelowWt())
+    case gr_slatSeqValignHt :	SLOTGETCOLATTR(seqValignHt())
+    case gr_slatSeqValignWt :	SLOTGETCOLATTR(seqValignWt())
+    default : return 0;
     }
 }
+
+#define SLOTCOLSETATTR(x) { \
+        SlotCollision *c = seg->collisionInfo(this); \
+        if (c) { c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
+        break; }
+#define SLOTCOLSETCOMPLEXATTR(t, y, x) { \
+        SlotCollision *c = seg->collisionInfo(this); \
+        if (c) { \
+        const t &s = c-> y; \
+        c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
+        break; }
 
 void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
 {
@@ -293,6 +335,29 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatJWidth :    just(value); break;
     case gr_slatSegSplit :  seg->charinfo(m_original)->addflags(value & 3); break;
     case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
+    case gr_slatColFlags :  {
+        SlotCollision *c = seg->collisionInfo(this);
+        if (c)
+            c->setFlags(value);
+        break; }
+    case gr_slatColLimitblx :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(value, s.bl.y), s.tr)))
+    case gr_slatColLimitbly :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(Position(s.bl.x, value), s.tr)))
+    case gr_slatColLimittrx :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(value, s.tr.y))))
+    case gr_slatColLimittry :	SLOTCOLSETCOMPLEXATTR(Rect, limit(), setLimit(Rect(s.bl, Position(s.tr.x, value))))
+    case gr_slatColMargin :		SLOTCOLSETATTR(setMargin(value))
+    case gr_slatColMarginWt :	SLOTCOLSETATTR(setMarginWt(value))
+    case gr_slatColExclGlyph :	SLOTCOLSETATTR(setExclGlyph(value))
+    case gr_slatColExclOffx :	SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(value, s.y)))
+    case gr_slatColExclOffy :	SLOTCOLSETCOMPLEXATTR(Position, exclOffset(), setExclOffset(Position(s.x, value)))
+    case gr_slatSeqClass :		SLOTCOLSETATTR(setSeqClass(value))
+	case gr_slatSeqProxClass :	SLOTCOLSETATTR(setSeqProxClass(value))
+    case gr_slatSeqOrder :		SLOTCOLSETATTR(setSeqOrder(value))
+    case gr_slatSeqAboveXoff :	SLOTCOLSETATTR(setSeqAboveXoff(value))
+    case gr_slatSeqAboveWt :	SLOTCOLSETATTR(setSeqAboveWt(value))
+    case gr_slatSeqBelowXlim :	SLOTCOLSETATTR(setSeqBelowXlim(value))
+    case gr_slatSeqBelowWt :	SLOTCOLSETATTR(setSeqBelowWt(value))
+    case gr_slatSeqValignHt :	SLOTCOLSETATTR(setSeqValignHt(value))
+    case gr_slatSeqValignWt :	SLOTCOLSETATTR(setSeqValignWt(value))
     default :
         break;
     }
@@ -424,4 +489,30 @@ void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
         v[2] = seg->glyphAttr(s->gid(), justs->attrStep());
         v[3] = seg->glyphAttr(s->gid(), justs->attrWeight());
     }
+}
+
+Slot * Slot::nextInCluster(const Slot *s) const
+{
+    Slot *base;
+    if (s->firstChild())
+        return s->firstChild();
+    else if (s->nextSibling())
+        return s->nextSibling();
+    while ((base = s->attachedTo()))
+    {
+        if (base->firstChild() == s && base->nextSibling())
+            return base->nextSibling();
+        s = base;
+    }
+    return NULL;
+}
+
+bool Slot::isChildOf(const Slot *base) const
+{
+    if (m_parent == base)
+        return true;
+    else if (!m_parent)
+        return false;
+    else
+        return m_parent->isChildOf(base);
 }

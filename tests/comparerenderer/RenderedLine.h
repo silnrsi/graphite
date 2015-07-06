@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cassert>
+#include <string>
 
 class RenderedLine;
 
@@ -81,8 +82,9 @@ class GlyphInfo
         }
         void dump(FILE * f)
         {
-            fprintf(f, "[%3u,%6.2f,%5.2f,%2u,%2u]", (unsigned int)m_gid,
-                    m_x, m_y, (unsigned int)m_firstChar, (unsigned int)m_lastChar);
+            //fprintf(f, "[%3u,%6.2f,%5.2f,%2u,%2u]", (unsigned int)m_gid,
+            //        m_x, m_y, (unsigned int)m_firstChar, (unsigned int)m_lastChar);
+            fprintf(f, "[%3u,%6.2f,%5.2f], ", (unsigned int)m_gid, m_x, m_y);
         }
     private:
         size_t m_gid;
@@ -97,29 +99,30 @@ class RenderedLine
 {
     public:
         RenderedLine()
-        : m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
+        : m_text(NULL), m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
         {}
-        RenderedLine(size_t numGlyphs, float adv = 0.0f)
-        : m_numGlyphs(numGlyphs), m_advance(adv), m_glyphs(new GlyphInfo[numGlyphs])
+        RenderedLine(std::string *text, size_t numGlyphs, float adv = 0.0f)
+        : m_text(text), m_numGlyphs(numGlyphs), m_advance(adv), m_glyphs(new GlyphInfo[numGlyphs])
         {
-            
         }
         ~RenderedLine()
         {
             delete [] m_glyphs;
             m_glyphs = NULL;
+            delete m_text;
         }
         void setAdvance(float newAdv) { m_advance = newAdv; }
         void dump(FILE * f)
         {
+            fprintf(f, "{\"%s\" : [", m_text->c_str());
             for (size_t i = 0; i < m_numGlyphs; i++)
             {
-                fprintf(f, "%2u", (unsigned int)i);
+                //fprintf(f, "%2u", (unsigned int)i);
                 (*this)[i].dump(f);
                 // only 3 glyphs fit on 80 char line
-                if ((i + 1) % 3 == 0) fprintf(f, "\n");
+                //if ((i + 1) % 3 == 0) fprintf(f, "\n");
             }
-            fprintf(f, "(%2u,%4.3f)", (unsigned int)m_numGlyphs, m_advance);
+            fprintf(f, "(%2u,%4.3f)]}\n", (unsigned int)m_numGlyphs, m_advance);
         }
         LineDifference compare(RenderedLine & cf, float tolerance, float fractional)
         {
@@ -157,5 +160,6 @@ class RenderedLine
         size_t m_numGlyphs;
         float m_advance;
         GlyphInfo * m_glyphs;
+        std::string * m_text;
 };
 

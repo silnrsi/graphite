@@ -1,0 +1,191 @@
+#!/usr/bin/python
+
+import codecs
+from optparse import OptionParser
+from difflib import SequenceMatcher
+from fontTools.ttLib import TTFont
+import graphite as gr
+import sys, os, shutil, re, json
+import json.encoder
+from xml.etree.ElementTree import parse
+
+class GrFont(object) :
+    def __init__(self, fname, size, rtl, feats = {}, script = 0, lang = 0) :
+        self.fname = fname
+        self.size = size
+        self.rtl = rtl
+        self.grface = gr.Face(fname)
+        self.feats = self.grface.get_featureval(lang)
+        self.script = script
+        for f,v in feats.items() :
+            fref = self.grface.get_featureref(f)
+            self.feats.set(fref, v)
+        if size > 0 :
+            size = size * 96 / 72.
+            self.font = gr.Font(self.grface, size)
+        else :
+            self.font = None
+
+    def glyphs(self, text, includewidth = False) :
+        seg = gr.Segment(self.font, self.grface, self.script, text, self.rtl, feats = self.feats)
+        res = []
+        for s in seg.slots :
+            res.append((s.gid, s.origin))
+        if includewidth : res.append((None, seg.advance))
+        del seg
+        return res
+
+tables = {
+    'gr' : ('GDEF', 'GSUB', 'GPOS'),
+    'ot' : ('Gloc', 'Glat', 'Silf', 'Sill', 'Feat'),
+    'hb' : (),
+    'hbot' : ('Gloc', 'Glat', 'Silf', 'Sill', 'Feat'),
+    'icu' : ('Gloc', 'Glat', 'Silf', 'Sill', 'Feat')
+}
+
+def roundpt(pt, res) :
+    try :
+        return(int(pt[0] / res) * res, int(pt[1] / res) * res)
+    except ValueError :
+        pass
+    return (0, 0)
+
+def name(tt, gl) :
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(gl[1], 0.1))
+
+def cmaplookup(tt, c) :
+    cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
+    if cmap :
+        return cmap.cmap.get(ord(c), '.notdef')
+    return '.notdef'
+
+def makelabel(name, line, word) :
+    if name :
+        if word > 1 :
+            return "{} {}".format(name, word)
+        else :
+            return name
+    else :
+        return "{}.{}".format(line, word)
+
+def ftostr(x, dp=2) :
+    res = ("{:." + str(dp) + "f}").format(x)
+    if res.endswith("." + ("0" * dp)) :
+        res = res[:-dp-1]
+    else :
+        res = re.sub(r"0*$", "", res)
+    return res
+
+# Have the JSONEncoder use ftostr to render floats to 2dp rather than lots
+json.encoder.FLOAT_REPR=ftostr
+
+class JsonLog(object) :
+    def __init__(self, f, fpaths, args, inputs) :
+        self.out = f
+        self.opts = args
+        self.out.write(u"[\n")
+        self.encoder = json.JSONEncoder()
+
+    def logentry(self, label, linenumber, wordnumber, string, gglyphs, bases) :
+        s = makelabel(label, linenumber, wordnumber)
+        self.out.write('{ \"'+s+'\" : ')
+        # have to use iterencode here to get json.encoder.FLOAT_REP to work
+        #res = "\n".join(map(lambda x : "".join(self.encoder.iterencode([(g[0], roundpt(g[1], 0.01)) for g in x])), gglyphs))
+        res = "".join(self.encoder.iterencode(gglyphs))
+        self.out.write(res)
+        self.out.write('},\n')
+
+    def logend(self) :
+        self.out.write(u"{}]\n")
+
+def LineReader(infile, spliton=None) :
+    f = codecs.open(infile, encoding="utf_8")
+    for l in f.readlines() :
+        l = l.strip()
+        if spliton is not None :
+            res = (None, l.split(spliton))
+        else :
+            res = (None, (l, ))
+        yield res
+
+def FtmlReader(infile, spliton=None) :
+    etree = parse(infile)
+    for e in etree.iter('test') :
+        l = e.get('label', "")
+        s = e.find('string')
+        if spliton is not None:
+            res = (l, s.text.split(spliton))
+        else :
+            res = (l, (s.text, ))
+        yield res
+
+texttypes = {
+    'txt' : LineReader,
+    'ftml' : FtmlReader
+}
+
+parser = OptionParser(usage = '''%prog [options] infont1 infont2
+
+If the first font is above the output file in the filesystem hierarchy, it may not load.
+On firefox, ensure that the configuration option security.fileuri.strict_origin_policy
+is set to false to allow locally loaded html files to access fonts anywhere on the
+local filesystem. Alternatively use --copy to copy the font and reference that.''')
+parser.add_option("-t","--text",help="text file to test each line from")
+parser.add_option("-o","--output",help="file to log results to")
+parser.add_option("-f","--feat",action="append",help="id=value pairs, may be repeated")
+parser.add_option("-l","--lang",help="language to tag text with")
+parser.add_option("-s","--script",help="script of text")
+parser.add_option("-r","--rtl",action="store_true",help="right to left")
+parser.add_option("-p","--split",action="store_true",help="Split on spaces")
+parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
+(opts, args) = parser.parse_args()
+
+if not len(args) :
+    parser.print_help()
+    sys.exit(1)
+if not opts.lang : opts.lang = 0
+if not opts.script : opts.script = 0
+if not opts.rtl : opts.rtl = 0
+if opts.output :
+    outfile = codecs.open(opts.output, mode="w", encoding="utf_8")
+else :
+#    outfile = codecs.EncodedFile(sys.stdout, "unicode_internal", file_encoding="utf_8")
+    outfile = codecs.getwriter("utf_8")(sys.stdout)
+
+if not opts.texttype : opts.texttype = 'txt'
+if opts.split : spliton = ' '
+else : spliton = None
+
+feats = {}
+if opts.feat :
+    for f in opts.feat :
+        k, v = f.split('=')
+        feats[k.strip()] = int(v.strip())
+
+origargs = []
+fpaths = map(lambda x:os.path.relpath(x, start=(os.path.dirname(opts.output) if opts.output else '.')), args)
+
+font = GrFont(args[0], 0, opts.rtl, feats, opts.script, opts.lang)
+tt = TTFont(args[0])
+
+reader = texttypes[opts.texttype](opts.text, spliton)
+
+count = 0
+errors = 0
+log = None
+for label, words in reader :
+    if words[0] is None : continue
+    count += 1
+    wcount = 0
+    for s in words :
+        wcount += 1
+        gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
+        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1])
+        if log is None :
+            log = JsonLog(outfile, fpaths, opts, args)
+        bases = map(lambda x: (cmaplookup(tt, x), (0,0)), s)
+        log.logentry(label, count, wcount, s, gls, bases)
+if log is not None : log.logend()
+outfile.close()
+sys.exit(0)
+

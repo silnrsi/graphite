@@ -9,6 +9,7 @@ set(S ${graphite2_core_SOURCE_DIR})
 
 add_library(graphite2-base STATIC
     ${S}/FeatureMap.cpp
+    ${S}/Intervals.cpp
     ${S}/NameTable.cpp
     ${S}/Sparse.cpp
     ${S}/TtfUtil.cpp
@@ -18,6 +19,7 @@ add_library(graphite2-segcache STATIC
     ${S}/Bidi.cpp
     ${S}/call_machine.cpp
     ${S}/Code.cpp
+    ${S}/Collider.cpp
     ${S}/CmapCache.cpp
     ${S}/Decompressor.cpp
     ${S}/Face.cpp
@@ -47,13 +49,14 @@ endif (${CMAKE_BUILD_TYPE} STREQUAL "ClangASN")
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES 
-                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
+                            COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
     set_target_properties(graphite2-segcache PROPERTIES 
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING${TELEMETRY};_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 # don't -D GRAPHITE2_STATIC so that tests can see the API symbols in the static library 
     set_target_properties(graphite2-base PROPERTIES 
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_DEFINITIONS "GRAPHITE2_NTRACING"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" 
         LINKER_LANGUAGE     C)
     set_target_properties(graphite2-segcache PROPERTIES 
@@ -63,9 +66,7 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         LINKER_LANGUAGE     C)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
-if (GRAPHITE2_COMPARE_RENDERER)
-    add_subdirectory(comparerenderer)
-endif (GRAPHITE2_COMPARE_RENDERER)
+add_subdirectory(comparerenderer)
 add_subdirectory(endian)
 add_subdirectory(bittwiddling)
 if (NOT GRAPHITE2_NFILEFACE)
@@ -125,3 +126,10 @@ fonttest(general1 general.ttf 0E01 0062)
 feattest(padauk_feat Padauk.ttf)
 feattest(charis_feat charis_r_gr.ttf)
 feattest(scher_feat Scheherazadegr.ttf)
+
+cmptest(padaukcmp1 Padauk.ttf my_HeadwordSyllables.txt)
+cmptest(chariscmp1 charis_r_gr.ttf udhr_eng.txt)
+cmptest(chariscmp2 charis_r_gr.ttf udhr_yor.txt)
+cmptest(annacmp1 Annapurnarc2.ttf udhr_nep.txt)
+cmptest(schercmp1 Scheherazadegr.ttf udhr_arb.txt -r)
+cmptest(awamicmp1 Awami_test.ttf awami_tests.txt -r)

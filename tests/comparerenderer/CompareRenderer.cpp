@@ -45,28 +45,8 @@
 #include "RenderedLine.h"
 #include "FeatureParser.h"
 
-#ifdef HAVE_GRAPHITE
-#include "GrRenderer.h"
-#endif
-
 #include "Gr2Renderer.h"
 #include "graphite2/Log.h"
-
-#ifdef HAVE_HARFBUZZNG
-#include "HbNgRenderer.h"
-#endif
-
-#ifdef HAVE_HARFBUZZ
-#include "HbRenderer.h"
-#endif
-
-#ifdef HAVE_USP10
-#include "UniscribeRenderer.h"
-#endif
-
-#ifdef HAVE_ICU
-#include "IcuRenderer.h"
-#endif
 
 const size_t NUM_RENDERERS = 6;
 
@@ -144,7 +124,7 @@ public:
             {
                 for (int i = 0; i < repeat; i++)
                     m_elapsedTime[r] += runRenderer(*m_renderers[r], m_lineResults[r], m_glyphCount[r], log);
-                fprintf(log, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
+                fprintf(stdout, "Ran %s in %fs (%lu glyphs)\n", m_renderers[r]->name(), m_elapsedTime[r], m_glyphCount[r]);
             }
         }
     }
@@ -212,16 +192,17 @@ protected:
             lfLength = 2;
         if (m_verbose)
         {
+            fprintf(log, "[\n");
             while (i < m_numLines)
             {
-                fprintf(stdout, "%s line %u\n", renderer.name(), i + 1);
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
                 pLine = m_fileBuffer + m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i, log);
-                pLineResult[i].dump(stdout);
+                pLineResult[i].dump(log);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
             }
+            fprintf(log, "]\n");
         }
         else
         {
@@ -341,7 +322,7 @@ int main(int argc, char ** argv)
     int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
-	Gr2Face face(fontFile, segCacheSize, traceLogPath, rendererOptions[OptDemand].get(argv));
+	Gr2Face face(fontFile, traceLogPath, rendererOptions[OptDemand].get(argv));
 
 
     if (rendererOptions[OptFeatures].exists())
@@ -369,84 +350,26 @@ int main(int argc, char ** argv)
         {
             std::string altTraceLogPath = traceLogPath;
             altTraceLogPath.insert(traceLogPath.find_last_of('.'), ".alt");
-        	Gr2Face altFace(altFontFile, segCacheSize, altTraceLogPath, rendererOptions[OptDemand].get(argv));
+        	Gr2Face altFace(altFontFile, altTraceLogPath, rendererOptions[OptDemand].get(argv));
 
             renderers[0] = new Gr2Renderer(face, fontSize, direction, featureSettings);
             renderers[1] = new Gr2Renderer(altFace, fontSize, direction, altFeatureSettings);
         }
-#ifdef HAVE_GRAPHITE
-        else if (rendererOptions[OptGraphite].exists())
-        {
-            renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
-            renderers[1] = (new GrRenderer(altFontFile, fontSize, direction, altFeatureSettings));
-        }
-#endif
-#ifdef HAVE_HARFBUZZNG
-        else if (rendererOptions[OptHarfbuzzNg].exists())
-        {
-            renderers[0] = (new HbNgRenderer(fontFile, fontSize, direction, rendererOptions[OptScript].get(argv), featureSettings));
-            renderers[1] = (new HbNgRenderer(altFontFile, fontSize, direction, rendererOptions[OptScript].get(argv), altFeatureSettings));
-        }
-#endif
-#ifdef HAVE_HARFBUZZ
-        else if (rendererOptions[OptHarfbuzz].exists())
-        {
-            renderers[0] = (new HbRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new HbRenderer(altFontFile, fontSize, direction));
-        }
-#endif
-#ifdef HAVE_ICU
-        else if (rendererOptions[OptIcu].exists())
-        {
-            renderers[0] = (new IcuRenderer(fontFile, fontSize, direction));
-            renderers[1] = (new IcuRenderer(altFontFile, fontSize, direction));
-        }
-#endif
-#ifdef HAVE_USP10
-        else if (rendererOptions[OptUniscribe].exists())
-        {
-            renderers[0] = (new UniscribeRenderer(fontFile, rendererOptions[OptUniscribe].get(argv), fontSize, direction));
-            renderers[1] = (new UniscribeRenderer(altFontFile, rendererOptions[OptUniscribe].get(argv), fontSize, direction));
-        }
-#endif
     }
     else
     {
-#ifdef HAVE_GRAPHITE
-        if (rendererOptions[OptGraphite].exists())
-            renderers[0] = (new GrRenderer(fontFile, fontSize, direction, featureSettings));
-#endif
         if (rendererOptions[OptGraphite2].exists())
-            renderers[1] = new Gr2Renderer(face, fontSize, direction, featureSettings);
+            renderers[0] = new Gr2Renderer(face, fontSize, direction, featureSettings);
 
         if (rendererOptions[OptGraphite2s].exists())
         {
-        	Gr2Face uncached(fontFile, 0,
+        	Gr2Face uncached(fontFile,
         			std::string(traceLogPath).insert(traceLogPath.find_last_of('.'), ".uncached"), rendererOptions[OptDemand].get(argv));
-            renderers[2] = new Gr2Renderer(uncached, fontSize, direction, featureSettings);
+            renderers[1] = new Gr2Renderer(uncached, fontSize, direction, featureSettings);
         }
-
-#ifdef HAVE_HARFBUZZNG
-        if (rendererOptions[OptHarfbuzzNg].exists())
-            renderers[3] = (new HbNgRenderer(fontFile, fontSize, direction, rendererOptions[OptScript].get(argv), featureSettings));
-#endif
-#ifdef HAVE_ICU
-        if (rendererOptions[OptIcu].exists())
-            renderers[4] = (new IcuRenderer(fontFile, fontSize, direction));
-#endif
-#ifdef HAVE_USP10
-        if (rendererOptions[OptUniscribe].exists())
-        {
-            const char * defaultUsp10 = "usp10.dll";
-            const char * usp10 = rendererOptions[OptUniscribe].get(argv);
-            if (strlen(usp10) == 0)
-                usp10 = defaultUsp10;
-            renderers[5] = (new UniscribeRenderer(fontFile, usp10, fontSize, direction));
-        }
-#endif
     }
 
-    if (renderers[0] == NULL && renderers[1] == NULL && renderers[2] == NULL && renderers[3] == NULL && renderers[4] == NULL && renderers[5] == NULL)
+    if (renderers[0] == NULL && renderers[1] == NULL)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();

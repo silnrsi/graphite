@@ -644,3 +644,37 @@ STARTOP(temp_copy)
     newSlot->markCopied(true);
     *map = newSlot;
 ENDOP
+
+STARTOP(band)
+    binop(&);
+ENDOP
+
+STARTOP(bor)
+    binop(|);
+ENDOP
+
+STARTOP(bnot)
+    *sp = ~*sp;
+ENDOP
+
+STARTOP(setbits)
+    declare_params(4);
+    const uint16 m  = uint16(param[0]) << 8
+                    | uint8(param[1]);
+    const uint16 v  = uint16(param[2]) << 8
+                    | uint8(param[3]);
+    *sp = ((*sp) & ~m) | v;
+ENDOP
+
+STARTOP(set_feat)
+    declare_params(2);
+    const unsigned int  feat        = uint8(param[0]);
+    const int           slot_ref    = int8(param[1]);
+    slotref slot = slotat(slot_ref);
+    if (slot)
+    {
+        uint8 fid = seg.charinfo(slot->original())->fid();
+        seg.setFeature(fid, feat, pop());
+    }
+ENDOP
+
