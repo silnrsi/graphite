@@ -212,6 +212,7 @@ parser.add_option("-P","--passes",type='int', default=0, help='Run this many pas
 parser.add_option("-j","--jobs",type='int', default=None, help='Number of subprocesses to run in parallel (default: cpu count)')
 parser.add_option("-r","--random",help="Seed the random number generator with the given string")
 parser.add_option("--valgrind",action="store_true",help="Run tests with valgrind and report errors")
+parser.add_option("-k","--keep",action="store_true",help="Keep going. Don't return error status")
 testset = OptionGroup(parser, 'Test sets',
 'Explicitly specify which tables to include or exclude from testing. '
 'By default all tables (including the font directory) are included.'
@@ -289,4 +290,5 @@ if __name__ == '__main__':
         sys.exit(exitrv)
     if opts.status :
         sys.stdout.write("Finished at {0}\n".format(time.ctime()))
-    sys.exit(exitrv)
+    if not opts.keep :
+        sys.exit(exitrv)

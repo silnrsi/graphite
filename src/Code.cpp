@@ -611,7 +611,8 @@ void Machine::Code::decoder::analysis::set_changed(const int index) throw() {
 
 void Machine::Code::release_buffers() throw()
 {
-    free(_code);
+    if (_own)
+        free(_code);
     _code = 0;
     _data = 0;
     _own  = false;

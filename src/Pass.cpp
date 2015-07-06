@@ -74,9 +74,9 @@ Pass::~Pass()
     free(m_states);
     free(m_ruleMap);
 
-    delete [] m_rules;
-    delete [] m_codes;
-    free(m_progs);
+    if (m_rules) delete [] m_rules;
+    if (m_codes) delete [] m_codes;
+    if (m_progs) free(m_progs);
 }
 
 bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, passtype pt, Error &e)
@@ -244,9 +244,10 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     }
 
     // Shrink the program pool
-    ptrdiff_t const delta = m_progs - static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs));
+    ptrdiff_t const delta = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs)) - m_progs;
     if (delta)
     {
+        m_progs += delta;
         for (Code * c = m_codes, * const ce = c + m_numRules*2; c != ce; ++c)
         {
             c->externalProgramMoved(delta);
