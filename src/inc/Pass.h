@@ -42,6 +42,7 @@ class Error;
 class ShiftCollider;
 class KernCollider;
 class json;
+
 enum passtype;
 
 class Pass
@@ -81,14 +82,16 @@ private:
     float   resolveKern(Segment *seg, Slot *slot, Slot *start, KernCollider &coll, int dir,
                      float &ymin, float &ymax, json *const dbgout) const;
 
-    const Silf* m_silf;
-    uint16    * m_cols;
-    Rule      * m_rules; // rules
-    RuleEntry * m_ruleMap;
-    uint16    * m_startStates; // prectxt length
-    uint16    * m_transitions;
-    State     * m_states;
-    
+    const Silf        * m_silf;
+    uint16            * m_cols;
+    Rule              * m_rules; // rules
+    RuleEntry         * m_ruleMap;
+    uint16            * m_startStates; // prectxt length
+    uint16            * m_transitions;
+    State             * m_states;
+    vm::Machine::Code * m_codes;
+    byte              * m_progs;
+
     byte   m_flags;
     byte   m_iMaxLoop;
     uint16 m_numGlyphs;

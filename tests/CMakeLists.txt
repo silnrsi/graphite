@@ -67,6 +67,7 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_subdirectory(comparerenderer)
 add_subdirectory(endian)
+add_subdirectory(bittwiddling)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(examples)
 endif (NOT GRAPHITE2_NFILEFACE)

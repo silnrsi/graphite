@@ -68,6 +68,7 @@ public:
     };
 
 private:
+    static byte * local_memory;
     class decoder;
 
     instr *     _code;
@@ -87,7 +88,8 @@ private:
 public:
     Code() throw();
     Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-         uint8 pre_context, uint16 rule_length, const Silf &, const Face &, enum passtype pt);
+         uint8 pre_context, uint16 rule_length, const Silf &, const Face &,
+         enum passtype pt, byte * & _out = local_memory);
     Code(const Machine::Code &) throw();
     ~Code() throw();
     
@@ -100,11 +102,13 @@ public:
     bool          immutable() const throw();
     bool          deletes() const throw();
     size_t        maxRef() const throw();
+    void          externalProgramMoved(ptrdiff_t) throw();
 
     int32 run(Machine &m, slotref * & map) const;
     
     CLASS_NEW_DELETE;
 };
+
 
 inline Machine::Code::Code() throw()
 : _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0),
@@ -177,6 +181,12 @@ inline bool Machine::Code::deletes() const throw()
 inline size_t Machine::Code::maxRef() const throw()
 {
     return _max_ref;
+}
+
+inline void Machine::Code::externalProgramMoved(ptrdiff_t dist) throw()
+{
+    _code += dist;
+    _data += dist;
 }
 
 } // namespace vm

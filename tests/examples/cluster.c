@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     {
         unsigned int before = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_before(is)));
         unsigned int after = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_after(is)));
-        while (clusters[ci].base_char >= before && ci)                               /*<2>*/
+        while (clusters[ci].base_char > before && ci)                               /*<2>*/
         {
             clusters[ci-1].num_chars += clusters[ci].num_chars;
             clusters[ci-1].num_glyphs += clusters[ci].num_glyphs;
