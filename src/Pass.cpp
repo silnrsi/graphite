@@ -145,7 +145,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);
     be::skip<uint16>(p, m_numRules + 1);
     const byte * const states = p;
-    if (e.test(p + 2 * m_numTransition*m_numColumns, E_BADPASSLENGTH)) return face.error(e);
+    if (e.test(p + 2 * m_numTransition*m_numColumns >= pass_end, E_BADPASSLENGTH)) return face.error(e);
     be::skip<int16>(p, m_numTransition*m_numColumns);
     m_colThreshold = be::read<uint8>(p);
     if (m_colThreshold == 0) m_colThreshold = 10;       // A default
