@@ -296,7 +296,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             Slot *other = map[idx];
             if (other == this) break;
             if (m_parent) m_parent->removeChild(this);
-            if (other->child(this))
+            if (!other->isChildOf(this) && other->child(this))
             {
                 attachTo(other);
                 if (((seg->dir() & 1) != 0) ^ (idx > subindex))
