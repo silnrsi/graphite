@@ -185,7 +185,7 @@ inline size_t Machine::Code::maxRef() const throw()
 
 inline void Machine::Code::externalProgramMoved(ptrdiff_t dist) throw()
 {
-    if (!_own && _code)
+    if (_code && !_own)
     {
         _code += dist;
         _data += dist;

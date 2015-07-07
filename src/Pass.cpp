@@ -76,13 +76,13 @@ Pass::~Pass()
 
     if (m_rules) delete [] m_rules;
     if (m_codes) delete [] m_codes;
-    if (m_progs) free(m_progs);
+    free(m_progs);
 }
 
 bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, passtype pt, Error &e)
 {
-    const byte *                p = pass_start,
-               * const pass_end   = p + pass_length;
+    const byte * p              = pass_start,
+               * const pass_end = p + pass_length;
     size_t numRanges;
 
     if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e); 

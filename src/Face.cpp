@@ -201,7 +201,7 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
     }
 #endif
 
-    bool res = aSilf->runGraphite(seg, 0, aSilf->justificationPass(), true);
+    bool res = aSilf->runGraphite(seg, 0, aSilf->positionPass(), true);
     if (res)
     {
         seg->associateChars(0, seg->charInfoCount());
