@@ -153,7 +153,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     assert(bytecode_begin != 0);
     if (bytecode_begin == bytecode_end)
     {
-      ::new (this) Code();
+      // ::new (this) Code();
       return;
     }
     assert(bytecode_end > bytecode_begin);

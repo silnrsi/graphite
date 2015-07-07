@@ -251,7 +251,6 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         for (Code * c = m_codes, * const ce = c + m_numRules*2; c != ce; ++c)
         {
             c->externalProgramMoved(delta);
-            c->externalProgramMoved(delta);
         }
     }
 

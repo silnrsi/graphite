@@ -185,8 +185,11 @@ inline size_t Machine::Code::maxRef() const throw()
 
 inline void Machine::Code::externalProgramMoved(ptrdiff_t dist) throw()
 {
-    _code += dist;
-    _data += dist;
+    if (!_own && _code)
+    {
+        _code += dist;
+        _data += dist;
+    }
 }
 
 } // namespace vm
