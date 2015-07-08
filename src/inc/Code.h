@@ -187,7 +187,7 @@ inline void Machine::Code::externalProgramMoved(ptrdiff_t dist) throw()
 {
     if (_code && !_own)
     {
-        _code += dist;
+        _code += dist / sizeof(instr);
         _data += dist;
     }
 }
