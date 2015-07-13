@@ -90,7 +90,6 @@ add_library(graphite2 SHARED
     NameTable.cpp
     Pass.cpp
     Position.cpp
-    Rule.cpp
     Segment.cpp
     Silf.cpp
     Slot.cpp

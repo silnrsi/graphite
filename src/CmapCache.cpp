@@ -34,25 +34,25 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-const void * bmp_subtable(const Face::Table & cmap, uint maxgid)
+const void * bmp_subtable(const Face::Table & cmap)
 {
     const void * stbl;
     if (!cmap.size()) return 0;
-    if (TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 3, 1, cmap.size()), maxgid)
-     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 3, cmap.size()), maxgid)
-     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 2, cmap.size()), maxgid)
-     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 1, cmap.size()), maxgid)
-     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 0, cmap.size()), maxgid))
+    if (TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 3, 1, cmap.size()))
+     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 3, cmap.size()))
+     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 2, cmap.size()))
+     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 1, cmap.size()))
+     || TtfUtil::CheckCmapSubtable4(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 0, cmap.size())))
         return stbl;
     return 0;
 }
 
-const void * smp_subtable(const Face::Table & cmap, uint maxgid)
+const void * smp_subtable(const Face::Table & cmap)
 {
     const void * stbl;
     if (!cmap.size()) return 0;
-    if (TtfUtil::CheckCmapSubtable12(stbl = TtfUtil::FindCmapSubtable(cmap, 3, 10, cmap.size()), maxgid)
-     || TtfUtil::CheckCmapSubtable12(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 4, cmap.size()), maxgid))
+    if (TtfUtil::CheckCmapSubtable12(stbl = TtfUtil::FindCmapSubtable(cmap, 3, 10, cmap.size()))
+     || TtfUtil::CheckCmapSubtable12(stbl = TtfUtil::FindCmapSubtable(cmap, 0, 4, cmap.size())))
         return stbl;
     return 0;
 }
@@ -84,15 +84,15 @@ bool cache_subtable(uint16 * blocks[], const void * cst, const unsigned int limi
 }
 
 
-CachedCmap::CachedCmap(const Face & face, uint maxgid)
+CachedCmap::CachedCmap(const Face & face)
 : m_isBmpOnly(true),
   m_blocks(0)
 {
     const Face::Table cmap(face, Tag::cmap);
     if (!cmap)  return;
 
-    const void * bmp_cmap = bmp_subtable(cmap, maxgid);
-    const void * smp_cmap = smp_subtable(cmap, maxgid);
+    const void * bmp_cmap = bmp_subtable(cmap);
+    const void * smp_cmap = smp_subtable(cmap);
     m_isBmpOnly = !smp_cmap;
 
     m_blocks = grzeroalloc<uint16 *>(m_isBmpOnly ? 0x100 : 0x1100);
@@ -134,10 +134,10 @@ CachedCmap::operator bool() const throw()
 }
 
 
-DirectCmap::DirectCmap(const Face & face, uint maxgid)
+DirectCmap::DirectCmap(const Face & face)
 : _cmap(face, Tag::cmap),
-  _smp(smp_subtable(_cmap, maxgid)),
-  _bmp(bmp_subtable(_cmap, maxgid))
+  _smp(smp_subtable(_cmap)),
+  _bmp(bmp_subtable(_cmap))
 {
 }
 

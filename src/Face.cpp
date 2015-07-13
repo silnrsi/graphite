@@ -105,9 +105,9 @@ bool Face::readGlyphs(uint32 faceOptions)
     }
 
     if (faceOptions & gr_face_cacheCmap)
-        m_cmap = new CachedCmap(*this, m_pGlyphFaceCache->numGlyphs() - 1);
+        m_cmap = new CachedCmap(*this);
     else
-        m_cmap = new DirectCmap(*this, m_pGlyphFaceCache->numGlyphs() - 1);
+        m_cmap = new DirectCmap(*this);
     if (e.test(!m_cmap, E_OUTOFMEM) || e.test(!*m_cmap, E_BADCMAP))
         return error(e);
 

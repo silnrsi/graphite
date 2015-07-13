@@ -873,7 +873,7 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft Unicode subtable for expected values
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable4(const void * pCmapSubtable4, unsigned int maxgid)
+bool CheckCmapSubtable4(const void * pCmapSubtable4 /*, unsigned int maxgid*/)
 {
     if (!pCmapSubtable4) return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
@@ -1062,7 +1062,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft UCS-4 subtable for expected values.
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable12(const void *pCmapSubtable12, unsigned int maxgid)
+bool CheckCmapSubtable12(const void *pCmapSubtable12 /*, unsigned int maxgid*/)
 {
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
