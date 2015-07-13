@@ -507,6 +507,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
     }
 
     slot = slot->next();
+    return;
 }
 
 #if !defined GRAPHITE2_NTRACING
@@ -639,15 +640,23 @@ int Pass::doAction(const Code *codeptr, Slot * & slot_out, vm::Machine & m) cons
 
 void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
 {
-    if (delta < 0)
+    if (!slot_out)
     {
-        if (!slot_out)
+        if (smap.highpassed() || slot_out == smap.highwater())
         {
             slot_out = smap.segment.last();
             ++delta;
-            if (smap.highpassed() && !smap.highwater())
+            if (!smap.highwater())
                 smap.highpassed(false);
         }
+        else
+        {
+            slot_out = smap.segment.first();
+            --delta;
+        }
+    }
+    if (delta < 0)
+    {
         while (++delta <= 0 && slot_out)
         {
             if (smap.highpassed() && smap.highwater() == slot_out)
@@ -657,11 +666,6 @@ void Pass::adjustSlot(int delta, Slot * & slot_out, SlotMap & smap) const
     }
     else if (delta > 0)
     {
-        if (!slot_out)
-        {
-            slot_out = smap.segment.first();
-            --delta;
-        }
         while (--delta >= 0 && slot_out)
         {
             slot_out = slot_out->next();

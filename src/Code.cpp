@@ -108,6 +108,7 @@ private:
     bool        emit_opcode(opcode opc, const byte * & bc);
     bool        validate_opcode(const opcode opc, const byte * const bc);
     bool        valid_upto(const uint16 limit, const uint16 x) const throw();
+    bool        test_context() const throw();
     void        failure(const status_t s) const throw() { _code.failure(s); }
     
     Code              & _code;
@@ -306,18 +307,22 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case NEXT :
         case NEXT_N :           // runtime checked
         case COPY_NEXT :
+            test_context();
             ++_pre_context;
             break;
         case PUT_GLYPH_8BIT_OBS :
             valid_upto(_max.classes, bc[0]);
+            test_context();
             break;
         case PUT_SUBS_8BIT_OBS :
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
             valid_upto(_max.classes, bc[1]);
             valid_upto(_max.classes, bc[2]);
+            test_context();
             break;
         case PUT_COPY :
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
+            test_context();
             break;
         case INSERT :
             if (_passtype >= PASS_TYPE_POSITIONING)
@@ -328,10 +333,12 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case DELETE :
             if (_passtype >= PASS_TYPE_POSITIONING)
                 failure(invalid_opcode);
+            test_context();
             break;
         case ASSOC :
             for (uint8 num = bc[0]; num; --num)
                 valid_upto(_rule_length, _pre_context + int8(bc[num]));
+            test_context();
             break;
         case CNTXT_ITEM :
             valid_upto(_max.rule_length, _max.pre_context + int8(bc[0]));
@@ -343,10 +350,12 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case ATTR_SUB :
         case ATTR_SET_SLOT :
             valid_upto(gr_slatMax, bc[0]);
+            test_context();
             break;
         case IATTR_SET_SLOT :
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
+            test_context();
             break;
         case PUSH_SLOT_ATTR :
             valid_upto(gr_slatMax, bc[0]);
@@ -391,6 +400,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case IATTR_SUB :
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
+            test_context();
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
         case PUSH_VERSION :
@@ -399,12 +409,14 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
             valid_upto(_max.classes, uint16(bc[1]<< 8) | bc[2]);
             valid_upto(_max.classes, uint16(bc[3]<< 8) | bc[4]);
+            test_context();
             break;
         case PUT_SUBS2 :        // not implemented
         case PUT_SUBS3 :        // not implemented
             break;
         case PUT_GLYPH :
             valid_upto(_max.classes, uint16(bc[0]<< 8) | bc[1]);
+            test_context();
             break;
         case PUSH_GLYPH_ATTR :
         case PUSH_ATT_TO_GLYPH_ATTR :
@@ -587,6 +599,15 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
     return t;
 }
 
+bool Machine::Code::decoder::test_context() const throw()
+{
+    if (_pre_context >= _rule_length)
+    {
+        failure(out_of_range_data);
+        return false;
+    }
+    return true;
+}
 
 inline 
 void Machine::Code::failure(const status_t s) throw() {
