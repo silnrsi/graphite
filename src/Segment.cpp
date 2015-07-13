@@ -490,14 +490,16 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     }
 }
 
-void Segment::initCollisions()
+bool Segment::initCollisions()
 {
     if (m_collisions) free(m_collisions);
     Slot *p = m_first;
     m_collisions = gralloc<SlotCollision>(slotCount());
+    if (!m_collisions) return false;
     for (unsigned short i = 0; i < slotCount(); ++i)
     {
         ::new (m_collisions + p->index()) SlotCollision(this, p);
         p = p->next();
     }
+    return true;
 }

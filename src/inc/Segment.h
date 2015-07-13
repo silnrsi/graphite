@@ -165,7 +165,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
     void finalise(const Font *font);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
-    void initCollisions();
+    bool initCollisions();
   
 private:
     Position        m_advance;          // whole segment advance

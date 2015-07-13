@@ -175,11 +175,12 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     if (e.test(p + sizeof(uint16) >= passes_start, E_BADPASSESSTART)) { releaseBuffers(); return face.error(e); }
     m_numPseudo = be::read<uint16>(p);
     be::skip<uint16>(p, 3); // searchPseudo, pseudoSelector, pseudoShift
-    if (e.test(p + m_numPseudo*(sizeof(uint32) + sizeof(uint16)) >= passes_start, E_BADNUMPSEUDO))
+    m_pseudos = new Pseudo[m_numPseudo];
+    if (e.test(p + m_numPseudo*(sizeof(uint32) + sizeof(uint16)) >= passes_start, E_BADNUMPSEUDO)
+        || e.test(!m_pseudos, E_OUTOFMEM))
     {
         releaseBuffers(); return face.error(e);
     }
-    m_pseudos = new Pseudo[m_numPseudo];
     for (int i = 0; i < m_numPseudo; i++)
     {
         m_pseudos[i].uid = be::read<uint32>(p);
@@ -187,9 +188,11 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     }
 
     const size_t clen = readClassMap(p, passes_start - p, version, e);
-    if (e || e.test(p + clen > passes_start, E_BADPASSESSTART)) { releaseBuffers(); return face.error(e); }
-
     m_passes = new Pass[m_numPasses];
+    if (e || e.test(p + clen > passes_start, E_BADPASSESSTART)
+          || e.test(!m_passes, E_OUTOFMEM))
+    { releaseBuffers(); return face.error(e); }
+
     for (size_t i = 0; i < m_numPasses; ++i)
     {
         const byte * const pass_start = silf_start + be::read<uint32>(o_passes),
@@ -416,9 +419,9 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
 #endif
 
         // test whether to reorder, prepare for positioning
-        if (i >= 32 || (seg->passBits() & (1 << i)) == 0 || (m_passes[i].flags() & 7))
-            if (!m_passes[i].runGraphite(m, fsm))
-                return false;
+        if ((i >= 32 || (seg->passBits() & (1 << i)) == 0 || (m_passes[i].flags() & 7))
+                && !m_passes[i].runGraphite(m, fsm))
+            return false;
         // only subsitution passes can change segment length, cached subsegments are short for their text
         if (m.status() != vm::Machine::finished
             || (i < m_pPass && (seg->slotCount() > initSize * MAX_SEG_GROWTH_FACTOR

@@ -162,6 +162,7 @@ bool Face::readGraphite(const Table & silf)
 
     bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
+    if (e.test(!m_silfs, E_OUTOFMEM)) return error(e);
     for (int i = 0; i < m_numSilf; i++)
     {
         error_context(EC_ASILF + (i << 8));
@@ -206,8 +207,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
     {
         seg->associateChars(0, seg->charInfoCount());
         if (aSilf->flags() & 0x20)
-            seg->initCollisions();
-        res = aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
+            res &= seg->initCollisions();
+        res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
     }
 
 #if !defined GRAPHITE2_NTRACING
