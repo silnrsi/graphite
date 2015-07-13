@@ -51,7 +51,8 @@ public:
     Pass();
     ~Pass();
     
-    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face, enum passtype pt, Error &e);
+    bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face,
+        enum passtype pt, uint32 version, Error &e);
     bool runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
     byte flags() const { return m_flags; }

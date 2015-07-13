@@ -79,7 +79,8 @@ Pass::~Pass()
     free(m_progs);
 }
 
-bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base, GR_MAYBE_UNUSED Face & face, passtype pt, Error &e)
+bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base,
+        GR_MAYBE_UNUSED Face & face, passtype pt, uint32 version, Error &e)
 {
     const byte * p              = pass_start,
                * const pass_end = p + pass_length;
@@ -93,6 +94,14 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_iMaxLoop = be::read<byte>(p);
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);
+    if (version >= 0x00050000)
+    {
+        m_colThreshold = be::read<uint8>(p);
+        be::skip<uint8>(p); // reserved
+        be::skip<uint8>(p);
+        be::skip<uint8>(p);
+    }
+    if (m_colThreshold == 0) m_colThreshold = 10;       // A default
     if (e.test(!m_numRules && !(m_flags & 7), E_BADEMPTYPASS)) return face.error(e);
     be::skip<uint16>(p);   // fsmOffset - not sure why we would want this
     const byte * const pcCode = pass_start + be::read<uint32>(p) - subtable_base,
@@ -105,7 +114,10 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_numColumns = be::read<uint16>(p);
     numRanges = be::read<uint16>(p);
     be::skip<uint16>(p, 3); // skip searchRange, entrySelector & rangeShift.
-    assert(p - pass_start == 40);
+    if (version >= 0x0005000)
+        assert(p - pass_start == 44);
+    else
+        assert(p - pass_start == 40);
     // Perform some sanity checks.
     if ( e.test(m_numTransition > m_numStates, E_BADNUMTRANS)
             || e.test(m_numSuccess > m_numStates, E_BADNUMSUCCESS)
@@ -140,7 +152,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<uint16>(p, m_numRules);
     const byte * const precontext = p;
     be::skip<byte>(p, m_numRules);
-    be::skip<byte>(p);     // skip reserved byte, numColStrata
+    be::skip<byte>(p);     // skip reserved byte
 
     if (e.test(p + sizeof(uint16) > pass_end, E_BADCTXTLENS)) return face.error(e);
     const size_t pass_constraint_len = be::read<uint16>(p);
@@ -151,8 +163,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     const byte * const states = p;
     if (e.test(p + 2 * m_numTransition*m_numColumns >= pass_end, E_BADPASSLENGTH)) return face.error(e);
     be::skip<int16>(p, m_numTransition*m_numColumns);
-    m_colThreshold = be::read<uint8>(p);
-    if (m_colThreshold == 0) m_colThreshold = 10;       // A default
+    be::skip<uint8>(p);
     if (e.test(p != pcCode, E_BADPASSCCODEPTR)) return face.error(e);
     be::skip<byte>(p, pass_constraint_len);
     if (e.test(p != rcCode, E_BADRULECCODEPTR)

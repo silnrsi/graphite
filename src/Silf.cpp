@@ -93,7 +93,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
                * const silf_end = p + lSilf;
     Error e;
 
-    if (e.test(version >= 0x00050000, E_BADSILFVERSION))
+    if (e.test(version >= 0x00060000, E_BADSILFVERSION))
     {
         releaseBuffers(); return face.error(e);
     }
@@ -209,7 +209,8 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         else pt = PASS_TYPE_LINEBREAK;
 
         m_passes[i].init(this);
-        if (!m_passes[i].readPass(pass_start, pass_end - pass_start, pass_start - silf_start, face, pt, e))
+        if (!m_passes[i].readPass(pass_start, pass_end - pass_start, pass_start - silf_start, face, pt,
+            version, e))
         {
             releaseBuffers();
             return false;

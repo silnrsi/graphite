@@ -356,7 +356,7 @@ pseudo-glyphs) |
 0xFF implies no bidi pass |
 
 |BYTE |flags | 0 - has line end contextuals, 1 - contextuals,
-2-4 - space contextuals |4.0 – added Bit 1
+2-4 - space contextuals, 5 - has collision pass |4.0 – added Bit 1
 
 |BYTE |maxPreContext |Max range for preceding cross-line-boundary
 contextualization |
@@ -560,6 +560,11 @@ trail this pass (ie, the maximum this pass is allowed to back up) |
 
 |USHORT |numRules |Number of action code blocks |
 
+|BYTE |collisionThreshold | |5.0 – added
+|BYTE |reserved | |5.0 - inserted
+|BYTE |reserved | |5.0 - inserted
+|BYTE |reserved | |5.0 - inserted
+
 |USHORT |fsmOffset |offset to numRows relative to the beginning of the
 SIL_Pass block |2.0 - added; 3.0 - use as fsmOffset
 
@@ -624,8 +629,7 @@ precedence of rules |
 number of items in the context before the first modified item, one for
 each rule |
 
-|BYTE |numColStrata | Number of stripes to analyse a run into for collision
-kerning purposes |2.0 – inserted, 5.0 – added
+|BYTE |reserved | |2.0 – inserted
 
 |USHORT |pConstraint |Length of passConstraint block |2.0 – added
 
@@ -638,7 +642,7 @@ relative to *aCode* and start of subtable |
 |USHORT |stateTrans[ ][ ] |Array of *numTransitional* rows of
 *numColumns* state transitions. |
 
-|BYTE |collisionThreshold | |2.0 – inserted, 5.0 – added
+|BYTE |reserved | |2.0 – inserted
 
 |BYTE |passConstraints[ ] |Sequences of constraint code for pass-level
 constraints |2.0 – added
