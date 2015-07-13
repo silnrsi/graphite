@@ -114,7 +114,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_numColumns = be::read<uint16>(p);
     numRanges = be::read<uint16>(p);
     be::skip<uint16>(p, 3); // skip searchRange, entrySelector & rangeShift.
-    if (version >= 0x0005000)
+    if (version >= 0x00050000)
         assert(p - pass_start == 44);
     else
         assert(p - pass_start == 40);
