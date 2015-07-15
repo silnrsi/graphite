@@ -1,5 +1,5 @@
 /*  Copyright (c) 2012, Siyuan Fu <fusiyuan2010@gmail.com>
-    Portions Copyright (c) 2015, SIL International
+    Copyright (c) 2015, SIL International
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
@@ -35,21 +35,44 @@
 
 using namespace shrinker;
 
-struct match_op
-{
-    u8 match_len:4;
-    u8 long_dist:1;
-    u8 literal_len:3;
-};
+namespace {
+
+u8 const LONG_DIST = 0x10;
+u8 const MATCH_LEN = 0x0f;
+
 
 inline
-void read_literal(u32 & v, u8 const * &s) {
+void read_literal_(u32 & v, u8 const * &s) {
     u8 b = 0; 
     do { v += b = *s++; } while(b==0xff);
 }
 
-u8 const LONG_DIST = 0x10;
-u8 const MATCH_LEN = 0x0f;
+template <int M>
+inline
+u32 read_literal(u8 const * &s, u32 l) {
+    if (unlikely(l == M))
+    {
+        u8 b = 0; 
+        do { l += b = *s++; } while(b==0xff);
+    }
+    return l;
+}
+
+bool read_directive(u8 const * &src, u32 & literal_len, u32 & match_len, u32 & match_dist)
+{
+    u8 const flag = *src++;
+    
+    literal_len = read_literal<7>(src, flag >> 5);
+    match_len = read_literal<15>(src, flag & MATCH_LEN);
+    
+    match_dist = *src++;
+    if (flag & LONG_DIST) 
+        match_dist |= ((*src++) << 8);
+    
+    return match_dist != 0xffff;
+}
+
+}
 
 int shrinker::decompress(void const *in, void *out, size_t size)
 {
@@ -57,41 +80,28 @@ int shrinker::decompress(void const *in, void *out, size_t size)
     u8 * dst = static_cast<u8*>(out);
     u8 * const end = dst + size;
     
-    while (true) 
+    u32 literal_len = 0,
+        match_len = 0,
+        match_dist = 0;
+        
+    while (read_directive(src, literal_len, match_len, match_dist))
     {
-        u8 const flag = *src++;
-        
-        u32 literal_len = flag >> 5;
-        if (unlikely(literal_len == 7))
-            read_literal(literal_len, src);
-        
-        u32 match_len = flag & MATCH_LEN;
-        if (unlikely(match_len == 15))
-            read_literal(match_len, src);
-        
-        u32 match_dist = *src++;
-        if (flag & LONG_DIST) 
-        {
-            match_dist |= ((*src++) << 8);
-            if (unlikely(match_dist == 0xffff)) {
-                if (unlikely(dst + literal_len > end)) return -1;
-                memcpy_nooverlap_surpass(dst, src, literal_len);
-                break;
-            }
-        }
-        
         // Copy in literal
-        if (unlikely(dst + literal_len > end)) return -1;
-        memcpy_nooverlap(dst, src, literal_len);
+        if (unlikely(dst + literal_len + sizeof(unsigned long) > end)) return -1;
+        dst = memcpy_nooverlap(dst, src, literal_len);
         src += literal_len;
         
         // Copy, possibly repeating, match from earlier in the
         //  decoded output.
         u8 const * const pcpy = dst - match_dist - 1;
         if (unlikely(pcpy < static_cast<u8*>(out) 
-                  || dst + match_len + MINMATCH > end)) return -1;
-        memcpy_(dst, pcpy, match_len + MINMATCH);
+                  || dst + match_len + MINMATCH  + sizeof(unsigned long) > end)) return -1;
+        dst = memcpy_(dst, pcpy, match_len + MINMATCH);
     }
+    
+    if (unlikely(dst + literal_len > end)) return -1;
+    dst = memcpy_nooverlap_surpass(dst, src, literal_len);
+    
     return dst - (u8*)out;
 }
 

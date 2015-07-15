@@ -1,5 +1,5 @@
 /*  Copyright (c) 2012, Siyuan Fu <fusiyuan2010@gmail.com>
-    Portions Copyright (c) 2015, SIL International
+    Copyright (c) 2015, SIL International
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without

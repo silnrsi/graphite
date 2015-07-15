@@ -133,32 +133,7 @@ bool Face::readGraphite(const Table & silf)
         be::skip<uint32>(p);        // compilerVersion
     m_numSilf = be::read<uint16>(p);
 
-    byte * uncompressed_silfs = 0;
-    if (version < 0x00060000)
-        be::skip<uint16>(p);            // reserved
-    else
-    {
-        // The scheme is in the 1st byte of the reserved uint16,
-        // so an uncompressed Silf will look identical to a version 4 table.
-        compression const scheme = compression(be::read<uint8>(p));
-        be::skip<uint8>(p);
-        switch(scheme)
-        {
-        case NONE: break;
-        case SHRINKER:
-        {
-            size_t const decomp_size = be::read<uint32>(p);
-            uncompressed_silfs = gralloc<byte>(decomp_size);
-            if (e.test(!uncompressed_silfs, E_OUTOFMEM)
-             || e.test(shrinker::decompress(p, uncompressed_silfs, decomp_size) == signed(decomp_size), E_SHRINKERFAILED))
-                    return error(e);
-            break;
-        }
-        default:
-            e.error(E_BADSCHEME);
-            return error(e);
-        };
-    }
+    be::skip<uint16>(p);            // reserved
 
     bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
@@ -177,10 +152,6 @@ bool Face::readGraphite(const Table & silf)
         if (m_silfs[i].numPasses())
             havePasses = true;
     }
-
-    // Free the decompression buffer, if no compression was used this will be a
-    //  0 pointer.
-    free(uncompressed_silfs);
 
     return havePasses;
 }
@@ -294,12 +265,18 @@ uint16 Face::languageForLocale(const char * locale) const
     return 0;
 }
 
-Face::Table::Table(const Face & face, const Tag n) throw()
+
+
+Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
 : _f(&face)
 {
     size_t sz = 0;
-    _p = reinterpret_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
+    _p = static_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
     _sz = uint32(sz);
+
+    if (be::peek<uint32>(_p) >= version)
+        decompress();
+
     if (!TtfUtil::CheckTable(n, _p, _sz))
     {
         this->~Table();     // Make sure we release the table buffer even if the table filed it's checks
@@ -316,3 +293,48 @@ Face::Table & Face::Table::operator = (const Table & rhs) throw()
     return *this;
 }
 
+Error Face::Table::decompress()
+{
+    Error e;
+    byte * uncompressed_table = 0;
+    size_t uncompressed_size = 0;
+
+    const byte * p = _p;
+    be::skip<uint32>(p);    // Table version number.
+
+    // The scheme is in the top 5 bits of the 1st uint32.
+    const uint32 hdr = be::read<uint32>(p);
+    switch(compression(hdr >> 27))
+    {
+    case NONE: return e;
+    case SHRINKER:
+    {
+        uncompressed_size  = hdr & 0x07ffffff;
+        uncompressed_table = gralloc<byte>(uncompressed_size+sizeof(uint32));
+        e.test(!uncompressed_table, E_OUTOFMEM);
+        e.test(shrinker::decompress(p, uncompressed_table+sizeof(uint32), uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
+        // Copy the table version number.
+        memcpy(uncompressed_table, _p, sizeof(uint32));
+        break;
+    }
+    default:
+        e.error(E_BADSCHEME);
+    };
+
+    // Tell the provider to release the compressed form since were replacing
+    //   it anyway.
+    this->~Table();
+
+    if (e)
+    {
+        free(uncompressed_table);
+        uncompressed_table = 0;
+        uncompressed_size  = 0;
+    }
+
+    _p = uncompressed_table;
+    _sz = uncompressed_size + sizeof(uint32);
+    _compressed = true;
+
+    return e;
+}

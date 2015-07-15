@@ -1,5 +1,5 @@
 /*  Copyright (c) 2012, Siyuan Fu <fusiyuan2010@gmail.com>
-    Portions Copyright (c) 2015, SIL International
+    Copyright (c) 2015, SIL International
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
-#include <iterator>
 
-#include "Main.h"
+#include <iterator>
 
 //the code from LZ4
 #if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
@@ -52,9 +51,18 @@
 namespace
 {
 
-typedef graphite2::uint8 u8;
-typedef graphite2::uint16 u16;
-typedef graphite2::uint32 u32;
+#if defined(_MSC_VER)
+typedef unsigned __int8 u8;
+typedef unsigned __int16 u16;
+typedef unsigned __int32 u32;
+typedef unsigned __int64 u64;
+#else
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+#endif
 
 ptrdiff_t const     MINMATCH  = 4;
 
@@ -64,9 +72,8 @@ void unaligned_copy(void * d, void const * s) {
   ::memcpy(d, s, S);
 }
 
-
 inline
-void memcpy_nooverlap(u8 * &d, u8 const * s, size_t n) {
+u8 * memcpy_nooverlap(u8 * d, u8 const * s, size_t n) {
     size_t const WS = sizeof(unsigned long);
     u8 const * e = s + n;
     do 
@@ -77,11 +84,13 @@ void memcpy_nooverlap(u8 * &d, u8 const * s, size_t n) {
     }
     while (s < e);
     d-=(s-e);
+    
+    return d;
 }
 
 
 inline
-void memcpy_nooverlap_surpass(u8 * &d, u8 const * s, size_t n) {
+u8 * memcpy_nooverlap_surpass(u8 * d, u8 const * s, size_t n) {
     size_t const WS = sizeof(unsigned long);
     size_t wn = n/WS;
     while (wn--) 
@@ -92,14 +101,17 @@ void memcpy_nooverlap_surpass(u8 * &d, u8 const * s, size_t n) {
     }
     n &= WS-1;
     while (n--) {*d++ = *s++; }
+    
+    return d;
 }
 
 
 inline 
-void memcpy_(u8 * &d, u8 const * s, size_t n) {
+u8 * memcpy_(u8 * d, u8 const * s, size_t n) {
     if (likely(d>s+sizeof(unsigned long)))
-        memcpy_nooverlap(d,s,n);
+        return memcpy_nooverlap(d,s,n);
     else while (n--) *d++ = *s++;
+    return d;
 }
 
 } // end of anonymous namespace
