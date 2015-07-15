@@ -250,11 +250,20 @@ STARTOP(put_copy)
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
             Slot *prev = is->prev();
             Slot *next = is->next();
-            memcpy(is, slotat(slot_ref), sizeof(Slot));
+            memcpy(is, ref, sizeof(Slot));
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
-            is->sibling(NULL);
+            if (is->isChildOf(is))
+                is->attachTo(NULL);
+            else if (ref->nextSibling())
+                ref->sibling(is);
+            if (ref->firstChild())
+            {
+                for (Slot *s = ref->firstChild(); s; s = s->nextSibling())
+                    s->attachTo(ref);
+                ref->removeChild(ref->firstChild());
+            }
         }
         is->markCopied(false);
         is->markDeleted(false);

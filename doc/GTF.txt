@@ -549,7 +549,7 @@ rule finding, and the actions that are executed when a rule is matched.
 |=======================================================================
 |Type |Name |Description |Version notes
 
-|BYTE |flags |0-2 - number of collision runs; 3 - kerning collisions | 5.0 - added bits 0-3
+|BYTE |flags |0-2 - number of collision runs; 3-4 - kerning collisions | 5.0 - added bits 0-4
 
 |BYTE |maxRuleLoop |MaxRuleLoop for this pass |
 

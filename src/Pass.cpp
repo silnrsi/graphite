@@ -400,7 +400,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const
         if (!collisionShift(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
             return false;
     }
-    if ((m_flags & 8) && !collisionKern(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
+    if ((m_flags & 24) && !collisionKern(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
         return false;
     if ((m_flags & 15) && !collisionFinish(&m.slotMap().segment, fsm.dbgout))
         return false;
@@ -1001,6 +1001,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         if (bb.bl.y == 0. && bb.tr.y == 0.)
         {
+            if ((m_flags & 24) == 16)
+                break;
             // Add space for a space glyph.
             currSpace += nbor->advance();
             ++space_count;
