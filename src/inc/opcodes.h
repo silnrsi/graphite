@@ -247,31 +247,16 @@ STARTOP(put_copy)
         slotref ref = slotat(slot_ref);
         if (ref)
         {
-            memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
-            // tidy up attachments in target
-            if (is->attachedTo())
-                is->attachedTo()->removeChild(is);
-            for (Slot *s = is->firstChild(); s; s = s->nextSibling())
-                s->attachTo(NULL);
+            if (is->attachedTo() || is->firstChild()) DIE
             Slot *prev = is->prev();
             Slot *next = is->next();
+            memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
             memcpy(is, ref, sizeof(Slot));
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
-            // sort out attachments in new target. Pass ownership to target
-            if (is->attachedTo() == is)
-                is->attachTo(NULL);
-            else if (is->attachedTo())
+            if (is->attachedTo())
                 is->attachedTo()->child(is);
-            if (is->firstChild())
-            {
-                for (Slot *s = is->firstChild(); s; s = s->nextSibling())
-                {
-                    ref->removeChild(s);
-                    s->attachTo(is);
-                }
-            }
         }
         is->markCopied(false);
         is->markDeleted(false);
