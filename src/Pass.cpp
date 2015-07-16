@@ -141,11 +141,12 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     be::skip<uint16>(p, m_numRules);
     const byte * const precontext = p;
     be::skip<byte>(p, m_numRules);
+
+    if (e.test(p + sizeof(uint16) + sizeof(uint8) > pass_end, E_BADCTXTLENS)) return face.error(e);
     m_colThreshold = be::read<uint8>(p);
     if (m_colThreshold == 0) m_colThreshold = 10;       // A default
-
-    if (e.test(p + sizeof(uint16) > pass_end, E_BADCTXTLENS)) return face.error(e);
     const size_t pass_constraint_len = be::read<uint16>(p);
+
     const uint16 * const o_constraint = reinterpret_cast<const uint16 *>(p);
     be::skip<uint16>(p, m_numRules + 1);
     const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);

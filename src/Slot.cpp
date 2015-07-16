@@ -294,7 +294,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (idx < map.size() && map[idx])
         {
             Slot *other = map[idx];
-            if (other == this) break;
+            if (other == this || other == m_parent) break;
             if (m_parent) m_parent->removeChild(this);
             if (!other->isChildOf(this) && other->child(this))
             {
@@ -439,6 +439,7 @@ bool Slot::removeSibling(Slot *ap)
     else if (ap == m_sibling)
     {
         m_sibling = m_sibling->nextSibling();
+        ap->sibling(NULL);
         return true;
     }
     else
