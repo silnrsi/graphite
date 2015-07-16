@@ -40,6 +40,33 @@ This document describes several additional TrueType table types. The
 the tables could be restructured to be stored inside the single “Silf”
 table.) In addition, use is made of the “name” table type.
 
+This version of the Graphite format includes the ability to compress 
+“Glat” and “Silf” tables, the extensions to those table provide a 
+compression scheme field permitting up to 32 compression schemes. 
+Currently only 2 schemes are defined: 0 – no compression, and 1 – a fast 
+LZ77 based scheme.
+
+All compressed tables have the same form the original table's 32bit 
+version number followed by a 32 bit compression header. This consists of 
+the top 5 bits for the scheme and 27 remaining bits for the uncompressed 
+table size. This is then followed by the compression scheme's data.
+
+[[comp_table]]
+.Compressed table
+[cols="3,3,8,3",options="unbreakable,header,compact",width="90%",frame="topbot",grid="none"]
+|===========================================================================
+|Type     |Name            |Description                       |Version notes
+
+|FIXED    |version         |Uncompressed Table version number |
+|ULONG:5  |scheme          |Compression scheme must not be 0  |5.0 – added
+|ULONG:27 |full_size       |Size of uncompressed table        |5.0 – added
+|BYTE[]   |compressed_data |Compression scheme data           |5.0 – added
+|===========================================================================
+
+The uncompressed form is the complete table including the version number but 
+with the scheme always set to 0. The remaining 27 bits are available to the 
+uncompressed table.
+
 === Glat ===
 
 The Glat table type is used for storing glyph attributes. Each glyph may
@@ -55,27 +82,26 @@ have collision avoidance support, will use a version 3 table.
 .Glat version 2
 [cols="3,3,8,3",options="unbreakable,header,compact",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type |Name |Description |Version notes
+|Type         |Name       |Description             |Version notes
 
-|FIXED |version |Table version: 00020000 |4.0 – 00020000
-
-|Glat_entry[] |entries |Glyph attribute entries |
+|FIXED        |version    |Table version: 00030000 |4.0 – 00020000
+|Glat_entry[] |entries    |Glyph attribute entries |
 |=======================================================================
 
 
 .Glat version 3
 [cols="3,3,8,3",options="unbreakable,header,compact",width="90%",frame="topbot",grid="none"]
-|=======================================================================
-|Type |Name |Description |Version notes
+|========================================================================
+|Type            |Name      |Description                  |Version notes
 
-|FIXED |version |Table version: 00030000 |5.0 – 00030000
-
-|Octabox_metrics |octaboxes |Glyph approximation metrics to support
-collision avoidance |5.0 – added
-
-|Glat_entry[] |entries |Glyph attribute entries |
-|=======================================================================
-
+|FIXED           |version   |Table version: 00030000      |5.0 – 00030000
+|ULONG:5         |scheme    |Compression scheme must be 0 |5.0 – added
+|ULONG:27        |reserved  |                             |5.0 – added
+|Octabox_metrics |octaboxes |Glyph approximation metrics 
+                             for collision avoidance      |5.0 – added
+|Glat_entry[]    |entries   |Glyph attribute entries      |
+|========================================================================
+For the compressed layout see <<comp_table>>.
 The first block of data includes metrics that approximate the glyph’s
 curves. The approximation uses “octoboxes”—rectangles with corners that
 may be cut out at an angle of 45 degrees. Each octobox requires 8 values
@@ -87,56 +113,44 @@ bounding box rectangle is stored elsewhere in the font.
 
 .Octabox_metrics
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
-|=======================================================================
-|Type |Name |Description |Version notes
+|================================================================================
+|Type           |Name          |Description                        |Version notes
 
-|USHORT |subbox_bitmap |Which subboxes exist on 4x4 grid;bit-index =
-(y-index * 4) + x-index |
-
-|BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal |
-
-|BYTE |diag_neg_max |Defines maximum  negatively -sloped diagonal |
-
-|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal |
-
-|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal |
-
-|Subbox_entry[] |subboxes |One entry per bit in subbox_bitmap |
-|=======================================================================
+|USHORT         |subbox_bitmap |Which subboxes exist on 4x4 grid; +
+                                bit-index = (y-index*4) + x-index  |
+|BYTE           |diag_neg_min  |Defines minimum negatively-sloped diagonal |
+|BYTE           |diag_neg_max  |Defines maximum negatively-sloped diagonal |
+|BYTE           |diag_pos_min  |Defines minimum positively-sloped diagonal |
+|BYTE           |diag_pos_max  |Defines maximum positively-sloped diagonal |
+|Subbox_entry[] |subboxes      |One entry per bit in subbox_bitmap |
+|================================================================================
 
 Note that in the subbox bitmap, bit 3 indicates the presence of the
 lower right cell, and bit 12 the upper left cell as per this diagram.
 
 .subbox_bitmap
 [cols=",,,",width="20%",grid="all"]
-|=======================================
+|==============
 |12 |13 |14 |15
 | 8 | 9 |10 |11
 | 4 | 5 | 6 | 7
 | 0 | 1 | 2 | 3
-|=======================================
+|==============
 
 .Subbox_entry
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
-|=======================================================================
-|Type |Name |Description |Version notes
+|===============================================================================
+|Type |Name         |Description                                  |Version notes
 
-|BYTE |left |Left of subbox |
-
-|BYTE |right |Right of subbox |
-
-|BYTE |bottom |Bottom of subbox |
-
-|BYTE |top |Top of subbox |
-
-|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal |
-
-|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal |
-
-|BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal |
-
+|BYTE |left         |Left of subbox                               |
+|BYTE |right        |Right of subbox                              |
+|BYTE |bottom       |Bottom of subbox                             |
+|BYTE |top          |Top of subbox                                |
+|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal   |
+|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal   |
+|BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal  |
 |BYTE |diag_neg_max |Defines maximum  negatively -sloped diagonal |
-|=======================================================================
+|===============================================================================
 
 Following the glyph curve approximation data, the glyph attributes
 appear. The glyph attributes associated with a particular glyph are
@@ -148,13 +162,11 @@ a Glat_entry is:
 .Glat_entry
 [cols="2,2,8,5",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type |Name |Description |Version notes
+|Type  |Name         |Description                         |Version notes
 
-|SHORT |attNum |Attribute number of first attribute |4.0 – BYTE to SHORT
-
-|SHORT |num |Number of attributes in this run |4.0 – BYTE to SHORT
-
-|SHORT |attributes[ ] |Array of num attributes |
+|SHORT |attNum       |Attribute number of first attribute |4.0 – BYTE to SHORT
+|SHORT |num          |Number of attributes in this run    |4.0 – BYTE to SHORT
+|SHORT |attributes[] |Array of num attributes             |
 |=======================================================================
 
 Notice that all glyph attributes are 16-bit signed values. If a 32-bit
@@ -297,27 +309,25 @@ various types of tables in a rendering description. The structure of the
 Silf table is:
 
 .Silf
-[cols="2,3,8,4",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
+[cols="2,3,8,5",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type |Name |Description |Version notes
+|Type     |Name            |Description             |Version notes
 
-|FIXED |version |Table version: 00030000 |2.0 – changed to 00020000;3.0
-– changed to 00030000
-
-|FIXED |compilerVersion |Actual version of the compiler that generated
-this font |3.0 – added
-
-|USHORT |numSub |Number of SIL subtables |
-
-|USHORT |reserved | |
-
-|ULONG |offset[ ] |Array of numSub offsets to the subtables relative to
-the start of this table |
-
-|SIL_Sub |tables[ ] |Array of independent rendering description
-subtables |
+|FIXED    |version         |Table version: 00050000      |2.0 – changed to 00020000
+|         |                |                             |3.0 – changed to 00030000
+|         |                |                             |5.0 – changed to 00050000
+|ULONG:5  |scheme          |Compression scheme must be 0 |5.0 – added
+|FIXED:27 |compilerVersion |Compiler version that 
+                            generated this font     |3.0 – added +
+                                                     5.0 – changed to 27 bits         
+|USHORT   |numSub          |Number of SIL subtables |
+|USHORT   |reserved        |                        |
+|ULONG    |offset[]        |Array of numSub offsets to the subtables 
+                            relative to the start of this table |
+|SIL_Sub  |tables[]        |Array of independent rendering description 
+                            subtables               |
 |=======================================================================
-
+For the compressed layout see <<comp_table>>.
 Since one TrueType file may hold multiple independent rendering
 descriptions, each rendering description is described in a subtable. The
 subtable contains all that is necessary to describe the rendering of one

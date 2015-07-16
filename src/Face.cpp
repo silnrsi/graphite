@@ -301,7 +301,7 @@ Error Face::Table::decompress()
     size_t uncompressed_size = 0;
 
     const byte * p = _p;
-    be::skip<uint32>(p);    // Table version number.
+    const uint32 version = be::read<uint32>(p);    // Table version number.
 
     // The scheme is in the top 5 bits of the 1st uint32.
     const uint32 hdr = be::read<uint32>(p);
@@ -311,16 +311,17 @@ Error Face::Table::decompress()
     case SHRINKER:
     {
         uncompressed_size  = hdr & 0x07ffffff;
-        uncompressed_table = gralloc<byte>(uncompressed_size+sizeof(uint32));
-        e.test(!uncompressed_table, E_OUTOFMEM);
-        e.test(shrinker::decompress(p, uncompressed_table+sizeof(uint32), uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
-        // Copy the table version number.
-        memcpy(uncompressed_table, _p, sizeof(uint32));
+        uncompressed_table = gralloc<byte>(uncompressed_size);
+        if (!e.test(!uncompressed_table, E_OUTOFMEM))
+            e.test(shrinker::decompress(p, uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         break;
     }
     default:
         e.error(E_BADSCHEME);
     };
+
+    // Check the uncompressed version number against the original.
+    e.test(be::peek<uint32>(uncompressed_table) != version, E_SHRINKERFAILED);
 
     // Tell the provider to release the compressed form since were replacing
     //   it anyway.
