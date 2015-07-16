@@ -268,20 +268,21 @@ uint16 Face::languageForLocale(const char * locale) const
 
 
 Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
-: _f(&face)
+: _f(&face), _compressed(false)
 {
     size_t sz = 0;
     _p = static_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
     _sz = uint32(sz);
 
-    if (be::peek<uint32>(_p) >= version)
-        decompress();
-
     if (!TtfUtil::CheckTable(n, _p, _sz))
     {
         this->~Table();     // Make sure we release the table buffer even if the table filed it's checks
         _p = 0; _sz = 0;
+        return;
     }
+
+    if (be::peek<uint32>(_p) >= version)
+        decompress();
 }
 
 Face::Table & Face::Table::operator = (const Table & rhs) throw()
