@@ -21,6 +21,7 @@ nmake*
 *.la
 *.kdev4
 *.orig
+*.pyc
 .cproject
 .project
 .pydevproject

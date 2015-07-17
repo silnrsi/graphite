@@ -311,22 +311,22 @@ Silf table is:
 .Silf
 [cols="2,3,8,5",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type     |Name            |Description             |Version notes
+|Type     |Name            |Description                  |Version notes
 
 |FIXED    |version         |Table version: 00050000      |2.0 – changed to 00020000
 |         |                |                             |3.0 – changed to 00030000
 |         |                |                             |5.0 – changed to 00050000
 |ULONG:5  |scheme          |Compression scheme must be 0 |5.0 – added
 |FIXED:27 |compilerVersion |Compiler version that 
-                            generated this font     |3.0 – added +
-                                                     5.0 – changed to 27 bits         
-|USHORT   |numSub          |Number of SIL subtables |
-|USHORT   |reserved        |                        |
+                            generated this font          |3.0 – added +
+                                                          5.0 – changed to 27 bits         
+|USHORT   |numSub          |Number of SIL subtables      |
+|USHORT   |reserved        |                             |
 |ULONG    |offset[]        |Array of numSub offsets to the subtables 
                             relative to the start of this table |
 |SIL_Sub  |tables[]        |Array of independent rendering description 
-                            subtables               |
-|=======================================================================
+                            subtables                    |
+|==================================================================================
 For the compressed layout see <<comp_table>>.
 Since one TrueType file may hold multiple independent rendering
 descriptions, each rendering description is described in a subtable. The
