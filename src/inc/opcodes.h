@@ -318,7 +318,7 @@ STARTOP(insert)
 ENDOP
 
 STARTOP(delete_)
-//    if (!is) DIE
+    if (!is) DIE
     is->markDeleted(true);
     if (is->prev())
         is->prev()->next(is->next());
