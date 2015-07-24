@@ -321,7 +321,8 @@ Error Face::Table::decompress()
     };
 
     // Check the uncompressed version number against the original.
-    e.test(be::peek<uint32>(uncompressed_table) != version, E_SHRINKERFAILED);
+    if (!e)
+        e.test(be::peek<uint32>(uncompressed_table) != version, E_SHRINKERFAILED);
 
     // Tell the provider to release the compressed form since were replacing
     //   it anyway.
