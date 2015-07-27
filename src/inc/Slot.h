@@ -123,8 +123,10 @@ public:
     Slot *attachedTo() const { return m_parent; }
     Position attachOffset() const { return m_attach - m_with; }
     Slot* firstChild() const { return m_child; }
+    void firstChild(Slot *ap) { m_child = ap; }
     bool child(Slot *ap);
     Slot* nextSibling() const { return m_sibling; }
+    void nextSibling(Slot *ap) { m_sibling = ap; }
     bool sibling(Slot *ap);
     bool removeChild(Slot *ap);
     bool removeSibling(Slot *ap);

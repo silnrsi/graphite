@@ -540,7 +540,7 @@ void processParens(Slot *s, Segment *seg, uint8 aMirror, int level, BracketPairS
     BracketPair *p;
     for ( ; s; s = s->prev())       // walk the sequence
     {
-        uint16 ogid = seg->glyphAttr(s->gid(), aMirror);
+        uint16 ogid = seg->glyphAttr(s->gid(), aMirror) || s->gid();
         int cls = BaseClass(s);
         
         switch(cls)

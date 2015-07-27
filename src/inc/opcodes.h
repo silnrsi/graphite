@@ -252,6 +252,8 @@ STARTOP(put_copy)
             Slot *next = is->next();
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
             memcpy(is, ref, sizeof(Slot));
+            is->firstChild(NULL);
+            is->nextSibling(NULL);
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
@@ -318,7 +320,7 @@ STARTOP(insert)
 ENDOP
 
 STARTOP(delete_)
-    if (!is) DIE
+    if (!is || is->isDeleted()) DIE
     is->markDeleted(true);
     if (is->prev())
         is->prev()->next(is->next());
