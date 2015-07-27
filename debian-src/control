@@ -3,7 +3,7 @@ Priority: optional
 Section: libs
 Maintainer: Debian LibreOffice Team <debian-openoffice@lists.debian.org>
 Uploaders: Rene Engelhard <rene@debian.org>, Daniel Glassey <wdg@debian.org>
-Build-Depends: debhelper (>= 7.0), cmake, libfreetype6-dev, libgraphite-dev, libicu-dev, python (>= 2.6)
+Build-Depends: debhelper (>= 7.0), cmake, libfreetype6-dev, libgraphite-dev, libicu-dev, python (>= 2.6), fonttools
 # perl: libmodule-build-perl
 Build-Depends-Indep: asciidoc, dblatex, doxygen, docbook-xsl, latex-xcolor, libxml2-utils
 Standards-Version: 3.9.1

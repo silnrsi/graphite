@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <time.h>
 #include "inc/Code.h"
 #include "inc/Rule.h"
