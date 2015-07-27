@@ -828,8 +828,8 @@ bool Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
         const SlotCollision * c = seg->collisionInfo(s);
         const Rect &bbox = seg->theGlyphBBoxTemporary(s->gid());
         float y = s->origin().y + c->shift().y;
-        ymax = std::max(y + bbox.tr.y, ymax);
-        ymin = std::min(y + bbox.bl.y, ymin);
+        ymax = max(y + bbox.tr.y, ymax);
+        ymin = min(y + bbox.bl.y, ymin);
         if (start && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
                         == (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
             resolveKern(seg, s, start, kerncoll, dir, ymin, ymax, dbgout);
@@ -1012,8 +1012,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         {
             space_count = 0; 
             float y = nbor->origin().y + cNbor->shift().y;
-            ymax = std::max(y + bb.tr.y, ymax);
-            ymin = std::min(y + bb.bl.y, ymin);
+            ymax = max(y + bb.tr.y, ymax);
+            ymin = min(y + bb.bl.y, ymin);
             if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
             {
                 seenEnd = true;

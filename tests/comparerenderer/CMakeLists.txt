@@ -4,6 +4,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     if (GRAPHITE2_ASAN)
         set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
     endif (GRAPHITE2_ASAN)
+    set(RT_LDFLAGS "rt")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src)
