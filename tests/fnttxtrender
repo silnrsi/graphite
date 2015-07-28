@@ -66,13 +66,13 @@ def roundhexpoint(pt, bits) :
             t = 0
         else :
             t = t & ~((1 << (bits - b)) - 1)
-        n = s[0:s.index('.')+1+c]+hex(t)[2:]+s[s.index('p'):]
+        n = s[0:s.index('.')+1+c]+hex(t)[2:].rstrip('L')+s[s.index('p'):]
         r = float.fromhex(n)
         res.append(r)
     return res
 
 def name(tt, gl, bits) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 0.1))
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 1))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
