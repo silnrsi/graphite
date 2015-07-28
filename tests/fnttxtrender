@@ -61,11 +61,9 @@ def roundhexpoint(pt, bits) :
         m = s[s.index('.')+1:s.index('p')]
         c = len(m) - len(m.lstrip('0'))
         t = int(m, 16)
-        b = 4 * len(m) - t.bit_length()
-        if b > bits :
-            t = 0
-        else :
-            t = t & ~((1 << (bits - b)) - 1)
+        #b = 4 * len(m) - t.bit_length()
+        if bits < 4 * len(m) :
+            t = t & ~((1 << (4 * len(m) - bits)) - 1)
         n = s[0:s.index('.')+1+c]+hex(t)[2:].rstrip('L')+s[s.index('p'):]
         r = float.fromhex(n)
         res.append(r)
