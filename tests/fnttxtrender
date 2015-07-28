@@ -72,7 +72,7 @@ def roundhexpoint(pt, bits) :
     return res
 
 def name(tt, gl, bits) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 1))
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 0.1))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
