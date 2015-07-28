@@ -75,14 +75,14 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = _limit.tr.x + currOffset.x;
                 _len[i] = bb.xa - bb.xi;
                 a = currOffset.y + currShift.y;
-                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, a);
+                _ranges[i].initialise<XY>(min, max, margin, marginWeight, a);
                 break;
             case 1 :	// y direction
                 min = _limit.bl.y + currOffset.y;
                 max = _limit.tr.y + currOffset.y;
                 _len[i] = bb.ya - bb.yi;
                 a = currOffset.x + currShift.x;
-                _ranges[i].initialise<XY>(min, max - min, margin, marginWeight, a);
+                _ranges[i].initialise<XY>(min, max, margin, marginWeight, a);
                 break;
             case 2 :	// sum (negatively sloped diagonal boundaries)
                 // pick closest x,y limit boundaries in s direction
@@ -91,7 +91,7 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = 2 * std::min(_limit.tr.x - currShift.x, _limit.tr.y - currShift.y) + shift;
                 _len[i] = sb.sa - sb.si;
                 a = currOffset.x - currOffset.y + currShift.x - currShift.y;
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, a);
+                _ranges[i].initialise<SD>(min, max, margin / ISQRT2, marginWeight, a);
                 break;
             case 3 :	// diff (positively sloped diagonal boundaries)
                 // pick closest x,y limit boundaries in d direction
@@ -100,7 +100,7 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
                 max = 2 * std::min(_limit.tr.x - currShift.x, currShift.y - _limit.bl.y) + shift;
                 _len[i] = sb.da - sb.di;
                 a = currOffset.x + currOffset.y + currShift.x + currShift.y;
-                _ranges[i].initialise<SD>(min, max - min, margin / ISQRT2, marginWeight, a);
+                _ranges[i].initialise<SD>(min, max, margin / ISQRT2, marginWeight, a);
                 break;
         }
     }
@@ -150,10 +150,10 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                 a = org.y + 0.5 * (bb.yi + bb.ya);
                 c = 0.5 * (bb.xi + bb.xa);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.x - c, box.width(), weight, a, m,
+                    _ranges[axis].weighted<XY>(box.bl.x - c, box.tr.x - c, weight, a, m,
                                                 (minright ? box.tr.x : box.bl.x) - c, a, 0, false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.x - c, box.width(), weight, a, 0, 0, org.y,
+                    _ranges[axis].weighted<XY>(box.bl.x - c, box.tr.x - c, weight, a, 0, 0, org.y,
                                                 m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - 0.5 * (bb.yi + bb.ya))), false);
             }
             break;
@@ -163,10 +163,10 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                 a = org.x + 0.5 * (bb.xi + bb.xa);
                 c = 0.5 * (bb.yi + bb.ya);
                 if (isx)
-                    _ranges[axis].weighted<XY>(box.bl.y - c, box.height(), weight, a, 0, 0, org.x,
+                    _ranges[axis].weighted<XY>(box.bl.y - c, box.tr.y - c, weight, a, 0, 0, org.x,
                                                 m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - 0.5 * (bb.xi + bb.xa))), false);
                 else
-                    _ranges[axis].weighted<XY>(box.bl.y - c, box.height(), weight, a, m, 
+                    _ranges[axis].weighted<XY>(box.bl.y - c, box.tr.y - c, weight, a, m, 
                                                 (minright ? box.tr.y : box.bl.y) - c, a, 0, false);
             }
             break;
@@ -184,7 +184,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     si = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     si = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(smin - c, smax - smin, weight / 2, a, m / 2, si, 0, 0, isx);
+                _ranges[axis].weighted<SD>(smin - c, smax - c, weight / 2, a, m / 2, si, 0, 0, isx);
             }
             break;
         case 3 :
@@ -201,7 +201,7 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
                     di = 2 * (minright ? box.tr.x : box.bl.x) - a;
                 else
                     di = 2 * (minright ? box.tr.y : box.bl.y) + a;
-                _ranges[axis].weighted<SD>(dmin - c, dmax - dmin, weight / 2, a, m / 2, di, 0, 0, !isx);
+                _ranges[axis].weighted<SD>(dmin - c, dmax - c, weight / 2, a, m / 2, di, 0, 0, !isx);
             }
             break;
         default :
@@ -213,14 +213,21 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
 // Mark an area with an absolute cost, making it completely inaccessible.
 inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, int axis)
 {
+    float c;
     switch (axis) {
         case 0 :
             if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
-                _ranges[axis].exclude(box.bl.x - 0.5 * (bb.xi + bb.xa), box.width());
+            {
+                c = 0.5 * (bb.xi + bb.xa);
+                _ranges[axis].exclude(box.bl.x - c, box.tr.x - c);
+            }
             break;
         case 1 :
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
-                _ranges[axis].exclude(box.bl.y - 0.5 * (bb.yi + bb.ya), box.height());
+            {
+                c = 0.5 * (bb.yi + bb.ya);
+                _ranges[axis].exclude(box.bl.y - c, box.tr.y - c);
+            }
             break;
         case 2 :
             if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di 
@@ -230,7 +237,8 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float da = org.x - org.y + sb.da;
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
-                _ranges[axis].exclude(smin - 0.5 * (sb.si + sb.sa), smax - smin - sb.height());
+                c = 0.5 * (sb.si + sb.sa);
+                _ranges[axis].exclude(smin - c, smax - c - sb.height());
             }
             break;
         case 3 :
@@ -241,7 +249,8 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float sa = org.x + org.y + sb.sa;
                 float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
                 float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
-                _ranges[axis].exclude(dmin - 0.5 * (sb.di + sb.da), dmax - dmin - sb.height());
+                c = 0.5 * (sb.di + sb.da);
+                _ranges[axis].exclude(dmin - c, dmax - c - sb.height());
             }
             break;
         default :
@@ -503,13 +512,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     dbgout->setenv(1, reinterpret_cast<void *>(j));
 #endif
                 if (omin > otmax)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
                                             sqr(_margin - omin + otmax) * _marginWt, false);
                 else if (omax < otmin)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                    _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
                                             sqr(_margin - otmin + omax) * _marginWt, false);
                 else
-                    _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+                    _ranges[i].exclude_with_margins(vmin, vmax, i);
                 anyhits = true;
             }
             if (anyhits)
@@ -523,13 +532,13 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
             isCol = true;
             if (omin > otmax)
-                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
                                         sqr(_margin - omin + otmax) * _marginWt, false);
             else if (omax < otmin)
-                _ranges[i].weightedAxis(i, vmin - _margin, vmax - vmin + 2 * _margin, 0, 0, 0, 0, 0,
+                _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
                                         sqr(_margin - otmin + omax) * _marginWt, false);
             else
-                _ranges[i].exclude_with_margins(vmin, vmax - vmin, i);
+                _ranges[i].exclude_with_margins(vmin, vmax, i);
 
         }
     }

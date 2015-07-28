@@ -55,28 +55,16 @@ Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
     return *this;
 }
 
-#if 0
-#define FLOATMASK 0xFFFFFFFF
-
-inline
-uint8 Zones::Exclusion::outcode(float val) const {
-    float p = float_round(val, FLOATMASK);
-    return ((p >= float_round(xm, FLOATMASK)) << 1) | (p < float_round(x, FLOATMASK));
-}
-#else
 inline
 uint8 Zones::Exclusion::outcode(float val) const {
     float p = val;
     return ((p >= xm) << 1) | (p < x);
 }
-#endif
 
-
-// hmm how to get the margin weight into here
-void Zones::exclude_with_margins(float pos, float len, int axis) {
-    remove(pos, pos+len);
-    weightedAxis(axis, pos-_margin_len, _margin_len, 0, 0, _margin_weight, pos-_margin_len, 0, 0, false);
-    weightedAxis(axis, pos+len, _margin_len, 0, 0, _margin_weight, pos+len+_margin_len, 0, 0, false);
+void Zones::exclude_with_margins(float xmin, float xmax, int axis) {
+    remove(xmin, xmax);
+    weightedAxis(axis, xmin-_margin_len, xmin, 0, 0, _margin_weight, xmin-_margin_len, 0, 0, false);
+    weightedAxis(axis, xmax, xmax+_margin_len, 0, 0, _margin_weight, xmax+_margin_len, 0, 0, false);
 }
 
 
