@@ -50,8 +50,29 @@ def roundpt(pt, res) :
         pass
     return (0, 0)
 
-def name(tt, gl) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(gl[1], 0.1))
+def roundhexpoint(pt, bits) :
+    if bits == 0 : return pt
+    res = []
+    for p in pt :
+        if type(p) == int :
+            res.append(p)
+            continue
+        s = p.hex()
+        m = s[s.index('.')+1:s.index('p')]
+        c = len(m) - len(m.lstrip('0'))
+        t = int(m, 16)
+        b = 4 * len(m) - t.bit_length()
+        if b > bits :
+            t = 0
+        else :
+            t = t & ~((1 << (bits - b)) - 1)
+        n = s[0:s.index('.')+1+c]+hex(t)[2:]+s[s.index('p'):]
+        r = float.fromhex(n)
+        res.append(r)
+    return res
+
+def name(tt, gl, bits) :
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 0.1))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
@@ -138,6 +159,7 @@ parser.add_option("-s","--script",help="script of text")
 parser.add_option("-r","--rtl",action="store_true",help="right to left")
 parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
+parser.add_option("-b","--bits",type=int,default=0,help="Round to bits of accuracy")
 (opts, args) = parser.parse_args()
 
 if not len(args) :
@@ -179,7 +201,7 @@ for label, words in reader :
     wcount = 0
     for s in words :
         wcount += 1
-        gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
+        gls = map(lambda x: name(tt, x, opts.bits), font.glyphs(s, includewidth = True))
         if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1])
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
