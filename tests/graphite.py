@@ -28,7 +28,7 @@ if getattr(sys, 'frozen', None) :
 #    basedir = os.path.join(os.path.dirname(__file__), '..', 'dll')
 else :
     #basedir = os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'src')
-    basedirs = [os.path.join('..', '..', 'src'), os.path.join('..', 'src')]
+    basedirs = [os.path.join('..', '..'), os.path.join('..'), os.path.join('..','build')]
 
 grfiles = {
     'darwin' : 'libgraphite2.dylib',
@@ -41,7 +41,7 @@ if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
     grfile = grfiles['win64']
 else :
     grfile = grfiles[sys.platform]
-for b in basedirs :
+for b in (os.path.join(b,'src',c) for b in basedirs for c in ('', 'Debug', 'Release', 'DebWithRelInfo', 'MinSizeRel')):
     testfile = os.path.join(b, grfile)
     print "Trying " + testfile
     try :
