@@ -61,7 +61,7 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
     //float sx = aSlot->origin().x + currShift.x;
     //float sy = aSlot->origin().y + currShift.y;
-    if (currOffset.x != 0. || currOffset.y != 0.)
+    if (currOffset.x != 0.f || currOffset.y != 0.f)
         _limit = Rect(limit.bl - currOffset, limit.tr - currOffset);
     else
         _limit = limit;
@@ -147,24 +147,24 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
         case 0 :
              if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
             {
-                a = org.y + 0.5 * (bb.yi + bb.ya);
-                c = 0.5 * (bb.xi + bb.xa);
+                a = org.y + 0.5f * (bb.yi + bb.ya);
+                c = 0.5f * (bb.xi + bb.xa);
                 if (isx)
                     _ranges[axis].weighted<XY>(box.bl.x - c, box.tr.x - c, weight, a, m,
                                                 (minright ? box.tr.x : box.bl.x) - c, a, 0, false);
                 else
                     _ranges[axis].weighted<XY>(box.bl.x - c, box.tr.x - c, weight, a, 0, 0, org.y,
-                                                m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - 0.5 * (bb.yi + bb.ya))), false);
+                                                m * (a * a + sqr((minright ? box.tr.y : box.bl.y) - 0.5f * (bb.yi + bb.ya))), false);
             }
             break;
         case 1 :
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
             {
-                a = org.x + 0.5 * (bb.xi + bb.xa);
-                c = 0.5 * (bb.yi + bb.ya);
+                a = org.x + 0.5f * (bb.xi + bb.xa);
+                c = 0.5f * (bb.yi + bb.ya);
                 if (isx)
                     _ranges[axis].weighted<XY>(box.bl.y - c, box.tr.y - c, weight, a, 0, 0, org.x,
-                                                m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - 0.5 * (bb.xi + bb.xa))), false);
+                                                m * (a * a + sqr((minright ? box.tr.x : box.bl.x) - 0.5f * (bb.xi + bb.xa))), false);
                 else
                     _ranges[axis].weighted<XY>(box.bl.y - c, box.tr.y - c, weight, a, m, 
                                                 (minright ? box.tr.y : box.bl.y) - c, a, 0, false);
@@ -173,8 +173,8 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
         case 2 :
             if (box.bl.x - box.tr.y < org.x - org.y + sb.da && box.tr.x - box.bl.y > org.x - org.y + sb.di)
             {
-                float d = org.x - org.y + 0.5 * (sb.di + sb.da);
-                c = 0.5 * (sb.si + sb.sa);
+                float d = org.x - org.y + 0.5f * (sb.di + sb.da);
+                c = 0.5f * (sb.si + sb.sa);
                 float smax = std::min(2 * box.tr.x - d, 2 * box.tr.y + d);
                 float smin = std::max(2 * box.bl.x - d, 2 * box.bl.y + d);
                 if (smin > smax) return;
@@ -190,8 +190,8 @@ void ShiftCollider::addBox_slope(bool isx, const Rect &box, const BBox &bb, cons
         case 3 :
             if (box.bl.x + box.bl.y < org.x + org.y + sb.sa && box.tr.x + box.tr.y > org.x + org.y + sb.si)
             {
-                float s = org.x + org.y + 0.5 * (sb.si + sb.sa);
-                c = 0.5 * (sb.di + sb.da);
+                float s = org.x + org.y + 0.5f * (sb.si + sb.sa);
+                c = 0.5f * (sb.di + sb.da);
                 float dmax = std::min(2 * box.tr.x - s, s - 2 * box.bl.y);
                 float dmin = std::max(2 * box.bl.x - s, s - 2 * box.tr.y);
                 if (dmin > dmax) return;
@@ -218,14 +218,14 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
         case 0 :
             if (box.bl.y < org.y + bb.ya && box.tr.y > org.y + bb.yi && box.width() > 0)
             {
-                c = 0.5 * (bb.xi + bb.xa);
+                c = 0.5f * (bb.xi + bb.xa);
                 _ranges[axis].exclude(box.bl.x - c, box.tr.x - c);
             }
             break;
         case 1 :
             if (box.bl.x < org.x + bb.xa && box.tr.x > org.x + bb.xi && box.height() > 0)
             {
-                c = 0.5 * (bb.yi + bb.ya);
+                c = 0.5f * (bb.yi + bb.ya);
                 _ranges[axis].exclude(box.bl.y - c, box.tr.y - c);
             }
             break;
@@ -237,7 +237,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float da = org.x - org.y + sb.da;
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
-                c = 0.5 * (sb.si + sb.sa);
+                c = 0.5f * (sb.si + sb.sa);
                 _ranges[axis].exclude(smin - c, smax - c - sb.height());
             }
             break;
@@ -249,7 +249,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float sa = org.x + org.y + sb.sa;
                 float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
                 float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
-                c = 0.5 * (sb.di + sb.da);
+                c = 0.5f * (sb.di + sb.da);
                 _ranges[axis].exclude(dmin - c, dmax - c - sb.height());
             }
             break;
@@ -387,9 +387,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
             switch (orderFlags) {
                 case SlotCollision::SEQ_ORDER_RIGHTUP :
                 {
-                    float r1Xedge = cslot->seqAboveXoff() + 0.5 * (bb.xi + bb.xa) + sx;
-                    float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx + 0.5 * (tbb.xa - tbb.xi);
-                    float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
+                    float r1Xedge = cslot->seqAboveXoff() + 0.5f * (bb.xi + bb.xa) + sx;
+                    float r3Xedge = cslot->seqBelowXlim() + bb.xa + sx + 0.5f * (tbb.xa - tbb.xi);
+                    float r2Yedge = 0.5f * (bb.yi + bb.ya) + sy;
                     
                     // DBGTAG(1x) means the regions are up and right
                     // region 1
@@ -415,9 +415,9 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 }
                 case SlotCollision::SEQ_ORDER_LEFTDOWN :
                 {
-                    float r1Xedge = 0.5 * (bb.xi + bb.xa) + cslot->seqAboveXoff() + sx;
-                    float r3Xedge = bb.xi - cslot->seqBelowXlim() + sx - 0.5 * (tbb.xa - tbb.xi);
-                    float r2Yedge = 0.5 * (bb.yi + bb.ya) + sy;
+                    float r1Xedge = 0.5f * (bb.xi + bb.xa) + cslot->seqAboveXoff() + sx;
+                    float r3Xedge = bb.xi - cslot->seqBelowXlim() + sx - 0.5f * (tbb.xa - tbb.xi);
+                    float r2Yedge = 0.5f * (bb.yi + bb.ya) + sy;
                     // DBGTAG(2x) means the regions are up and right
                     // region 1
                     DBGTAG(21)
@@ -563,7 +563,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
 {
     float tbase;
-    float totalCost = (float)(std::numeric_limits<float>::max() / 2.);
+    float totalCost = (float)(std::numeric_limits<float>::max() / 2);
     Position resultPos = Position(0, 0);
 #if !defined GRAPHITE2_NTRACING
 	int bestAxis = -1;
@@ -599,14 +599,14 @@ Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MA
         if (dbgout)
             outputJsonDbgOneVector(dbgout, seg, i, tbase, bestCost, bestPos) ;
 #endif
-        if (bestCost >= 0.0)
+        if (bestCost >= 0.0f)
         {
             isCol = false;
             switch (i) {
                 case 0 : testp = Position(bestPos, _currShift.y); break;
                 case 1 : testp = Position(_currShift.x, bestPos); break;
-                case 2 : testp = Position(0.5 * (_currShift.x - _currShift.y + bestPos), 0.5 * (_currShift.y - _currShift.x + bestPos)); break;
-                case 3 : testp = Position(0.5 * (_currShift.x + _currShift.y + bestPos), 0.5 * (_currShift.x + _currShift.y - bestPos)); break;
+                case 2 : testp = Position(0.5f * (_currShift.x - _currShift.y + bestPos), 0.5f * (_currShift.y - _currShift.x + bestPos)); break;
+                case 3 : testp = Position(0.5f * (_currShift.x + _currShift.y + bestPos), 0.5f * (_currShift.x + _currShift.y - bestPos)); break;
             }
             if (bestCost < totalCost)
             {
@@ -821,15 +821,15 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _offsetPrev = offsetPrev; // kern from a previous pass
     
     // Calculate the height of the glyph and how many horizontal slices to use.
-    if (_maxy >= 1e37)
+    if (_maxy >= 1e37f)
     {
         _maxy = ymax;
         _miny = ymin;
-        _sliceWidth = margin / 1.5;
-        numSlices = int((_maxy - _miny + 2) / (_sliceWidth / 1.5) + 1.);  // +2 helps with rounding errors
+        _sliceWidth = margin / 1.5f;
+        numSlices = int((_maxy - _miny + 2) / (_sliceWidth / 1.5f) + 1.f);  // +2 helps with rounding errors
         _edges.clear();
-        _edges.insert(_edges.begin(), numSlices, (dir & 1) ? 1e38 : -1e38);
-        _xbound = (dir & 1) ? (float)1e38 : (float)-1e38;
+        _edges.insert(_edges.begin(), numSlices, (dir & 1) ? 1e38f : -1e38f);
+        _xbound = (dir & 1) ? (float)1e38f : (float)-1e38f;
     }
     else if (_maxy != ymax || _miny != ymin)
     {
@@ -838,7 +838,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             numSlices = int((ymin - _miny) / _sliceWidth - 1);
             _miny += numSlices * _sliceWidth;
             if (numSlices < 0)
-                _edges.insert(_edges.begin(), -numSlices, (dir & 1) ? 1e38 : -1e38);
+                _edges.insert(_edges.begin(), -numSlices, (dir & 1) ? 1e38f : -1e38f);
             else if ((unsigned)numSlices < _edges.size())    // this shouldn't fire since we always grow the range
             {
                 Vector<float>::iterator e = _edges.begin();
@@ -852,7 +852,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             numSlices = int((ymax - _miny) / _sliceWidth + 1);
             _maxy = numSlices * _sliceWidth + _miny;
             if (numSlices > (int)_edges.size())
-                _edges.insert(_edges.end(), numSlices - _edges.size(), (dir & 1) ? 1e38 : -1e38);
+                _edges.insert(_edges.end(), numSlices - _edges.size(), (dir & 1) ? 1e38f : -1e38f);
             else if (numSlices < (int)_edges.size())   // this shouldn't fire since we always grow the range
             {
                 while ((int)_edges.size() > numSlices)
@@ -868,7 +868,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     _slotNear.clear();
     _slotNear.insert(_slotNear.begin(), numSlices, NULL);
     _nearEdges.clear();
-    _nearEdges.insert(_nearEdges.begin(), numSlices, (dir & 1) ? -1e38 : +1e38);
+    _nearEdges.insert(_nearEdges.begin(), numSlices, (dir & 1) ? -1e38f : +1e38f);
 #endif
     
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
@@ -887,7 +887,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         for (int i = smin; i <= smax; ++i)
         {
             float t;
-            float y = _miny - 1 + (i + .5) * _sliceWidth; // vertical center of slice
+            float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
                 t = get_edge(seg, s, currShift, y, _sliceWidth, false);
@@ -940,7 +940,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     for (int i = smin; i <= smax; ++i)
     {
         float t;
-        float y = (float)(_miny - 1 + (i + .5) * _sliceWidth);  // vertical center of slice
+        float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
         if (x * rtl > _edges[i] * rtl - _mingap - currSpace)
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add

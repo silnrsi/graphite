@@ -164,10 +164,10 @@ float GlyphCache::getBoundingMetric(unsigned short glyphid, uint8 metric) const
         case 1: return (float)(glyph(glyphid)->theBBox().bl.y);                          // y_min
         case 2: return (float)(glyph(glyphid)->theBBox().tr.x);                          // x_max
         case 3: return (float)(glyph(glyphid)->theBBox().tr.y);                          // y_max
-        case 4: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().bl.x : 0.);    // sum_min
-        case 5: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().bl.y : 0.);    // diff_min
-        case 6: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().tr.x : 0.);    // sum_max
-        case 7: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().tr.y : 0.);    // diff_max
+        case 4: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().bl.x : 0.f);    // sum_min
+        case 5: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().bl.y : 0.f);    // diff_min
+        case 6: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().tr.x : 0.f);    // sum_max
+        case 7: return (float)(_boxes[glyphid] ? _boxes[glyphid]->slant().tr.y : 0.f);    // diff_max
         default: return 0.;
     }
 }

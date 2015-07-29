@@ -90,7 +90,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 {
     SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
-    float scale = font ? font->scale() : 1.0;
+    float scale = font ? font->scale() : 1.0f;
     Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
@@ -121,9 +121,9 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     {
         float tAdv;
         m_position += (m_attach - m_with) * scale;
-        tAdv = m_advance.x >= 0.5 ? m_position.x + tAdvance - shift.x : 0.f;
+        tAdv = m_advance.x >= 0.5f ? m_position.x + tAdvance - shift.x : 0.f;
         res = Position(tAdv, 0);
-        if ((m_advance.x >= 0.5 || m_position.x < 0) && m_position.x < clusterMin) clusterMin = m_position.x;
+        if ((m_advance.x >= 0.5f || m_position.x < 0) && m_position.x < clusterMin) clusterMin = m_position.x;
     }
 
     if (glyphFace)
@@ -135,7 +135,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
         Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, isFinal);
-        if ((!m_parent || m_advance.x >= 0.5) && tRes.x > res.x) res = tRes;
+        if ((!m_parent || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)

@@ -80,7 +80,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     {
         do {
             Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
-            if (bbox.bl.x != 0. || bbox.bl.y != 0. || bbox.tr.x != 0. || bbox.tr.y == 0.)
+            if (bbox.bl.x != 0.f || bbox.bl.y != 0.f || bbox.tr.x != 0.f || bbox.tr.y == 0.f)
                 break;
             pLast = pLast->prev();
         } while (pLast != pFirst);
@@ -126,7 +126,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         s->just(0);
     }
 
-    for (int i = (width < 0.0) ? -1 : numLevels - 1; i >= 0; --i)
+    for (int i = (width < 0.0f) ? -1 : numLevels - 1; i >= 0; --i)
     {
         float diff;
         float error = 0.;
@@ -196,7 +196,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
                     << "passes"     << json::array;
 #endif
 
-    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0. || (silf()->flags() & 1)))
+    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0.f || (silf()->flags() & 1)))
         m_silf->runGraphite(this, m_silf->justificationPass(), m_silf->positionPass());
 
 #if !defined GRAPHITE2_NTRACING

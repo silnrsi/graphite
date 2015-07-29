@@ -930,7 +930,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
             break;
     }
     bool isCol = false;
-    if (collides || cFix->shift().x != 0. || cFix->shift().y != 0.)
+    if (collides || cFix->shift().x != 0.f || cFix->shift().y != 0.f)
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
         // isCol has been set to true if a collision remains.
@@ -1000,7 +1000,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
             return 0.;
         const Rect &bb = seg->theGlyphBBoxTemporary(nbor->gid());
         SlotCollision *cNbor = seg->collisionInfo(nbor);
-        if (bb.bl.y == 0. && bb.tr.y == 0.)
+        if (bb.bl.y == 0.f && bb.tr.y == 0.f)
         {
             if ((m_flags & 24) == 16)
                 break;

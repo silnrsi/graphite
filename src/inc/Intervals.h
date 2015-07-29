@@ -223,9 +223,9 @@ Zones::Exclusion Zones::Exclusion::weighted<SD>(float xmin, float xmax, float f,
         float m, float xi, float ai,float c, bool nega) {
     float xia = nega ? xi - ai : xi + ai;
     return Exclusion(xmin, xmax, 
-            0.25 * (m + 2 * f), 
-            0.25 * m * xia, 
-            0.25 * (m * xia * xia + 2 * f * a0 * a0) + c);
+            0.25f * (m + 2.f * f), 
+            0.25f * m * xia, 
+            0.25f * (m * xia * xia + 2.f * f * a0 * a0) + c);
 }
 
 } // end of namespace graphite2
