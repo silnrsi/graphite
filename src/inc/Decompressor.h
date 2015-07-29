@@ -35,7 +35,7 @@
 namespace shrinker
 {
 
-int decompress(void const *in, void *out, size_t size);
+int decompress(void const *in, size_t in_size, void *out, size_t out_size);
 /*
 in:     inbuf --- compressed data
 out:    outbuf --- decompressed data to place in

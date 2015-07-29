@@ -40,30 +40,23 @@ namespace {
 u8 const LONG_DIST = 0x10;
 u8 const MATCH_LEN = 0x0f;
 
-
-inline
-void read_literal_(u32 & v, u8 const * &s) {
-    u8 b = 0; 
-    do { v += b = *s++; } while(b==0xff);
-}
-
 template <int M>
 inline
-u32 read_literal(u8 const * &s, u32 l) {
+u32 read_literal(u8 const * &s, u8 const * const e, u32 l) {
     if (unlikely(l == M))
     {
         u8 b = 0; 
-        do { l += b = *s++; } while(b==0xff);
+        do { l += b = *s++; } while(b==0xff && s != e);
     }
     return l;
 }
 
-bool read_directive(u8 const * &src, u32 & literal_len, u32 & match_len, u32 & match_dist)
+bool read_directive(u8 const * &src, u8 const * const end, u32 & literal_len, u32 & match_len, u32 & match_dist)
 {
     u8 const flag = *src++;
     
-    literal_len = read_literal<7>(src, flag >> 5);
-    match_len = read_literal<15>(src, flag & MATCH_LEN);
+    literal_len = read_literal<7>(src, end, flag >> 5);
+    match_len = read_literal<15>(src, end, flag & MATCH_LEN);
     
     match_dist = *src++;
     if (flag & LONG_DIST) 
@@ -74,20 +67,22 @@ bool read_directive(u8 const * &src, u32 & literal_len, u32 & match_len, u32 & m
 
 }
 
-int shrinker::decompress(void const *in, void *out, size_t size)
+int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_size)
 {
-    u8 const * src = static_cast<u8 const *>(in);
-    u8 * dst = static_cast<u8*>(out);
-    u8 * const end = dst + size;
+    u8 const *       src     = static_cast<u8 const *>(in),
+             * const src_end = src + in_size;
+
+    u8 *       dst     = static_cast<u8*>(out),
+       * const dst_end = dst + out_size;
     
     u32 literal_len = 0,
         match_len = 0,
         match_dist = 0;
         
-    while (read_directive(src, literal_len, match_len, match_dist))
+    while (read_directive(src, src_end, literal_len, match_len, match_dist))
     {
         // Copy in literal
-        if (unlikely(dst + literal_len + sizeof(unsigned long) > end)) return -1;
+        if (unlikely(dst + literal_len + sizeof(unsigned long) > dst_end)) return -1;
         dst = memcpy_nooverlap(dst, src, literal_len);
         src += literal_len;
         
@@ -95,11 +90,11 @@ int shrinker::decompress(void const *in, void *out, size_t size)
         //  decoded output.
         u8 const * const pcpy = dst - match_dist - 1;
         if (unlikely(pcpy < static_cast<u8*>(out) 
-                  || dst + match_len + MINMATCH  + sizeof(unsigned long) > end)) return -1;
+                  || dst + match_len + MINMATCH  + sizeof(unsigned long) > dst_end)) return -1;
         dst = memcpy_(dst, pcpy, match_len + MINMATCH);
     }
     
-    if (unlikely(dst + literal_len > end)) return -1;
+    if (unlikely(dst + literal_len > dst_end)) return -1;
     dst = memcpy_nooverlap_surpass(dst, src, literal_len);
     
     return dst - (u8*)out;

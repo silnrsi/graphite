@@ -313,7 +313,7 @@ Error Face::Table::decompress()
         uncompressed_size  = hdr & 0x07ffffff;
         uncompressed_table = gralloc<byte>(uncompressed_size);
         if (!e.test(!uncompressed_table, E_OUTOFMEM))
-            e.test(shrinker::decompress(p, uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
+            e.test(shrinker::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         break;
     }
     default:
