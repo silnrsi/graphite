@@ -22,6 +22,16 @@ This will do a default build of Graphite with minimal dependencies on other
 packages. There are various option settings see 
 <<X1,Generator configuration options>>>.
 
+On amd64 architecture if you wish build and test 32 bit binaries this is 
+possible using the following cmake ivocation:
+
+----
+CFLAGS=-m32 CXXFLAGS=-m32 cmake ..
+make
+make test
+----
+You will need g++-multilib support see <<X2,Limitations>>
+
 It is possible to use clang and also the addresss sanitizer (in clang 3.3 or later)
 to build and test Graphite. Use this build command:
 
@@ -142,6 +152,7 @@ GRAPHITE2_VM_TYPE:STRING::
     The value of call tells the system to use the slower but more cross 
     compiler portable call based machine.
 
+[[X2]]
 === Limitations ===
 
 There are some hard build dependencies:
@@ -155,4 +166,10 @@ Other configuration related dependencies:
 
 fonttools::
     This python library supports truetype font reading.
+
+g++-multilib::
+    If building 32bit binaries under a 64bit Linux host this is 
+    required for successful linking. These are the `g++-multilib` and 
+    `libc6-dev-i386` packages on Debian and derivatives and `glibc-devel.i686`, 
+    `glibc-devel` and `libstdc++-devel.i686` on Redhat OSs
 
