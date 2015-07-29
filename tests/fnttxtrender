@@ -167,10 +167,9 @@ if not opts.lang : opts.lang = 0
 if not opts.script : opts.script = 0
 if not opts.rtl : opts.rtl = 0
 if opts.output :
-    outfile = codecs.open(opts.output, mode="w", encoding="utf_8")
+    outfile = open(opts.output, mode="wt")
 else :
-#    outfile = codecs.EncodedFile(sys.stdout, "unicode_internal", file_encoding="utf_8")
-    outfile = codecs.getwriter("utf_8")(sys.stdout)
+    outfile = sys.stdout
 
 if not opts.texttype : opts.texttype = 'txt'
 if opts.split : spliton = ' '
