@@ -43,12 +43,12 @@ tables = {
     'icu' : ('Gloc', 'Glat', 'Silf', 'Sill', 'Feat')
 }
 
-def roundpt(pt, res) :
+def roundfloat(f, res) :
     try :
-        return(int(pt[0] / res) * res, int(pt[1] / res) * res)
+        return(int(f / res) * res)
     except ValueError :
         pass
-    return (0, 0)
+    return 0
 
 def roundhexpoint(pt, bits) :
     if bits == 0 : return pt
@@ -70,7 +70,7 @@ def roundhexpoint(pt, bits) :
     return res
 
 def name(tt, gl, bits) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundpt(roundhexpoint(gl[1], bits), 0.1))
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundfloat(gl[1][0], 0.01), roundfloat(gl[1][1], 0.01))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
@@ -95,6 +95,20 @@ def ftostr(x, dp=2) :
         res = re.sub(r"0*$", "", res)
     return res
 
+def scalecmp(a, b, e) :
+    if a != 0 :
+        return (abs(1. - b / a) > e)
+    else :
+        return (abs(a - b) > e)
+
+def cmpgls(tests, bases, epsilon) :
+    if len(tests) != len(bases) : return True
+    for i in range(len(tests)) :
+        if tests[i][0] != bases[i][0] : return True
+        for j in range(1,3) :
+            if scalecmp(tests[i][j], bases[i][j], epsilon) : return True
+    return False
+
 # Have the JSONEncoder use ftostr to render floats to 2dp rather than lots
 json.encoder.FLOAT_REPR=ftostr
 
@@ -102,20 +116,20 @@ class JsonLog(object) :
     def __init__(self, f, fpaths, args, inputs) :
         self.out = f
         self.opts = args
-        self.out.write(u"[\n")
+        self.out.write(u"{\n")
         self.encoder = json.JSONEncoder()
 
     def logentry(self, label, linenumber, wordnumber, string, gglyphs, bases) :
         s = makelabel(label, linenumber, wordnumber)
-        self.out.write('{ \"'+s+'\" : ')
+        self.out.write('\"'+s+'\" : ')
         # have to use iterencode here to get json.encoder.FLOAT_REP to work
         #res = "\n".join(map(lambda x : "".join(self.encoder.iterencode([(g[0], roundpt(g[1], 0.01)) for g in x])), gglyphs))
         res = "".join(self.encoder.iterencode(gglyphs))
         self.out.write(res)
-        self.out.write('},\n')
+        self.out.write(',\n')
 
     def logend(self) :
-        self.out.write(u"{}]\n")
+        self.out.write(u'"":[]}\n')
 
 def LineReader(infile, spliton=None) :
     f = codecs.open(infile, encoding="utf_8")
@@ -151,6 +165,8 @@ is set to false to allow locally loaded html files to access fonts anywhere on t
 local filesystem. Alternatively use --copy to copy the font and reference that.''')
 parser.add_option("-t","--text",help="text file to test each line from")
 parser.add_option("-o","--output",help="file to log results to")
+parser.add_option("-c","--compare",help="json file to compare results against")
+parser.add_option("-q","--quiet",action="store_true",help="Don't output position results")
 parser.add_option("-f","--feat",action="append",help="id=value pairs, may be repeated")
 parser.add_option("-l","--lang",help="language to tag text with")
 parser.add_option("-s","--script",help="script of text")
@@ -166,10 +182,18 @@ if not len(args) :
 if not opts.lang : opts.lang = 0
 if not opts.script : opts.script = 0
 if not opts.rtl : opts.rtl = 0
-if opts.output :
-    outfile = open(opts.output, mode="wt")
+if opts.bits :
+    epsilon = 0.5 ** opts.bits
 else :
-    outfile = sys.stdout
+    epsilon = 0.
+
+outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
+
+if opts.compare :
+    with open(opts.compare) as f :
+        cjson = json.load(f)
+else :
+    cjson = None
 
 if not opts.texttype : opts.texttype = 'txt'
 if opts.split : spliton = ' '
@@ -199,12 +223,17 @@ for label, words in reader :
     for s in words :
         wcount += 1
         gls = map(lambda x: name(tt, x, opts.bits), font.glyphs(s, includewidth = True))
-        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1])
+        if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1], gls[-1][2])
+        l = makelabel(label, count, wcount)
+        if cjson is not None and cmpgls(gls, cjson[l], epsilon) :
+            errors += 1
+            print l + " Failed"
+        if opts.quiet : continue
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
         bases = map(lambda x: (cmaplookup(tt, x), (0,0)), s)
         log.logentry(label, count, wcount, s, gls, bases)
 if log is not None : log.logend()
 outfile.close()
-sys.exit(0)
+sys.exit(errors)
 
