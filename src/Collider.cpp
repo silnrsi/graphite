@@ -238,7 +238,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float smax = sdm(di, da, box.tr.x, box.tr.y, std::greater<float>());
                 float smin = sdm(da, di, box.bl.x, box.bl.y, std::less<float>());
                 c = 0.5f * (sb.si + sb.sa);
-                _ranges[axis].exclude(smin - c, smax - c - sb.width());
+                _ranges[axis].exclude(smin - c, smax - c);
             }
             break;
         case 3 :
@@ -250,7 +250,7 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
                 float dmax = sdm(si, sa, box.tr.x, -box.bl.y, std::greater<float>());
                 float dmin = sdm(sa, si, box.bl.x, -box.tr.y, std::less<float>());
                 c = 0.5f * (sb.di + sb.da);
-                _ranges[axis].exclude(dmin - c, dmax - c - sb.height());
+                _ranges[axis].exclude(dmin - c, dmax - c);
             }
             break;
         default :
