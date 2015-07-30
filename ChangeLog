@@ -1,3 +1,13 @@
+1.3.0
+    . Add collision avoidance
+        . Shift Collider
+        . Kern Collider
+        . Octabox outlines and subboxes
+    . Add compressed Silf and Glat table support
+    . Bug fixes:
+        . Stop loops forming in the child, sibling tree
+        . Handle bidi mirroring correctly if no bidi occurring
+
 1.2.4
     . Face failure now has error code reporting via debug logging
         . can now call gr_start_logging(NULL, fname)
