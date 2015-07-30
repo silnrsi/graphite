@@ -25,7 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include "inc/Position.h"
-#include <math.h>
+#include <cmath>
 
 using namespace graphite2;
 
@@ -53,9 +53,9 @@ float boundmin(float move, float lim1, float lim2, float &error)
     if (move < lim1 && move < lim2)
     { error = 0.; return move; }
     else if (lim1 < lim2)
-    { error = fabs(move - lim1); return lim1; }
+    { error = std::fabs(move - lim1); return lim1; }
     else
-    { error = fabs(move - lim2); return lim2; }
+    { error = std::fabs(move - lim2); return lim2; }
 }
 
 #if 0

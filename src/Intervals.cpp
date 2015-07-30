@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 #include "inc/Intervals.h"
@@ -67,6 +68,16 @@ void Zones::exclude_with_margins(float xmin, float xmax, int axis) {
     weightedAxis(axis, xmax, xmax+_margin_len, 0, 0, _margin_weight, xmax+_margin_len, 0, 0, false);
 }
 
+namespace
+{
+
+inline
+bool separated(float a, float b) {
+    //return a != b;
+    return std::fabs(a-b) > std::numeric_limits<float>::epsilon(); // std::epsilon may not work. but 0.5 fails exising 64 bit tests
+}
+
+}
 
 void Zones::insert(Exclusion e)
 {
@@ -96,7 +107,7 @@ void Zones::insert(Exclusion e)
             // split i at e->x into i1,i2
             // split e at i.mx into e1,e2
             // trim i1, insert i2+e1, e=e2
-            if (i->x != e.x && i->xm != e.x)   { i = _exclusions.insert(i,i->split_at(e.x)); ++i; }
+            if (separated(i->x,e.x) && separated(i->xm, e.x))   { i = _exclusions.insert(i,i->split_at(e.x)); ++i; }
             *i += e;
             e.left_trim(i->xm);
             break;
@@ -104,14 +115,14 @@ void Zones::insert(Exclusion e)
             // split e at i->x into e1,e2
             // split i at e.mx into i1,i2
             // drop e1, insert e2+i1, trim i2
-            if (e.xm != i->xm) i = _exclusions.insert(i,i->split_at(e.xm));
+            if (separated(e.xm, i->xm)) i = _exclusions.insert(i,i->split_at(e.xm));
             *i += e;
             return;
         case 3:     // i completely covers e
             // split i at e.x into i1,i2
             // split i2 at e.mx into i2,i3
             // insert i1, insert e+i2
-            if (e.xm != i->xm) i = _exclusions.insert(i,i->split_at(e.xm));
+            if (separated(e.xm, i->xm)) i = _exclusions.insert(i,i->split_at(e.xm));
             i = _exclusions.insert(i, i->split_at(e.x));
             *++i += e;
             return;
@@ -140,14 +151,14 @@ void Zones::remove(float x, float xm)
         switch (oca ^ ocb)  // What kind of overlap?
         {
         case 0:     // i completely covers e
-            if (i->x != x)  { i = _exclusions.insert(i,i->split_at(x)); ++i; }
+            if (separated(i->x, x))  { i = _exclusions.insert(i,i->split_at(x)); ++i; }
             // no break
         case 1:     // i overlaps on the rhs of e
             i->left_trim(xm);
             return;
         case 2:     // i overlaps on the lhs of e
             i->xm = x;
-            if (i->x != i->xm) break;
+            if (separated(i->x, i->xm)) break;
             // no break
         case 3:     // e completely covers i
             i = _exclusions.erase(i);
