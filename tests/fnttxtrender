@@ -69,7 +69,7 @@ def roundhexpoint(pt, bits) :
         res.append(r)
     return res
 
-def name(tt, gl, bits) :
+def name(tt, gl) :
     return (tt.getGlyphName(gl[0]) if gl[0] else None, roundfloat(gl[1][0], 0.01), roundfloat(gl[1][1], 0.01))
 
 def cmaplookup(tt, c) :
@@ -96,10 +96,11 @@ def ftostr(x, dp=2) :
     return res
 
 def scalecmp(a, b, e) :
-    if a != 0 :
-        return (abs(1. - b / a) > e)
-    else :
-        return (abs(a - b) > e)
+    return abs(a - b) > e
+#    if a != 0 :
+#        return (abs(1. - b / a) > e)
+#    else :
+#        return (abs(a - b) > e)
 
 def cmpgls(tests, bases, epsilon) :
     if len(tests) != len(bases) : return True
@@ -173,7 +174,7 @@ parser.add_option("-s","--script",help="script of text")
 parser.add_option("-r","--rtl",action="store_true",help="right to left")
 parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
-parser.add_option("-b","--bits",type=int,default=0,help="Round to bits of accuracy")
+parser.add_option("-e","--error",type=int,default=0,help="Amount of fuzz to allow in values")
 (opts, args) = parser.parse_args()
 
 if not len(args) :
@@ -182,10 +183,10 @@ if not len(args) :
 if not opts.lang : opts.lang = 0
 if not opts.script : opts.script = 0
 if not opts.rtl : opts.rtl = 0
-if opts.bits :
-    epsilon = 0.5 ** opts.bits
-else :
-    epsilon = 0.
+#if opts.bits :
+#    epsilon = 0.5 ** opts.bits
+#else :
+#    epsilon = 0.
 
 outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
 
@@ -222,10 +223,10 @@ for label, words in reader :
     wcount = 0
     for s in words :
         wcount += 1
-        gls = map(lambda x: name(tt, x, opts.bits), font.glyphs(s, includewidth = True))
+        gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
         if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1], gls[-1][2])
         l = makelabel(label, count, wcount)
-        if cjson is not None and cmpgls(gls, cjson[l], epsilon) :
+        if cjson is not None and cmpgls(gls, cjson[l], opts.error) :
             errors += 1
             print l + " Failed"
         if opts.quiet : continue
