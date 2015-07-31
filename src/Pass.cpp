@@ -31,7 +31,7 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-#include <math.h>
+#include <cmath>
 #include "inc/Segment.h"
 #include "inc/Code.h"
 #include "inc/Rule.h"
@@ -934,7 +934,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     {
         Position shift = coll.resolve(seg, isCol, dbgout);
         // isCol has been set to true if a collision remains.
-        if (fabs(shift.x) < 1e38 && fabs(shift.y) < 1e38)
+        if (std::fabs(shift.x) < 1e38f && std::fabs(shift.y) < 1e38f)
         {
             if (sqr(shift.x-cFix->shift().x) + sqr(shift.y-cFix->shift().y) >= m_colThreshold * m_colThreshold)
                 moved = true;
