@@ -174,7 +174,7 @@ parser.add_option("-s","--script",help="script of text")
 parser.add_option("-r","--rtl",action="store_true",help="right to left")
 parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
-#parser.add_option("-e","--error",type=int,default=0,help="Amount of fuzz to allow in values")
+parser.add_option("-e","--error",type=float,default=0,help="Amount of fuzz to allow in values")
 parser.add_option("-b","--bits",type=int,default=0,help="numbers compare equal if this many bits are the same")
 parser.add_option("-d","--dp",type=int,default=1,help="Output numbers to this many decimal places")
 (opts, args) = parser.parse_args()
@@ -185,7 +185,9 @@ if not len(args) :
 if not opts.lang : opts.lang = 0
 if not opts.script : opts.script = 0
 if not opts.rtl : opts.rtl = 0
-if opts.bits :
+if opts.error :
+    epsilon = opts.error
+elif opts.bits :
     epsilon = 0.5 ** opts.bits
 else :
     epsilon = 0.
