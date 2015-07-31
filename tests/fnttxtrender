@@ -96,11 +96,11 @@ def ftostr(x, dp=2) :
     return res
 
 def scalecmp(a, b, e) :
-    return abs(a - b) > e
-#    if a != 0 :
-#        return (abs(1. - b / a) > e)
-#    else :
-#        return (abs(a - b) > e)
+#    return abs(a - b) > e
+    if a != 0 :
+        return (abs(1. - b / a) > e)
+    else :
+        return (abs(a - b) > e)
 
 def cmpgls(tests, bases, epsilon) :
     if len(tests) != len(bases) : return True
@@ -174,7 +174,8 @@ parser.add_option("-s","--script",help="script of text")
 parser.add_option("-r","--rtl",action="store_true",help="right to left")
 parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
-parser.add_option("-e","--error",type=int,default=0,help="Amount of fuzz to allow in values")
+#parser.add_option("-e","--error",type=int,default=0,help="Amount of fuzz to allow in values")
+parser.add_option("-b","--bits",type=int,default=0,help="numbers compare equal if this many bits are the same")
 (opts, args) = parser.parse_args()
 
 if not len(args) :
@@ -183,10 +184,10 @@ if not len(args) :
 if not opts.lang : opts.lang = 0
 if not opts.script : opts.script = 0
 if not opts.rtl : opts.rtl = 0
-#if opts.bits :
-#    epsilon = 0.5 ** opts.bits
-#else :
-#    epsilon = 0.
+if opts.bits :
+    epsilon = 0.5 ** opts.bits
+else :
+    epsilon = 0.
 
 outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
 
@@ -226,7 +227,7 @@ for label, words in reader :
         gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
         if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1], gls[-1][2])
         l = makelabel(label, count, wcount)
-        if cjson is not None and cmpgls(gls, cjson[l], opts.error) :
+        if cjson is not None and cmpgls(gls, cjson[l], epsilon) :
             errors += 1
             print l + " Failed"
         if opts.quiet : continue
