@@ -69,8 +69,8 @@ def roundhexpoint(pt, bits) :
         res.append(r)
     return res
 
-def name(tt, gl) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundfloat(gl[1][0], 0.01), roundfloat(gl[1][1], 0.01))
+def name(tt, gl, rounding) :
+    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundfloat(gl[1][0], rounding), roundfloat(gl[1][1], rounding))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
@@ -87,7 +87,7 @@ def makelabel(name, line, word) :
     else :
         return "{}.{}".format(line, word)
 
-def ftostr(x, dp=2) :
+def ftostr(x, dp=6) :
     res = ("{:." + str(dp) + "f}").format(x)
     if res.endswith("." + ("0" * dp)) :
         res = res[:-dp-1]
@@ -176,6 +176,7 @@ parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
 #parser.add_option("-e","--error",type=int,default=0,help="Amount of fuzz to allow in values")
 parser.add_option("-b","--bits",type=int,default=0,help="numbers compare equal if this many bits are the same")
+parser.add_option("-d","--dp",type=int,default=1,help="Output numbers to this many decimal places")
 (opts, args) = parser.parse_args()
 
 if not len(args) :
@@ -188,6 +189,7 @@ if opts.bits :
     epsilon = 0.5 ** opts.bits
 else :
     epsilon = 0.
+rounding = 0.1 ** opts.dp
 
 outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
 
@@ -224,7 +226,7 @@ for label, words in reader :
     wcount = 0
     for s in words :
         wcount += 1
-        gls = map(lambda x: name(tt, x), font.glyphs(s, includewidth = True))
+        gls = map(lambda x: name(tt, x, rounding), font.glyphs(s, includewidth = True))
         if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1], gls[-1][2])
         l = makelabel(label, count, wcount)
         if cjson is not None and cmpgls(gls, cjson[l], epsilon) :
