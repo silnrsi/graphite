@@ -38,7 +38,7 @@ sparse classe is working correctly.
 
 using namespace graphite2;
 
-#define maskoff(n) (-1ULL >> (8*sizeof(0ULL) - n))
+#define maskoff(n) ((unsigned long long)(-1L) >> (8*sizeof(0UL) - n))
 
 #define pat(b)   0x01##b, 0x03##b, 0x07##b, 0x0f##b
 #define pat8(b)  pat(b), pat(f##b)
@@ -47,7 +47,7 @@ using namespace graphite2;
 #define pat64(b) pat32(b), pat32(ffffffff##b)
 
 #define patterns(bw) \
-    uint##bw const  u##bw##_pat[] = {0, pat##bw() }; \
+    uint##bw const  u##bw##_pat[] = {0, pat##bw(UL) }; \
     int##bw const * s##bw##_pat   = reinterpret_cast<int##bw const *>(u##bw##_pat)
 
 //#define BENCHMARK 40000000
