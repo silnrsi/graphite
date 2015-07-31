@@ -69,6 +69,9 @@ static BBox nullBBox(0, 0, 0, 0);
 
 class GlyphBox
 {
+    GlyphBox(const GlyphBox &);
+    GlyphBox & operator = (const GlyphBox &);
+
 public:
     GlyphBox(uint8 numsubs, unsigned short bitmap, Rect *slanted) : _num(numsubs), _bitmap(bitmap), _slant(*slanted) {}; 
 

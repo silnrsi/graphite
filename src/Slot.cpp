@@ -188,7 +188,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
     }
 }
 
-#define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? c-> x : 0; }
+#define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? int(c-> x) : 0; }
 
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
@@ -221,7 +221,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatBreak :     return seg->charinfo(m_original)->breakWeight();
     case gr_slatCompRef :   return 0;
     case gr_slatDir :       if (m_bidiCls == -1)
-                                const_cast<Slot *>(this)->setBidiClass(seg->glyphAttr(gid(), seg->silf()->aBidi()));
+                                const_cast<Slot *>(this)->setBidiClass(int8(seg->glyphAttr(gid(), seg->silf()->aBidi())));
                             return m_bidiCls;
     case gr_slatInsert :    return isInsertBefore();
     case gr_slatPosX :      return int(m_position.x); // but need to calculate it
@@ -322,7 +322,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         seg->charinfo(m_original)->breakWeight(value);
         break;
     case gr_slatCompRef :   break;      // not sure what to do here
-    case gr_slatDir :       m_bidiCls = value; break;
+    case gr_slatDir :       m_bidiCls = int8(value); break;
     case gr_slatInsert :
         markInsertBefore(value? true : false);
         break;

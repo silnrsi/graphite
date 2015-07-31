@@ -71,7 +71,7 @@ namespace
 
     protected:
         const byte     * _e, * _v;
-        ptrdiff_t        _n;
+        size_t        _n;
     };
 
     typedef _glat_iterator<uint8>   glat_iterator;

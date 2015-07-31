@@ -173,7 +173,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
                                   precontext[0], be::peek<uint16>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
         if (e.test(!m_cPConstraint, E_OUTOFMEM)
-                || e.test(m_cPConstraint.status(), m_cPConstraint.status() + E_CODEFAILURE))
+                || e.test(!m_cPConstraint, m_cPConstraint.status() + E_CODEFAILURE))
             return face.error(e);
         face.error_context(face.error_context() - 1);
     }
@@ -811,8 +811,8 @@ bool Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
 {
     KernCollider kerncoll(dbgout);
     Slot *start = seg->first();
-    float ymin = 1e38;
-    float ymax = -1e38;
+    float ymin = 1e38f;
+    float ymax = -1e38f;
     const GlyphCache &gc = seg->getFace()->glyphs();
 
     // phase 3 : handle kerning of clusters
@@ -989,7 +989,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         cFix->setFlags(cFix->flags() | SlotCollision::COLL_KERN | SlotCollision::COLL_FIX);
         return 0;
     }
-    bool seenEnd = cFix->flags() & SlotCollision::COLL_END;
+    bool seenEnd = (cFix->flags() & SlotCollision::COLL_END) != 0;
     bool isInit = false;
 
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())

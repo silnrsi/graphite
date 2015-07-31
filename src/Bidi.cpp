@@ -62,8 +62,8 @@ enum DirCode {  // Hungarian: dirc
 };
 
 enum DirMask {
-        WSflag = (1 << 7),     // keep track of WS for eos handling
-        WSMask = ~(1 << 7)
+        WSflag = int8(1 << 7),     // keep track of WS for eos handling
+        WSMask = int8(~(1 << 7))
 };
 
 inline uint8    BaseClass(Slot *s)   { return s->getBidiClass() & WSMask; }

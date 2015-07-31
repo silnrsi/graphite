@@ -179,7 +179,7 @@ protected:
 class KernCollider
 {
 public:
-    KernCollider(GR_MAYBE_UNUSED json *dbg) : _miny(-1e38), _maxy(1e38) { };
+    KernCollider(GR_MAYBE_UNUSED json *dbg) : _miny(-1e38f), _maxy(1e38f) { };
     ~KernCollider() throw() { };
     bool initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir,
