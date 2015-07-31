@@ -608,7 +608,7 @@ Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MA
                 case 2 : testp = Position(0.5f * (_currShift.x - _currShift.y + bestPos), 0.5f * (_currShift.y - _currShift.x + bestPos)); break;
                 case 3 : testp = Position(0.5f * (_currShift.x + _currShift.y + bestPos), 0.5f * (_currShift.x + _currShift.y - bestPos)); break;
             }
-            if (bestCost < totalCost)
+            if (bestCost < totalCost - 0.01f)
             {
                 totalCost = bestCost;
                 resultPos = testp;
