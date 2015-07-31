@@ -241,12 +241,12 @@ ENDOP
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (is && (slot_ref ||is != *map))
+    if (is)
     {
-        int16 *tempUserAttrs = is->userAttrs();
         slotref ref = slotat(slot_ref);
-        if (ref)
+        if (ref && ref != is)
         {
+            int16 *tempUserAttrs = is->userAttrs();
             if (is->attachedTo() || is->firstChild()) DIE
             Slot *prev = is->prev();
             Slot *next = is->next();
