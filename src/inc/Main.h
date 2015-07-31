@@ -125,3 +125,7 @@ inline T max(const T a, const T b)
 #else
 #define GR_MAYBE_UNUSED
 #endif
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif

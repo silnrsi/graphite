@@ -28,6 +28,7 @@ The test harness for the Sparse class. This validates the
 sparse classe is working correctly.
 -----------------------------------------------------------------------------*/
 
+#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -37,11 +38,17 @@ sparse classe is working correctly.
 
 using namespace graphite2;
 
-#define v(n) (~(-1LL << n))
-#define b8(i) 	v(i+0), v(i+1), v(i+2), v(i+3), v(i+4), v(i+5), v(i+6), v(i+7), v(i+8)
-#define b16(i) 	b8(i+0), b8(i+9)
-#define b32(i) 	b16(i+0), b16(i+18)
-#define b64(i)  b32(i+0), b32(i+36)
+#define maskoff(n) (-1ULL >> (8*sizeof(0ULL) - n))
+
+#define pat(b)   0x01##b, 0x03##b, 0x07##b, 0x0f##b
+#define pat8(b)  pat(b), pat(f##b)
+#define pat16(b) pat8(b), pat8(ff##b)
+#define pat32(b) pat16(b), pat16(ffff##b)
+#define pat64(b) pat32(b), pat32(ffffffff##b)
+
+#define patterns(bw) \
+    uint##bw const  u##bw##_pat[] = {0, pat##bw() }; \
+    int##bw const * s##bw##_pat   = reinterpret_cast<int##bw const *>(u##bw##_pat)
 
 //#define BENCHMARK 40000000
 #if defined BENCHMARK
@@ -51,18 +58,16 @@ using namespace graphite2;
 #endif
 
 
-typedef     unsigned long   uint64;
-typedef     signed long     int64;
+typedef     unsigned long long   uint64;
+typedef     signed long long     int64;
 namespace
 {
-	uint8 	u8_pat[] = { b8(0) };
-	int8 	s8_pat[] = { b8(0) };
-	uint16 	u16_pat[] = { b16(0) };
-	int16 	s16_pat[] = { b16(0) };
-	uint32 	u32_pat[] = { b32(0) };
-	int32 	s32_pat[] = { b32(0) };
-	uint64 	u64_pat[] = { b64(0) };
-	int64 	s64_pat[] = { b64(0) };
+    patterns(8);
+    patterns(16);
+    patterns(32);
+#ifdef __x86_64__
+    patterns(64);
+#endif
 
     int ret = 0;
 
@@ -91,7 +96,7 @@ namespace
 			                    << std::hex 
 			                    << std::setw(sizeof(T)*2) 
 			                    << std::setfill('0') 
-			                    << static_cast<unsigned long>(pat[p]) 
+			                    << static_cast<unsigned long>(pat[p] & maskoff(8*sizeof(T)))
 		                << ")) -> "  
 		                    << std::dec 
 	                        <<  bit_set_count(pat[p]) << std::endl;
@@ -108,6 +113,8 @@ namespace
 
 int main(int argc , char *argv[])
 {
+    assert(sizeof(uint64) == 8);
+
     benchmark()
     {
         // Test bit_set_count
@@ -117,8 +124,10 @@ int main(int argc , char *argv[])
         test_bit_set_count(s16_pat);
         test_bit_set_count(u32_pat);
         test_bit_set_count(s32_pat);
+#ifdef __x86_64__
         test_bit_set_count(u64_pat);
         test_bit_set_count(s64_pat);
+#endif
     }
     
     return ret;

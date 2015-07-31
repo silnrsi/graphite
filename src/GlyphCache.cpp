@@ -145,7 +145,7 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
         }
         else if (numsubs > 0)
         {
-            GlyphBox * boxes = (GlyphBox *)gralloc<char>(_num_glyphs * sizeof(GlyphBox) + numsubs * 8 * sizeof(float));
+            GlyphBox * boxes = (GlyphBox *)gralloc<char>(_num_glyphs * sizeof(GlyphBox) + (numsubs-1) * 8 * sizeof(float));
             GlyphBox * currbox = boxes;
 
             for (uint16 gid = 0; currbox && gid != _num_glyphs; ++gid)

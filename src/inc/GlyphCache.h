@@ -85,7 +85,7 @@ private:
     uint8   _num;
     unsigned short  _bitmap;
     Rect    _slant;
-    Rect    _subs[0];
+    Rect    _subs[1];
 };
 
 class GlyphCache
