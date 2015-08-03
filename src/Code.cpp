@@ -119,6 +119,7 @@ private:
     limits            & _max;
     analysis            _analysis;
     enum passtype       _passtype;
+    int                 _stack_depth;
 };
 
 
@@ -137,7 +138,8 @@ inline Machine::Code::decoder::decoder(limits & lims, Code &code, enum passtype 
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
-  _instr(code._code), _data(code._data), _max(lims), _passtype(pt)
+  _instr(code._code), _data(code._data), _max(lims), _passtype(pt),
+  _stack_depth(0)
 { }
     
 
@@ -276,24 +278,22 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
     switch (opc)
     {
         case NOP :
+            break;
         case PUSH_BYTE :
         case PUSH_BYTEU :
         case PUSH_SHORT :
         case PUSH_SHORTU :
         case PUSH_LONG :
+            ++_stack_depth;
+            break;
         case ADD :
         case SUB :
         case MUL :
         case DIV :
         case MIN_ :
         case MAX_ :
-        case NEG :
-        case TRUNC8 :
-        case TRUNC16 :
-        case COND :
         case AND :
         case OR :
-        case NOT :
         case EQUAL :
         case NOT_EQ :
         case LESS :
@@ -302,8 +302,22 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case GTR_EQ :
         case BITOR :
         case BITAND :
+            if (--_stack_depth <= 0)
+                failure(underfull_stack);
+            break;
+        case NEG :
+        case TRUNC8 :
+        case TRUNC16 :
+        case NOT :
         case BITNOT :
         case BITSET :
+            if (_stack_depth <= 0)
+                failure(underfull_stack);
+            break;
+        case COND :
+            _stack_depth -= 2;
+            if (_stack_depth <= 0)
+                failure(underfull_stack);
             break;
         case NEXT :
         case NEXT_N :           // runtime checked
@@ -350,41 +364,52 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case ATTR_ADD :
         case ATTR_SUB :
         case ATTR_SET_SLOT :
+            if (--_stack_depth < 0)
+                failure(underfull_stack);
             valid_upto(gr_slatMax, bc[0]);
             test_context();
             break;
         case IATTR_SET_SLOT :
+            if (--_stack_depth < 0)
+                failure(underfull_stack);
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
             test_context();
             break;
         case PUSH_SLOT_ATTR :
+            ++_stack_depth;
             valid_upto(gr_slatMax, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             break;
         case PUSH_GLYPH_ATTR_OBS :
+            ++_stack_depth;
             valid_upto(_max.glyf_attrs, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             break;
         case PUSH_GLYPH_METRIC :
+            ++_stack_depth;
             valid_upto(kgmetDescent, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             // level: dp[2] no check necessary
             break;
         case PUSH_FEAT :
+            ++_stack_depth;
             valid_upto(_max.features, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             break;
         case PUSH_ATT_TO_GATTR_OBS :
+            ++_stack_depth;
             valid_upto(_max.glyf_attrs, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             break;
         case PUSH_ATT_TO_GLYPH_METRIC :
+            ++_stack_depth;
             valid_upto(kgmetDescent, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
             // level: dp[2] no check necessary
             break;
         case PUSH_ISLOT_ATTR :
+            ++_stack_depth;
             if (valid_upto(gr_slatMax, bc[0]))
             {
                 valid_upto(_rule_length, _pre_context + int8(bc[1]));
@@ -392,19 +417,25 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             }
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
+            ++_stack_depth;
         case POP_RET :
+            if (--_stack_depth < 0)
+                failure(underfull_stack);
         case RET_ZERO :
         case RET_TRUE :
             break;
         case IATTR_SET :
         case IATTR_ADD :
         case IATTR_SUB :
+            if (--_stack_depth < 0)
+                failure(underfull_stack);
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
             test_context();
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
         case PUSH_VERSION :
+            ++_stack_depth;
             break;
         case PUT_SUBS :
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
@@ -421,6 +452,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             break;
         case PUSH_GLYPH_ATTR :
         case PUSH_ATT_TO_GLYPH_ATTR :
+            ++_stack_depth;
             valid_upto(_max.glyf_attrs, uint16(bc[0]<< 8) | bc[1]);
             valid_upto(_rule_length, _pre_context + int8(bc[2]));
             break;

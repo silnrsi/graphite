@@ -64,7 +64,8 @@ public:
         jump_past_end,
         arguments_exhausted,
         missing_return,
-        nested_context_item
+        nested_context_item,
+        underfull_stack
     };
 
 private:
