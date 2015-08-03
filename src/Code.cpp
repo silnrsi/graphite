@@ -95,7 +95,7 @@ public:
 
     };
     
-    decoder(const limits & lims, Code &code, enum passtype pt) throw();
+    decoder(limits & lims, Code &code, enum passtype pt) throw();
     
     bool        load(const byte * bc_begin, const byte * bc_end);
     void        apply_analysis(instr * const code, instr * code_end);
@@ -116,7 +116,7 @@ private:
     uint16              _rule_length;
     instr             * _instr;
     byte              * _data;
-    const limits      & _max;
+    limits            & _max;
     analysis            _analysis;
     enum passtype       _passtype;
 };
@@ -124,7 +124,7 @@ private:
 
 struct Machine::Code::decoder::limits
 {
-  const byte * const bytecode;
+  const byte       * bytecode;
   const uint8        pre_context;
   const uint16       rule_length,
                      classes,
@@ -133,7 +133,7 @@ struct Machine::Code::decoder::limits
   const byte         attrid[gr_slatMax];
 };
    
-inline Machine::Code::decoder::decoder(const limits & lims, Code &code, enum passtype pt) throw()
+inline Machine::Code::decoder::decoder(limits & lims, Code &code, enum passtype pt) throw()
 : _code(code),
   _pre_context(code._constraint ? 0 : lims.pre_context), 
   _rule_length(code._constraint ? 1 : lims.rule_length), 
@@ -172,7 +172,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
         return;
     }
     
-    const decoder::limits lims = {
+    decoder::limits lims = {
         bytecode_end,
         pre_context,
         rule_length,
@@ -246,6 +246,7 @@ Machine::Code::~Code() throw ()
 
 bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
 {
+    _max.bytecode = bc_end;
     while (bc < bc_end)
     {
         const opcode opc = fetch_opcode(bc++);
@@ -535,16 +536,20 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         byte & instr_skip = _data[-1];
         byte & data_skip  = *_data++;
         ++_code._data_size;
+        const byte *curr_end = _max.bytecode;
 
         if (load(bc, bc + instr_skip))
         {
             bc += instr_skip;
             data_skip  = instr_skip - (_code._instr_count - ctxt_start);
             instr_skip = _code._instr_count - ctxt_start;
+            _max.bytecode = curr_end;
 
             _rule_length = 1;
             _pre_context = 0;
         }
+        else
+            return false;
     }
     
     return bool(_code);
@@ -583,7 +588,7 @@ bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * cons
     }
     const opcode_t & op = Machine::getOpcodeTable()[opc];
     const size_t param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;
-    if (bc + param_sz > _max.bytecode)
+    if (bc - 1 + param_sz > _max.bytecode)
     {
         failure(arguments_exhausted);
         return false;
