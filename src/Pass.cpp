@@ -859,7 +859,7 @@ bool Pass::collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) co
             c->setShift(nullPosition);
         }
     }
-    seg->positionSlots();
+//    seg->positionSlots();
 
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)

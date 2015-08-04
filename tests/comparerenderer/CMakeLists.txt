@@ -3,7 +3,7 @@ project(comparerenderer)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     if (GRAPHITE2_ASAN)
         set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
-        set(GLIB_LD_FLAGS "c++")
+        set(GLIB_LD_FLAGS "stdc++")
     endif (GRAPHITE2_ASAN)
     set(RT_LDFLAGS "rt")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -50,7 +50,6 @@ comparetest(piglatin PigLatinBenchmark_v3.ttf udhr_eng.txt)
 # silgraphite and gr2 bidi algorithms don't quite agree enough
 comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
 comparetest(annapurna_nep Annapurnarc2.ttf udhr_nep.txt)
-#comparetest(nafees Nafees_gr.ttf nafees_tests.txt)
 
 # comparerenderer can also be used for font testing
 # install(TARGETS comparerenderer EXPORT comparerenderer RUNTIME DESTINATION bin)
