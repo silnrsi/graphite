@@ -111,7 +111,7 @@ function(cmptest TESTNAME FONTFILE TEXTFILE)
     endif (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
     if (NOT (GRAPHITE2_NFILEFACE))
         add_test(NAME ${TESTNAME} COMMAND python ${PROJECT_SOURCE_DIR}/fnttxtrender -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json -c ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
-        set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 10)
+        set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 30)
     endif (NOT (GRAPHITE2_NFILEFACE))
 endfunction(cmptest)
 

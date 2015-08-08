@@ -34,13 +34,14 @@ grfiles = {
     'darwin' : 'libgraphite2.dylib',
     'linux2' : 'libgraphite2.so',
     'win32' : 'graphite2.dll',
-    'win64' : 'graphite2-x64.dll'
+    'win64' : 'graphite2-x64.dll',
+    'gnukfreebsd9' : 'libgraphite2.so'
 }
 gr2 = None
 if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
     grfile = grfiles['win64']
 else :
-    grfile = grfiles[sys.platform]
+    grfile = grfiles.get(sys.platform, grfiles['linux2'])
 for b in (os.path.join(b,'src',c) for b in basedirs for c in ('', 'Debug', 'Release', 'DebWithRelInfo', 'MinSizeRel')):
     testfile = os.path.join(b, grfile)
     print "Trying " + testfile
