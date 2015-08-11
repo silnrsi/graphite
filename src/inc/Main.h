@@ -128,5 +128,5 @@ inline T max(const T a, const T b)
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4800)
-#pragma warning(once: 4355)
+#pragma warning(disable: 4355)
 #endif
