@@ -13,8 +13,9 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(sparsetest sparsetest.cpp)
 target_link_libraries(sparsetest graphite2-base)
-if (GRAPHITE2_ASAN)
-    set_target_properties(sparsetest PROPERTIES LINK_FLAGS "-fsanitize=address")
-endif (GRAPHITE2_ASAN)
 
 add_test(NAME sparsetest COMMAND $<TARGET_FILE:sparsetest>)
+if (GRAPHITE2_ASAN)
+    set_target_properties(sparsetest PROPERTIES LINK_FLAGS "-fsanitize=address")
+    set_property(TEST sparsetest APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
+endif (GRAPHITE2_ASAN)

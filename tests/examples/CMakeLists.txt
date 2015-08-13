@@ -24,6 +24,9 @@ macro(test_example TESTNAME SRCFILE)
 
     add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
     set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
+    if (GRAPHITE2_ASAN)
+        set_property(TEST ${TESTNAME} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
+    endif (GRAPHITE2_ASAN)
 endmacro(test_example)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

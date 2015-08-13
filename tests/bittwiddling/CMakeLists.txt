@@ -13,8 +13,9 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 add_executable(bits bits.cpp)
 target_link_libraries(bits graphite2-base)
-if (GRAPHITE2_ASAN)
-    set_target_properties(bits PROPERTIES LINK_FLAGS "-fsanitize=address")
-endif (GRAPHITE2_ASAN)
 
 add_test(NAME bits COMMAND $<TARGET_FILE:bits>)
+if (GRAPHITE2_ASAN)
+    set_target_properties(bits PROPERTIES LINK_FLAGS "-fsanitize=address")
+    set_property(TEST bits APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
+endif (GRAPHITE2_ASAN)
