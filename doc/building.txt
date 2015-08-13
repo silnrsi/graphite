@@ -36,12 +36,12 @@ It is possible to use clang and also the addresss sanitizer (in clang 3.3 or lat
 to build and test Graphite. Use this build command:
 
 ----
-C=clang CXX=clang cmake .. -DGRAPHITE2_ASAN:BOOL=True
+CC=clang CXX=clang++ cmake .. -DGRAPHITE2_ASAN:BOOL=True
 make
 ----
 
-Bear in mind that ASAN will not work with ulimit constraints so running the fuzztest
-may result in problems.
+Bear in mind that ASAN will not work with ulimit constraints so running the 
+fuzztest may result in problems. You will need libc++ libc++-abi see clang-asan section of <<X2,Limitations>>.
 
 === Windows ===
 
@@ -172,4 +172,9 @@ g++-multilib::
     required for successful linking. These are the `g++-multilib` and 
     `libc6-dev-i386` packages on Debian and derivatives and `glibc-devel.i686`, 
     `glibc-devel` and `libstdc++-devel.i686` on Redhat OSs
+
+clang-asan::
+    To build with clang under linux you will need to ensure you have installed 
+    libc++ and libc++abi packages. The easiest way to do on Debian & derivatives
+    is to install the libc++-dev and libc++abi-dev packages.
 
