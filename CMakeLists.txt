@@ -7,11 +7,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif (NOT CMAKE_BUILD_TYPE)
-#if (CMAKE_BUILD_TYPE STREQUAL ClangASN)
-#    add_definitions(-fsanitize=address -fno-omit-frame-pointer)
-#    set_property(CACHE CMAKE_C_COMPILER PROPERTY VALUE clang)
-#    set_property(CACHE CMAKE_CXX_COMPILER PROPERTY VALUE clang)
-#endif (CMAKE_BUILD_TYPE STREQUAL ClangASN)
 
 enable_language(CXX C)
 
@@ -42,7 +37,7 @@ if (GRAPHITE2_ASAN)
     add_definitions(-fsanitize=address -fno-omit-frame-pointer -g)
     find_program(ASAN_SYMBOLIZER llvm-symbolizer
             PATHS "/usr/lib" "/usr/local/lib"
-            PATH_SUFFIXES "llvm-3.3/bin" "llvm-3.4/bin" "llvm-3.5/bin")
+            PATH_SUFFIXES "llvm-3.5/bin" "llvm-3.4/bin" "llvm-3.3/bin")
 endif (GRAPHITE2_ASAN)
 
 string(TOLOWER ${GRAPHITE2_VM_TYPE} GRAPHITE2_VM_TYPE)
