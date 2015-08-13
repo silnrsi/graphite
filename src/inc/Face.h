@@ -206,6 +206,7 @@ Face::Table::~Table() throw()
         free(const_cast<byte *>(_p));
     else if (_p && _f->m_ops.release_table)
         (*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
+    _p = 0; _sz = 0;
 }
 
 inline
