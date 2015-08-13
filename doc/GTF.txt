@@ -506,8 +506,8 @@ approaches are supported in the ClassMap table structure:
 
 |USHORT |numLinear |Number of linearly stored replacement classes |
 
-|USHORT |oClass[ ] |Array of numClass + 1 offsets to class arrays from
-the beginning of the class map |
+|ULONG |oClass[ ] |Array of numClass + 1 offsets to class arrays from
+the beginning of the class map | 4.0 changed from USHORT
 
 |USHORT |glyphs[ ] |Glyphs for linear classes |
 

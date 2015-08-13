@@ -229,7 +229,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 {
     using namespace Sfnt;
     
-    if (pTable == 0) return false;
+    if (pTable == 0 || lTableSize == 0) return false;
 
     switch(TableId)
     {
@@ -237,6 +237,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::CharacterCodeMap * const pCmap 
             = reinterpret_cast<const Sfnt::CharacterCodeMap *>(pTable);
+        if (lTableSize < sizeof(Sfnt::CharacterCodeMap))
+            return false;
         return be::swap(pCmap->version) == 0;
     }
 
@@ -244,6 +246,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::FontHeader * const pHead 
             = reinterpret_cast<const Sfnt::FontHeader *>(pTable);
+        if (lTableSize < sizeof(Sfnt::FontHeader))
+            return false;
         bool r = be::swap(pHead->version) == OneFix
             && be::swap(pHead->magic_number) == FontHeader::MagicNumber
             && be::swap(pHead->glyph_data_format)
@@ -260,6 +264,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::PostScriptGlyphName * const pPost 
             = reinterpret_cast<const Sfnt::PostScriptGlyphName *>(pTable);
+        if (lTableSize < sizeof(Sfnt::PostScriptGlyphName))
+            return false;
         const fixed format = be::swap(pPost->format);
         bool r = format == PostScriptGlyphName::Format1 
             || format == PostScriptGlyphName::Format2 
@@ -272,6 +278,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::HorizontalHeader * pHhea = 
             reinterpret_cast<const Sfnt::HorizontalHeader *>(pTable);
+        if (lTableSize < sizeof(Sfnt::HorizontalHeader))
+            return false;
         bool r = be::swap(pHhea->version) == OneFix
             && be::swap(pHhea->metric_data_format) == 0
             && sizeof (Sfnt::HorizontalHeader) <= lTableSize;
@@ -282,6 +290,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::MaximumProfile * pMaxp = 
             reinterpret_cast<const Sfnt::MaximumProfile *>(pTable);
+        if (lTableSize < sizeof(Sfnt::MaximumProfile))
+            return false;
         bool r = be::swap(pMaxp->version) == OneFix
             && sizeof(Sfnt::MaximumProfile) <= lTableSize;
         return r;
@@ -326,6 +336,8 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
     {
         const Sfnt::FontNames * pName 
             = reinterpret_cast<const Sfnt::FontNames *>(pTable);
+        if (lTableSize < sizeof(Sfnt::FontNames))
+            return false;
         return be::swap(pName->format) == 0;
     }
 
@@ -798,7 +810,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
     size_t cLongHorMetrics = be::swap(phhea->num_long_hor_metrics);
     if (nGlyphId < cLongHorMetrics) 
     {   // glyph id is acceptable
-        if (nGlyphId * sizeof(Sfnt::HorizontalMetric) >= lHmtxSize) return false;
+        if ((nGlyphId + 1) * sizeof(Sfnt::HorizontalMetric) > lHmtxSize) return false;
         nAdvWid = be::swap(phmtx[nGlyphId].advance_width);
         nLsb = be::swap(phmtx[nGlyphId].left_side_bearing);
     }
@@ -808,7 +820,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
         size_t lLsbOffset = sizeof(Sfnt::HorizontalMetric) * cLongHorMetrics +
             sizeof(int16) * (nGlyphId - cLongHorMetrics); // offset in bytes
         // We test like this as LsbOffset is an offset not a length.
-        if (lLsbOffset > lHmtxSize - sizeof(int16))
+        if (lLsbOffset >= lHmtxSize - sizeof(int16))
         {
             nLsb = 0;
             return false;
@@ -875,7 +887,7 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft Unicode subtable for expected values
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable4(const void * pCmapSubtable4 /*, unsigned int maxgid*/)
+bool CheckCmapSubtable4(const void * pCmapSubtable4, size_t table_len /*, unsigned int maxgid*/)
 {
     if (!pCmapSubtable4) return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
@@ -884,6 +896,8 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4 /*, unsigned int maxgid*/)
     if (be::swap(pTable->format) != 4) return false;
     const Sfnt::CmapSubTableFormat4 * pTable4 = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmapSubtable4);
     uint16 length = be::swap(pTable4->length);
+    if (length > table_len)
+        return false;
     if (length < sizeof(Sfnt::CmapSubTableFormat4))
         return false;
     uint16 nRanges = be::swap(pTable4->seg_count_x2) >> 1;
@@ -1064,7 +1078,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft UCS-4 subtable for expected values.
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable12(const void *pCmapSubtable12 /*, unsigned int maxgid*/)
+bool CheckCmapSubtable12(const void *pCmapSubtable12, size_t table_len /*, unsigned int maxgid*/)
 {
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
@@ -1072,6 +1086,8 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12 /*, unsigned int maxgid*/)
         return false;
     const Sfnt::CmapSubTableFormat12 * pTable12 = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmapSubtable12);
     uint32 length = be::swap(pTable12->length);
+    if (length > table_len)
+        return false;
     if (length < sizeof(Sfnt::CmapSubTableFormat12))
         return false;
     uint32 num_groups = be::swap(pTable12->num_groups);
