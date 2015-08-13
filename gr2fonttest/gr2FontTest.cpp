@@ -517,7 +517,7 @@ void Parameters::printFeatures(const gr_face * face) const
         fprintf(log, "\t");
         for (size_t j = 4; j; --j)
         {
-        	const char c = lang_id >> (j*8-8);
+        	const unsigned char c = lang_id >> (j*8-8);
             if ((c >= 0x20) && (c < 0x80))
                 fprintf(log, "%c", c);
         }

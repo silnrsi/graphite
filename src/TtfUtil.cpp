@@ -62,8 +62,10 @@ Description
 ***********************************************************************************************/
 namespace 
 {
+#ifdef ALL_TTFUTILS
     // max number of components allowed in composite glyphs
     const int kMaxGlyphComponents = 8;
+#endif
 
     template <int R, typename T>
     inline float fixed_to_float(const T f) {

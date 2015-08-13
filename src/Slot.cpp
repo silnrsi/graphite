@@ -192,7 +192,6 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
 
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
-    if (!this) return 0;
     if (ind == gr_slatUserDefnV1)
     {
         ind = gr_slatUserDefn;
@@ -272,7 +271,6 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 
 void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
 {
-    if (!this) return;
     if (ind == gr_slatUserDefnV1)
     {
         ind = gr_slatUserDefn;

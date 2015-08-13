@@ -31,7 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/CharInfo.h"
 #include "inc/Slot.h"
 #include "inc/Main.h"
-#include <math.h>
+#include <cmath>
 
 using namespace graphite2;
 
@@ -170,7 +170,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
                 }
             }
             currWidth += diff - error;
-        } while (i == 0 && int(abs(error)) > 0 && tWeight);
+        } while (i == 0 && int(std::abs(error)) > 0 && tWeight);
     }
 
     Slot *oldFirst = m_first;
