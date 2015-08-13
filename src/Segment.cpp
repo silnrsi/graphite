@@ -68,8 +68,10 @@ Segment::~Segment()
 {
     for (SlotRope::iterator i = m_slots.begin(); i != m_slots.end(); ++i)
         free(*i);
-    for (AttributeRope::iterator j = m_userAttrs.begin(); j != m_userAttrs.end(); ++j)
-        free(*j);
+    for (AttributeRope::iterator i = m_userAttrs.begin(); i != m_userAttrs.end(); ++i)
+        free(*i);
+    for (JustifyRope::iterator i = m_justifies.begin(); i != m_justifies.end(); ++i)
+        free(*i);
     delete[] m_charinfo;
 }
 

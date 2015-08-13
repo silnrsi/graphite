@@ -48,7 +48,7 @@ namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
-typedef Vector<int16 *>        AttributeRope;
+typedef Vector<int16 *>         AttributeRope;
 typedef Vector<SlotJustify *>   JustifyRope;
 
 #ifndef GRAPHITE2_NSEGCACHE
