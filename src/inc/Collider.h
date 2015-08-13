@@ -118,8 +118,8 @@ private:
 	
 };  // end of class SlotColllision
 
-class BBox;
-class SlantBox;
+struct BBox;
+struct SlantBox;
 
 class ShiftCollider
 {

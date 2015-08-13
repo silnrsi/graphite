@@ -78,7 +78,8 @@ namespace
     typedef _glat_iterator<uint16>  glat2_iterator;
 }
 
-const Rect GlyphCache::nullRect = Rect();
+const SlantBox SlantBox::empty = {0,0,0,0};
+
 
 class GlyphCache::Loader
 {

@@ -77,7 +77,6 @@ struct context
 
 } // end namespace
 
-byte * Machine::Code::local_memory = 0;
 
 class Machine::Code::decoder
 {
@@ -146,7 +145,7 @@ inline Machine::Code::decoder::decoder(limits & lims, Code &code, enum passtype 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
            uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face,
-           enum passtype pt, byte * & _out)
+           enum passtype pt, byte * * const _out)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(_out==0)
 {
@@ -164,7 +163,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     
     // Allocate code and dat target buffers, these sizes are a worst case 
     // estimate.  Once we know their real sizes the we'll shrink them.
-    if (_out)   _code = reinterpret_cast<instr *>(_out);
+    if (_out)   _code = reinterpret_cast<instr *>(*_out);
     else        _code = static_cast<instr *>(malloc((bytecode_end - bytecode_begin)
                                              * (sizeof(instr)+sizeof(byte))));
     _data = reinterpret_cast<byte *>(_code + (bytecode_end - bytecode_begin));
@@ -220,7 +219,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     memmove(_code + (_instr_count+1), _data, _data_size*sizeof(byte));
     size_t const total_sz = ((_instr_count+1) + (_data_size + sizeof(instr)-1)/sizeof(instr))*sizeof(instr);
     if (_out)
-        _out += total_sz;
+        *_out += total_sz;
     else
         _code = static_cast<instr *>(realloc(_code, total_sz));
    _data = reinterpret_cast<byte *>(_code + (_instr_count+1));

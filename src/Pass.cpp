@@ -235,8 +235,8 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end)
             return false;
-        r->action     = new (m_codes+n*2-2) vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face, pt, prog_pool_free);
-        r->constraint = new (m_codes+n*2-1) vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, pt, prog_pool_free);
+        r->action     = new (m_codes+n*2-2) vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face, pt, &prog_pool_free);
+        r->constraint = new (m_codes+n*2-1) vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, pt, &prog_pool_free);
 
         if (e.test(!r->action || !r->constraint, E_OUTOFMEM)
                 || e.test(r->action->status() != Code::loaded, r->action->status() + E_CODEFAILURE)
