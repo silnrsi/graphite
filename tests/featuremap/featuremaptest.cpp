@@ -243,7 +243,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 {
     FeatureMap testFeatureMap;
     dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
-    const gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
+    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
     if (!face) throw std::runtime_error("failed to load font");
     bool readStatus = testFeatureMap.readFeats(*face);
     testAssert("readFeats", readStatus);
@@ -264,11 +264,13 @@ template <class T> void testFeatTable(const T & table, const char * testName)
                        table.m_settings[settingsIndex+j].m_label);
         }
     }
+    gr_face_destroy(face);
 }
 
 int main(int argc, char * argv[])
 {
-	try
+    gr_face * face = 0;
+    try
 	{
 		if (argc != 2)	throw std::length_error("not enough arguments: need a backing font");
 
@@ -283,15 +285,17 @@ int main(int argc, char * argv[])
 		// test a bad settings offset stradling the end of the table
 		FeatureMap testFeatureMap;
 		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
-		const gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
+		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
 		bool readStatus = testFeatureMap.readFeats(*face);
 		testAssert("fail gracefully on bad table", !readStatus);
 	}
 	catch (std::exception & e)
 	{
 		fprintf(stderr, "%s: %s\n", argv[0], e.what());
+		gr_face_destroy(face);
 		return 1;
 	}
 
+    gr_face_destroy(face);
     return 0;
 }

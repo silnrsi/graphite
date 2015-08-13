@@ -110,8 +110,10 @@ void testName(void * data, size_t length, uint16 langId,
     if ((n == NULL) || (strncmp(n, utf8Text, strLen) != 0))
     {
         fprintf(stderr, "name=%s expected=%s\n", n, utf8Text);
+        free(n);
         exit(1);
     }
+    free(n);
     if (lang != actualLang)
     {
         fprintf(stderr, "lang=%x actual=%x\n", lang, actualLang);
@@ -188,6 +190,7 @@ int main(int, char **)
     testLangId(testAData, sizeof(NameTestA), "my-Mymr", 0x455);
     testLangId(testAData, sizeof(NameTestA), "my-Mymr-MM", 0x455);
     testLangId(testAData, sizeof(NameTestA), "en-GB-Cockney", 0x809);
+    free(testAData);
 
     struct NameTestB* testBData = toBigEndian<struct NameTestB>(testB);
     testLangId(testBData, sizeof(NameTestB), "en-US", 0x409);
@@ -199,6 +202,7 @@ int main(int, char **)
     testName(testBData, sizeof(NameTestB), 0x8000, 0x8000, 7, "ကၢၤ");
     testName(testBData, sizeof(NameTestB), 0x8001, 0x8001, 7, "ၜ");
     testName(testBData, sizeof(NameTestB), 0x8002, 0x409, 1, "Aa");
+    free(testBData);
 
     return 0;
 }

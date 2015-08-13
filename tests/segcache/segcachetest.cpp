@@ -122,10 +122,10 @@ bool testSeg(CachedFace
     gr_segment * segA = gr_make_seg(sizedFont, api_cast(face), 0, NULL, gr_utf8, testString,
                         *testLength, 0);
     assert(segA);
-    if ((gr_seg_n_slots(segA) == 0) ||
-        !checkEntries(face, testString, *testGlyphString, *testLength))
-        return false;
-   return true;
+    const bool result = (gr_seg_n_slots(segA) != 0)
+                     && checkEntries(face, testString, *testGlyphString, *testLength);
+    gr_seg_destroy(segA);
+    return result;
 }
 
 int main(int argc, char ** argv)
@@ -172,8 +172,9 @@ int main(int argc, char ** argv)
     }
     for (size_t i = 0; i < numTestStrings; i++)
     {
-        if (!checkEntries(face, testStrings[i], testGlyphStrings[i], testLengths[i]))
-            return -3;
+        const bool failed = !checkEntries(face, testStrings[i], testGlyphStrings[i], testLengths[i]);
+        free(testGlyphStrings[i]);
+        if (failed) return -3;
     }
     segCount = segCache->segmentCount();
     accessCount = segCache->totalAccessCount();
@@ -189,6 +190,7 @@ int main(int argc, char ** argv)
     testSeg(face, sizedFont, "ba", &len, &testGlyphString);
     segCount = segCache->segmentCount();
     accessCount = segCache->totalAccessCount();
+    free(testGlyphString);
     if (segCount > 10 || accessCount != 30)
     {
         fprintf(stderr, "SegCache after purge contains %u entries, which were used %lld times\n",
@@ -196,9 +198,9 @@ int main(int argc, char ** argv)
         return -2;
     }
     gr_font_destroy(sizedFont);
-    gr_face_destroy(api_cast(face));
     gr_featureval_destroy(defaultFeatures);
 
     gr_stop_logging(api_cast(face));
+    gr_face_destroy(api_cast(face));
     return 0;
 }

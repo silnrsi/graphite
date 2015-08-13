@@ -71,6 +71,7 @@ int main(int argc, char **argv)
         printf("\n");
     }
     free((void*)lineslots);
+    gr_seg_destroy(seg);
     gr_font_destroy(font);
     gr_face_destroy(face);
     return 0;
