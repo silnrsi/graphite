@@ -1,5 +1,9 @@
 project(comparerenderer)
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(RT_LDFLAGS "rt")
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src)
 
 file(GLOB PRIVATE_HEADERS *.h) 
