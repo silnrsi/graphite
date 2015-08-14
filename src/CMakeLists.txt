@@ -113,7 +113,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         LINK_FLAGS      "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" 
         LINKER_LANGUAGE C)
     if (CMAKE_COMPILER_IS_GNUCXX)
-        target_compile_options(graphite2 PRIVATE "-Wdouble-promotion")
+        add_definitions(-Wdouble-promotion)
     endif (CMAKE_COMPILER_IS_GNUCXX)
     if (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
         target_link_libraries(graphite2 kernel32 msvcr90 mingw32 gcc user32)
