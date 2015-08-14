@@ -70,7 +70,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     if (width < 0 && !(silf()->flags()))
         return width;
 
-    if ((m_dir & 1) != m_silf->dir())
+    if ((m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
     {
         reverseSlots();
         s = pFirst;
@@ -229,7 +229,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     m_first = oldFirst;
     m_last = oldLast;
 
-    if ((m_dir & 1) != m_silf->dir())
+    if ((m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
         reverseSlots();
     return res.x;
 }

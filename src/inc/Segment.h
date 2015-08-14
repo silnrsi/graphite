@@ -197,7 +197,7 @@ inline
 void Segment::finalise(const Font *font, bool reverse)
 {
     if (!m_first) return;
-    if (reverse && (m_dir & 1) != m_silf->dir())
+    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
         reverseSlots();
 
     m_advance = positionSlots(font, m_first, m_last, m_dir);
