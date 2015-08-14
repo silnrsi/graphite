@@ -22,45 +22,8 @@ from ctypes import *
 import ctypes.util
 import sys, os
 
-if getattr(sys, 'frozen', None) :
-    basedir = [sys._MEIPASS]
-#elif sys.platform == 'win32' :
-#    basedir = os.path.join(os.path.dirname(__file__), '..', 'dll')
-else :
-    #basedir = os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'src')
-    basedirs = [os.path.join('..', '..'), os.path.join('..'), os.path.join('..','build')]
-
-grfiles = {
-    'darwin' : 'libgraphite2.dylib',
-    'linux2' : 'libgraphite2.so',
-    'win32' : 'graphite2.dll',
-    'win64' : 'graphite2-x64.dll',
-    'gnukfreebsd9' : 'libgraphite2.so'
-}
-gr2 = None
-if sys.platform == 'win32' and sys.maxsize > (1 << 32) :
-    grfile = grfiles['win64']
-else :
-    grfile = grfiles.get(sys.platform, grfiles['linux2'])
-for b in (os.path.join(b,'src',c) for b in basedirs for c in ('', 'Debug', 'Release', 'DebWithRelInfo', 'MinSizeRel')):
-    testfile = os.path.join(b, grfile)
-    print "Trying " + testfile
-    try :
-        gr2 = CDLL(testfile)
-    except OSError :
-        gr2 = None
-    if gr2 is not None : break
-
-if not gr2 :
-    print "Trying general library"
-    grlibrary = ctypes.util.find_library("graphite2")
-    try :
-        gr2 = CDLL(grlibrary)
-    except :
-        gr2 = None
-
-if not gr2 :
-    raise RuntimeError, "Graphite2 library not found"
+grlibrary = ctypes.util.find_library("graphite2")
+gr2 = CDLL(grlibrary)
 
 def grversion() :
     a = c_int()

@@ -4,8 +4,6 @@ project(gr2fonttest)
 
 enable_testing()
 
-include_directories(${PROJECT_SOURCE_DIR})
-
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -14,17 +12,8 @@ add_executable(gr2fonttest gr2FontTest.cpp UtfCodec.cpp)
 target_link_libraries(gr2fonttest graphite2)
 
 if (GRAPHITE2_ASAN)
-    set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
+    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-fsanitize=address")
 endif (GRAPHITE2_ASAN)
-
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    # -lgcc LINKER_LANGUAGE C
-    add_definitions(-fno-rtti -fno-exceptions)
-    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" LINKER_LANGUAGE C)
-    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-    # This script just fails
-    nolib_test(stdc++ $<TARGET_FILE:gr2fonttest>)
-endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 # copy the DLL so that gr2fonttest can find it
 add_custom_target(${PROJECT_NAME}_copy_dll ALL 

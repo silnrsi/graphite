@@ -1,12 +1,5 @@
 project(comparerenderer)
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    if (GRAPHITE2_ASAN)
-        set(GRAPHITE_LINK_FLAGS "-fsanitize=address")
-    endif (GRAPHITE2_ASAN)
-    set(RT_LDFLAGS "rt")
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src)
 
 file(GLOB PRIVATE_HEADERS *.h) 
@@ -17,8 +10,12 @@ add_executable(comparerenderer
     ${PRIVATE_HEADERS}
     )
 
+if (GRAPHITE2_ASAN)
+    set_target_properties(comparerenderer PROPERTIES LINK_FLAGS "-fsanitize=address")
+endif (GRAPHITE2_ASAN)
+
 # rt is for timing
-target_link_libraries(comparerenderer graphite2-base graphite2 ${GRAPHITE_LINK_FLAGS} ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
+target_link_libraries(comparerenderer graphite2-base graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)

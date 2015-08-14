@@ -112,13 +112,16 @@ function(cmptest TESTNAME FONTFILE TEXTFILE)
     if (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
         set(PLATFORM_TEST_SUFFIX ${CMAKE_SYSTEM_NAME})
     endif (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
-    if (NOT (GRAPHITE2_NFILEFACE))
+    if (NOT (GRAPHITE2_NFILEFACE) AND CMAKE_COMPILER_IS_GNUCXX)
         add_test(NAME ${TESTNAME} COMMAND python ${PROJECT_SOURCE_DIR}/fnttxtrender -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json -c ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
         set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 30)
         if (GRAPHITE2_ASAN)
-            set_property(TEST ${TESTNAME} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
+            set_property(TEST ${TESTNAME} APPEND 
+                    PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}"
+                                         "LD_PRELOAD=libasan.so.1"
+                                         "LD_LIBRARY_PATH=${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/")
         endif (GRAPHITE2_ASAN)
-    endif (NOT (GRAPHITE2_NFILEFACE))
+    endif (NOT (GRAPHITE2_NFILEFACE) AND CMAKE_COMPILER_IS_GNUCXX)
 endfunction(cmptest)
 
 
