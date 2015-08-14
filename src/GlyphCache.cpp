@@ -348,10 +348,12 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
 
             if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
+            {
+                if ((xMin > xMax) || (yMin > yMax))
+                    return 0;
                 bbox = Rect(Position(static_cast<float>(xMin), static_cast<float>(yMin)),
                     Position(static_cast<float>(xMax), static_cast<float>(yMax)));
-            if (xMin > xMax || yMin > yMax)
-                return 0;
+            }
         }
         if (TtfUtil::HorMetrics(glyphid, _hmtx, _hmtx.size(), _hhea, nLsb, nAdvWid))
             advance = Position(static_cast<float>(nAdvWid), 0);
