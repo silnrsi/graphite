@@ -19,11 +19,16 @@
 
 
 from ctypes import *
-import ctypes.util
-import sys, os
+from ctypes.util import find_library
+import sys, os, platform
 
-grlibrary = ctypes.util.find_library("graphite2")
-gr2 = CDLL(grlibrary)
+# Load the library we use windll instead of cdll on Windows.
+if platform.system() == "Windows" :
+    gr2 = windll.LoadLibrary(find_library("graphite2"))
+    LOCALFUNCTYPE = WINFUNCTYPE
+else :
+    gr2 = cdll.LoadLibrary(find_library("graphite2"))
+    LOCALFUNCTYPE = CFUNCTYPE
 
 def grversion() :
     a = c_int()
@@ -42,8 +47,8 @@ class FaceInfo(Structure) :
                 ("extra_descent", c_ushort),
                 ("upem", c_ushort)]
 
-tablefn = CFUNCTYPE(c_void_p, c_void_p, c_uint, POINTER(c_size_t))
-advfn = CFUNCTYPE(c_float, c_void_p, c_ushort)
+tablefn = LOCALFUNCTYPE(c_void_p, c_void_p, c_uint, POINTER(c_size_t))
+advfn = LOCALFUNCTYPE(c_float, c_void_p, c_ushort)
 
 fn('gr_engine_version', None, POINTER(c_int), POINTER(c_int), POINTER(c_int))
 fn('gr_make_face', c_void_p, c_void_p, tablefn, c_uint)
