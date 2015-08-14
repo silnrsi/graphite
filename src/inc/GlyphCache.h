@@ -146,7 +146,7 @@ unsigned short  GlyphCache::unitsPerEm() const throw()
 inline
 bool GlyphCache::check(unsigned short glyphid) const
 {
-    return glyphid < _num_glyphs;
+    return _boxes && glyphid < _num_glyphs;
 }
 
 inline
