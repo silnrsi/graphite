@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     // run the program
     Segment seg;
     uint32 ret = 0;
-    SlotMap smap(seg);
+    SlotMap smap(seg, 0);
     Machine m(smap);
     smap.pushSlot(0);
     slotref * map = smap.begin();

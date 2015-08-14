@@ -22,7 +22,7 @@ ${TESTSDIR}/fuzztest \
     -f ${TESTSDIR}/fonts/${FONT}.ttf \
     ${NLIM} -s 60 \
     --include=required,graphite \
-    --exclude=fontdir,opentype,volt,advtypo,post \
+    --exclude=fontdir,opentype,volt,advtypo,post,glyf \
     "$@" -- comparerenderer/comparerenderer \
         -q -s 12 -n ${RTL} \
         -f {} -t ${TESTSDIR}/texts/${TEXT}.txt

@@ -86,17 +86,17 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool isFinal)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal)
 {
     SlotCollision *coll = NULL;
     if (attrLevel && m_attLevel > attrLevel) return Position(0, 0);
     float scale = font ? font->scale() : 1.0f;
-    Position shift(m_shift.x * ((seg->dir() & 1) * -2 + 1) + m_just, m_shift.y);
+    Position shift(m_shift.x * (rtl * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
     if (isFinal && (coll = seg->collisionInfo(this)))
     {
         const Position &collshift = coll->offset();
-        if (!(coll->flags() & SlotCollision::COLL_KERN) || (seg->dir() & 1))
+        if (!(coll->flags() & SlotCollision::COLL_KERN) || rtl)
             shift = shift + collshift;
     }
     const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(glyph());
@@ -134,13 +134,13 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, isFinal);
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal);
         if ((!m_parent || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, isFinal);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal);
         if (tRes.x > res.x) res = tRes;
     }
     
@@ -154,12 +154,12 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     return res;
 }
 
-int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel)
+int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, bool rtl)
 {
     Position base;
     Rect bbox = seg->theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, false);
+    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);
 
     switch (metrics(metric))
     {
@@ -297,7 +297,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             if (!other->isChildOf(this) && other->child(this))
             {
                 attachTo(other);
-                if (((seg->dir() & 1) != 0) ^ (idx > subindex))
+                if ((map.dir() != 0) ^ (idx > subindex))
                     m_with = Position(advance(), 0);
                 else        // normal match to previous root
                     m_attach = Position(other->advance(), 0);

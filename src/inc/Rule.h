@@ -94,7 +94,7 @@ class SlotMap
 {
 public:
   enum {MAX_SLOTS=64};
-  SlotMap(Segment & seg);
+  SlotMap(Segment & seg, uint8 direction);
   
   Slot       * * begin();
   Slot       * * end();
@@ -112,12 +112,15 @@ public:
   bool           highpassed() const { return m_highpassed; }
   void           highpassed(bool v) { m_highpassed = v; }
 
+  uint8          dir() const { return m_dir; }
+
   Segment &    segment;
 private:
   Slot         * m_slot_map[MAX_SLOTS+1];
   unsigned short m_size;
   unsigned short m_precontext;
   Slot         * m_highwater;
+  uint8          m_dir;
   bool           m_highpassed;
 };
 
@@ -231,8 +234,8 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 }
 
 inline
-SlotMap::SlotMap(Segment & seg)
-: segment(seg), m_size(0), m_precontext(0), m_highwater(0), m_highpassed(false)
+SlotMap::SlotMap(Segment & seg, uint8 direction)
+: segment(seg), m_size(0), m_precontext(0), m_highwater(0), m_dir(direction), m_highpassed(false)
 {
     m_slot_map[0] = 0;
 }

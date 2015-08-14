@@ -70,6 +70,13 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     if (width < 0 && !(silf()->flags()))
         return width;
 
+    if ((m_dir & 1) != m_silf->dir())
+    {
+        reverseSlots();
+        s = pFirst;
+        pFirst = pLast;
+        pLast = s;
+    }
     if (!pFirst) pFirst = pSlot;
     while (!pFirst->isBase()) pFirst = pFirst->attachedTo();
     if (!pLast) pLast = last();
@@ -203,7 +210,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     if (dbgout)
     {
         *dbgout     << json::item << json::close; // Close up the passes array
-        positionSlots(NULL, pSlot, pLast);
+        positionSlots(NULL, pSlot, pLast, m_dir);
         Slot *lEnd = pLast->nextSibling();
         *dbgout << "output" << json::array;
         for(Slot * t = pSlot; t != lEnd; t = t->next())
@@ -212,7 +219,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 #endif
 
-    res = positionSlots(font, pSlot, pLast);
+    res = positionSlots(font, pSlot, pLast, m_dir);
 
     if (silf()->flags() & 1)
     {
@@ -221,6 +228,9 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
     m_first = oldFirst;
     m_last = oldLast;
+
+    if ((m_dir & 1) != m_silf->dir())
+        reverseSlots();
     return res.x;
 }
 

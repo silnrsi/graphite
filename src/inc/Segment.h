@@ -124,7 +124,7 @@ public:
     void freeSlot(Slot *);
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
-    Position positionSlots(const Font *font=0, Slot *first=0, Slot *last=0, bool isFinal = true);
+    Position positionSlots(const Font *font=0, Slot *first=0, Slot *last=0, bool isRtl = false, bool isFinal = true);
     void associateChars(int offset, int num);
     void linkClusters(Slot *first, Slot *last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
@@ -142,7 +142,7 @@ public:
     unsigned int passBits() const { return m_passBits; }
     void mergePassBits(const unsigned int val) { m_passBits &= val; }
     int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
-    int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const;
+    int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
     float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
@@ -154,6 +154,7 @@ public:
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
     bool hasJustification() const { return m_justifies.size() != 0; }
+    void reverseSlots();
 
     bool isWhitespace(const int cid) const;
     bool hasCollisionInfo() const { return m_collisions != 0; }
@@ -163,7 +164,7 @@ public:
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
-    void finalise(const Font *font);
+    void finalise(const Font *font, bool reverse = true);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
     bool initCollisions();
   
@@ -193,21 +194,23 @@ private:
 
 
 inline
-void Segment::finalise(const Font *font)
+void Segment::finalise(const Font *font, bool reverse)
 {
     if (!m_first) return;
+    if (reverse && (m_dir & 1) != m_silf->dir())
+        reverseSlots();
 
-    m_advance = positionSlots(font);
+    m_advance = positionSlots(font, m_first, m_last, m_dir);
     //associateChars(0, m_numCharinfo);
     linkClusters(m_first, m_last);
 }
 
 inline
-int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel) const {
+int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const {
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);
-        return is->clusterMetric(this, metric, attrLevel);
+        return is->clusterMetric(this, metric, attrLevel, rtl);
     }
     else
         return m_face->getGlyphMetric(iSlot->gid(), metric);

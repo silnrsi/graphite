@@ -144,7 +144,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     m_aLig      = be::read<uint16>(p);
     m_aUser     = be::read<uint8>(p);
     m_iMaxComp  = be::read<uint8>(p);
-    be::skip<byte>(p);                          // direction
+    m_dir       = be::read<uint8>(p) - 1;
     m_aCollision = be::read<uint8>(p);
     be::skip<byte>(p,3);
     be::skip<uint16>(p, be::read<uint8>(p));    // don't need critical features yet
@@ -351,7 +351,7 @@ uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
 bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi) const
 {
     assert(seg != 0);
-    SlotMap            map(*seg);
+    SlotMap            map(*seg, m_dir);
     FiniteStateMachine fsm(map, seg->getFace()->logger());
     vm::Machine        m(map);
     unsigned int       initSize = seg->slotCount();
@@ -366,7 +366,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
             return true;
         lastPass = m_numPasses;
     }
-    if ((firstPass < lbidi || (dobidi && firstPass == lbidi)) && lastPass >= lbidi)
+    if ((firstPass < lbidi || (dobidi && firstPass == lbidi)) && (lastPass >= lbidi || (dobidi && lastPass + 1 == lbidi)))
         lastPass++;
     else
         lbidi = 0xFF;
@@ -382,7 +382,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
                 *dbgout << json::item << json::object
                             << "id"     << -1
                             << "slots"  << json::array;
-                seg->positionSlots(0);
+                seg->positionSlots(0, 0, 0, m_dir);
                 for(Slot * s = seg->first(); s; s = s->next())
                     *dbgout     << dslot(seg, s);
                 *dbgout         << json::close
@@ -392,7 +392,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
 #endif
 
             if (!(seg->dir() & 2))
-                seg->bidiPass(m_aBidi, seg->dir() & 1, m_aMirror);
+                seg->bidiPass(m_aBidi, lbidi == lastPass ? seg->dir() & 1 : m_dir, m_aMirror);
             else if (m_aMirror && (seg->dir() & 1))
             {
                 Slot * s;
@@ -415,7 +415,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
             *dbgout << json::item << json::object
                         << "id"     << i+1
                         << "slots"  << json::array;
-            seg->positionSlots(0);
+            seg->positionSlots(0, 0, 0, m_dir);
             for(Slot * s = seg->first(); s; s = s->next())
                 *dbgout     << dslot(seg, s);
             *dbgout         << json::close;

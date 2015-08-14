@@ -311,6 +311,25 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 }
 #endif // GRAPHITE2_NSEGCACHE
 
+void Segment::reverseSlots()
+{
+    Slot *t = 0;
+    Slot *curr = m_first;
+    Slot *out = 0;
+    while (curr)
+    {
+        if (out)
+            out->prev(curr);
+        t = curr->next();
+        curr->next(out);
+        out = curr;
+        curr = t;
+    }
+    out->prev(0);
+    m_first = m_last;
+    m_last = out;
+}
+
 void Segment::linkClusters(Slot *s, Slot * end)
 {
     end = end->next();
@@ -340,7 +359,7 @@ void Segment::linkClusters(Slot *s, Slot * end)
     }
 }
 
-Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bool isFinal)
+Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bool isRtl, bool isFinal)
 {
     Position currpos(0., 0.);
     float clusterMin = 0.;
@@ -349,12 +368,12 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bo
     if (!iStart)    iStart = m_first;
     if (!iEnd)      iEnd   = m_last;
 
-    if (m_dir & 1)
+    if (isRtl)
     {
         for (Slot * s = iEnd, * const end = iStart->prev(); s && s != end; s = s->prev())
         {
             if (s->isBase())
-                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x, isFinal);
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
         }
     }
     else
@@ -362,7 +381,7 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bo
         for (Slot * s = iStart, * const end = iEnd->next(); s && s != end; s = s->next())
         {
             if (s->isBase())
-                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x, isFinal);
+                currpos = s->finalise(this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
         }
     }
     return currpos;

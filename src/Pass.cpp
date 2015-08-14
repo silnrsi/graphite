@@ -395,13 +395,13 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
         {
-            m.slotMap().segment.positionSlots(0, 0, 0, true);
+            m.slotMap().segment.positionSlots(0, 0, 0, m.slotMap().dir(), true);
 //            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
-        if (!collisionShift(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
+        if (!collisionShift(&m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
             return false;
     }
-    if ((m_flags & 24) && !collisionKern(&m.slotMap().segment, m.slotMap().segment.dir(), fsm.dbgout))
+    if ((m_flags & 24) && !collisionKern(&m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
         return false;
     if ((m_flags & 15) && !collisionFinish(&m.slotMap().segment, fsm.dbgout))
         return false;
@@ -478,7 +478,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
                 if (r != re)
                 {
                     const int adv = doAction(r->rule->action, slot, m);
-                    dumpRuleEventOutput(fsm, *r->rule, slot);
+                    dumpRuleEventOutput(fsm, m, *r->rule, slot);
                     if (r->rule->action->deletes()) fsm.slots.collectGarbage();
                     adjustSlot(adv, slot, fsm.slots);
                     *fsm.dbgout << "cursor" << objectid(dslot(&fsm.slots.segment, slot))
@@ -533,7 +533,7 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
 }
 
 
-void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * const last_slot) const
+void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, Machine & m, const Rule & r, Slot * const last_slot) const
 {
     *fsm.dbgout     << json::item << json::flat << json::object
                         << "id"     << &r - m_rules
@@ -551,7 +551,7 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
                     << json::close // close "input"
                     << "slots"  << json::array;
     const Position rsb_prepos = last_slot ? last_slot->origin() : fsm.slots.segment.advance();
-    fsm.slots.segment.positionSlots(0);
+    fsm.slots.segment.positionSlots(0, 0, 0, m.slotMap().dir());
 
     for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
         *fsm.dbgout     << dslot(&fsm.slots.segment, slot);
@@ -944,7 +944,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                 Rect bbox;
                 Position here = slotFix->origin() + shift;
                 float clusterMin = here.x;
-                slotFix->firstChild()->finalise(seg, NULL, here, bbox, 0, clusterMin, false);
+                slotFix->firstChild()->finalise(seg, NULL, here, bbox, 0, clusterMin, rtl, false);
             }
         }
     }

@@ -190,7 +190,7 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
                 << "output" << json::array;
         for(Slot * s = seg->first(); s; s = s->next())
             *dbgout     << dslot(seg, s);
-        seg->finalise(0);                   // Call this here to fix up charinfo back indexes.
+        seg->finalise(0, false);                   // Call this here to fix up charinfo back indexes.
         *dbgout         << json::close
                 << "advance" << seg->advance()
                 << "chars"   << json::array;
