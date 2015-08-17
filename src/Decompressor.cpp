@@ -82,7 +82,8 @@ int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_s
     while (read_directive(src, src_end, literal_len, match_len, match_dist))
     {
         // Copy in literal
-        if (unlikely(dst + literal_len + sizeof(unsigned long) > dst_end)) return -1;
+        if (unlikely(src + literal_len + sizeof(unsigned long) > src_end
+                  || dst + literal_len + sizeof(unsigned long) > dst_end)) return -1;
         dst = memcpy_nooverlap(dst, src, literal_len);
         src += literal_len;
         
@@ -94,7 +95,8 @@ int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_s
         dst = memcpy_(dst, pcpy, match_len + MINMATCH);
     }
     
-    if (unlikely(dst + literal_len > dst_end)) return -1;
+    if (unlikely(src + literal_len > src_end
+              || dst + literal_len > dst_end)) return -1;
     dst = memcpy_nooverlap_surpass(dst, src, literal_len);
     
     return dst - (u8*)out;
