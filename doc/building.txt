@@ -32,16 +32,13 @@ make test
 ----
 You will need g++-multilib support see <<X2,Limitations>>
 
-It is possible to use clang and also the addresss sanitizer (in clang 3.3 or later)
-to build and test Graphite. Use this build command:
+It is possible to use clang to build and test Graphite. Use this build command:
 
 ----
-CC=clang CXX=clang++ cmake .. -DGRAPHITE2_ASAN:BOOL=True
+CC=clang CXX=clang++ cmake ..
 make
 ----
-
-Bear in mind that ASAN will not work with ulimit constraints so running the 
-fuzztest may result in problems. You will need libc++ libc++-abi see clang-asan section of <<X2,Limitations>>.
+You will need libc++ libc++-abi see clang-asan section of <<X2,Limitations>>.
 
 === Windows ===
 
@@ -120,7 +117,7 @@ There are various option settings that can be passed to cmake when generating.
 They are described here, along with their type and possible and default values. 
 Boolean values may take the value OFF or ON. Options may be set using 
 the -Doption=value command line option. 
-For example: -DGRAPHITE2_COMPARE_RENDERER=ON
+For example: -DGRAPHITE2_COMPARE_RENDERER:BOOL=ON
 
 CMAKE_BUILD_TYPE:STRING::
     This specifies which type of build to do. It is a string and may take the 
@@ -152,6 +149,17 @@ GRAPHITE2_VM_TYPE:STRING::
     The value of call tells the system to use the slower but more cross 
     compiler portable call based machine.
 
+GRAPHITE2_ASAN:BOOL::
+    This turns on copmile time support for Google's 
+    https://code.google.com/p/address-sanitizer/[ASAN] Address Sanitizer. 
+    This works with both gcc and clang, however under clang any tests driven by 
+    Python will not be run. These tests require the ASAN runtime as a shared 
+    library and currently clang only provides static version.
+
+Bear in mind that ASAN will not work with ulimit constraints so running the 
+fuzztest may result in problems. 
+
+
 [[X2]]
 === Limitations ===
 
@@ -173,7 +181,7 @@ g++-multilib::
     `libc6-dev-i386` packages on Debian and derivatives and `glibc-devel.i686`, 
     `glibc-devel` and `libstdc++-devel.i686` on Redhat OSs
 
-clang-asan::
+clang::
     To build with clang under linux you will need to ensure you have installed 
     libc++ and libc++abi packages. The easiest way to do on Debian & derivatives
     is to install the libc++-dev and libc++abi-dev packages.
