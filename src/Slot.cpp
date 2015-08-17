@@ -459,6 +459,8 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
         }
     }
     m_realglyphid = theGlyph->attrs()[seg->silf()->aPseudo()];
+    if (m_realglyphid > seg->getFace()->glyphs().numGlyphs())
+        m_realglyphid = 0;
     const GlyphFace *aGlyph = theGlyph;
     if (m_realglyphid)
     {
