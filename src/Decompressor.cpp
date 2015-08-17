@@ -55,8 +55,10 @@ bool read_directive(u8 const * &src, u8 const * const end, u32 & literal_len, u3
 {
     u8 const flag = *src++;
     
-    literal_len = read_literal<7>(src, end, flag >> 5);
-    match_len = read_literal<15>(src, end, flag & MATCH_LEN);
+    // We make end 2 bytes less here to ensure that read_literal will end with
+    // enough room to allow us to read a 16bit match_dist value without overrun
+    literal_len = read_literal<7>(src, end-2, flag >> 5);
+    match_len = read_literal<15>(src, end-2, flag & MATCH_LEN);
     
     match_dist = *src++;
     if (flag & LONG_DIST) 
