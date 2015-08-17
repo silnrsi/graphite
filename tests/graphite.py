@@ -19,16 +19,22 @@
 
 
 from ctypes import *
-from ctypes.util import find_library
+import ctypes.util
 import sys, os, platform
+
 
 # Load the library we use windll instead of cdll on Windows.
 if platform.system() == "Windows" :
-    gr2 = windll.LoadLibrary(find_library("graphite2"))
+    dll = windll
     LOCALFUNCTYPE = WINFUNCTYPE
 else :
-    gr2 = cdll.LoadLibrary(find_library("graphite2"))
+    dll = cdll
     LOCALFUNCTYPE = CFUNCTYPE
+
+gr2 = dll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH', 
+                                     ctypes.util.find_library("graphite2")))
+
+
 
 def grversion() :
     a = c_int()
