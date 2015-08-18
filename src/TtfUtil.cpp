@@ -1851,7 +1851,6 @@ bool GlyfContourEndPoints(gid16 nGlyphId, const void * pGlyf, const void * pLoca
         This range is parallel to the prgnX & prgnY
     Return true if successful, false otherwise. On false, all points may be INT_MIN
         False may indicate a white space glyph, a multi-level composite, or a corrupt font
-    // TODO: doesn't support composite glyphs whose components are themselves components
         It's not clear from the TTF spec when the transforms should be applied. Should the 
         transform be done before or after attachment point calcs? (current code - before) 
         Should the transform be applied to other offsets? (currently - no; however commented 
