@@ -543,8 +543,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
     }
     bool res = true;
-    //TODO: Coverty: 1315809: REVERSE_NULL
-    if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
+    if (cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
     {
         // Set up the bogus slot representing the exclusion glyph.
         Slot *exclSlot = seg->newSlot();
