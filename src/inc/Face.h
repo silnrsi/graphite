@@ -174,6 +174,8 @@ class Face::Table
 
     Error decompress();
 
+    void releaseBuffers();
+
 public:
     Table() throw();
     Table(const Face & face, const Tag n, uint32 version=0xffffffff) throw();
@@ -202,11 +204,7 @@ Face::Table::Table(const Table & rhs) throw()
 inline
 Face::Table::~Table() throw()
 {
-    if (_compressed)
-        free(const_cast<byte *>(_p));
-    else if (_p && _f->m_ops.release_table)
-        (*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
-    _p = 0; _sz = 0;
+    releaseBuffers();
 }
 
 inline

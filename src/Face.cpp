@@ -284,6 +284,15 @@ Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
         decompress();
 }
 
+void Face::Table::releaseBuffers()
+{
+    if (_compressed)
+        free(const_cast<byte *>(_p));
+    else if (_p && _f->m_ops.release_table)
+        (*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
+    _p = 0; _sz = 0;
+}
+
 Face::Table & Face::Table::operator = (const Table & rhs) throw()
 {
     if (_p == rhs._p)   return *this;
@@ -325,7 +334,7 @@ Error Face::Table::decompress()
 
     // Tell the provider to release the compressed form since were replacing
     //   it anyway.
-    this->~Table();
+    releaseBuffers();
 
     if (e)
     {
