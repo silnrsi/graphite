@@ -82,7 +82,7 @@ public:
     uint32 index() const { return m_index; }
     void index(uint32 val) { m_index = val; }
 
-    Slot();
+    Slot(int16 *m_userAttr = NULL);
     void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }

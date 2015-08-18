@@ -34,15 +34,14 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Slot::Slot() :
+Slot::Slot(int16 *user_attrs) :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0), m_justs(NULL)
-    // Do not set m_userAttr since it is set *before* new is called since this
-    // is used as a positional new to reset the GrSlot
+    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0), 
+    m_userAttr(user_attrs), m_justs(NULL)
 {
 }
 

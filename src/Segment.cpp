@@ -178,9 +178,8 @@ Slot *Segment::newSlot()
         if (!newSlots || !newAttrs) return NULL;
         for (size_t i = 0; i < m_bufSize; i++)
         {
+            ::new (newSlots + i) Slot(newAttrs + i * numUser);
             newSlots[i].next(newSlots + i + 1);
-            newSlots[i].userAttrs(newAttrs + i * numUser);
-            newSlots[i].setBidiClass(-1);
         }
         newSlots[m_bufSize - 1].next(NULL);
         newSlots[0].next(NULL);
@@ -207,7 +206,7 @@ void Segment::freeSlot(Slot *aSlot)
         aSlot->removeChild(aSlot->firstChild());
     }
     // reset the slot incase it is reused
-    ::new (aSlot) Slot;
+    ::new (aSlot) Slot(aSlot->userAttrs());
     memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
     // Update generation counter for debug
 #if !defined GRAPHITE2_NTRACING
