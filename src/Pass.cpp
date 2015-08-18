@@ -42,6 +42,13 @@ using namespace graphite2;
 using vm::Machine;
 typedef Machine::Code  Code;
 
+enum KernCollison
+{
+    None       = 0,
+    CrossSpace = 1,
+    InWord     = 2,
+    reserved   = 3
+};
 
 Pass::Pass()
 : m_silf(0),
@@ -53,7 +60,8 @@ Pass::Pass()
   m_states(0),
   m_codes(0),
   m_progs(0),
-  m_flags(0),
+  m_numCollRuns(0),
+  m_kernColls(0),
   m_iMaxLoop(0),
   m_numGlyphs(0),
   m_numRules(0),
@@ -90,13 +98,15 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
 
     if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e); 
     // Read in basic values
-    m_flags = be::read<byte>(p);
-    if (e.test((m_flags & 15) && pt < PASS_TYPE_POSITIONING, E_BADCOLLISIONPASS))
+    const byte flags = be::read<byte>(p);
+    if (e.test((flags & 0x1f) && pt < PASS_TYPE_POSITIONING, E_BADCOLLISIONPASS))
         return face.error(e);
+    m_numCollRuns = flags & 0x7;
+    m_kernColls   = (flags >> 3) & 0x3;
     m_iMaxLoop = be::read<byte>(p);
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);
-    if (e.test(!m_numRules && !(m_flags & 7), E_BADEMPTYPASS)) return face.error(e);
+    if (e.test(!m_numRules && m_numCollRuns == 0, E_BADEMPTYPASS)) return face.error(e);
     be::skip<uint16>(p);   // fsmOffset - not sure why we would want this
     const byte * const pcCode = pass_start + be::read<uint32>(p) - subtable_base,
                * const rcCode = pass_start + be::read<uint32>(p) - subtable_base,
@@ -250,7 +260,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     }
 
     // Shrink the program pool
-    // TODO: Coverty: 1315808: RESOURCE_LEAK
+    // TODO: Coverty: 1315808: RESOURCE_LEAK - Resolved
     ptrdiff_t const delta = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs)) - m_progs;
     if (delta)
     {
@@ -394,10 +404,12 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const
         } while (s);
     }
     //TODO: Use enums for flags
-    if (!(m_flags & 15) || !m.slotMap().segment.hasCollisionInfo())
+    const bool collisions = m_numCollRuns || m_kernColls;
+
+    if (!collisions || !m.slotMap().segment.hasCollisionInfo())
         return true;
 
-    if (m_flags & 7)
+    if (m_numCollRuns)
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
         {
@@ -407,9 +419,9 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const
         if (!collisionShift(&m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
             return false;
     }
-    if ((m_flags & 24) && !collisionKern(&m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
+    if ((m_kernColls) && !collisionKern(&m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
         return false;
-    if ((m_flags & 15) && !collisionFinish(&m.slotMap().segment, fsm.dbgout))
+    if (collisions && !collisionFinish(&m.slotMap().segment, fsm.dbgout))
         return false;
     return true;
 }
@@ -687,7 +699,6 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
 {
     ShiftCollider shiftcoll(dbgout);
     // bool isfirst = true;
-    const uint8 numLoops = m_flags & 7;   // number of loops permitted to fix collisions; does not include kerning
     bool hasCollisions = false;
     Slot *start = seg->first();      // turn on collision fixing for the first slot
     Slot *end = NULL;
@@ -696,7 +707,7 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
         *dbgout << "collisions" << json::array
-            << json::flat << json::object << "num-loops" << numLoops << json::close;
+            << json::flat << json::object << "num-loops" << m_numCollRuns << json::close;
 #endif
 
     while (start)
@@ -726,7 +737,7 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
 #endif
 
         // phase 2 : loop until happy. 
-        for (int i = 0; i < numLoops - 1; ++i)
+        for (int i = 0; i < m_numCollRuns - 1; ++i)
         {
             if (hasCollisions || moved)
             {
@@ -1008,7 +1019,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         if (bb.bl.y == 0.f && bb.tr.y == 0.f)
         {
-            if ((m_flags & 24) == 16)
+            if (m_kernColls == CrossSpace)
                 break;
             // Add space for a space glyph.
             currSpace += nbor->advance();

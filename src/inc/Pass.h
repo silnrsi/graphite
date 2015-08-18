@@ -55,7 +55,7 @@ public:
         enum passtype pt, uint32 version, Error &e);
     bool runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const;
     void init(Silf *silf) { m_silf = silf; }
-    byte flags() const { return m_flags; }
+    byte collisionLoops() const { return m_numCollRuns; }
 
     CLASS_NEW_DELETE
 private:
@@ -93,7 +93,8 @@ private:
     vm::Machine::Code * m_codes;
     byte              * m_progs;
 
-    byte   m_flags;
+    byte   m_numCollRuns;
+    byte   m_kernColls;
     byte   m_iMaxLoop;
     uint16 m_numGlyphs;
     uint16 m_numRules;
