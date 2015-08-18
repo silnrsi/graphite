@@ -935,7 +935,7 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4, size_t table_len /*, unsign
         lastend = end;
     }
 #endif
-    return true;;
+    return true;
 }
 
 /*----------------------------------------------------------------------------------------------

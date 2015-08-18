@@ -416,9 +416,11 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
             ++_stack_depth;
+            break;
         case POP_RET :
             if (--_stack_depth < 0)
                 failure(underfull_stack);
+            // no break
         case RET_ZERO :
         case RET_TRUE :
             break;

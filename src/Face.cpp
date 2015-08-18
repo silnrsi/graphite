@@ -320,7 +320,9 @@ Error Face::Table::decompress()
     {
         uncompressed_size  = hdr & 0x07ffffff;
         uncompressed_table = gralloc<byte>(uncompressed_size);
+        //TODO: Coverty: 1315803: FORWARD_NULL
         if (!e.test(!uncompressed_table, E_OUTOFMEM))
+            //TODO: Coverty: 1315800: CHECKED_RETURN
             e.test(shrinker::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         break;
     }
@@ -330,6 +332,7 @@ Error Face::Table::decompress()
 
     // Check the uncompressed version number against the original.
     if (!e)
+        //TODO: Coverty: 1315800: CHECKED_RETURN
         e.test(be::peek<uint32>(uncompressed_table) != version, E_SHRINKERFAILED);
 
     // Tell the provider to release the compressed form since were replacing

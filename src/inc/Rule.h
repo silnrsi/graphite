@@ -41,8 +41,8 @@ struct Rule {
   uint16           rule_idx;
 #endif
 
-  Rule() : constraint(0), action(0), sort(0), preContext(0) {}
-  ~Rule();
+  Rule();
+  ~Rule() {}
 
   CLASS_NEW_DELETE;
 
@@ -51,8 +51,16 @@ private:
   Rule & operator = (const Rule &);
 };
 
-inline Rule::~Rule()
+inline
+Rule::Rule()
+: constraint(0),
+  action(0),
+  sort(0),
+  preContext(0)
 {
+#ifndef NDEBUG
+  rule_idx = 0;
+#endif
 }
 
 

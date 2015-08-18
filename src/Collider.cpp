@@ -543,6 +543,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         }
     }
     bool res = true;
+    //TODO: Coverty: 1315809: REVERSE_NULL
     if (cslot && cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
     {
         // Set up the bogus slot representing the exclusion glyph.
@@ -971,7 +972,6 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
 
 // Return the amount to kern by.
-// TODO: do we need to make use of marginMin here? Probably not.
 Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
         int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
 {

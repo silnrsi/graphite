@@ -60,9 +60,11 @@ Pass::Pass()
   m_numStates(0),
   m_numTransition(0),
   m_numSuccess(0),
+  m_successStart(0),
   m_numColumns(0),
   m_minPreCtxt(0),
-  m_maxPreCtxt(0)
+  m_maxPreCtxt(0),
+  m_colThreshold(0)
 {
 }
 
@@ -152,7 +154,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);
     be::skip<uint16>(p, m_numRules + 1);
     const byte * const states = p;
-    if (e.test(p + 2 * m_numTransition*m_numColumns >= pass_end, E_BADPASSLENGTH)) return face.error(e);
+    if (e.test(p + 2u*m_numTransition*m_numColumns >= pass_end, E_BADPASSLENGTH)) return face.error(e);
     be::skip<int16>(p, m_numTransition*m_numColumns);
     be::skip<uint8>(p);
     if (e.test(p != pcCode, E_BADPASSCCODEPTR)) return face.error(e);
@@ -249,6 +251,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     }
 
     // Shrink the program pool
+    // TODO: Coverty: 1315808: RESOURCE_LEAK
     ptrdiff_t const delta = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs)) - m_progs;
     if (delta)
     {
@@ -261,6 +264,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 
     // Load the rule entries map
     face.error_context((face.error_context() & 0xFFFF00) + EC_APASS);
+    //TODO: Coverty: 1315804: FORWARD_NULL
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
     if (e.test(!re, E_OUTOFMEM)) return face.error(e);
     for (size_t n = num_entries; n; --n, ++re)
@@ -390,7 +394,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm) const
             }
         } while (s);
     }
-
+    //TODO: Use enums for flags
     if (!(m_flags & 15) || !m.slotMap().segment.hasCollisionInfo())
         return true;
 
@@ -710,7 +714,7 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
             if (start && (c->flags() & (SlotCollision::COLL_FIX | SlotCollision::COLL_KERN)) == SlotCollision::COLL_FIX
                       && !resolveCollisions(seg, s, start, shiftcoll, false, dir, moved, hasCollisions, dbgout))
                 return false;
-            if (s != start && c->flags() & SlotCollision::COLL_END)
+            if (s != start && (c->flags() & SlotCollision::COLL_END))
             {
                 end = s->next();
                 break;
@@ -921,7 +925,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                             || (rtl ^ ignoreForKern))       // or it comes before(ltr) or after(rtl)
                       && (!isRev    // if processing forwards then good to merge otherwise only:
                             || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
-                            || (cNbor->flags() & SlotCollision::COLL_KERN && !sameCluster)     // ignore other kernable clusters
+                            || ((cNbor->flags() & SlotCollision::COLL_KERN) && !sameCluster)     // ignore other kernable clusters
                             || (cNbor->flags() & SlotCollision::COLL_ISCOL))   // test against other collided glyphs
                       && !coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, collides, false, dbgout))
             return false;

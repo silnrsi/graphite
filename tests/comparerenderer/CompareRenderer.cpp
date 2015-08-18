@@ -314,7 +314,6 @@ int main(int argc, char ** argv)
         }
     }
 
-    // TODO features
 
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL, NULL, NULL};
     FeatureParser * featureSettings = NULL;

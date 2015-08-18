@@ -51,6 +51,7 @@ Silf::Silf() throw()
   m_jPass(0),
   m_bPass(0),
   m_flags(0),
+  m_dir(0),
   m_aPseudo(0),
   m_aBreak(0),
   m_aUser(0),
@@ -58,6 +59,7 @@ Silf::Silf() throw()
   m_aMirror(0),
   m_aPassBits(0),
   m_iMaxComp(0),
+  m_aCollision(0),
   m_aLig(0),
   m_numPseudo(0),
   m_nClass(0),
@@ -141,10 +143,10 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     }
 
     if (e.test(p + sizeof(uint16) + sizeof(uint8)*8 >= silf_end, E_BADENDJUSTS)) { releaseBuffers(); return face.error(e); }
-    m_aLig      = be::read<uint16>(p);
-    m_aUser     = be::read<uint8>(p);
-    m_iMaxComp  = be::read<uint8>(p);
-    m_dir       = be::read<uint8>(p) - 1;
+    m_aLig       = be::read<uint16>(p);
+    m_aUser      = be::read<uint8>(p);
+    m_iMaxComp   = be::read<uint8>(p);
+    m_dir        = be::read<uint8>(p) - 1;
     m_aCollision = be::read<uint8>(p);
     be::skip<byte>(p,3);
     be::skip<uint16>(p, be::read<uint8>(p));    // don't need critical features yet
