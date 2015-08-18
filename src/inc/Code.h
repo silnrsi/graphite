@@ -86,6 +86,8 @@ private:
     void failure(const status_t) throw();
 
 public:
+    static size_t estimateCodeDataOut(size_t num_bytecodes);
+
     Code() throw();
     Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
          uint8 pre_context, uint16 rule_length, const Silf &, const Face &,
@@ -108,6 +110,12 @@ public:
     
     CLASS_NEW_DELETE;
 };
+
+inline
+size_t  Machine::Code::estimateCodeDataOut(size_t n_bc)
+{
+    return n_bc * (sizeof(instr)+sizeof(byte));
+}
 
 
 inline Machine::Code::Code() throw()
