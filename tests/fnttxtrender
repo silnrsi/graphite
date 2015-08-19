@@ -4,7 +4,6 @@ import codecs
 from optparse import OptionParser
 from difflib import SequenceMatcher
 from fontTools.ttLib import TTFont
-import graphite as gr
 import sys, os, shutil, re, json
 import json.encoder
 from xml.etree.ElementTree import parse
@@ -13,7 +12,7 @@ class GrFont(object) :
     def __init__(self, fname, size, rtl, feats = {}, script = 0, lang = 0) :
         self.fname = fname
         self.size = size
-        self.rtl = rtl
+        self.rtl = int(rtl)
         self.grface = gr.Face(fname)
         self.feats = self.grface.get_featureval(lang)
         self.script = script
@@ -169,29 +168,32 @@ parser.add_option("-o","--output",help="file to log results to")
 parser.add_option("-c","--compare",help="json file to compare results against")
 parser.add_option("-q","--quiet",action="store_true",help="Don't output position results")
 parser.add_option("-f","--feat",action="append",help="id=value pairs, may be repeated")
-parser.add_option("-l","--lang",help="language to tag text with")
-parser.add_option("-s","--script",help="script of text")
-parser.add_option("-r","--rtl",action="store_true",help="right to left")
+parser.add_option("-l","--lang", default=0, help="language to tag text with")
+parser.add_option("-s","--script", default=0, help="script of text")
+parser.add_option("-r","--rtl", default=False, action="store_true",help="right to left")
 parser.add_option("-p","--split",action="store_true",help="Split on spaces")
 parser.add_option("--texttype",help="Type of text input file [*txt, ftml]")
-parser.add_option("-e","--error",type=float,default=0,help="Amount of fuzz to allow in values")
+parser.add_option("-e","--error",type=float, dest='epsilon', default=0.0, help="Amount of fuzz to allow in values")
 parser.add_option("-b","--bits",type=int,default=0,help="numbers compare equal if this many bits are the same")
 parser.add_option("-d","--dp",type=int,default=1,help="Output numbers to this many decimal places")
+parser.add_option("--graphite_library", help="Path to graphite library instead of system version.")
 (opts, args) = parser.parse_args()
 
 if not len(args) :
     parser.print_help()
     sys.exit(1)
-if not opts.lang : opts.lang = 0
-if not opts.script : opts.script = 0
-if not opts.rtl : opts.rtl = 0
-if opts.error :
-    epsilon = opts.error
-elif opts.bits :
-    epsilon = 0.5 ** opts.bits
-else :
-    epsilon = 0.
+
+if opts.bits :
+    opts.epsilon = 0.5 ** opts.bits
+
+if opts.graphite_library:
+    os.environ['PYGRAPHITE2_LIBRARY_PATH'] = opts.graphite_library
+
 rounding = 0.1 ** opts.dp
+
+# Import this here to allow the graphite module to see the modified environment
+#  if --graphite_library is used.
+import graphite as gr
 
 outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
 
@@ -231,7 +233,7 @@ for label, words in reader :
         gls = map(lambda x: name(tt, x, rounding), font.glyphs(s, includewidth = True))
         if gls[-1][0] is None : gls[-1] = ('_adv_', gls[-1][1], gls[-1][2])
         l = makelabel(label, count, wcount)
-        if cjson is not None and cmpgls(gls, cjson[l], epsilon) :
+        if cjson is not None and cmpgls(gls, cjson[l], opts.epsilon) :
             errors += 1
             print l + " Failed"
         if opts.quiet : continue
