@@ -98,10 +98,11 @@ int main(int argc, char *argv[])
     
     // run the program
     Segment seg;
+    Slot s1;
     uint32 ret = 0;
     SlotMap smap(seg, 0);
     Machine m(smap);
-    smap.pushSlot(0);
+    smap.pushSlot(&s1);
     slotref * map = smap.begin();
     for(size_t n = repeats; n; --n) {
         ret = prog.run(m, map);
@@ -117,6 +118,11 @@ int main(int argc, char *argv[])
                 return 2;
             case Machine::stack_not_empty:
                 std::cerr << "program completed but stack not empty." << std::endl;
+                repeats -= n-1;
+                n=1;
+                break;
+            case Machine::slot_offset_out_bounds:
+                std::cerr << "illegal slot reference." << std::endl;
                 repeats -= n-1;
                 n=1;
                 break;
