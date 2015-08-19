@@ -78,7 +78,6 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/bits.h \
     $($(_NS)_BASE)/src/inc/debug.h \
     $($(_NS)_BASE)/src/inc/json.h \
-    $($(_NS)_BASE)/src/inc/locale2lcid.h \
     $($(_NS)_BASE)/src/inc/Bidi.h \
     $($(_NS)_BASE)/src/inc/CachedFace.h \
     $($(_NS)_BASE)/src/inc/CharInfo.h \

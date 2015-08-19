@@ -89,7 +89,8 @@ public:
         byte      max_ref;
         
         analysis() : slotref(0), max_ref(0) {};
-        void set_ref(int index) throw();
+        void set_ref(int index, bool incinsert=false) throw();
+        void set_noref(int index) throw();
         void set_changed(int index) throw();
 
     };
@@ -477,14 +478,23 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUT_GLYPH_8BIT_OBS :
     case PUT_GLYPH :
       _code._modify = true;
-      _analysis.set_changed(_analysis.slotref);
+      _analysis.set_changed(0);
+      break;
+    case ATTR_SET :
+    case ATTR_ADD :
+    case ATTR_SET_SLOT :
+    case IATTR_SET_SLOT :
+    case IATTR_SET :
+    case IATTR_ADD :
+    case IATTR_SUB :
+      _analysis.set_noref(0);
       break;
     case NEXT :
     case COPY_NEXT :
       if (!_analysis.contexts[_analysis.slotref].flags.inserted)
         ++_analysis.slotref;
       _analysis.contexts[_analysis.slotref] = context(_code._instr_count+1);
-      if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
+      // if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
       break;
     case INSERT :
       _analysis.contexts[_analysis.slotref].flags.inserted = true;
@@ -493,14 +503,15 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
     case PUT_SUBS : 
       _code._modify = true;
-      _analysis.set_changed(_analysis.slotref);
+      _analysis.set_changed(0);
       // no break
     case PUT_COPY :
     {
-      if (arg[0] != 0) { _analysis.set_changed(_analysis.slotref); _code._modify = true; }
+      if (arg[0] != 0) { _analysis.set_changed(0); _code._modify = true; }
       if (arg[0] <= 0 && -arg[0] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(_analysis.slotref + arg[0] - _analysis.contexts[_analysis.slotref].flags.inserted);
-      else if (_analysis.slotref + arg[0] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[0];
+        _analysis.set_ref(arg[0], true);
+      else if (arg[0] > 0)
+        _analysis.set_ref(arg[0], true);
       break;
     }
     case PUSH_ATT_TO_GATTR_OBS : // slotref on 2nd parameter
@@ -513,16 +524,18 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUSH_ISLOT_ATTR :
     case PUSH_FEAT :
       if (arg[1] <= 0 && -arg[1] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(_analysis.slotref + arg[1] - _analysis.contexts[_analysis.slotref].flags.inserted);
-      else if (_analysis.slotref + arg[1] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[1];
+        _analysis.set_ref(arg[1], true);
+      else if (arg[1] > 0)
+        _analysis.set_ref(arg[1], true);
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
         if (_code._constraint) return;
         // no break
     case PUSH_GLYPH_ATTR :
       if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(_analysis.slotref + arg[2] - _analysis.contexts[_analysis.slotref].flags.inserted);
-      else if (_analysis.slotref + arg[2] > _analysis.max_ref) _analysis.max_ref = _analysis.slotref + arg[2];
+        _analysis.set_ref(arg[2], true);
+      else if (arg[2] > 0)
+        _analysis.set_ref(arg[2], true);
       break;
     case ASSOC :                // slotrefs in varargs
       break;
@@ -654,16 +667,28 @@ void Machine::Code::failure(const status_t s) throw() {
 
 
 inline
-void Machine::Code::decoder::analysis::set_ref(const int index) throw() {
-    contexts[index].flags.referenced = true;
-    if (index > max_ref) max_ref = index;
+void Machine::Code::decoder::analysis::set_ref(int index, bool incinsert) throw() {
+    if (incinsert && contexts[slotref].flags.inserted) --index;
+    if (index + slotref < 0) return;
+    contexts[index + slotref].flags.referenced = true;
+    if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
 }
 
 
 inline
-void Machine::Code::decoder::analysis::set_changed(const int index) throw() {
-    contexts[index].flags.changed = true;
-    if (index > max_ref) max_ref = index;
+void Machine::Code::decoder::analysis::set_noref(int index) throw() {
+    if (contexts[slotref].flags.inserted) --index;
+    if (index + slotref < 0) return;
+    if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
+}
+
+
+inline
+void Machine::Code::decoder::analysis::set_changed(int index) throw() {
+    if (contexts[slotref].flags.inserted) --index;
+    if (index + slotref < 0) return;
+    contexts[index + slotref].flags.changed = true;
+    if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
 }
 
 
@@ -682,10 +707,12 @@ int32 Machine::Code::run(Machine & m, slotref * & map) const
 //    assert(_own);
     assert(*this);          // Check we are actually runnable
 
-    if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context()))
+    if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context())
+        || m.slotMap()[_max_ref + m.slotMap().context()] == 0)
     {
         m._status = Machine::slot_offset_out_bounds;
         return 1;
+//        return m.run(_code, _data, map);
     }
 
     return  m.run(_code, _data, map);
