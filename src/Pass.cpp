@@ -104,6 +104,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_numCollRuns = flags & 0x7;
     m_kernColls   = (flags >> 3) & 0x3;
     m_iMaxLoop = be::read<byte>(p);
+    if (m_iMaxLoop < 1) m_iMaxLoop = 1;
     be::skip<byte>(p,2); // skip maxContext & maxBackup
     m_numRules = be::read<uint16>(p);
     if (e.test(!m_numRules && m_numCollRuns == 0, E_BADEMPTYPASS)) return face.error(e);
