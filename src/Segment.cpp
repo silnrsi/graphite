@@ -169,6 +169,9 @@ Slot *Segment::newSlot()
 {
     if (!m_freeSlots)
     {
+        // check that the segment doesn't grow indefinintely
+        if (m_numGlyphs > m_numCharinfo * MAX_SEG_GROWTH_FACTOR)
+            return NULL;
         int numUser = m_silf->numUser();
 #if !defined GRAPHITE2_NTRACING
         if (m_face->logger()) ++numUser;
