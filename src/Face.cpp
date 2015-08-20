@@ -161,7 +161,7 @@ bool Face::readFeatures()
     return m_Sill.readFace(*this);
 }
 
-bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
+bool Face::runGraphite(Segment *seg, const Silf *aSilf, const Font *aFont) const
 {
 #if !defined GRAPHITE2_NTRACING
     json * dbgout = logger();
@@ -185,6 +185,7 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
 {
+        seg->positionSlots(0, 0, 0, aSilf->dir());
         *dbgout             << json::item
                             << json::close // Close up the passes array
                 << "output" << json::array;
@@ -200,6 +201,9 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
                     << json::close;     // Close up the segment object
     }
 #endif
+
+    if (res)
+        seg->finalise(aFont, true);
 
     return res;
 }

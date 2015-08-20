@@ -1019,7 +1019,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         if (bb.bl.y == 0.f && bb.tr.y == 0.f)
         {
-            if (m_kernColls == CrossSpace)
+            if (m_kernColls == InWord)
                 break;
             // Add space for a space glyph.
             currSpace += nbor->advance();

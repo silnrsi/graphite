@@ -95,7 +95,7 @@ public:
     unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(int num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
-    bool runGraphite() { if (m_silf) return m_face->runGraphite(this, m_silf); else return true;};
+    bool runGraphite(const Font *aFont) { if (m_silf) return m_face->runGraphite(this, m_silf, aFont); else return true;};
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
     unsigned int charInfoCount() const { return m_numCharinfo; }

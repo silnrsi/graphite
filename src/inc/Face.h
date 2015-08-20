@@ -43,6 +43,7 @@ class FileFace;
 class GlyphCache;
 class NameTable;
 class json;
+class Font;
 
 
 using TtfUtil::Tag;
@@ -62,7 +63,7 @@ public:
     Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     virtual ~Face();
 
-    virtual bool        runGraphite(Segment *seg, const Silf *silf) const;
+    virtual bool        runGraphite(Segment *seg, const Silf *silf, const Font *aFont) const;
 
 public:
     bool                readGlyphs(uint32 faceOptions);
