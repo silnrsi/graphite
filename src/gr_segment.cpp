@@ -43,12 +43,12 @@ namespace
       Segment* pRes=new Segment(nChars, face, script, dir);
 
       
-      if (!pRes->read_text(face, pFeats, enc, pStart, nChars) || !pRes->runGraphite(font))
+      if (!pRes->read_text(face, pFeats, enc, pStart, nChars) || !pRes->runGraphite())
       {
         delete pRes;
         return NULL;
       }
-//      pRes->finalise(font, true);
+      pRes->finalise(font, true);
 
       return static_cast<gr_segment*>(pRes);
   }

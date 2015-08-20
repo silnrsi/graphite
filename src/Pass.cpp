@@ -497,7 +497,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
                 {
                     const int adv = doAction(r->rule->action, slot, m);
                     dumpRuleEventOutput(fsm, m, *r->rule, slot);
-                    if (r->rule->action->deletes()) fsm.slots.collectGarbage();
+                    if (r->rule->action->deletes()) fsm.slots.collectGarbage(slot);
                     adjustSlot(adv, slot, fsm.slots);
                     *fsm.dbgout << "cursor" << objectid(dslot(&fsm.slots.segment, slot))
                             << json::close; // Close RuelEvent object
@@ -519,7 +519,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
             if (r != re)
             {
                 const int adv = doAction(r->rule->action, slot, m);
-                if (r->rule->action->deletes()) fsm.slots.collectGarbage();
+                if (r->rule->action->deletes()) fsm.slots.collectGarbage(slot);
                 adjustSlot(adv, slot, fsm.slots);
                 return;
             }
@@ -625,12 +625,16 @@ bool Pass::testConstraint(const Rule & r, Machine & m) const
 }
 
 
-void SlotMap::collectGarbage()
+void SlotMap::collectGarbage(Slot * &aSlot)
 {
     for(Slot **s = begin(), *const *const se = end() - 1; s != se; ++s) {
         Slot *& slot = *s;
         if(slot->isDeleted() || slot->isCopied())
+        {
+            if (slot == aSlot)
+                aSlot = slot->prev() ? slot->prev() : slot->next();
             segment.freeSlot(slot);
+        }
     }
 }
 

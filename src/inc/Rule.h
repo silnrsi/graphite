@@ -113,7 +113,7 @@ public:
   Slot * const & operator[](int n) const;
   Slot       * & operator [] (int);
   void           pushSlot(Slot * const slot);
-  void           collectGarbage();
+  void           collectGarbage(Slot *& aSlot);
 
   Slot         * highwater() { return m_highwater; }
   void           highwater(Slot *s) { m_highwater = s; m_highpassed = false; }
