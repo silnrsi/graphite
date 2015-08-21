@@ -200,7 +200,9 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         const byte * const pass_start = silf_start + be::read<uint32>(o_passes),
                    * const pass_end = silf_start + be::peek<uint32>(o_passes);
         face.error_context((face.error_context() & 0xFF00) + EC_ASILF + (i << 16));
-        if (e.test(pass_start > pass_end, E_BADPASSSTART) || e.test(pass_end > silf_end, E_BADPASSEND)) {
+        if (e.test(pass_start > pass_end, E_BADPASSSTART) 
+                || e.test(pass_start < passes_start, E_BADPASSSTART)
+                || e.test(pass_end > silf_end, E_BADPASSEND)) {
             releaseBuffers(); return face.error(e);
         }
 
