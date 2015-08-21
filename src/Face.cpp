@@ -306,6 +306,8 @@ Face::Table & Face::Table::operator = (const Table & rhs) throw()
 Error Face::Table::decompress()
 {
     Error e;
+    if (!e.test(_sz < 2 * sizeof(uin32) + 3, E_BADSIZE))
+        return e;
     byte * uncompressed_table = 0;
     size_t uncompressed_size = 0;
 
@@ -317,6 +319,7 @@ Error Face::Table::decompress()
     switch(compression(hdr >> 27))
     {
     case NONE: return e;
+
     case SHRINKER:
     {
         uncompressed_size  = hdr & 0x07ffffff;
@@ -327,6 +330,7 @@ Error Face::Table::decompress()
             e.test(shrinker::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         break;
     }
+
     default:
         e.error(E_BADSCHEME);
     };

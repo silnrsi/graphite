@@ -229,7 +229,7 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
 {
     using namespace Sfnt;
     
-    if (pTable == 0 || lTableSize == 0) return false;
+    if (pTable == 0 || lTableSize < 4) return false;
 
     switch(TableId)
     {
