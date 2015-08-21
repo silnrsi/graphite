@@ -306,7 +306,7 @@ Face::Table & Face::Table::operator = (const Table & rhs) throw()
 Error Face::Table::decompress()
 {
     Error e;
-    if (!e.test(_sz < 2 * sizeof(uin32) + 3, E_BADSIZE))
+    if (e.test(_sz < 2 * sizeof(uint32) + 3, E_BADSIZE))
         return e;
     byte * uncompressed_table = 0;
     size_t uncompressed_size = 0;
