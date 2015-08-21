@@ -135,7 +135,8 @@ bool FeatureMap::readFeats(const Face & face)
         const uint16    flags  = be::read<uint16>(p),
                         uiName = be::read<uint16>(p);
 
-        if (feat_setts + num_settings * FEATURE_SETTING_SIZE > feat_end)
+        // handle wrap around on feat_setts offset from feat_start.
+        if (feat_setts < feat_start || feat_setts + num_settings * FEATURE_SETTING_SIZE > feat_end)
         {
             free(defVals);
             return false;
