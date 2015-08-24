@@ -125,7 +125,7 @@ bool Face::readGraphite(const Table & silf)
     Error e;
     error_context(EC_READSILF);
     const byte * p = silf;
-    if (e.test(!p, E_NOSILF)) return error(e);
+    if (e.test(!p, E_NOSILF) || e.test(silf.size() < 20, E_BADSIZE)) return error(e);
 
     const uint32 version = be::read<uint32>(p);
     if (e.test(version < 0x00020000, E_TOOOLD)) return error(e);
