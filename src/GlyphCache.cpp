@@ -278,19 +278,20 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
         //  subtracting the length of the attribids array (numAttribs long if present)
         //  and dividing by either 2 or 4 depending on shor or lonf format
         _long_fmt              = flags & 1;
-        _num_glyphs_attributes = (m_pGloc.size()
+        int tmpnumgattrs       = (m_pGloc.size()
                                    - (p - m_pGloc)
                                    - sizeof(uint16)*(flags & 0x2 ? _num_attrs : 0))
                                        / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
 
-        if (version >= 0x00020000
+        if (version >= 0x00020000 || tmpnumgattrs < 0 || tmpnumgattrs > 65535
             || _num_attrs == 0 || _num_attrs > 0x3000  // is this hard limit appropriate?
-            || _num_glyphs_graphics > _num_glyphs_attributes)
+            || _num_glyphs_graphics > tmpnumgattrs)
         {
             _head = Face::Table();
             return;
         }
 
+        _num_glyphs_attributes = static_cast<unsigned short>(tmpnumgattrs);
         p = m_pGlat;
         version = be::read<uint32>(p);
         if (version >= 0x00040000)       // reject Glat tables that are too new
