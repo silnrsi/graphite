@@ -314,7 +314,7 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     const uint16 * cls = m_classData + m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
     {
-        for (unsigned int i = 0, n = m_classOffsets[cid + 1]; i < n; ++i, ++cls)
+        for (unsigned int i = 0, n = m_classOffsets[cid + 1] - m_classOffsets[cid]; i < n; ++i, ++cls)
             if (*cls == gid) return i;
         return -1;
     }

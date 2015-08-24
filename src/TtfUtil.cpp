@@ -820,7 +820,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
         size_t lLsbOffset = sizeof(Sfnt::HorizontalMetric) * cLongHorMetrics +
             sizeof(int16) * (nGlyphId - cLongHorMetrics); // offset in bytes
         // We test like this as LsbOffset is an offset not a length.
-        if (lLsbOffset >= lHmtxSize - sizeof(int16))
+        if (lLsbOffset >= lHmtxSize - sizeof(int16) || cLongHorMetrics == 0)
         {
             nLsb = 0;
             return false;
@@ -1239,7 +1239,7 @@ size_t LocaLookup(gid16 nGlyphId,
 void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
 {
     const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
-        if (nGlyfOffset == size_t(-1) || nGlyfOffset == size_t(-2) || nGlyfOffset >= nTableLen)
+        if (nGlyfOffset == size_t(-1) || nGlyfOffset == size_t(-2) || nGlyfOffset >= nTableLen - 8)
             return NULL;
     return const_cast<uint8 *>(pByte + nGlyfOffset);
 }

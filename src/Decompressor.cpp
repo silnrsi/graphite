@@ -43,7 +43,7 @@ u8 const MATCH_LEN = 0x0f;
 template <int M>
 inline
 u32 read_literal(u8 const * &s, u8 const * const e, u32 l) {
-    if (unlikely(l == M))
+    if (unlikely(l == M) && likely(s != e))
     {
         u8 b = 0; 
         do { l += b = *s++; } while(b==0xff && s != e);
@@ -84,7 +84,7 @@ int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_s
     while (read_directive(src, src_end, literal_len, match_len, match_dist))
     {
         // Copy in literal
-        if (unlikely(src + literal_len + sizeof(unsigned long) > src_end
+        if (unlikely(src + literal_len + sizeof(unsigned long) > src_end - 3
                   || dst + literal_len + sizeof(unsigned long) > dst_end)) return -1;
         dst = memcpy_nooverlap(dst, src, literal_len);
         src += literal_len;

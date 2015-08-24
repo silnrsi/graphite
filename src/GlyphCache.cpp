@@ -62,7 +62,7 @@ namespace
         // This is strictly a >= operator. A true == operator could be
         // implemented that test for overlap but it would be more expensive a
         // test.
-        bool operator == (const _glat_iterator<W> & rhs) { return _v >= rhs._e; }
+        bool operator == (const _glat_iterator<W> & rhs) { return _v >= rhs._e - 1; }
         bool operator != (const _glat_iterator<W> & rhs) { return !operator==(rhs); }
 
         value_type          operator * () const {
@@ -403,7 +403,8 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         else
         {
             if (gloce - glocs < 3*sizeof(uint16)        // can a glyph have no attributes? why not?
-                || gloce - glocs > _num_attrs*3*sizeof(uint16))
+                || gloce - glocs > _num_attrs*3*sizeof(uint16)
+                || gloce > m_pGlat.size() - 2*sizeof(uint16))
                     return 0;
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
