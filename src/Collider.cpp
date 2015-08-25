@@ -39,7 +39,7 @@ of the License or (at your option) any later version.
 
 // Possible rounding error for subbox boundaries: 0.016 = 1/64 = 1/256 * 4 
 // (values in font range from 0..256)
-#define SUBBOX_RND_ERR 0.016
+// #define SUBBOX_RND_ERR 0.016
 
 using namespace graphite2;
 

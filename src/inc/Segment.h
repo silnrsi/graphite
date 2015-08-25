@@ -197,10 +197,10 @@ inline
 void Segment::finalise(const Font *font, bool reverse)
 {
     if (!m_first) return;
-    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
+    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != 255 && m_silf->bidiPass() != m_silf->numPasses())
         reverseSlots();
 
-    m_advance = positionSlots(font, m_first, m_last, m_dir);
+    m_advance = positionSlots(font, m_first, m_last, m_dir & 1);
     //associateChars(0, m_numCharinfo);
     linkClusters(m_first, m_last);
 }
