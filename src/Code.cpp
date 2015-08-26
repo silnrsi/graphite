@@ -632,6 +632,11 @@ bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * cons
         return false;
     }
     const opcode_t & op = Machine::getOpcodeTable()[opc];
+    if (op.param_sz == VARARGS && bc >= _max.bytecode)
+    {
+        failure(arguments_exhausted);
+        return false;
+    }
     const size_t param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;
     if (bc - 1 + param_sz >= _max.bytecode)
     {
