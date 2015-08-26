@@ -156,6 +156,8 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
 int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, bool rtl)
 {
     Position base;
+    if (glyph() >= seg->getFace()->glyphs().numGlyphs())
+        return 0;
     Rect bbox = seg->theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
     Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);

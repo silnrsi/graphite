@@ -925,6 +925,8 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int rtl = (dir & 1) * 2 - 1;
+    if (!seg->getFace()->glyphs().check(slot->gid()))
+        return false;
     const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
     const float sx = slot->origin().x + currShift.x;
     float x = sx + (rtl > 0 ? bb.tr.x : bb.bl.x);
