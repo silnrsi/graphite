@@ -31,47 +31,46 @@
 #include <cassert>
 
 #include "inc/Decompressor.h"
-#include "inc/Shrinker.h"
+#include "inc/Compression.h"
 
-using namespace shrinker;
+using namespace lz4;
 
 namespace {
 
-u8 const LONG_DIST = 0x10;
-u8 const MATCH_LEN = 0x0f;
-
-template <int M>
 inline
 u32 read_literal(u8 const * &s, u8 const * const e, u32 l) {
-    if (unlikely(l == M) && likely(s != e))
+    if (unlikely(l == 15) && likely(s != e))
     {
-        u8 b = 0; 
+        u8 b = 0;
         do { l += b = *s++; } while(b==0xff && s != e);
     }
     return l;
 }
 
-bool read_directive(u8 const * &src, u8 const * const end, u32 & literal_len, u32 & match_len, u32 & match_dist)
+bool read_sequence(u8 const * &src, u8 const * const end, u8 const * &literal, u32 & literal_len, u32 & match_len, u32 & match_dist)
 {
-    u8 const flag = *src++;
+    u8 const token = *src++;
     
-    // We make end 2 bytes less here to ensure that read_literal will end with
-    // enough room to allow us to read a 16bit match_dist value without overrun
-    literal_len = read_literal<7>(src, end-2, flag >> 5);
-    match_len = read_literal<15>(src, end-2, flag & MATCH_LEN);
+    literal_len = read_literal(src, end, token >> 4);
+    literal = src;
+    src += literal_len;
     
-    match_dist = *src++;
-    if (flag & LONG_DIST) 
-        match_dist |= ((*src++) << 8);
+    if (unlikely(src == end))
+        return false;
     
-    return match_dist != 0xffff;
+    match_dist  = *src++ << 8;
+    match_dist |= *src++;
+    match_len = read_literal(src, end, token & 0xf);
+    
+    return true;
 }
 
 }
 
-int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_size)
+int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
 {
     u8 const *       src     = static_cast<u8 const *>(in),
+             *       literal = 0,
              * const src_end = src + in_size;
 
     u8 *       dst     = static_cast<u8*>(out),
@@ -80,26 +79,28 @@ int shrinker::decompress(void const *in, size_t in_size, void *out, size_t out_s
     u32 literal_len = 0,
         match_len = 0,
         match_dist = 0;
-        
-    while (read_directive(src, src_end, literal_len, match_len, match_dist))
+    
+    while (read_sequence(src, src_end, literal, literal_len, match_len, match_dist))
     {
         // Copy in literal
-        if (unlikely(src + literal_len + sizeof(unsigned long) > src_end - 3
-                  || dst + literal_len + sizeof(unsigned long) > dst_end)) return -1;
-        dst = memcpy_nooverlap(dst, src, literal_len);
-        src += literal_len;
+        if (unlikely(literal + literal_len + sizeof(unsigned long) > src_end
+                  || dst + literal_len + sizeof(unsigned long) > dst_end)) 
+            return -1;
+        dst = memcpy_nooverlap(dst, literal, literal_len);
         
         // Copy, possibly repeating, match from earlier in the
         //  decoded output.
-        u8 const * const pcpy = dst - match_dist - 1;
+        u8 const * const pcpy = dst - match_dist;
         if (unlikely(pcpy < static_cast<u8*>(out) 
-                  || dst + match_len + MINMATCH  + sizeof(unsigned long) > dst_end)) return -1;
+                  || dst + match_len + MINMATCH  + sizeof(unsigned long) > dst_end)) 
+            return -1;
         dst = memcpy_(dst, pcpy, match_len + MINMATCH);
     }
     
-    if (unlikely(src + literal_len > src_end
-              || dst + literal_len > dst_end)) return -1;
-    dst = memcpy_nooverlap_surpass(dst, src, literal_len);
+    if (unlikely(literal + literal_len > src_end
+              || dst + literal_len > dst_end)) 
+        return -1;
+    dst = memcpy_nooverlap_surpass(dst, literal, literal_len);
     
     return dst - (u8*)out;
 }

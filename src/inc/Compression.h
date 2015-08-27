@@ -28,25 +28,92 @@
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
     POSSIBILITY OF SUCH DAMAGE.
 */
+
 #pragma once
 
+#include <cassert>
 #include <cstddef>
+#include <cstring>
 
-namespace lz4
+#include <iterator>
+
+//the code from LZ4
+#if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
+# define expect(expr,value)    (__builtin_expect ((expr),(value)) )
+#else
+# define expect(expr,value)    (expr)
+#endif
+#define likely(expr)     expect((expr) != 0, 1)
+#define unlikely(expr)   expect((expr) != 0, 0)
+////////////////////
+
+
+namespace
 {
 
-int decompress(void const *in, size_t in_size, void *out, size_t out_size);
-/*
-in:     inbuf --- compressed data
-out:    outbuf --- decompressed data to place in
-size:   decompressed(original) data size should be
+#if defined(_MSC_VER)
+typedef unsigned __int8 u8;
+typedef unsigned __int16 u16;
+typedef unsigned __int32 u32;
+typedef unsigned __int64 u64;
+#else
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+#endif
 
-return value:
-    positive integer means decompress success and it's the sizeof decompressed data,
-    which should be equal to size.
-    or -1 means decompress failed
-*/
+ptrdiff_t const     MINMATCH  = 4;
 
-} // end of namespace shrinker
+template<int S>
+inline 
+void unaligned_copy(void * d, void const * s) {
+  ::memcpy(d, s, S);
+}
+
+inline
+u8 * memcpy_nooverlap(u8 * d, u8 const * s, size_t n) {
+    size_t const WS = sizeof(unsigned long);
+    u8 const * e = s + n;
+    do 
+    {
+        unaligned_copy<WS>(d, s);
+        d += WS;
+        s += WS;
+    }
+    while (s < e);
+    d-=(s-e);
+    
+    return d;
+}
+
+
+inline
+u8 * memcpy_nooverlap_surpass(u8 * d, u8 const * s, size_t n) {
+    size_t const WS = sizeof(unsigned long);
+    size_t wn = n/WS;
+    while (wn--) 
+    {
+        unaligned_copy<WS>(d, s);
+        d += WS;
+        s += WS;
+    }
+    n &= WS-1;
+    while (n--) {*d++ = *s++; }
+    
+    return d;
+}
+
+
+inline 
+u8 * memcpy_(u8 * d, u8 const * s, size_t n) {
+    if (likely(d>s+sizeof(unsigned long)))
+        return memcpy_nooverlap(d,s,n);
+    else while (n--) *d++ = *s++;
+    return d;
+}
+
+} // end of anonymous namespace
 
 

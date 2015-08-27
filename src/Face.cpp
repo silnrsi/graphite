@@ -46,7 +46,7 @@ namespace
 enum compression
 {
     NONE,
-    SHRINKER
+    LZ4
 };
 
 }
@@ -322,14 +322,14 @@ Error Face::Table::decompress()
     {
     case NONE: return e;
 
-    case SHRINKER:
+    case LZ4:
     {
         uncompressed_size  = hdr & 0x07ffffff;
         uncompressed_table = gralloc<byte>(uncompressed_size);
         //TODO: Coverty: 1315803: FORWARD_NULL
         if (!e.test(!uncompressed_table, E_OUTOFMEM))
             //TODO: Coverty: 1315800: CHECKED_RETURN
-            e.test(shrinker::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
+            e.test(lz4::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         break;
     }
 
