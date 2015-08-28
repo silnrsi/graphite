@@ -1,3 +1,12 @@
+1.3.1
+    . Change compression block format slightly to conform to LZ4
+    . Bug fixes:
+        . For mono direction text, ensure same glyphs and positions (if
+          different slot order) for either paragraph direction
+        . Fixed lots of fuzz bugs
+        . Coverity cleanups
+        . Build now works for clang and/or asan and/or afl etc.
+
 1.3.0
     . Add collision avoidance
         . Shift Collider
@@ -79,14 +88,17 @@
     . Tidy up perl wrappers
     . Fuzz tester improvements
     . Various bug fixes for bad font handling
+
 1.1.2
     . Support feature ids < 4 chars when space padded for inclusion in FF 14.
     . More fuzztesting and removal of causes of valgrind bad reads and sigabrts
     . Remove contrib/android into its own repo (http://hg.palaso.org/grandroid)
     . Update comparerenderer to latest harfbuzzng api
+
 1.1.1
     . Missing Log.h included
     . perl wrappers updated
+
 1.1.0
     . Refactored debug output to use json
     . Renamed VM_MACHINE_TYPE to GRAPHITE2_VM_TYPE
@@ -108,7 +120,7 @@
     . Moved internal .h files into src/inc
     . Parallelise fuzztest
     . General build improvements, particularly on Windows
-      
+
 1.0.3
     . Fix UTF16 surrogate support
     . script and lang tags may be space padded or null padded

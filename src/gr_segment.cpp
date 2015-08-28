@@ -48,7 +48,7 @@ namespace
         delete pRes;
         return NULL;
       }
-      pRes->finalise(font, true);
+      pRes->finalise(font);
 
       return static_cast<gr_segment*>(pRes);
   }

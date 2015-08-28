@@ -13,6 +13,7 @@ p.add_argument('-s','--single',action='store_true',help='Do single processing')
 p.add_argument('-f','--font',help='font file to use for a single test')
 p.add_argument('-t','--text',help='text file to use for a single test')
 p.add_argument('-l','--line',help='line in text file for single test')
+p.add_argument('-k','--keep',action='store_true',help='Store intermediate callgrind results in current directory')
 args = p.parse_args()
 
 def parsecg(fname) :
@@ -71,10 +72,14 @@ def dorow(x) :
         cfns = parsecg(resf)
         for rk, rf in job[1].items() :
             results[rk] = cfns.get(rf, 0)
-        os.remove(resf)
+        if not args.keep :
+            os.remove(resf)
     return outformat.format(**results)
 
-tmpd = tempfile.mkdtemp()
+if args.keep :
+    tmpd = "."
+else :
+    tmpd = tempfile.mkdtemp()
 dumpf = os.path.join(tmpd+'dump.out')
 dumpfh = open(dumpf, "w")
 if args.file :
@@ -100,4 +105,5 @@ if fh is not None:
     fh.close()
 dumpfh.close()
 os.unlink(dumpf)
-os.rmdir(tmpd)
+if not args.keep :
+    os.rmdir(tmpd)

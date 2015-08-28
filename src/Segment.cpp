@@ -156,6 +156,12 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->originate(id);
     aSlot->before(id);
     aSlot->after(id);
+    uint8 aBidi = m_silf->aBidi();
+    if (aBidi != 0xFF)
+    {
+        unsigned int bAttr = glyphAttr(gid, aBidi);
+        aSlot->setBidiClass((bAttr <= 22) * bAttr);
+    }
     if (m_last) m_last->next(aSlot);
     aSlot->prev(m_last);
     m_last = aSlot;
@@ -313,6 +319,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 }
 #endif // GRAPHITE2_NSEGCACHE
 
+// reverse the slots but keep diacritics in their same position after their bases
 void Segment::reverseSlots()
 {
     Slot *t = 0;
@@ -320,16 +327,36 @@ void Segment::reverseSlots()
     Slot *out = 0;
     while (curr)
     {
-        if (out)
-            out->prev(curr);
-        t = curr->next();
-        curr->next(out);
-        out = curr;
+        if (curr->getBidiClass() == 16)
+        {
+            Slot *d = curr->next();
+            while (d && d->getBidiClass() == 16)
+                d = d->next();
+            if (d)
+                d = d->prev();
+            else
+                d = m_last;
+            Slot *p = out->next();    // one after the diacritics
+            p->prev(d);
+            t = d->next();
+            d->next(p);
+            curr->prev(out);
+            if (out)
+                out->next(curr);
+        }
+        else
+        {
+            if (out)
+                out->prev(curr);
+            t = curr->next();
+            curr->next(out);
+            out = curr;
+        }
         curr = t;
     }
     out->prev(0);
-    m_first = m_last;
-    m_last = out;
+    m_last = m_first;
+    m_first = out;
 }
 
 void Segment::linkClusters(Slot *s, Slot * end)
@@ -465,7 +492,7 @@ void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Slot *s);
 Slot *resolveOrder(Slot * & s, const bool reordered, const int level = 0);
 
-void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
+void Segment::bidiPass(int paradir, uint8 aMirror)
 {
     if (slotCount() == 0)
         return;
@@ -476,11 +503,8 @@ void Segment::bidiPass(uint8 aBidi, int paradir, uint8 aMirror)
     unsigned int ssize = 0;
     for (s = first(); s; s = s->next())
     {
-        if (s->getBidiClass() == -1)
-        {
-            unsigned int bAttr = glyphAttr(s->gid(), aBidi);
-            s->setBidiClass((bAttr <= 22) * bAttr);
-        }
+        if (s->getBidiClass() < 0)
+            s->setBidiClass(0);
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);
         if (s->getBidiClass() == 21)

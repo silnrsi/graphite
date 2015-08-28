@@ -405,7 +405,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         {
             if (gloce - glocs < 3*sizeof(uint16)        // can a glyph have no attributes? why not?
                 || gloce - glocs > _num_attrs*3*sizeof(uint16)
-                || gloce > m_pGlat.size() - 2*sizeof(uint16))
+                || glocs > m_pGlat.size() - 2*sizeof(uint16))
                     return 0;
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }

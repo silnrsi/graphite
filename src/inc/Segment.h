@@ -150,7 +150,7 @@ public:
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
-    void bidiPass(uint8 aBidi, int paradir, uint8 aMirror);
+    void bidiPass(int paradir, uint8 aMirror);
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
     bool hasJustification() const { return m_justifies.size() != 0; }
@@ -164,7 +164,7 @@ public:
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
-    void finalise(const Font *font, bool reverse = true);
+    void finalise(const Font *font);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
     bool initCollisions();
   
@@ -194,13 +194,13 @@ private:
 
 
 inline
-void Segment::finalise(const Font *font, bool reverse)
+void Segment::finalise(const Font *font)
 {
     if (!m_first) return;
-    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != 255 && m_silf->bidiPass() != m_silf->numPasses())
-        reverseSlots();
+//    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != 255 && m_silf->bidiPass() != m_silf->numPasses())
+//        reverseSlots();
 
-    m_advance = positionSlots(font, m_first, m_last, m_dir & 1);
+    m_advance = positionSlots(font, m_first, m_last, m_silf->dir());
     //associateChars(0, m_numCharinfo);
     linkClusters(m_first, m_last);
 }
