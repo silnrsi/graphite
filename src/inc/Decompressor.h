@@ -32,17 +32,8 @@ of the License or (at your option) any later version.
 namespace lz4
 {
 
+// return value is either decompressed size of -1
 int decompress(void const *in, size_t in_size, void *out, size_t out_size);
-/*
-in:     inbuf --- compressed data
-out:    outbuf --- decompressed data to place in
-size:   decompressed(original) data size should be
-
-return value:
-    positive integer means decompress success and it's the sizeof decompressed data,
-    which should be equal to size.
-    or -1 means decompress failed
-*/
 
 } // end of namespace shrinker
 
