@@ -220,14 +220,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatAttLevel :  return m_attLevel;
     case gr_slatBreak :     return seg->charinfo(m_original)->breakWeight();
     case gr_slatCompRef :   return 0;
-    case gr_slatDir :       if (m_bidiCls == -1)
-                            {
-                                int8 bidiVal = int8(seg->glyphAttr(gid(), seg->silf()->aBidi()));
-                                if (bidiVal > 22 || bidiVal < -1)
-                                    bidiVal = 0;
-                                const_cast<Slot *>(this)->setBidiClass(bidiVal);
-                            }
-                            return m_bidiCls;
+    case gr_slatDir :       return seg->dir() & 1;
     case gr_slatInsert :    return isInsertBefore();
     case gr_slatPosX :      return int(m_position.x); // but need to calculate it
     case gr_slatPosY :      return int(m_position.y);
@@ -326,11 +319,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         seg->charinfo(m_original)->breakWeight(value);
         break;
     case gr_slatCompRef :   break;      // not sure what to do here
-    case gr_slatDir :
-        if (value > 22 || value < -1)
-            value = 0;
-        m_bidiCls = int8(value);
-        break;
+    case gr_slatDir : break;
     case gr_slatInsert :
         markInsertBefore(value? true : false);
         break;
