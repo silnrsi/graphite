@@ -164,7 +164,7 @@ public:
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
-    void finalise(const Font *font);
+    void finalise(const Font *font, bool reverse=false);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
     bool initCollisions();
   
@@ -194,14 +194,14 @@ private:
 
 
 inline
-void Segment::finalise(const Font *font)
+void Segment::finalise(const Font *font, bool reverse)
 {
     if (!m_first) return;
-//    if (reverse && (m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != 255 && m_silf->bidiPass() != m_silf->numPasses())
-//        reverseSlots();
 
     m_advance = positionSlots(font, m_first, m_last, m_silf->dir());
     //associateChars(0, m_numCharinfo);
+    if (reverse && (m_dir & 1) != m_silf->dir())
+        reverseSlots();
     linkClusters(m_first, m_last);
 }
 
