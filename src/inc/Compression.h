@@ -33,7 +33,7 @@ of the License or (at your option) any later version.
 
 #include <iterator>
 
-#if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
+#if ((defined GCC_VERSION && GCC_VERSION >= 302) || (defined __INTEL_COMPILER && __INTEL_COMPILER >= 800) || defined(__clang__))
     #define expect(expr,value)    (__builtin_expect ((expr),(value)) )
 #else
     #define expect(expr,value)    (expr)
