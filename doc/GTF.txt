@@ -43,8 +43,9 @@ table.) In addition, use is made of the “name” table type.
 This version of the Graphite format includes the ability to compress 
 “Glat” and “Silf” tables, the extensions to those table provide a 
 compression scheme field permitting up to 32 compression schemes. 
-Currently only 2 schemes are defined: 0 – no compression, and 1 – a fast 
-LZ77 based scheme.
+Currently only 2 schemes are defined: 0 – no compression, and 1 – an LZ4 block
+decompressor. This is not the LZ4 framing format just the inner block level 
+format without any checksum.
 
 All compressed tables have the same form the original table's 32bit 
 version number followed by a 32 bit compression header. This consists of 
