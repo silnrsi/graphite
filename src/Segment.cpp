@@ -322,12 +322,13 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 // reverse the slots but keep diacritics in their same position after their bases
 void Segment::reverseSlots()
 {
+    if (!m_first) return;
+
     Slot *t = 0;
     Slot *curr = m_first;
     Slot *tlast = m_first;
     Slot *out = 0;
-    if (!curr)
-        return;
+
     while (curr)
     {
         if (curr->getBidiClass() == 16)
@@ -336,27 +337,14 @@ void Segment::reverseSlots()
             while (d && d->getBidiClass() == 16)
                 d = d->next();
 
-            if (d)
-                d = d->prev();
+            d = d ? d->prev() : m_last;
+            Slot *p = out ? out->next() : 0;    // one after the diacritics
+            if (p)
+                p->prev(d);
             else
-                d = m_last;
-
-            if (out)
-            {
-                Slot *p = out->next();    // one after the diacritics
-                if (p)
-                    p->prev(d);
-                else
-                    tlast = d;
-                t = d->next();
-                d->next(p);
-            }
-            else
-            {
                 tlast = d;
-                t = d->next();
-                d->next(0);
-            }
+            t = d->next();
+            d->next(p);
             curr->prev(out);
             if (out)
                 out->next(curr);
