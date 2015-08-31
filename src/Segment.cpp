@@ -322,12 +322,18 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 // reverse the slots but keep diacritics in their same position after their bases
 void Segment::reverseSlots()
 {
-    if (!m_first) return;
+    if (m_first == m_last) return;      // skip 0 or 1 glyph runs
 
     Slot *t = 0;
     Slot *curr = m_first;
     Slot *tlast = m_first;
+    Slot *tfirst = 0;
     Slot *out = 0;
+
+    while (curr && curr->getBidiClass() == 16)
+        curr = curr->next();
+    if (!curr) return;
+    tfirst = curr->prev();
 
     while (curr)
     {
@@ -338,7 +344,7 @@ void Segment::reverseSlots()
                 d = d->next();
 
             d = d ? d->prev() : m_last;
-            Slot *p = out ? out->next() : 0;    // one after the diacritics
+            Slot *p = out->next();    // one after the diacritics. out can't be null
             if (p)
                 p->prev(d);
             else
@@ -346,10 +352,9 @@ void Segment::reverseSlots()
             t = d->next();
             d->next(p);
             curr->prev(out);
-            if (out)
-                out->next(curr);
+            out->next(curr);
         }
-        else
+        else    // will always fire first time round the loop
         {
             if (out)
                 out->prev(curr);
@@ -359,9 +364,12 @@ void Segment::reverseSlots()
         }
         curr = t;
     }
-    out->prev(0);
+    out->prev(tfirst);
+    if (tfirst)
+        tfirst->next(out);
+    else
+        m_first = out;
     m_last = tlast;
-    m_first = out;
 }
 
 void Segment::linkClusters(Slot *s, Slot * end)
