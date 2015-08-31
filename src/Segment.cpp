@@ -324,7 +324,10 @@ void Segment::reverseSlots()
 {
     Slot *t = 0;
     Slot *curr = m_first;
+    Slot *tlast = m_first;
     Slot *out = 0;
+    if (!curr)
+        return;
     while (curr)
     {
         if (curr->getBidiClass() == 16)
@@ -332,14 +335,28 @@ void Segment::reverseSlots()
             Slot *d = curr->next();
             while (d && d->getBidiClass() == 16)
                 d = d->next();
+
             if (d)
                 d = d->prev();
             else
                 d = m_last;
-            Slot *p = out->next();    // one after the diacritics
-            p->prev(d);
-            t = d->next();
-            d->next(p);
+
+            if (out)
+            {
+                Slot *p = out->next();    // one after the diacritics
+                if (p)
+                    p->prev(d);
+                else
+                    tlast = d;
+                t = d->next();
+                d->next(p);
+            }
+            else
+            {
+                tlast = d;
+                t = d->next();
+                d->next(0);
+            }
             curr->prev(out);
             if (out)
                 out->next(curr);
@@ -355,7 +372,7 @@ void Segment::reverseSlots()
         curr = t;
     }
     out->prev(0);
-    m_last = m_first;
+    m_last = tlast;
     m_first = out;
 }
 

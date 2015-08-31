@@ -84,6 +84,7 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/CmapCache.h \
     $($(_NS)_BASE)/src/inc/Code.h \
     $($(_NS)_BASE)/src/inc/Collider.h \
+    $($(_NS)_BASE)/src/inc/Compression.h \
     $($(_NS)_BASE)/src/inc/Decompressor.h \
     $($(_NS)_BASE)/src/inc/Endian.h \
     $($(_NS)_BASE)/src/inc/Error.h \
@@ -109,7 +110,6 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/SegCacheEntry.h \
     $($(_NS)_BASE)/src/inc/SegCacheStore.h \
     $($(_NS)_BASE)/src/inc/Segment.h \
-    $($(_NS)_BASE)/src/inc/Shrinker.h \
     $($(_NS)_BASE)/src/inc/Silf.h \
     $($(_NS)_BASE)/src/inc/Slot.h \
     $($(_NS)_BASE)/src/inc/Sparse.h \

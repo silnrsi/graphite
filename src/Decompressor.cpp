@@ -51,7 +51,7 @@ bool read_sequence(u8 const * &src, u8 const * const end, u8 const * &literal, u
     literal = src;
     src += literal_len;
     
-    if (unlikely(src == end))
+    if (unlikely(src > end - 2))
         return false;
     
     match_dist  = *src++;
