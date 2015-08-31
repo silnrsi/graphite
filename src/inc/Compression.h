@@ -68,6 +68,11 @@ void unaligned_copy(void * d, void const * s) {
 }
 
 inline
+size_t align(size_t p) {
+    return (p + 7) & ~(sizeof(unsigned long)-1);
+}
+
+inline
 u8 * memcpy_nooverlap(u8 * d, u8 const * s, size_t n) {
     size_t const WS = sizeof(unsigned long);
     u8 const * e = s + n;
