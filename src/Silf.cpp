@@ -394,10 +394,7 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
                             << json::close;
             }
 #endif
-
-            if (!(seg->dir() & 2) && m_aBidi != 0xFF)
-                seg->bidiPass(seg->currdir(), m_aMirror);
-            else if (seg->currdir() != m_dir)
+            if (seg->currdir() != m_dir)
                 seg->reverseSlots();
             if (m_aMirror && (seg->dir() & 3) == 3)
                 seg->doMirror(m_aMirror);

@@ -156,12 +156,12 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->originate(id);
     aSlot->before(id);
     aSlot->after(id);
-    uint8 aBidi = m_silf->aBidi();
-    if (aBidi != 0xFF)
-    {
-        unsigned int bAttr = glyphAttr(gid, aBidi);
-        aSlot->setBidiClass((bAttr <= 22) * bAttr);
-    }
+//    uint8 aBidi = m_silf->aBidi();
+//    if (aBidi != 0xFF)
+//    {
+//        unsigned int bAttr = glyphAttr(gid, aBidi);
+//        aSlot->setBidiClass((bAttr <= 22) * bAttr);
+//    }
     if (m_last) m_last->next(aSlot);
     aSlot->prev(m_last);
     m_last = aSlot;
@@ -331,17 +331,17 @@ void Segment::reverseSlots()
     Slot *tfirst = 0;
     Slot *out = 0;
 
-    while (curr && curr->getBidiClass() == 16)
+    while (curr && getSlotBidiClass(curr) == 16)
         curr = curr->next();
     if (!curr) return;
     tfirst = curr->prev();
 
     while (curr)
     {
-        if (curr->getBidiClass() == 16)
+        if (getSlotBidiClass(curr) == 16)
         {
             Slot *d = curr->next();
-            while (d && d->getBidiClass() == 16)
+            while (d && getSlotBidiClass(d) == 16)
                 d = d->next();
 
             d = d ? d->prev() : m_last;
@@ -517,7 +517,7 @@ void Segment::bidiPass(int paradir, uint8 aMirror)
     unsigned int ssize = 0;
     for (s = first(); s; s = s->next())
     {
-        if (s->getBidiClass() < 0)
+        if (getSlotBidiClass(s) < 0)
             s->setBidiClass(0);
         bmask |= (1 << s->getBidiClass());
         s->setBidiLevel(baseLevel);

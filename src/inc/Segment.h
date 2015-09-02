@@ -152,6 +152,7 @@ public:
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void bidiPass(int paradir, uint8 aMirror);
+    int8 getSlotBidiClass(Slot *s) const;
     void doMirror(uint16 aMirror);
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
@@ -193,7 +194,15 @@ private:
     uint8           m_flags;            // General purpose flags
 };
 
-
+inline
+int8 Segment::getSlotBidiClass(Slot *s) const
+{
+    int8 res = s->getBidiClass();
+    if (res != -1) return res;
+    res = glyphAttr(s->gid(), m_silf->aBidi());
+    s->setBidiClass(res);
+    return res;
+}
 
 inline
 void Segment::finalise(const Font *font, bool reverse)
