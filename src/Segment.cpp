@@ -322,6 +322,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
 // reverse the slots but keep diacritics in their same position after their bases
 void Segment::reverseSlots()
 {
+    m_dir = m_dir ^ 64;                 // invert the reverse flag
     if (m_first == m_last) return;      // skip 0 or 1 glyph runs
 
     Slot *t = 0;

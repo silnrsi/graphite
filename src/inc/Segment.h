@@ -101,7 +101,6 @@ public:
     unsigned int charInfoCount() const { return m_numCharinfo; }
     const CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
-    int8 dir() const { return m_dir; }
 
     Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
     ~Segment();
@@ -138,7 +137,9 @@ public:
             if (val > pFR->maxVal()) val = pFR->maxVal();
             pFR->applyValToFeature(val, m_feats[index]);
         } }
+    int8 dir() const { return m_dir; }
     void dir(int8 val) { m_dir = val; }
+    bool currdir() const { return ((m_dir >> 6) ^ m_dir) & 1; }
     unsigned int passBits() const { return m_passBits; }
     void mergePassBits(const unsigned int val) { m_passBits &= val; }
     int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
@@ -200,7 +201,7 @@ void Segment::finalise(const Font *font, bool reverse)
 
     m_advance = positionSlots(font, m_first, m_last, m_silf->dir());
     //associateChars(0, m_numCharinfo);
-    if (reverse && (m_dir & 1) != m_silf->dir())
+    if (reverse && currdir() != m_silf->dir())
         reverseSlots();
     linkClusters(m_first, m_last);
 }

@@ -173,8 +173,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
     }
 #endif
 
-    if ((seg->dir() & 1) != aSilf->dir())
-        seg->reverseSlots();
+//    if ((seg->dir() & 1) != aSilf->dir())
+//        seg->reverseSlots();
     bool res = aSilf->runGraphite(seg, 0, aSilf->positionPass(), true);
     if (res)
     {
