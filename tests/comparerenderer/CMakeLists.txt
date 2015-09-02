@@ -48,7 +48,7 @@ comparetest(padauk_ulon Padauk.ttf my_HeadwordSyllables.txt --features ulon=1)
 comparetest(charis_yor charis_r_gr.ttf udhr_yor.txt)
 comparetest(piglatin PigLatinBenchmark_v3.ttf udhr_eng.txt)
 # silgraphite and gr2 bidi algorithms don't quite agree enough
-comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
+# comparetest(scheherazade_arb Scheherazadegr.ttf udhr_arb.txt --rtl)
 comparetest(annapurna_nep Annapurnarc2.ttf udhr_nep.txt)
 
 # comparerenderer can also be used for font testing
