@@ -104,7 +104,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
         return face.error(e);
     m_numCollRuns = flags & 0x7;
     m_kernColls   = (flags >> 3) & 0x3;
-    m_isReverseDir = (flags >> 4) & 0x1;
+    m_isReverseDir = (flags >> 5) & 0x1;
     m_iMaxLoop = be::read<byte>(p);
     if (m_iMaxLoop < 1) m_iMaxLoop = 1;
     be::skip<byte>(p,2); // skip maxContext & maxBackup
