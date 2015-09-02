@@ -396,19 +396,11 @@ bool Silf::runGraphite(Segment *seg, uint8 firstPass, uint8 lastPass, int dobidi
 #endif
 
             if (!(seg->dir() & 2) && m_aBidi != 0xFF)
-                seg->bidiPass(m_dir, m_aMirror);
+                seg->bidiPass(seg->currdir(), m_aMirror);
             else if (seg->currdir() != m_dir)
                 seg->reverseSlots();
-            if (m_aMirror && (seg->dir() & 7) == 3)
-            {
-                Slot * s;
-                for (s = seg->first(); s; s = s->next())
-                {
-                    unsigned short g = seg->glyphAttr(s->gid(), m_aMirror);
-                    if (g && (!(seg->dir() & 4) || !seg->glyphAttr(s->gid(), m_aMirror + 1)))
-                        s->setGlyph(seg, g);
-                }
-            }
+            if (m_aMirror && (seg->dir() & 3) == 3)
+                seg->doMirror(m_aMirror);
         --i;
         lbidi = lastPass;
         --lastPass;

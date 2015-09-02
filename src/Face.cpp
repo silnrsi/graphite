@@ -175,6 +175,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
 
 //    if ((seg->dir() & 1) != aSilf->dir())
 //        seg->reverseSlots();
+    if ((seg->dir() & 3) == 3 && aSilf->bidiPass() == 0xFF)
+        seg->doMirror(aSilf->aMirror());
     bool res = aSilf->runGraphite(seg, 0, aSilf->positionPass(), true);
     if (res)
     {

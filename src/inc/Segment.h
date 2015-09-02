@@ -152,6 +152,7 @@ public:
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void bidiPass(int paradir, uint8 aMirror);
+    void doMirror(uint16 aMirror);
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
     bool hasJustification() const { return m_justifies.size() != 0; }

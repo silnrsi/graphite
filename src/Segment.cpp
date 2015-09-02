@@ -551,6 +551,17 @@ void Segment::bidiPass(int paradir, uint8 aMirror)
     }
 }
 
+void Segment::doMirror(uint16 aMirror)
+{
+    Slot * s;
+    for (s = m_first; s; s = s->next())
+    {
+        unsigned short g = glyphAttr(s->gid(), aMirror);
+        if (g && (!(dir() & 4) || !glyphAttr(s->gid(), aMirror + 1)))
+            s->setGlyph(this, g);
+    }
+}
+
 bool Segment::initCollisions()
 {
     if (m_collisions) free(m_collisions);
