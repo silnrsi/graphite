@@ -82,7 +82,7 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         if (unlikely(literal + align(literal_len) > src_end
                   || dst + align(literal_len) > dst_end))
             return -1;
-        dst = memcpy_nooverlap(dst, literal, literal_len);
+        dst = overrun_copy(dst, literal, literal_len);
         
         // Copy, possibly repeating, match from earlier in the
         //  decoded output.
@@ -90,13 +90,13 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         if (unlikely(pcpy < static_cast<u8*>(out) 
                   || dst + align(match_len + MINMATCH) > dst_end))
             return -1;
-        dst = memcpy_(dst, pcpy, match_len + MINMATCH);
+        dst = copy(dst, pcpy, match_len + MINMATCH);
     }
     
     if (unlikely(literal + literal_len > src_end
               || dst + literal_len > dst_end)) 
         return -1;
-    dst = memcpy_nooverlap_surpass(dst, literal, literal_len);
+    dst = fast_copy(dst, literal, literal_len);
     
     return dst - (u8*)out;
 }
