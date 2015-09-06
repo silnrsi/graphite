@@ -327,14 +327,15 @@ void Segment::reverseSlots()
 
     Slot *t = 0;
     Slot *curr = m_first;
-    Slot *tlast = m_first;
-    Slot *tfirst = 0;
+    Slot *tlast;
+    Slot *tfirst;
     Slot *out = 0;
 
     while (curr && getSlotBidiClass(curr) == 16)
         curr = curr->next();
     if (!curr) return;
     tfirst = curr->prev();
+    tlast = curr;
 
     while (curr)
     {
