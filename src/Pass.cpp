@@ -267,11 +267,11 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 
     if (moved_progs != m_progs)
     {
-        m_progs = moved_progs;
         for (Code * c = m_codes, * const ce = c + m_numRules*2; c != ce; ++c)
         {
             c->externalProgramMoved(moved_progs - m_progs);
         }
+        m_progs = moved_progs;
     }
 
     // Load the rule entries map
