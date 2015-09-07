@@ -228,7 +228,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     m_rules = new Rule [m_numRules];
     m_codes = new Code [m_numRules*2];
     const size_t prog_pool_sz = vm::Machine::Code::estimateCodeDataOut(ac_end - ac_data + rc_end - rc_data);
-    m_progs = static_cast<byte *>(malloc(prog_pool_sz));
+    m_progs = gralloc<byte>(prog_pool_sz);
     byte * prog_pool_free = m_progs,
          * prog_pool_end  = m_progs + prog_pool_sz;
     if (e.test(!(m_rules && m_codes && m_progs), E_OUTOFMEM)) return face.error(e);
@@ -262,15 +262,15 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
             return face.error(e);
     }
 
-    // Shrink the program pool
-    // TODO: Coverty: 1315808: RESOURCE_LEAK - Resolved
-    ptrdiff_t const delta = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs)) - m_progs;
-    if (delta)
+    byte * moved_progs = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs));
+    if (e.test(!moved_progs, E_OUTOFMEM))   return face.error(e);
+
+    if (moved_progs != m_progs)
     {
-        m_progs += delta;
+        m_progs = moved_progs;
         for (Code * c = m_codes, * const ce = c + m_numRules*2; c != ce; ++c)
         {
-            c->externalProgramMoved(delta);
+            c->externalProgramMoved(moved_progs - m_progs);
         }
     }
 
