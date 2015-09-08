@@ -81,9 +81,10 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
     
     while (read_sequence(src, src_end, literal, literal_len, match_len, match_dist))
     {
-        // Copy in literal
+        // Copy in literal. At this point the last full sequence must be at
+        // least MINMATCH + 5 from the end of the output buffer.
         if (unlikely(literal + align(literal_len) > src_end
-                  || dst + align(literal_len) > dst_end - 7))
+                  || dst + align(literal_len) > dst_end - MINMATCH+5))
             return -1;
         dst = overrun_copy(dst, literal, literal_len);
 
