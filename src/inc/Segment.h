@@ -39,7 +39,7 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Position.h"
 #include "inc/List.h"
-#include "inc/Bidi.h"
+//#include "inc/Bidi.h"
 #include "inc/Collider.h"
 
 #define MAX_SEG_GROWTH_FACTOR  256

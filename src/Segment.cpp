@@ -36,7 +36,7 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
-#include "inc/Bidi.h"
+//#include "inc/Bidi.h"
 #include "inc/Collider.h"
 #include "graphite2/Segment.h"
 
@@ -502,6 +502,7 @@ bool Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
     return true;
 }
 
+#if 0
 Slot *process_bidi(Slot *start, int level, int prelevel, int &nextLevel, int dirover, int isol, int &cisol, int &isolerr, int &embederr, int init, Segment *seg, uint8 aMirror, BracketPairStack &stack);
 void resolveImplicit(Slot *s, Segment *seg, uint8 aMirror);
 void resolveWhitespace(int baseLevel, Slot *s);
@@ -551,6 +552,7 @@ void Segment::bidiPass(int paradir, uint8 aMirror)
         }
     }
 }
+#endif
 
 void Segment::doMirror(uint16 aMirror)
 {
