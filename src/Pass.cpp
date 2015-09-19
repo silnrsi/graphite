@@ -383,7 +383,11 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) 
 {
     Slot *s = m.slotMap().segment.first();
     if (!s || !testPassConstraint(m)) return true;
-    if (reverse) m.slotMap().segment.reverseSlots();
+    if (reverse)
+    {
+        m.slotMap().segment.reverseSlots();
+        s = m.slotMap().segment.first();
+    }
     if (m_numRules)
     {
         Slot *currHigh = s->next();
