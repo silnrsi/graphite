@@ -409,6 +409,14 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bo
     float clusterMin = 0.;
     Rect bbox;
 
+    if (currdir() != isRtl)
+    {
+        Slot *temp;
+        reverseSlots();
+        temp = iStart;
+        iStart = iEnd;
+        iEnd = temp;
+    }
     if (!iStart)    iStart = m_first;
     if (!iEnd)      iEnd   = m_last;
 
