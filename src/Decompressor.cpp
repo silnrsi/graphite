@@ -65,7 +65,7 @@ bool read_sequence(u8 const * &src, u8 const * const end, u8 const * &literal, u
 
 int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
 {
-    if (out_size <= in_size)
+    if (out_size <= in_size || in_size < sizeof(unsigned long)+1)
         return -1;
 
     u8 const *       src     = static_cast<u8 const *>(in),
