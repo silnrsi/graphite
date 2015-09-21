@@ -130,7 +130,8 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
         return face.error(e);
 
     m_successStart = m_numStates - m_numSuccess;
-    if (e.test(p + numRanges * 6 - 4 > pass_end, E_BADPASSLENGTH)) return face.error(e);
+    // test for beyond end - 1 to account for reading uint16
+    if (e.test(p + numRanges * 6 - 2 > pass_end, E_BADPASSLENGTH)) return face.error(e);
     m_numGlyphs = be::peek<uint16>(p + numRanges * 6 - 4) + 1;
     // Calculate the start of various arrays.
     const byte * const ranges = p;
