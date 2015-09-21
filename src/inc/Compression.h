@@ -30,8 +30,10 @@ of the License or (at your option) any later version.
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include "inc/Main.h"
 
-#include <iterator>
+using namespace graphite2;
+
 
 #if ((defined GCC_VERSION && GCC_VERSION >= 302) || (defined __INTEL_COMPILER && __INTEL_COMPILER >= 800) || defined(__clang__))
     #define expect(expr,value)    (__builtin_expect ((expr),(value)) )
@@ -69,7 +71,7 @@ void unaligned_copy(void * d, void const * s) {
 
 inline
 size_t align(size_t p) {
-    return (p + sizeof(unsigned long)-1) & ~(sizeof(unsigned long)-1);
+    return (max(p,size_t(1)) + sizeof(unsigned long)-1) & ~(sizeof(unsigned long)-1);
 }
 
 inline
