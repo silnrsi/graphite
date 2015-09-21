@@ -263,7 +263,11 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     }
 
     byte * moved_progs = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs));
-    if (e.test(!moved_progs, E_OUTOFMEM))   return face.error(e);
+    if (e.test(!moved_progs, E_OUTOFMEM))
+    {
+        if (prog_pool_free - m_progs == 0) m_progs = 0;
+        return face.error(e);
+    }
 
     if (moved_progs != m_progs)
     {
