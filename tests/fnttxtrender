@@ -29,8 +29,8 @@ class GrFont(object) :
         seg = gr.Segment(self.font, self.grface, self.script, text, self.rtl, feats = self.feats)
         res = []
         for s in seg.slots :
-            res.append((s.gid, s.origin))
-        if includewidth : res.append((None, seg.advance))
+            res.append((s.gid, s.origin, seg.cinfo(s.original).unicode))
+        if includewidth : res.append((None, seg.advance, 0))
         del seg
         return res
 
@@ -69,7 +69,13 @@ def roundhexpoint(pt, bits) :
     return res
 
 def name(tt, gl, rounding) :
-    return (tt.getGlyphName(gl[0]) if gl[0] else None, roundfloat(gl[1][0], rounding), roundfloat(gl[1][1], rounding))
+    if gl[0] is None :
+        x = "_adv_"
+    elif gl[0] != 0 :
+        x = tt.getGlyphName(gl[0])
+    else :
+        x = "0:{:04X}".format(gl[2])
+    return (x, roundfloat(gl[1][0], rounding), roundfloat(gl[1][1], rounding))
 
 def cmaplookup(tt, c) :
     cmap = tt['cmap'].getcmap(3, 1) or tt['cmap'].getcmap(1, 0)
