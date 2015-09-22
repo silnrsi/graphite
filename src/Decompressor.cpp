@@ -58,7 +58,7 @@ bool read_sequence(u8 const * &src, u8 const * const end, u8 const * &literal, u
     match_dist |= *src++ << 8;
     match_len = read_literal(src, end, token & 0xf);
     
-    return true;
+    return src <= end-5;
 }
 
 }
@@ -85,8 +85,7 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         {
             // Copy in literal. At this point the last full sequence must be at
             // least MINMATCH + 5 from the end of the output buffer.
-            if (src >= src_end - 5
-                || dst + align(literal_len) > dst_end - MINMATCH+5)
+            if (dst + align(literal_len) > dst_end - MINMATCH+5)
                 return -1;
             dst = overrun_copy(dst, literal, literal_len);
         }
