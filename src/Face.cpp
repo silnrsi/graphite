@@ -358,7 +358,7 @@ Error Face::Table::decompress()
     }
 
     _p = uncompressed_table;
-    _sz = uncompressed_size + sizeof(uint32);
+    _sz = uncompressed_size;
     _compressed = true;
 
     return e;
