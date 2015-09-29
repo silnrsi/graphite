@@ -97,17 +97,28 @@ have collision avoidance support, will use a version 3 table.
 
 |FIXED           |version   |Table version: 00030000      |5.0 – 00030000
 |ULONG:5         |scheme    |Compression scheme must be 0 |5.0 – added
-|ULONG:27        |reserved  |                             |5.0 – added
-|Octabox_metrics |octaboxes |Glyph approximation metrics 
-                             for collision avoidance      |5.0 – added
-|Glat_entry[]    |entries   |Glyph attribute entries      |
+|ULONG:28        |reserved  |                             |5.0 – added
+|ULONG:1         |octaboxes |Octaboxes are present flag   |5.0 – added
+|Glyph_attrs[]   |entries   |Glyph attribute entries      |
 |========================================================================
 For the compressed layout see <<comp_table>>.
-The first block of data includes metrics that approximate the glyph’s
-curves. The approximation uses “octoboxes”—rectangles with corners that
-may be cut out at an angle of 45 degrees. Each octobox requires 8 values
-to define. There are metrics for the entire glyph and for a 4x4
-approximation grid, resulting in up to 16 sub-boxes. For some glyphs, no
+
+.Glyph_attrs
+[cols="3,3,8,3",options="unbreakable,header,compact",width="90%",frame="topbot",grid="none"]
+|========================================================================
+|Type            |Name      |Description                   |Version notes
+
+|Octabox_metrics |octabox    |Octabox metrics, only present 
+                              if the Glat header indicates |5.0 – added
+|Glat_entry[]    |entries    |Glyph attribute entries      |
+|========================================================================
+
+If the octaboxes flag is set in the Glat header then for each per glyph block 
+of data specified by the Gloc table, first set of data includes metrics that 
+approximate the glyph’s curves. The approximation uses “octoboxes”—rectangles 
+with corners that may be cut out at an angle of 45 degrees. Each octobox 
+requires 8 values to define. There are metrics for the entire glyph and for a 
+4x4 approximation grid, resulting in up to 16 sub-boxes. For some glyphs, no
 sub-box data will be present, in which case the bitmap will be zero.
 Note that the rectangle for the full glyph is not included here, as the
 bounding box rectangle is stored elsewhere in the font.
@@ -160,7 +171,7 @@ run-length encoded. Thus a glyph will have a series of Glat_entrys
 corresponding to each non-contiguous set of attributes. The structure of
 a Glat_entry is:
 
-.Glat_entry
+.Glat_entry, version 2 & 3
 [cols="2,2,8,5",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
 |Type  |Name         |Description                         |Version notes
