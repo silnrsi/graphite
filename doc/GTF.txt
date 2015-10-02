@@ -539,11 +539,11 @@ a fast binary search engine:
 
 |USHORT |numIDs |Number of elements in the lookup |
 
-|USHORT |searchRange |(max power of 2<= numIDs) * 4 |
+|USHORT |searchRange |(max power of 2<= numIDs) |
 
 |USHORT |entrySelector |log2(max power of 2<= numIDs) |
 
-|USHORT |rangeShift |numIds*4 – searchRange |
+|USHORT |rangeShift |numIds – searchRange |
 
 |LookupPair |lookups[ ] |lookups; there are numIDs of these |
 |=======================================================================
