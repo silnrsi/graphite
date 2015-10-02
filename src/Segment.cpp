@@ -177,7 +177,12 @@ Slot *Segment::newSlot()
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
         int16 *newAttrs = grzeroalloc<int16>(numUser * m_bufSize);
-        if (!newSlots || !newAttrs) return NULL;
+        if (!newSlots || !newAttrs)
+        {
+            free(newSlots);
+            free(newAttrs);
+            return NULL;
+        }
         for (size_t i = 0; i < m_bufSize; i++)
         {
             ::new (newSlots + i) Slot(newAttrs + i * numUser);

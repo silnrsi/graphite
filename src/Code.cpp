@@ -594,7 +594,10 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
             _pre_context = 0;
         }
         else
+        {
+            _pre_context = 0;
             return false;
+        }
     }
     
     return bool(_code);

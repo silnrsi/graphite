@@ -415,7 +415,7 @@ ligature components |
 
 |BYTE |direction |Supported direction(s) |
 
-|BYTE |attCollisions | First of a set of attributes that hold collision flags and constraint box | 5.0 - added
+|BYTE |attCollisions | First of a set of attributes that hold collision flags and constraint box | 5.0 - used
 
 |BYTE |reserved | |
 
