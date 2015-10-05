@@ -505,7 +505,8 @@ Slot * Slot::nextInCluster(const Slot *s) const
         return s->nextSibling();
     while ((base = s->attachedTo()))
     {
-        if (base->firstChild() == s && base->nextSibling())
+        // if (base->firstChild() == s && base->nextSibling())
+        if (base->nextSibling())
             return base->nextSibling();
         s = base;
     }

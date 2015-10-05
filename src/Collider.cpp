@@ -896,7 +896,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_edge(seg, s, currShift, y, _sliceWidth, false);
+                t = get_edge(seg, s, c->shift(), y, _sliceWidth, false);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -906,7 +906,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_edge(seg, s, currShift, y, _sliceWidth, true);
+                t = get_edge(seg, s, c->shift(), y, _sliceWidth, true);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
