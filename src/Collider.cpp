@@ -993,6 +993,9 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
 				<< "gid" << _target->gid()
                 << "margin" << _margin
                 << "limit" << _limit
+                << "miny" << _miny
+                << "maxy" << _maxy
+                << "slicewidth" << _sliceWidth
                 << "target" << json::object
                     << "origin" << _target->origin()
                     //<< "currShift" << _currShift
@@ -1000,8 +1003,6 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
                     << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
                     << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern"
-                    << "slices" << _edges.size()
-                    << "sliceWidth" << _sliceWidth
                     << json::close; // target object
         
         *dbgout << "slices" << json::array;
