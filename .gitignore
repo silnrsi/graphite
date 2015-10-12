@@ -1,4 +1,3 @@
-syntax:glob
 *~
 *.bak
 m4
@@ -26,11 +25,10 @@ nmake*
 .project
 .pydevproject
 
-syntax:regexp
-\.libs/
-\.deps/
-\.externalToolBuilders
-build*/
+.libs/
+.deps/
+.externalToolBuilders
+build*/**
 release/
 debug/
 dev/
