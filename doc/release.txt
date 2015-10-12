@@ -16,7 +16,8 @@ These notes are not necessarily part of the manual. They are here for code devel
 
 The release is done by:
 
-. hg archive graphite-<version>.tgz
+. git archive -o graphite2-<version>.tgz <version>
+. git archive -o graphite2-minimal-<version>.tgz <version> include src LICENSE COPYING README.md
 . Then push up to sf.net/projects/silgraphite and projects.palaso.org/graphiteng-dev
 
 === How to do a test pdebuild ===
