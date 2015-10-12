@@ -66,8 +66,13 @@ def dorow(x) :
         t = ft.readlines()[int(line)].strip()
         ft.close()
         cmd = ['valgrind', '-q', '--tool=callgrind', '--callgrind-out-file='+resf, 'hb-shape', '--font-file='+font, '--text='+t, '--shapers='+job[0]]
-        if len(r) > 3 and r[3] == 'r' :
+        copt = 3
+        if len(r) > copt and r[copt] == 'r' :
             cmd.append('--direction=rtl')
+            copt += 1
+        if len(r) > copt and r[copt] == 'f' :
+            cmd.append('--features=' + r[copt+1])
+            copt += 2
         call(cmd, stdout=dumpfh)
         cfns = parsecg(resf)
         for rk, rf in job[1].items() :
