@@ -197,7 +197,7 @@ int8 Segment::getSlotBidiClass(Slot *s) const
 {
     int8 res = s->getBidiClass();
     if (res != -1) return res;
-    res = glyphAttr(s->gid(), m_silf->aBidi());
+    res = int8(glyphAttr(s->gid(), m_silf->aBidi()));
     s->setBidiClass(res);
     return res;
 }
