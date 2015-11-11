@@ -1,23 +1,23 @@
 [
     {
         "type" : "telemetry",
-        "silf" : 224582,
+        "silf" : 378724,
         "states" : 74688,
         "starts" : 48,
         "transitions" : 106494,
-        "glyphs" : 535299,
-        "code" : 82195,
-        "misc" : 2968,
-        "total" : 1026274
+        "glyphs" : 465023,
+        "code" : 82211,
+        "misc" : 2936,
+        "total" : 1110124
     },
     {
-        "id" : "00a4-00-bdb0",
+        "id" : "0149-00-24f0",
         "passes" : [
             {
                 "id" : 1,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -28,7 +28,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -39,7 +39,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -56,7 +56,7 @@
                 "id" : 2,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -67,7 +67,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -78,7 +78,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -95,7 +95,7 @@
                 "id" : 3,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -106,7 +106,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -117,7 +117,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -134,7 +134,7 @@
                 "id" : 4,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -145,7 +145,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -156,7 +156,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -173,7 +173,7 @@
                 "id" : 5,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -184,7 +184,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -195,7 +195,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -212,7 +212,7 @@
                 "id" : 6,
                 "slots" : [
                     {
-                        "id" : "00a4-01-be80",
+                        "id" : "0149-01-2620",
                         "gid" : 1572,
                         "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                         "origin" : [ 0, 0 ],
@@ -223,7 +223,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf00",
+                        "id" : "0149-00-26a0",
                         "gid" : 36,
                         "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                         "origin" : [ 1997, 0 ],
@@ -234,7 +234,7 @@
                         "user" : [ 0, 0, 0, 0, 0 ]
                     },
                     {
-                        "id" : "00a4-00-bf80",
+                        "id" : "0149-00-2720",
                         "gid" : 1912,
                         "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                         "origin" : [ 3377, 0 ],
@@ -250,7 +250,7 @@
         ],
         "output" : [
             {
-                "id" : "00a4-01-be80",
+                "id" : "0149-01-2620",
                 "gid" : 1572,
                 "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
                 "origin" : [ 0, 0 ],
@@ -261,7 +261,7 @@
                 "user" : [ 0, 0, 0, 0, 0 ]
             },
             {
-                "id" : "00a4-00-bf00",
+                "id" : "0149-00-26a0",
                 "gid" : 36,
                 "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
                 "origin" : [ 1997, 0 ],
@@ -272,7 +272,7 @@
                 "user" : [ 0, 0, 0, 0, 0 ]
             },
             {
-                "id" : "00a4-00-bf80",
+                "id" : "0149-00-2720",
                 "gid" : 1912,
                 "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
                 "origin" : [ 3377, 0 ],
@@ -283,7 +283,7 @@
                 "user" : [ 0, 0, 0, 0, 0 ]
             }
         ],
-        "advance" : [ 4988, 0 ],
+        "advance" : [ 0, 0 ],
         "chars" : [
             { "offset" : 0, "unicode" : 120080, "break" : 30, "flags" : 0, "slot" : { "before" : 0, "after" : 0 } },
             { "offset" : 1, "unicode" : 65, "break" : 30, "flags" : 0, "slot" : { "before" : 1, "after" : 1 } },

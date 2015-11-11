@@ -240,7 +240,7 @@ for label, words in reader :
         gls = [map(lambda x: name(tt, x, rounding), font.glyphs(s, includewidth = True))]
         if gls[-1][-1][0] is None : gls[-1] = ('_adv_', gls[-1][-1][1], gls[-1][-1][2])
         l = makelabel(label, count, wcount)
-        if cjson is not None and cmpgls(gls[0], cjson[l], opts.epsilon) :
+        if cjson is not None and cmpgls(gls[0], cjson[l][0], opts.epsilon) :
             errors += 1
             print l + " Failed"
         if opts.quiet : continue
