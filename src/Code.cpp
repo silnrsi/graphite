@@ -97,7 +97,7 @@ public:
     
     decoder(limits & lims, Code &code, enum passtype pt) throw();
     
-    bool        load(const byte * bc_begin, const byte * bc_end);
+    bool        load(const byte * bc_begin, const byte * bc_end, bool isInCntxt = false);
     void        apply_analysis(instr * const code, instr * code_end);
     byte        max_ref() { return _analysis.max_ref; }
     int         pre_context() const { return _pre_context; }
@@ -245,13 +245,13 @@ Machine::Code::~Code() throw ()
 }
 
 
-bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
+bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end, bool isInCntxt)
 {
     _max.bytecode = bc_end;
     while (bc < bc_end)
     {
         const opcode opc = fetch_opcode(bc++);
-        if (opc == vm::MAX_OPCODE)
+        if (opc == vm::MAX_OPCODE || (isInCntxt && opc == vm::CNTXT_ITEM))
             return false;
         
         analyse_opcode(opc, reinterpret_cast<const int8 *>(bc));
@@ -587,7 +587,7 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         ++_code._data_size;
         const byte *curr_end = _max.bytecode;
 
-        if (load(bc, bc + instr_skip))
+        if (load(bc, bc + instr_skip, true))
         {
             bc += instr_skip;
             data_skip  = instr_skip - (_code._instr_count - ctxt_start);
