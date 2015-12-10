@@ -42,6 +42,13 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+template<typename T>
+inline
+size_t align(size_t p) {
+    return (p*sizeof(T) + sizeof(unsigned long)-1) & ~(sizeof(unsigned long)-1)/sizeof(T);
+}
+
+
 Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir)
 : m_freeSlots(NULL),
   m_freeJustifies(NULL),
@@ -175,7 +182,7 @@ Slot *Segment::newSlot()
         if (m_face->logger()) ++numUser;
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
-        int attrSize = numUser + (hasCollisionInfo() ? ((sizeof(SlotCollision) + 1) / 2) : 0);
+        int attrSize = align<int16>(numUser) + (hasCollisionInfo() ? sizeof(SlotCollision) : 0);
         int16 *newAttrs = grzeroalloc<int16>(m_bufSize * attrSize);
         if (!newSlots || !newAttrs)
         {
@@ -214,7 +221,7 @@ void Segment::freeSlot(Slot *aSlot)
     }
     // reset the slot incase it is reused
     ::new (aSlot) Slot(aSlot->userAttrs());
-    int attrSize = m_silf->numUser() + (hasCollisionInfo() ? ((sizeof(SlotCollision) + 1) / 2) : 0);
+    int attrSize = align<int16>(m_silf->numUser()) + (hasCollisionInfo() ? sizeof(SlotCollision) : 0);
     memset(aSlot->userAttrs(), 0, attrSize * sizeof(int16));
     // Update generation counter for debug
 #if !defined GRAPHITE2_NTRACING
@@ -304,7 +311,7 @@ void Segment::splice(size_t offset, size_t length, Slot * const startSlot,
     assert(offset + numChars <= m_numCharinfo);
     Slot * indexmap[eMaxSpliceSize*3];
     assert(numGlyphs < sizeof indexmap/sizeof *indexmap);
-    int attrSize = m_silf->numUser() + (hasCollisionInfo() ? ((sizeof(SlotCollision) + 1) / 2) : 0);
+    int attrSize = align<int16>(m_silf->numUser()) + (hasCollisionInfo() ? sizeof(SlotCollision) : 0);
     Slot * slot = startSlot;
     for (uint16 i=0; i < numGlyphs; slot = slot->next(), ++i)
         indexmap[i] = slot;

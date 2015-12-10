@@ -160,8 +160,11 @@ public:
 
     bool isWhitespace(const int cid) const;
     bool hasCollisionInfo() const { return (m_flags & SEG_HASCOLLISIONS); }
+#if defined GRAPHITE2_NTRACING
     SlotCollision *collisionInfo(const Slot *s) const { return hasCollisionInfo() ? reinterpret_cast<SlotCollision *>(s->userAttrs() + m_silf->numUser()) : 0; }
-
+#else
+    SlotCollision *collisionInfo(const Slot *s) const { return hasCollisionInfo() ? reinterpret_cast<SlotCollision *>(s->userAttrs() + m_silf->numUser() + int(m_face->logger()==0)) : 0; }
+#endif
     CLASS_NEW_DELETE
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
