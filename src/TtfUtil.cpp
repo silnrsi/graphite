@@ -1166,7 +1166,7 @@ unsigned int CmapSubtable12NextCodepoint(const void *pCmap310, unsigned int nUni
     // Just in case we have a bad key:
     while (iRange > 0 && be::swap(pTable->group[iRange].start_char_code) > nUnicodePrev)
         iRange--;
-    while (be::swap(pTable->group[iRange].end_char_code) < nUnicodePrev)
+    while (iRange < nRange - 1 && be::swap(pTable->group[iRange].end_char_code) < nUnicodePrev)
         iRange++;
 
     // Now iRange is the range containing nUnicodePrev.
