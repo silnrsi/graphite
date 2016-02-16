@@ -889,8 +889,9 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft Unicode subtable for expected values
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable4(const void * pCmapSubtable4, size_t table_len /*, unsigned int maxgid*/)
+bool CheckCmapSubtable4(const void * pCmapSubtable4, const void * pCmapEnd /*, unsigned int maxgid*/)
 {
+    size_t table_len = (const byte *)pCmapEnd - (const byte *)pCmapSubtable4;
     if (!pCmapSubtable4) return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
     // Bob H say some freeware TT fonts have version 1 (eg, CALIGULA.TTF) 
@@ -1080,8 +1081,9 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 /*----------------------------------------------------------------------------------------------
     Check the Microsoft UCS-4 subtable for expected values.
 ----------------------------------------------------------------------------------------------*/
-bool CheckCmapSubtable12(const void *pCmapSubtable12, size_t table_len /*, unsigned int maxgid*/)
+bool CheckCmapSubtable12(const void *pCmapSubtable12, const void *pCmapEnd /*, unsigned int maxgid*/)
 {
+    size_t table_len = (const byte *)pCmapEnd - (const byte *)pCmapSubtable12;
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
     if (be::swap(pTable->format) != 12)
