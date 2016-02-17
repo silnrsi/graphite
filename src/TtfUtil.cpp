@@ -1050,7 +1050,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
     // Just in case we have a bad key:
     while (iRange > 0 && be::peek<uint16>(pStartCode + iRange) > nUnicodePrev)
         iRange--;
-    while (be::peek<uint16>(pTable->end_code + iRange) < nUnicodePrev)
+    while (iRange < nRange - 1 && be::peek<uint16>(pTable->end_code + iRange) < nUnicodePrev)
         iRange++;
 
     // Now iRange is the range containing nUnicodePrev.
@@ -1075,7 +1075,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
     // ends with 0xFFFF.
     if (pRangeKey)
         *pRangeKey = iRange + 1;
-    return be::peek<uint16>(pStartCode + iRange + 1);
+    return (iRange + 1 >= nRange) ? 0xFFFF : be::peek<uint16>(pStartCode + iRange + 1);
 }
 
 /*----------------------------------------------------------------------------------------------
