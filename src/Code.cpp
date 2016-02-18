@@ -368,6 +368,8 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             if (--_stack_depth < 0)
                 failure(underfull_stack);
             valid_upto(gr_slatMax, bc[0]);
+            if (attrCode(bc[0]) == gr_slatUserDefn)     // use IATTR for user attributes
+                failure(out_of_range_data);
             test_context();
             break;
         case IATTR_SET_SLOT :
