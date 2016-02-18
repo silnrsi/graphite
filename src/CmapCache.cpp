@@ -64,7 +64,7 @@ bool cache_subtable(uint16 * blocks[], const void * cst, const unsigned int limi
     int rangeKey = 0;
     uint32          codePoint = NextCodePoint(cst, 0, &rangeKey),
                     prevCodePoint = 0;
-    while (codePoint != limit)
+    while (codePoint < limit)
     {
         unsigned int block = codePoint >> 8;
         if (!blocks[block])
