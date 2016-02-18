@@ -410,6 +410,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) 
         do
         {
             findNDoRule(s, m, fsm);
+            if (m.status() != Machine::finished) return false;
             if (s && (s == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
                 if (!lc)
                     s = m.slotMap().highwater();
@@ -500,7 +501,12 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
         // Search for the first rule which passes the constraint
         const RuleEntry *        r = fsm.rules.begin(),
                         * const re = fsm.rules.end();
-        while (r != re && !testConstraint(*r->rule, m)) ++r;
+        while (r != re && !testConstraint(*r->rule, m))
+        {
+            ++r;
+            if (m.status() != Machine::finished)
+                return;
+        }
 
 #if !defined GRAPHITE2_NTRACING
         if (fsm.dbgout)
