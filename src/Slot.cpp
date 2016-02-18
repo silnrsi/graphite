@@ -197,6 +197,8 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     {
         ind = gr_slatUserDefn;
         subindex = 0;
+        if (seg->numAttrs() == 0)
+            return 0;
     }
     else if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
     {
@@ -274,6 +276,8 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     {
         ind = gr_slatUserDefn;
         subindex = 0;
+        if (seg->numAttrs() == 0)
+            return;
     }
     else if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
     {
