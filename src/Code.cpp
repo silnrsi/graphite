@@ -383,6 +383,8 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             ++_stack_depth;
             valid_upto(gr_slatMax, bc[0]);
             valid_upto(_rule_length, _pre_context + int8(bc[1]));
+            if (attrCode(bc[0]) == gr_slatUserDefn)     // use IATTR for user attributes
+                failure(out_of_range_data);
             break;
         case PUSH_GLYPH_ATTR_OBS :
             ++_stack_depth;
@@ -663,7 +665,7 @@ bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * cons
 
 bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
 {
-    const bool t = x < limit;
+    const bool t = (limit != 0) && (x < limit);
     if (!t) failure(out_of_range_data);
     return t;
 }
