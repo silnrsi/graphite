@@ -76,7 +76,7 @@ of the License or (at your option) any later version.
 #define push(n)             { *++sp = n; }
 #define pop()               (*sp--)
 #define slotat(x)           (map[(x)])
-#define DIE                 { is=seg.last(); EXIT(1); }
+#define DIE                 { is=seg.last(); status = Machine::died_early; EXIT(1); }
 #define POSITIONED          1
 
 STARTOP(nop)
