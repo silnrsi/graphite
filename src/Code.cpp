@@ -84,8 +84,9 @@ public:
     struct limits;
     struct analysis
     {
+        static const int NUMCONTEXTS = 256;
         uint8     slotref;
-        context   contexts[256];
+        context   contexts[NUMCONTEXTS];
         byte      max_ref;
         
         analysis() : slotref(0), max_ref(0) {};
@@ -690,7 +691,7 @@ void Machine::Code::failure(const status_t s) throw() {
 inline
 void Machine::Code::decoder::analysis::set_ref(int index, bool incinsert) throw() {
     if (incinsert && contexts[slotref].flags.inserted) --index;
-    if (index + slotref < 0) return;
+    if (index + slotref < 0 || index + slotref >= NUMCONTEXTS) return;
     contexts[index + slotref].flags.referenced = true;
     if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
 }
@@ -699,7 +700,7 @@ void Machine::Code::decoder::analysis::set_ref(int index, bool incinsert) throw(
 inline
 void Machine::Code::decoder::analysis::set_noref(int index) throw() {
     if (contexts[slotref].flags.inserted) --index;
-    if (index + slotref < 0) return;
+    if (index + slotref < 0 || index + slotref >= NUMCONTEXTS) return;
     if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
 }
 
@@ -707,7 +708,7 @@ void Machine::Code::decoder::analysis::set_noref(int index) throw() {
 inline
 void Machine::Code::decoder::analysis::set_changed(int index) throw() {
     if (contexts[slotref].flags.inserted) --index;
-    if (index + slotref < 0) return;
+    if (index + slotref < 0 || index + slotref >= NUMCONTEXTS) return;
     contexts[index + slotref].flags.changed = true;
     if ((index > 0 || !contexts[index + slotref].flags.inserted) && index + slotref > max_ref) max_ref = index + slotref;
 }
