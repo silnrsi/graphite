@@ -425,7 +425,7 @@ bool Slot::removeChild(Slot *ap)
     else if (ap == m_child)
     {
         Slot *nSibling = m_child->nextSibling();
-        m_child->sibling(NULL);
+        m_child->removeSibling(nSibling);
         m_child = nSibling;
         return true;
     }
@@ -440,7 +440,7 @@ bool Slot::removeSibling(Slot *ap)
     else if (ap == m_sibling)
     {
         m_sibling = m_sibling->nextSibling();
-        ap->sibling(NULL);
+        if (m_sibling) ap->removeSibling(m_sibling);
         return true;
     }
     else
