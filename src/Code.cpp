@@ -673,7 +673,7 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
 
 bool Machine::Code::decoder::test_context() const throw()
 {
-    if (_pre_context >= _rule_length)
+    if (_pre_context >= _rule_length || _analysis.slotref >= analysis::NUMCONTEXTS - 1)
     {
         failure(out_of_range_data);
         return false;
