@@ -1095,7 +1095,7 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12, const void *pCmapEnd /*, u
     if (length < sizeof(Sfnt::CmapSubTableFormat12))
         return false;
     uint32 num_groups = be::swap(pTable12->num_groups);
-    if (length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32) * 3))
+    if (num_groups > 0x10000000 || length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32) * 3))
         return false;
 #if 0
     for (unsigned int i = 0; i < num_groups; ++i)
