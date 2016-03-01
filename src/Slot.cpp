@@ -299,11 +299,21 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             if (m_parent) m_parent->removeChild(this);
             if (!other->isChildOf(this) && other->child(this))
             {
-                attachTo(other);
-                if ((map.dir() != 0) ^ (idx > subindex))
-                    m_with = Position(advance(), 0);
-                else        // normal match to previous root
-                    m_attach = Position(other->advance(), 0);
+                int count = 0;
+                Slot *s = other;
+                while (s->attachedTo())
+                {
+                    ++count;
+                    s = s->attachedTo();
+                }
+                if (count < 100)
+                {
+                    attachTo(other);
+                    if ((map.dir() != 0) ^ (idx > subindex))
+                        m_with = Position(advance(), 0);
+                    else        // normal match to previous root
+                        m_attach = Position(other->advance(), 0);
+                }
             }
         }
         break;
@@ -526,3 +536,4 @@ bool Slot::isChildOf(const Slot *base) const
     else
         return m_parent->isChildOf(base);
 }
+
