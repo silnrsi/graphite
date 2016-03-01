@@ -93,6 +93,7 @@ public:
     bool rtl;
     bool useLineFill;
     int useCodes;
+    bool autoCodes;
     int justification;
     bool enableCache;
     float width;
@@ -137,6 +138,7 @@ void Parameters::clear()
     ws = false;
     useLineFill = false;
     useCodes = 0;
+    autoCodes = false;
     justification = 0;
     enableCache = false;
     width = 100.0f;
@@ -210,6 +212,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         LINE_END,
         LINE_FILL,
         CODES,
+        AUTOCODES,
         FEAT,
         LOG,
         TRACE,
@@ -364,6 +367,18 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                     pText32 = (unsigned int *)malloc(sizeof(unsigned int) * argc);
                     fprintf(log, "Text codes\n");
                 }
+                else if (strcmp(argv[a], "-auto") == 0)
+                {
+                    const unsigned kCodeLimit = 0x1000;
+                    charLength = kCodeLimit - 1;
+                    pText32 = (unsigned int *)malloc(sizeof(unsigned int) * kCodeLimit);
+                    unsigned int i;
+                    for (i = 1; i < kCodeLimit; ++i)
+                        pText32[i - 1] = i;
+                    pText32[charLength] = 0;
+                    autoCodes = true;
+                    option = NONE;
+                }
                 else if (strcmp(argv[a], "-linefill") == 0)
                 {
                     option = LINE_FILL;
@@ -437,7 +452,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     if (mainArgOffset < 1) argError = true;
     else if (mainArgOffset > 1)
     {
-        if (!useCodes && pText != NULL)
+        if (!autoCodes && !useCodes && pText != NULL)
         {
             charLength = convertUtf<gr2::utf8>(pText, pText32);
             if (!pText32)
@@ -751,6 +766,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-dpi d\tDots per Inch (72)\n");
         fprintf(stderr,"-pt d\tPoint size (12)\n");
         fprintf(stderr,"-codes\tEnter text as hex code points instead of utf8 (false)\n");
+        fprintf(stderr,"-auto\tAutomatically generate a test string of all codes 1-0xFFF\n");
         fprintf(stderr,"\te.g. %s font.ttf -codes 1000 102f\n",argv[0]);
         //fprintf(stderr,"-ls\tStart of line = true (false)\n");
         //fprintf(stderr,"-le\tEnd of line = true (false)\n");
