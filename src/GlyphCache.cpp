@@ -116,8 +116,10 @@ private:
 
 GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
 : _glyph_loader(new Loader(face, bool(face_options & gr_face_dumbRendering))),
-  _glyphs(_glyph_loader && *_glyph_loader ? grzeroalloc<const GlyphFace *>(_glyph_loader->num_glyphs()) : 0),
-  _boxes(_glyph_loader && _glyph_loader->has_boxes() ? grzeroalloc<GlyphBox *>(_glyph_loader->num_glyphs()) : 0),
+  _glyphs(_glyph_loader && *_glyph_loader && _glyph_loader->num_glyphs()
+        ? grzeroalloc<const GlyphFace *>(_glyph_loader->num_glyphs()) : 0),
+  _boxes(_glyph_loader && _glyph_loader->has_boxes() && _glyph_loader->num_glyphs()
+        ? grzeroalloc<GlyphBox *>(_glyph_loader->num_glyphs()) : 0),
   _num_glyphs(_glyphs ? _glyph_loader->num_glyphs() : 0),
   _num_attrs(_glyphs ? _glyph_loader->num_attrs() : 0),
   _upem(_glyphs ? _glyph_loader->units_per_em() : 0)

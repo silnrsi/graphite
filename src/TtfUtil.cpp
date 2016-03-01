@@ -1004,7 +1004,7 @@ gid16 CmapSubtable4Lookup(const void * pCmapSubtabel4, unsigned int nUnicodeId, 
         // Look up value in glyphIdArray
         const ptrdiff_t offset = (nUnicodeId - chStart) + (idRangeOffset >> 1) +
                 (pMid - reinterpret_cast<const uint16 *>(pTable));
-        if (offset * 2 >= be::swap<uint16>(pTable->length))
+        if (offset * 2 + 1 >= be::swap<uint16>(pTable->length))
             return 0;
         gid16 nGlyphId = be::peek<uint16>(reinterpret_cast<const uint16 *>(pTable)+offset);
         // If this value is 0, return 0. Else add the idDelta
