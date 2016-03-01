@@ -353,6 +353,8 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             test_context();
             break;
         case ASSOC :
+            if (bc[0] == 0)
+                failure(out_of_range_data);
             for (uint8 num = bc[0]; num; --num)
                 valid_upto(_rule_length, _pre_context + int8(bc[num]));
             test_context();
@@ -483,6 +485,11 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case DELETE :
       _code._delete = true;
       break;
+    case ASSOC :
+      _analysis.set_changed(0);
+//      for (uint8 num = arg[0]; num; --num)
+//        _analysis.set_noref(num);
+      break;
     case PUT_GLYPH_8BIT_OBS :
     case PUT_GLYPH :
       _code._modify = true;
@@ -547,8 +554,6 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
         _analysis.set_ref(arg[2], true);
       else if (arg[2] > 0)
         _analysis.set_ref(arg[2], true);
-      break;
-    case ASSOC :                // slotrefs in varargs
       break;
     default:
         break;
