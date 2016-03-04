@@ -521,12 +521,8 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       GR_FALLTHROUGH;
       // no break
     case PUT_COPY :
-    {
       if (arg[0] != 0) { _analysis.set_changed(0); _code._modify = true; }
-      if (arg[0] <= 0 && -arg[0] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(arg[0], true);
-      else if (arg[0] > 0)
-        _analysis.set_ref(arg[0], true);
+      _analysis.set_ref(arg[0], true);
       break;
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_SLOT_ATTR :
@@ -535,17 +531,11 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :
     case PUSH_FEAT :
-      if (arg[1] <= 0 && -arg[1] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(arg[1], true);
-      else if (arg[1] > 0)
-        _analysis.set_ref(arg[1], true);
+      _analysis.set_ref(arg[1], true);
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
     case PUSH_GLYPH_ATTR :
-      if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
-        _analysis.set_ref(arg[2], true);
-      else if (arg[2] > 0)
-        _analysis.set_ref(arg[2], true);
+      _analysis.set_ref(arg[2], true);
       break;
     default:
         break;
