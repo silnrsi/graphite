@@ -242,7 +242,7 @@ ENDOP
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (is)
+    if (is && !is->isDeleted())
     {
         slotref ref = slotat(slot_ref);
         if (ref && ref != is)
