@@ -338,6 +338,8 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             test_context();
             break;
         case PUT_COPY :
+            if (bc[0] == 0)
+                failure(out_of_range_data);
             valid_upto(_rule_length, _pre_context + int8(bc[0]));
             test_context();
             break;
