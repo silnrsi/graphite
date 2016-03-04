@@ -295,8 +295,8 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
         if (idx < map.size() && map[idx])
         {
             Slot *other = map[idx];
-            if (other == this || other == m_parent) break;
-            if (m_parent) m_parent->removeChild(this);
+            if (other == this || other == m_parent || other->isCopied()) break;
+            if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
             Slot *pOther = other;
             int count = 0;
             while (pOther && pOther != this)
