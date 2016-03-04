@@ -101,7 +101,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     // Read in basic values
     const byte flags = be::read<byte>(p);
     if (e.test((flags & 0x1f) && 
-            (pt < PASS_TYPE_POSITIONING || !m_silf->aCollision() || !face.glyphs().hasBoxes()),
+            (pt < PASS_TYPE_POSITIONING || !m_silf->aCollision() || !face.glyphs().hasBoxes() || !(m_silf->flags() & 0x20)),
             E_BADCOLLISIONPASS))
         return face.error(e);
     m_numCollRuns = flags & 0x7;
