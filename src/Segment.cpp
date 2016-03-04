@@ -424,6 +424,9 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bo
     if (!iStart)    iStart = m_first;
     if (!iEnd)      iEnd   = m_last;
 
+    if (!iStart || !iEnd)   // only true for empty segments
+        return currpos;
+
     if (isRtl)
     {
         for (Slot * s = iEnd, * const end = iStart->prev(); s && s != end; s = s->prev())
