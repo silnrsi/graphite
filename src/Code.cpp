@@ -497,6 +497,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       break;
     case ATTR_SET :
     case ATTR_ADD :
+    case ATTR_SUB :
     case ATTR_SET_SLOT :
     case IATTR_SET_SLOT :
     case IATTR_SET :
