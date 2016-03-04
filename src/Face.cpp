@@ -183,7 +183,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
         seg->associateChars(0, seg->charInfoCount());
         if (aSilf->flags() & 0x20)
             res &= seg->initCollisions();
-        res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
+        if (res)
+            res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
     }
 
 #if !defined GRAPHITE2_NTRACING

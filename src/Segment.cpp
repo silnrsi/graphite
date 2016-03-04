@@ -531,6 +531,9 @@ bool Segment::initCollisions()
     if (!m_collisions) return false;
 
     for (Slot *p = m_first; p; p = p->next())
-        ::new (collisionInfo(p)) SlotCollision(this, p);
+        if (p->index() < slotCount())
+            ::new (collisionInfo(p)) SlotCollision(this, p);
+        else
+            return false;
     return true;
 }
