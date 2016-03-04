@@ -183,7 +183,8 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
         seg->associateChars(0, seg->charInfoCount());
         if (aSilf->flags() & 0x20)
             res &= seg->initCollisions();
-        res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
+        if (res)
+            res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
     }
 
 #if !defined GRAPHITE2_NTRACING
@@ -231,7 +232,7 @@ uint16 Face::findPseudo(uint32 uid) const
     return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0;
 }
 
-uint16 Face::getGlyphMetric(uint16 gid, uint8 metric) const
+int32 Face::getGlyphMetric(uint16 gid, uint8 metric) const
 {
     switch (metrics(metric))
     {

@@ -896,8 +896,10 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4, const void * pCmapEnd /*, u
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
     // Bob H say some freeware TT fonts have version 1 (eg, CALIGULA.TTF) 
     // so don't check subtable version. 21 Mar 2002 spec changes version to language.
-    if (be::swap(pTable->format) != 4) return false;
+    if (table_len < sizeof(*pTable) || be::swap(pTable->format) != 4) return false;
     const Sfnt::CmapSubTableFormat4 * pTable4 = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmapSubtable4);
+    if (table_len < sizeof(*pTable4))
+        return false;
     uint16 length = be::swap(pTable4->length);
     if (length > table_len)
         return false;
@@ -1086,9 +1088,11 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12, const void *pCmapEnd /*, u
     size_t table_len = (const byte *)pCmapEnd - (const byte *)pCmapSubtable12;
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
-    if (be::swap(pTable->format) != 12)
+    if (table_len < sizeof(*pTable) || be::swap(pTable->format) != 12)
         return false;
     const Sfnt::CmapSubTableFormat12 * pTable12 = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmapSubtable12);
+    if (table_len < sizeof(*pTable12))
+        return false;
     uint32 length = be::swap(pTable12->length);
     if (length > table_len)
         return false;

@@ -388,7 +388,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             gloce = be::peek<uint16>(gloc);
         }
 
-        if (glocs >= m_pGlat.size() || gloce > m_pGlat.size())
+        if (glocs + 1 >= m_pGlat.size() || gloce > m_pGlat.size())
             return 0;
 
         const uint32 glat_version = be::peek<uint32>(m_pGlat);
