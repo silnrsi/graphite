@@ -356,7 +356,8 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
         s->rules = begin;
         s->rules_end = (end - begin <= FiniteStateMachine::MAX_RULES)? end :
             begin + FiniteStateMachine::MAX_RULES;
-        qsort(begin, end - begin, sizeof(RuleEntry), &cmpRuleEntry);
+        if (begin)      // keep UBSan happy can't call qsort with null begin
+            qsort(begin, end - begin, sizeof(RuleEntry), &cmpRuleEntry);
     }
 
     return true;
