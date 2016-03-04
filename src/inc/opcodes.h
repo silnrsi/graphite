@@ -555,7 +555,7 @@ STARTOP(iattr_add)
     const          int  val  = int(pop());
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
-        seg.positionSlots(0, *smap.begin(), *(smap.end()-1), dir);
+        seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
     int res = is->getAttr(&seg, slat, idx);
@@ -569,7 +569,7 @@ STARTOP(iattr_sub)
     const          int  val  = int(pop());
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
-        seg.positionSlots(0, *smap.begin(), *(smap.end()-1), dir);
+        seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
     int res = is->getAttr(&seg, slat, idx);
