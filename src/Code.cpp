@@ -478,8 +478,6 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
 
 void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
 {
-  if (_code._constraint) return;
-  
   switch (opc)
   {
     case DELETE :
@@ -530,14 +528,10 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       else if (arg[0] > 0)
         _analysis.set_ref(arg[0], true);
       break;
-    }
-    case PUSH_ATT_TO_GATTR_OBS : // slotref on 2nd parameter
-        if (_code._constraint) return;
-        GR_FALLTHROUGH;
-        // no break
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_SLOT_ATTR :
     case PUSH_GLYPH_METRIC :
+    case PUSH_ATT_TO_GATTR_OBS :
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :
     case PUSH_FEAT :
@@ -547,9 +541,6 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
         _analysis.set_ref(arg[1], true);
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
-        if (_code._constraint) return;
-        GR_FALLTHROUGH;
-        // no break
     case PUSH_GLYPH_ATTR :
       if (arg[2] <= 0 && -arg[2] <= _analysis.slotref - _analysis.contexts[_analysis.slotref].flags.inserted)
         _analysis.set_ref(arg[2], true);
@@ -655,6 +646,11 @@ bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * cons
         return false;
     }
     const opcode_t & op = Machine::getOpcodeTable()[opc];
+    if (op.impl[_code._constraint] == 0)
+    {
+        failure(unimplemented_opcode_used);
+        return false;
+    }
     if (op.param_sz == VARARGS && bc >= _max.bytecode)
     {
         failure(arguments_exhausted);
