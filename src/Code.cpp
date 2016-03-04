@@ -467,6 +467,10 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             valid_upto(_max.glyf_attrs, uint16(bc[0]<< 8) | bc[1]);
             valid_upto(_rule_length, _pre_context + int8(bc[2]));
             break;
+        case SET_FEAT :
+            valid_upto(_max.features, bc[0]);
+            valid_upto(_rule_length, _pre_context + int8(bc[1]));
+            break;
         default:
             failure(invalid_opcode);
             break;
@@ -531,6 +535,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUSH_ATT_TO_GLYPH_METRIC :
     case PUSH_ISLOT_ATTR :
     case PUSH_FEAT :
+    case SET_FEAT :
       _analysis.set_ref(arg[1], true);
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
