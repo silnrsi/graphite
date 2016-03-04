@@ -297,23 +297,20 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             Slot *other = map[idx];
             if (other == this || other == m_parent) break;
             if (m_parent) m_parent->removeChild(this);
-            if (!other->isChildOf(this) && other->child(this))
+            Slot *pOther = other;
+            int count = 0;
+            while (pOther && pOther != this)
             {
-                int count = 0;
-                Slot *s = other;
-                while (s->attachedTo())
-                {
-                    ++count;
-                    s = s->attachedTo();
-                }
-                if (count < 100)
-                {
-                    attachTo(other);
-                    if ((map.dir() != 0) ^ (idx > subindex))
-                        m_with = Position(advance(), 0);
-                    else        // normal match to previous root
-                        m_attach = Position(other->advance(), 0);
-                }
+                ++count;
+                pOther = pOther->attachedTo();
+            }
+            if (count < 100 && !pOther && other->child(this))
+            {
+                attachTo(other);
+                if ((map.dir() != 0) ^ (idx > subindex))
+                    m_with = Position(advance(), 0);
+                else        // normal match to previous root
+                    m_attach = Position(other->advance(), 0);
             }
         }
         break;
