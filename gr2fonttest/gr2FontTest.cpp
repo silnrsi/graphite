@@ -92,6 +92,7 @@ public:
     bool ws;
     bool rtl;
     bool useLineFill;
+    bool noprint;
     int useCodes;
     bool autoCodes;
     int justification;
@@ -139,6 +140,7 @@ void Parameters::clear()
     useLineFill = false;
     useCodes = 0;
     autoCodes = false;
+    noprint = false;
     justification = 0;
     enableCache = false;
     width = 100.0f;
@@ -357,6 +359,10 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 else if (strcmp(argv[a], "-bytes") == 0)
                 {
                     option = SIZE;
+                }
+                else if (strcmp(argv[a], "-noprint") == 0)
+                {
+                    noprint = true;
                 }
                 else if (strcmp(argv[a], "-codes") == 0)
                 {
@@ -684,7 +690,7 @@ int Parameters::testFileFont() const
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, textSrc.utfEncodingForm(),
                 textSrc.get_utf_buffer_begin(), textSrc.getLength(), rtl ? 1 : 0);
 
-        if (pSeg)
+        if (pSeg && !noprint)
         {
             int i = 0;
             float advanceWidth;
@@ -736,8 +742,9 @@ int Parameters::testFileFont() const
                 fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
             }
             free(map);
-            gr_seg_destroy(pSeg);
         }
+        if (pSeg)
+            gr_seg_destroy(pSeg);
         if (featureList) gr_featureval_destroy(featureList);
         gr_font_destroy(sizedFont);
         if (trace) gr_stop_logging(face);
@@ -766,8 +773,9 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-dpi d\tDots per Inch (72)\n");
         fprintf(stderr,"-pt d\tPoint size (12)\n");
         fprintf(stderr,"-codes\tEnter text as hex code points instead of utf8 (false)\n");
-        fprintf(stderr,"-auto\tAutomatically generate a test string of all codes 1-0xFFF\n");
         fprintf(stderr,"\te.g. %s font.ttf -codes 1000 102f\n",argv[0]);
+        fprintf(stderr,"-auto\tAutomatically generate a test string of all codes 1-0xFFF\n");
+        fprintf(stderr,"-noprint\tDon't print results\n");
         //fprintf(stderr,"-ls\tStart of line = true (false)\n");
         //fprintf(stderr,"-le\tEnd of line = true (false)\n");
         fprintf(stderr,"-rtl\tRight to left = true (false)\n");
