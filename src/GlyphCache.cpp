@@ -456,7 +456,7 @@ GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphF
         gloce = be::peek<uint16>(gloc);
     }
 
-    if (glocs >= m_pGlat.size() || gloce > m_pGlat.size())
+    if (gloce > m_pGlat.size() || glocs + 6 >= gloce)
         return 0;
 
     const byte * p = m_pGlat + glocs;
@@ -469,6 +469,8 @@ GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphF
     Rect diabound = readbox(diamax, p[0], p[2], p[1], p[3]);
     ::new (curr) GlyphBox(num, bmap, &diabound);
     be::skip<uint8>(p, 4);
+    if (glocs + 6 + num * 8 >= gloce)
+        return 0;
 
     for (int i = 0; i < num * 2; ++i)
     {
