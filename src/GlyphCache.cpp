@@ -287,7 +287,8 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
 
         if (version >= 0x00020000 || tmpnumgattrs < 0 || tmpnumgattrs > 65535
             || _num_attrs == 0 || _num_attrs > 0x3000  // is this hard limit appropriate?
-            || _num_glyphs_graphics > tmpnumgattrs)
+            || _num_glyphs_graphics > tmpnumgattrs
+            || m_pGlat.size() < 4)
         {
             _head = Face::Table();
             return;
@@ -296,7 +297,7 @@ GlyphCache::Loader::Loader(const Face & face, const bool dumb_font)
         _num_glyphs_attributes = static_cast<unsigned short>(tmpnumgattrs);
         p = m_pGlat;
         version = be::read<uint32>(p);
-        if (version >= 0x00040000)       // reject Glat tables that are too new
+        if (version >= 0x00040000 || (version >= 0x00030000 && m_pGlat.size() < 8))       // reject Glat tables that are too new
         {
             _head = Face::Table();
             return;
