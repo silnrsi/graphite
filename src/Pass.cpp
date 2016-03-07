@@ -653,7 +653,7 @@ void SlotMap::collectGarbage(Slot * &aSlot)
 {
     for(Slot **s = begin(), *const *const se = end() - 1; s != se; ++s) {
         Slot *& slot = *s;
-        if(slot->isDeleted() || slot->isCopied())
+        if(slot && (slot->isDeleted() || slot->isCopied()))
         {
             if (slot == aSlot)
                 aSlot = slot->prev() ? slot->prev() : slot->next();
