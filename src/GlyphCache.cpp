@@ -393,7 +393,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
             return 0;
 
         const uint32 glat_version = be::peek<uint32>(m_pGlat);
-        if (glat_version == 0x00030000)
+        if (glat_version >= 0x00030000)
         {
             const byte * p = m_pGlat + glocs;
             uint16 bmap = be::read<uint16>(p);
