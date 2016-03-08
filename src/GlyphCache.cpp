@@ -146,7 +146,7 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
             _glyphs[0] = 0;
             delete [] glyphs;
         }
-        else if (numsubs > 0)
+        else if (numsubs > 0 && _boxes)
         {
             GlyphBox * boxes = (GlyphBox *)gralloc<char>(_num_glyphs * sizeof(GlyphBox) + numsubs * 8 * sizeof(float));
             GlyphBox * currbox = boxes;
