@@ -299,12 +299,18 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
             if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
             Slot *pOther = other;
             int count = 0;
-            while (pOther && pOther != this)
+            bool foundOther = false;
+            while (pOther)
             {
                 ++count;
+                if (pOther == this) foundOther = true;
                 pOther = pOther->attachedTo();
             }
-            if (count < 100 && !pOther && other->child(this))
+            for (pOther = m_child; pOther; pOther = pOther->m_child)
+                ++count;
+            for (pOther = m_sibling; pOther; pOther = pOther->m_sibling)
+                ++count;
+            if (count < 100 && !foundOther && other->child(this))
             {
                 attachTo(other);
                 if ((map.dir() != 0) ^ (idx > subindex))
