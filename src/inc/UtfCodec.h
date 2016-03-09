@@ -40,7 +40,7 @@ struct _utf_codec
 
     static void     put(codeunit_t * cp, const uchar_t , int8 & len) throw();
     static uchar_t  get(const codeunit_t * cp, int8 & len) throw();
-    static bool     validate(codeunit_t * s, size_t n) throw();
+    static bool     validate(const codeunit_t * s, const codeunit_t * e) throw();
 };
 
 
