@@ -716,13 +716,15 @@ int Parameters::testFileFont() const
                 assert((i + 1 < numSlots) || (slot == gr_seg_last_slot(pSeg)));
                 float orgX = gr_slot_origin_X(slot);
                 float orgY = gr_slot_origin_Y(slot);
+                const gr_char_info *cinfo = gr_seg_cinfo(pSeg, gr_slot_original(slot));
                 fprintf(log, "%02d  %4d %3d@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
                         i, gr_slot_gid(slot), lookup(map, (size_t)gr_slot_attached_to(slot)),
                         gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
                         gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
-                        gr_cinfo_break_weight(gr_seg_cinfo(pSeg, gr_slot_original(slot))), gr_slot_before(slot), gr_slot_after(slot));
+                        cinfo ? gr_cinfo_break_weight(cinfo) : 0, gr_slot_before(slot), gr_slot_after(slot));
                
-                if (pText32 != NULL)
+                if (pText32 != NULL && gr_slot_before(slot) + offset < charLength
+                                    && gr_slot_after(slot) + offset < charLength)
                 {
                     fprintf(log, "%7x\t%7x",
                         pText32[gr_slot_before(slot) + offset],
