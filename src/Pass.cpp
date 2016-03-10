@@ -459,9 +459,9 @@ bool Pass::runFSM(FiniteStateMachine& fsm, Slot * slot) const
     do
     {
         fsm.slots.pushSlot(slot);
-        if (--free_slots == 0
-         || slot->gid() >= m_numGlyphs
+        if (slot->gid() >= m_numGlyphs
          || m_cols[slot->gid()] == 0xffffU
+         || --free_slots == 0
          || state >= m_numTransition)
             return free_slots != 0;
 
@@ -637,10 +637,13 @@ bool Pass::testConstraint(const Rule & r, Machine & m) const
     const uint16 curr_context = m.slotMap().context();
     if (unsigned(r.sort - r.preContext) > m.slotMap().size() - curr_context
         || curr_context - r.preContext < 0) return false;
-    if (!*r.constraint) return true;
-    assert(r.constraint->constraint());
 
     vm::slotref * map = m.slotMap().begin() + curr_context - r.preContext;
+    if (map[r.sort - 1] == 0)
+        return false;
+
+    if (!*r.constraint) return true;
+    assert(r.constraint->constraint());
     for (int n = r.sort; n && map; --n, ++map)
     {
         if (!*map) continue;
