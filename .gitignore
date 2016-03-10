@@ -33,3 +33,5 @@ build*/**
 release/
 debug/
 dev/
+*.tgz
+*.sha1sum

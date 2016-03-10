@@ -231,7 +231,11 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     // Allocate pools
     m_rules = new Rule [m_numRules];
     m_codes = new Code [m_numRules*2];
-    const size_t prog_pool_sz = vm::Machine::Code::estimateCodeDataOut(ac_end - ac_data + rc_end - rc_data);
+    int totalSlots = 0;
+    const uint16 *tsort = sort_key;
+    for (int i = 0; i < m_numRules; ++i)
+        totalSlots += be::peek<uint16>(--tsort);
+    const size_t prog_pool_sz = vm::Machine::Code::estimateCodeDataOut(ac_end - ac_data + rc_end - rc_data, 2 * m_numRules, totalSlots);
     m_progs = gralloc<byte>(prog_pool_sz);
     byte * prog_pool_free = m_progs,
          * prog_pool_end  = m_progs + prog_pool_sz;
@@ -254,7 +258,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end
-                || vm::Machine::Code::estimateCodeDataOut(ac_end - ac_begin + rc_end - rc_begin) > size_t(prog_pool_end - prog_pool_free))
+                || vm::Machine::Code::estimateCodeDataOut(ac_end - ac_begin + rc_end - rc_begin, 2, r->sort) > size_t(prog_pool_end - prog_pool_free))
             return false;
         r->action     = new (m_codes+n*2-2) vm::Machine::Code(false, ac_begin, ac_end, r->preContext, r->sort, *m_silf, face, pt, &prog_pool_free);
         r->constraint = new (m_codes+n*2-1) vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, pt, &prog_pool_free);

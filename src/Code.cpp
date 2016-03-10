@@ -168,7 +168,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     // Allocate code and data target buffers, these sizes are a worst case
     // estimate.  Once we know their real sizes the we'll shrink them.
     if (_out)   _code = reinterpret_cast<instr *>(*_out);
-    else        _code = static_cast<instr *>(malloc(estimateCodeDataOut(bytecode_end-bytecode_begin)));
+    else        _code = static_cast<instr *>(malloc(estimateCodeDataOut(bytecode_end-bytecode_begin, 1, is_constraint ? 0 : rule_length)));
     _data = reinterpret_cast<byte *>(_code + (bytecode_end - bytecode_begin));
     
     if (!_code || !_data) {
