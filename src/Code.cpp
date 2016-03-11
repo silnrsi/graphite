@@ -66,11 +66,10 @@ inline bool is_return(const instr i) {
 
 struct context
 {
-    context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false; flags.inserted=false;}
+    context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false;}
     struct { 
         uint8   changed:1,
-                referenced:1,
-                inserted:1;
+                referenced:1;
     } flags;
     uint8       codeRef;
 };
@@ -113,7 +112,7 @@ private:
     enum passtype       _passtype;
     int                 _stack_depth;
     bool                _in_ctxt_item;
-    uint8               _slotref;
+    int16               _slotref;
     context             _contexts[NUMCONTEXTS];
     byte                _max_ref;
 };
@@ -321,7 +320,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case NEXT_N :           // runtime checked
         case COPY_NEXT :
             ++_out_index;
-            if (_out_index < -1 || _out_index > _out_length)
+            if (_out_index < -1 || _out_index > _out_length || _slotref > _max.rule_length)
                 failure(out_of_range_data);
             break;
         case PUT_GLYPH_8BIT_OBS :
@@ -504,13 +503,12 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       break;
     case NEXT :
     case COPY_NEXT :
-      if (!_contexts[_slotref].flags.inserted)
-        ++_slotref;
+      ++_slotref;
       _contexts[_slotref] = context(_code._instr_count+1);
       // if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
       break;
     case INSERT :
-      _contexts[_slotref].flags.inserted = true;
+      if (_slotref >= 0) --_slotref;
       _code._modify = true;
       break;
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
@@ -611,7 +609,7 @@ void Machine::Code::decoder::apply_analysis(instr * const code, instr * code_end
     if (_code._constraint) return;
 
     const instr temp_copy = Machine::getOpcodeTable()[TEMP_COPY].impl[0];
-    for (const context * c = _contexts, * const ce = c + _slotref; c != ce; ++c)
+    for (const context * c = _contexts, * const ce = c + _slotref; c < ce; ++c)
     {
         if (!c->flags.referenced || !c->flags.changed) continue;
         
@@ -693,27 +691,24 @@ void Machine::Code::failure(const status_t s) throw() {
 
 inline
 void Machine::Code::decoder::set_ref(int index, bool incinsert) throw() {
-    if (incinsert && _contexts[_slotref].flags.inserted) --index;
     if (index + _slotref < 0 || index + _slotref >= NUMCONTEXTS) return;
     _contexts[index + _slotref].flags.referenced = true;
-    if ((index > 0 || !_contexts[index + _slotref].flags.inserted) && index + _slotref > _max_ref) _max_ref = index + _slotref;
+    if (index + _slotref > _max_ref) _max_ref = index + _slotref;
 }
 
 
 inline
 void Machine::Code::decoder::set_noref(int index) throw() {
-    if (_contexts[_slotref].flags.inserted) --index;
     if (index + _slotref < 0 || index + _slotref >= NUMCONTEXTS) return;
-    if ((index > 0 || !_contexts[index + _slotref].flags.inserted) && index + _slotref > _max_ref) _max_ref = index + _slotref;
+    if (index + _slotref > _max_ref) _max_ref = index + _slotref;
 }
 
 
 inline
 void Machine::Code::decoder::set_changed(int index) throw() {
-    if (_contexts[_slotref].flags.inserted) --index;
     if (index + _slotref < 0 || index + _slotref >= NUMCONTEXTS) return;
     _contexts[index + _slotref].flags.changed= true;
-    if ((index > 0 || !_contexts[index + _slotref].flags.inserted) && index + _slotref > _max_ref) _max_ref = index + _slotref;
+    if (index + _slotref > _max_ref) _max_ref = index + _slotref;
 }
 
 
