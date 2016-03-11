@@ -661,15 +661,10 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
     return t;
 }
 
+inline
 bool Machine::Code::decoder::test_ref(int8 index) const throw()
 {
-    int8 absolute = _slotref + _max.pre_context + index;
-    if (absolute < 0 || absolute > _max.rule_length)
-    {
-        failure(out_of_range_data);
-        return false;
-    }
-    return true;
+    return valid_upto(_max.rule_length, _slotref + _max.pre_context + index);
 }
 
 bool Machine::Code::decoder::test_context() const throw()
