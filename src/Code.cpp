@@ -91,7 +91,7 @@ public:
     int         out_index() const { return _out_index; }
     
 private:
-    void        set_ref(int index, bool incinsert=false) throw();
+    void        set_ref(int index) throw();
     void        set_noref(int index) throw();
     void        set_changed(int index) throw();
     opcode      fetch_opcode(const byte * bc);
@@ -519,7 +519,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       // no break
     case PUT_COPY :
       if (arg[0] != 0) { set_changed(0); _code._modify = true; }
-      set_ref(arg[0], true);
+      set_ref(arg[0]);
       break;
     case PUSH_GLYPH_ATTR_OBS :
     case PUSH_SLOT_ATTR :
@@ -529,11 +529,11 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case PUSH_ISLOT_ATTR :
     case PUSH_FEAT :
     case SET_FEAT :
-      set_ref(arg[1], true);
+      set_ref(arg[1]);
       break;
     case PUSH_ATT_TO_GLYPH_ATTR :
     case PUSH_GLYPH_ATTR :
-      set_ref(arg[2], true);
+      set_ref(arg[2]);
       break;
     default:
         break;
@@ -685,7 +685,7 @@ void Machine::Code::failure(const status_t s) throw() {
 
 
 inline
-void Machine::Code::decoder::set_ref(int index, bool incinsert) throw() {
+void Machine::Code::decoder::set_ref(int index) throw() {
     if (index + _slotref < 0 || index + _slotref >= NUMCONTEXTS) return;
     _contexts[index + _slotref].flags.referenced = true;
     if (index + _slotref > _max_ref) _max_ref = index + _slotref;
