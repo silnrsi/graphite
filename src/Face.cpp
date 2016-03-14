@@ -283,7 +283,7 @@ Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
 
     if (!TtfUtil::CheckTable(n, _p, _sz))
     {
-        this->~Table();     // Make sure we release the table buffer even if the table filed it's checks
+        releaseBuffers();     // Make sure we release the table buffer even if the table failed it's checks
         return;
     }
 
