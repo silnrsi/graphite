@@ -40,7 +40,7 @@ of the License or (at your option) any later version.
 #include "inc/List.h"
 #include "inc/Collider.h"
 
-#define MAX_SEG_GROWTH_FACTOR  256
+#define MAX_SEG_GROWTH_FACTOR  64
 
 namespace graphite2 {
 

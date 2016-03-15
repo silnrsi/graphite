@@ -267,6 +267,7 @@ STARTOP(put_copy)
 ENDOP
 
 STARTOP(insert)
+    if (smap.decMax() <= 0) DIE;
     Slot *newSlot = seg.newSlot();
     if (!newSlot) DIE;
     Slot *iss = is;
