@@ -1,5 +1,6 @@
 1.3.7
     . Bug fixes
+    . Start to deprecate SegCache. This will be going away in a later release.
 
 1.3.6
     . Bug fixes
