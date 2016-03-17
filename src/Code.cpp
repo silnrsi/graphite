@@ -572,6 +572,7 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         assert(_out_index == 0);
         _in_ctxt_item = true;
         _out_index = _max.pre_context + int8(_data[-2]);
+        _slotref = int8(_data[-2]);
         _out_length = _max.rule_length;
 
         const size_t ctxt_start = _code._instr_count;
@@ -589,11 +590,13 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
 
             _out_length = 1;
             _out_index = 0;
+            _slotref = 0;
             _in_ctxt_item = false;
         }
         else
         {
             _out_index = 0;
+            _slotref = 0;
             return false;
         }
     }

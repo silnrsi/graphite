@@ -1,0 +1,144 @@
+[
+    {
+        "type" : "telemetry",
+        "silf" : 6482,
+        "states" : 240,
+        "starts" : 2,
+        "transitions" : 72,
+        "glyphs" : 33671,
+        "code" : 2184,
+        "misc" : 74,
+        "total" : 42725
+    },
+    {
+        "id" : "0141-00-0490",
+        "passes" : [
+            {
+                "id" : 1,
+                "slots" : [
+                    {
+                        "id" : "0141-01-43e0",
+                        "gid" : 67,
+                        "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                        "origin" : [ 0, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 462, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0141-00-4460",
+                        "gid" : 71,
+                        "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                        "origin" : [ 462, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 462, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0141-00-44e0",
+                        "gid" : 75,
+                        "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                        "origin" : [ 924, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 289, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0141-00-4560",
+                        "gid" : 75,
+                        "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                        "origin" : [ 1213, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 289, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    },
+                    {
+                        "id" : "0141-00-45e0",
+                        "gid" : 81,
+                        "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                        "origin" : [ 1502, 0 ],
+                        "shift" : [ 0, 0 ],
+                        "advance" : [ 520, 0 ],
+                        "insert" : true,
+                        "break" : 30,
+                        "user" : [ 0 ]
+                    }
+                ],
+                "rules" : []
+            }
+        ],
+        "output" : [
+            {
+                "id" : "0141-01-43e0",
+                "gid" : 67,
+                "charinfo" : { "original" : 0, "before" : 0, "after" : 0 },
+                "origin" : [ 0, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 462, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : [ 0 ]
+            },
+            {
+                "id" : "0141-00-4460",
+                "gid" : 71,
+                "charinfo" : { "original" : 1, "before" : 1, "after" : 1 },
+                "origin" : [ 462, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 462, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : [ 0 ]
+            },
+            {
+                "id" : "0141-00-44e0",
+                "gid" : 75,
+                "charinfo" : { "original" : 2, "before" : 2, "after" : 2 },
+                "origin" : [ 924, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 289, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : [ 0 ]
+            },
+            {
+                "id" : "0141-00-4560",
+                "gid" : 75,
+                "charinfo" : { "original" : 3, "before" : 3, "after" : 3 },
+                "origin" : [ 1213, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 289, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : [ 0 ]
+            },
+            {
+                "id" : "0141-00-45e0",
+                "gid" : 81,
+                "charinfo" : { "original" : 4, "before" : 4, "after" : 4 },
+                "origin" : [ 1502, 0 ],
+                "shift" : [ 0, 0 ],
+                "advance" : [ 520, 0 ],
+                "insert" : true,
+                "break" : 30,
+                "user" : [ 0 ]
+            }
+        ],
+        "advance" : [ 0, 0 ],
+        "chars" : [
+            { "offset" : 0, "unicode" : 97, "break" : 30, "flags" : 0, "slot" : { "before" : 0, "after" : 0 } },
+            { "offset" : 1, "unicode" : 101, "break" : 30, "flags" : 0, "slot" : { "before" : 1, "after" : 1 } },
+            { "offset" : 2, "unicode" : 105, "break" : 30, "flags" : 0, "slot" : { "before" : 2, "after" : 2 } },
+            { "offset" : 3, "unicode" : 105, "break" : 30, "flags" : 0, "slot" : { "before" : 3, "after" : 3 } },
+            { "offset" : 4, "unicode" : 111, "break" : 30, "flags" : 0, "slot" : { "before" : 4, "after" : 4 } }
+        ]
+    }
+]

@@ -111,6 +111,7 @@ fonttest(magyar2 MagyarLinLibertineG.ttf 0031 0030 -feat 210=200)
 fonttest(magyar3 MagyarLinLibertineG.ttf 0066 0069 0066 0074 0079 002d 0066 0069 0076 0065 -feat 209=3)
 fonttest(grtest1 grtest1gr.ttf 0062 0061 0061 0061 0061 0061 0061 0062 0061)
 fonttest(general1 general.ttf 0E01 0062)
+fonttest(piglatin1 PigLatinBenchmark_v3.ttf 0061 0065 0069 0069 006F)
 
 feattest(padauk_feat Padauk.ttf)
 feattest(charis_feat charis_r_gr.ttf)
