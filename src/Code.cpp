@@ -667,7 +667,17 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
 inline
 bool Machine::Code::decoder::test_ref(int8 index) const throw()
 {
-    return valid_upto(_max.rule_length, _slotref + _max.pre_context + index);
+    if (_code._constraint && !_in_ctxt_item)
+    {
+        if (index > 0 || -index > _max.pre_context)
+        {
+            failure(out_of_range_data);
+            return false;
+        }
+    }
+    else
+        return valid_upto(_max.rule_length, _slotref + _max.pre_context + index);
+    return true;
 }
 
 bool Machine::Code::decoder::test_context() const throw()
