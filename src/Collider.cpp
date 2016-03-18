@@ -974,9 +974,9 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
                 _nearEdges[i] = m * rtl;
             }
 #endif
-        below = here; here = above;
-        above = i < (int)_edges.size() - 2 ? _edges[i+2] * rtl : 1e38f;
         }
+    below = here; here = above;
+    above = i < (int)_edges.size() - 2 ? _edges[i+2] * rtl : 1e38f;
     }
     return collides;   // note that true is not a necessarily reliable value
     
