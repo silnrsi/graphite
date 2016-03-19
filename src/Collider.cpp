@@ -943,6 +943,8 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     const float sy = slot->origin().y + currShift.y;
     int smin = max(1, int((bb.bl.y + (1 - _miny + sy)) / _sliceWidth + 1)) - 1;
     int smax = min((int)_edges.size() - 2, int((bb.tr.y + (1 - _miny + sy)) / _sliceWidth + 1)) + 1;
+    if (smin > smax)
+        return false;
     bool collides = false;
     float below = smin > 0 ? _edges[smin-1] * rtl : 1e38f;
     float here = _edges[smin] * rtl;
