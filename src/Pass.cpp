@@ -861,7 +861,6 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
 
 bool Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
 {
-    KernCollider kerncoll(dbgout);
     Slot *start = seg->first();
     float ymin = 1e38f;
     float ymax = -1e38f;
@@ -884,7 +883,7 @@ bool Pass::collisionKern(Segment *seg, int dir, json * const dbgout) const
         ymin = min(y + bbox.bl.y, ymin);
         if (start && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
                         == (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
-            resolveKern(seg, s, start, kerncoll, dir, ymin, ymax, dbgout);
+            resolveKern(seg, s, start, dir, ymin, ymax, dbgout);
         if (c->flags() & SlotCollision::COLL_END)
             start = NULL;
         if (c->flags() & SlotCollision::COLL_START)
@@ -1023,7 +1022,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     return true;
 }
 
-float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, KernCollider &coll, int dir,
+float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start, int dir,
     float &ymin, float &ymax, json *const dbgout) const
 {
     Slot *nbor; // neighboring slot
@@ -1043,6 +1042,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     }
     bool seenEnd = (cFix->flags() & SlotCollision::COLL_END) != 0;
     bool isInit = false;
+    KernCollider coll(dbgout);
 
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())
     {
