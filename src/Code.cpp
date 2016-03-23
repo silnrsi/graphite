@@ -266,7 +266,7 @@ bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
 
 opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
 {
-    const byte opc = opcode(*bc++);
+    const byte opc = *bc++;
 
     // Do some basic sanity checks based on what we know about the opcode
     if (!validate_opcode(opc, bc))  return MAX_OPCODE;
