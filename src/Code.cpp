@@ -97,7 +97,7 @@ private:
     opcode      fetch_opcode(const byte * bc);
     void        analyse_opcode(const opcode, const int8 * const dp) throw();
     bool        emit_opcode(opcode opc, const byte * & bc);
-    bool        validate_opcode(const opcode opc, const byte * const bc);
+    bool        validate_opcode(const byte opc, const byte * const bc);
     bool        valid_upto(const uint16 limit, const uint16 x) const throw();
     bool        test_context() const throw();
     bool        test_ref(int8 index) const throw();
@@ -266,7 +266,7 @@ bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
 
 opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
 {
-    const opcode opc = opcode(*bc++);
+    const byte opc = opcode(*bc++);
 
     // Do some basic sanity checks based on what we know about the opcode
     if (!validate_opcode(opc, bc))  return MAX_OPCODE;
@@ -470,7 +470,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             break;
     }
 
-    return bool(_code) ? opc : MAX_OPCODE;
+    return bool(_code) ? opcode(opc) : MAX_OPCODE;
 }
 
 
@@ -629,7 +629,7 @@ void Machine::Code::decoder::apply_analysis(instr * const code, instr * code_end
 
 
 inline
-bool Machine::Code::decoder::validate_opcode(const opcode opc, const byte * const bc)
+bool Machine::Code::decoder::validate_opcode(const byte opc, const byte * const bc)
 {
     if (opc >= MAX_OPCODE)
     {
