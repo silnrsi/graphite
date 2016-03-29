@@ -100,7 +100,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
-        for (s = pSlot; s != end; s = s->next())
+        for (s = pSlot; s && s != end; s = s->next())
         {
             CharInfo *c = charinfo(s->before());
             if (isWhitespace(c->unicodeChar()))

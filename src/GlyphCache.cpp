@@ -211,6 +211,8 @@ GlyphCache::~GlyphCache()
 
 const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
 { 
+    if (glyphid >= numGlyphs())
+        return _glyphs[0];
     const GlyphFace * & p = _glyphs[glyphid];
     if (p == 0 && _glyph_loader)
     {
