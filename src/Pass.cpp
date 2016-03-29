@@ -339,7 +339,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
         *t = be::read<uint16>(states);
         if (e.test(*t >= m_numStates, E_BADSTATE))
         {
-            face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + (((t - m_transitions) / m_numColumns) << 24));
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + (((t - m_transitions) / m_numColumns) << 8));
             return face.error(e);
         }
     }
