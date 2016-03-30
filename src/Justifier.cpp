@@ -139,6 +139,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         float error = 0.;
         float diffpw;
         int tWeight = stats[i].weight();
+        if (tWeight == 0) continue;
 
         do {
             error = 0.;
