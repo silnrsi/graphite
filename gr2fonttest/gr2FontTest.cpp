@@ -665,7 +665,7 @@ int Parameters::testFileFont() const
             unsigned short *pText16 = (unsigned short *)malloc((textSrc.getLength() * 2 + 1) * sizeof(unsigned short));
             gr2::utf16::iterator ui = pText16;
             unsigned int *p = pText32;
-            for (int i = 0; i < textSrc.getLength(); ++i)
+            for (unsigned int i = 0; i < textSrc.getLength(); ++i)
             {
                 *ui = *p++;
                 ui++;
@@ -678,7 +678,7 @@ int Parameters::testFileFont() const
             unsigned char *pText8 = (unsigned char *)malloc((textSrc.getLength() + 1) * 4);
             gr2::utf8::iterator ui = pText8;
             unsigned int *p = pText32;
-            for (int i = 0; i < textSrc.getLength(); ++i)
+            for (unsigned int i = 0; i < textSrc.getLength(); ++i)
             {
                 *ui = *p++;
                 ui++;

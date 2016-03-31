@@ -21,6 +21,7 @@ int main(int argc, char **argv)
     char *pError;               /* location of faulty utf-8 */
     gr_font *font = NULL;
     size_t numCodePoints = 0;
+    unsigned int lenstr = strlen(argv[2]);
     gr_segment * seg = NULL;
     cluster_t *clusters;
     int ic, ci = 0;
@@ -30,7 +31,6 @@ int main(int argc, char **argv)
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);
     if (!font) return 2;
-    size_t lenstr = strlen(argv[2]);
     numCodePoints = gr_count_unicode_characters(gr_utf8, argv[2], NULL,
                 (const void **)(&pError));
     if (pError || !numCodePoints) return 3;
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
                                    gr_slot_origin_Y(s));
         if (--clusters[ci].num_glyphs == 0)                                         /*<5>*/
         {
-            fprintf(log, "\n");
+            fprintf(log, "[%d+%d]\n", clusters[ci].base_char, clusters[ci].num_chars);
             ++ci;
         }
     }
