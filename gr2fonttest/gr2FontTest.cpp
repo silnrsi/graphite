@@ -662,7 +662,7 @@ int Parameters::testFileFont() const
             featureList = parseFeatures(face);
         if (codesize == 2)
         {
-            unsigned short *pText16 = (unsigned short *)malloc(textSrc.getLength() * 2 * sizeof(unsigned short));
+            unsigned short *pText16 = (unsigned short *)malloc((textSrc.getLength() * 2 + 1) * sizeof(unsigned short));
             gr2::utf16::iterator ui = pText16;
             unsigned int *p = pText32;
             for (int i = 0; i < textSrc.getLength(); ++i)
@@ -675,7 +675,7 @@ int Parameters::testFileFont() const
         }
         else if (codesize == 1)
         {
-            unsigned char *pText8 = (unsigned char *)malloc(textSrc.getLength() * 4);
+            unsigned char *pText8 = (unsigned char *)malloc((textSrc.getLength() + 1) * 4);
             gr2::utf8::iterator ui = pText8;
             unsigned int *p = pText32;
             for (int i = 0; i < textSrc.getLength(); ++i)
@@ -737,11 +737,11 @@ int Parameters::testFileFont() const
             // position arrays must be one bigger than what countGlyphs() returned
             fprintf(log, "Advance width = %6.1f\n", advanceWidth);
             unsigned int numchar = gr_seg_n_cinfo(pSeg);
-            fprintf(log, "\nChar\tUnicode\tBefore\tAfter\n");
+            fprintf(log, "\nChar\tUnicode\tBefore\tAfter\tBase\n");
             for (unsigned int j = 0; j < numchar; j++)
             {
                 const gr_char_info *c = gr_seg_cinfo(pSeg, j);
-                fprintf(log, "%d\t%04X\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c));
+                fprintf(log, "%d\t%04X\t%d\t%d\t%ld\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c), gr_cinfo_base(c));
             }
             free(map);
         }

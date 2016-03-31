@@ -8,8 +8,8 @@ pos  gid   attach	     x	     y	ins bw	  chars		Unicode
 03    72  -1@0,0	   7.1	   0.0	 1  30	  3   3	     65	     65
 Advance width =   13.0
 
-Char	Unicode	Before	After
-0	0020	0	0
-1	006C	1	1
-2	0325	2	2
-3	0065	3	3
+Char	Unicode	Before	After	Base
+0	0020	0	0	0
+1	006C	1	1	1
+2	0325	2	2	2
+3	0065	3	3	3

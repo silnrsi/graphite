@@ -30,6 +30,7 @@ int main(int argc, char **argv)
     if (!face) return 1;
     font = gr_make_font(pointsize * dpi / 72.0f, face);
     if (!font) return 2;
+    size_t lenstr = strlen(argv[2]);
     numCodePoints = gr_count_unicode_characters(gr_utf8, argv[2], NULL,
                 (const void **)(&pError));
     if (pError || !numCodePoints) return 3;
@@ -61,8 +62,10 @@ int main(int argc, char **argv)
         }
         ++clusters[ci].num_glyphs;
 
-        if (clusters[ci].base_char + clusters[ci].num_chars < after + 1)            /*<4>*/
-            clusters[ci].num_chars = after + 1 - clusters[ci].base_char;
+        unsigned int nAfter = gr_slot_after(is) + 1;
+        unsigned int cAfter = nAfter < numCodePoints ? gr_cinfo_base(gr_seg_cinfo(seg, nAfter)) : lenstr;
+        if (clusters[ci].base_char + clusters[ci].num_chars < cAfter)              /*<4>*/
+            clusters[ci].num_chars = cAfter - clusters[ci].base_char;
     }
 
     ci = 0;
