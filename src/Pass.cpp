@@ -962,8 +962,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     {
         SlotCollision *cNbor = seg->collisionInfo(nbor);
         bool sameCluster = nbor->isChildOf(base);
-        if (nbor != slotFix         // don't process if this is the slot of interest
-                      && !(cNbor->flags() & SlotCollision::COLL_IGNORE)    // don't process if ignoring
+        if (nbor != slotFix         						// don't process if this is the slot of interest
+                      && !(cNbor->ignore())    				// don't process if ignoring
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
                             || !inKernCluster(seg, nbor)    // or this cluster is not to be kerned
                             || (rtl ^ ignoreForKern))       // or it comes before(ltr) or after(rtl)
@@ -1052,7 +1052,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
             return 0.;
         const Rect &bb = seg->theGlyphBBoxTemporary(nbor->gid());
         SlotCollision *cNbor = seg->collisionInfo(nbor);
-        if (bb.bl.y == 0.f && bb.tr.y == 0.f)
+        if ((bb.bl.y == 0.f && bb.tr.y == 0.f) || (cNbor->flags() & SlotCollision::COLL_ISSPACE))
         {
             if (m_kernColls == InWord)
                 break;
@@ -1066,7 +1066,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
             float y = nbor->origin().y + cNbor->shift().y;
             ymax = max(y + bb.tr.y, ymax);
             ymin = min(y + bb.bl.y, ymin);
-            if (nbor != slotFix && !(cNbor->flags() & SlotCollision::COLL_IGNORE))
+            if (nbor != slotFix && !cNbor->ignore())
             {
                 seenEnd = true;
                 if (!isInit)

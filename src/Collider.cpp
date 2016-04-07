@@ -1093,3 +1093,7 @@ float SlotCollision::getKern(int dir) const
     	return 0;
 }
 
+bool SlotCollision::ignore() const
+{
+	return ((flags() & SlotCollision::COLL_IGNORE) || (flags() & SlotCollision::COLL_ISSPACE));
+}
