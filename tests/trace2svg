@@ -48,7 +48,7 @@ class FGlyphs(object) :
         if gid >= self._font['maxp'].numGlyphs : return
         gname = self._font.getGlyphName(gid)
         g = self._glyphSet[gname]._glyph
-        if g is None or not hasattr(g, 'gbox') :
+        if g is None or not hasattr(g, 'xMin') :
             gbox = (0, 0, 0, 0)
         else :
             gbox = (g.xMin, g.yMin, g.xMax, g.yMax)
@@ -127,8 +127,7 @@ class Slot(object) :
                         if temp[0] != gid :
                             finalt = temp[2]
                             break
-                if start > 0 or finalt < final :
-                    res += '{0}  <set attributeName="visibility" attributeType="CSS" to="visible" begin="{1}s" dur="{2}s" fill="{3}"/>\n'.format(indent, start*dur, (finalt-start)*dur, "freeze" if finalt >= final else "reset")
+                res += '{0}  <set attributeName="visibility" attributeType="CSS" to="visible" begin="{1}s" dur="{2}s" fill="{3}"/>\n'.format(indent, start*dur, (finalt-start)*dur, "freeze" if finalt >= final else "reset")
             elif e[1] != currpos :
                 valx.append(valx[-1])
                 valx.append(e[1][0] * scale)
@@ -177,9 +176,9 @@ class SlotSequence(object) :
             slot.addEvent(r[1], r[2], t)
 
     def asSVG(self, final, scale, bbox, dur=1, trans=0.5) :
-        res = '<g id="surface1" transform="matrix(1,0,0,-1,{},{})">\n'.format(-bbox[0], bbox[3])
+        res = '<g id="surface1" transform="matrix(1,0,0,-1,{},{})">\n'.format(-bbox[0], bbox[3] + 10)
         res += '  <rect x="{}" y="{}" width="{}" height="{}" style="fill:white;stroke:none"/>\n'.format(
-            bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1])
+            bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3] + 10)
         res += '  <g style="fill:black">\n'
         for s in self.slots :
             res += self.allSlots[s].asSVG(final, scale, indent='    ', dur=dur, trans=trans)
