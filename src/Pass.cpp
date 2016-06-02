@@ -523,7 +523,7 @@ void Pass::findNDoRule(Slot * & slot, Machine &m, FiniteStateMachine & fsm) cons
                 if (r != re)
                 {
                     const int adv = doAction(r->rule->action, slot, m);
-                    dumpRuleEventOutput(fsm, m, *r->rule, slot);
+                    dumpRuleEventOutput(fsm, *r->rule, slot);
                     if (r->rule->action->deletes()) fsm.slots.collectGarbage(slot);
                     adjustSlot(adv, slot, fsm.slots);
                     *fsm.dbgout << "cursor" << objectid(dslot(&fsm.slots.segment, slot))
@@ -579,7 +579,7 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
 }
 
 
-void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, Machine & m, const Rule & r, Slot * const last_slot) const
+void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * const last_slot) const
 {
     *fsm.dbgout     << json::item << json::flat << json::object
                         << "id"     << &r - m_rules
@@ -597,7 +597,7 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, Machine & m, cons
                     << json::close // close "input"
                     << "slots"  << json::array;
     const Position rsb_prepos = last_slot ? last_slot->origin() : fsm.slots.segment.advance();
-    fsm.slots.segment.positionSlots(0, 0, 0, m.slotMap().dir());
+    fsm.slots.segment.positionSlots(0, 0, 0, fsm.slots.segment.currdir());
 
     for(Slot * slot = output_slot(fsm.slots, 0); slot != last_slot; slot = slot->next())
         *fsm.dbgout     << dslot(&fsm.slots.segment, slot);

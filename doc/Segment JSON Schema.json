@@ -8,14 +8,14 @@
         "id" : "Segment",
         "type" : "object",
         "description" : "A Segment object with a passes log containing \
-                         positioned slot arrays"
+                         positioned slot arrays",
         "properties" :
         {
             "id" : 
             { 
                 "id" : "UUID",
                 "type" : "string",
-                "title" : "uuid"
+                "title" : "uuid",
                 "description" : "A unique ID"
             },
                 
@@ -35,14 +35,30 @@
                         "id" : 
                         {
                             "type" : "integer",
-                            "title" : "Pass number"
+                            "title" : "Pass number",
                             "description" : "The Pass as listed in dbg_engine code.\
                                              -1 is a synthetic pass representing \
-                                             the bidi pass."
+                                             the bidi pass.",
                             "required" : true,
                             "minimum" : -1
                         },
                         
+                        "slotsdir" :
+                        {
+                            "type" : "string",
+                            "titie" : "Slot stream direction",
+                            "description" : "Direction (rtl or ltr) of slots in the slots array",
+                            "required" : true
+                        },
+
+                        "passdir" :
+                        {
+                            "type" : "string",
+                            "titie" : "Pass direction",
+                            "description" : "Processing direction (rtl or ltr) of the pass",
+                            "required" : true
+                        },
+
                         "slots" :
                         {
                             "type" : "array",
@@ -60,8 +76,8 @@
                                     { 
                                         "id" : "UUID",
                                         "type" : "integer",
-                                        "title" : "Slot uuid"
-                                        "description" : "A unique ID for tracking Slot movement"
+                                        "title" : "Slot uuid",
+                                        "description" : "A unique ID for tracking Slot movement",
                                         "minimim" : 0, 
                                         "maximum" : 65535
                                     },
@@ -85,7 +101,7 @@
                                             { 
                                                 "id" : "Index",
                                                 "type" : "integer",
-                                                "required" : true,
+                                                "required" : true
                                             },
                                             
                                             "before" : { "$ref" : "Index" },
@@ -100,7 +116,7 @@
                                         "type" : "array",
                                         "required" : true,
                                         "title" : "position",
-                                        "description" : "A 2-tuple ordered x, y"
+                                        "description" : "A 2-tuple ordered x, y",
                                         "items" : 
                                         [ 
                                             { "type" : "number" }, 
@@ -132,19 +148,19 @@
                                     "bidi" : 
                                     { 
                                         "type" : "integer", 
-                                        "title" : "Bidirection level"
+                                        "title" : "Bidirection level",
                                         "minimum" : 0,
-                                        "maxmimum" : 63,
+                                        "maxmimum" : 63
                                     },
                                     
                                     "justification" : { "type" : "number", "title" : "Justification width" },
                                     
                                     "parent" : 
                                     {
-                                        "type" : "object"
+                                        "type" : "object",
                                         "description" : "SlotRef to this slots \
                                                          parent and offset from \
-                                                         the parent's origin"
+                                                         the parent's origin",
                                         "properties" :
                                         {
                                             "id" : { "$ref" : "UUID" },
@@ -196,8 +212,8 @@
                                         "required" : true,
                                         "items" :
                                         {
-                                            "id" : "Rule"
-                                            "type" : "object"
+                                            "id" : "Rule",
+                                            "type" : "object",
                                             "properties" :
                                             {
                                                 "id" :
@@ -222,7 +238,7 @@
                                                             "type" : "integer", 
                                                             "required" : true, 
                                                             "minimum" : 0 
-                                                        },
+                                                        }
                                                     }
                                                 }
                                             }
@@ -231,8 +247,8 @@
                                     
                                     "output" :
                                     {
-                                        "type" : ["object", "null"]
-                                        "title" : "Output slots"
+                                        "type" : ["object", "null"],
+                                        "title" : "Output slots",
                                         "required" : true,
                                         "properties" :
                                         {
@@ -240,7 +256,7 @@
                                             {
                                                 "type" : "object",
                                                 "title" : "Input slot range",
-                                                "description" : "Input slot range replaced by the output slots"
+                                                "description" : "Input slot range replaced by the output slots",
                                                 "required" : true,
                                                 "properties" : 
                                                 {
@@ -276,6 +292,14 @@
                 }
             },
             
+            "outputdir" :
+            {
+                "type" : "string",
+                "titie" : "Slot stream direction",
+                "description" : "Direction (rtl or ltr) of slots in the output array",
+                "required" : true
+            },
+
             "output" :
             {
                 "type" : "array",
@@ -283,7 +307,7 @@
                 "description" : "Slot stream after the final pass has run.",
                 "required" : true, 
                 "items" : { "$ref" : "Slot" }
-            }
+            },
     
             "advance" : { "$ref" : "Advance" },
                    
@@ -292,11 +316,11 @@
                 "type" : "array",
                 "title" : "CharInfo array",
                 "description" : "A array of CharInfo objects referneced by the \
-                                 slots"
+                                 slots",
                 "items" : 
                 {
                     "id" : "CharInfo",
-                    "type" : "object"
+                    "type" : "object",
                     "properties" :
                     {
                         "offset" : { "$ref" : "Index" },
@@ -322,12 +346,12 @@
                         "slot" : 
                         {
                             "type" : "object",
-                            "title" : "Slot relations"
-                            "required" : true
+                            "title" : "Slot relations",
+                            "required" : true,
                             "properties" : 
                             {
                                 "before" : { "$ref" : "Index" },
-                                "after" : { "$ref" : "Index" },
+                                "after" : { "$ref" : "Index" }
                             }
                         }
                     }
