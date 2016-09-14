@@ -131,10 +131,12 @@ json & json::operator << (json::number f) throw()
         fprintf(_stream, "%g", f); 
     return *this; 
 }
-json & json::operator << (json::integer d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
-json & json::operator << (long unsigned d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
-json & json::operator << (json::boolean b) throw()  { context(seq); fputs(b ? "true" : "false", _stream); return *this; }
-json & json::operator << (json::_null_t) throw()    { context(seq); fputs("null",_stream); return *this; }
+json & json::operator << (json::integer d) throw()          { context(seq); fprintf(_stream, "%ld", d); return *this; }
+json & json::operator << (unsigned long int d) throw()      { context(seq); fprintf(_stream, "%lu", d); return *this; }
+json & json::operator << (unsigned long long int d) throw() { context(seq); fprintf(_stream, "%llu", d); return *this; }
+json & json::operator << (long long int d) throw()          { context(seq); fprintf(_stream, "%lld", d); return *this; }
+json & json::operator << (json::boolean b) throw()          { context(seq); fputs(b ? "true" : "false", _stream); return *this; }
+json & json::operator << (json::_null_t) throw()            { context(seq); fputs("null",_stream); return *this; }
 
 #endif
 

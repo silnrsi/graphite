@@ -85,7 +85,9 @@ public:
     json & operator << (string) throw();
     json & operator << (number) throw();
     json & operator << (integer) throw();
-    json & operator << (long unsigned int d) throw();
+    json & operator << (unsigned long int d) throw();
+    json & operator << (unsigned long long int d) throw();
+    json & operator << (long long int d) throw();
     json & operator << (boolean) throw();
     json & operator << (_null_t) throw();
     json & operator << (_context_t) throw();
