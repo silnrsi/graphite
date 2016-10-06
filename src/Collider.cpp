@@ -306,6 +306,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
         float seq_above_wt = cslot->seqAboveWt();
         float seq_below_wt = cslot->seqBelowWt();
         float seq_valign_wt = cslot->seqValignWt();
+        float lmargin = _margin;
         // if isAfter, invert orderFlags for diagonal orders.
         if (isAfter)
         {
@@ -334,6 +335,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     torg = _currOffset.x;
                     cmin = _limit.bl.x + torg;
                     cmax = _limit.tr.x - tbb.xi + tbb.xa + torg;
+                    lmargin = _margin;
                     break;
                 case 1 :	// y direction
                     vmin = max(max(bb.yi - tbb.ya + sy, tsb.di - sb.da + tx - sd), sb.si - tsb.sa - tx + ss);
@@ -345,6 +347,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     torg = _currOffset.y;
                     cmin = _limit.bl.y + torg;
                     cmax = _limit.tr.y - tbb.yi + tbb.ya + torg;
+                    lmargin = _margin;
                     break;
                 case 2 :    // sum - moving along the positively-sloped vector, so the boundaries are the
                             // negatively-sloped boundaries.
@@ -357,6 +360,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     torg = _currOffset.x + _currOffset.y;
                     cmin = _limit.bl.x + _limit.bl.y + torg;
                     cmax = _limit.tr.x + _limit.tr.y - tsb.si + tsb.sa + torg;
+                    lmargin = _margin / ISQRT2;
                     break;
                 case 3 :    // diff - moving along the negatively-sloped vector, so the boundaries are the
                             // positively-sloped boundaries.
@@ -369,6 +373,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                     torg = _currOffset.x - _currOffset.y;
                     cmin = _limit.bl.x - _limit.tr.y + torg;
                     cmax = _limit.tr.x - _limit.bl.y - tsb.di + tsb.da + torg;
+                    lmargin = _margin / ISQRT2;
                     break;
                 default :
                     continue;
@@ -470,7 +475,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                 }
             }
 
-            if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
+            if (vmax < cmin - lmargin || vmin > cmax + lmargin || omax < otmin - lmargin || omin > otmax + lmargin)
                 continue;
 
             // Process sub-boxes that are defined for this glyph.
@@ -509,7 +514,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                             omax = ssb.sa + ss;
                             break;
                     }
-                    if (vmax < cmin - _margin || vmin > cmax + _margin || omax < otmin - _margin || omin > otmax + _margin)
+                    if (vmax < cmin - lmargin || vmin > cmax + lmargin || omax < otmin - lmargin || omin > otmax + lmargin)
                         continue;
 
 #if !defined GRAPHITE2_NTRACING
@@ -517,11 +522,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
                         dbgout->setenv(1, reinterpret_cast<void *>(j));
 #endif
                     if (omin > otmax)
-                        _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
-                                                sqr(_margin - omin + otmax) * _marginWt, false);
+                        _ranges[i].weightedAxis(i, vmin - lmargin, vmax + lmargin, 0, 0, 0, 0, 0,
+                                                sqr(lmargin - omin + otmax) * _marginWt, false);
                     else if (omax < otmin)
-                        _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
-                                                sqr(_margin - otmin + omax) * _marginWt, false);
+                        _ranges[i].weightedAxis(i, vmin - lmargin, vmax + lmargin, 0, 0, 0, 0, 0,
+                                                sqr(lmargin - otmin + omax) * _marginWt, false);
                     else
                         _ranges[i].exclude_with_margins(vmin, vmax, i);
                     anyhits = true;
@@ -537,11 +542,11 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShif
 #endif
                 isCol = true;
                 if (omin > otmax)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
-                                            sqr(_margin - omin + otmax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - lmargin, vmax + lmargin, 0, 0, 0, 0, 0,
+                                            sqr(lmargin - omin + otmax) * _marginWt, false);
                 else if (omax < otmin)
-                    _ranges[i].weightedAxis(i, vmin - _margin, vmax + _margin, 0, 0, 0, 0, 0,
-                                            sqr(_margin - otmin + omax) * _marginWt, false);
+                    _ranges[i].weightedAxis(i, vmin - lmargin, vmax + lmargin, 0, 0, 0, 0, 0,
+                                            sqr(lmargin - otmin + omax) * _marginWt, false);
                 else
                     _ranges[i].exclude_with_margins(vmin, vmax, i);
 
