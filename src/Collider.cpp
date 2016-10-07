@@ -953,22 +953,17 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     if (smin > smax)
         return false;
     bool collides = false;
-    float below = smin > 0 ? _edges[smin-1] * rtl : 1e38f;
-    float here = _edges[smin] * rtl;
-    float above = smin < (int)_edges.size() - 1 ? _edges[smin+1] * rtl : 1e38f;
 
     for (int i = smin; i <= smax; ++i)
     {
         float t;
+        float here = _edges[i] * rtl;
         float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
-        if (    (x > here - _mingap - currSpace)
-             || (x > below - _mingap - currSpace)
-             || (x > above - _mingap - currSpace))
+        if (    (x > here - _mingap - currSpace) )
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
             float m = get_edge(seg, slot, currShift, y, _sliceWidth, 0., rtl > 0) * rtl + 2 * currSpace;
-            // Check slices above and below (if any).
-            t = min(min(here, below), above) - m;
+            t = here - m;
             // _mingap is positive to shrink
             if (t < _mingap)
             {
@@ -984,8 +979,6 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             }
 #endif
         }
-        below = here; here = above;
-        above = i < (int)_edges.size() - 2 ? _edges[i+2] * rtl : 1e38f;
     }
     return collides;   // note that true is not a necessarily reliable value
     
