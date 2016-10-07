@@ -193,7 +193,7 @@ public:
             const Position &currShift, const Position &offsetPrev, int dir,
             float ymin, float ymax, json * const dbgout);
     bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
-    Position resolve(Segment *seg, Slot *slot, int dir, float margin, json * const dbgout);
+    Position resolve(Segment *seg, Slot *slot, int dir, json * const dbgout);
     void shift(const Position &mv, int dir);
 
     CLASS_NEW_DELETE;

@@ -757,7 +757,7 @@ static float localmin(float al, float au, float bl, float bu, float x)
 }
 
 // Return the given edge of the glyph at height y, taking any slant box into account.
-static float get_edge(Segment *seg, const Slot *s, const Position &shift, float y, float width, bool isRight)
+static float get_edge(Segment *seg, const Slot *s, const Position &shift, float y, float width, float margin, bool isRight)
 {
     const GlyphCache &gc = seg->getFace()->glyphs();
     unsigned short gid = s->gid();
@@ -772,15 +772,15 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
         {
             const BBox &sbb = gc.getSubBoundingBBox(gid, i);
             const SlantBox &ssb = gc.getSubBoundingSlantBox(gid, i);
-            if (sy + sbb.yi > y + width / 2 || sy + sbb.ya < y - width / 2)
+            if (sy + sbb.yi - margin > y + width / 2 || sy + sbb.ya + margin < y - width / 2)
                 continue;
             if (isRight)
             {
-                float x = sx + sbb.xa;
+                float x = sx + sbb.xa + margin;
                 if (x > res)
                 {
-                    float td = sx - sy + ssb.da + y;
-                    float ts = sx + sy + ssb.sa - y;
+                    float td = sx - sy + ssb.da + margin + y;
+                    float ts = sx + sy + ssb.sa + margin - y;
                     x = localmax(td - width / 2, td + width / 2,  ts - width / 2, ts + width / 2, x);
                     if (x > res)
                         res = x;
@@ -788,11 +788,11 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
             }
             else
             {
-                float x = sx + sbb.xi;
+                float x = sx + sbb.xi - margin;
                 if (x < res)
                 {
-                    float td = sx - sy + ssb.di + y;
-                    float ts = sx + sy + ssb.si - y;
+                    float td = sx - sy + ssb.di - margin + y;
+                    float ts = sx + sy + ssb.si - margin - y;
                     x = localmin(td - width / 2, td + width / 2, ts - width / 2, ts + width / 2, x);
                     if (x < res)
                         res = x;
@@ -807,9 +807,9 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
         float td = sx - sy + y;
         float ts = sx + sy - y;
         if (isRight)
-            res = localmax(td + sb.da - width / 2, td + sb.da + width / 2, ts + sb.sa - width / 2, ts + sb.sa + width / 2, sx + bb.xa);
+            res = localmax(td + sb.da - width / 2, td + sb.da + width / 2, ts + sb.sa - width / 2, ts + sb.sa + width / 2, sx + bb.xa) + margin;
         else
-            res = localmin(td + sb.di - width / 2, td + sb.di + width / 2, ts + sb.si - width / 2, ts + sb.si + width / 2, sx + bb.xi);
+            res = localmin(td + sb.di - width / 2, td + sb.di + width / 2, ts + sb.si - width / 2, ts + sb.si + width / 2, sx + bb.xi) - margin;
     }
     return res;
 }
@@ -870,6 +870,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
                     _edges.pop_back();
             }
         }
+        goto done;
     }
     numSlices = _edges.size();
 
@@ -901,7 +902,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_edge(seg, s, c->shift(), y, _sliceWidth, false);
+                t = get_edge(seg, s, c->shift(), y, _sliceWidth, margin, false);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -911,7 +912,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_edge(seg, s, c->shift(), y, _sliceWidth, true);
+                t = get_edge(seg, s, c->shift(), y, _sliceWidth, margin, true);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
@@ -921,6 +922,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
         }
     }
+    done:
     _mingap = (float)1e38;
     _target = aSlot;
     _margin = margin;
@@ -964,7 +966,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
              || (x > above - _mingap - currSpace))
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
-            float m = get_edge(seg, slot, currShift, y, _sliceWidth, rtl > 0) * rtl + 2 * currSpace;
+            float m = get_edge(seg, slot, currShift, y, _sliceWidth, 0., rtl > 0) * rtl + 2 * currSpace;
             // Check slices above and below (if any).
             t = min(min(here, below), above) - m;
             // _mingap is positive to shrink
@@ -992,9 +994,10 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
 // Return the amount to kern by.
 Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
-        int dir, float margin, GR_MAYBE_UNUSED json * const dbgout)
+        int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
-    float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
+    float resultNeeded = (1 - 2 * (dir & 1)) * _mingap;
+    // float resultNeeded = (1 - 2 * (dir & 1)) * (_mingap - margin);
     float result = min(_limit.tr.x - _offsetPrev.x, max(resultNeeded, _limit.bl.x - _offsetPrev.x));
 
 #if !defined GRAPHITE2_NTRACING
@@ -1003,7 +1006,6 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
         *dbgout << json::object // slot
                 << "slot" << objectid(dslot(seg, _target))
 				<< "gid" << _target->gid()
-                << "margin" << _margin
                 << "limit" << _limit
                 << "miny" << _miny
                 << "maxy" << _maxy
