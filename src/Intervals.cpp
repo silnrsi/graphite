@@ -73,7 +73,9 @@ namespace
 
 inline
 bool separated(float a, float b) {
-    return a != b;
+    float res = a - b;
+    return (*(unsigned int *)(&res) > 2);
+    //return a != b;
     //return std::fabs(a-b) > std::numeric_limits<float>::epsilon(); // std::epsilon may not work. but 0.5 fails exising 64 bit tests
     //return std::fabs(a-b) > 0.5f;
 }

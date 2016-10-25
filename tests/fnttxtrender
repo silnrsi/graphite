@@ -101,11 +101,11 @@ def ftostr(x, dp=6) :
     return res
 
 def scalecmp(a, b, e) :
-#    return abs(a - b) > e
-    if a != 0 :
-        return (abs(1. - b / a) > e)
-    else :
-        return (abs(a - b) > e)
+    return abs(a - b) > e
+#    if a != 0 :
+#        return (abs(1. - b / a) > e/a)
+#    else :
+#        return (abs(b) > e)
 
 def cmpgls(tests, bases, epsilon) :
     if len(tests) != len(bases) : return True
