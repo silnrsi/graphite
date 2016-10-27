@@ -59,7 +59,8 @@ Zones::Exclusion & Zones::Exclusion::operator += (Exclusion const & rhs) {
 inline
 uint8 Zones::Exclusion::outcode(float val) const {
     float p = val;
-    float d = std::numeric_limits<float>::epsilon();
+    //float d = std::numeric_limits<float>::epsilon();
+    float d = 0.;
     return ((p - xm >= d) << 1) | (x - p > d);
 }
 
