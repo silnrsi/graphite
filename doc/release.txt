@@ -17,7 +17,7 @@ These notes are not necessarily part of the manual. They are here for code devel
 The release is done by:
 
 . git tag -s <version>
-. git archive -o graphite2-<version>.tgz --prefix=graphite2-<version> <version>
+. git archive -o graphite2-<version>.tgz --prefix=graphite2-<version>/ <version>
 . git archive -o graphite2-minimal-<version>.tgz --prefix=graphite2-<version>/ <version> include src LICENSE COPYING README.md
 . sha1sum graphite2-<version>.tgz graphite2-minimal-<version>.tgz > graphite2-<version>.sha1sum
 . Then push up to sf.net/projects/silgraphite and projects.palaso.org/graphiteng-dev
