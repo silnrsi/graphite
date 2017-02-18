@@ -974,7 +974,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
                             || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
                             || ((cNbor->flags() & SlotCollision::COLL_KERN) && !sameCluster)     // ignore other kernable clusters
                             || (cNbor->flags() & SlotCollision::COLL_ISCOL))   // test against other collided glyphs
-                      && !coll.mergeSlot(seg, nbor, cNbor->shift(), !ignoreForKern, sameCluster, collides, false, dbgout))
+                      && !coll.mergeSlot(seg, nbor, cNbor, cNbor->shift(), !ignoreForKern, sameCluster, collides, false, dbgout))
             return false;
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
