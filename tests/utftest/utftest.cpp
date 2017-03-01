@@ -8,6 +8,9 @@ struct test8
     unsigned char str[12];
 };
 struct test8 tests8[] = {
+    { 0,  0, {0xF4, 0x90, 0x80, 0x80, 0,    0,    0,    0,    0,    0,    0,    0} },   // bad(4) [U+110000]
+    { 0,  0, {0xC0, 0x80, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0} },   // bad(4) [U+110000]
+    { 0,  0, {0xA0, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0} },   // bad(4) [U+110000]    
     { 4, -1, {0x7F, 0xDF, 0xBF, 0xEF, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0,    0} },   // U+7F, U+7FF, U+FFFF, U+10FFF
     { 2,  3, {0x7F, 0xDF, 0xBF, 0xF0, 0x8F, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0} },   // U+7F, U+7FF, long(U+FFFF), U+10FFF
     { 1,  1, {0x7F, 0xE0, 0x9F, 0xBF, 0xEF, 0xBF, 0xBF, 0xF4, 0x8F, 0xBF, 0xBF, 0} },   // U+7F, long(U+7FF), U+FFFF, U+10FFF
