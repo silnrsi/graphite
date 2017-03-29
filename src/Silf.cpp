@@ -191,7 +191,7 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
 
     const size_t clen = readClassMap(p, passes_start - p, version, e);
     m_passes = new Pass[m_numPasses];
-    if (e || e.test(p + clen > passes_start, E_BADPASSESSTART)
+    if (e || e.test(clen > unsigned(passes_start - p), E_BADPASSESSTART)
           || e.test(!m_passes, E_OUTOFMEM))
     { releaseBuffers(); return face.error(e); }
 
