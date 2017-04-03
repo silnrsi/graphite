@@ -85,7 +85,7 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         {
             // Copy in literal. At this point the last full sequence must be at
             // least MINMATCH + 5 from the end of the output buffer.
-            if (align(literal_len) > unsigned(dst_end - dst - (MINMATCH+5)))
+            if (align(literal_len) > unsigned(dst_end - dst - (MINMATCH+5)) || dst_end - dst < MINMATCH + 5)
                 return -1;
             dst = overrun_copy(dst, literal, literal_len);
         }
@@ -94,7 +94,8 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         //  decoded output.
         u8 const * const pcpy = dst - match_dist;
         if (pcpy < static_cast<u8*>(out)
-                  || match_len > unsigned(dst_end - dst - (MINMATCH+5)))
+                  || match_len > unsigned(dst_end - dst - (MINMATCH+5))
+                  || dst_end - dst < MINMATCH + 5)
             return -1;
         if (dst > pcpy+sizeof(unsigned long) 
             && dst + align(match_len + MINMATCH) <= dst_end)
@@ -103,8 +104,8 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
             dst = safe_copy(dst, pcpy, match_len + MINMATCH);
     }
     
-    if (literal + literal_len > src_end
-              || dst + literal_len > dst_end)
+    if (literal_len > src_end - literal
+              || literal_len > dst_end - dst)
         return -1;
     dst = fast_copy(dst, literal, literal_len);
     
