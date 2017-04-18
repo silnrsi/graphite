@@ -293,7 +293,8 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version, Error 
         if (e.test(*o + 4 > max_off, E_HIGHCLASSOFFSET)                        // LookupClass doesn't stretch over max_off
          || e.test(lookup[0] == 0                                                   // A LookupClass with no looks is a suspicious thing ...
                     || lookup[0] * 2 + *o + 4 > max_off                             // numIDs lookup pairs fits within (start of LookupClass' lookups array, max_off]
-                    || lookup[3] + lookup[1] != lookup[0], E_BADCLASSLOOKUPINFO))   // rangeShift:   numIDs  - searchRange
+                    || lookup[3] + lookup[1] != lookup[0], E_BADCLASSLOOKUPINFO)    // rangeShift:   numIDs  - searchRange
+         || e.test(((o[1] - *o) & 1) != 0, ERROROFFSET))                         // glyphs are in pairs so difference must be even.
             return ERROROFFSET;
     }
 
