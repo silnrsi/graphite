@@ -47,6 +47,18 @@ GRAPHITE2_NTRACING::
 GRAPHITE2_CUSTOM_HEADER::
     If set, then the value of this macro will be included as a header in Main.h (in effect, all source files). See Main.h for details.
 
+=== Floating point maths ===
+
+On some Intel 32 bit processors, gcc on Linux, will attempt to optimise floating point operations by keeping 
+floating point values in 80 bit (or larger) float registers for as long as possible. In some of the floating 
+point maths performed for collision detection this results in error accumlating which produces different
+results between 64 bit and 32 bit native code.  The current work around is to pass either -ffloat-store (the 
+slow but widely compatible option) or -mfpmath=sse -msse2 (the faster but not as generic), this causes float 
+values to be rounded between every opteration or the use of sse float operations which are more strictly 
+specified and therfore more predictable across processor generations.
+This has not been observed to be an issue on 32 bit MSVC or Mac 32 bit compilers and is not an issue on ARM 32 
+bit either.
+
 === Thread Safety ===
 
 The Graphite engine has no locking or thread safe storage. But it is possible to use the Graphite engine in a thread safe manner.
