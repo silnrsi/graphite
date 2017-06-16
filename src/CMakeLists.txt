@@ -65,7 +65,7 @@ set(GRAPHITE_HEADERS
 
 file(GLOB PRIVATE_HEADERS inc/*.h) 
 
-add_library(graphite2 SHARED
+set(GRAPHITE_OBJECTS
     ${GRAPHITE2_VM_TYPE}_machine.cpp
     gr_char_info.cpp
     gr_features.cpp
@@ -98,6 +98,13 @@ add_library(graphite2 SHARED
     ${FILEFACE}
     ${SEGCACHE}
     ${TRACING})
+
+add_library(graphite2 SHARED ${GRAPHITE_OBJECTS})
+
+if(UNIX)
+add_library(graphite2static STATIC ${GRAPHITE_OBJECTS})
+set_target_properties(graphite2static PROPERTIES OUTPUT_NAME graphite2)
+endif()
 
 set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             SOVERSION ${GRAPHITE_SO_VERSION}
