@@ -56,6 +56,10 @@ if (GRAPHITE2_TELEMETRY)
     add_definitions(-DGRAPHITE2_TELEMETRY)
 endif (GRAPHITE2_TELEMETRY)
 
+if (NOT BUILD_SHARED_LIBS)
+    add_definitions(-DGRAPHITE2_STATIC)
+endif (NOT BUILD_SHARED_LIBS)
+
 set(GRAPHITE_HEADERS 
     ../include/graphite2/Font.h
     ../include/graphite2/Segment.h
@@ -65,7 +69,7 @@ set(GRAPHITE_HEADERS
 
 file(GLOB PRIVATE_HEADERS inc/*.h) 
 
-add_library(graphite2 SHARED
+add_library(graphite2
     ${GRAPHITE2_VM_TYPE}_machine.cpp
     gr_char_info.cpp
     gr_features.cpp
@@ -130,7 +134,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             target_link_libraries(graphite2 c gcc)
         endif (GRAPHITE2_ASAN)
         include(Graphite)
-        nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+        if (BUILD_SHARED_LIBS)
+            nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+        endif (BUILD_SHARED_LIBS)
     endif (${CMAKE_CXX_COMPILER} MATCHES  ".*mingw.*")
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
     CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
