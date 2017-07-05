@@ -23,7 +23,7 @@ packages. There are various option settings see
 <<X1,Generator configuration options>>>.
 
 On amd64 architecture if you wish build and test 32 bit binaries this is 
-possible using the following cmake ivocation:
+possible using the following cmake invocation:
 
 ----
 CFLAGS=-m32 CXXFLAGS=-m32 cmake ..
@@ -119,30 +119,39 @@ Boolean values may take the value OFF or ON. Options may be set using
 the -Doption=value command line option. 
 For example: -DGRAPHITE2_COMPARE_RENDERER:BOOL=ON
 
+BUILD_SHARED_LIBS:BOOL::
+    Specifies that libgraphite2 should be built as a shared library, setting 
+    this to OFF will cause it built as a static library. When OFF this will 
+    also disable a few tests which either test aspects of a shared library or
+    require one (such as any test case with a python driver).
+    The default is ON.
+    
 CMAKE_BUILD_TYPE:STRING::
-    This specifies which type of build to do. It is a string and may take the 
+    Specifies which type of build to do. It is a string and may take the 
     values: Release, RelWithDeb, Debug.
     The default is Release. This must be specified on Windows.
 
 GRAPHITE2_COMPARE_RENDERER:BOOL::
-    This is a boolean value that specifies whether to build the comparerenderer 
-    program that may link to silGraphite or harfbuzz, if libraries of those 
-    packages are installed. The default value is OFF.
+    Specifies whether to build the comparerenderer program that may link to 
+    silGraphite or harfbuzz, if libraries of those 
+    packages are installed. 
+    The default is OFF.
 
 GRAPHITE2_NFILEFACE:BOOL::
-    This boolean value turns off FileFace support to save code space. 
-    By default it is OFF.
+    Turns off FileFace support to save code space. 
+    The default is OFF.
 
 GRAPHITE2_NSEGCACHE:BOOL::
-    This boolean value turns off Segment caching support to save code space. 
-    By default it is OFF.
+    Turns off Segment caching support to save code space. 
+    The default is OFF.
 
 GRAPHITE2_NTRACING:BOOL::
-    This boolean value turns off tracing support to save code space. Tracing 
-    support allows debug output of segment creation. By default it is OFF.
+    Turns off tracing support to save code space. Tracing support allows debug 
+    output of segment creation. 
+    The default is OFF.
 
 GRAPHITE2_VM_TYPE:STRING::
-    This string value can be auto, direct or call. It specifies which type of 
+    This value can be auto, direct or call. It specifies which type of 
     virtual machine processor to use. The default value of auto tells the 
     system to work out the best approach for this architecture. A value of 
     direct tells the system to use the direct machine which is faster. 
@@ -150,7 +159,7 @@ GRAPHITE2_VM_TYPE:STRING::
     compiler portable call based machine.
 
 GRAPHITE2_ASAN:BOOL::
-    This turns on copmile time support for Google's 
+    This turns on compile time support for Google's 
     https://code.google.com/p/address-sanitizer/[ASAN] Address Sanitizer. 
     This works with both gcc and clang, however under clang any tests driven by 
     Python will not be run. These tests require the ASAN runtime as a shared 
