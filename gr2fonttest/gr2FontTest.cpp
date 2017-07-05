@@ -463,7 +463,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             charLength = convertUtf<gr2::utf8>(pText, pText32);
             if (!pText32)
             {
-            	if (charLength == -1)
+            	if (charLength == -1U)
             		perror("decoding utf-8 data failed");
             	else
             		perror("insufficent memory for text buffer");
@@ -554,7 +554,6 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
     if (features && (pLang = strstr(features, "lang=")))
     {
         pLang += 5;
-        size_t i = 0;
         for (int i = 4; i; --i)
         {
             lang_id <<= 8;

@@ -318,10 +318,10 @@ int main(int argc, char ** argv)
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL, NULL, NULL};
     FeatureParser * featureSettings = NULL;
     FeatureParser * altFeatureSettings = NULL;
-    int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
+    bool direction = rendererOptions[OptRtl].exists();
     int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
-	Gr2Face face(fontFile, traceLogPath, rendererOptions[OptDemand].get(argv));
+	  Gr2Face face(fontFile, traceLogPath, rendererOptions[OptDemand].get(argv));
 
 
     if (rendererOptions[OptFeatures].exists())

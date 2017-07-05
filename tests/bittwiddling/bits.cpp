@@ -71,17 +71,17 @@ namespace
 
     int ret = 0;
 
-    
-    template<typename T> 
-    struct type_name {};
-    
+
     template<typename T>
-    inline 
-    std::ostream & operator << (std::ostream & o, type_name<T>)
-    {
-        if (!std::numeric_limits<T>::is_signed) o.put('u');
-        o << "int" << std::dec << sizeof(T)*8;
-    }
+    struct type_name {};
+
+    // template<typename T>
+    // inline
+    // std::ostream & operator << (std::ostream & o, type_name<T>)
+    // {
+    //     if (!std::numeric_limits<T>::is_signed) o.put('u');
+    //     o << "int" << std::dec << sizeof(T)*8;
+    // }
     
 	template<typename T>
 	inline

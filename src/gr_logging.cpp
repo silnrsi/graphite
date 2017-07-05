@@ -214,7 +214,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     j << "user" << json::flat << json::array;
     for (int n = 0; n!= seg.numAttrs(); ++n)
         j   << s.userAttrs()[n];
-        j   << json::close;
+    j       << json::close;
     if (s.firstChild())
     {
         j   << "children" << json::flat << json::array;

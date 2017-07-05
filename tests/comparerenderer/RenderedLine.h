@@ -99,9 +99,9 @@ class RenderedLine
 {
     public:
         RenderedLine()
-        : m_text(NULL), m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
+        : m_numGlyphs(0), m_advance(0), m_glyphs(NULL)
         {}
-        RenderedLine(std::string *text, size_t numGlyphs, float adv = 0.0f)
+        RenderedLine(const std::string & text, size_t numGlyphs, float adv = 0.0f)
         : m_text(text), m_numGlyphs(numGlyphs), m_advance(adv), m_glyphs(new GlyphInfo[numGlyphs])
         {
         }
@@ -109,12 +109,11 @@ class RenderedLine
         {
             delete [] m_glyphs;
             m_glyphs = NULL;
-            delete m_text;
         }
         void setAdvance(float newAdv) { m_advance = newAdv; }
         void dump(FILE * f)
         {
-            fprintf(f, "{\"%s\" : [", m_text->c_str());
+            fprintf(f, "{\"%s\" : [", m_text.c_str());
             for (size_t i = 0; i < m_numGlyphs; i++)
             {
                 //fprintf(f, "%2u", (unsigned int)i);
@@ -157,9 +156,8 @@ class RenderedLine
             return true;
         }
     private:
-        size_t m_numGlyphs;
-        float m_advance;
+        size_t      m_numGlyphs;
+        float       m_advance;
         GlyphInfo * m_glyphs;
-        std::string * m_text;
+        std::string m_text;
 };
-
