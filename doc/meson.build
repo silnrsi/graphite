@@ -1,5 +1,4 @@
 a2x      = find_program('a2x',      required: false)
-dblatex  = find_program('dblatex',  required: false)
 doxygen  = find_program('doxygen',  required: false)
 pdflatex = find_program('pdflatex', required: false)
 
@@ -29,8 +28,7 @@ if a2x.found()
       '../tests/examples/features.c')
     gtf_deps = files('graphite.css', 'OpCodes.txt')
 
-    man_html = custom_target('manual.html',
-        output: 'manual.html',
+    man_html = custom_target('manual.html', output: 'manual.html',
         input: 'manual.txt',
         depend_files: manual_deps,
         install: true,
@@ -44,12 +42,12 @@ if a2x.found()
         install_dir: installdir,
         command: a2x_html)
 
+    dblatex  = find_program('dblatex',  required: false)
     if dblatex.found()
         a2x_pdf = [a2x,
             '--icons',
             '--destination-dir=@OUTDIR@', '@INPUT@']
-        custom_target('manual.pdf',
-            output: 'manual.pdf',
+        custom_target('manual.pdf', output: 'manual.pdf',
             input: 'manual.txt',
             depends: man_html,
             install: true,
@@ -65,12 +63,21 @@ if a2x.found()
     endif
 endif
 
-# if doxygen.found() and pdflatex.found()
-#     make = find_program('make')
-#     doxy_conf = get_option('GRAPHITE2_DOXYGEN_CONFIG')
-#     doxy = run_target('doxygen/latex/refman.tex',
-#         command: [doxygen, doxy_conf+'.cfg'])
-#     run_target('doxygen/latex/refman.pdf',
-#         command: [make, '-C', 'doxygen/latex'])
-# #    install_data('doxygen/latex/refman.pdf', install_dir: installdir)
-# endif
+if doxygen.found() and pdflatex.found()
+  make = find_program('make')
+  dirch = [python, '-c', 'import os,subprocess,sys; os.chdir(sys.argv[1]); exit(subprocess.call(sys.argv[2:]))']
+  doxy_conf = get_option('GRAPHITE2_DOXYGEN_CONFIG') + '.cfg'
+
+  doxy = custom_target('doyxgen', output: 'refman.tex',
+      input: join_paths(meson.current_source_dir(), doxy_conf),
+      depends: [man_html, gtf_html],
+      depend_files: headers,
+      command: dirch + ['doc', doxygen.path(), '@INPUT@'])
+  install_subdir(join_paths(meson.current_build_dir(), 'doxygen', 'html'),
+      install_dir: installdir)
+
+  custom_target('doxygen/latex/refman.pdf', output: 'refman.pdf',
+      depends: doxy,
+      command: [make, '-C', 'doc/doxygen/latex'])
+#  install_data(join_paths(meson.current_build_dir(),'doxygen','latex','refman.pdf'), install_dir: installdir)
+endif

@@ -28,6 +28,13 @@ Memory telemtry:       @3@
 VM Machine type:       @4@
 '''.format(segcache, fileface, tracing, telemtry, vm_type))
 
+py = import('python3')
+python = py.find_python()
+python2 = find_program('python2')
+if not python.found()
+  python = python2
+endif
+
 subdir('include')
 subdir('src')
 subdir('doc')

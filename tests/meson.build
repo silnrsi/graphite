@@ -1,10 +1,3 @@
-py = import('python3')
-python = py.find_python()
-python2 = find_program('python2')
-if not python.found()
-  python = python2
-endif
-
 cmpfiles = ['-c', 'import sys, filecmp; exit(not filecmp.cmp(*sys.argv[1:]))']
 texts = join_paths(meson.source_root(), 'tests', 'texts')
 fonts = join_paths(meson.source_root(), 'tests', 'fonts')
