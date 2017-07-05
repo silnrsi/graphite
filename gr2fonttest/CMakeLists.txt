@@ -15,11 +15,12 @@ if (GRAPHITE2_ASAN)
     set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-fsanitize=address")
 endif (GRAPHITE2_ASAN)
 
-# copy the DLL so that gr2fonttest can find it
-add_custom_target(${PROJECT_NAME}_copy_dll ALL 
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-
-add_dependencies(${PROJECT_NAME}_copy_dll graphite2 gr2fonttest)
+if (BUILD_SHARED_LIBS)
+    # copy the DLL so that gr2fonttest can find it
+    add_custom_target(${PROJECT_NAME}_copy_dll ALL 
+	    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    add_dependencies(${PROJECT_NAME}_copy_dll graphite2 gr2fonttest)
+endif (BUILD_SHARED_LIBS)
 
 install(TARGETS gr2fonttest EXPORT gr2fonttest RUNTIME DESTINATION bin)
 

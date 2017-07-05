@@ -239,6 +239,9 @@ for attribute names, = 0 for stripped |
 |USHORT |attribIds[ ] |Debug id for each attribute |
 |=======================================================================
 
+A version 1.1 (0x00010001) table indicates that the Glat table has octabox
+information. But such a version is not required in that case.
+
 The flags entry contains a bit to indicate whether the locations array
 is of type USHORT or ULONG. The locations array is identically
 structured to that of the loca table. There is one entry per glyph and

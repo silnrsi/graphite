@@ -94,6 +94,7 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         //  decoded output.
         u8 const * const pcpy = dst - match_dist;
         if (pcpy < static_cast<u8*>(out)
+                  || pcpy >= dst
                   || match_len > unsigned(dst_end - dst - (MINMATCH+5))
                   || dst_end - dst < MINMATCH + 5)
             return -1;
