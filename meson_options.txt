@@ -1,0 +1,23 @@
+option('GRAPHITE2_VM_TYPE', type: 'combo',
+        choices: ['auto', 'direct', 'call'],
+        description: 'Choose the type of vm machine.')
+option('GRAPHITE2_NSEGCACHE', type: 'boolean',
+        value: false,
+        description: 'Compile out the gr_*_with_seg_cache APIs.')
+option('GRAPHITE2_NFILEFACE',  type: 'boolean',
+        value: false,
+        description: 'Compile out the gr_make_file_face* APIs.')
+option('GRAPHITE2_NTRACING',  type: 'boolean',
+        value: false,
+        description: 'Compile out log segment tracing capability.')
+option('GRAPHITE2_TELEMETRY',  type: 'boolean',
+        value: false,
+        description: 'Add memory usage telemetry.')
+option('GRAPHITE2_DOXYGEN_CONFIG', type: 'combo',
+        choices: ['public', 'full'],
+        description: 'Specifies the base configuration file for doxygen.')
+option('GRAPHITE2_COMPARE_RENDERER', type: 'boolean',
+       value: false,
+       description: 'Build tool to compare output of different renderers')
+#option('GRAPHITE2_ASAN',  type: 'boolean',
+#        description: 'Enable Address Sanitizing')

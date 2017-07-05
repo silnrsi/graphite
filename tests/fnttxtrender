@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function, unicode_literals
 import codecs
 from optparse import OptionParser
 from difflib import SequenceMatcher
@@ -242,7 +243,7 @@ for label, words in reader :
         l = makelabel(label, count, wcount)
         if cjson is not None and cmpgls(gls[0], cjson[l][0], opts.epsilon) :
             errors += 1
-            print l + " Failed"
+            print(l + " Failed")
         if opts.quiet : continue
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
@@ -251,4 +252,3 @@ for label, words in reader :
 if log is not None : log.logend()
 outfile.close()
 sys.exit(errors)
-
