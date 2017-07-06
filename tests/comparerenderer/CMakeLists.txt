@@ -11,8 +11,12 @@ set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 add_executable(comparerenderer
     CompareRenderer.cpp
-    ${PRIVATE_HEADERS}
-    )
+    ${PRIVATE_HEADERS})
+
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set_target_properties(comparerenderer PROPERTIES
+    COMPILE_FLAGS   "-std=c++11")
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if (GRAPHITE2_ASAN)
     set_target_properties(comparerenderer PROPERTIES LINK_FLAGS "-fsanitize=address")
