@@ -35,7 +35,9 @@ if not python.found()
   python = python2
 endif
 
-subdir('include')
+inc = include_directories('include', is_system: true)
+
+subdir('include/graphite2')
 subdir('src')
 if segcache or fileface
     subdir('gr2fonttest')
