@@ -3,6 +3,7 @@ doxygen  = find_program('doxygen',  required: false)
 pdflatex = find_program('pdflatex', required: false)
 
 installdir = join_paths(get_option('datadir'), 'doc', meson.project_name())
+installdocs = get_option('enable-docs')
 
 if a2x.found()
     a2x_html = [a2x,
@@ -28,56 +29,72 @@ if a2x.found()
       '../tests/examples/features.c')
     gtf_deps = files('graphite.css', 'OpCodes.txt')
 
-    man_html = custom_target('manual.html', output: 'manual.html',
-        input: 'manual.txt',
+    man_html = custom_target('manual.html', command: a2x_html,
         depend_files: manual_deps,
-        install: true,
-        install_dir: installdir,
-        command: a2x_html)
-    gtf_html = custom_target('gtf.html',
-        output: 'GTF.html',
-        input: 'GTF.txt',
+        input: 'manual.txt',
+        output: 'manual.html',
+        install: installdocs,
+        install_dir: installdir)
+    gtf_html = custom_target('GTF.html', command: a2x_html,
         depend_files: gtf_deps,
-        install: true,
-        install_dir: installdir,
-        command: a2x_html)
+        input: 'GTF.txt',
+        output: 'GTF.html',
+        install: installdocs,
+        install_dir: installdir)
+    if installdocs
+      install_data('glyph_string.png', 'graphite.css','guardspace.png',
+          install_dir: installdir)
+    endif
 
     dblatex  = find_program('dblatex',  required: false)
     if dblatex.found()
         a2x_pdf = [a2x,
             '--icons',
             '--destination-dir=@OUTDIR@', '@INPUT@']
-        custom_target('manual.pdf', output: 'manual.pdf',
-            input: 'manual.txt',
+        custom_target('manual.pdf', command: a2x_pdf,
             depends: man_html,
-            install: true,
-            install_dir: installdir,
-            command: a2x_pdf)
-        custom_target('gtf.pdf',
-            output: 'GTF.pdf',
-            input: 'GTF.txt',
+            input: 'manual.txt',
+            output: 'manual.pdf',
+            install: installdocs,
+            install_dir: installdir)
+        custom_target('gtf.pdf', command: a2x_pdf,
             depends: gtf_html,
-            install: true,
-            install_dir: installdir,
-            command: a2x_pdf)
+            input: 'GTF.txt',
+            output: 'GTF.pdf',
+            install: installdocs,
+            install_dir: installdir)
     endif
 endif
 
 if doxygen.found() and pdflatex.found()
   make = find_program('make')
-  dirch = [python, '-c', 'import os,subprocess,sys; os.chdir(sys.argv[1]); exit(subprocess.call(sys.argv[2:]))']
-  doxy_conf = get_option('GRAPHITE2_DOXYGEN_CONFIG') + '.cfg'
 
-  doxy = custom_target('doyxgen', output: 'refman.tex',
-      input: join_paths(meson.current_source_dir(), doxy_conf),
-      depends: [man_html, gtf_html],
+  doxy_conf = configuration_data()
+  doxy_conf.set('project_name', meson.project_name())
+  doxy_conf.set('project_number', meson.project_version())
+  doxy_conf.set('source_root', meson.source_root())
+  doxy_conf.set('build_root', meson.current_build_dir())
+  doxy_conf.set('have_dot', find_program('dot',
+                                required: false).found() ? 'YES' : 'NO')
+
+  doxy_cfg = get_option('GRAPHITE2_DOXYGEN_CONFIG') + '.cfg'
+  doxyfile = configure_file(input: doxy_cfg+'.in',
+      output: doxy_cfg,
+      configuration: doxy_conf,
+      install: false)
+
+  api_docs = custom_target('html',
+      input: doxyfile,
+      output: ['html', 'refman.tex'],
       depend_files: headers,
-      command: dirch + ['doc', doxygen.path(), '@INPUT@'])
-  install_subdir(join_paths(meson.current_build_dir(), 'doxygen', 'html'),
+      command: [doxygen, '@INPUT@'],
+      install: installdocs,
       install_dir: installdir)
 
-  custom_target('doxygen/latex/refman.pdf', output: 'refman.pdf',
-      depends: doxy,
-      command: [make, '-C', 'doc/doxygen/latex'])
-#  install_data(join_paths(meson.current_build_dir(),'doxygen','latex','refman.pdf'), install_dir: installdir)
+  api_pdf = custom_target('refman.pdf',
+      output: 'refman.pdf',
+      depends: api_docs,
+      command: [make, '-C', 'doc'],
+      install: installdocs,
+      install_dir: installdir)
 endif

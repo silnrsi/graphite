@@ -17,7 +17,10 @@ option('GRAPHITE2_DOXYGEN_CONFIG', type: 'combo',
         choices: ['public', 'full'],
         description: 'Specifies the base configuration file for doxygen.')
 option('GRAPHITE2_COMPARE_RENDERER', type: 'boolean',
-       value: false,
-       description: 'Build tool to compare output of different renderers')
+        value: false,
+        description: 'Build tool to compare output of different renderers.')
+option('enable-docs', type: 'boolean',
+        value: false,
+        description: 'Build documentation for instllation.')
 #option('GRAPHITE2_ASAN',  type: 'boolean',
 #        description: 'Enable Address Sanitizing')

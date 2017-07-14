@@ -37,8 +37,8 @@ endif
 
 subdir('include')
 subdir('src')
-subdir('doc')
 if segcache or fileface
     subdir('gr2fonttest')
 endif
 subdir('tests')
+subdir('doc')
