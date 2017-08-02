@@ -17,7 +17,11 @@
 #    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
-
+from __future__ import print_function, unicode_literals, division, absolute_import
+try:
+    unicode
+except NameError:
+    unicode = str
 from ctypes import *
 import ctypes.util
 import sys, os, platform
@@ -181,6 +185,7 @@ class FeatureRef(object) :
 
 class Face(object) :
     def __init__(self, data, options = 0, fn=None, segcache=0) :
+        data = data.encode('utf8')
         if fn :
             if segcache :
                 self.face = gr2.gr_make_face_with_seg_cache(data, fn, segcache, options)
@@ -202,12 +207,12 @@ class Face(object) :
         return gr2.fr_face_n_glyphs(self.face)
 
     def get_featureval(self, lang) :
-        if isinstance(lang, basestring) :
+        if isinstance(lang, bytes) :
             lang = gr_str_to_tag(lang)
         return FeatureVal(gr2.gr_face_featureval_for_lang(self.face, lang))
 
     def get_featureref(self, featid) :
-        if isinstance(featid, basestring) :
+        if isinstance(featid, bytes) :
             featid = gr_str_to_tag(featid)
         return FeatureRef(gr2.gr_face_find_fref(self.face, featid))
 
@@ -320,7 +325,7 @@ class Segment(object) :
     def __init__(self, font, face, scriptid, string, rtl, length = None, feats = None) :
         if not length :
             length = len(string)
-        if isinstance(scriptid, basestring) :
+        if isinstance(scriptid, bytes) :
             scriptid = gr2.gr_str_to_tag(scriptid)
         self.seg = gr2.gr_make_seg(font.font if font is not None else 0, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
 

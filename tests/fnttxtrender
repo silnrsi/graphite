@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+from __future__ import print_function, unicode_literals
+try:
+    import itertools.imap as map
+except ImportError:
+    pass
+
 import codecs
 from optparse import OptionParser
 from difflib import SequenceMatcher
@@ -202,7 +208,7 @@ rounding = 0.1 ** opts.dp
 #  if --graphite_library is used.
 import graphite as gr
 
-outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wt") if opts.output else sys.stdout)
+outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wb") if opts.output else sys.stdout)
 
 if opts.compare :
     with open(opts.compare) as f :
@@ -237,7 +243,7 @@ for label, words in reader :
     wcount = 0
     for s in words :
         wcount += 1
-        gls = [map(lambda x: name(tt, x, rounding), font.glyphs(s, includewidth = True))]
+        gls = [list(map(lambda x: name(tt, x, rounding), font.glyphs(s, includewidth = True)))]
         if gls[-1][-1][0] is None : gls[-1] = ('_adv_', gls[-1][-1][1], gls[-1][-1][2])
         l = makelabel(label, count, wcount)
         if cjson is not None and cmpgls(gls[0], cjson[l][0], opts.epsilon) :
@@ -251,4 +257,3 @@ for label, words in reader :
 if log is not None : log.logend()
 outfile.close()
 sys.exit(errors)
-
