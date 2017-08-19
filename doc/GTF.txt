@@ -174,11 +174,11 @@ a Glat_entry is:
 .Glat_entry, version 2 & 3
 [cols="2,2,8,5",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type  |Name         |Description                         |Version notes
+|Type   |Name         |Description                         |Version notes
 
-|SHORT |attNum       |Attribute number of first attribute |4.0 – BYTE to SHORT
-|SHORT |num          |Number of attributes in this run    |4.0 – BYTE to SHORT
-|SHORT |attributes[] |Array of num attributes             |
+|USHORT |attNum       |Attribute number of first attribute |4.0 – BYTE to SHORT
+|USHORT |num          |Number of attributes in this run    |4.0 – BYTE to SHORT
+|SHORT  |attributes[] |Array of num attributes             |
 |=======================================================================
 
 Notice that all glyph attributes are 16-bit signed values. If a 32-bit
@@ -204,13 +204,11 @@ follows.
 .Glat_entry, version 1
 [cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
 |=======================================================================
-|Type |Name |Description |Version notes
+|Type  |Name         |Description |Version notes
 
-|BYTE |attNum |Attribute number of first attribute |
-
-|BYTE |num |Number of attributes in this run |
-
-|SHORT |attributes[ ] |Array of num attributes |
+|BYTE  |attNum       |Attribute number of first attribute |
+|BYTE  |num          |Number of attributes in this run |
+|SHORT |attributes[] |Array of num attributes |
 |=======================================================================
 
 === Gloc ===
