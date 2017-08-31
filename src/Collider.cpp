@@ -960,26 +960,24 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
     for (int i = smin; i <= smax; ++i)
     {
-        float t;
         float here = _edges[i] * rtl;
-        float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
         if (here > (float)9e37)
             continue;
         if (!_hit || x > here - _mingap - currSpace)
         {
+            float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
             float m = get_edge(seg, slot, currShift, y, _sliceWidth, 0., rtl > 0) * rtl + 2 * currSpace;
-            if (m > (float)-8e37)
-                nooverlap = false;
-            t = here - m;
+            if (m < (float)-8e37)       // only true if the glyph has a gap in it
+                continue;
+            nooverlap = false;
+            float t = here - m;
             // _mingap is positive to shrink
-            if (t < _mingap)
+            if (t < _mingap || (!_hit && !collides && t > _mingap))
             {
                 _mingap = t;
                 collides = true;
             }
-            else if (!_hit && !collides && t > _mingap)
-                _mingap = t;
 #if !defined GRAPHITE2_NTRACING
             // Debugging - remember the closest neighboring edge for this slice.
             if (m > rtl * _nearEdges[i])
@@ -993,7 +991,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             nooverlap = false;
     }
     if (nooverlap)
-        _mingap = _xbound + currSpace + _margin - x;
+        _mingap = max(_mingap, _xbound + currSpace + _margin - x);
     if (collides && !nooverlap)
         _hit = true;
     return collides | nooverlap;   // note that true is not a necessarily reliable value
