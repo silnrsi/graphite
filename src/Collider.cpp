@@ -963,6 +963,8 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         float t;
         float here = _edges[i] * rtl;
         float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
+        if (here > (float)9e37)
+            continue;
         if (!_hit || x > here - _mingap - currSpace)
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
@@ -976,6 +978,8 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
                 _mingap = t;
                 collides = true;
             }
+            else if (!_hit && !collides && t > _mingap)
+                _mingap = t;
 #if !defined GRAPHITE2_NTRACING
             // Debugging - remember the closest neighboring edge for this slice.
             if (m > rtl * _nearEdges[i])
@@ -985,12 +989,12 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             }
 #endif
         }
-        else if (here < (float)8e37)    // big but not 1e38
+        else
             nooverlap = false;
     }
     if (nooverlap)
         _mingap = _xbound + currSpace + _margin - x;
-    if (collides)
+    if (collides && !nooverlap)
         _hit = true;
     return collides | nooverlap;   // note that true is not a necessarily reliable value
     
