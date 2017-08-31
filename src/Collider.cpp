@@ -947,7 +947,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     const float sx = slot->origin().x + currShift.x;
     float x = (sx + (rtl > 0 ? bb.tr.x : bb.bl.x)) * rtl;
     // this isn't going to reduce _mingap so skip
-    if (x < rtl * (_xbound - _mingap - currSpace))
+    if (_hit && x < rtl * (_xbound - _mingap - currSpace))
         return false;
 
     const float sy = slot->origin().y + currShift.y;
@@ -963,7 +963,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
         float t;
         float here = _edges[i] * rtl;
         float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
-        if (x > here - _mingap - currSpace)
+        if (!_hit || x > here - _mingap - currSpace)
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
             float m = get_edge(seg, slot, currShift, y, _sliceWidth, 0., rtl > 0) * rtl + 2 * currSpace;
@@ -989,7 +989,9 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             nooverlap = false;
     }
     if (nooverlap)
-        _mingap = _xbound - currSpace - _margin - rtl * x;
+        _mingap = _xbound + currSpace + _margin - x;
+    if (collides)
+        _hit = true;
     return collides | nooverlap;   // note that true is not a necessarily reliable value
     
 }   // end of KernCollider::mergeSlot
