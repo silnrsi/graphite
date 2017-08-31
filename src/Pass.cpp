@@ -1037,6 +1037,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         base = base->attachedTo();
     SlotCollision *cFix = seg->collisionInfo(base);
     const GlyphCache &gc = seg->getFace()->glyphs();
+    const Rect &bbb = seg->theGlyphBBoxTemporary(slotFix->gid());
+    const float by = slotFix->origin().y + cFix->shift().y;
 
     if (base != slotFix)
     {
@@ -1047,6 +1049,8 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     bool isInit = false;
     KernCollider coll(dbgout);
 
+    ymax = max(by + bbb.tr.y, ymax);
+    ymin = min(by + bbb.bl.y, ymin);
     for (nbor = slotFix->next(); nbor; nbor = nbor->next())
     {
         if (nbor->isChildOf(base))
@@ -1066,9 +1070,6 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         else
         {
             space_count = 0; 
-            float y = nbor->origin().y + cNbor->shift().y;
-            ymax = max(y + bb.tr.y, ymax);
-            ymin = min(y + bb.bl.y, ymin);
             if (nbor != slotFix && !cNbor->ignore())
             {
                 seenEnd = true;

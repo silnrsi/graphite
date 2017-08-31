@@ -805,6 +805,8 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
     {
         const BBox &bb = gc.getBoundingBBox(gid);
         const SlantBox &sb = gc.getBoundingSlantBox(gid);
+        if (sy + bb.yi - margin > y + width / 2 || sy + bb.ya + margin < y - width / 2)
+            return res;
         float td = sx - sy + y;
         float ts = sx + sy - y;
         if (isRight)
@@ -924,7 +926,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         }
     }
     done:
-    _mingap = (float)1e38;
+    _mingap = (float)1e37;      // less than 1e38 s.t. 1e38-_mingap is really big
     _target = aSlot;
     _margin = margin;
     _currShift = currShift;
@@ -954,16 +956,19 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
     if (smin > smax)
         return false;
     bool collides = false;
+    bool nooverlap = true;
 
     for (int i = smin; i <= smax; ++i)
     {
         float t;
         float here = _edges[i] * rtl;
         float y = (float)(_miny - 1 + (i + .5f) * _sliceWidth);  // vertical center of slice
-        if (    (x > here - _mingap - currSpace) )
+        if (x > here - _mingap - currSpace)
         {
             // 2 * currSpace to account for the space that is already separating them and the space we want to add
             float m = get_edge(seg, slot, currShift, y, _sliceWidth, 0., rtl > 0) * rtl + 2 * currSpace;
+            if (m > (float)-8e37)
+                nooverlap = false;
             t = here - m;
             // _mingap is positive to shrink
             if (t < _mingap)
@@ -980,8 +985,12 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             }
 #endif
         }
+        else if (here < (float)8e37)    // big but not 1e38
+            nooverlap = false;
     }
-    return collides;   // note that true is not a necessarily reliable value
+    if (nooverlap)
+        _mingap = _xbound - currSpace - _margin - rtl * x;
+    return collides | nooverlap;   // note that true is not a necessarily reliable value
     
 }   // end of KernCollider::mergeSlot
 
