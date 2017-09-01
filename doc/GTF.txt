@@ -130,10 +130,10 @@ bounding box rectangle is stored elsewhere in the font.
 
 |USHORT         |subbox_bitmap |Which subboxes exist on 4x4 grid; +
                                 bit-index = (y-index*4) + x-index  |
-|BYTE           |diag_neg_min  |Defines minimum negatively-sloped diagonal |
-|BYTE           |diag_neg_max  |Defines maximum negatively-sloped diagonal |
-|BYTE           |diag_pos_min  |Defines minimum positively-sloped diagonal |
-|BYTE           |diag_pos_max  |Defines maximum positively-sloped diagonal |
+|BYTE           |diag_neg_min  |Defines minimum negatively-sloped diagonal (di) |
+|BYTE           |diag_neg_max  |Defines maximum negatively-sloped diagonal (da) |
+|BYTE           |diag_pos_min  |Defines minimum positively-sloped diagonal (si) |
+|BYTE           |diag_pos_max  |Defines maximum positively-sloped diagonal (sa) |
 |Subbox_entry[] |subboxes      |One entry per bit in subbox_bitmap |
 |================================================================================
 
@@ -158,10 +158,10 @@ lower right cell, and bit 12 the upper left cell as per this diagram.
 |BYTE |right        |Right of subbox                              |
 |BYTE |bottom       |Bottom of subbox                             |
 |BYTE |top          |Top of subbox                                |
-|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal   |
-|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal   |
-|BYTE |diag_neg_min |Defines minimum  negatively-sloped diagonal  |
-|BYTE |diag_neg_max |Defines maximum  negatively -sloped diagonal |
+|BYTE |diag_neg_min |Defines minimum negatively-sloped diagonal (si) |
+|BYTE |diag_neg_max |Defines maximum negatively-sloped diagonal (sa) |
+|BYTE |diag_pos_min |Defines minimum positively-sloped diagonal (di) |
+|BYTE |diag_pos_max |Defines maximum positively-sloped diagonal (da) |
 |===============================================================================
 
 Following the glyph curve approximation data, the glyph attributes
