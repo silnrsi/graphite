@@ -441,11 +441,11 @@ subtable; numPasses + 1 of these |
 
 |USHORT |numPseudo |Number of Unicode -> pseudo-glyph mappings |
 
-|USHORT |searchPseudo |(max power of 2 <= numPseudo) * sizeof(PseudoMap) |
+|USHORT |searchPseudo |(max power of 2 <= numPseudo) * sizeof(PseudoMap) [Deprecated] |
 
-|USHORT |pseudoSelector |log2(max power of 2<= numPseudo) |
+|USHORT |pseudoSelector |log2(max power of 2<= numPseudo) [Deprecated] |
 
-|USHORT |pseudoShift |numPseudo - searchPseudo |
+|USHORT |pseudoShift |numPseudo - searchPseudo [Deprecated] |
 
 |PseudoMap |pMaps[ ] |Mappings between Unicode and pseudo-glyphs in
 order of Unicode |
@@ -456,6 +456,8 @@ actions |
 |SIL_Pass |passes[ ] |Array of passes |
 |=======================================================================
 
+Deprecated values will not be removed from the structure, but their meaning is lost,
+they become reserved values that will not be reassigned. 
 Each justification level has several glyph attributes associated with
 it.
 
@@ -613,11 +615,11 @@ debug stripped |
 columns |
 
 |USHORT |searchRange |(maximum power of 2 <=
-numRange)*sizeof(Pass_Range) |
+numRange)*sizeof(Pass_Range) [Deprecated] |
 
-|USHORT |entrySelector |log2(maximum power of 2 <= numRange) |
+|USHORT |entrySelector |log2(maximum power of 2 <= numRange) [Deprecated] |
 
-|USHORT |rangeShift |numRange*sizeof(Pass_Range)-searchRange |
+|USHORT |rangeShift |numRange*sizeof(Pass_Range)-searchRange [Deprecated] |
 
 |Pass_Range |ranges[ ] |Ranges of glyph IDs for this FSM; *numRange* of
 these |
@@ -679,6 +681,9 @@ debugging. 0 = stripped.  Corresponds to the last numRows – numRules |
 
 |USHORT |dCols[ ] |Name index for each state (numRows of these) |
 |=======================================================================
+
+Deprecated values will not be removed from the structure, but their meaning is lost,
+they become reserved values that will not be reassigned. 
 
 Notice that the ranges array has fast lookup information on the front to
 allow for the quick identification of which range a particular glyph id
@@ -840,11 +845,11 @@ This table was added as of version 3.
 
 |USHORT |numLangs |Number of languages supported |
 
-|USHORT |searchRange |(maximum power of 2 <= numLangs) |
+|USHORT |searchRange |(maximum power of 2 <= numLangs) [Deprecated] |
 
-|USHORT |entrySelector |log2(maximum power of 2 <= numLangs) |
+|USHORT |entrySelector |log2(maximum power of 2 <= numLangs) [Deprecated] |
 
-|USHORT |rangeShift |numLangs  - searchRange |
+|USHORT |rangeShift |numLangs  - searchRange [Deprecated] |
 
 |LanguageEntry |entries[ ] |Languages and pointers to feature settings;
 there are numLang + 1 of these |
