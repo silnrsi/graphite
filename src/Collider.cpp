@@ -973,7 +973,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
             nooverlap = false;
             float t = here - m;
             // _mingap is positive to shrink
-            if (t < _mingap || (!_hit && !collides && t > _mingap))
+            if (t < _mingap || (!_hit && !collides))
             {
                 _mingap = t;
                 collides = true;
