@@ -47,12 +47,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 # don't -D GRAPHITE2_STATIC so that tests can see the API symbols in the static library
     set_target_properties(graphite2-base PROPERTIES
-        COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions"
         COMPILE_DEFINITIONS "GRAPHITE2_NTRACING"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE     C)
     set_target_properties(graphite2-segcache PROPERTIES
-        COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions -fno-stack-protector"
+        COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions"
         COMPILE_DEFINITIONS "GRAPHITE2_NTRACING${TELEMETRY}"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE     C)
