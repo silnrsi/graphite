@@ -127,7 +127,7 @@ if fileface and not build_static
     txtfile = t[2] + '.txt'
     args = t[3]
 
-    test(testname, python2, args: [
+    test(testname, python, args: [
         join_paths(meson.source_root(), 'tests', 'fnttxtrender'),
         '--graphite_library=' + lib.full_path(),
         '-t', join_paths(texts, txtfile),
