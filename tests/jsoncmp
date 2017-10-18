@@ -1,11 +1,10 @@
 #!/usr/bin/python
 from __future__ import print_function, unicode_literals
-from itertools import imap
 import sys, json, operator, re
 
 def walktree(tree, path="", parent=None) :
-    if isinstance(tree, (list,dict)):   
-        ixs = sorted(tree.iteritems(), key=operator.itemgetter(0)) if isinstance(tree, dict) else enumerate(tree)
+    if isinstance(tree, (list,dict)):
+        ixs = sorted(tree.items(), key=operator.itemgetter(0)) if isinstance(tree, dict) else enumerate(tree)
         for k,v in ixs :
             for y in walktree(v, "{0}/{1!s}".format(path, k), tree) :
                 yield y
@@ -67,7 +66,7 @@ def _compare(t1, t2):
 def compare(j1, j2) :
     trimtelemetry(j1)
     trimtelemetry(j2)
-    return all(imap(_compare, walktree(j1), walktree(j2)))
+    return all(map(_compare, walktree(j1), walktree(j2)))
 
 try:
     r1 = canonids(readjson(sys.argv[1]))
@@ -85,7 +84,3 @@ res = compare(r1, r2)
 if res :
     sys.exit(0)
 sys.exit(1)
-
-
-        
-            

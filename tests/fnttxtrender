@@ -248,7 +248,7 @@ for label, words in reader :
         l = makelabel(label, count, wcount)
         if cjson is not None and cmpgls(gls[0], cjson[l][0], opts.epsilon) :
             errors += 1
-            print l + " Failed"
+            print(l + " Failed")
         if opts.quiet : continue
         if log is None :
             log = JsonLog(outfile, fpaths, opts, args)
