@@ -21,11 +21,13 @@ nmake*
 *.kdev4
 *.orig
 *.pyc
+.atom-build.yml
+.atom-dbg.cson
 .cproject
 .project
 .pydevproject
 .settings
-
+.tags
 .libs/
 .deps/
 .externalToolBuilders
@@ -33,5 +35,6 @@ build*/**
 release/
 debug/
 dev/
+tests/private/**
 *.tgz
 *.sha1sum
