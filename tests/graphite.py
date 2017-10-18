@@ -137,16 +137,16 @@ class Label(unicode) :
     def __init__(self, ref, size) :
         self.ref = ref
 
-    def __del__(self) :
-        if self.ref : gr2.gr_label_destroy(self.ref)
+    def __del__(self, __gr2=gr2) :
+        if self.ref : __gr2.gr_label_destroy(self.ref)
 
 
 class FeatureVal(object) :
     def __init__(self, fval) :
         self.fval = fval
 
-    def __del__(self) :
-        gr2.gr_featureval_destroy(self.fval)
+    def __del__(self, __gr2=gr2) :
+        __gr2.gr_featureval_destroy(self.fval)
 
     def get(self, fref) :
         return gr2.gr_fref_feature_value(fref.fref, self.fval)
@@ -196,8 +196,8 @@ class Face(object) :
         else :
             self.face = gr2.gr_make_file_face(data, options)
 
-    def __del__(self) :
-        gr2.gr_face_destroy(self.face)
+    def __del__(self, __gr2=gr2) :
+        __gr2.gr_face_destroy(self.face)
 
     def get_upem(self) :
         finfo = gr2.gr_face_info(self.face)
@@ -236,8 +236,8 @@ class Font(object) :
         else :
             self.font = gr2.gr_make_font(ppm, face.face)
 
-    def __del__(self) :
-        gr2.gr_font_destroy(self.font)
+    def __del__(self, __gr2=gr2) :
+        __gr2.gr_font_destroy(self.font)
 
 class CInfo(object) :
     def __init__(self, pcinfo) :
@@ -329,8 +329,8 @@ class Segment(object) :
             scriptid = gr2.gr_str_to_tag(scriptid)
         self.seg = gr2.gr_make_seg(font.font if font is not None else 0, face.face, scriptid, (feats.fval if feats else 0), 1, string.encode('utf_8'), length, rtl)
 
-    def __del__(self) :
-        gr2.gr_seg_destroy(self.seg)
+    def __del__(self, __gr2=gr2) :
+        __gr2.gr_seg_destroy(self.seg)
 
     @property
     def advance(self) :
