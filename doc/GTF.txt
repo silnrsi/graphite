@@ -639,9 +639,9 @@ these |
 array from start of array. First item corresponds to state # (numRows –
 numSuccess); ie, non-success states are omitted. [0xFFFF implies rule
 number is equal to state number (i.e. no entry in ruleMap) – NOT
-IMPLEMENTED] |
+IMPLEMENTED]. There are (numSuccess + 1) entries. |
 
-|USHORT |ruleMap[ ] |Array of rule numbers corresponding to an success
+|USHORT |ruleMap[ ] |Linear arrays of rule numbers corresponding to a success
 state number |
 
 |BYTE |minRulePreContext |Minimum number of items in any rule’s context
@@ -650,7 +650,7 @@ before the first modified rule item |
 |BYTE |maxRulePreContext |Maximum number of items in any rule’s context
 before the first modified rule item |
 
-|SHORT |startStates[ ] |Array of size (maxRulePreContext –
+|USHORT |startStates[ ] |Array of size (maxRulePreContext –
 minRulePreContext + 1), indicating the start state in the state machine
 based on how many pre-context items a rule has |
 
@@ -666,10 +666,10 @@ each rule |
 |USHORT |pConstraint |Length of passConstraint block |2.0 – added
 
 |USHORT |oConstraints[ ] |numRules + 1 offsets to constraint code blocks
-relative to *rcCode* and start of subtable |
+relative to start of ruleConstraints. |
 
 |USHORT |oActions[ ] |numRules + 1 offsets to action code blocks
-relative to *aCode* and start of subtable |
+relative to start of actions. |
 
 |USHORT |stateTrans[ ][ ] |Array of *numTransitional* rows of
 *numColumns* state transitions. |

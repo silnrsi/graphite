@@ -85,7 +85,12 @@ template <typename T> T * gralloc(size_t n)
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::count_bytes(sizeof(T) * n);
 #endif
-    return static_cast<T*>(malloc(sizeof(T) * n));
+    size_t total = n * sizeof(T);
+    // is either n or sizeof(T) >= sqrt(size_max(T)) if so check
+    if (((n | sizeof(T)) & (~size_t(0) << (sizeof(size_t) << 2))) &&
+            (total / sizeof(T) != n))
+        return 0;
+    return static_cast<T*>(malloc(total));
 }
 
 template <typename T> T * grzeroalloc(size_t n)
