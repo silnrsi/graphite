@@ -5,15 +5,19 @@
 from argparse import ArgumentParser
 from subprocess import call
 from multiprocessing import Pool
-import re, csv, tempfile, os
+import re, json, tempfile, os
 
 p = ArgumentParser()
 p.add_argument('file',nargs='?',help="control file")
+p.add_argument('-g','--graph',action='store_true',help='Display a graph instead of csv results')
 p.add_argument('-s','--single',action='store_true',help='Do single processing')
 p.add_argument('-f','--font',help='font file to use for a single test')
 p.add_argument('-t','--text',help='text file to use for a single test')
 p.add_argument('-l','--line',help='line in text file for single test')
-p.add_argument('-k','--keep',action='store_true',help='Store intermediate callgrind results in current directory')
+p.add_argument('-n','--normalize',action="store_true",help="Normalize results")
+p.add_argument('-k','--keep',help='Store intermediate callgrind results in given directory')
+p.add_argument('-u','--usp',action="store_true",help="Include usp results")
+p.add_argument('-v','--verbose',action='store_true',help='Print the commands executed')
 args = p.parse_args()
 
 def parsecg(fname) :
@@ -26,7 +30,7 @@ def parsecg(fname) :
         ident = m.group(1)
         name = m.group(2)
         if ident and name : idcache[ident] = name
-        if ident : return (ident, idcache[ident])
+        if ident : return (ident, idcache.get(ident,name))
         else : return (None, name)
             
     fncosts = {}
@@ -48,53 +52,104 @@ def parsecg(fname) :
                 (id, name) = parseline(l)
     return fncosts
 
+usphome = "/home/mhosken/Work/dev/harfbuzz/harfbuzz/uniscribe"
+
 modes = {
-    'ot' : ('ot', {'ot' : 'hb_shape_plan_execute'}),
-    'gr' : ('graphite2', {'hbgr' : 'hb_shape_plan_execute', 'gr' : 'gr_make_seg'})
+    'ot' : ('ot', {'ot' : 'hb_shape_plan_execute', 'ot_GSUB' : 'hb_ot_map_t::substitute(hb_ot_shape_plan_t const*, hb_font_t*, hb_buffer_t*) const', 'ot_GPOS' : 'hb_ot_map_t::position(hb_ot_shape_plan_t const*, hb_font_t*, hb_buffer_t*) const'}),
+    'gr' : ('graphite2', {'hbgr' : 'hb_shape_plan_execute', 'gr' : 'gr_make_seg', 
+                          'grcoll' : 'graphite2::Pass::collisionShift(graphite2::Segment*, int, graphite2::json*) const',
+                          'grkern' : 'graphite2::Pass::collisionKern(graphite2::Segment*, int, graphite2::json*) const'}),
+    'usp' : ('uniscribe', {'usp' : '0x61829dc6', 'abc' : 'GetCharABCWidthsI', 'usp_GSUB' : '0x6f90e350', 'usp_GPOS' : '0x6f90e660'}, 
+                          {'valgrind_parms' : ['--trace-children=yes', '--combine-dumps=yes'],
+                           'dir' : usphome,
+                           'exe' : ['wine', usphome + '/util/hb-shape.exe'],
+                           'env' : {'WINEPATH' : usphome, 'WINEDLLPATH' : usphome, 'WINEDLLOVERRIDES' : '"usp10=n"', 'WINEDEBUG' : 'trace+dll'}},
+                          {'uspnorm' : lambda x:int(x['usp']) - int(x['abc'])}) 
 }
-outtop = 'name,ot,hbgr,gr'
-outformat = '{font}+{text}, {ot}, {hbgr}, {gr}' 
+
+def getval(dat, key, defkey = None) :
+    if not hasattr(dat, 'keys') : return dat
+    if defkey is not None :
+        return dat.get(key, dat[defkey])
+    else :
+        return dat.get(key, None)
 
 def dorow(x) :
     (c, r) = x
-    if len(r) < 3 : return None
-    (font, text, line) = r[:3]
-    results = {'font' : font, 'text' : text, 'line' : line}
+    results = r.copy()
     for k, job in modes.items() :
-        resf = os.path.join(tmpd, 'callgrind_'+k+'_'+str(c)+'.out')
-        ft = open(text)
-        t = ft.readlines()[int(line)].strip()
+        if k == 'usp' and not args.usp:
+            for l in ('usp', 'abc', 'uspnorm', 'usp_GSUB', 'usp_GPOS'):
+                results[l] = 0
+            continue
+        resf = os.path.abspath(os.path.join(tmpd, 'callgrind_'+k+'_'+str(c)+'.out'))
+        ft = open(r['textfile'])
+        t = ft.readlines()[int(r['textline'])].strip()
         ft.close()
-        cmd = ['valgrind', '-q', '--tool=callgrind', '--callgrind-out-file='+resf, 'hb-shape', '--font-file='+font, '--text='+t, '--shapers='+job[0]]
+        tfile = os.path.abspath(os.path.join(tmpd, 't'+k+str(c)+'.out'))
+        ft = open(tfile, "w")
+        ft.write(t+"\n")
+        results['char'] = len(t.decode('utf8'))
+        ft.close()
+        font = getval(r['font'], k, defkey='ot')
+        cmd = ['valgrind', '-q', '--tool=callgrind', '--callgrind-out-file='+resf, 'hb-shape', '--font-file='+font, '--shapers='+job[0], '--text-file='+tfile]
+        cwd = None
+        env = os.environ.copy()
+        if len(job) > 2 :
+            cmd = cmd[:4] + job[2]['valgrind_parms'] + job[2]['exe'] + cmd[5:]
+            csd = job[2]['dir']
+            env.update(job[2]['env'])
         copt = 3
-        if len(r) > copt and r[copt] == 'r' :
+        if 'rtl' in r and r['rtl'] :
             cmd.append('--direction=rtl')
-            copt += 1
-        if len(r) > copt and r[copt] == 'f' :
-            cmd.append('--features=' + r[copt+1])
-            copt += 2
-        call(cmd, stdout=dumpfh)
+        if 'cmdext' in r :
+            f = getval(r['cmdext'], k)
+            if f is not None :
+                cmd.append(f)
+        if args.verbose:
+            print " ".join(cmd)
+        try :
+            call(cmd, stdout=dumpfh, cwd=cwd)
+        except :
+            pass
         cfns = parsecg(resf)
         for rk, rf in job[1].items() :
-            results[rk] = cfns.get(rf, 0)
+            if 'ignore' in r and k in r['ignore'] :
+                results[rk] = 0
+            else :
+                results[rk] = int(cfns.get(rf, 0))
+            if args.normalize :
+                results[rk] /= results['char']
+        if len(job) > 3 :
+            for rk, rl in job[3].items() :
+                results[rk] = rl(results)
         if not args.keep :
             os.remove(resf)
-    return outformat.format(**results)
+            os.remove(tfile)
+    return results
+
+outtop = 'name, length, ot, ot_GSUB, ot_GPOS, hbgr, gr, grcoll, grkern, usp, abc, uspnorm, usp_GSUB, usp_GPOS'
+outformat = '{label}, {char}, {ot}, {ot_GSUB}, {ot_GPOS}, {hbgr}, {gr}, {grcoll}, {grkern}, {usp}, {abc}, {uspnorm}, {usp_GSUB}, {usp_GPOS}' 
 
 if args.keep :
-    tmpd = "."
+    tmpd = args.keep
 else :
     tmpd = tempfile.mkdtemp()
 dumpf = os.path.join(tmpd+'dump.out')
 dumpfh = open(dumpf, "w")
 if args.file :
     fh = open(args.file)
-    c = csv.reader(fh, delimiter=' ', skipinitialspace=True, escapechar='\\')
+    c = json.load(fh)
+    fh.close()
 else :
     fh = None
-    c = [[args.font, args.text, args.line]]
+    c = [{
+        'font' : args.font,
+        'textfile' : args.text,
+        'textline' : args.line,
+        'label' : 'Commandline'
+        }]
 
-print outtop
 if args.single or fh is None :
     res = map(dorow, enumerate(c))
 else :
@@ -102,13 +157,48 @@ else :
     res = list(pool.imap(dorow, enumerate(c)))
     pool.close()
     pool.join()
-for r in res :
-    if r is not None :
-        print r
-
-if fh is not None:
-    fh.close()
 dumpfh.close()
 os.unlink(dumpf)
 if not args.keep :
     os.rmdir(tmpd)
+
+if not args.graph :
+    print outtop
+    for r in res :
+        if r is not None :
+            print outformat.format(**r)
+else:
+    import matplotlib.pyplot as plt
+
+    def stackplot(xs, ydat, width, **kwargs) :
+        res = []
+        h = len(ydat[0])
+        yacc = [0] * len(ydat)
+        for i in range(h) :
+            res.append(plt.bar(xs, [y[i] - (y[i-1] if i > 0 else 0) for y in ydat], width, bottom = [y[i-1] if i > 0 else 0 for y in ydat], **kwargs))
+        return res
+
+    width = 0.25
+    fig, ax = plt.subplots(figsize=(10,5))
+    dat = [
+        [(x['uspnorm'], ) if args.normalize else (x['uspnorm'] / x['char'], ) for x in res],
+        [(x['ot'], ) if args.normalize else (x['ot'] / x['char'], ) for x in res],
+        [(x['gr'], ) if args.normalize else (x['gr'] / x['char'], ) for x in res]]
+        # [(x['usp_GSUB'], x['usp_GSUB'] + x['usp_GPOS'] - x['abc'], x['uspnorm']) for x in res],
+        # [(x['ot_GSUB'], x['ot_GSUB'] + x['ot_GPOS'], x['ot']) for x in res],
+        # [(x['gr'], x['hbgr']) for x in res]]
+    pos = range(len(dat[1]))
+    plots = [stackplot(pos, dat[0], width, alpha=0.6, color='blue', label='usp'),
+            stackplot([p + width for p in pos], dat[1], width, alpha=0.6, color='red', label='ot'),
+            stackplot([p + width * 2 for p in pos], dat[2], width, alpha=0.6, color='green', label='gr')]
+    ax.set_ylabel('Cycles / character')
+    ax.set_title('Font Speed Test')
+    ax.set_xticks([p + 1.5 * width for p in pos])
+    ax.set_xticklabels([x['label'] for x in res])
+    plt.xlim(min(pos) - width, max(pos) + width * 4)
+    #ymax = max([max(x) for x in dat])
+    #plt.ylim(0, ymax)
+    plt.legend([x[0] for x in plots], ['usp', 'ot', 'gr'], loc='upper left')
+    plt.grid()
+    plt.show()
+

@@ -1,0 +1,56 @@
+[
+  {
+    "font" : "/usr/share/fonts/opentype/charissil/CharisSIL-R.ttf",
+    "textfile" : "texts/udhr_eng_para.txt",
+    "textline" : 18,
+    "label" : "en (Charis)"
+  },
+  {
+    "font" : "/usr/share/fonts/opentype/charissil/CharisSIL-R.ttf",
+    "textfile" : "texts/udhr_yor_nfc.txt",
+    "textline" : 9,
+    "label" : "yor (Charis)"
+  },
+  {
+    "font" : "/usr/share/fonts/opentype/scheherazade/Scheherazade-Regular.ttf",
+    "textfile" : "texts/udhr_arb.txt",
+    "textline" : 11,
+    "rtl" : 1,
+    "label" : "ar (Scheherazade)"
+  },
+  {
+    "font" : "/usr/share/fonts/opentype/annapurna/AnnapurnaSIL-Regular.ttf",
+    "textfile" : "texts/udhr_nep.txt",
+    "textline" : 3,
+    "label" : "nep (Annapurna)"
+  },
+  {
+    "font" : "/usr/share/fonts/opentype/taiheritagepro/TaiHeritagePro-R.ttf",
+    "textfile" : "texts/udhr_blt.txt",
+    "textline" : 12,
+    "label" : "blt (TaiHeritagePro)",
+    "ignore" : ["usp"]
+  },
+  {
+    "font" : "/home/mhosken/.fonts/Busra-R.ttf",
+    "textfile" : "texts/udhr_khm.txt",
+    "textline" : 11,
+    "label" : "kh (Busra)"
+  },
+  {
+    "font" : "/home/mhosken/.fonts/Padauk-Regular.ttf",
+    "textfile" : "texts/udhr_mya.txt",
+    "textline" : 11,
+    "label" : "my (Padauk)",
+    "ignore" : ["usp"]
+  },
+  {
+    "font" : {
+        "ot" : "/usr/share/fonts/truetype/noto/NotoNastaliqUrdu-Regular.ttf",
+        "gr" : "/home/mhosken/.fonts/Awami_preV1.ttf"
+    },
+    "textfile" : "texts/udhr_urd.txt",
+    "textline" : 11,
+    "label" : "ur (Noto, Awami)"
+  }
+]
