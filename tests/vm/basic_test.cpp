@@ -20,6 +20,9 @@ const byte simple_prog[] =
             PUSH_BYTE, 11, PUSH_BYTE, 13, ADD,
             PUSH_BYTE, 4, SUB,
         COND,
+//        PUSH_LONG, 0x80, 0x00, 0x00, 0x00,
+//        PUSH_LONG, 0xff, 0xff, 0xff, 0xff,
+//        DIV,
 //        COND,                                 // Uncomment to cause an underflow
 //    POP_RET
 };
@@ -41,7 +44,8 @@ const char * run_error_msg[] = {
     _msg(stack_underflow),
     _msg(stack_not_empty),
     _msg(stack_overflow),
-    _msg(slot_offset_out_bounds)
+    _msg(slot_offset_out_bounds),
+    _msg(died_early)
 };
 
 class graphite2::Segment {};
@@ -109,7 +113,8 @@ int main(int argc, char *argv[])
         switch (m.status()) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:
-                std::cerr << "program terminated early: " 
+            case Machine::died_early:
+                std::cerr << "program terminated early: "
                           << run_error_msg[m.status()] << std::endl;
                 std::cout << "--------" << std::endl
                           << "between " << prog.instructionCount()*(repeats-n) 

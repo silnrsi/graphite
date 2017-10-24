@@ -32,6 +32,7 @@ of the License or (at your option) any later version.
 
 #pragma once
 #include <cstring>
+#include <limits>
 #include <graphite2/Types.h>
 #include "inc/Main.h"
 
@@ -186,6 +187,8 @@ inline Machine::status_t Machine::status() const throw()
 
 inline void Machine::check_final_stack(const stack_t * const sp)
 {
+    if (_status != finished) return;
+    
     stack_t const * const base  = _stack + STACK_GUARD,
                   * const limit = base + STACK_MAX;
     if      (sp <  base)    _status = stack_underflow;       // This should be impossible now.
