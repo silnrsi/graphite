@@ -20,7 +20,7 @@ The release is done by:
 . git archive -o graphite2-<version>.tgz --prefix=graphite2-<version>/ <version>
 . git archive -o graphite2-minimal-<version>.tgz --prefix=graphite2-<version>/ <version> include src LICENSE COPYING README.md
 . sha1sum graphite2-<version>.tgz graphite2-minimal-<version>.tgz > graphite2-<version>.sha1sum
-. Then push up to sf.net/projects/silgraphite and projects.palaso.org/graphiteng-dev
+. Then push up to http://sf.net/projects/silgraphite/files/graphite2 and https://github.com/silnrsi/graphite/releases
 
 === How to do a test pdebuild ===
 
