@@ -111,9 +111,9 @@ set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set_target_properties(graphite2 PROPERTIES 
-        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector"
-        LINK_FLAGS      "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}" 
+    set_target_properties(graphite2 PROPERTIES
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -mfpmath=sse -msse2"
+        LINK_FLAGS      "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE C)
     if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86")
         add_definitions(-mfpmath=sse -msse2)
@@ -143,9 +143,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set_target_properties(graphite2 PROPERTIES 
-        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wimplicit-fallthrough -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -fno-stack-protector -mfpmath=sse -msse2"
-        LINK_FLAGS      "-nodefaultlibs" 
+    set_target_properties(graphite2 PROPERTIES
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wimplicit-fallthrough -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -mfpmath=sse -msse2"
+        LINK_FLAGS      "-nodefaultlibs"
         LINKER_LANGUAGE C)
     target_link_libraries(graphite2 c)
     include(Graphite)
