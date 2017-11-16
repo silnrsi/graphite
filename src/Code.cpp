@@ -219,7 +219,11 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
     if (_out)
         *_out += total_sz;
     else
-        _code = static_cast<instr *>(realloc(_code, total_sz));
+    {
+      instr * const old_code = _code;
+      _code = static_cast<instr *>(realloc(_code, total_sz));
+      if (!_code) free(old_code);
+    }
    _data = reinterpret_cast<byte *>(_code + (_instr_count+1));
 
     if (!_code)
