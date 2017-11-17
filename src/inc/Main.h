@@ -165,7 +165,7 @@ inline T max(const T a, const T b)
 
 #if defined(__clang__) && __cplusplus >= 201103L
    /* clang's fallthrough annotations are only available starting in C++11. */
-    #define GR_FALLTHROUGH [[clang::fallthrough]]
+    #define GR_FALLTHROUGH [[fallthrough]]
 #elif defined(_MSC_VER)
    /*
     * MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):

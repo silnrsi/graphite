@@ -50,7 +50,13 @@ gr_font* gr_make_font_with_ops(float ppm/*pixels per em*/, const void* appFontHa
     if (face == 0 || ppm <= 0)  return 0;
 
     Font * const res = new Font(ppm, *face, appFontHandle, font_ops);
-    return static_cast<gr_font*>(res);
+    if (*res)
+        return static_cast<gr_font*>(res);
+    else
+    {
+        delete res;
+        return 0;
+    }
 }
 
 gr_font* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* appFontHandle/*non-NULL*/, gr_advance_fn getAdvance, const gr_face * face/*needed for scaling*/)
