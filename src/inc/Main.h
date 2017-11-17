@@ -136,6 +136,8 @@ inline T max(const T a, const T b)
     */
     #include <sal.h>
     #define GR_FALLTHROUGH __fallthrough
+#elif defined(__GNUC__) 
+    #define GR_FALLTHROUGH __attribute ((fallthrough))
 #else
     #define GR_FALLTHROUGH /* fallthrough */
 #endif
