@@ -136,7 +136,7 @@ inline T max(const T a, const T b)
     */
     #include <sal.h>
     #define GR_FALLTHROUGH __fallthrough
-#elif defined(__GNUC__) 
+#elif __GNUC__ >= 7
     #define GR_FALLTHROUGH __attribute__ ((fallthrough))
 #else
     #define GR_FALLTHROUGH /* fallthrough */
