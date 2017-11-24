@@ -117,7 +117,7 @@ int lz4::decompress(void const *in, size_t in_size, void *out, size_t out_size)
         out_size -= match_len;
     }
 
-    if (literal_len > src_end - literal || literal_len > out_size)
+    if (literal > src_end - literal_len || literal_len > out_size)
         return -1;
     dst = fast_copy(dst, literal, literal_len);
     
