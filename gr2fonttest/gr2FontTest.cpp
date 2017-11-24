@@ -430,6 +430,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 if (code > 0)
                 {
 // convert text to utfOut using iconv because its easier to debug string placements
+                    assert(pText32);
                     pText32[charLength++] = code;
                     if (charLength % 10 == 0)
                         fprintf(log, "%4x\n",code);
@@ -485,6 +486,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         }
         else 
         {
+            assert(pText32);
             pText32[charLength] = 0;
             fprintf(log, "\n");
         }
@@ -577,6 +579,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
         {
             case ',':
             case '&':
+                assert(valueText);
                 value = atoi(valueText);
                 if (ref)
                 {
@@ -595,6 +598,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
                 }
                 if (!ref)
                 {
+                    assert(name);
                     feat_id = atoi(name);
                     ref = gr_face_find_fref(face, feat_id);
                 }
@@ -611,6 +615,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
         }
         if (ref)
         {
+            assert(valueText);
             value = atoi(valueText);
             gr_fref_set_feature_value(ref, value, featureList);
             if (feat_id > 0x20000000)
