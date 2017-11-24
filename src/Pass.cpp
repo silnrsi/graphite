@@ -270,7 +270,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
             return face.error(e);
     }
 
-    byte * moved_progs = static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs));
+    byte * const moved_progs = prog_pool_free > m_progs ? static_cast<byte *>(realloc(m_progs, prog_pool_free - m_progs)) : 0;
     if (e.test(!moved_progs, E_OUTOFMEM))
     {
         free(m_progs);
