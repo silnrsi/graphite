@@ -684,6 +684,7 @@ int Parameters::testFileFont() const
             }
             *ui = 0;
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, (gr_encform)codesize, pText8, textSrc.getLength(), rtl ? 1 : 0);
+            free(pText8);
         }
         else
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, textSrc.utfEncodingForm(),
