@@ -196,7 +196,7 @@ protected:
             while (i < m_numLines)
             {
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
-                pLine = m_fileBuffer + m_lineOffsets[i];
+                pLine += m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 pLineResult[i].dump(log);
                 glyphCount += pLineResult[i].numGlyphs();
@@ -209,7 +209,7 @@ protected:
             while (i < m_numLines)
             {
                 size_t lineLength = m_lineOffsets[i+1] - m_lineOffsets[i] - lfLength;
-                pLine = m_fileBuffer + m_lineOffsets[i];
+                pLine += m_lineOffsets[i];
                 renderer.renderText(pLine, lineLength, pLineResult + i, log);
                 glyphCount += pLineResult[i].numGlyphs();
                 ++i;
@@ -318,8 +318,8 @@ int main(int argc, char ** argv)
     Renderer* renderers[NUM_RENDERERS] = {NULL, NULL, NULL, NULL, NULL};
     FeatureParser * featureSettings = NULL;
     FeatureParser * altFeatureSettings = NULL;
-    bool direction = rendererOptions[OptRtl].exists();
-    int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
+    int direction = (rendererOptions[OptRtl].exists())? 1 : 0;
+    //int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
 	  Gr2Face face(fontFile, traceLogPath, rendererOptions[OptDemand].get(argv));
 

@@ -306,7 +306,7 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const SlotCollision *csl
         float seq_above_wt = cslot->seqAboveWt();
         float seq_below_wt = cslot->seqBelowWt();
         float seq_valign_wt = cslot->seqValignWt();
-        float lmargin = _margin;
+        float lmargin;
         // if isAfter, invert orderFlags for diagonal orders.
         if (isAfter)
         {
