@@ -740,7 +740,7 @@ int Parameters::testFileFont() const
             for (unsigned int j = 0; j < numchar; j++)
             {
                 const gr_char_info *c = gr_seg_cinfo(pSeg, j);
-                fprintf(log, "%d\t%04X\t%d\t%d\t%ld\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c), gr_cinfo_base(c));
+                fprintf(log, "%d\t%04X\t%d\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c), int(gr_cinfo_base(c)));
             }
             free(map);
         }
