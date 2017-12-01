@@ -275,7 +275,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
     // Do some basic sanity checks based on what we know about the opcode
     if (!validate_opcode(opc, bc))  return MAX_OPCODE;
 
-    // And check it's arguments as far as possible
+    // And check its arguments as far as possible
     switch (opcode(opc))
     {
         case NOP :
