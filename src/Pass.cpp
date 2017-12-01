@@ -288,7 +288,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 
     // Load the rule entries map
     face.error_context((face.error_context() & 0xFFFF00) + EC_APASS);
-    //TODO: Coverty: 1315804: FORWARD_NULL
+    //TODO: Coverity: 1315804: FORWARD_NULL
     RuleEntry * re = m_ruleMap = gralloc<RuleEntry>(num_entries);
     if (e.test(!re, E_OUTOFMEM)) return face.error(e);
     for (size_t n = num_entries; n; --n, ++re)

@@ -79,9 +79,9 @@ enum
 //**********************************************************************************************
 namespace Sfnt 
 {
-#pragma pack(1) // We need this or the structure members aren't alligned 
+#pragma pack(1) // We need this or the structure members aren't aligned
                         // correctly.  Fortunately this form of pragma is supposed
-                        // to be recongnised by VS C++ too (at least according to 
+                        // to be recognised by VS C++ too (at least according to
                         // MSDN).
 
     struct OffsetSubTable
