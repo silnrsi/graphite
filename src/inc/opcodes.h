@@ -65,7 +65,7 @@ of the License or (at your option) any later version.
      
 
 // #define NOT_IMPLEMENTED     assert(false)
-#define NOT_IMPLEMENTED
+// #define NOT_IMPLEMENTED
 
 #define binop(op)           const uint32 a = pop(); *sp = uint32(*sp) op a
 #define sbinop(op)          const int32 a = pop(); *sp = int32(*sp) op a
@@ -210,12 +210,12 @@ STARTOP(next)
     ++map;
 ENDOP
 
-STARTOP(next_n)
-    use_params(1);
-    NOT_IMPLEMENTED;
+//STARTOP(next_n)
+//    use_params(1);
+//    NOT_IMPLEMENTED;
     //declare_params(1);
     //const size_t num = uint8(*param);
-ENDOP
+//ENDOP
 
 //STARTOP(copy_next)
 //     if (is) is = is->next();

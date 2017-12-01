@@ -320,8 +320,9 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             if (_stack_depth <= 0)
                 failure(underfull_stack);
             break;
-        case NEXT :
         case NEXT_N :           // runtime checked
+            break;
+        case NEXT :
         case COPY_NEXT :
             ++_out_index;
             if (_out_index < -1 || _out_index > _out_length || _slotref > _max.rule_length)
