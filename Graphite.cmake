@@ -1,4 +1,5 @@
 include(GetPrerequisites)
+find_program(PYTHON_EXECUTABLE python3 python python2 REQUIRED)
 
 function(nolib_test LIBNAME OBJECTFILE)
     string(REGEX REPLACE "[][^$.*+?|()-]" "\\\\\\0" LIBNAME_REGEX ${LIBNAME})
@@ -85,7 +86,7 @@ function(fonttest TESTNAME FONTFILE)
         endif (GRAPHITE2_ASAN)
         add_test(NAME ${TESTNAME}Output COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.log)
         if (NOT GRAPHITE2_NTRACING)
-            add_test(NAME ${TESTNAME}Debug COMMAND python ${PROJECT_SOURCE_DIR}/jsoncmp ${PROJECT_BINARY_DIR}/${TESTNAME}.json ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}.json)
+            add_test(NAME ${TESTNAME}Debug COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/jsoncmp ${PROJECT_BINARY_DIR}/${TESTNAME}.json ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}.json)
             set_tests_properties(${TESTNAME}Debug  PROPERTIES DEPENDS ${TESTNAME})
         endif (NOT GRAPHITE2_NTRACING)
         set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
@@ -113,7 +114,7 @@ function(cmptest TESTNAME FONTFILE TEXTFILE)
         set(PLATFORM_TEST_SUFFIX ${CMAKE_SYSTEM_NAME})
     endif (EXISTS ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${CMAKE_SYSTEM_NAME}.json)
     if ((NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_ASAN) OR CMAKE_COMPILER_IS_GNUCXX))
-        add_test(NAME ${TESTNAME} COMMAND python ${PROJECT_SOURCE_DIR}/fnttxtrender --graphite_library=$<TARGET_FILE:graphite2> -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json -c ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
+        add_test(NAME ${TESTNAME} COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/fnttxtrender --graphite_library=$<TARGET_FILE:graphite2> -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json -c ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
         if (GRAPHITE2_ASAN)
             set_property(TEST ${TESTNAME} APPEND 
                     PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}"
