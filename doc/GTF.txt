@@ -272,8 +272,7 @@ storing feature names and feature value names.
 |=======================================================================
 |Type |Name |Description |Version notes
 
-|FIXED |version |Table version: 00020000 |3.0 – changed from 00010000 to
-00020000
+|FIXED |version |Table version: 00020001 |
 
 |USHORT |numFeat |Number of features |
 
@@ -292,17 +291,29 @@ indexed by offset |
 |=======================================================================
 |Type |Name |Description |Version notes
 
-|ULONG |id |Feature ID number |3.0 – added
+|ULONG |id |Feature ID number |2.0 – added
 
 |USHORT |numSettings |Number of settings |
 
-|USHORT |reserved | |3.0 – inserted
+|USHORT |reserved | |2.0 – inserted
 
 |ULONG |offset |Offset into featSettings list |
 
-|USHORT |flags | |
+|USHORT |flags | |2.1 - added meaning from simply reserved
 
 |USHORT |label |Index into name table for UI label |
+|=======================================================================
+
+The flags value has its own bit structure:
+
+.FeatureFlags
+[cols="3,3,8,3",options="unbreakable,header",width="90%",frame="topbot",grid="none"]
+|=======================================================================
+|Bits |Mask |Description |Version notes
+
+|0 |0x0001 |This feature is an alias of the previous one |2.1 - added
+
+|1-15 |0xFFFE |Reserved |
 |=======================================================================
 
 .FeatureSettingDefn
