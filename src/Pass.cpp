@@ -968,8 +968,8 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         if (nbor != slotFix         						// don't process if this is the slot of interest
                       && !(cNbor->ignore())    				// don't process if ignoring
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
-                            || !inKernCluster(seg, nbor)    // or this cluster is not to be kerned
-                            || (rtl ^ ignoreForKern))       // or it comes before(ltr) or after(rtl)
+                            || !inKernCluster(seg, nbor))   // or this cluster is not to be kerned
+//                            || (rtl ^ ignoreForKern))       // or it comes before(ltr) or after(rtl)
                       && (!isRev    // if processing forwards then good to merge otherwise only:
                             || !(cNbor->flags() & SlotCollision::COLL_FIX)     // merge in immovable stuff
                             || ((cNbor->flags() & SlotCollision::COLL_KERN) && !sameCluster)     // ignore other kernable clusters
