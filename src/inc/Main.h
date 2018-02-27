@@ -93,14 +93,21 @@ struct telemetry  {};
   #define HAVE_INTSAFE_H
 #endif
 
+// Need to import intsafe into the top level namespace
+#if defined(HAVE_INTSAFE_H)
+} // namespace graphite2
+
+#include <intsafe.h>
+
+namespace graphite2 {
+#endif
+
 #if defined(HAVE_BUILTIN_OVERFLOW)
 inline
 bool checked_mul(const size_t a, const size_t b, size_t & t) {
     return __builtin_mul_overflow(a, b, &t);
 }
 #elif defined(HAVE_INTSAFE_H)
-#include <intsafe.h>
-
 inline
 bool checked_mul(const size_t a, const size_t b, size_t & t) {
     return SizeTMult(&t, a, b);
