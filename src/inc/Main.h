@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -99,6 +99,8 @@ bool checked_mul(const size_t a, const size_t b, size_t & t) {
     return __builtin_mul_overflow(a, b, &t);
 }
 #elif defined(HAVE_INTSAFE_H)
+#include <intsafe.h>
+
 inline
 bool checked_mul(const size_t a, const size_t b, size_t & t) {
     return SizeTMult(&t, a, b);
