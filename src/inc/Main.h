@@ -110,13 +110,13 @@ bool checked_mul(const size_t a, const size_t b, size_t & t) {
 #elif defined(HAVE_INTSAFE_H)
 inline
 bool checked_mul(const size_t a, const size_t b, size_t & t) {
-    return SizeTMult(&t, a, b);
+    return SizeTMult(a, b, &t) == INTSAFE_E_ARITHMETIC_OVERFLOW;
 }
 #else
 inline
 bool checked_mul(const size_t a, const size_t b, size_t & t) {
   t = a*b;
-  return (((a | b) & (~size_t(0) << (sizeof(size_t) << 2))) && (t / a != b))
+  return (((a | b) & (~size_t(0) << (sizeof(size_t) << 2))) && (t / a != b));
 }
 #endif
 
