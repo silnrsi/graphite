@@ -32,7 +32,7 @@ of the License or (at your option) any later version.
 
 #pragma once
 #include <cstring>
-//#include <limits>
+#include <limits>
 #include <graphite2/Types.h>
 #include "inc/Main.h"
 
@@ -55,6 +55,13 @@ of the License or (at your option) any later version.
 #else
 #define     HOT
 #define     REGPARM(n)
+#endif
+
+#if defined(__MINGW32__)
+// MinGW's <limits> at some point includes winnt.h which #define's a
+// DELETE macro, which conflicts with enum opcode below, so we undefine
+// it here.
+#undef DELETE
 #endif
 
 namespace graphite2 {
