@@ -131,7 +131,7 @@ gr_feature_val* gr_featureval_clone(const gr_feature_val* pfeatures/*may be NULL
   
 void gr_featureval_destroy(gr_feature_val *p)
 {
-    delete p;
+    delete static_cast<Features*>(p);
 }
 
 
