@@ -67,7 +67,7 @@ gr_font* gr_make_font_with_advance_fn(float ppm/*pixels per em*/, const void* ap
 
 void gr_font_destroy(gr_font *font)
 {
-    delete font;
+    delete static_cast<Font*>(font);
 }
 
 
