@@ -1,3 +1,9 @@
+graphite2 (1.3.11~palaso1ubuntu1) xenial; urgency=medium
+
+  * Minor bug fixes release
+
+ -- Martin Hosken <martin_hosken@sil.org>  Mon, 05 Mar 2018 11:04:03 +0700
+
 graphite2 (1.3.10~palaso1) xenial; urgency=medium
 
   * Minor features and bug fix release
