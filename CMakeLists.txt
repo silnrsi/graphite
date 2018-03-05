@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
 include(TestBigEndian)
+include(FindPythonInterp)
 
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
@@ -62,6 +63,19 @@ if (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMA
 endif (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
 message(STATUS "Using vm machine type: ${GRAPHITE2_VM_TYPE}")
 
+if (BUILD_SHARED_LIBS)
+    if (PYTHONINTERP_FOUND)
+        EXEC_PROGRAM(${PYTHON_EXECUTABLE}
+            ARGS -c "'import ctypes; print(ctypes.sizeof(ctypes.c_void_p))'"
+            OUTPUT_VARIABLE PYTHON_SIZEOF_VOID_P)
+        if ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_ASAN) OR CMAKE_COMPILER_IS_GNUCXX))
+            set(PYTHON_CTYPES_COMPATBILE TRUE)
+        else ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_ASAN) OR CMAKE_COMPILER_IS_GNUCXX))
+            message(WARNING "Python ctypes is incompatible with built DLL. Disabling some tests.")
+        endif ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_ASAN) OR CMAKE_COMPILER_IS_GNUCXX))
+    endif (PYTHONINTERP_FOUND)
+endif (BUILD_SHARED_LIBS)
+
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(doc)
@@ -76,4 +90,3 @@ set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 configure_file(graphite2.pc.in graphite2.pc)
 
 install(FILES ${PROJECT_BINARY_DIR}/graphite2.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
-
