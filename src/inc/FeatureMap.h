@@ -118,7 +118,12 @@ class FeatureMap
 {
 public:
     FeatureMap() : m_numFeats(0), m_feats(NULL), m_pNamedFeats(NULL) {}
-    ~FeatureMap() { free(m_feats); delete[] m_pNamedFeats; }
+    ~FeatureMap() {
+      for (unsigned i = 0; i < m_numFeats; i++)
+        m_feats[i].~FeatureRef();
+      free(m_feats);
+      delete[] m_pNamedFeats;
+    }
 
     bool readFeats(const Face & face);
     const FeatureRef *findFeatureRef(uint32 name) const;
