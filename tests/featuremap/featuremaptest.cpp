@@ -243,7 +243,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 {
     FeatureMap testFeatureMap;
     dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
-    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
+    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
     if (!face) throw std::runtime_error("failed to load font");
     bool readStatus = testFeatureMap.readFeats(*face);
     testAssert("readFeats", readStatus);
@@ -285,9 +285,8 @@ int main(int argc, char * argv[])
 		// test a bad settings offset stradling the end of the table
 		FeatureMap testFeatureMap;
 		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
-		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
-		bool readStatus = testFeatureMap.readFeats(*face);
-		testAssert("fail gracefully on bad table", !readStatus);
+		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
+		testAssert("fail gracefully on bad table", !face);
 	}
 	catch (std::exception & e)
 	{

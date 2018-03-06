@@ -20,7 +20,7 @@ if (GRAPHITE2_ASAN)
 endif (GRAPHITE2_ASAN)
 target_link_libraries(featuremaptest graphite2 graphite2-base graphite2-segcache graphite2-base)
 
-add_test(NAME featuremaptest COMMAND $<TARGET_FILE:featuremaptest> ${testing_SOURCE_DIR}/fonts/tiny.ttf)
+add_test(NAME featuremaptest COMMAND $<TARGET_FILE:featuremaptest> ${testing_SOURCE_DIR}/fonts/small.ttf)
 set_tests_properties(featuremaptest PROPERTIES TIMEOUT 3)
 if (GRAPHITE2_ASAN)
     set_property(TEST featuremaptest APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")

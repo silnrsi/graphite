@@ -41,7 +41,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-add_test(vm-test-call-threading vm-test-call ${testing_SOURCE_DIR}/fonts/tiny.ttf 1)
+add_test(vm-test-call-threading vm-test-call ${testing_SOURCE_DIR}/fonts/small.ttf 1)
 set_tests_properties(vm-test-call-threading PROPERTIES
         PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
         FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")
@@ -51,7 +51,7 @@ if (GRAPHITE2_ASAN)
 endif (GRAPHITE2_ASAN)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})
-	add_test(vm-test-direct-threading vm-test-direct ${testing_SOURCE_DIR}/fonts/tiny.ttf 1)
+	add_test(vm-test-direct-threading vm-test-direct ${testing_SOURCE_DIR}/fonts/small.ttf 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
 			FAIL_REGULAR_EXPRESSION "program terminated early;stack not empty")

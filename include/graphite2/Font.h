@@ -56,7 +56,7 @@ GR2_API void gr_engine_version(int *nMajor, int *nMinor, int *nBugFix);
 enum gr_face_options {
     /** No preload, no cmap caching, fail if the graphite tables are invalid */
     gr_face_default = 0,
-    /** Dumb rendering will be enabled if the graphite tables are invalid */
+    /** Dumb rendering will be enabled if the graphite tables are invalid. DEPRECATED. */
     gr_face_dumbRendering = 1,
     /** preload glyphs at construction time */
     gr_face_preloadGlyphs = 2,

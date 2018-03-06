@@ -47,8 +47,7 @@ namespace
         telemetry::category _misc_cat(face.tele.misc);
 #endif
         Face::Table silf(face, Tag::Silf, 0x00050000);
-        if (silf)   options &= ~gr_face_dumbRendering;
-        else if (!(options &  gr_face_dumbRendering))
+        if (!silf)
             return false;
 
         if (!face.readGlyphs(options))
@@ -74,7 +73,7 @@ namespace
                 return true;
         }
         else
-            return options & gr_face_dumbRendering;
+            return false;
     }
 }
 
