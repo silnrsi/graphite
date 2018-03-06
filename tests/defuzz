@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''
 Clean log file output from the fuzztest test harness.  This tool collapses
 duplicate outputs into a single copy preceded by all the fuzz lines that 

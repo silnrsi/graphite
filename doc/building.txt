@@ -175,9 +175,8 @@ fuzztest may result in problems.
 There are some hard build dependencies:
 
 python::
-    To run the make test and make fuzztest, the build system requires 
-    python v2.6 or later. Currently python 3 is not supported, however porting
-    using 2to3 is straightforward. 
+    To run the make test and make fuzztest, the build system requires
+    python v2.6 or later.
 
 Other configuration related dependencies:
 

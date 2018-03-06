@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''
 A multiprocess fuzz test framework that generates corrupt fonts to run a user 
 supplied test harness against.  This will check each byte in every table of a 
