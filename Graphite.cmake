@@ -5,12 +5,12 @@ function(nolib_test LIBNAME OBJECTFILE)
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND otool -L ${OBJECTFILE})
-        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
+        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES
             FAIL_REGULAR_EXPRESSION "${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}[.0-9]+${CMAKE_SHARED_LIBRARY_SUFFIX}")
     else (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         add_test(NAME nolib-${LIBNAME}-${PROJECT_NAME}
             COMMAND readelf --dynamic ${OBJECTFILE})
-        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES 
+        set_tests_properties(nolib-${LIBNAME}-${PROJECT_NAME} PROPERTIES
             FAIL_REGULAR_EXPRESSION "0x[0-9a-f]+ \\(NEEDED\\)[ \\t]+Shared library: \\[${CMAKE_SHARED_LIBRARY_PREFIX}${LIBNAME_REGEX}${CMAKE_SHARED_LIBRARY_SUFFIX}.*\\]")
     endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 endfunction(nolib_test)
@@ -34,7 +34,7 @@ FUNCTION(CREATE_LIBTOOL_FILE _target _install_DIR)
   GET_TARGET_PROPERTY_WITH_DEFAULT(_target_shouldnotlink ${_target} LT_SHOULDNOTLINK no)
   GET_TARGET_PROPERTY_WITH_DEFAULT(_target_dlopen ${_target} LT_DLOPEN "")
   GET_TARGET_PROPERTY_WITH_DEFAULT(_target_dlpreopen ${_target} LT_DLPREOPEN "")
-  
+
   SET(_lanamewe ${CMAKE_SHARED_LIBRARY_PREFIX}${_target})
   SET(_soname ${_lanamewe}${CMAKE_SHARED_LIBRARY_SUFFIX})
   SET(_soext ${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -87,7 +87,7 @@ function(fonttest TESTNAME FONTFILE)
         if ((NOT GRAPHITE2_NTRACING) AND PYTHONINTERP_FOUND)
             add_test(NAME ${TESTNAME}Debug COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/jsoncmp ${PROJECT_BINARY_DIR}/${TESTNAME}.json ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}.json)
             set_tests_properties(${TESTNAME}Debug  PROPERTIES DEPENDS ${TESTNAME})
-        endif (NOT GRAPHITE2_NTRACING)
+        endif ((NOT GRAPHITE2_NTRACING) AND PYTHONINTERP_FOUND)
         set_tests_properties(${TESTNAME}Output PROPERTIES DEPENDS ${TESTNAME})
     endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
 endfunction(fonttest)
@@ -115,11 +115,9 @@ function(cmptest TESTNAME FONTFILE TEXTFILE)
     if (PYTHON_CTYPES_COMPATBILE)
         add_test(NAME ${TESTNAME} COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/fnttxtrender --graphite_library=$<TARGET_FILE:graphite2> -t ${PROJECT_SOURCE_DIR}/texts/${TEXTFILE} -o ${PROJECT_BINARY_DIR}/${TESTNAME}.json -c ${PROJECT_SOURCE_DIR}/standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.json ${ARGN} ${PROJECT_SOURCE_DIR}/fonts/${FONTFILE})
         if (GRAPHITE2_ASAN)
-            set_property(TEST ${TESTNAME} APPEND 
+            set_property(TEST ${TESTNAME} APPEND
                     PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}"
                                          "LD_PRELOAD=libasan.so.1")
         endif (GRAPHITE2_ASAN)
     endif (PYTHON_CTYPES_COMPATBILE)
 endfunction(cmptest)
-
-
