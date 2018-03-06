@@ -636,6 +636,15 @@ int Parameters::testFileFont() const
 //    try
     {
         gr_face *face = NULL;
+        FILE * testfile = fopen(fileName, "rb");
+        if (!testfile)
+        {
+            fprintf(stderr, "Unable to open font file\n");
+            return 4;
+        }
+        else
+            fclose(testfile);
+
         if (alltrace) gr_start_logging(NULL, alltrace);
         if (enableCache)
             face = gr_make_file_face_with_seg_cache(fileName, 1000, opts | gr_face_dumbRendering);
