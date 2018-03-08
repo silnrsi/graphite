@@ -141,10 +141,6 @@ GRAPHITE2_NFILEFACE:BOOL::
     Turns off FileFace support to save code space. 
     The default is OFF.
 
-GRAPHITE2_NSEGCACHE:BOOL::
-    Turns off Segment caching support to save code space. 
-    The default is OFF.
-
 GRAPHITE2_NTRACING:BOOL::
     Turns off tracing support to save code space. Tracing support allows debug 
     output of segment creation. 

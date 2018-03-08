@@ -49,9 +49,6 @@ typedef Vector<Slot *>          SlotRope;
 typedef Vector<int16 *>         AttributeRope;
 typedef Vector<SlotJustify *>   JustifyRope;
 
-#ifndef GRAPHITE2_NSEGCACHE
-class SegmentScopeState;
-#endif
 class Font;
 class Segment;
 class Silf;
@@ -103,14 +100,6 @@ public:
 
     Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
     ~Segment();
-#ifndef GRAPHITE2_NSEGCACHE
-    SegmentScopeState setScope(Slot * firstSlot, Slot * lastSlot, size_t subLength);
-    void removeScope(SegmentScopeState & state);
-    void append(const Segment &other);
-    void splice(size_t offset, size_t length, Slot * const startSlot,
-            Slot * endSlot, const Slot * srcSlot,
-            const size_t numGlyphs);
-#endif
     uint8 flags() const { return m_flags; }
     void flags(uint8 f) { m_flags = f; }
     Slot *first() { return m_first; }

@@ -34,12 +34,6 @@ include(TestBigEndian)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-set(SEGCACHE SegCache.cpp SegCacheEntry.cpp SegCacheStore.cpp)
-if (GRAPHITE2_NSEGCACHE)
-    add_definitions(-DGRAPHITE2_NSEGCACHE)
-    set(SEGCACHE)
-endif (GRAPHITE2_NSEGCACHE)
-
 set(FILEFACE FileFace.cpp)
 if (GRAPHITE2_NFILEFACE)
     add_definitions(-DGRAPHITE2_NFILEFACE)
@@ -78,7 +72,6 @@ add_library(graphite2
     gr_logging.cpp
     gr_segment.cpp
     gr_slot.cpp
-    CachedFace.cpp
     CmapCache.cpp
     Code.cpp
     Collider.cpp
@@ -100,7 +93,6 @@ add_library(graphite2
     TtfUtil.cpp
     UtfCodec.cpp
     ${FILEFACE}
-    ${SEGCACHE}
     ${TRACING})
 
 set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"

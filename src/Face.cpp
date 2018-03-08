@@ -34,7 +34,6 @@ of the License or (at your option) any later version.
 #include "inc/FileFace.h"
 #include "inc/GlyphFace.h"
 #include "inc/json.h"
-#include "inc/SegCacheStore.h"
 #include "inc/Segment.h"
 #include "inc/NameTable.h"
 #include "inc/Error.h"

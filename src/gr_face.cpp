@@ -28,7 +28,6 @@ of the License or (at your option) any later version.
 #include "inc/Face.h"
 #include "inc/FileFace.h"
 #include "inc/GlyphCache.h"
-#include "inc/CachedFace.h"
 #include "inc/CmapCache.h"
 #include "inc/Silf.h"
 #include "inc/json.h"
@@ -97,28 +96,6 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tab
     const gr_face_ops ops = {sizeof(gr_face_ops), tablefn, NULL};
     return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
 }
-
-#ifndef GRAPHITE2_NSEGCACHE
-gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int cacheSize, unsigned int faceOptions)
-                  //the appFaceHandle must stay alive all the time when the GrFace is alive. When finished with the GrFace, call destroy_face
-{
-    if (ops == 0)   return 0;
-
-    CachedFace *res = new CachedFace(appFaceHandle, *ops);
-    if (res && load_face(*res, faceOptions)
-            && res->setupCache(cacheSize))
-        return static_cast<gr_face *>(static_cast<Face *>(res));
-
-    delete res;
-    return 0;
-}
-
-gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int cacheSize, unsigned int faceOptions)
-{
-    const gr_face_ops ops = {sizeof(gr_face_ops), getTable, NULL};
-    return gr_make_face_with_seg_cache_and_ops(appFaceHandle, &ops, cacheSize, faceOptions);
-}
-#endif
 
 gr_uint32 gr_str_to_tag(const char *str)
 {
@@ -251,30 +228,7 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     delete pFileFace;
     return NULL;
 }
-
-#ifndef GRAPHITE2_NSEGCACHE
-gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int segCacheMaxSize, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
-                  //when finished with, call destroy_face
-{
-    FileFace* pFileFace = new FileFace(filename);
-    if (*pFileFace)
-    {
-      gr_face * pRes = gr_make_face_with_seg_cache_and_ops(pFileFace, &FileFace::ops, segCacheMaxSize, faceOptions);
-      if (pRes)
-      {
-        pRes->takeFileFace(pFileFace);        //takes ownership
-        return pRes;
-      }
-    }
-
-    //error when loading
-
-    delete pFileFace;
-    return NULL;
-}
 #endif
-#endif      //!GRAPHITE2_NFILEFACE
-
 
 } // extern "C"
 

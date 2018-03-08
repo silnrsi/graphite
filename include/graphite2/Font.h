@@ -142,32 +142,6 @@ GR2_API gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, co
   */
 GR2_API gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn getTable, unsigned int faceOptions);
 
-//#ifndef GRAPHITE2_NSEGCACHE
-/** Create a gr_face object given application information, with subsegmental caching support
-  *
-  * @return gr_face or NULL if the font fails to load.
-  * @param appFaceHandle is a pointer to application specific information that is passed to getTable.
-  *                      This may not be NULL and must stay alive as long as the gr_face is alive.
-  * @param face_ops      Pointer to face specific callback structure for table management. Must stay
-  *                      alive for the duration of the call only.
-  * @param segCacheMaxSize   How large the segment cache is.
-  * @param faceOptions   Bitfield of values from enum gr_face_options
-  */
-GR2_API gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle, const gr_face_ops *face_ops, unsigned int segCacheMaxSize, unsigned int faceOptions);
-
-/** Create a gr_face object given application information, with subsegmental caching support.
-  * This function is deprecated as of v1.2.0 in favour of gr_make_face_with_seg_cache_and_ops.
-  *
-  * @return gr_face or NULL if the font fails to load.
-  * @param appFaceHandle is a pointer to application specific information that is passed to getTable.
-  *                      This may not be NULL and must stay alive as long as the gr_face is alive.
-  * @param getTable      The function graphite calls to access font table data
-  * @param segCacheMaxSize   How large the segment cache is.
-  * @param faceOptions   Bitfield of values from enum gr_face_options
-  */
-GR2_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
-//#endif
-
 /** Convert a tag in a string into a gr_uint32
   *
   * @return gr_uint32 tag, zero padded

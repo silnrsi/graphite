@@ -11,7 +11,7 @@ set(S ${graphite2_core_SOURCE_DIR})
 # models rather than linking against the library from source.
 add_library(vm-test-common STATIC 
     basic_test.cpp)
-target_link_libraries(vm-test-common graphite2 graphite2-segcache graphite2-base)
+target_link_libraries(vm-test-common graphite2 graphite2-file graphite2-base)
 add_definitions(-DGRAPHITE2_NTRACING)
 
 if  (${CMAKE_COMPILER_IS_GNUCXX})

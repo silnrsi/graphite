@@ -2,7 +2,7 @@ project(testing)
 include(Graphite)
 include(CMakeDependentOption)
 CMAKE_DEPENDENT_OPTION(GRAPHITE2_COMPARE_RENDERER "Build tool to compare output of different renderers" OFF
-                        "NOT GRAPHITE2_NFILEFACE;NOT GRAPHITE2_NSEGCACHE" OFF)
+                        "NOT GRAPHITE2_NFILEFACE" OFF)
 
 include_directories(${graphite2_core_SOURCE_DIR})
 set(S ${graphite2_core_SOURCE_DIR})
@@ -15,7 +15,7 @@ add_library(graphite2-base STATIC
     ${S}/TtfUtil.cpp
     ${S}/UtfCodec.cpp)
 
-add_library(graphite2-segcache STATIC
+add_library(graphite2-file STATIC
     ${S}/call_machine.cpp
     ${S}/Code.cpp
     ${S}/Collider.cpp
@@ -27,8 +27,6 @@ add_library(graphite2-segcache STATIC
     ${S}/GlyphFace.cpp
     ${S}/gr_logging.cpp
     ${S}/Pass.cpp
-    ${S}/SegCache.cpp
-    ${S}/SegCacheEntry.cpp
     ${S}/Segment.cpp
     ${S}/Silf.cpp
     ${S}/Slot.cpp
@@ -42,7 +40,7 @@ endif (GRAPHITE2_TELEMETRY)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
-    set_target_properties(graphite2-segcache PROPERTIES
+    set_target_properties(graphite2-file PROPERTIES
                             COMPILE_DEFINITIONS "GRAPHITE2_STATIC;GRAPHITE2_NTRACING${TELEMETRY};_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE")
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 # don't -D GRAPHITE2_STATIC so that tests can see the API symbols in the static library
@@ -51,7 +49,7 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         COMPILE_DEFINITIONS "GRAPHITE2_NTRACING"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE     C)
-    set_target_properties(graphite2-segcache PROPERTIES
+    set_target_properties(graphite2-file PROPERTIES
         COMPILE_FLAGS       "-Wall -Wextra -fno-rtti -fno-exceptions"
         COMPILE_DEFINITIONS "GRAPHITE2_NTRACING${TELEMETRY}"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
@@ -70,9 +68,6 @@ add_subdirectory(featuremap)
 add_subdirectory(grlist)
 add_subdirectory(json)
 add_subdirectory(nametabletest)
-if (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
-    add_subdirectory(segcache)
-endif (NOT (GRAPHITE2_NSEGCACHE OR GRAPHITE2_NFILEFACE))
 add_subdirectory(sparsetest)
 add_subdirectory(utftest)
 if (NOT GRAPHITE2_NFILEFACE)

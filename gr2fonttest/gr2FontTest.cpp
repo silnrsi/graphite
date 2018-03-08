@@ -96,7 +96,6 @@ public:
     int useCodes;
     bool autoCodes;
     int justification;
-    bool enableCache;
     float width;
     int textArgIndex;
     unsigned int * pText32;
@@ -142,7 +141,6 @@ void Parameters::clear()
     autoCodes = false;
     noprint = false;
     justification = 0;
-    enableCache = false;
     width = 100.0f;
     pText32 = NULL;
     textArgIndex = 0;
@@ -346,11 +344,6 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 {
                     option = NONE;
                     ws = true;
-                }
-                else if (strcmp(argv[a], "-cache") == 0)
-                {
-                    option = NONE;
-                    enableCache = true;
                 }
                 else if (strcmp(argv[a], "-feat") == 0)
                 {
@@ -646,10 +639,7 @@ int Parameters::testFileFont() const
             fclose(testfile);
 
         if (alltrace) gr_start_logging(NULL, alltrace);
-        if (enableCache)
-            face = gr_make_file_face_with_seg_cache(fileName, 1000, opts | gr_face_dumbRendering);
-        else
-            face = gr_make_file_face(fileName, opts);
+        face = gr_make_file_face(fileName, opts);
 
         // use the -trace option to specify a file
     	if (trace)	gr_start_logging(face, trace);
@@ -803,7 +793,6 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.json\tDefine a file for the JSON trace log\n");
         fprintf(stderr,"-demand\tDemand load glyphs and cmap cache\n");
-        fprintf(stderr,"-cache\tEnable Segment Cache\n");
         fprintf(stderr,"-bytes\tword size for character transfer [1,2,4] defaults to 4\n");
         return 1;
     }

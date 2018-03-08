@@ -31,11 +31,6 @@ GRAPHITE2_BUILTINS::
     Currently this is only used for __builtin_popcount and should only be turned when you know the instruction
     will be emitted as the gcc __builtin_popcount is 2x slower on Intel than Graphite's own version.
 
-GRAPHITE2_NSEGCACHE::
-    If set, the segment caching code is not compiled into the library. This can be used to save space
-    if the engine is under space constraints both for code and memory. The default is that this is not
-    defined.
-
 GRAPHITE2_NFILEFACE::
     If set, the code to support creating a face directly from a font file is not included in the library.
     By default this is not set.
