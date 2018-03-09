@@ -6,7 +6,7 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src)
 
-file(GLOB PRIVATE_HEADERS *.h) 
+file(GLOB PRIVATE_HEADERS *.h)
 set_source_files_properties(${PRIVATE_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 add_executable(comparerenderer

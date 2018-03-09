@@ -82,7 +82,7 @@ namespace
     //     if (!std::numeric_limits<T>::is_signed) o.put('u');
     //     o << "int" << std::dec << sizeof(T)*8;
     // }
-    
+
 	template<typename T>
 	inline
 	void test_bit_set_count(const T pat[])
@@ -93,12 +93,12 @@ namespace
 			std::cout << "bit_set_count("
 			                << (!std::numeric_limits<T>::is_signed ? "uint" : "int")
 			                << std::dec << sizeof(T)*8 << "(0x"
-			                    << std::hex 
-			                    << std::setw(sizeof(T)*2) 
-			                    << std::setfill('0') 
+			                    << std::hex
+			                    << std::setw(sizeof(T)*2)
+			                    << std::setfill('0')
 			                    << static_cast<unsigned long>(pat[p] & maskoff(8*sizeof(T)))
-		                << ")) -> "  
-		                    << std::dec 
+		                << ")) -> "
+		                    << std::dec
 	                        <<  bit_set_count(pat[p]) << std::endl;
 #endif
 			if (bit_set_count(pat[p]) != p)
@@ -129,7 +129,6 @@ int main(int argc , char *argv[])
         test_bit_set_count(s64_pat);
 #endif
     }
-    
+
     return ret;
 }
-

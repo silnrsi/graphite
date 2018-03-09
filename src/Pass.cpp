@@ -97,10 +97,10 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
                * const pass_end = p + pass_length;
     size_t numRanges;
 
-    if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e); 
+    if (e.test(pass_length < 40, E_BADPASSLENGTH)) return face.error(e);
     // Read in basic values
     const byte flags = be::read<byte>(p);
-    if (e.test((flags & 0x1f) && 
+    if (e.test((flags & 0x1f) &&
             (pt < PASS_TYPE_POSITIONING || !m_silf->aCollision() || !face.glyphs().hasBoxes() || !(m_silf->flags() & 0x20)),
             E_BADCOLLISIONPASS))
         return face.error(e);
@@ -191,7 +191,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     if (pass_constraint_len)
     {
         face.error_context(face.error_context() + 1);
-        m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len, 
+        m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len,
                                   precontext[0], be::peek<uint16>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
         if (e.test(!m_cPConstraint, E_OUTOFMEM)
                 || e.test(m_cPConstraint.status() != Code::loaded, m_cPConstraint.status() + E_CODEFAILURE))
@@ -774,7 +774,7 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
             *dbgout << json::close << json::close; // phase-1
 #endif
 
-        // phase 2 : loop until happy. 
+        // phase 2 : loop until happy.
         for (int i = 0; i < m_numCollRuns - 1; ++i)
         {
             if (hasCollisions || moved)
@@ -820,10 +820,10 @@ bool Pass::collisionShift(Segment *seg, int dir, json * const dbgout) const
                         << json::object << "phase" << "2b" << "loop" << i << "moves" << json::array;
 #endif
 
-                // phase 2b : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts 
-                // glyphs from their current adjusted position, which has the effect of gradually minimizing the  
-                // resulting adjustment; ie, the final result will be gradually closer to the original location.  
-                // Also it allows more flexibility in the final adjustment, since it is moving along the  
+                // phase 2b : redo basic diacritic positioning pass for ALL glyphs. Each successive loop adjusts
+                // glyphs from their current adjusted position, which has the effect of gradually minimizing the
+                // resulting adjustment; ie, the final result will be gradually closer to the original location.
+                // Also it allows more flexibility in the final adjustment, since it is moving along the
                 // possible 8 vectors from successively different starting locations.
                 if (moved)
                 {
@@ -962,7 +962,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
     while (base->attachedTo())
         base = base->attachedTo();
     Position zero(0., 0.);
-    
+
     // Look for collisions with the neighboring glyphs.
     for (nbor = start; nbor; nbor = isRev ? nbor->prev() : nbor->next())
     {
@@ -982,7 +982,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
         else if (nbor == slotFix)
             // Switching sides of this glyph - if we were ignoring kernable stuff before, don't anymore.
             ignoreForKern = !ignoreForKern;
-            
+
         if (nbor != start && (cNbor->flags() & (isRev ? SlotCollision::COLL_START : SlotCollision::COLL_END)))
             break;
     }
@@ -1011,7 +1011,7 @@ bool Pass::resolveCollisions(Segment *seg, Slot *slotFix, Slot *start,
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
         {
-            *dbgout << json::object 
+            *dbgout << json::object
                             << "missed" << objectid(dslot(seg, slotFix));
             coll.outputJsonDbg(dbgout, seg, -1);
             *dbgout << json::close;
@@ -1072,7 +1072,7 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
         }
         else
         {
-            space_count = 0; 
+            space_count = 0;
             if (nbor != slotFix && !cNbor->ignore())
             {
                 seenEnd = true;
@@ -1105,4 +1105,3 @@ float Pass::resolveKern(Segment *seg, Slot *slotFix, GR_MAYBE_UNUSED Slot *start
     }
     return 0.;
 }
-

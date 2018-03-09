@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -40,7 +40,7 @@ Slot::Slot(int16 *user_attrs) :
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0), 
+    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0),
     m_userAttr(user_attrs), m_justs(NULL)
 {
 }
@@ -107,7 +107,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
             tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(glyph());
         else
             tAdvance *= scale;
-    }    
+    }
     Position res;
 
     m_position = base + shift;
@@ -142,7 +142,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
         Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
         if (tRes.x > res.x) res = tRes;
     }
-    
+
     if (!m_parent && clusterMin < base.x)
     {
         Position adj = Position(m_position.x - clusterMin, 0.);
@@ -532,4 +532,3 @@ bool Slot::isChildOf(const Slot *base) const
             return true;
     return false;
 }
-

@@ -14,7 +14,7 @@ die "Invalid font, failed to read or parse tables\n" unless $face;
 my $sized_font = $face->make_font(12);
 my $pdf = PDF::API2->new(-file => "test.pdf");
 $pdf->mediabox("A4");
-my $page = $pdf->page; 
+my $page = $pdf->page;
 our $font = $pdf->ttfont($fontfile) || die "No PDF font found";
 my $text = $page->text;
 $text->font($font,12);

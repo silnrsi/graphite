@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -80,14 +80,14 @@ Segment::~Segment()
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
     Slot *aSlot = newSlot();
-    
+
     if (!aSlot) return;
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
     m_charinfo[id].base(coffset);
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     m_charinfo[id].breakWeight(theGlyph ? theGlyph->attrs()[m_silf->aBreak()] : 0);
-    
+
     aSlot->child(NULL);
     aSlot->setGlyph(this, gid, theGlyph);
     aSlot->originate(id);
@@ -98,7 +98,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_last = aSlot;
     if (!m_first) m_first = aSlot;
     if (theGlyph && m_silf->aPassBits())
-        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()] 
+        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()]
                     | (m_silf->numPasses() > 16 ? (theGlyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
 }
 

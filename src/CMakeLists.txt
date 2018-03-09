@@ -15,8 +15,8 @@
 #
 #    You should also have received a copy of the GNU Lesser General Public
 #    License along with this library in the file named "LICENSE".
-#    If not, write to the Free Software Foundation, 51 Franklin Street, 
-#    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    If not, write to the Free Software Foundation, 51 Franklin Street,
+#    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
@@ -54,14 +54,14 @@ if (NOT BUILD_SHARED_LIBS)
     add_definitions(-DGRAPHITE2_STATIC)
 endif (NOT BUILD_SHARED_LIBS)
 
-set(GRAPHITE_HEADERS 
+set(GRAPHITE_HEADERS
     ../include/graphite2/Font.h
     ../include/graphite2/Segment.h
     ../include/graphite2/Types.h
     ../include/graphite2/Log.h
     )
 
-file(GLOB PRIVATE_HEADERS inc/*.h) 
+file(GLOB PRIVATE_HEADERS inc/*.h)
 
 add_library(graphite2
     ${GRAPHITE2_VM_TYPE}_machine.cpp
@@ -147,7 +147,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set_target_properties(graphite2 PROPERTIES 
+    set_target_properties(graphite2 PROPERTIES
         COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 

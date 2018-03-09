@@ -51,7 +51,7 @@ GR2_API void gr_engine_version(int *nMajor, int *nMinor, int *nBugFix);
 * The Face Options allow the application to require that certain tables are
 * read during face construction. This may be of concern if the appFaceHandle
 * used in the gr_get_table_fn may change.
-* The values can be combined 
+* The values can be combined
 */
 enum gr_face_options {
     /** No preload, no cmap caching, fail if the graphite tables are invalid */
@@ -113,7 +113,7 @@ struct gr_face_ops
 	gr_get_table_fn 	get_table;
         /** is a pointer to a function to notify the client the a table can be released.
           * This can be NULL to signify that the client does not wish to do any release handling. */
-	gr_release_table_fn	release_table;  
+	gr_release_table_fn	release_table;
 };
 typedef struct gr_face_ops	gr_face_ops;
 
@@ -349,7 +349,7 @@ GR2_API gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
   * @param pfeatureref gr_feature_ref of the feature of interest
   * @param settingno   Index up to the return value of gr_fref_n_values() of the value
   */
-GR2_API gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno);   
+GR2_API gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno);
 
 /** Returns a string of the UI name of a feature
   *
@@ -387,4 +387,3 @@ GR2_API void gr_featureval_destroy(gr_feature_val *pfeatures);
 #ifdef __cplusplus
 }
 #endif
-

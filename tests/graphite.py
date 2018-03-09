@@ -14,7 +14,7 @@
 #    You should also have received a copy of the GNU Lesser General Public
 #    License along with this library in the file named "LICENSE".
 #    If not, write to the Free Software Foundation, 51 Franklin Street,
-#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 from __future__ import print_function, unicode_literals, division, absolute_import
@@ -27,7 +27,7 @@ import ctypes.util
 import sys, os, platform
 
 
-gr2 = cdll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH', 
+gr2 = cdll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
                                       ctypes.util.find_library("graphite2")))
 
 
@@ -122,7 +122,7 @@ if major > 1 or minor > 1 :
 else :
     fn('graphite_start_logging', c_int, c_void_p, c_int)
     fn('graphite_stop_logging', None)
- 
+
 def tag_to_str(num) :
     s = create_string_buffer('\000' * 5)
     gr2.gr_tag_to_str(num, s)

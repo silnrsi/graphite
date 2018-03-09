@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''
-A multiprocess fuzz test framework that generates corrupt fonts to run a user 
-supplied test harness against.  This will check each byte in every table of a 
-TTF or subset if specified by overwriting with a random or user specified 
+A multiprocess fuzz test framework that generates corrupt fonts to run a user
+supplied test harness against.  This will check each byte in every table of a
+TTF or subset if specified by overwriting with a random or user specified
 value. It can also re-run tests using previous output logs as input.
 '''
 from __future__ import division, print_function, unicode_literals
@@ -10,7 +10,7 @@ from __future__ import division, print_function, unicode_literals
 __version__ = "1.0"
 __date__    = "4 April 2012"
 __author__  = "Tim Eves <tim_eves@sil.org>"
-__license__ ='''  
+__license__ ='''
 GRAPHITE2 LICENSING
 
     Copyright 2010, SIL International
@@ -43,7 +43,7 @@ from itertools import chain, cycle, imap, islice, izip, repeat, starmap
 from random import uniform, seed
 
 import multiprocessing.dummy as multiprocessing
-import shutil, tempfile 
+import shutil, tempfile
 import os, re, resource, sys, time
 from subprocess import call
 
@@ -66,7 +66,7 @@ class font:
         self.nolog = open('/dev/null','wt')
         with open(fnt._font_path, "rb") as font_file:
             shutil.copyfileobj(font_file, self.file)
-           
+
     def __init__(self, font_path, inclusion, exclusion):
         fpath = os.path.splitext(os.path.basename(font_path))[0]
         self._tmpdir = tempfile.mkdtemp(prefix='fuzztest-' + fpath + '-')
@@ -75,10 +75,10 @@ class font:
         inclusion = set(inclusion or (tr.tag for tr in self.__table_dir)) - set(exclusion)
         self.__table_dir = filter(lambda tr: tr.tag in inclusion, self.read_tabledir())
         if not opts.quiet :
-            sys.stdout.write("Font: {0}\n".format(fpath)) 
+            sys.stdout.write("Font: {0}\n".format(fpath))
             sys.stdout.write("tables tested: {0!s}\n".format(','.join(tr.tag for tr in self.__table_dir)))
         self.pool = multiprocessing.Pool(initializer=self.__initialise_worker, initargs=[self], processes=opts.jobs)
-    
+
     def close(self):
         self.pool.terminate()
         self.pool.join()
@@ -89,10 +89,10 @@ class font:
 
     def tests_per_pass(self):
         return sum(tr.end-tr.start for tr in self.__table_dir)
-    
+
     def input(self,path):
         return [(int(m.group(1),0), int(m.group(2),0)) for m in imap(self.__recm.match, open(path, "rt")) if m]
-        
+
 
     def linear(self, value=[], start=0, passes=0):
         tables = chain.from_iterable(repeat(self.__table_dir, passes)) if passes else cycle(self.__table_dir)
@@ -149,13 +149,13 @@ def test(cr):
             with open(log_path, "wt") as log:
                 proc = args[:]
                 proc[proc.index('{}')] = self.file.name
-                retval = call(proc, 
+                retval = call(proc,
                               stdout=self.nolog, stderr=log, preexec_fn=rlimit, close_fds = True)
                 self.count += 1
                 self.count %= 10000
-                if not log.tell():  os.unlink(log.name)   
+                if not log.tell():  os.unlink(log.name)
                 return (retval, cr, log.tell() and log.name)
-    except KeyboardInterrupt: 
+    except KeyboardInterrupt:
         return (0, cr, log_path)
 
 class estimator:
@@ -165,7 +165,7 @@ class estimator:
         self.__m = 0
         self.__t = 1
         self.__st = self.__base
-    
+
     def sample(self, current):
         ct = time.time()
         if (ct - self.__st <= opts.status):
@@ -179,7 +179,7 @@ class estimator:
         self.__m = m
         self.__st = ct
         return (x, time.ctime(ct + (self.__max - current)/m) if m else 'never')
-        
+
 def bayes(x, s, m, t):
     st = s + t
     return m*s/st + x*t/st
@@ -227,9 +227,9 @@ CHUNK_SIZE=10
 
 if __name__ == '__main__':
     (opts, args) = parser.parse_args()
-    
+
     if opts.random :    seed(opts.random)
-    if opts.valgrind :  
+    if opts.valgrind :
         args = ["valgrind", "-q"] + args
         opts.verbose = True
     opts.position = opts.position and int(opts.position,0)
@@ -237,13 +237,13 @@ if __name__ == '__main__':
     opts.exclude  = opts.exclude and tableset(opts.exclude.split(','))
     opts.include  = opts.include and tableset(opts.include.split(','))
     if opts.quiet : opts.status = None
-    
+
     if '{}' not in args: args += ['{}']
-     
+
     try:
         exitrv = 0
-        log = open(opts.logfile, "at") if opts.logfile else sys.stdout     
-        with closing(font(opts.font, opts.include, opts.exclude)) as fnt:        
+        log = open(opts.logfile, "at") if opts.logfile else sys.stdout
+        with closing(font(opts.font, opts.include, opts.exclude)) as fnt:
             if   opts.input:    cs = fnt.input(opts.input)
             elif opts.position: cs = fnt.position(opts.position, opts.value)
             else:               cs = fnt.linear(opts.value, opts.position, opts.passes)
@@ -253,12 +253,12 @@ if __name__ == '__main__':
                 total_tests = len(cs)
             else:
                 total_tests = fnt.tests_per_pass()
-                
+
             if opts.status:
                 sys.stdout.write("tests per pass: {0}\t\tpasses: {1}\n".format(total_tests, opts.passes if opts.passes else 'until killed'))
                 sys.stdout.write("% {0}complete\ttests per second\testimated time to {0}complete\n".format('' if opts.passes else 'pass '))
                 total_tests *= opts.passes or 1
-        
+
             estimate = estimator(total_tests)
             for count,(rv,cr,errlog) in enumerate(fnt.pool.imap_unordered(test, cs, CHUNK_SIZE)):
                 try:

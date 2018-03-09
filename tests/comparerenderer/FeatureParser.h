@@ -113,7 +113,7 @@ public:
                         featId.uId = atoi(name);
                         //ref = gr_face_find_fref(face, featId.uId);
                     }
-                    m_settings[featIndex].m_id.uId = featId.uId; 
+                    m_settings[featIndex].m_id.uId = featId.uId;
                     valueText = features + i + 1;
                     name = NULL;
                     break;

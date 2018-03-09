@@ -16,7 +16,7 @@ right now are Graphite enabled.)
 
 =cut
 
-sub open { 
+sub open {
     my ($self, $ff, %opts) = @_;
     my $opt = 0;
     $opt |= 1 if $opts{dumb_rendering};

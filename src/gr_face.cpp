@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -79,7 +79,7 @@ namespace
 extern "C" {
 
 gr_face* gr_make_face_with_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int faceOptions)
-                  //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face    
+                  //the appFaceHandle must stay alive all the time when the gr_face is alive. When finished with the gr_face, call destroy_face
 {
     if (ops == 0)   return 0;
 
@@ -239,7 +239,7 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
         return pRes;
       }
     }
-    
+
     //error when loading
 
     delete pFileFace;

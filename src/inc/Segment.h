@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -119,7 +119,7 @@ public:
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
     uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void setFeature(int index, uint8 findex, uint32 val) {
-        const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); 
+        const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex);
         if (pFR)
         {
             if (val > pFR->maxVal()) val = pFR->maxVal();
@@ -157,7 +157,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     void finalise(const Font *font, bool reverse=false);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
     bool initCollisions();
-  
+
 private:
     Position        m_advance;          // whole segment advance
     SlotRope        m_slots;            // Vector of slot buffers
@@ -234,4 +234,3 @@ bool Segment::isWhitespace(const int cid) const
 } // namespace graphite2
 
 struct gr_segment : public graphite2::Segment {};
-

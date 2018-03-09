@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -238,7 +238,7 @@ int32 Face::getGlyphMetric(uint16 gid, uint8 metric) const
     {
         case kgmetAscent : return m_ascent;
         case kgmetDescent : return m_descent;
-        default: 
+        default:
             if (gid >= glyphs().numGlyphs()) return 0;
             return glyphs().glyph(gid)->getMetric(metric);
     }
@@ -249,7 +249,7 @@ void Face::takeFileFace(FileFace* pFileFace GR_MAYBE_UNUSED/*takes ownership*/)
 #ifndef GRAPHITE2_NFILEFACE
     if (m_pFileFace==pFileFace)
       return;
-    
+
     delete m_pFileFace;
     m_pFileFace = pFileFace;
 #endif

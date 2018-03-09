@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -210,7 +210,7 @@ GlyphCache::~GlyphCache()
 }
 
 const GlyphFace *GlyphCache::glyph(unsigned short glyphid) const      //result may be changed by subsequent call with a different glyphid
-{ 
+{
     if (glyphid >= numGlyphs())
         return _glyphs[0];
     const GlyphFace * & p = _glyphs[glyphid];
@@ -483,7 +483,6 @@ GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphF
         Rect box = readbox((i & 1) ? diamax : bbox, p[0], p[2], p[1], p[3]);
         curr->addSubBox(i >> 1, i & 1, &box);
         be::skip<uint8>(p, 4);
-    } 
+    }
     return (GlyphBox *)((char *)(curr) + sizeof(GlyphBox) + 2 * num * sizeof(Rect));
 }
-

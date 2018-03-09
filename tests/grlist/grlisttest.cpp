@@ -133,7 +133,7 @@ int main(int /*argc*/, char ** /*argv*/)
         stdVector.push_back(i*3);
         grList.push_back(i*3);
     }
-    
+
     assert(stdVector.size() == grList.size());
     for (size_t i = 0; i < stdVector.size(); i++)
     {
@@ -192,6 +192,6 @@ int main(int /*argc*/, char ** /*argv*/)
     {
         assert(grList3[i] == stdVector3[i]);
     }
-    
+
     return 0;
 }

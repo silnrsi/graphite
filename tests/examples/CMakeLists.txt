@@ -44,7 +44,7 @@ macro(test_freetype TESTNAME SRCFILE)
             set_target_properties(${TESTNAME} PROPERTIES LINK_FLAGS "-fsanitize=address")
         endif (GRAPHITE2_ASAN)
         target_link_libraries(${TESTNAME} graphite2 ${FREETYPE_LIBRARIES})
-        
+
         add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
         set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
     endif (${FREETYPE_FOUND})

@@ -49,11 +49,11 @@ typedef void                uint64;
 typedef void                 int64;
 #endif
 
-template <typename T8, typename T4, typename T2, typename T1> 
+template <typename T8, typename T4, typename T2, typename T1>
 bool test_swaps()
 {
 	bool t = true;
-	
+
 	t &= be::swap<T1>(T1(0xFEU)) == T1(0xFEU);
 	t &= le::swap<T1>(T1(0xFEU)) == T1(0xFEU);
 
@@ -69,13 +69,13 @@ bool test_swaps()
 }
 
 
-template <typename T8, typename T4, typename T2, typename T1> 
+template <typename T8, typename T4, typename T2, typename T1>
 int test_reads(const size_t rounds)
 {
 	static const unsigned char data[] = {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF,
 	                                     0xEF,0xCD,0xAB,0x89,0x67,0x45,0x23,0x01};
 	bool t = true;
-	
+
 #if defined(HAVE_64_LONG)
 	for (size_t r = rounds; r; --r)
 	{
@@ -92,29 +92,29 @@ int test_reads(const size_t rounds)
 		if (!t) return  4;
 		t  = le::read<T4>(p) == T4(0x89ABCDEF);
 		t &= le::read<T4>(p) == T4(0x01234567);
-		if (!t) return 40;		
+		if (!t) return 40;
 	}
 	for (size_t r = rounds; r; --r)
     {
 	    const unsigned char *p = data;
 		t  = be::read<T2>(p) == T2(0x0123);
-		t &= be::read<T2>(p) == T2(0x4567); 
-		t &= be::read<T2>(p) == T2(0x89AB); 
-		t &= be::read<T2>(p) == T2(0xCDEF); 
+		t &= be::read<T2>(p) == T2(0x4567);
+		t &= be::read<T2>(p) == T2(0x89AB);
+		t &= be::read<T2>(p) == T2(0xCDEF);
 		if (!t) return  2;
-		t  = le::read<T2>(p) == T2(0xCDEF); 
-		t &= le::read<T2>(p) == T2(0x89AB); 
-		t &= le::read<T2>(p) == T2(0x4567); 
+		t  = le::read<T2>(p) == T2(0xCDEF);
+		t &= le::read<T2>(p) == T2(0x89AB);
+		t &= le::read<T2>(p) == T2(0x4567);
 		t &= le::read<T2>(p) == T2(0x0123);
 		if (!t) return 20;
 	}
 	for (size_t r = rounds; r; --r)
 	{
 	    const unsigned char *p = data;
-		t  = be::read<T1>(p) == T1(0x01); 
+		t  = be::read<T1>(p) == T1(0x01);
 		t &= be::read<T1>(p) == T1(0x23);
 		t &= be::read<T1>(p) == T1(0x45);
-		t &= be::read<T1>(p) == T1(0x67); 
+		t &= be::read<T1>(p) == T1(0x67);
 		t &= be::read<T1>(p) == T1(0x89);
 		t &= be::read<T1>(p) == T1(0xAB);
 		t &= be::read<T1>(p) == T1(0xCD);
@@ -124,10 +124,10 @@ int test_reads(const size_t rounds)
 		t &= le::read<T1>(p) == T1(0xCD);
 		t &= le::read<T1>(p) == T1(0xAB);
 		t &= le::read<T1>(p) == T1(0x89);
-		t &= le::read<T1>(p) == T1(0x67); 
+		t &= le::read<T1>(p) == T1(0x67);
 		t &= le::read<T1>(p) == T1(0x45);
 		t &= le::read<T1>(p) == T1(0x23);
-		t &= le::read<T1>(p) == T1(0x01); 
+		t &= le::read<T1>(p) == T1(0x01);
 		if (!t) return 10;
 	}
 	return 0;
@@ -141,9 +141,8 @@ int main(int argc , char *argv[])
     if   (!test_swaps<uint64, uint32, uint16, uint8>()
        || !test_swaps<int64, int32, int16, int8>())
         return 5;
-    
+
 	if (r == 0) r = test_reads<uint64, uint32, uint16, uint8>(rounds);
 	if (r == 0) r = test_reads<int64, int32, int16, int8>(rounds);
 	return r;
 }
-

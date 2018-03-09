@@ -9,7 +9,7 @@ set(S ${graphite2_core_SOURCE_DIR})
 
 # I build the vm code here since it needs to be built for both code threading
 # models rather than linking against the library from source.
-add_library(vm-test-common STATIC 
+add_library(vm-test-common STATIC
     basic_test.cpp)
 target_link_libraries(vm-test-common graphite2 graphite2-file graphite2-base)
 add_definitions(-DGRAPHITE2_NTRACING)
@@ -60,4 +60,3 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
         set_property(TEST vm-test-direct-threading APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
     endif (GRAPHITE2_ASAN)
 endif  (${CMAKE_COMPILER_IS_GNUCXX})
-

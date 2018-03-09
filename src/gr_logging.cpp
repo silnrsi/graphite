@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -225,7 +225,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     }
     if (cslot)
     {
-		// Note: the reason for using Positions to lump together related attributes is to make the 
+		// Note: the reason for using Positions to lump together related attributes is to make the
 		// JSON output slightly more compact.
         j << "collision" << json::flat << json::object
 //              << "shift" << cslot->shift() -- not used pass level, only within the collision routine itself

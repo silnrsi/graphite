@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -30,7 +30,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-namespace 
+namespace
 {
 
   gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
@@ -42,7 +42,7 @@ namespace
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
 
-      
+
       if (!pRes->read_text(face, pFeats, enc, pStart, nChars) || !pRes->runGraphite())
       {
         delete pRes;

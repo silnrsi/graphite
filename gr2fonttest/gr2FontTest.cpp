@@ -14,8 +14,8 @@ Responsibility: Keith Stribley, Martin Hosken
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -24,8 +24,8 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 
 Description:
-A simple console app that creates a segment using FileFont and dumps a 
-diagnostic table of the resulting glyph vector to the console. 
+A simple console app that creates a segment using FileFont and dumps a
+diagnostic table of the resulting glyph vector to the console.
 If graphite has been built with -DTRACING then it will also produce a
 diagnostic log of the segment creation in grSegmentLog.txt
 -----------------------------------------------------------------------------*/
@@ -106,7 +106,7 @@ public:
     char * alltrace;
     int codesize;
     gr_face_options opts;
-    
+
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
     Parameters& operator=(const Parameters&);
@@ -158,7 +158,7 @@ void Parameters::closeLog()
 {
   if (log==stdout)
     return ;
-  
+
   fclose(log);
   log = stdout;
 }
@@ -202,7 +202,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     codesize = 4;
     bool argError = false;
     char* pText = NULL;
-    typedef enum 
+    typedef enum
     {
         NONE,
         POINT_SIZE,
@@ -477,7 +477,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             }
             fprintf(log, "\n");
         }
-        else 
+        else
         {
             assert(pText32);
             pText32[charLength] = 0;
@@ -726,7 +726,7 @@ int Parameters::testFileFont() const
                         gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
                         gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
                         cinfo ? gr_cinfo_break_weight(cinfo) : 0, gr_slot_before(slot), gr_slot_after(slot));
-               
+
                 if (pText32 != NULL && gr_slot_before(slot) + offset < charLength
                                     && gr_slot_after(slot) + offset < charLength)
                 {
@@ -769,9 +769,9 @@ int lookup(size_t *map, size_t val)
 
 int main(int argc, char *argv[])
 {
-    
+
     Parameters parameters;
-    
+
     if (!parameters.loadFromArgs(argc, argv))
     {
         fprintf(stderr,"Usage: %s [options] fontfile utf8text \n",argv[0]);
@@ -798,4 +798,3 @@ int main(int argc, char *argv[])
     }
     return parameters.testFileFont();
 }
-

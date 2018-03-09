@@ -28,7 +28,7 @@ def parsecg(fname) :
         if ident and name : idcache[ident] = name
         if ident : return (ident, idcache[ident])
         else : return (None, name)
-            
+
     fncosts = {}
     with open(fname) as fh :
         incfn = False
@@ -53,7 +53,7 @@ modes = {
     'gr' : ('graphite2', {'hbgr' : 'hb_shape_plan_execute', 'gr' : 'gr_make_seg'})
 }
 outtop = 'name,ot,hbgr,gr'
-outformat = '{font}+{text}, {ot}, {hbgr}, {gr}' 
+outformat = '{font}+{text}, {ot}, {hbgr}, {gr}'
 
 def dorow(x) :
     (c, r) = x

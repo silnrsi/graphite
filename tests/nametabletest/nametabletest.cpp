@@ -154,7 +154,7 @@ template <class T> T * toBigEndian(T & table)
     bigEndian->m_nameHeader.name_record[0].name_id = be::swap<uint16>(table.m_nameHeader.name_record[0].name_id);
     bigEndian->m_nameHeader.name_record[0].length = be::swap<uint16>(table.m_nameHeader.name_record[0].length);
     bigEndian->m_nameHeader.name_record[0].offset = be::swap<uint16>(table.m_nameHeader.name_record[0].offset);
-    
+
     memcpy(bigEndian->m_textData, table.m_textData, sizeof(table.m_textData) );
     return bigEndian;
 }
@@ -180,7 +180,7 @@ int main(int, char **)
     testName(testAData, sizeof(NameTestA), 0x409, 0x409, 7, "ABC");
     testName(testAData, sizeof(NameTestA), 0x809, 0x809, 7, "abcd");
     testName(testAData, sizeof(NameTestA), 0x455, 0x455, 7, "ကခ");
-    
+
     testLangId(testAData, sizeof(NameTestA), "en-US", 0x409);
     testLangId(testAData, sizeof(NameTestA), "en", 0x409);
     testLangId(testAData, sizeof(NameTestA), "en-GB", 0x809);
@@ -206,4 +206,3 @@ int main(int, char **)
 
     return 0;
 }
-

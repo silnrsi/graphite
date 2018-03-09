@@ -252,4 +252,3 @@ uint16 NameTable::getLanguageId(const char * bcp47Locale)
     }
     return localeId;
 }
-

@@ -118,8 +118,8 @@ json & json::operator << (json::string s) throw()
 }
 
 json & json::operator << (json::number f) throw()
-{ 
-    context(seq); 
+{
+    context(seq);
     if (std::numeric_limits<json::number>::infinity() == f)
         fputs("Infinity", _stream);
     else if (-std::numeric_limits<json::number>::infinity() == f)
@@ -128,8 +128,8 @@ json & json::operator << (json::number f) throw()
             std::numeric_limits<json::number>::signaling_NaN() == f)
         fputs("NaN", _stream);
     else
-        fprintf(_stream, "%g", f); 
-    return *this; 
+        fprintf(_stream, "%g", f);
+    return *this;
 }
 json & json::operator << (json::integer d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
 json & json::operator << (long unsigned d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
@@ -137,4 +137,3 @@ json & json::operator << (json::boolean b) throw()  { context(seq); fputs(b ? "t
 json & json::operator << (json::_null_t) throw()    { context(seq); fputs("null",_stream); return *this; }
 
 #endif
-

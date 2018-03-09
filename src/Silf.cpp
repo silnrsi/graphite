@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -235,7 +235,7 @@ template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t
     const T cls_off = 2*sizeof(uint16) + sizeof(T)*(m_nClass+1);
     const size_t max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
     // Check that the last+1 offset is less than or equal to the class map length.
-    if (e.test(be::peek<T>(p) != cls_off, E_MISALIGNEDCLASSES) 
+    if (e.test(be::peek<T>(p) != cls_off, E_MISALIGNEDCLASSES)
             || e.test(max_off > (data_len - cls_off)/sizeof(uint16), E_HIGHCLASSOFFSET))
         return ERROROFFSET;
 

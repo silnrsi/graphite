@@ -19,7 +19,7 @@ def settreeval(parent, path, value) :
 def readjson(fname) :
     return json.load(open(fname,'r'))
 
-def any_re(s, *res): 
+def any_re(s, *res):
     return any(re.search(r,s) for r in res)
 
 def canonids(j) :
@@ -38,7 +38,7 @@ def canonids(j) :
                 segmap[v] = segcount
                 segcount += 1
             settreeval(h, p, segmap[v])
-            
+
     for (v, p, h) in walktree(j) :
         if any_re(p, r"parent/id$", "input/start$", r"output/range/(start|end)$", r"cursor$", r"children/\d+$") :
             settreeval(h, p, slotmap[v])
@@ -62,7 +62,7 @@ def _compare(t1, t2):
         print(b"Value difference: left = {0!s}, right = {1!s} at {2!s}".format(v1, v2, p1))
         return False
     return True
-    
+
 def compare(j1, j2) :
     trimtelemetry(j1)
     trimtelemetry(j2)
@@ -73,7 +73,7 @@ try:
 except KeyError as ke:
     sys.stderr.write(b"unresolvable slot id {0} found while reading {1!r}\n".format(ke, sys.argv[1]))
     sys.exit(2)
-    
+
 try:
     r2 = canonids(readjson(sys.argv[2]))
 except KeyError as ke:
