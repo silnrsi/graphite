@@ -42,7 +42,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Segment::Segment(unsigned int numchars, const Face* face, uint32 script, int textDir)
+Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
 : m_freeSlots(NULL),
   m_freeJustifies(NULL),
   m_charinfo(new CharInfo[numchars]),
@@ -178,7 +178,7 @@ SlotJustify *Segment::newJustify()
         const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
         byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
         if (!justs) return NULL;
-        for (int i = m_bufSize - 2; i >= 0; --i)
+        for (long i = m_bufSize - 2; i >= 0; --i)
         {
             SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
             SlotJustify *next = reinterpret_cast<SlotJustify *>(justs + justSize * (i + 1));
@@ -329,7 +329,7 @@ Position Segment::positionSlots(const Font *font, Slot * iStart, Slot * iEnd, bo
 }
 
 
-void Segment::associateChars(int offset, int numChars)
+void Segment::associateChars(int offset, size_t numChars)
 {
     int i = 0, j = 0;
     CharInfo *c, *cend;
@@ -353,7 +353,7 @@ void Segment::associateChars(int offset, int numChars)
     for (Slot *s = m_first; s; s = s->next())
     {
         int a;
-        for (a = s->after() + 1; a < offset + numChars && charinfo(a)->after() < 0; ++a)
+        for (a = s->after() + 1; a < offset + int(numChars) && charinfo(a)->after() < 0; ++a)
         { charinfo(a)->after(s->index()); }
         --a;
         s->after(a);

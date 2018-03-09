@@ -180,7 +180,7 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
         utf8::iterator d = uniBuffer;
         for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
             *d = *s;
-        length = d - uniBuffer;
+        length = uint32(d - uniBuffer);
         uniBuffer[length] = 0;
         free(utf16Name);
         return uniBuffer;
@@ -201,7 +201,7 @@ void* NameTable::getName(uint16& languageId, uint16 nameId, gr_encform enc, uint
         utf32::iterator d = uniBuffer;
         for (utf16::const_iterator s = utf16Name, e = utf16Name + utf16Length; s != e; ++s, ++d)
             *d = *s;
-        length = d - uniBuffer;
+        length = uint32(d - uniBuffer);
         uniBuffer[length] = 0;
         free(utf16Name);
         return uniBuffer;

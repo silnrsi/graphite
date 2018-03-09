@@ -257,7 +257,7 @@ GlyphCache::Loader::Loader(const Face & face)
     const Face::Table maxp = Face::Table(face, Tag::maxp);
     if (!maxp) { _head = Face::Table(); return; }
 
-    _num_glyphs_graphics = TtfUtil::GlyphCount(maxp);
+    _num_glyphs_graphics = static_cast<unsigned short>(TtfUtil::GlyphCount(maxp));
     // This will fail if the number of glyphs is wildly out of range.
     if (_glyf && TtfUtil::LocaLookup(_num_glyphs_graphics-1, _loca, _loca.size(), _head) == size_t(-2))
     {
@@ -280,7 +280,7 @@ GlyphCache::Loader::Loader(const Face & face)
     //  subtracting the length of the attribids array (numAttribs long if present)
     //  and dividing by either 2 or 4 depending on shor or lonf format
     _long_fmt              = flags & 1;
-    int tmpnumgattrs       = (m_pGloc.size()
+    ptrdiff_t tmpnumgattrs       = (m_pGloc.size()
                                - (p - m_pGloc)
                                - sizeof(uint16)*(flags & 0x2 ? _num_attrs : 0))
                                    / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;

@@ -387,14 +387,14 @@ ENDOP
 STARTOP(attr_set)
     declare_params(1);
     const attrCode      slat = attrCode(uint8(*param));
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     is->setAttr(&seg, slat, 0, val, smap);
 ENDOP
 
 STARTOP(attr_add)
     declare_params(1);
     const attrCode      slat = attrCode(uint8(*param));
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
@@ -407,7 +407,7 @@ ENDOP
 STARTOP(attr_sub)
     declare_params(1);
     const attrCode      slat = attrCode(uint8(*param));
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
@@ -419,17 +419,17 @@ ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
-    const attrCode      slat = attrCode(uint8(*param));
-    const int offset = (map - smap.begin())*int(slat == gr_slatAttTo);
-    const          int  val  = int(pop())  + offset;
+    const attrCode  slat   = attrCode(uint8(*param));
+    const int       offset = int(map - smap.begin())*int(slat == gr_slatAttTo);
+    const int       val    = pop()  + offset;
     is->setAttr(&seg, slat, offset, val, smap);
 ENDOP
 
 STARTOP(iattr_set_slot)
     declare_params(2);
-    const attrCode      slat = attrCode(uint8(param[0]));
-    const size_t        idx  = uint8(param[1]);
-    const          int  val  = int(pop())  + (map - smap.begin())*int(slat == gr_slatAttTo);
+    const attrCode  slat = attrCode(uint8(param[0]));
+    const size_t    idx  = uint8(param[1]);
+    const int       val  = int(pop()  + (map - smap.begin())*int(slat == gr_slatAttTo));
     is->setAttr(&seg, slat, idx, val, smap);
 ENDOP
 
@@ -549,7 +549,7 @@ STARTOP(iattr_set)
     declare_params(2);
     const attrCode      slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     is->setAttr(&seg, slat, idx, val, smap);
 ENDOP
 
@@ -557,7 +557,7 @@ STARTOP(iattr_add)
     declare_params(2);
     const attrCode      slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
@@ -571,7 +571,7 @@ STARTOP(iattr_sub)
     declare_params(2);
     const attrCode      slat = attrCode(uint8(param[0]));
     const size_t        idx  = uint8(param[1]);
-    const          int  val  = int(pop());
+    const          int  val  = pop();
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (flags & POSITIONED) == 0)
     {
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());

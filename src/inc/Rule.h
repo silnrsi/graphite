@@ -102,8 +102,8 @@ class SlotMap
 {
 public:
   enum {MAX_SLOTS=64};
-  SlotMap(Segment & seg, uint8 direction, int maxSize);
-  
+  SlotMap(Segment & seg, uint8 direction, size_t maxSize);
+
   Slot       * * begin();
   Slot       * * end();
   size_t         size() const;
@@ -244,9 +244,9 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 }
 
 inline
-SlotMap::SlotMap(Segment & seg, uint8 direction, int maxSize)
+SlotMap::SlotMap(Segment & seg, uint8 direction, size_t maxSize)
 : segment(seg), m_size(0), m_precontext(0), m_highwater(0),
-    m_maxSize(maxSize), m_dir(direction), m_highpassed(false)
+    m_maxSize(int(maxSize)), m_dir(direction), m_highpassed(false)
 {
     m_slot_map[0] = 0;
 }

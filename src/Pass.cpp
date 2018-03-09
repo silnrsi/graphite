@@ -246,7 +246,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     Rule * r = m_rules + m_numRules - 1;
     for (size_t n = m_numRules; r >= m_rules; --n, --r, ac_end = ac_begin, rc_end = rc_begin)
     {
-        face.error_context((face.error_context() & 0xFFFF00) + EC_ARULE + ((n - 1) << 24));
+        face.error_context((face.error_context() & 0xFFFF00) + EC_ARULE + int((n - 1) << 24));
         r->preContext = *--precontext;
         r->sort       = be::peek<uint16>(--sort_key);
 #ifndef NDEBUG
@@ -330,7 +330,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
         *s = be::read<uint16>(starts);
         if (e.test(*s >= m_numStates, E_BADSTATE))
         {
-            face.error_context((face.error_context() & 0xFFFF00) + EC_ASTARTS + ((s - m_startStates) << 24));
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ASTARTS + int((s - m_startStates) << 24));
             return face.error(e); // true;
         }
     }
@@ -342,7 +342,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
         *t = be::read<uint16>(states);
         if (e.test(*t >= m_numStates, E_BADSTATE))
         {
-            face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + (((t - m_transitions) / m_numColumns) << 8));
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + int(((t - m_transitions) / m_numColumns) << 8));
             return face.error(e);
         }
     }
@@ -357,7 +357,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 
         if (e.test(begin >= rule_map_end || end > rule_map_end || begin > end, E_BADRULEMAPPING))
         {
-            face.error_context((face.error_context() & 0xFFFF00) + EC_ARULEMAP + (n << 24));
+            face.error_context((face.error_context() & 0xFFFF00) + EC_ARULEMAP + int(n << 24));
             return face.error(e);
         }
         s->rules = begin;

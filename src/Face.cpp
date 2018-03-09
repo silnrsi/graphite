@@ -141,7 +141,7 @@ bool Face::readGraphite(const Table & silf)
     {
         error_context(EC_ASILF + (i << 8));
         const uint32 offset = be::read<uint32>(p),
-                     next   = i == m_numSilf - 1 ? silf.size() : be::peek<uint32>(p);
+                     next   = i == m_numSilf - 1 ? uint32(silf.size()) : be::peek<uint32>(p);
         if (e.test(next > silf.size() || offset >= next, E_BADSIZE))
             return error(e);
 
@@ -200,7 +200,7 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
                 << "advance" << seg->advance()
                 << "chars"   << json::array;
         for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-            *dbgout     << json::flat << *seg->charinfo(i);
+            *dbgout     << json::flat << *seg->charinfo(int(i));
         *dbgout         << json::close  // Close up the chars array
                     << json::close;     // Close up the segment object
     }

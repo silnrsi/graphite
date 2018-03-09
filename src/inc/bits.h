@@ -107,7 +107,7 @@ inline unsigned long _mask_over_val<1>(unsigned long v)
 template<typename T>
 inline T mask_over_val(T v)
 {
-    return _mask_over_val<sizeof(T)>(v);
+    return T(_mask_over_val<sizeof(T)>(v));
 }
 
 template<typename T>

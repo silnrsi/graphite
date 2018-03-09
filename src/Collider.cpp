@@ -877,7 +877,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
         }
         goto done;
     }
-    numSlices = _edges.size();
+    numSlices = int(_edges.size());
 
 #if !defined GRAPHITE2_NTRACING
     // Debugging

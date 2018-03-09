@@ -88,17 +88,17 @@ public:
         SEG_HASCOLLISIONS = 2
     };
 
-    unsigned int slotCount() const { return m_numGlyphs; }      //one slot per glyph
-    void extendLength(int num) { m_numGlyphs += num; }
+    size_t slotCount() const { return m_numGlyphs; }      //one slot per glyph
+    void extendLength(ptrdiff_t num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
     bool runGraphite() { if (m_silf) return m_face->runGraphite(this, m_silf); else return true;};
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
-    unsigned int charInfoCount() const { return m_numCharinfo; }
+    size_t charInfoCount() const { return m_numCharinfo; }
     const CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
 
-    Segment(unsigned int numchars, const Face* face, uint32 script, int dir);
+    Segment(size_t numchars, const Face* face, uint32 script, int dir);
     ~Segment();
     uint8 flags() const { return m_flags; }
     void flags(uint8 f) { m_flags = f; }
@@ -112,11 +112,11 @@ public:
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
     Position positionSlots(const Font *font=0, Slot *first=0, Slot *last=0, bool isRtl = false, bool isFinal = true);
-    void associateChars(int offset, int num);
+    void associateChars(int offset, size_t num);
     void linkClusters(Slot *first, Slot *last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
-    int addFeatures(const Features& feats) { m_feats.push_back(feats); return m_feats.size() - 1; }
+    int addFeatures(const Features& feats) { m_feats.push_back(feats); return int(m_feats.size()) - 1; }
     uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
     void setFeature(int index, uint8 findex, uint32 val) {
         const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex);
@@ -128,7 +128,7 @@ public:
     int8 dir() const { return m_dir; }
     void dir(int8 val) { m_dir = val; }
     bool currdir() const { return ((m_dir >> 6) ^ m_dir) & 1; }
-    unsigned int passBits() const { return m_passBits; }
+    size_t passBits() const { return m_passBits; }
     void mergePassBits(const unsigned int val) { m_passBits &= val; }
     int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
     int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
@@ -172,7 +172,7 @@ private:
     const Silf    * m_silf;
     Slot          * m_first;            // first slot in segment
     Slot          * m_last;             // last slot in segment
-    unsigned int    m_bufSize,          // how big a buffer to create when need more slots
+    size_t          m_bufSize,          // how big a buffer to create when need more slots
                     m_numGlyphs,
                     m_numCharinfo,      // size of the array and number of input characters
                     m_passBits;         // if bit set then skip pass

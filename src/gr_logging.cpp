@@ -252,14 +252,14 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 graphite2::objectid::objectid(const dslot & ds) throw()
 {
     const Slot * const p = ds.second;
-    uint32 s = reinterpret_cast<size_t>(p);
+    uint32 s = uint32(reinterpret_cast<size_t>(p));
     sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->userAttrs()[ds.first->silf()->numUser()] : 0), uint16(s));
     name[sizeof name-1] = 0;
 }
 
 graphite2::objectid::objectid(const Segment * const p) throw()
 {
-    uint32 s = reinterpret_cast<size_t>(p);
+    uint32 s = uint32(reinterpret_cast<size_t>(p));
     sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), 0, uint16(s));
     name[sizeof name-1] = 0;
 }

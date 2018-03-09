@@ -57,7 +57,7 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     else
         m_before = orig.m_before + charOffset;
     if (charOffset <= 0 && orig.m_after + charOffset >= numChars)
-        m_after = numChars - 1;
+        m_after = int(numChars) - 1;
     else
         m_after = orig.m_after + charOffset;
     m_parent = NULL;

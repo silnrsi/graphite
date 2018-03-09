@@ -51,12 +51,12 @@ typedef unsigned short gid16;
 // Enumeration used to specify a table in a TTF file
 class Tag
 {
-    unsigned long _v;
+    unsigned int _v;
 public:
     Tag(const char n[5]) throw()            : _v(TTF_TAG(n[0],n[1],n[2],n[3])) {}
-    Tag(const unsigned long tag) throw()    : _v(tag) {}
+    Tag(const unsigned int tag) throw()    : _v(tag) {}
 
-    operator unsigned long () const throw () { return _v; }
+    operator unsigned int () const throw () { return _v; }
 
     enum
     {

@@ -509,7 +509,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case NEXT :
     case COPY_NEXT :
       ++_slotref;
-      _contexts[_slotref] = context(_code._instr_count+1);
+      _contexts[_slotref] = context(uint8(_code._instr_count+1));
       // if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
       break;
     case INSERT :
@@ -517,7 +517,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       _code._modify = true;
       break;
     case PUT_SUBS_8BIT_OBS :    // slotref on 1st parameter
-    case PUT_SUBS : 
+    case PUT_SUBS :
       _code._modify = true;
       set_changed(0);
       GR_FALLTHROUGH;
@@ -559,7 +559,7 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
     const size_t     param_sz = op.param_sz == VARARGS ? bc[0] + 1 : op.param_sz;
 
     // Add this instruction
-    *_instr++ = op.impl[_code._constraint]; 
+    *_instr++ = op.impl[_code._constraint];
     ++_code._instr_count;
 
     // Grab the parameters
@@ -569,8 +569,8 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         _data            += param_sz;
         _code._data_size += param_sz;
     }
-    
-    // recursively decode a context item so we can split the skip into 
+
+    // recursively decode a context item so we can split the skip into
     // instruction and data portions.
     if (opc == CNTXT_ITEM)
     {
@@ -589,8 +589,8 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
         if (load(bc, bc + instr_skip))
         {
             bc += instr_skip;
-            data_skip  = instr_skip - (_code._instr_count - ctxt_start);
-            instr_skip = _code._instr_count - ctxt_start;
+            data_skip  = instr_skip - byte(_code._instr_count - ctxt_start);
+            instr_skip =  byte(_code._instr_count - ctxt_start);
             _max.bytecode = curr_end;
 
             _out_length = 1;
@@ -605,7 +605,7 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
             return false;
         }
     }
-    
+
     return bool(_code);
 }
 
@@ -620,15 +620,15 @@ void Machine::Code::decoder::apply_analysis(instr * const code, instr * code_end
     for (const context * c = _contexts, * const ce = c + _slotref; c < ce; ++c)
     {
         if (!c->flags.referenced || !c->flags.changed) continue;
-        
-        instr * const tip = code + c->codeRef + tempcount;        
+
+        instr * const tip = code + c->codeRef + tempcount;
         memmove(tip+1, tip, (code_end - tip) * sizeof(instr));
         *tip = temp_copy;
         ++code_end;
         ++tempcount;
         _code._delete = true;
     }
-    
+
     _code._instr_count = code_end - code;
 }
 
@@ -695,7 +695,7 @@ bool Machine::Code::decoder::test_context() const throw()
     return true;
 }
 
-inline 
+inline
 void Machine::Code::failure(const status_t s) throw() {
     release_buffers();
     _status = s;
@@ -750,4 +750,3 @@ int32 Machine::Code::run(Machine & m, slotref * & map) const
 
     return  m.run(_code, _data, map);
 }
-

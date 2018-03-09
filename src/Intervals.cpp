@@ -183,16 +183,16 @@ void Zones::remove(float x, float xm)
 
 Zones::const_iterator Zones::find_exclusion_under(float x) const
 {
-    int l = 0, h = _exclusions.size();
+    size_t l = 0, h = _exclusions.size();
 
     while (l < h)
     {
-        int const p = (l+h) >> 1;
+        size_t const p = (l+h) >> 1;
         switch (_exclusions[p].outcode(x))
         {
         case 0 : return _exclusions.begin()+p;
         case 1 : h = p; break;
-        case 2 : 
+        case 2 :
         case 3 : l = p+1; break;
         }
     }
