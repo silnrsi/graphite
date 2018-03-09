@@ -97,24 +97,41 @@ gr_face* gr_make_face(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tab
     return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
 }
 
+
+gr_face* gr_make_face_with_seg_cache_and_ops(const void* appFaceHandle/*non-NULL*/, const gr_face_ops *ops, unsigned int , unsigned int faceOptions)
+{
+  return gr_make_face_with_ops(appFaceHandle, ops, faceOptions);
+}
+
+gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_get_table_fn tablefn, unsigned int, unsigned int faceOptions)
+{
+  const gr_face_ops ops = {sizeof(gr_face_ops), tablefn, NULL};
+  return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
+}
+
 gr_uint32 gr_str_to_tag(const char *str)
 {
     uint32 res = 0;
-    int i = strlen(str);
-    if (i > 4) i = 4;
-    while (--i >= 0)
-        res = (res >> 8) + (str[i] << 24);
+    switch(max(strlen(str),size_t(4)))
+    {
+        case 4: res |= str[3];       GR_FALLTHROUGH;
+        case 3: res |= str[2] << 8;  GR_FALLTHROUGH;
+        case 2: res |= str[1] << 16; GR_FALLTHROUGH;
+        case 1: res |= str[0] << 24; GR_FALLTHROUGH;
+        default:  break;
+    }
     return res;
 }
 
 void gr_tag_to_str(gr_uint32 tag, char *str)
 {
-    int i = 4;
-    while (--i >= 0)
-    {
-        str[i] = tag & 0xFF;
-        tag >>= 8;
-    }
+    if (!str) return;
+
+    *str++ = char(tag >> 24);
+    *str++ = char(tag >> 16);
+    *str++ = char(tag >> 8);
+    *str++ = char(tag);
+    *str = '\0';
 }
 
 inline
@@ -228,8 +245,12 @@ gr_face* gr_make_file_face(const char *filename, unsigned int faceOptions)
     delete pFileFace;
     return NULL;
 }
-#endif
+
+gr_face* gr_make_file_face_with_seg_cache(const char* filename, unsigned int, unsigned int faceOptions)   //returns NULL on failure. //TBD better error handling
+                  //when finished with, call destroy_face
+{
+    return gr_make_file_face(filename, faceOptions);
+}
+#endif      //!GRAPHITE2_NFILEFACE
 
 } // extern "C"
-
-

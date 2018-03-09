@@ -63,9 +63,6 @@ $(_NS)_SOURCES = \
     $($(_NS)_BASE)/src/NameTable.cpp \
     $($(_NS)_BASE)/src/Pass.cpp \
     $($(_NS)_BASE)/src/Position.cpp \
-    $($(_NS)_BASE)/src/SegCache.cpp \
-    $($(_NS)_BASE)/src/SegCacheEntry.cpp \
-    $($(_NS)_BASE)/src/SegCacheStore.cpp \
     $($(_NS)_BASE)/src/Segment.cpp \
     $($(_NS)_BASE)/src/Silf.cpp \
     $($(_NS)_BASE)/src/Slot.cpp \
@@ -104,9 +101,6 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/Pass.h \
     $($(_NS)_BASE)/src/inc/Position.h \
     $($(_NS)_BASE)/src/inc/Rule.h \
-    $($(_NS)_BASE)/src/inc/SegCache.h \
-    $($(_NS)_BASE)/src/inc/SegCacheEntry.h \
-    $($(_NS)_BASE)/src/inc/SegCacheStore.h \
     $($(_NS)_BASE)/src/inc/Segment.h \
     $($(_NS)_BASE)/src/inc/Silf.h \
     $($(_NS)_BASE)/src/inc/Slot.h \

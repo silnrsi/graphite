@@ -44,29 +44,39 @@ enum gr_encform {
 #if defined _WIN32 || defined __CYGWIN__
   #if defined GRAPHITE2_STATIC
     #define GR2_API
+    #define GR2_DEPRECATED_API   __attribute__ ((deprecated))
   #elif defined GRAPHITE2_EXPORTING
     #if defined __GNUC__
-      #define GR2_API    __attribute__((dllexport))
+      #define GR2_API            __attribute__((dllexport))
+      #define GR2_DEPRECATED_API __attribute__((deprecated,dllexport))
     #else
-      #define GR2_API    __declspec(dllexport)
+      #define GR2_API            __declspec(dllexport)
+      #define GR2_DEPRECATED_API __declspec(dllexport,deprecated)
     #endif
   #else
     #if defined __GNUC__
-      #define GR2_API    __attribute__((dllimport))
+      #define GR2_API            __attribute__((dllimport))
+      #define GR2_DEPRECATED_API __attribute__((deprecated,dllimport))
     #else
-      #define GR2_API    __declspec(dllimport)
+      #define GR2_API            __declspec(dllimport)
+      #define GR2_DEPRECATED_API __declspec(dllimport,deprecated)
     #endif
   #endif
   #define GR2_LOCAL
+  #define GR2_DEPRECATED_LOCAL __attribute__ ((deprecated))
 #elif __GNUC__ >= 4
   #if defined GRAPHITE2_STATIC
-    #define GR2_API      __attribute__ ((visibility("hidden")))
+    #define GR2_API             __attribute__ ((visibility("hidden")))
+    #define GR2_DEPRECATED_API  __attribute__ ((deprecated,visibility("hidden")))
   #else
-    #define GR2_API      __attribute__ ((visibility("default")))
+    #define GR2_API             __attribute__ ((visibility("default")))
+    #define GR2_DEPRECATED_API  __attribute__ ((deprecated,visibility("default")))
   #endif
-  #define GR2_LOCAL      __attribute__ ((visibility("hidden")))
+  #define GR2_LOCAL             __attribute__ ((visibility("hidden")))
+  #define GR2_DEPRECATED_LOCAL  __attribute__ ((deprecated,visibility("hidden")))
 #else
   #define GR2_API
+  #define GR2_DEPRECATED_API   __attribute__ ((deprecated))
   #define GR2_LOCAL
+  #define GR2_DEPRECATED_LOCAL __attribute__ ((deprecated))
 #endif
-

@@ -155,23 +155,14 @@ can save memory to preload everything and delete the tables.
 
 === Caching ===
 
-Graphite2 has the capability to make use of a subsegmental cache. What this
-does is to chop each run of characters at a word break, as defined by the
-linebreaking pass. Each sub run is then looked up in the cache rather than
-calculating the values from scratch.  The cache is most effective when similar
-runs of text are processed. For raw benchmark testing against wordlists, the
-cache can be slightly slower than uncached processing. But most people use real
-text in their documents and that has a much higher level of redundancy.
-
-To use the cache, one simply creates a cached face, specifying the size of the
-cache in elements. A cache size of 5,000 to 10,000 has produced a good
-compromise between time and space.
-
-In the example above, point 1 becomes:
-
-----
-    gr_face *face = make_file_face_with_seg_cache(argv[1]);
-----
+Graphite2 had the capability to make use of a subsegmental cache. Each sub run
+was then looked up in the cache rather than calculating the values from scratch.
+While the cache could be effective when similar runs of text were being
+processed, it often didn't fit with target applications exisiting framework and
+was a source of several bugs, it was marked as deprecated in 1.3.7.  In order to
+avoid an API change `gr_make_face_with_seg_cache`,
+`gr_make_face_with_seg_cache_and_ops` and `gr_make_file_face_with_seg_cache` now
+simply alias their non-caching counterparts and ignore the cacheSize paramter.
 
 === Clustering ===
 
