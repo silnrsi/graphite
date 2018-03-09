@@ -15,6 +15,7 @@ if(A2X)
                            COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.txt)
         add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/GTF.pdf
                            DEPENDS ${PROJECT_SOURCE_DIR}/GTF.txt
+                                   ${PROJECT_SOURCE_DIR}/OpCodes.txt
                            COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.txt)
         set(DOC_DEPENDS ${PROJECT_BINARY_DIR}/manual.pdf ${PROJECT_BINARY_DIR}/GTF.pdf)
     endif(DBLATEX)
@@ -22,7 +23,9 @@ if(A2X)
                        DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.txt ${PROJECT_SOURCE_DIR}/graphite.css
                        COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.txt)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/GTF.html
-                       DEPENDS ${PROJECT_SOURCE_DIR}/GTF.txt ${PROJECT_SOURCE_DIR}/graphite.css
+                       DEPENDS ${PROJECT_SOURCE_DIR}/GTF.txt
+                               ${PROJECT_SOURCE_DIR}/OpCodes.txt
+                               ${PROJECT_SOURCE_DIR}/graphite.css
                        COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.txt)
     set(DOC_DEPENDS ${DOC_DEPENDS} ${PROJECT_BINARY_DIR}/manual.html ${PROJECT_BINARY_DIR}/GTF.html)
 endif(A2X)
