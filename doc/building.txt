@@ -1,11 +1,11 @@
 == Building Graphite 2 ==
 
-Graphite 2 is made available as a source tarball from these urls: 
+Graphite 2 is made available as a source tarball from these urls:
     https://github.com/silnrsi/graphite/releases
  or http://sf.net/projects/silgraphite/files/graphite2
 
-Graphite 2 uses cmake for its build system. The basic build procedure is to 
-create a directory in which to build the library and produce the products. 
+Graphite 2 uses cmake for its build system. The basic build procedure is to
+create a directory in which to build the library and executable products.
 Then cmake is run to generate build files and then the build is run.
 
 === Linux ===
@@ -18,11 +18,11 @@ make
 make test
 ----
 
-This will do a default build of Graphite with minimal dependencies on other 
-packages. There are various option settings see 
+This will do a default build of Graphite with minimal dependencies on other
+packages. There are various option settings see
 <<X1,Generator configuration options>>>.
 
-On amd64 architecture if you wish build and test 32 bit binaries this is 
+On amd64 architecture if you wish build and test 32 bit binaries this is
 possible using the following cmake invocation:
 
 ----
@@ -42,7 +42,7 @@ You will need libc++ libc++-abi see clang-asan section of <<X2,Limitations>>.
 
 === Windows ===
 
-1. Create your build directory 
+1. Create your build directory
 +
 ----
 mkdir build
@@ -50,21 +50,20 @@ cd build
 ----
 
 2. Generate project files for your build system
-+ 
++
 You need to specify the CMAKE_BUILD_TYPE as some Windows generators require it.
 +
 ----
 cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
 ----
 +
-CMake will automatically detect your build system and generate a project for 
+CMake will automatically detect your build system and generate a project for
 that. The options passed above will do a default build of Graphite with minimal
-dependencies on other packages. 
-You may wish to specify a build system other than the automatically detected 
-one, for examples if you have multiple versions of Visual Studio installed or 
-other toolchains such as MinGW you wish build under. To do this pass 
-the `-G <generator name>` option to the initial cmake configuration call, for 
-example for Visual Studio 8:
+dependencies on other packages.  You may wish to specify a build system other
+than the automatically detected one, for examples if you have multiple versions
+of Visual Studio installed or other toolchains such as MinGW you wish build
+under. To do this pass the `-G <generator name>` option to the initial cmake
+configuration call, for example for Visual Studio 8:
 +
 ----
 cmake -G "Visual Studio 8 2005" -DCMAKE_BUILD_TYPE:STRING=Release ..
@@ -79,19 +78,19 @@ cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release ..
 TIP: You can get a list of generators CMakes supports with `cmake --help`.
 
 3. Build graphite binaries
-+ 
++
 ----
 cmake --build .
 ----
 +
-When building with using the Visual Studio generator you will need to append 
-`--config Debug` or `--config Release` for you debug and release builds 
-respectively to the end of above command. Depending on your chosen generator 
-the next step varies, for MS Visual Studio projects you will need to run:
+When building with using the Visual Studio generator you will need to append
+`--config Debug` or `--config Release` for you debug and release builds
+respectively to the end of above command. Depending on your chosen generator the
+next step varies, for MS Visual Studio projects you will need to run:
 +
 ----
 cmake --build . --target RUN_TESTS
----- 
+----
 +
 for everything else:
 +
@@ -100,7 +99,7 @@ cmake --build . --target test
 ----
 
 4. Rebuilds
-+ 
++
 You can clean the project with:
 +
 ----
@@ -113,56 +112,57 @@ Or just delete the build directory and start again.
 [[X1]]
 === Generator configuration options ===
 
-There are various option settings that can be passed to cmake when generating. 
-They are described here, along with their type and possible and default values. 
-Boolean values may take the value OFF or ON. Options may be set using 
-the -Doption=value command line option. 
+There are various option settings that can be passed to cmake when generating.
+They are described here, along with their type and possible and default values.
+Boolean values may take the value OFF or ON. Options may be set using
+the -Doption=value command line option.
 For example: -DGRAPHITE2_COMPARE_RENDERER:BOOL=ON
 
 BUILD_SHARED_LIBS:BOOL::
-    Specifies that libgraphite2 should be built as a shared library, setting 
-    this to OFF will cause it built as a static library. When OFF this will 
-    also disable a few tests which either test aspects of a shared library or
-    require one (such as any test case with a python driver).
+    Specifies that libgraphite2 should be built as a shared library, setting
+    this to OFF will cause it built as a static library. When OFF this will also
+    disable a few tests which either test aspects of a shared library or require
+    one (such as any test case with a python driver). +
     The default is ON.
-    
+
 CMAKE_BUILD_TYPE:STRING::
-    Specifies which type of build to do. It is a string and may take the 
-    values: Release, RelWithDeb, Debug.
+    Specifies which type of build to do. It is a string and may take the values:
+    Release, RelWithDeb, Debug. +
     The default is Release. This must be specified on Windows.
 
 GRAPHITE2_COMPARE_RENDERER:BOOL::
-    Specifies whether to build the comparerenderer program that may link to 
-    silGraphite or harfbuzz, if libraries of those 
-    packages are installed. 
+    Specifies whether to build the comparerenderer program that may link to
+    silGraphite or harfbuzz, if libraries of those packages are installed. +
     The default is OFF.
 
 GRAPHITE2_NFILEFACE:BOOL::
-    Turns off FileFace support to save code space. 
+    Turns off FileFace support to save code space. +
     The default is OFF.
 
 GRAPHITE2_NTRACING:BOOL::
-    Turns off tracing support to save code space. Tracing support allows debug 
-    output of segment creation. 
+    Turns off tracing support to save code space. Tracing support allows debug
+    output of segment creation. +
     The default is OFF.
 
 GRAPHITE2_VM_TYPE:STRING::
-    This value can be auto, direct or call. It specifies which type of 
-    virtual machine processor to use. The default value of auto tells the 
-    system to work out the best approach for this architecture. A value of 
-    direct tells the system to use the direct machine which is faster. 
-    The value of call tells the system to use the slower but more cross 
-    compiler portable call based machine.
+    This value can be `auto`, `direct` or `call`. It specifies which type of
+    virtual machine processor to use. The value of `auto` tells the system to
+    work out the best approach for this architecture. A value of `direct` tells
+    the system to use the direct machine which is faster. The value of `call`
+    tells the system to use the slower but more cross compiler portable call
+    based machine. +
+    The default is auto.
 
 GRAPHITE2_ASAN:BOOL::
-    This turns on compile time support for Google's 
-    https://code.google.com/p/address-sanitizer/[ASAN] Address Sanitizer. 
-    This works with both gcc and clang, however under clang any tests driven by 
-    Python will not be run. These tests require the ASAN runtime as a shared 
-    library and currently clang only provides static version.
+    This turns on compile time support for Google's
+    https://code.google.com/p/address-sanitizer/[ASAN] Address Sanitizer.
+    This works with both gcc and clang, however under clang any tests driven by
+    Python will not be run. These tests require the ASAN runtime as a shared
+    library and currently clang only provides static version. +
+    The default is OFF.
 
-Bear in mind that ASAN will not work with ulimit constraints so running the 
-fuzztest may result in problems. 
+Bear in mind that ASAN will not work with ulimit constraints so running the
+fuzztest may result in problems.
 
 
 [[X2]]
@@ -180,13 +180,12 @@ fonttools::
     This python library supports truetype font reading.
 
 g++-multilib::
-    If building 32bit binaries under a 64bit Linux host this is 
-    required for successful linking. These are the `g++-multilib` and 
-    `libc6-dev-i386` packages on Debian and derivatives and `glibc-devel.i686`, 
-    `glibc-devel` and `libstdc++-devel.i686` on Redhat OSs
+    If building 32bit binaries under a 64bit Linux host this is required for
+    successful linking. These are the `g++-multilib` and `libc6-dev-i386`
+    packages on Debian and derivatives and `glibc-devel.i686`, `glibc-devel` and
+    `libstdc++-devel.i686` on Redhat OSs
 
 clang::
-    To build with clang under linux you will need to ensure you have installed 
+    To build with clang under linux you will need to ensure you have installed
     libc++ and libc++abi packages. The easiest way to do on Debian & derivatives
     is to install the libc++-dev and libc++abi-dev packages.
-

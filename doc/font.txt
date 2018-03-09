@@ -75,4 +75,3 @@ change from both to or from left only. Likewise it is possible to use a rule to
 change from none to or from right only. But, unfortunately, it is not possible
 to shift glyphs within their drawn space and so switch between both and none,
 purely from GDL.
-

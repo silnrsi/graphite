@@ -39,5 +39,3 @@ pdebuild
 == Anticipated API Changes ==
 
 Here are the things we will probably change in the API once we come to the conclusion that we have got to change the API for some really important reason.
-
-
