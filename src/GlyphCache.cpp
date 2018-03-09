@@ -46,7 +46,7 @@ namespace
     template<typename W>
     class _glat_iterator : public std::iterator<std::input_iterator_tag, std::pair<sparse::key_type, sparse::mapped_type> >
     {
-        unsigned short  key() const             { return be::peek<W>(_e) + _n; }
+        unsigned short  key() const             { return uint16(be::peek<W>(_e) + _n); }
         unsigned int    run() const             { return be::peek<W>(_e+sizeof(W)); }
         void            advance_entry()         { _n = 0; _e = _v; be::skip<W>(_v,2); }
     public:

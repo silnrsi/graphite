@@ -250,7 +250,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         r->preContext = *--precontext;
         r->sort       = be::peek<uint16>(--sort_key);
 #ifndef NDEBUG
-        r->rule_idx   = n - 1;
+        r->rule_idx   = uint16(n - 1);
 #endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;

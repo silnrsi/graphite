@@ -51,7 +51,7 @@ NameTable::NameTable(const void* data, size_t length, uint16 platformId, uint16 
         {
             m_nameData = reinterpret_cast<const uint8*>(pdata) + offset;
             setPlatformEncoding(platformId, encodingID);
-            m_nameDataLength = length - offset;
+            m_nameDataLength = uint16(length - offset);
             return;
         }
     }

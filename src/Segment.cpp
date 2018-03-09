@@ -54,10 +54,10 @@ Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
-  m_passBits(m_silf->aPassBits() ? -1 : 0),
   m_defaultOriginal(0),
   m_dir(textDir),
-  m_flags(((m_silf->flags() & 0x20) != 0) << 1)
+  m_flags(((m_silf->flags() & 0x20) != 0) << 1),
+  m_passBits(m_silf->aPassBits() ? -1 : 0)
 {
     Slot *s = newSlot();
     if (s)
@@ -178,7 +178,7 @@ SlotJustify *Segment::newJustify()
         const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
         byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
         if (!justs) return NULL;
-        for (long i = m_bufSize - 2; i >= 0; --i)
+        for (ptrdiff_t i = m_bufSize - 2; i >= 0; --i)
         {
             SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
             SlotJustify *next = reinterpret_cast<SlotJustify *>(justs + justSize * (i + 1));

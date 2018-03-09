@@ -1670,7 +1670,7 @@ void * GlyfLookup(gid16 nGlyphId, const void * pGlyf, const void * pLoca,
         }
     }
 
-    long lGlyfOffset = LocaLookup(nGlyphId, pLoca, lLocaSize, pHead);
+    size_t lGlyfOffset = LocaLookup(nGlyphId, pLoca, lLocaSize, pHead);
     void * pSimpleGlyf = GlyfLookup(pGlyf, lGlyfOffset, lGlyfSize); // invalid loca offset returns null
     return pSimpleGlyf;
 }

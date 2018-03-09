@@ -107,13 +107,13 @@ inline unsigned long _mask_over_val<1>(unsigned long v)
 template<typename T>
 inline T mask_over_val(T v)
 {
-    return T(_mask_over_val<sizeof(T)>(v));
+    return T(_mask_over_val<sizeof(T)>(static_cast<unsigned long>(v)));
 }
 
 template<typename T>
 inline unsigned long next_highest_power2(T v)
 {
-    return _mask_over_val<sizeof(T)>(v-1)+1;
+    return _mask_over_val<sizeof(T)>(static_cast<unsigned long>(v-1))+1;
 }
 
 template<typename T>

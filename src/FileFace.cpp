@@ -48,7 +48,7 @@ FileFace::FileFace(const char *filename)
 
     // Get the header.
     if (!TtfUtil::GetHeaderInfo(tbl_offset, tbl_len)) return;
-    if (fseek(_file, tbl_offset, SEEK_SET)) return;
+    if (fseek(_file, long(tbl_offset), SEEK_SET)) return;
     _header_tbl = (TtfUtil::Sfnt::OffsetSubTable*)gralloc<char>(tbl_len);
     if (_header_tbl)
     {
@@ -59,7 +59,7 @@ FileFace::FileFace(const char *filename)
     // Get the table directory
     if (!TtfUtil::GetTableDirInfo(_header_tbl, tbl_offset, tbl_len)) return;
     _table_dir = (TtfUtil::Sfnt::OffsetSubTable::Entry*)gralloc<char>(tbl_len);
-    if (fseek(_file, tbl_offset, SEEK_SET)) return;
+    if (fseek(_file, long(tbl_offset), SEEK_SET)) return;
     if (_table_dir && fread(_table_dir, 1, tbl_len, _file) != tbl_len)
     {
         free(_table_dir);
@@ -88,7 +88,7 @@ const void *FileFace::get_table_fn(const void* appFaceHandle, unsigned int name,
         return 0;
 
     if (tbl_offset > file_face._file_len || tbl_len > file_face._file_len - tbl_offset
-            || fseek(file_face._file, tbl_offset, SEEK_SET) != 0)
+            || fseek(file_face._file, long(tbl_offset), SEEK_SET) != 0)
         return 0;
 
     tbl = malloc(tbl_len);

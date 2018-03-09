@@ -165,25 +165,25 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, boo
     switch (metrics(metric))
     {
     case kgmetLsb :
-        return bbox.bl.x;
+        return int32(bbox.bl.x);
     case kgmetRsb :
-        return res.x - bbox.tr.x;
+        return int32(res.x - bbox.tr.x);
     case kgmetBbTop :
-        return bbox.tr.y;
+        return int32(bbox.tr.y);
     case kgmetBbBottom :
-        return bbox.bl.y;
+        return int32(bbox.bl.y);
     case kgmetBbLeft :
-        return bbox.bl.x;
+        return int32(bbox.bl.x);
     case kgmetBbRight :
-        return bbox.tr.x;
+        return int32(bbox.tr.x);
     case kgmetBbWidth :
-        return bbox.tr.x - bbox.bl.x;
+        return int32(bbox.tr.x - bbox.bl.x);
     case kgmetBbHeight :
-        return bbox.tr.y - bbox.bl.y;
+        return int32(bbox.tr.y - bbox.bl.y);
     case kgmetAdvWidth :
-        return res.x;
+        return int32(res.x);
     case kgmetAdvHeight :
-        return res.y;
+        return int32(res.y);
     default :
         return 0;
     }
