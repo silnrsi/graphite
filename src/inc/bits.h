@@ -73,6 +73,7 @@ inline unsigned int bit_set_count(signed long long v)
 {
     return __builtin_popcountll(v);
 }
+
 #else
 
 template<typename T>
@@ -86,17 +87,18 @@ inline unsigned int bit_set_count(T v)
 
 #endif
 
-
+//TODO: Changed these to uintmax_t when we go to C++11
 template<int S>
-inline unsigned long _mask_over_val(unsigned long v)
+inline size_t _mask_over_val(size_t v)
 {
     v = _mask_over_val<S/2>(v);
     v |= v >> S*4;
     return v;
 }
 
+//TODO: Changed these to uintmax_t when we go to C++11
 template<>
-inline unsigned long _mask_over_val<1>(unsigned long v)
+inline size_t _mask_over_val<1>(size_t v)
 {
     v |= v >> 1;
     v |= v >> 2;
@@ -107,13 +109,13 @@ inline unsigned long _mask_over_val<1>(unsigned long v)
 template<typename T>
 inline T mask_over_val(T v)
 {
-    return T(_mask_over_val<sizeof(T)>(static_cast<unsigned long>(v)));
+    return T(_mask_over_val<sizeof(T)>(v));
 }
 
 template<typename T>
 inline unsigned long next_highest_power2(T v)
 {
-    return _mask_over_val<sizeof(T)>(static_cast<unsigned long>(v-1))+1;
+    return _mask_over_val<sizeof(T)>(v-1)+1;
 }
 
 template<typename T>
