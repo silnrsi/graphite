@@ -100,7 +100,7 @@ namespace
 			                    << std::hex
 			                    << std::setw(sizeof(T)*2)
 			                    << std::setfill('0')
-			                    << static_cast<unsigned long>(pat[p] & maskoff(8*sizeof(T)))
+			                    << (pat[p] & maskoff(8*sizeof(T)))
 		                << ")) -> "
 		                    << std::dec
 	                        <<  bit_set_count(pat[p]) << std::endl;

@@ -79,10 +79,12 @@ inline unsigned int bit_set_count(signed long long v)
 template<typename T>
 inline unsigned int bit_set_count(T v)
 {
-    v = v - ((v >> 1) & T(~(0UL)/3));                           // temp
-    v = (v & T(~(0UL)/15*3)) + ((v >> 2) & T(~(0UL)/15*3));     // temp
-    v = (v + (v >> 4)) & T(~(0UL)/255*15);                      // temp
-    return (T)(v * T(~(0UL)/255)) >> (sizeof(T)-1)*8;           // count
+	static size_t const ONES = ~0;
+
+	v = v - ((v >> 1) & T(ONES/3));                      // temp
+    v = (v & T(ONES/15*3)) + ((v >> 2) & T(ONES/15*3));  // temp
+    v = (v + (v >> 4)) & T(ONES/255*15);                 // temp
+    return (T)(v * T(ONES/255)) >> (sizeof(T)-1)*8;      // count
 }
 
 #endif
