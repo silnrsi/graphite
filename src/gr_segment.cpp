@@ -132,7 +132,7 @@ float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/)
 unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return int(pSeg->charInfoCount());
+    return static_cast<unsigned int>(pSeg->charInfoCount());
 }
 
 
@@ -145,7 +145,7 @@ const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned in
 unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return int(pSeg->slotCount());
+    return static_cast<unsigned int>(pSeg->slotCount());
 }
 
 const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
