@@ -38,7 +38,11 @@ sparse classe is working correctly.
 
 using namespace graphite2;
 
-#define maskoff(n) ((unsigned long long)(-1L) >> (8*sizeof(0UL) - n))
+#if defined(__x86_64__) || defined(_WIN64)
+	#define HAS_64BIT
+#endif
+
+#define maskoff(n) (size_t(-1L) >> (8*sizeof(size_t) - n))
 
 #define pat(b)   0x01##b, 0x03##b, 0x07##b, 0x0f##b
 #define pat8(b)  pat(b), pat(f##b)
@@ -65,7 +69,7 @@ namespace
     patterns(8);
     patterns(16);
     patterns(32);
-#ifdef __x86_64__
+#if defined(HAS_64BIT)
     patterns(64);
 #endif
 
@@ -124,7 +128,7 @@ int main(int argc , char *argv[])
         test_bit_set_count(s16_pat);
         test_bit_set_count(u32_pat);
         test_bit_set_count(s32_pat);
-#ifdef __x86_64__
+#if defined(HAS_64BIT)
         test_bit_set_count(u64_pat);
         test_bit_set_count(s64_pat);
 #endif
