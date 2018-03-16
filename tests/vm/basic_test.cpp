@@ -163,7 +163,7 @@ std::vector<byte> random_sequence(size_t n)
         if (done[r]) continue;
 
         done[r] = true;
-        seq[r]  = r;
+        seq[r]  = byte(r);
         --n;
     }
 

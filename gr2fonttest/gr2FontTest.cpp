@@ -457,7 +457,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             charLength = convertUtf<gr2::utf8>(pText, pText32);
             if (!pText32)
             {
-            	if (charLength == -1U)
+            	if (charLength == ~0)
             		perror("decoding utf-8 data failed");
             	else
             		perror("insufficent memory for text buffer");

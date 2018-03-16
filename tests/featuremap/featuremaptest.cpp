@@ -258,7 +258,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);
         size_t settingsIndex = (table.m_defs[i].m_settingsOffset - sizeof(FeatHeader)
             - (sizeof(FeatDefn) * table.m_header.m_numFeat)) / sizeof(FeatSetting);
-        for (size_t j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
+        for (uint16 j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
         {
             testAssertEqual("setting label %hu %hu\n", ref->getSettingName(j),
                        table.m_settings[settingsIndex+j].m_label);

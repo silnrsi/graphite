@@ -480,7 +480,7 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
     m_advance = Position(aGlyph->theAdvance().x, 0.);
     if (seg->silf()->aPassBits())
     {
-        seg->mergePassBits(theGlyph->attrs()[seg->silf()->aPassBits()]);
+        seg->mergePassBits(uint8(theGlyph->attrs()[seg->silf()->aPassBits()]));
         if (seg->silf()->numPasses() > 16)
             seg->mergePassBits(theGlyph->attrs()[seg->silf()->aPassBits()+1] << 16);
     }

@@ -5,10 +5,10 @@
 #include <string.h>
 
 typedef struct cluster_t {
-    unsigned int base_char;
-    unsigned int num_chars;
-    unsigned int base_glyph;
-    unsigned int num_glyphs;
+    size_t base_char;
+    size_t num_chars;
+    size_t base_glyph;
+    size_t num_glyphs;
 } cluster_t;
 
 /* usage: ./cluster fontfile.ttf string */
@@ -21,10 +21,10 @@ int main(int argc, char **argv)
     char *pError;               /* location of faulty utf-8 */
     gr_font *font = NULL;
     size_t numCodePoints = 0;
-    unsigned int lenstr = strlen(argv[2]);
+    size_t lenstr = strlen(argv[2]);
     gr_segment * seg = NULL;
     cluster_t *clusters;
-    int ic, ci = 0;
+    size_t ic, ci = 0;
     const gr_slot *s, *is;
     FILE *log;
     gr_face *face = gr_make_file_face(argv[1], 0);
@@ -41,10 +41,10 @@ int main(int argc, char **argv)
     memset(clusters, 0, numCodePoints * sizeof(cluster_t));
     for (is = gr_seg_first_slot(seg), ic = 0; is; is = gr_slot_next_in_segment(is), ic++)
     {
-        unsigned int before = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_before(is)));
-        unsigned int after = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_after(is)));
-        unsigned int nAfter;
-        unsigned int cAfter;
+        size_t before = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_before(is)));
+        size_t after = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_after(is)));
+        int    nAfter;
+        size_t cAfter;
         while (clusters[ci].base_char > before && ci)                               /*<2>*/
         {
             clusters[ci-1].num_chars += clusters[ci].num_chars;
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
                                    gr_slot_origin_Y(s));
         if (--clusters[ci].num_glyphs == 0)                                         /*<5>*/
         {
-            fprintf(log, "[%d+%d]\n", clusters[ci].base_char, clusters[ci].num_chars);
+            fprintf(log, "[%zd+%zd]\n", clusters[ci].base_char, clusters[ci].num_chars);
             ++ci;
         }
     }
