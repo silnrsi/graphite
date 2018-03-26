@@ -172,9 +172,14 @@ inline T max(const T a, const T b)
 #define GR_MAYBE_UNUSED
 #endif
 
-#if defined(__clang__) && __cplusplus >= 201103L
-   /* clang's fallthrough annotations are only available starting in C++11. */
-    #define GR_FALLTHROUGH [[fallthrough]]
+#ifndef __has_cpp_attribute
+#  define __has_cpp_attribute(x) 0
+#endif
+
+#if __has_cpp_attribute(clang::fallthrough)
+#  define GR_FALLTHROUGH [[clang::fallthrough]]
+#elif __has_cpp_attribute(gnu::fallthrough)
+#  define GR_FALLTHROUGH [[gnu::fallthrough]]
 #elif defined(_MSC_VER)
    /*
     * MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
