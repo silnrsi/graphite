@@ -62,7 +62,7 @@ message(STATUS "Using vm machine type: ${GRAPHITE2_VM_TYPE}")
 if (BUILD_SHARED_LIBS)
     if (PYTHONINTERP_FOUND)
         EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-            ARGS -c "'import ctypes; print(ctypes.sizeof(ctypes.c_void_p))'"
+            ARGS -c \"import ctypes\; print(ctypes.sizeof(ctypes.c_void_p)) \"
             OUTPUT_VARIABLE PYTHON_SIZEOF_VOID_P)
         if ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_ASAN) OR CMAKE_COMPILER_IS_GNUCXX))
             set(PYTHON_CTYPES_COMPATBILE TRUE)
