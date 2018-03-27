@@ -86,7 +86,7 @@ struct telemetry  {};
   #define HAVE_BUILTIN_OVERFLOW
 #endif
 #if defined(__has_include)
-  #if __has_include(<intsafe.h>)
+  #if __has_include(<intsafe.h>) && !defined(__CYGWIN__)
     #define HAVE_INTSAFE_H
   #endif
 #elif defined(_WIN32)
