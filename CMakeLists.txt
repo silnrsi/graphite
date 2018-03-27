@@ -12,6 +12,8 @@ endif (NOT CMAKE_BUILD_TYPE)
 option(BUILD_SHARED_LIBS "Make library a shared library instead of static" ON)
 
 enable_language(CXX C)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED 11)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
