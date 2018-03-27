@@ -33,6 +33,14 @@ of the License or (at your option) any later version.
 #include <limits>
 #include "inc/json.h"
 
+#if defined(_MSC_VER)
+#define FORMAT_INTMAX "%lli"
+#define FORMAT_UINTMAX "%llu"
+#else
+#define FORMAT_INTMAX "%ji"
+#define FORMAT_UINTMAX "%ju"
+#endif
+
 using namespace graphite2;
 
 namespace
@@ -45,7 +53,7 @@ namespace
     };
 }
 
-const json::_null_t json::null = {};
+const std::nullptr_t json::null = nullptr;
 
 inline
 void json::context(const char current) throw()
@@ -131,9 +139,9 @@ json & json::operator << (json::number f) throw()
         fprintf(_stream, "%g", f);
     return *this;
 }
-json & json::operator << (json::integer d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
-json & json::operator << (long unsigned d) throw()  { context(seq); fprintf(_stream, "%ld", d); return *this; }
+json & json::operator << (json::integer d) throw()  { context(seq); fprintf(_stream, FORMAT_INTMAX, intmax_t(d)); return *this; }
+json & json::operator << (json::integer_u d) throw()  { context(seq); fprintf(_stream, FORMAT_UINTMAX, uintmax_t(d)); return *this; }
 json & json::operator << (json::boolean b) throw()  { context(seq); fputs(b ? "true" : "false", _stream); return *this; }
-json & json::operator << (json::_null_t) throw()    { context(seq); fputs("null",_stream); return *this; }
+json & json::operator << (std::nullptr_t)  throw()  { context(seq); fputs("null",_stream); return *this; }
 
 #endif
