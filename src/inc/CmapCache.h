@@ -39,7 +39,7 @@ public:
 
     virtual ~Cmap() throw() {}
 
-    virtual uint16 operator [] (const uint32) const throw() { return 0; }
+    virtual uint16_t operator [] (const uint32_t) const throw() { return 0; }
 
     virtual operator bool () const throw() { return false; }
 
@@ -53,7 +53,7 @@ class DirectCmap : public Cmap
 
 public:
     DirectCmap(const Face &);
-    virtual uint16 operator [] (const uint32 usv) const throw();
+    virtual uint16_t operator [] (const uint32_t usv) const throw();
     virtual operator bool () const throw();
 
     CLASS_NEW_DELETE;
@@ -71,12 +71,12 @@ class CachedCmap : public Cmap
 public:
     CachedCmap(const Face &);
     virtual ~CachedCmap() throw();
-    virtual uint16 operator [] (const uint32 usv) const throw();
+    virtual uint16_t operator [] (const uint32_t usv) const throw();
     virtual operator bool () const throw();
     CLASS_NEW_DELETE;
 private:
     bool m_isBmpOnly;
-    uint16 ** m_blocks;
+    uint16_t ** m_blocks;
 };
 
 } // namespace graphite2

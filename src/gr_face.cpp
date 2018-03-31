@@ -111,7 +111,7 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
 
 gr_uint32 gr_str_to_tag(const char *str)
 {
-    uint32 res = 0;
+    uint32_t res = 0;
     switch(max(strlen(str),size_t(4)))
     {
         case 4: res |= str[3];       GR_FALLTHROUGH;
@@ -135,7 +135,7 @@ void gr_tag_to_str(gr_uint32 tag, char *str)
 }
 
 inline
-uint32 zeropad(const uint32 x)
+uint32_t zeropad(const uint32_t x)
 {
     if (x == 0x20202020)                    return 0;
     if ((x & 0x00FFFFFF) == 0x00202020)     return x & 0xFF000000;

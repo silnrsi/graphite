@@ -34,18 +34,10 @@ of the License or (at your option) any later version.
 namespace
 {
 
-#if defined(_MSC_VER)
-typedef unsigned __int8 u8;
-typedef unsigned __int16 u16;
-typedef unsigned __int32 u32;
-typedef unsigned __int64 u64;
-#else
-#include <stdint.h>
-typedef uint8_t u8;
+#include <cstdint>
+typedef uint8_t  u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
-typedef uint64_t u64;
-#endif
 
 ptrdiff_t const     MINMATCH = 4,
                     LASTLITERALS = 5,

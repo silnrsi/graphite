@@ -37,16 +37,16 @@ struct NameTestA
 {
     TtfUtil::Sfnt::FontNames m_nameHeader;
     TtfUtil::Sfnt::NameRecord m_records[5];
-    uint8 m_textData[27];
+    uint8_t m_textData[27];
 };
 
 struct NameTestB
 {
     TtfUtil::Sfnt::FontNames m_nameHeader;
     TtfUtil::Sfnt::NameRecord m_records[7];
-    uint16 m_langTagCount;
+    uint16_t m_langTagCount;
     TtfUtil::Sfnt::LangTagRecord m_languages[2];
-    uint8 m_textData[59];
+    uint8_t m_textData[59];
 };
 
 NameTestA testA = {
@@ -100,12 +100,12 @@ NameTestB testB = {
 
 #pragma pack(pop)
 
-void testName(void * data, size_t length, uint16 langId,
-              uint16 actualLang, uint16 nameId, const char * utf8Text)
+void testName(void * data, size_t length, uint16_t langId,
+              uint16_t actualLang, uint16_t nameId, const char * utf8Text)
 {
     NameTable name(data, length);
-    uint16 lang = langId;
-    uint32 strLen = 0;
+    uint16_t lang = langId;
+    uint32_t strLen = 0;
     char * n = reinterpret_cast<char*>(name.getName(lang, nameId, gr_utf8, strLen));
     if ((n == NULL) || (strncmp(n, utf8Text, strLen) != 0))
     {
@@ -121,10 +121,10 @@ void testName(void * data, size_t length, uint16 langId,
     }
 }
 
-void testLangId(void * data, size_t length, const char * id, uint16 expected)
+void testLangId(void * data, size_t length, const char * id, uint16_t expected)
 {
     NameTable table(data, length);
-    uint16 lId = table.getLanguageId(id);
+    uint16_t lId = table.getLanguageId(id);
     if (lId != expected)
     {
         fprintf(stderr, "%s lang id: %d expected: %d\n", id, lId, expected);
@@ -134,26 +134,26 @@ void testLangId(void * data, size_t length, const char * id, uint16 expected)
 template <class T> T * toBigEndian(T & table)
 {
     T * bigEndian = gralloc<T>(1);
-    bigEndian->m_nameHeader.format = be::swap<uint16>(table.m_nameHeader.format);
-    bigEndian->m_nameHeader.count = be::swap<uint16>(table.m_nameHeader.count);
-    bigEndian->m_nameHeader.string_offset = be::swap<uint16>(table.m_nameHeader.string_offset);
+    bigEndian->m_nameHeader.format = be::swap<uint16_t>(table.m_nameHeader.format);
+    bigEndian->m_nameHeader.count = be::swap<uint16_t>(table.m_nameHeader.count);
+    bigEndian->m_nameHeader.string_offset = be::swap<uint16_t>(table.m_nameHeader.string_offset);
 
-    for (uint16 i = 0; i < table.m_nameHeader.count; i++)
+    for (uint16_t i = 0; i < table.m_nameHeader.count; i++)
     {
-        bigEndian->m_records[i].platform_id = be::swap<uint16>(table.m_records[i].platform_id);
-        bigEndian->m_records[i].platform_specific_id = be::swap<uint16>(table.m_records[i].platform_specific_id);
-        bigEndian->m_records[i].language_id = be::swap<uint16>(table.m_records[i].language_id);
-        bigEndian->m_records[i].name_id = be::swap<uint16>(table.m_records[i].name_id);
-        bigEndian->m_records[i].length = be::swap<uint16>(table.m_records[i].length);
-        bigEndian->m_records[i].offset = be::swap<uint16>(table.m_records[i].offset);
+        bigEndian->m_records[i].platform_id = be::swap<uint16_t>(table.m_records[i].platform_id);
+        bigEndian->m_records[i].platform_specific_id = be::swap<uint16_t>(table.m_records[i].platform_specific_id);
+        bigEndian->m_records[i].language_id = be::swap<uint16_t>(table.m_records[i].language_id);
+        bigEndian->m_records[i].name_id = be::swap<uint16_t>(table.m_records[i].name_id);
+        bigEndian->m_records[i].length = be::swap<uint16_t>(table.m_records[i].length);
+        bigEndian->m_records[i].offset = be::swap<uint16_t>(table.m_records[i].offset);
     }
 
-    bigEndian->m_nameHeader.name_record[0].platform_id = be::swap<uint16>(table.m_nameHeader.name_record[0].platform_id);
-    bigEndian->m_nameHeader.name_record[0].platform_specific_id = be::swap<uint16>(table.m_nameHeader.name_record[0].platform_specific_id);
-    bigEndian->m_nameHeader.name_record[0].language_id = be::swap<uint16>(table.m_nameHeader.name_record[0].language_id);
-    bigEndian->m_nameHeader.name_record[0].name_id = be::swap<uint16>(table.m_nameHeader.name_record[0].name_id);
-    bigEndian->m_nameHeader.name_record[0].length = be::swap<uint16>(table.m_nameHeader.name_record[0].length);
-    bigEndian->m_nameHeader.name_record[0].offset = be::swap<uint16>(table.m_nameHeader.name_record[0].offset);
+    bigEndian->m_nameHeader.name_record[0].platform_id = be::swap<uint16_t>(table.m_nameHeader.name_record[0].platform_id);
+    bigEndian->m_nameHeader.name_record[0].platform_specific_id = be::swap<uint16_t>(table.m_nameHeader.name_record[0].platform_specific_id);
+    bigEndian->m_nameHeader.name_record[0].language_id = be::swap<uint16_t>(table.m_nameHeader.name_record[0].language_id);
+    bigEndian->m_nameHeader.name_record[0].name_id = be::swap<uint16_t>(table.m_nameHeader.name_record[0].name_id);
+    bigEndian->m_nameHeader.name_record[0].length = be::swap<uint16_t>(table.m_nameHeader.name_record[0].length);
+    bigEndian->m_nameHeader.name_record[0].offset = be::swap<uint16_t>(table.m_nameHeader.name_record[0].offset);
 
     memcpy(bigEndian->m_textData, table.m_textData, sizeof(table.m_textData) );
     return bigEndian;
@@ -162,11 +162,11 @@ template <class T> T * toBigEndian(T & table)
 template <class T> T * toBigEndian1(T & table)
 {
     T * bigEndian = toBigEndian<T>(table);
-    bigEndian->m_langTagCount = be::swap<uint16>(table.m_langTagCount);
+    bigEndian->m_langTagCount = be::swap<uint16_t>(table.m_langTagCount);
     for (size_t i = 0; i < table.m_langTagCount; i++)
     {
-        bigEndian->m_languages[i] = be::swap<uint16>(table.m_languages[i]);
-        bigEndian->m_languages[i] = be::swap<uint16>(table.m_languages[i]);
+        bigEndian->m_languages[i] = be::swap<uint16_t>(table.m_languages[i]);
+        bigEndian->m_languages[i] = be::swap<uint16_t>(table.m_languages[i]);
     }
 }
 

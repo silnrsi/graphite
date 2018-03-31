@@ -66,7 +66,7 @@ public:
     enum class integer : std::intmax_t {};
     enum class integer_u : std::uintmax_t {};
     using boolean = bool;
-    static const std::nullptr_t  null;
+    static std::nullptr_t constexpr null = nullptr;
 
     void setenv(unsigned int index, void *val) { _env.reserve(index + 1); if (index >= _env.size()) _env.insert(_env.end(), _env.size() - index + 1, 0); _env[index] = val; }
     void *getenv(unsigned int index) const { return _env[index]; }

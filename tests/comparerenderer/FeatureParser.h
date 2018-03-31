@@ -29,14 +29,14 @@ union FeatID
     unsigned int uId;
 };
 
-typedef struct
+struct FeatureSetting
 {
     FeatID m_id;
     union {
         signed short m_sValue;
         unsigned short m_uValue;
     };
-} FeatureSetting;
+};
 
 class FeatureParser
 {

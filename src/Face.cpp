@@ -87,7 +87,7 @@ float Face::default_glyph_advance(const void* font_ptr, gr_uint16 glyphid)
     return font.face().glyphs().glyph(glyphid)->theAdvance().x * font.scale();
 }
 
-bool Face::readGlyphs(uint32 faceOptions)
+bool Face::readGlyphs(uint32_t faceOptions)
 {
     Error e;
 #ifdef GRAPHITE2_TELEMETRY
@@ -123,16 +123,16 @@ bool Face::readGraphite(const Table & silf)
 #endif
     Error e;
     error_context(EC_READSILF);
-    const byte * p = silf;
+    const uint8_t * p = silf;
     if (e.test(!p, E_NOSILF) || e.test(silf.size() < 20, E_BADSIZE)) return error(e);
 
-    const uint32 version = be::read<uint32>(p);
+    const uint32_t version = be::read<uint32_t>(p);
     if (e.test(version < 0x00020000, E_TOOOLD)) return error(e);
     if (version >= 0x00030000)
-        be::skip<uint32>(p);        // compilerVersion
-    m_numSilf = be::read<uint16>(p);
+        be::skip<uint32_t>(p);        // compilerVersion
+    m_numSilf = be::read<uint16_t>(p);
 
-    be::skip<uint16>(p);            // reserved
+    be::skip<uint16_t>(p);            // reserved
 
     bool havePasses = false;
     m_silfs = new Silf[m_numSilf];
@@ -140,8 +140,8 @@ bool Face::readGraphite(const Table & silf)
     for (int i = 0; i < m_numSilf; i++)
     {
         error_context(EC_ASILF + (i << 8));
-        const uint32 offset = be::read<uint32>(p),
-                     next   = i == m_numSilf - 1 ? uint32(silf.size()) : be::peek<uint32>(p);
+        const uint32_t offset = be::read<uint32_t>(p),
+                     next   = i == m_numSilf - 1 ? uint32_t(silf.size()) : be::peek<uint32_t>(p);
         if (e.test(next > silf.size() || offset >= next, E_BADSIZE))
             return error(e);
 
@@ -217,7 +217,7 @@ void Face::setLogger(FILE * log_file GR_MAYBE_UNUSED)
 #endif
 }
 
-const Silf *Face::chooseSilf(uint32 script) const
+const Silf *Face::chooseSilf(uint32_t script) const
 {
     if (m_numSilf == 0)
         return NULL;
@@ -227,12 +227,12 @@ const Silf *Face::chooseSilf(uint32 script) const
         return m_silfs;
 }
 
-uint16 Face::findPseudo(uint32 uid) const
+uint16_t Face::findPseudo(uint32_t uid) const
 {
     return (m_numSilf) ? m_silfs[0].findPseudo(uid) : 0;
 }
 
-int32 Face::getGlyphMetric(uint16 gid, uint8 metric) const
+int32_t Face::getGlyphMetric(uint16_t gid, uint8_t metric) const
 {
     switch (metrics(metric))
     {
@@ -264,7 +264,7 @@ NameTable * Face::nameTable() const
     return m_pNames;
 }
 
-uint16 Face::languageForLocale(const char * locale) const
+uint16_t Face::languageForLocale(const char * locale) const
 {
     nameTable();
     if (m_pNames)
@@ -274,12 +274,12 @@ uint16 Face::languageForLocale(const char * locale) const
 
 
 
-Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
+Face::Table::Table(const Face & face, const Tag n, uint32_t version) throw()
 : _f(&face), _compressed(false)
 {
     size_t sz = 0;
-    _p = static_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
-    _sz = uint32(sz);
+    _p = static_cast<const uint8_t *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
+    _sz = uint32_t(sz);
 
     if (!TtfUtil::CheckTable(n, _p, _sz))
     {
@@ -287,14 +287,14 @@ Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
         return;
     }
 
-    if (be::peek<uint32>(_p) >= version)
+    if (be::peek<uint32_t>(_p) >= version)
         decompress();
 }
 
 void Face::Table::releaseBuffers()
 {
     if (_compressed)
-        free(const_cast<byte *>(_p));
+        free(const_cast<uint8_t *>(_p));
     else if (_p && _f->m_ops.release_table)
         (*_f->m_ops.release_table)(_f->m_appFaceHandle, _p);
     _p = 0; _sz = 0;
@@ -312,16 +312,16 @@ Face::Table & Face::Table::operator = (const Table & rhs) throw()
 Error Face::Table::decompress()
 {
     Error e;
-    if (e.test(_sz < 5 * sizeof(uint32), E_BADSIZE))
+    if (e.test(_sz < 5 * sizeof(uint32_t), E_BADSIZE))
         return e;
-    byte * uncompressed_table = 0;
+    uint8_t * uncompressed_table = 0;
     size_t uncompressed_size = 0;
 
-    const byte * p = _p;
-    const uint32 version = be::read<uint32>(p);    // Table version number.
+    const uint8_t * p = _p;
+    const uint32_t version = be::read<uint32_t>(p);    // Table version number.
 
-    // The scheme is in the top 5 bits of the 1st uint32.
-    const uint32 hdr = be::read<uint32>(p);
+    // The scheme is in the top 5 bits of the 1st uint32_t.
+    const uint32_t hdr = be::read<uint32_t>(p);
     switch(compression(hdr >> 27))
     {
     case NONE: return e;
@@ -329,13 +329,13 @@ Error Face::Table::decompress()
     case LZ4:
     {
         uncompressed_size  = hdr & 0x07ffffff;
-        uncompressed_table = gralloc<byte>(uncompressed_size);
+        uncompressed_table = gralloc<uint8_t>(uncompressed_size);
         if (!e.test(!uncompressed_table || uncompressed_size < 4, E_OUTOFMEM))
         {
             memset(uncompressed_table, 0, 4);   // make sure version number is initialised
             // coverity[forward_null : FALSE] - uncompressed_table has been checked so can't be null
             // coverity[checked_return : FALSE] - we test e later
-            e.test(lz4::decompress(p, _sz - 2*sizeof(uint32), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
+            e.test(lz4::decompress(p, _sz - 2*sizeof(uint32_t), uncompressed_table, uncompressed_size) != signed(uncompressed_size), E_SHRINKERFAILED);
         }
         break;
     }
@@ -348,7 +348,7 @@ Error Face::Table::decompress()
     if (!e)
         // coverity[forward_null : FALSE] - uncompressed_table has already been tested so can't be null
         // coverity[checked_return : FALSE] - we test e later
-        e.test(be::peek<uint32>(uncompressed_table) != version, E_SHRINKERFAILED);
+        e.test(be::peek<uint32_t>(uncompressed_table) != version, E_SHRINKERFAILED);
 
     // Tell the provider to release the compressed form since were replacing
     //   it anyway.

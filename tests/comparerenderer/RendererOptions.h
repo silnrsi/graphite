@@ -24,12 +24,12 @@
 class Option
 {
 public:
-    typedef enum {
+    enum OptionType {
         OPTION_BOOL,
         OPTION_STRING,
         OPTION_INT,
         OPTION_FLOAT
-    } OptionType;
+    };
     Option(const char * shortOpt, const char * longOpt, const char * desc, OptionType type)
         : m_shortOption(shortOpt), m_longOption(longOpt), m_description(desc),
         m_type(type), m_position(-1)
@@ -58,7 +58,7 @@ private:
 };
 
 // enum must be in same order as rendererOptions
-typedef enum {
+enum OptionId {
     OptTextFile,
     OptFontFile,
     OptSize,
@@ -84,7 +84,7 @@ typedef enum {
     OptFeatures,
     OptAltFeatures,
     OptQuiet
-} OptionId;
+};
 
 static Option rendererOptions[] = {
     Option("-t", "--text", "Text file", Option::OPTION_STRING),

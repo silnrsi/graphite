@@ -46,14 +46,14 @@ namespace
     template<typename W>
     class _glat_iterator : public std::iterator<std::input_iterator_tag, std::pair<sparse::key_type, sparse::mapped_type> >
     {
-        unsigned short  key() const             { return uint16(be::peek<W>(_e) + _n); }
+        unsigned short  key() const             { return uint16_t(be::peek<W>(_e) + _n); }
         unsigned int    run() const             { return be::peek<W>(_e+sizeof(W)); }
         void            advance_entry()         { _n = 0; _e = _v; be::skip<W>(_v,2); }
     public:
-        _glat_iterator(const void * glat=0) : _e(reinterpret_cast<const byte *>(glat)), _v(_e+2*sizeof(W)), _n(0) {}
+        _glat_iterator(const void * glat=0) : _e(reinterpret_cast<const uint8_t *>(glat)), _v(_e+2*sizeof(W)), _n(0) {}
 
         _glat_iterator<W> & operator ++ () {
-            ++_n; be::skip<uint16>(_v);
+            ++_n; be::skip<uint16_t>(_v);
             if (_n == run()) advance_entry();
             return *this;
         }
@@ -66,16 +66,16 @@ namespace
         bool operator != (const _glat_iterator<W> & rhs) { return !operator==(rhs); }
 
         value_type          operator * () const {
-            return value_type(key(), be::peek<uint16>(_v));
+            return value_type(key(), be::peek<uint16_t>(_v));
         }
 
     protected:
-        const byte     * _e, * _v;
+        const uint8_t     * _e, * _v;
         size_t        _n;
     };
 
-    typedef _glat_iterator<uint8>   glat_iterator;
-    typedef _glat_iterator<uint16>  glat2_iterator;
+    typedef _glat_iterator<uint8_t>   glat_iterator;
+    typedef _glat_iterator<uint16_t>  glat2_iterator;
 }
 
 const SlantBox SlantBox::empty = {0,0,0,0};
@@ -93,7 +93,7 @@ public:
     bool has_boxes() const throw();
 
     const GlyphFace * read_glyph(unsigned short gid, GlyphFace &, int *numsubs) const throw();
-    GlyphBox * read_box(uint16 gid, GlyphBox *curr, const GlyphFace & face) const throw();
+    GlyphBox * read_box(uint16_t gid, GlyphBox *curr, const GlyphFace & face) const throw();
 
     CLASS_NEW_DELETE;
 private:
@@ -114,7 +114,7 @@ private:
 
 
 
-GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
+GlyphCache::GlyphCache(const Face & face, const uint32_t face_options)
 : _glyph_loader(new Loader(face)),
   _glyphs(_glyph_loader && *_glyph_loader && _glyph_loader->num_glyphs()
         ? grzeroalloc<const GlyphFace *>(_glyph_loader->num_glyphs()) : 0),
@@ -138,7 +138,7 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
         //  thus assigning the &glyphs[0] to _glyphs[0] means _glyphs[0] points
         //  to the entire array.
         const GlyphFace * loaded = _glyphs[0];
-        for (uint16 gid = 1; loaded && gid != _num_glyphs; ++gid)
+        for (uint16_t gid = 1; loaded && gid != _num_glyphs; ++gid)
             _glyphs[gid] = loaded = _glyph_loader->read_glyph(gid, glyphs[gid], &numsubs);
 
         if (!loaded)
@@ -151,7 +151,7 @@ GlyphCache::GlyphCache(const Face & face, const uint32 face_options)
             GlyphBox * boxes = (GlyphBox *)gralloc<char>(_num_glyphs * sizeof(GlyphBox) + numsubs * 8 * sizeof(float));
             GlyphBox * currbox = boxes;
 
-            for (uint16 gid = 0; currbox && gid != _num_glyphs; ++gid)
+            for (uint16_t gid = 0; currbox && gid != _num_glyphs; ++gid)
             {
                 _boxes[gid] = currbox;
                 currbox = _glyph_loader->read_box(gid, currbox, *_glyphs[gid]);
@@ -199,7 +199,7 @@ GlyphCache::~GlyphCache()
         if (_glyph_loader)
         {
             GlyphBox *  * g = _boxes;
-            for (uint16 n = _num_glyphs; n; --n, ++g)
+            for (uint16_t n = _num_glyphs; n; --n, ++g)
                 free(*g);
         }
         else
@@ -272,18 +272,18 @@ GlyphCache::Loader::Loader(const Face & face)
         _head = Face::Table();
         return;
     }
-    const byte    * p = m_pGloc;
-    int       version = be::read<uint32>(p);
-    const uint16    flags = be::read<uint16>(p);
-    _num_attrs = be::read<uint16>(p);
+    const uint8_t    * p = m_pGloc;
+    int       version = be::read<uint32_t>(p);
+    const uint16_t    flags = be::read<uint16_t>(p);
+    _num_attrs = be::read<uint16_t>(p);
     // We can accurately calculate the number of attributed glyphs by
     //  subtracting the length of the attribids array (numAttribs long if present)
     //  and dividing by either 2 or 4 depending on shor or lonf format
     _long_fmt              = flags & 1;
     ptrdiff_t tmpnumgattrs       = (m_pGloc.size()
                                - (p - m_pGloc)
-                               - sizeof(uint16)*(flags & 0x2 ? _num_attrs : 0))
-                                   / (_long_fmt ? sizeof(uint32) : sizeof(uint16)) - 1;
+                               - sizeof(uint16_t)*(flags & 0x2 ? _num_attrs : 0))
+                                   / (_long_fmt ? sizeof(uint32_t) : sizeof(uint16_t)) - 1;
 
     if (version >= 0x00020000 || tmpnumgattrs < 0 || tmpnumgattrs > 65535
         || _num_attrs == 0 || _num_attrs > 0x3000  // is this hard limit appropriate?
@@ -296,7 +296,7 @@ GlyphCache::Loader::Loader(const Face & face)
 
     _num_glyphs_attributes = static_cast<unsigned short>(tmpnumgattrs);
     p = m_pGlat;
-    version = be::read<uint32>(p);
+    version = be::read<uint32_t>(p);
     if (version >= 0x00040000 || (version >= 0x00030000 && m_pGlat.size() < 8))       // reject Glat tables that are too new
     {
         _head = Face::Table();
@@ -304,7 +304,7 @@ GlyphCache::Loader::Loader(const Face & face)
     }
     else if (version >= 0x00030000)
     {
-        unsigned int glatflags = be::read<uint32>(p);
+        unsigned int glatflags = be::read<uint32_t>(p);
         _has_boxes = glatflags & 1;
         // delete this once the compiler is fixed
         _has_boxes = true;
@@ -370,39 +370,39 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
 
     if (glyphid < _num_glyphs_attributes)
     {
-        const byte * gloc = m_pGloc;
+        const uint8_t * gloc = m_pGloc;
         size_t      glocs = 0, gloce = 0;
 
-        be::skip<uint32>(gloc);
-        be::skip<uint16>(gloc,2);
+        be::skip<uint32_t>(gloc);
+        be::skip<uint16_t>(gloc,2);
         if (_long_fmt)
         {
-            if (8 + glyphid * sizeof(uint32) > m_pGloc.size())
+            if (8 + glyphid * sizeof(uint32_t) > m_pGloc.size())
                 return 0;
-            be::skip<uint32>(gloc, glyphid);
-            glocs = be::read<uint32>(gloc);
-            gloce = be::peek<uint32>(gloc);
+            be::skip<uint32_t>(gloc, glyphid);
+            glocs = be::read<uint32_t>(gloc);
+            gloce = be::peek<uint32_t>(gloc);
         }
         else
         {
-            if (8 + glyphid * sizeof(uint16) > m_pGloc.size())
+            if (8 + glyphid * sizeof(uint16_t) > m_pGloc.size())
                 return 0;
-            be::skip<uint16>(gloc, glyphid);
-            glocs = be::read<uint16>(gloc);
-            gloce = be::peek<uint16>(gloc);
+            be::skip<uint16_t>(gloc, glyphid);
+            glocs = be::read<uint16_t>(gloc);
+            gloce = be::peek<uint16_t>(gloc);
         }
 
         if (glocs >= m_pGlat.size() - 1 || gloce > m_pGlat.size())
             return 0;
 
-        const uint32 glat_version = be::peek<uint32>(m_pGlat);
+        const uint32_t glat_version = be::peek<uint32_t>(m_pGlat);
         if (glat_version >= 0x00030000)
         {
             if (glocs >= gloce)
                 return 0;
-            const byte * p = m_pGlat + glocs;
-            uint16 bmap = be::read<uint16>(p);
-            int num = bit_set_count((uint32)bmap);
+            const uint8_t * p = m_pGlat + glocs;
+            uint16_t bmap = be::read<uint16_t>(p);
+            int num = bit_set_count((uint32_t)bmap);
             if (numsubs) *numsubs += num;
             glocs += 6 + 8 * num;
             if (glocs > gloce)
@@ -410,16 +410,16 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         }
         if (glat_version < 0x00020000)
         {
-            if (gloce - glocs < 2*sizeof(byte)+sizeof(uint16)
-                || gloce - glocs > _num_attrs*(2*sizeof(byte)+sizeof(uint16)))
+            if (gloce - glocs < 2*sizeof(uint8_t)+sizeof(uint16_t)
+                || gloce - glocs > _num_attrs*(2*sizeof(uint8_t)+sizeof(uint16_t)))
                     return 0;
             new (&glyph) GlyphFace(bbox, advance, glat_iterator(m_pGlat + glocs), glat_iterator(m_pGlat + gloce));
         }
         else
         {
-            if (gloce - glocs < 3*sizeof(uint16)        // can a glyph have no attributes? why not?
-                || gloce - glocs > _num_attrs*3*sizeof(uint16)
-                || glocs > m_pGlat.size() - 2*sizeof(uint16))
+            if (gloce - glocs < 3*sizeof(uint16_t)        // can a glyph have no attributes? why not?
+                || gloce - glocs > _num_attrs*3*sizeof(uint16_t)
+                || glocs > m_pGlat.size() - 2*sizeof(uint16_t))
                     return 0;
             new (&glyph) GlyphFace(bbox, advance, glat2_iterator(m_pGlat + glocs), glat2_iterator(m_pGlat + gloce));
         }
@@ -429,52 +429,52 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
     return &glyph;
 }
 
-inline float scale_to(uint8 t, float zmin, float zmax)
+inline float scale_to(uint8_t t, float zmin, float zmax)
 {
     return (zmin + t * (zmax - zmin) / 255);
 }
 
-Rect readbox(Rect &b, uint8 zxmin, uint8 zymin, uint8 zxmax, uint8 zymax)
+Rect readbox(Rect &b, uint8_t zxmin, uint8_t zymin, uint8_t zxmax, uint8_t zymax)
 {
     return Rect(Position(scale_to(zxmin, b.bl.x, b.tr.x), scale_to(zymin, b.bl.y, b.tr.y)),
                 Position(scale_to(zxmax, b.bl.x, b.tr.x), scale_to(zymax, b.bl.y, b.tr.y)));
 }
 
-GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphFace & glyph) const throw()
+GlyphBox * GlyphCache::Loader::read_box(uint16_t gid, GlyphBox *curr, const GlyphFace & glyph) const throw()
 {
     if (gid >= _num_glyphs_attributes) return 0;
 
-    const byte * gloc = m_pGloc;
+    const uint8_t * gloc = m_pGloc;
     size_t      glocs = 0, gloce = 0;
 
-    be::skip<uint32>(gloc);
-    be::skip<uint16>(gloc,2);
+    be::skip<uint32_t>(gloc);
+    be::skip<uint16_t>(gloc,2);
     if (_long_fmt)
     {
-        be::skip<uint32>(gloc, gid);
-        glocs = be::read<uint32>(gloc);
-        gloce = be::peek<uint32>(gloc);
+        be::skip<uint32_t>(gloc, gid);
+        glocs = be::read<uint32_t>(gloc);
+        gloce = be::peek<uint32_t>(gloc);
     }
     else
     {
-        be::skip<uint16>(gloc, gid);
-        glocs = be::read<uint16>(gloc);
-        gloce = be::peek<uint16>(gloc);
+        be::skip<uint16_t>(gloc, gid);
+        glocs = be::read<uint16_t>(gloc);
+        gloce = be::peek<uint16_t>(gloc);
     }
 
     if (gloce > m_pGlat.size() || glocs + 6 >= gloce)
         return 0;
 
-    const byte * p = m_pGlat + glocs;
-    uint16 bmap = be::read<uint16>(p);
-    int num = bit_set_count((uint32)bmap);
+    const uint8_t * p = m_pGlat + glocs;
+    uint16_t bmap = be::read<uint16_t>(p);
+    int num = bit_set_count((uint32_t)bmap);
 
     Rect bbox = glyph.theBBox();
     Rect diamax(Position(bbox.bl.x + bbox.bl.y, bbox.bl.x - bbox.tr.y),
                 Position(bbox.tr.x + bbox.tr.y, bbox.tr.x - bbox.bl.y));
     Rect diabound = readbox(diamax, p[0], p[2], p[1], p[3]);
     ::new (curr) GlyphBox(num, bmap, &diabound);
-    be::skip<uint8>(p, 4);
+    be::skip<uint8_t>(p, 4);
     if (glocs + 6 + num * 8 >= gloce)
         return 0;
 
@@ -482,7 +482,7 @@ GlyphBox * GlyphCache::Loader::read_box(uint16 gid, GlyphBox *curr, const GlyphF
     {
         Rect box = readbox((i & 1) ? diamax : bbox, p[0], p[2], p[1], p[3]);
         curr->addSubBox(i >> 1, i & 1, &box);
-        be::skip<uint8>(p, 4);
+        be::skip<uint8_t>(p, 4);
     }
     return (GlyphBox *)((char *)(curr) + sizeof(GlyphBox) + 2 * num * sizeof(Rect));
 }

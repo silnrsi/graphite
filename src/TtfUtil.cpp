@@ -157,7 +157,7 @@ bool GetHeaderInfo(size_t & lOffset, size_t & lSize)
 {
     lOffset = 0;
     lSize   = offsetof(Sfnt::OffsetSubTable, table_directory);
-    assert(sizeof(uint32) + 4*sizeof (uint16) == lSize);
+    assert(sizeof(uint32_t) + 4*sizeof (uint16_t) == lSize);
     return true;
 }
 
@@ -304,16 +304,16 @@ bool CheckTable(const Tag TableId, const void * pTable, size_t lTableSize)
         if (be::swap(pOs2->version) == 0)
         { // OS/2 table version 1 size
 //          if (sizeof(Sfnt::Compatibility)
-//                  - sizeof(uint32)*2 - sizeof(int16)*2
-//                  - sizeof(uint16)*3 <= lTableSize)
+//                  - sizeof(uint32_t)*2 - sizeof(int16_t)*2
+//                  - sizeof(uint16_t)*3 <= lTableSize)
             if (sizeof(Sfnt::Compatibility0) <= lTableSize)
                 return true;
         }
         else if (be::swap(pOs2->version) == 1)
         { // OS/2 table version 2 size
 //          if (sizeof(Sfnt::Compatibility)
-//                  - sizeof(int16) *2
-//                  - sizeof(uint16)*3 <= lTableSize)
+//                  - sizeof(int16_t) *2
+//                  - sizeof(uint16_t)*3 <= lTableSize)
             if (sizeof(Sfnt::Compatibility1) <= lTableSize)
                 return true;
         }
@@ -533,8 +533,8 @@ bool GetNameInfo(const void * pName, int nPlatformId, int nEncodingId,
     lSize = 0;
 
     const Sfnt::FontNames * pTable = reinterpret_cast<const Sfnt::FontNames *>(pName);
-    uint16 cRecord = be::swap(pTable->count);
-    uint16 nRecordOffset = be::swap(pTable->string_offset);
+    uint16_t cRecord = be::swap(pTable->count);
+    uint16_t nRecordOffset = be::swap(pTable->string_offset);
     const Sfnt::NameRecord * pRecord = reinterpret_cast<const Sfnt::NameRecord *>(pTable + 1);
 
     for (int i = 0; i < cRecord; ++i)
@@ -565,9 +565,9 @@ int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
 {
     const Sfnt::FontNames * pTable = reinterpret_cast<const Sfnt::FontNames *>(pName);
         int cLangIds = 0;
-    uint16 cRecord = be::swap(pTable->count);
+    uint16_t cRecord = be::swap(pTable->count);
         if (cRecord > 127) return cLangIds;
-    //uint16 nRecordOffset = swapw(pTable->stringOffset);
+    //uint16_t nRecordOffset = swapw(pTable->stringOffset);
     const Sfnt::NameRecord * pRecord = reinterpret_cast<const Sfnt::NameRecord *>(pTable + 1);
 
     for (int i = 0; i < cRecord; ++i)
@@ -610,7 +610,7 @@ int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
 
 /*----------------------------------------------------------------------------------------------
     Get the offset and size of the font family name in English for the MS Platform with Unicode
-    writing system. The offset is within the pName data. The string is double byte with MSB
+    writing system. The offset is within the pName data. The string is double uint8_t with MSB
     first.
 ----------------------------------------------------------------------------------------------*/
 bool Get31EngFamilyInfo(const void * pName, size_t & lOffset, size_t & lSize)
@@ -621,7 +621,7 @@ bool Get31EngFamilyInfo(const void * pName, size_t & lOffset, size_t & lSize)
 
 /*----------------------------------------------------------------------------------------------
     Get the offset and size of the full font name in English for the MS Platform with Unicode
-    writing system. The offset is within the pName data. The string is double byte with MSB
+    writing system. The offset is within the pName data. The string is double uint8_t with MSB
     first.
 
     Note: this method is not currently used by the Graphite engine.
@@ -634,7 +634,7 @@ bool Get31EngFullFontInfo(const void * pName, size_t & lOffset, size_t & lSize)
 
 /*----------------------------------------------------------------------------------------------
     Get the offset and size of the font family name in English for the MS Platform with Symbol
-    writing system. The offset is within the pName data. The string is double byte with MSB
+    writing system. The offset is within the pName data. The string is double uint8_t with MSB
     first.
 ----------------------------------------------------------------------------------------------*/
 bool Get30EngFamilyInfo(const void * pName, size_t & lOffset, size_t & lSize)
@@ -645,7 +645,7 @@ bool Get30EngFamilyInfo(const void * pName, size_t & lOffset, size_t & lSize)
 
 /*----------------------------------------------------------------------------------------------
     Get the offset and size of the full font name in English for the MS Platform with Symbol
-    writing system. The offset is within the pName data. The string is double byte with MSB
+    writing system. The offset is within the pName data. The string is double uint8_t with MSB
     first.
 
     Note: this method is not currently used by the Graphite engine.
@@ -707,7 +707,7 @@ int PostLookup(const void * pPost, size_t lPostSize, const void * pMaxp,
         int cnGlyphs = GlyphCount(pMaxp);
         for (gid16 nGlyphId = 0; nGlyphId < cnGlyphs && nGlyphId < kcPostNames;
                 nGlyphId++)
-        { // glyph_name_index25 contains bytes so no byte swapping needed
+        { // glyph_name_index25 contains bytes so no uint8_t swapping needed
           // search for first glyph id that uses the standard name
             if (nGlyphId + pTable25->offset[nGlyphId] == iPostName)
                 return nGlyphId;
@@ -785,16 +785,16 @@ void SwapWString(void * pWStr, size_t nSize /* = 0 */) //throw (std::invalid_arg
         return;
     }
 
-    uint16 * pStr = reinterpret_cast<uint16 *>(pWStr);
-    uint16 * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
+    uint16_t * pStr = reinterpret_cast<uint16_t *>(pWStr);
+    uint16_t * const pStrEnd = pStr + (nSize == 0 ? wcslen((const wchar_t*)pStr) : nSize);
 
         for (; pStr != pStrEnd; ++pStr)
           *pStr = be::swap(*pStr);
-//  std::transform(pStr, pStrEnd, pStr, read<uint16>);
+//  std::transform(pStr, pStrEnd, pStr, read<uint16_t>);
 
 //      for (int i = 0; i < nSize; i++)
 //      { // swap the wide characters in the string
-//          pStr[i] = utf16(be::swap(uint16(pStr[i])));
+//          pStr[i] = utf16(be::swap(uint16_t(pStr[i])));
 //      }
 }
 #endif
@@ -823,15 +823,15 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
     {
         // guard against bad glyph id
         size_t lLsbOffset = sizeof(Sfnt::HorizontalMetric) * cLongHorMetrics +
-            sizeof(int16) * (nGlyphId - cLongHorMetrics); // offset in bytes
+            sizeof(int16_t) * (nGlyphId - cLongHorMetrics); // offset in bytes
         // We test like this as LsbOffset is an offset not a length.
-        if (lLsbOffset >= lHmtxSize - sizeof(int16) || cLongHorMetrics == 0)
+        if (lLsbOffset >= lHmtxSize - sizeof(int16_t) || cLongHorMetrics == 0)
         {
             nLsb = 0;
             return false;
         }
         nAdvWid = be::swap(phmtx[cLongHorMetrics - 1].advance_width);
-        nLsb = be::peek<int16>(reinterpret_cast<const byte *>(phmtx) + lLsbOffset);
+        nLsb = be::peek<int16_t>(reinterpret_cast<const uint8_t *>(phmtx) + lLsbOffset);
     }
 
     return true;
@@ -845,7 +845,7 @@ bool HorMetrics(gid16 nGlyphId, const void * pHmtx, size_t lHmtxSize, const void
 const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int nEncodingId, /* = 1 */ size_t length)
 {
     const Sfnt::CharacterCodeMap * pTable = reinterpret_cast<const Sfnt::CharacterCodeMap *>(pCmap);
-    uint16 csuPlatforms = be::swap(pTable->num_subtables);
+    uint16_t csuPlatforms = be::swap(pTable->num_subtables);
     if (length && (sizeof(Sfnt::CharacterCodeMap) + 8 * (csuPlatforms - 1) > length))
         return NULL;
     for (int i = 0; i < csuPlatforms; i++)
@@ -853,16 +853,16 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
         if (be::swap(pTable->encoding[i].platform_id) == nPlatformId &&
                 (nEncodingId == -1 || be::swap(pTable->encoding[i].platform_specific_id) == nEncodingId))
         {
-            uint32 offset = be::swap(pTable->encoding[i].offset);
-            const uint8 * pRtn = reinterpret_cast<const uint8 *>(pCmap) + offset;
+            uint32_t offset = be::swap(pTable->encoding[i].offset);
+            const uint8_t * pRtn = reinterpret_cast<const uint8_t *>(pCmap) + offset;
             if (length)
             {
                 if (offset > length - 2) return NULL;
-                uint16 format = be::read<uint16>(pRtn);
+                uint16_t format = be::read<uint16_t>(pRtn);
                 if (format == 4)
                 {
                     if (offset > length - 4) return NULL;
-                    uint16 subTableLength = be::peek<uint16>(pRtn);
+                    uint16_t subTableLength = be::peek<uint16_t>(pRtn);
                     if (i + 1 == csuPlatforms)
                     {
                         if (subTableLength > length - offset)
@@ -874,7 +874,7 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
                 if (format == 12)
                 {
                     if (offset > length - 6) return NULL;
-                    uint32 subTableLength = be::peek<uint32>(pRtn);
+                    uint32_t subTableLength = be::peek<uint32_t>(pRtn);
                     if (i + 1 == csuPlatforms)
                     {
                         if (subTableLength > length - offset)
@@ -884,7 +884,7 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
                         return NULL;
                 }
             }
-            return reinterpret_cast<const uint8 *>(pCmap) + offset;
+            return reinterpret_cast<const uint8_t *>(pCmap) + offset;
         }
     }
 
@@ -896,7 +896,7 @@ const void * FindCmapSubtable(const void * pCmap, int nPlatformId, /* =3 */ int 
 ----------------------------------------------------------------------------------------------*/
 bool CheckCmapSubtable4(const void * pCmapSubtable4, const void * pCmapEnd /*, unsigned int maxgid*/)
 {
-    size_t table_len = (const byte *)pCmapEnd - (const byte *)pCmapSubtable4;
+    size_t table_len = (const uint8_t *)pCmapEnd - (const uint8_t *)pCmapSubtable4;
     if (!pCmapSubtable4) return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable4);
     // Bob H say some freeware TT fonts have version 1 (eg, CALIGULA.TTF)
@@ -905,37 +905,37 @@ bool CheckCmapSubtable4(const void * pCmapSubtable4, const void * pCmapEnd /*, u
     const Sfnt::CmapSubTableFormat4 * pTable4 = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmapSubtable4);
     if (table_len < sizeof(*pTable4))
         return false;
-    uint16 length = be::swap(pTable4->length);
+    uint16_t length = be::swap(pTable4->length);
     if (length > table_len)
         return false;
     if (length < sizeof(Sfnt::CmapSubTableFormat4))
         return false;
-    uint16 nRanges = be::swap(pTable4->seg_count_x2) >> 1;
-    if (!nRanges || length < sizeof(Sfnt::CmapSubTableFormat4) + 4 * nRanges * sizeof(uint16))
+    uint16_t nRanges = be::swap(pTable4->seg_count_x2) >> 1;
+    if (!nRanges || length < sizeof(Sfnt::CmapSubTableFormat4) + 4 * nRanges * sizeof(uint16_t))
         return false;
     // check last range is properly terminated
-    uint16 chEnd = be::peek<uint16>(pTable4->end_code + nRanges - 1);
+    uint16_t chEnd = be::peek<uint16_t>(pTable4->end_code + nRanges - 1);
     if (chEnd != 0xFFFF)
         return false;
 #if 0
     int lastend = -1;
     for (int i = 0; i < nRanges; ++i)
     {
-        uint16 end = be::peek<uint16>(pTable4->end_code + i);
-        uint16 start = be::peek<uint16>(pTable4->end_code + nRanges + 1 + i);
-        int16 delta = be::peek<int16>(pTable4->end_code + 2*nRanges + 1 + i);
-        uint16 offset = be::peek<uint16>(pTable4->end_code + 3*nRanges + 1 + i);
+        uint16_t end = be::peek<uint16_t>(pTable4->end_code + i);
+        uint16_t start = be::peek<uint16_t>(pTable4->end_code + nRanges + 1 + i);
+        int16_t delta = be::peek<int16_t>(pTable4->end_code + 2*nRanges + 1 + i);
+        uint16_t offset = be::peek<uint16_t>(pTable4->end_code + 3*nRanges + 1 + i);
         if (lastend >= end || lastend >= start)
             return false;
         if (offset)
         {
-            const uint16 *gstart = pTable4->end_code + 3*nRanges + 1 + i + (offset >> 1);
-            const uint16 *gend = gstart + end - start;
+            const uint16_t *gstart = pTable4->end_code + 3*nRanges + 1 + i + (offset >> 1);
+            const uint16_t *gend = gstart + end - start;
             if ((char *)gend >= (char *)pCmapSubtable4 + length)
                 return false;
             while (gstart <= gend)
             {
-                uint16 g = be::peek<uint16>(gstart++);
+                uint16_t g = be::peek<uint16_t>(gstart++);
                 if (g && ((g + delta) & 0xFFFF) > maxgid)
                     return false;
             }
@@ -957,16 +957,16 @@ gid16 CmapSubtable4Lookup(const void * pCmapSubtabel4, unsigned int nUnicodeId, 
 {
     const Sfnt::CmapSubTableFormat4 * pTable = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmapSubtabel4);
 
-    uint16 nSeg = be::swap(pTable->seg_count_x2) >> 1;
+    uint16_t nSeg = be::swap(pTable->seg_count_x2) >> 1;
 
-    uint16 n;
-    const uint16 * pLeft, * pMid;
-    uint16 cMid, chStart, chEnd;
+    uint16_t n;
+    const uint16_t * pLeft, * pMid;
+    uint16_t cMid, chStart, chEnd;
 
     if (rangeKey)
     {
         pMid = &(pTable->end_code[rangeKey]);
-        chEnd = be::peek<uint16>(pMid);
+        chEnd = be::peek<uint16_t>(pMid);
     }
     else
     {
@@ -977,10 +977,10 @@ gid16 CmapSubtable4Lookup(const void * pCmapSubtabel4, unsigned int nUnicodeId, 
         {
             cMid = n >> 1;           // Pick an element in the middle
             pMid = pLeft + cMid;
-            chEnd = be::peek<uint16>(pMid);
+            chEnd = be::peek<uint16_t>(pMid);
             if (nUnicodeId <= chEnd)
             {
-                if (cMid == 0 || nUnicodeId > be::peek<uint16>(pMid -1))
+                if (cMid == 0 || nUnicodeId > be::peek<uint16_t>(pMid -1))
                         break;          // Must be this seg or none!
                 n = cMid;            // Continue on left side, omitting mid point
             }
@@ -998,22 +998,22 @@ gid16 CmapSubtable4Lookup(const void * pCmapSubtabel4, unsigned int nUnicodeId, 
     // Ok, we're down to one segment and pMid points to the endCode element
     // Either this is it or none is.
 
-    chStart = be::peek<uint16>(pMid += nSeg + 1);
+    chStart = be::peek<uint16_t>(pMid += nSeg + 1);
     if (chEnd >= nUnicodeId && nUnicodeId >= chStart)
     {
         // Found correct segment. Find Glyph Id
-        int16 idDelta = be::peek<uint16>(pMid += nSeg);
-        uint16 idRangeOffset = be::peek<uint16>(pMid += nSeg);
+        int16_t idDelta = be::peek<uint16_t>(pMid += nSeg);
+        uint16_t idRangeOffset = be::peek<uint16_t>(pMid += nSeg);
 
         if (idRangeOffset == 0)
-            return (uint16)(idDelta + nUnicodeId); // must use modulus 2^16
+            return (uint16_t)(idDelta + nUnicodeId); // must use modulus 2^16
 
         // Look up value in glyphIdArray
         const ptrdiff_t offset = (nUnicodeId - chStart) + (idRangeOffset >> 1) +
-                (pMid - reinterpret_cast<const uint16 *>(pTable));
-        if (offset * 2 + 1 >= be::swap<uint16>(pTable->length))
+                (pMid - reinterpret_cast<const uint16_t *>(pTable));
+        if (offset * 2 + 1 >= be::swap<uint16_t>(pTable->length))
             return 0;
-        gid16 nGlyphId = be::peek<uint16>(reinterpret_cast<const uint16 *>(pTable)+offset);
+        gid16 nGlyphId = be::peek<uint16_t>(reinterpret_cast<const uint16_t *>(pTable)+offset);
         // If this value is 0, return 0. Else add the idDelta
         return nGlyphId ? nGlyphId + idDelta : 0;
     }
@@ -1031,11 +1031,11 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 {
     const Sfnt::CmapSubTableFormat4 * pTable = reinterpret_cast<const Sfnt::CmapSubTableFormat4 *>(pCmap31);
 
-    uint16 nRange = be::swap(pTable->seg_count_x2) >> 1;
+    uint16_t nRange = be::swap(pTable->seg_count_x2) >> 1;
 
-    uint32 nUnicodePrev = (uint32)nUnicodeId;
+    uint32_t nUnicodePrev = (uint32_t)nUnicodeId;
 
-    const uint16 * pStartCode = &(pTable->end_code[0])
+    const uint16_t * pStartCode = &(pTable->end_code[0])
         + nRange // length of end code array
         + 1;   // reserved word
 
@@ -1044,7 +1044,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
         // return the first codepoint.
         if (pRangeKey)
             *pRangeKey = 0;
-        return be::peek<uint16>(pStartCode);
+        return be::peek<uint16_t>(pStartCode);
     }
     else if (nUnicodePrev >= 0xFFFF)
     {
@@ -1055,14 +1055,14 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 
     int iRange = (pRangeKey) ? *pRangeKey : 0;
     // Just in case we have a bad key:
-    while (iRange > 0 && be::peek<uint16>(pStartCode + iRange) > nUnicodePrev)
+    while (iRange > 0 && be::peek<uint16_t>(pStartCode + iRange) > nUnicodePrev)
         iRange--;
-    while (iRange < nRange - 1 && be::peek<uint16>(pTable->end_code + iRange) < nUnicodePrev)
+    while (iRange < nRange - 1 && be::peek<uint16_t>(pTable->end_code + iRange) < nUnicodePrev)
         iRange++;
 
     // Now iRange is the range containing nUnicodePrev.
-    unsigned int nStartCode = be::peek<uint16>(pStartCode + iRange);
-    unsigned int nEndCode = be::peek<uint16>(pTable->end_code + iRange);
+    unsigned int nStartCode = be::peek<uint16_t>(pStartCode + iRange);
+    unsigned int nEndCode = be::peek<uint16_t>(pTable->end_code + iRange);
 
     if (nStartCode > nUnicodePrev)
         // Oops, nUnicodePrev is not in the cmap! Adjust so we get a reasonable
@@ -1082,7 +1082,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
     // ends with 0xFFFF.
     if (pRangeKey)
         *pRangeKey = iRange + 1;
-    return (iRange + 1 >= nRange) ? 0xFFFF : be::peek<uint16>(pStartCode + iRange + 1);
+    return (iRange + 1 >= nRange) ? 0xFFFF : be::peek<uint16_t>(pStartCode + iRange + 1);
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1090,7 +1090,7 @@ unsigned int CmapSubtable4NextCodepoint(const void *pCmap31, unsigned int nUnico
 ----------------------------------------------------------------------------------------------*/
 bool CheckCmapSubtable12(const void *pCmapSubtable12, const void *pCmapEnd /*, unsigned int maxgid*/)
 {
-    size_t table_len = (const byte *)pCmapEnd - (const byte *)pCmapSubtable12;
+    size_t table_len = (const uint8_t *)pCmapEnd - (const uint8_t *)pCmapSubtable12;
     if (!pCmapSubtable12)  return false;
     const Sfnt::CmapSubTable * pTable = reinterpret_cast<const Sfnt::CmapSubTable *>(pCmapSubtable12);
     if (table_len < sizeof(*pTable) || be::swap(pTable->format) != 12)
@@ -1098,13 +1098,13 @@ bool CheckCmapSubtable12(const void *pCmapSubtable12, const void *pCmapEnd /*, u
     const Sfnt::CmapSubTableFormat12 * pTable12 = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmapSubtable12);
     if (table_len < sizeof(*pTable12))
         return false;
-    uint32 length = be::swap(pTable12->length);
+    uint32_t length = be::swap(pTable12->length);
     if (length > table_len)
         return false;
     if (length < sizeof(Sfnt::CmapSubTableFormat12))
         return false;
-    uint32 num_groups = be::swap(pTable12->num_groups);
-    if (num_groups > 0x10000000 || length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32) * 3))
+    uint32_t num_groups = be::swap(pTable12->num_groups);
+    if (num_groups > 0x10000000 || length != (sizeof(Sfnt::CmapSubTableFormat12) + (num_groups - 1) * sizeof(uint32_t) * 3))
         return false;
 #if 0
     for (unsigned int i = 0; i < num_groups; ++i)
@@ -1127,17 +1127,17 @@ gid16 CmapSubtable12Lookup(const void * pCmap310, unsigned int uUnicodeId, int r
 {
     const Sfnt::CmapSubTableFormat12 * pTable = reinterpret_cast<const Sfnt::CmapSubTableFormat12 *>(pCmap310);
 
-    //uint32 uLength = be::swap(pTable->length); //could use to test for premature end of table
-    uint32 ucGroups = be::swap(pTable->num_groups);
+    //uint32_t uLength = be::swap(pTable->length); //could use to test for premature end of table
+    uint32_t ucGroups = be::swap(pTable->num_groups);
 
     for (unsigned int i = rangeKey; i < ucGroups; i++)
     {
-        uint32 uStartCode = be::swap(pTable->group[i].start_char_code);
-        uint32 uEndCode = be::swap(pTable->group[i].end_char_code);
+        uint32_t uStartCode = be::swap(pTable->group[i].start_char_code);
+        uint32_t uEndCode = be::swap(pTable->group[i].end_char_code);
         if (uUnicodeId >= uStartCode && uUnicodeId <= uEndCode)
         {
-            uint32 uDiff = uUnicodeId - uStartCode;
-            uint32 uStartGid = be::swap(pTable->group[i].start_glyph_id);
+            uint32_t uDiff = uUnicodeId - uStartCode;
+            uint32_t uStartGid = be::swap(pTable->group[i].start_glyph_id);
             return static_cast<gid16>(uStartGid + uDiff);
         }
     }
@@ -1157,7 +1157,7 @@ unsigned int CmapSubtable12NextCodepoint(const void *pCmap310, unsigned int nUni
 
     int nRange = be::swap(pTable->num_groups);
 
-    uint32 nUnicodePrev = (uint32)nUnicodeId;
+    uint32_t nUnicodePrev = (uint32_t)nUnicodeId;
 
     if (nUnicodePrev == 0)
     {
@@ -1223,9 +1223,9 @@ size_t LocaLookup(gid16 nGlyphId,
     { // loca entries are two bytes and have been divided by two
         if (lLocaSize > 1 && nGlyphId + 1u < lLocaSize >> 1) // allow sentinel value to be accessed
         {
-            const uint16 * pShortTable = reinterpret_cast<const uint16 *>(pLoca);
-            res = be::peek<uint16>(pShortTable + nGlyphId) << 1;
-            if (res == static_cast<size_t>(be::peek<uint16>(pShortTable + nGlyphId + 1) << 1))
+            const uint16_t * pShortTable = reinterpret_cast<const uint16_t *>(pLoca);
+            res = be::peek<uint16_t>(pShortTable + nGlyphId) << 1;
+            if (res == static_cast<size_t>(be::peek<uint16_t>(pShortTable + nGlyphId + 1) << 1))
                 return -1;
         }
     }
@@ -1233,9 +1233,9 @@ size_t LocaLookup(gid16 nGlyphId,
     { // loca entries are four bytes
         if (lLocaSize > 3 && nGlyphId + 1u < lLocaSize >> 2)
         {
-            const uint32 * pLongTable = reinterpret_cast<const uint32 *>(pLoca);
-            res = be::peek<uint32>(pLongTable + nGlyphId);
-            if (res == static_cast<size_t>(be::peek<uint32>(pLongTable + nGlyphId + 1)))
+            const uint32_t * pLongTable = reinterpret_cast<const uint32_t *>(pLoca);
+            res = be::peek<uint32_t>(pLongTable + nGlyphId);
+            if (res == static_cast<size_t>(be::peek<uint32_t>(pLongTable + nGlyphId + 1)))
                 return -1;
         }
     }
@@ -1251,10 +1251,10 @@ size_t LocaLookup(gid16 nGlyphId,
 ----------------------------------------------------------------------------------------------*/
 void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
 {
-    const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
+    const uint8_t * pByte = reinterpret_cast<const uint8_t *>(pGlyf);
         if (nGlyfOffset + pByte < pByte || nGlyfOffset >= nTableLen - sizeof(Sfnt::Glyph))
             return NULL;
-    return const_cast<uint8 *>(pByte + nGlyfOffset);
+    return const_cast<uint8_t *>(pByte + nGlyfOffset);
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1338,13 +1338,13 @@ bool GlyfPoints(const void * pSimpleGlyf, int * prgnX, int * prgnY,
     if (cPts > cnPointsTotal)
         return false;
 
-    // skip over bounding box data & point to byte count of instructions (hints)
-    const uint8 * pbGlyph = reinterpret_cast<const uint8 *>
+    // skip over bounding box data & point to uint8_t count of instructions (hints)
+    const uint8_t * pbGlyph = reinterpret_cast<const uint8_t *>
         (&pGlyph->end_pts_of_contours[cContours]);
 
     // skip over hints & point to first flag
-    int cbHints = be::swap(*(uint16 *)pbGlyph);
-    pbGlyph += sizeof(uint16);
+    int cbHints = be::swap(*(uint16_t *)pbGlyph);
+    pbGlyph += sizeof(uint16_t);
     pbGlyph += cbHints;
 
     // load flags & point to first x coordinate
@@ -1358,7 +1358,7 @@ bool GlyfPoints(const void * pSimpleGlyf, int * prgnX, int * prgnY,
             iFlag++;
         }
         else
-        { // flag is repeated; count specified by next byte
+        { // flag is repeated; count specified by next uint8_t
             char chFlag = (char)*pbGlyph;
             pbGlyph++;
             int cFlags = (int)*pbGlyph;
@@ -1397,8 +1397,8 @@ bool GlyfPoints(const void * pSimpleGlyf, int * prgnX, int * prgnY,
             }
             else
             {
-                prgnX[iFlag] = be::swap(*(int16 *)pbGlyph);
-                pbGlyph += sizeof(int16);
+                prgnX[iFlag] = be::swap(*(int16_t *)pbGlyph);
+                pbGlyph += sizeof(int16_t);
             }
         }
         iFlag++;
@@ -1426,8 +1426,8 @@ bool GlyfPoints(const void * pSimpleGlyf, int * prgnX, int * prgnY,
             }
             else
             {
-                prgnY[iFlag] = be::swap(*(int16 *)pbGlyph);
-                pbGlyph += sizeof(int16);
+                prgnY[iFlag] = be::swap(*(int16_t *)pbGlyph);
+                pbGlyph += sizeof(int16_t);
             }
         }
         iFlag++;
@@ -1456,16 +1456,16 @@ bool GetComponentGlyphIds(const void * pSimpleGlyf, int * prgnCompId,
 
     const Sfnt::SimpleGlyph * pGlyph = reinterpret_cast<const Sfnt::SimpleGlyph *>(pSimpleGlyf);
     // for a composite glyph, the special data begins here
-    const uint8 * pbGlyph = reinterpret_cast<const uint8 *>(&pGlyph->end_pts_of_contours[0]);
+    const uint8_t * pbGlyph = reinterpret_cast<const uint8_t *>(&pGlyph->end_pts_of_contours[0]);
 
-    uint16 GlyphFlags;
+    uint16_t GlyphFlags;
     size_t iCurrentComp = 0;
     do
     {
-        GlyphFlags = be::swap(*((uint16 *)pbGlyph));
-        pbGlyph += sizeof(uint16);
-        prgnCompId[iCurrentComp++] = be::swap(*((uint16 *)pbGlyph));
-        pbGlyph += sizeof(uint16);
+        GlyphFlags = be::swap(*((uint16_t *)pbGlyph));
+        pbGlyph += sizeof(uint16_t);
+        prgnCompId[iCurrentComp++] = be::swap(*((uint16_t *)pbGlyph));
+        pbGlyph += sizeof(uint16_t);
         if (iCurrentComp >= cnCompIdTotal)
             return false;
         int nOffset = 0;
@@ -1501,24 +1501,24 @@ bool GetComponentPlacement(const void * pSimpleGlyf, int nCompId,
 
     const Sfnt::SimpleGlyph * pGlyph = reinterpret_cast<const Sfnt::SimpleGlyph *>(pSimpleGlyf);
     // for a composite glyph, the special data begins here
-    const uint8 * pbGlyph = reinterpret_cast<const uint8 *>(&pGlyph->end_pts_of_contours[0]);
+    const uint8_t * pbGlyph = reinterpret_cast<const uint8_t *>(&pGlyph->end_pts_of_contours[0]);
 
-    uint16 GlyphFlags;
+    uint16_t GlyphFlags;
     do
     {
-        GlyphFlags = be::swap(*((uint16 *)pbGlyph));
-        pbGlyph += sizeof(uint16);
-        if (be::swap(*((uint16 *)pbGlyph)) == nCompId)
+        GlyphFlags = be::swap(*((uint16_t *)pbGlyph));
+        pbGlyph += sizeof(uint16_t);
+        if (be::swap(*((uint16_t *)pbGlyph)) == nCompId)
         {
-            pbGlyph += sizeof(uint16); // skip over glyph id of component
+            pbGlyph += sizeof(uint16_t); // skip over glyph id of component
             fOffset = (GlyphFlags & CompoundGlyph::ArgsAreXYValues) == CompoundGlyph::ArgsAreXYValues;
 
             if (GlyphFlags & CompoundGlyph::Arg1Arg2Words )
             {
-                a = be::swap(*(int16 *)pbGlyph);
-                pbGlyph += sizeof(int16);
-                b = be::swap(*(int16 *)pbGlyph);
-                pbGlyph += sizeof(int16);
+                a = be::swap(*(int16_t *)pbGlyph);
+                pbGlyph += sizeof(int16_t);
+                b = be::swap(*(int16_t *)pbGlyph);
+                pbGlyph += sizeof(int16_t);
             }
             else
             { // args are signed bytes
@@ -1527,7 +1527,7 @@ bool GetComponentPlacement(const void * pSimpleGlyf, int nCompId,
             }
             return true;
         }
-        pbGlyph += sizeof(uint16); // skip over glyph id of component
+        pbGlyph += sizeof(uint16_t); // skip over glyph id of component
         int nOffset = 0;
         nOffset += GlyphFlags & CompoundGlyph::Arg1Arg2Words  ? 4 : 2;
         nOffset += GlyphFlags & CompoundGlyph::HaveScale ? 2 : 0;
@@ -1566,16 +1566,16 @@ bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
 
     const Sfnt::SimpleGlyph * pGlyph = reinterpret_cast<const Sfnt::SimpleGlyph *>(pSimpleGlyf);
     // for a composite glyph, the special data begins here
-    const uint8 * pbGlyph = reinterpret_cast<const uint8 *>(&pGlyph->end_pts_of_contours[0]);
+    const uint8_t * pbGlyph = reinterpret_cast<const uint8_t *>(&pGlyph->end_pts_of_contours[0]);
 
-    uint16 GlyphFlags;
+    uint16_t GlyphFlags;
     do
     {
-        GlyphFlags = be::swap(*((uint16 *)pbGlyph));
-        pbGlyph += sizeof(uint16);
-        if (be::swap(*((uint16 *)pbGlyph)) == nCompId)
+        GlyphFlags = be::swap(*((uint16_t *)pbGlyph));
+        pbGlyph += sizeof(uint16_t);
+        if (be::swap(*((uint16_t *)pbGlyph)) == nCompId)
         {
-            pbGlyph += sizeof(uint16); // skip over glyph id of component
+            pbGlyph += sizeof(uint16_t); // skip over glyph id of component
             pbGlyph += GlyphFlags & CompoundGlyph::Arg1Arg2Words  ? 4 : 2; // skip over placement data
 
             if (fTransOffset) // MS rasterizer
@@ -1585,31 +1585,31 @@ bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
 
             if (GlyphFlags & CompoundGlyph::HaveScale)
             {
-                flt11 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
+                flt11 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
                 flt12 = 0;
                 flt21 = 0;
                 flt22 = flt11;
             }
             else if (GlyphFlags & CompoundGlyph::HaveXAndYScale)
             {
-                flt11 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
+                flt11 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
                 flt12 = 0;
                 flt21 = 0;
-                flt22 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
+                flt22 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
             }
             else if (GlyphFlags & CompoundGlyph::HaveTwoByTwo)
             {
-                flt11 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
-                flt12 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
-                flt21 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
-                flt22 = fixed_to_float<14>(be::swap(*(uint16 *)pbGlyph));
-                pbGlyph += sizeof(uint16);
+                flt11 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
+                flt12 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
+                flt21 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
+                flt22 = fixed_to_float<14>(be::swap(*(uint16_t *)pbGlyph));
+                pbGlyph += sizeof(uint16_t);
             }
             else
             { // identity transform
@@ -1620,7 +1620,7 @@ bool GetComponentTransform(const void * pSimpleGlyf, int nCompId,
             }
             return true;
         }
-        pbGlyph += sizeof(uint16); // skip over glyph id of component
+        pbGlyph += sizeof(uint16_t); // skip over glyph id of component
         int nOffset = 0;
         nOffset += GlyphFlags & CompoundGlyph::Arg1Arg2Words  ? 4 : 2;
         nOffset += GlyphFlags & CompoundGlyph::HaveScale ? 2 : 0;
@@ -2028,9 +2028,9 @@ bool CalcAbsolutePoints(int * prgnX, int * prgnY, int cnPoints)
     Currently used.
 ---------------------------------------------------------------------------------------------*/
 #if 0
-size_t NameTableLength(const byte * pTable)
+size_t NameTableLength(const uint8_t * pTable)
 {
-    byte * pb = (const_cast<byte *>(pTable)) + 2; // skip format
+    uint8_t * pb = (const_cast<uint8_t *>(pTable)) + 2; // skip format
     size_t cRecords = *pb++ << 8; cRecords += *pb++;
     int dbStringOffset0 = (*pb++) << 8; dbStringOffset0 += *pb++;
     int dbMaxStringOffset = 0;

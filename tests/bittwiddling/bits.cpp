@@ -28,17 +28,17 @@ The test harness for the Sparse class. This validates the
 sparse classe is working correctly.
 -----------------------------------------------------------------------------*/
 
-#include <cassert>
+// #include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <string>
-#include "inc/Main.h"
 #include "inc/bits.h"
 
 using namespace graphite2;
 
-#if defined(__x86_64__) || defined(_WIN64)
+#if (UINTPTR_MAX == UINT64_MAX)
 	#define HAS_64BIT
 #endif
 
@@ -51,8 +51,8 @@ using namespace graphite2;
 #define pat64(b) pat32(b), pat32(ffffffff##b)
 
 #define patterns(bw) \
-    uint##bw const  u##bw##_pat[] = {0, pat##bw(UL) }; \
-    int##bw const * s##bw##_pat   = reinterpret_cast<int##bw const *>(u##bw##_pat)
+    uint##bw##_t const   u##bw##_pat[] = {0, pat##bw(UL) }; \
+    int##bw##_t  const * s##bw##_pat   = reinterpret_cast<int##bw##_t const *>(u##bw##_pat)
 
 //#define BENCHMARK 40000000
 #if defined BENCHMARK
@@ -61,9 +61,6 @@ using namespace graphite2;
 #define benchmark()
 #endif
 
-
-typedef     unsigned long long   uint64;
-typedef     signed long long     int64;
 namespace
 {
     patterns(8);
@@ -117,8 +114,6 @@ namespace
 
 int main(int argc , char *argv[])
 {
-    assert(sizeof(uint64) == 8);
-
     benchmark()
     {
         // Test bit_set_count

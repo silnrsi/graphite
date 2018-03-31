@@ -58,10 +58,10 @@ namespace {
 
 const void * direct_run(const bool          get_table_mode,
                         const instr       * program,
-                        const byte        * data,
+                        const uint8_t        * data,
                         Machine::stack_t  * stack,
                         slotref         * & __map,
-                        uint8                _dir,
+                        uint8_t                _dir,
                         Machine::status_t & status,
                         SlotMap           * __smap=0)
 {
@@ -73,7 +73,7 @@ const void * direct_run(const bool          get_table_mode,
 
     // Declare virtual machine registers
     const instr           * ip = program;
-    const byte            * dp = data;
+    const uint8_t            * dp = data;
     Machine::stack_t      * sp = stack + Machine::STACK_GUARD,
                     * const sb = sp;
     SlotMap             & smap = *__smap;
@@ -81,8 +81,8 @@ const void * direct_run(const bool          get_table_mode,
     slotref                 is = *__map,
                          * map = __map,
                   * const mapb = smap.begin()+smap.context();
-    uint8                  dir = _dir;
-    int8                 flags = 0;
+    uint8_t                  dir = _dir;
+    int8_t                 flags = 0;
 
     // start the program
     goto **ip;
@@ -107,7 +107,7 @@ const opcode_t * Machine::getOpcodeTable() throw()
 
 
 Machine::stack_t  Machine::run(const instr   * program,
-                               const byte    * data,
+                               const uint8_t    * data,
                                slotref     * & is)
 {
     assert(program != 0);

@@ -37,14 +37,13 @@ Description:
 
 
 #include <cstddef>
+#include <cstdint>
 
 namespace graphite2
 {
 namespace TtfUtil
 {
-
-typedef long fontTableId32;
-typedef unsigned short gid16;
+typedef uint16_t  gid16;
 
 #define TTF_TAG(a,b,c,d) ((a << 24UL) + (b << 16UL) + (c << 8UL) + (d))
 
@@ -127,7 +126,7 @@ public:
     ////////////////////////////////// utility methods helpful for name table
     bool GetNameInfo(const void * pName, int nPlatformId, int nEncodingId,
         int nLangId, int nNameId, size_t & lOffset, size_t & lSize);
-    //size_t NameTableLength(const byte * pTable);
+    //size_t NameTableLength(const uint8_t * pTable);
 #ifdef ALL_TTFUTILS
     int GetLangsForNames(const void * pName, int nPlatformId, int nEncodingId,
         int *nameIdList, int cNameIds, short *langIdList);

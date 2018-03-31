@@ -4,7 +4,7 @@ Graphite 2 is made available as a source tarball from these urls:
 https://github.com/silnrsi/graphite/releases or +
 http://sf.net/projects/silgraphite/files/graphite2
 
-While Graphite 2 is written in C++11 it is written in a subset that ensures no
+While Graphite 2 is written in C++11, it is written in a subset that ensures no
 runtime dependency on the language runtime.
 
 Graphite 2 uses cmake for its build system. The basic build procedure is to

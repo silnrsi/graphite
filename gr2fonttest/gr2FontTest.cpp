@@ -202,7 +202,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     codesize = 4;
     bool argError = false;
     char* pText = NULL;
-    typedef enum
+    enum TestOptions
     {
         NONE,
         POINT_SIZE,
@@ -218,7 +218,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
         TRACE,
         ALLTRACE,
         SIZE
-    } TestOptions;
+    };
     TestOptions option = NONE;
     char * pIntEnd = NULL;
     char * pFloatEnd = NULL;
@@ -487,7 +487,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     return (argError) ? false : true;
 }
 
-typedef gr_uint32 tag_t;
+typedef uint32_t tag_t;
 
 void Parameters::printFeatures(const gr_face * face) const
 {

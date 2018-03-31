@@ -28,10 +28,10 @@ of the License or (at your option) any later version.
 /*
 Description:
     A set of fast template based decoders for decoding values of any C integer
-    type up to long int size laid out with most significant byte first or least
-    significant byte first (aka big endian or little endian).  These are CPU
-    byte order agnostic and will function the same regardless of the CPUs native
-    byte order.
+    type up to long int size laid out with most significant uint8_t first or least
+    significant uint8_t first (aka big endian or little endian).  These are CPU
+    uint8_t order agnostic and will function the same regardless of the CPUs native
+    uint8_t order.
 
     Being template based means if the either le or be class is not used then
     template code of unused functions will not be instantiated by the compiler

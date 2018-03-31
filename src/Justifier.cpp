@@ -154,14 +154,14 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
                 if (!step) step = 1;        // handle lazy font developers
                 if (pref > 0)
                 {
-                    float max = uint16(s->getJustify(this, i, 0));
+                    float max = uint16_t(s->getJustify(this, i, 0));
                     if (i == 0) max -= s->just();
                     if (pref > max) pref = max;
                     else tWeight += w;
                 }
                 else
                 {
-                    float max = uint16(s->getJustify(this, i, 1));
+                    float max = uint16_t(s->getJustify(this, i, 1));
                     if (i == 0) max += s->just();
                     if (-pref > max) pref = -max;
                     else tWeight += w;
@@ -239,7 +239,7 @@ Slot *Segment::addLineEnd(Slot *nSlot)
 {
     Slot *eSlot = newSlot();
     if (!eSlot) return NULL;
-    const uint16 gid = silf()->endLineGlyphid();
+    const uint16_t gid = silf()->endLineGlyphid();
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     eSlot->setGlyph(this, gid, theGlyph);
     if (nSlot)

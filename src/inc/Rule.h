@@ -36,9 +36,9 @@ struct Rule {
   const vm::Machine::Code * constraint,
                  * action;
   unsigned short   sort;
-  byte             preContext;
+  uint8_t             preContext;
 #ifndef NDEBUG
-  uint16           rule_idx;
+  uint16_t           rule_idx;
 #endif
 
   Rule();
@@ -102,7 +102,7 @@ class SlotMap
 {
 public:
   enum {MAX_SLOTS=64};
-  SlotMap(Segment & seg, uint8 direction, size_t maxSize);
+  SlotMap(Segment & seg, uint8_t direction, size_t maxSize);
 
   Slot       * * begin();
   Slot       * * end();
@@ -120,7 +120,7 @@ public:
   bool           highpassed() const { return m_highpassed; }
   void           highpassed(bool v) { m_highpassed = v; }
 
-  uint8          dir() const { return m_dir; }
+  uint8_t          dir() const { return m_dir; }
   int            decMax() { return --m_maxSize; }
 
   Segment &    segment;
@@ -130,7 +130,7 @@ private:
   unsigned short m_precontext;
   Slot         * m_highwater;
   int            m_maxSize;
-  uint8          m_dir;
+  uint8_t          m_dir;
   bool           m_highpassed;
 };
 
@@ -244,7 +244,7 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
 }
 
 inline
-SlotMap::SlotMap(Segment & seg, uint8 direction, size_t maxSize)
+SlotMap::SlotMap(Segment & seg, uint8_t direction, size_t maxSize)
 : segment(seg), m_size(0), m_precontext(0), m_highwater(0),
     m_maxSize(int(maxSize)), m_dir(direction), m_highpassed(false)
 {

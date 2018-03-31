@@ -32,7 +32,7 @@ of the License or (at your option) any later version.
 #define NILOP   0U
 
 // types or parameters are: (.. is inclusive)
-//      number - any byte
+//      number - any uint8_t
 //      output_class - 0 .. silf.m_nClass
 //      input_class - 0 .. silf.m_nClass
 //      sattrnum - 0 .. 29 (gr_slatJWidth) , 55 (gr_slatUserDefn)
@@ -40,7 +40,7 @@ of the License or (at your option) any later version.
 //      gattrnum - 0 .. face->getGlyphFaceCache->numAttrs()
 //      gmetric - 0 .. 11 (kgmetDescent)
 //      featidx - 0 .. face.numFeatures()
-//      level - any byte
+//      level - any uint8_t
 static const opcode_t opcode_table[] =
 {
     {{do2(nop)},                                    0, "NOP"},

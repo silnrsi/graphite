@@ -72,10 +72,10 @@ private:
     class decoder;
 
     instr *     _code;
-    byte  *     _data;
+    uint8_t  *     _data;
     size_t      _data_size,
                 _instr_count;
-    byte        _max_ref;
+    uint8_t        _max_ref;
     mutable status_t _status;
     bool        _constraint,
                 _modify,
@@ -89,9 +89,9 @@ public:
     static size_t estimateCodeDataOut(size_t num_bytecodes, int nRules, int nSlots);
 
     Code() throw();
-    Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-         uint8 pre_context, uint16 rule_length, const Silf &, const Face &,
-         enum passtype pt, byte * * const _out = 0);
+    Code(bool is_constraint, const uint8_t * bytecode_begin, const uint8_t * const bytecode_end,
+         uint8_t pre_context, uint16_t rule_length, const Silf &, const Face &,
+         enum passtype pt, uint8_t * * const _out = 0);
     Code(const Machine::Code &) throw();
     ~Code() throw();
 
@@ -106,7 +106,7 @@ public:
     size_t        maxRef() const throw()            { return _max_ref; }
     void          externalProgramMoved(ptrdiff_t) throw();
 
-    int32 run(Machine &m, slotref * & map) const;
+    int32_t run(Machine &m, slotref * & map) const;
 
     CLASS_NEW_DELETE;
 };
@@ -116,7 +116,7 @@ size_t  Machine::Code::estimateCodeDataOut(size_t n_bc, int nRules, int nSlots)
 {
     // max is: all codes are instructions + 1 for each rule + max tempcopies
     // allocate space for separate maximal code and data then merge them later
-    return (n_bc + nRules + nSlots) * sizeof(instr) + n_bc * sizeof(byte);
+    return (n_bc + nRules + nSlots) * sizeof(instr) + n_bc * sizeof(uint8_t);
 }
 
 

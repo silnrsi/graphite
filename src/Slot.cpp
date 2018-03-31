@@ -34,7 +34,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Slot::Slot(int16 *user_attrs) :
+Slot::Slot(int16_t *user_attrs) :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
@@ -85,7 +85,7 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
+Position Slot::finalise(const Segment *seg, const Font *font, Position & base, Rect & bbox, uint8_t attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
 {
     SlotCollision *coll = NULL;
     if (depth > 100 || (attrLevel && m_attLevel > attrLevel)) return Position(0, 0);
@@ -153,7 +153,7 @@ Position Slot::finalise(const Segment *seg, const Font *font, Position & base, R
     return res;
 }
 
-int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, bool rtl)
+int32_t Slot::clusterMetric(const Segment *seg, uint8_t metric, uint8_t attrLevel, bool rtl)
 {
     Position base;
     if (glyph() >= seg->getFace()->glyphs().numGlyphs())
@@ -165,25 +165,25 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, boo
     switch (metrics(metric))
     {
     case kgmetLsb :
-        return int32(bbox.bl.x);
+        return int32_t(bbox.bl.x);
     case kgmetRsb :
-        return int32(res.x - bbox.tr.x);
+        return int32_t(res.x - bbox.tr.x);
     case kgmetBbTop :
-        return int32(bbox.tr.y);
+        return int32_t(bbox.tr.y);
     case kgmetBbBottom :
-        return int32(bbox.bl.y);
+        return int32_t(bbox.bl.y);
     case kgmetBbLeft :
-        return int32(bbox.bl.x);
+        return int32_t(bbox.bl.x);
     case kgmetBbRight :
-        return int32(bbox.tr.x);
+        return int32_t(bbox.tr.x);
     case kgmetBbWidth :
-        return int32(bbox.tr.x - bbox.bl.x);
+        return int32_t(bbox.tr.x - bbox.bl.x);
     case kgmetBbHeight :
-        return int32(bbox.tr.y - bbox.bl.y);
+        return int32_t(bbox.tr.y - bbox.bl.y);
     case kgmetAdvWidth :
-        return int32(res.x);
+        return int32_t(res.x);
     case kgmetAdvHeight :
-        return int32(res.y);
+        return int32_t(res.y);
     default :
         return 0;
     }
@@ -191,7 +191,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, boo
 
 #define SLOTGETCOLATTR(x) { SlotCollision *c = seg->collisionInfo(this); return c ? int(c-> x) : 0; }
 
-int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
+int Slot::getAttr(const Segment *seg, attrCode ind, uint8_t subindex) const
 {
     if (ind == gr_slatUserDefnV1)
     {
@@ -270,7 +270,7 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
         c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
         break; }
 
-void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
+void Slot::setAttr(Segment *seg, attrCode ind, uint8_t subindex, int16_t value, const SlotMap & map)
 {
     if (ind == gr_slatUserDefnV1)
     {
@@ -291,7 +291,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatAdvY :  m_advance.y = value; break;
     case gr_slatAttTo :
     {
-        const uint16 idx = uint16(value);
+        const uint16_t idx = uint16_t(value);
         if (idx < map.size() && map[idx])
         {
             Slot *other = map[idx];
@@ -330,7 +330,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     case gr_slatAttWithXOff :
     case gr_slatAttWithYOff :   break;
     case gr_slatAttLevel :
-        m_attLevel = byte(value);
+        m_attLevel = uint8_t(value);
         break;
     case gr_slatBreak :
         seg->charinfo(m_original)->breakWeight(value);
@@ -377,7 +377,7 @@ void Slot::setAttr(Segment *seg, attrCode ind, uint8 subindex, int16 value, cons
     }
 }
 
-int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
+int Slot::getJustify(const Segment *seg, uint8_t level, uint8_t subindex) const
 {
     if (level && level >= seg->silf()->numJustLevels()) return 0;
 
@@ -397,7 +397,7 @@ int Slot::getJustify(const Segment *seg, uint8 level, uint8 subindex) const
     }
 }
 
-void Slot::setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value)
+void Slot::setJustify(Segment *seg, uint8_t level, uint8_t subindex, int16_t value)
 {
     if (level && level >= seg->silf()->numJustLevels()) return;
     if (!m_justs)
@@ -454,7 +454,7 @@ bool Slot::removeChild(Slot *ap)
     return false;
 }
 
-void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
+void Slot::setGlyph(Segment *seg, uint16_t glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
     m_bidiCls = -1;
@@ -480,7 +480,7 @@ void Slot::setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph)
     m_advance = Position(aGlyph->theAdvance().x, 0.);
     if (seg->silf()->aPassBits())
     {
-        seg->mergePassBits(uint8(theGlyph->attrs()[seg->silf()->aPassBits()]));
+        seg->mergePassBits(uint8_t(theGlyph->attrs()[seg->silf()->aPassBits()]));
         if (seg->silf()->numPasses() > 16)
             seg->mergePassBits(theGlyph->attrs()[seg->silf()->aPassBits()+1] << 16);
     }
@@ -500,7 +500,7 @@ void SlotJustify::LoadSlot(const Slot *s, const Segment *seg)
     for (int i = seg->silf()->numJustLevels() - 1; i >= 0; --i)
     {
         Justinfo *justs = seg->silf()->justAttrs() + i;
-        int16 *v = values + i * NUMJUSTPARAMS;
+        int16_t *v = values + i * NUMJUSTPARAMS;
         v[0] = seg->glyphAttr(s->gid(), justs->attrStretch());
         v[1] = seg->glyphAttr(s->gid(), justs->attrShrink());
         v[2] = seg->glyphAttr(s->gid(), justs->attrStep());

@@ -31,22 +31,12 @@ magnitude for the number of rounds to run.
 Adding -DHAVE_64_LONG to your compilers command line will test 64bit wide
 integers in addition to 32, 16 and 8 bit.
 -----------------------------------------------------------------------------*/
-#include <cstdlib>
+#include <cstdint>
 #include <string>
 #include "inc/Endian.h"
 
-typedef unsigned char 		uint8;
-typedef signed char		     int8;
-typedef short unsigned int 	uint16;
-typedef short signed int 	 int16;
-typedef unsigned int 		uint32;
-typedef signed int 		     int32;
-#if defined(HAVE_64_LONG)
-typedef long unsigned int 	uint64;
-typedef long signed int 	 int64;
-#else
-typedef void                uint64;
-typedef void                 int64;
+#if (UINTPTR_MAX == UINT64_MAX)
+	#define HAS_64BIT
 #endif
 
 template <typename T8, typename T4, typename T2, typename T1>
@@ -60,12 +50,15 @@ bool test_swaps()
 	t &= be::swap<T2>(be::swap<T2>(T2(0xFFEEU))) == T2(0xFFEEU);
 	t &= le::swap<T2>(le::swap<T2>(T2(0xFFEEU))) == T2(0xFFEEU);
 	t &= be::swap<T2>(T2(0xFFEEU)) == le::swap<T2>(T2(0xEEFFU));
-#if defined(HAVE_64_LONG)
 	t &= be::swap<T4>(be::swap<T4>(T4(0xDEADBEEFU))) == T4(0xDEADBEEFU);
 	t &= le::swap<T4>(le::swap<T4>(T4(0xDEADBEEFU))) == T4(0xDEADBEEFU);
 	t &= be::swap<T4>(T4(0xDEADBEEFU)) == le::swap<T4>(T4(0xEFBEADDEU));
+#if defined(HAS_64BIT)
+	t &= be::swap<T8>(be::swap<T8>(T8(0x0123456789ABCDEF))) == T8(0x0123456789ABCDEF);
+	t &= le::swap<T8>(le::swap<T8>(T8(0x0123456789ABCDEF))) == T8(0x0123456789ABCDEF);
+	t &= be::swap<T8>(T8(0x0123456789ABCDEF)) == le::swap<T8>(T8(0xEFCDAB8967452301));
 #endif
-    return t;
+  return t;
 }
 
 
@@ -76,7 +69,7 @@ int test_reads(const size_t rounds)
 	                                     0xEF,0xCD,0xAB,0x89,0x67,0x45,0x23,0x01};
 	bool t = true;
 
-#if defined(HAVE_64_LONG)
+#if defined(HAS_64BIT)
 	for (size_t r = rounds; r; --r)
 	{
 	    const unsigned char *p = data;
@@ -138,11 +131,11 @@ int main(int argc , char *argv[])
 	const size_t rounds = 1UL << atoi(argv[1]);
 	int r = 0;
 
-    if   (!test_swaps<uint64, uint32, uint16, uint8>()
-       || !test_swaps<int64, int32, int16, int8>())
+    if   (!test_swaps<uint64_t, uint32_t, uint16_t, uint8_t>()
+       || !test_swaps<int64_t, int32_t, int16_t, int8_t>())
         return 5;
 
-	if (r == 0) r = test_reads<uint64, uint32, uint16, uint8>(rounds);
-	if (r == 0) r = test_reads<int64, int32, int16, int8>(rounds);
+	if (r == 0) r = test_reads<uint64_t, uint32_t, uint16_t, uint8_t>(rounds);
+	if (r == 0) r = test_reads<int64_t, int32_t, int16_t, int8_t>(rounds);
 	return r;
 }

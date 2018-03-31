@@ -53,8 +53,6 @@ namespace
     };
 }
 
-const std::nullptr_t json::null = nullptr;
-
 inline
 void json::context(const char current) throw()
 {

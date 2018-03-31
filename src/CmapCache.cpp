@@ -58,18 +58,18 @@ const void * smp_subtable(const Face::Table & cmap)
 }
 
 template <unsigned int (*NextCodePoint)(const void *, unsigned int, int *),
-          uint16 (*LookupCodePoint)(const void *, unsigned int, int)>
-bool cache_subtable(uint16 * blocks[], const void * cst, const unsigned int limit)
+          uint16_t (*LookupCodePoint)(const void *, unsigned int, int)>
+bool cache_subtable(uint16_t * blocks[], const void * cst, const unsigned int limit)
 {
     int rangeKey = 0;
-    uint32          codePoint = NextCodePoint(cst, 0, &rangeKey),
+    uint32_t          codePoint = NextCodePoint(cst, 0, &rangeKey),
                     prevCodePoint = 0;
     while (codePoint < limit)
     {
         unsigned int block = codePoint >> 8;
         if (!blocks[block])
         {
-            blocks[block] = grzeroalloc<uint16>(0x100);
+            blocks[block] = grzeroalloc<uint16_t>(0x100);
             if (!blocks[block])
                 return false;
         }
@@ -95,7 +95,7 @@ CachedCmap::CachedCmap(const Face & face)
     const void * smp_cmap = smp_subtable(cmap);
     m_isBmpOnly = !smp_cmap;
 
-    m_blocks = grzeroalloc<uint16 *>(m_isBmpOnly ? 0x100 : 0x1100);
+    m_blocks = grzeroalloc<uint16_t *>(m_isBmpOnly ? 0x100 : 0x1100);
     if (m_blocks && smp_cmap)
     {
         if (!cache_subtable<TtfUtil::CmapSubtable12NextCodepoint, TtfUtil::CmapSubtable12Lookup>(m_blocks, smp_cmap, 0x10FFFF))
@@ -118,11 +118,11 @@ CachedCmap::~CachedCmap() throw()
     free(m_blocks);
 }
 
-uint16 CachedCmap::operator [] (const uint32 usv) const throw()
+uint16_t CachedCmap::operator [] (const uint32_t usv) const throw()
 {
     if ((m_isBmpOnly && usv > 0xFFFF) || (usv > 0x10FFFF))
         return 0;
-    const uint32 block = 0xFFFF & (usv >> 8);
+    const uint32_t block = 0xFFFF & (usv >> 8);
     if (m_blocks[block])
         return m_blocks[block][usv & 0xFF];
     return 0;
@@ -141,7 +141,7 @@ DirectCmap::DirectCmap(const Face & face)
 {
 }
 
-uint16 DirectCmap::operator [] (const uint32 usv) const throw()
+uint16_t DirectCmap::operator [] (const uint32_t usv) const throw()
 {
     return usv > 0xFFFF
             ? (_smp ? TtfUtil::CmapSubtable12Lookup(_smp, usv, 0) : 0)

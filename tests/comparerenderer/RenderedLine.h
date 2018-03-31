@@ -26,7 +26,7 @@
 
 class RenderedLine;
 
-typedef enum {
+enum LineDifference {
     IDENTICAL = 0,
     MORE_GLYPHS = 1,
     LESS_GLYPHS = 2,
@@ -34,7 +34,7 @@ typedef enum {
     DIFFERENT_GLYPHS = 8,
     DIFFERENT_POSITIONS = 16,
     ALL_DIFFERENCE_TYPES = MORE_GLYPHS | LESS_GLYPHS | DIFFERENT_ADVANCE | DIFFERENT_GLYPHS | DIFFERENT_POSITIONS
-} LineDifference;
+};
 
 const char * DIFFERENCE_DESC[] = {
     "same",//0

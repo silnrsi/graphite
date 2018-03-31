@@ -31,15 +31,15 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-typedef uint32  uchar_t;
+typedef uint32_t  uchar_t;
 
 template <int N>
 struct _utf_codec
 {
     typedef uchar_t codeunit_t;
 
-    static void     put(codeunit_t * cp, const uchar_t , int8 & len) throw();
-    static uchar_t  get(const codeunit_t * cp, int8 & len) throw();
+    static void     put(codeunit_t * cp, const uchar_t , int8_t & len) throw();
+    static uchar_t  get(const codeunit_t * cp, int8_t & len) throw();
     static bool     validate(const codeunit_t * s, const codeunit_t * e) throw();
 };
 
@@ -50,16 +50,16 @@ struct _utf_codec<32>
 private:
     static const uchar_t    limit = 0x110000;
 public:
-    typedef uint32  codeunit_t;
+    typedef uint32_t  codeunit_t;
 
     inline
-    static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+    static void put(codeunit_t * cp, const uchar_t usv, int8_t & l) throw()
     {
         *cp = usv; l = 1;
     }
 
     inline
-    static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+    static uchar_t get(const codeunit_t * cp, int8_t & l) throw()
     {
         if (cp[0] < limit)  { l = 1;  return cp[0]; }
         else                { l = -1; return 0xFFFD; }
@@ -77,13 +77,13 @@ template <>
 struct _utf_codec<16>
 {
 private:
-    static const int32  lead_offset      = 0xD800 - (0x10000 >> 10);
-    static const int32  surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
+    static const int32_t  lead_offset      = 0xD800 - (0x10000 >> 10);
+    static const int32_t  surrogate_offset = 0x10000 - (0xD800 << 10) - 0xDC00;
 public:
-    typedef uint16  codeunit_t;
+    typedef uint16_t  codeunit_t;
 
     inline
-    static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+    static void put(codeunit_t * cp, const uchar_t usv, int8_t & l) throw()
     {
         if (usv < 0x10000)  { l = 1; cp[0] = codeunit_t(usv); }
         else
@@ -95,13 +95,13 @@ public:
     }
 
     inline
-    static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+    static uchar_t get(const codeunit_t * cp, int8_t & l) throw()
     {
-        const uint32    uh = cp[0];
+        const uint32_t    uh = cp[0];
         l = 1;
 
         if (uh < 0xD800|| uh > 0xDFFF) { return uh; }
-        const uint32 ul = cp[1];
+        const uint32_t ul = cp[1];
         if (uh > 0xDBFF || ul < 0xDC00 || ul > 0xDFFF) { l = -1; return 0xFFFD; }
         ++l;
         return (uh<<10) + ul + surrogate_offset;
@@ -112,7 +112,7 @@ public:
     {
         const ptrdiff_t n = e-s;
         if (n <= 0) return n == 0;
-        const uint32 u = *(s+(n-1)); // Get the last codepoint
+        const uint32_t u = *(s+(n-1)); // Get the last codepoint
         return (u < 0xD800 || u > 0xDBFF);
     }
 };
@@ -122,15 +122,15 @@ template <>
 struct _utf_codec<8>
 {
 private:
-    static const int8 sz_lut[16];
-    static const byte mask_lut[5];
+    static const int8_t sz_lut[16];
+    static const uint8_t mask_lut[5];
     static const uchar_t    limit = 0x110000;
 
 public:
-    typedef uint8   codeunit_t;
+    typedef uint8_t   codeunit_t;
 
     inline
-    static void put(codeunit_t * cp, const uchar_t usv, int8 & l) throw()
+    static void put(codeunit_t * cp, const uchar_t usv, int8_t & l) throw()
     {
         if (usv < 0x80)     {l = 1; cp[0] = usv; return; }
         if (usv < 0x0800)   {l = 2; cp[0] = 0xC0 + (usv >> 6);  cp[1] = 0x80 + (usv & 0x3F); return; }
@@ -139,9 +139,9 @@ public:
     }
 
     inline
-    static uchar_t get(const codeunit_t * cp, int8 & l) throw()
+    static uchar_t get(const codeunit_t * cp, int8_t & l) throw()
     {
-        const int8 seq_sz = sz_lut[*cp >> 4];
+        const int8_t seq_sz = sz_lut[*cp >> 4];
         uchar_t u = *cp & mask_lut[seq_sz];
         l = 1;
         bool toolong = false;
@@ -191,7 +191,7 @@ class _utf_iterator
     typedef _utf_codec<sizeof(C)*8> codec;
 
     C             * cp;
-    mutable int8    sl;
+    mutable int8_t    sl;
 
 public:
     typedef C           codeunit_type;
@@ -242,8 +242,8 @@ struct utf
 };
 
 
-typedef utf<uint32> utf32;
-typedef utf<uint16> utf16;
-typedef utf<uint8>  utf8;
+typedef utf<uint32_t> utf32;
+typedef utf<uint16_t> utf16;
+typedef utf<uint8_t>  utf8;
 
 } // namespace graphite2

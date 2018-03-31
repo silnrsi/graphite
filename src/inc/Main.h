@@ -35,15 +35,6 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-typedef gr_uint8        uint8;
-typedef gr_uint8        byte;
-typedef gr_uint16       uint16;
-typedef gr_uint32       uint32;
-typedef gr_int8         int8;
-typedef gr_int16        int16;
-typedef gr_int32        int32;
-typedef size_t          uintptr;
-
 #ifdef GRAPHITE2_TELEMETRY
 struct telemetry
 {
@@ -157,9 +148,9 @@ inline T max(const T a, const T b)
 } // namespace graphite2
 
 #define CLASS_NEW_DELETE \
-    void * operator new   (size_t size){ return gralloc<byte>(size);} \
+    void * operator new   (size_t size){ return gralloc<uint8_t>(size);} \
     void * operator new   (size_t, void * p) throw() { return p; } \
-    void * operator new[] (size_t size) {return gralloc<byte>(size);} \
+    void * operator new[] (size_t size) {return gralloc<uint8_t>(size);} \
     void * operator new[] (size_t, void * p) throw() { return p; } \
     void operator delete   (void * p) throw() { free(p);} \
     void operator delete   (void *, void *) throw() {} \

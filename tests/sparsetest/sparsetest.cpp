@@ -123,13 +123,13 @@ int main(int argc , char *argv[])
 
     std::cout << "key range:\t" << data[0].first << "-" << data_end[-1].first << std::endl
               << "key space size: " << data_end[-1].first - data[0].first << std::endl
-              << "linear uint16 array:" << std::endl
+              << "linear uint16_t array:" << std::endl
               << "\tcapacity:       " << data_end[-1].first+1 << std::endl
               << "\tresidency:      " << sizeof(data)/sizeof(sparse::value_type) << std::endl
               << "\tfill ratio:     " << 100.0f*(sizeof(data)/sizeof(sparse::value_type)/float(data_end[-1].first+1)) << "%" << std::endl
-              << "\tsize:           " << (data_end[-1].first+1)*sizeof(uint16) << std::endl
+              << "\tsize:           " << (data_end[-1].first+1)*sizeof(uint16_t) << std::endl
 
-              << "sparse uint16 array:" << std::endl
+              << "sparse uint16_t array:" << std::endl
               << "\tcapacity:       " << sp.capacity() << std::endl
               << "\tresidency:      " << sp.capacity() << std::endl
               << "\tfill ratio:     " << 100.0f << "%" << std::endl

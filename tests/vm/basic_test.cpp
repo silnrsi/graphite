@@ -12,7 +12,7 @@ using namespace graphite2;
 using namespace vm;
 typedef Machine::Code  Code;
 
-const byte simple_prog[] =
+const uint8_t simple_prog[] =
 {
         PUSH_BYTE, 43,
         PUSH_BYTE, 42,
@@ -50,7 +50,7 @@ const char * run_error_msg[] = {
 
 class graphite2::Segment {};
 
-//std::vector<byte> fuzzer(int);
+//std::vector<uint8_t> fuzzer(int);
 
 
 int main(int argc, char *argv[])
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
     std::cout << "simple program size:    " << sizeof(simple_prog)+1 << " bytes" << std::endl;
     // Replicate the code copies times.
-    std::vector<byte> big_prog;
+    std::vector<uint8_t> big_prog;
     big_prog.push_back(simple_prog[0]);
     big_prog.push_back(simple_prog[1]);
     for(; copies; --copies)
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     // run the program
     Segment seg;
     Slot s1;
-    uint32 ret = 0;
+    uint32_t ret = 0;
     SlotMap smap(seg, 0, 0);
     Machine m(smap);
     smap.pushSlot(&s1);
@@ -149,10 +149,10 @@ int main(int argc, char *argv[])
 }
 
 
-std::vector<byte> random_sequence(size_t n)
+std::vector<uint8_t> random_sequence(size_t n)
 {
     std::vector<bool> done(n);
-    std::vector<byte> seq(n);
+    std::vector<uint8_t> seq(n);
 
     srand(static_cast<unsigned int>(time(NULL)));
 
@@ -163,7 +163,7 @@ std::vector<byte> random_sequence(size_t n)
         if (done[r]) continue;
 
         done[r] = true;
-        seq[r]  = byte(r);
+        seq[r]  = uint8_t(r);
         --n;
     }
 
@@ -171,9 +171,9 @@ std::vector<byte> random_sequence(size_t n)
 }
 
 /*
-std::vector<byte> fuzzer(int n)
+std::vector<uint8_t> fuzzer(int n)
 {
-    std::vector<byte>   code(256);
+    std::vector<uint8_t>   code(256);
     std::vector<bool>   covered(256);
 
     // Track stack depth to ensure we don't create programs that

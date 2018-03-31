@@ -46,7 +46,7 @@ namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
 typedef Vector<Slot *>          SlotRope;
-typedef Vector<int16 *>         AttributeRope;
+typedef Vector<int16_t *>         AttributeRope;
 typedef Vector<SlotJustify *>   JustifyRope;
 
 class Font;
@@ -92,16 +92,16 @@ public:
     void extendLength(ptrdiff_t num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
     bool runGraphite() { if (m_silf) return m_face->runGraphite(this, m_silf); else return true;};
-    void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
+    void chooseSilf(uint32_t script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
     size_t charInfoCount() const { return m_numCharinfo; }
     const CharInfo *charinfo(unsigned int index) const { return index < m_numCharinfo ? m_charinfo + index : NULL; }
     CharInfo *charinfo(unsigned int index) { return index < m_numCharinfo ? m_charinfo + index : NULL; }
 
-    Segment(size_t numchars, const Face* face, uint32 script, int dir);
+    Segment(size_t numchars, const Face* face, uint32_t script, int dir);
     ~Segment();
-    uint8 flags() const { return m_flags; }
-    void flags(uint8 f) { m_flags = f; }
+    uint8_t flags() const { return m_flags; }
+    void flags(uint8_t f) { m_flags = f; }
     Slot *first() { return m_first; }
     void first(Slot *p) { m_first = p; }
     Slot *last() { return m_last; }
@@ -114,34 +114,34 @@ public:
     Position positionSlots(const Font *font=0, Slot *first=0, Slot *last=0, bool isRtl = false, bool isFinal = true);
     void associateChars(int offset, size_t num);
     void linkClusters(Slot *first, Slot *last);
-    uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
-    uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
+    uint16_t getClassGlyph(uint16_t cid, uint16_t offset) const { return m_silf->getClassGlyph(cid, offset); }
+    uint16_t findClassIndex(uint16_t cid, uint16_t gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return int(m_feats.size()) - 1; }
-    uint32 getFeature(int index, uint8 findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
-    void setFeature(int index, uint8 findex, uint32 val) {
+    uint32_t getFeature(int index, uint8_t findex) const { const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex); if (!pFR) return 0; else return pFR->getFeatureVal(m_feats[index]); }
+    void setFeature(int index, uint8_t findex, uint32_t val) {
         const FeatureRef* pFR=m_face->theSill().theFeatureMap().featureRef(findex);
         if (pFR)
         {
             if (val > pFR->maxVal()) val = pFR->maxVal();
             pFR->applyValToFeature(val, m_feats[index]);
         } }
-    int8 dir() const { return m_dir; }
-    void dir(int8 val) { m_dir = val; }
+    int8_t dir() const { return m_dir; }
+    void dir(int8_t val) { m_dir = val; }
     bool currdir() const { return ((m_dir >> 6) ^ m_dir) & 1; }
-    uint8 passBits() const { return m_passBits; }
-    void mergePassBits(const uint8 val) { m_passBits &= val; }
-    int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
-    int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
-    float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
-    const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
+    uint8_t passBits() const { return m_passBits; }
+    void mergePassBits(const uint8_t val) { m_passBits &= val; }
+    int16_t glyphAttr(uint16_t gid, uint16_t gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
+    int32_t getGlyphMetric(Slot *iSlot, uint8_t metric, uint8_t attrLevel, bool rtl) const;
+    float glyphAdvance(uint16_t gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
+    const Rect &theGlyphBBoxTemporary(uint16_t gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
     Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
     int numAttrs() const { return m_silf->numUser(); }
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
-    void bidiPass(int paradir, uint8 aMirror);
-    int8 getSlotBidiClass(Slot *s) const;
-    void doMirror(uint16 aMirror);
+    void bidiPass(int paradir, uint8_t aMirror);
+    int8_t getSlotBidiClass(Slot *s) const;
+    void doMirror(uint16_t aMirror);
     Slot *addLineEnd(Slot *nSlot);
     void delLineEnd(Slot *s);
     bool hasJustification() const { return m_justifies.size() != 0; }
@@ -152,7 +152,7 @@ public:
     SlotCollision *collisionInfo(const Slot *s) const { return m_collisions ? m_collisions + s->index() : 0; }
     CLASS_NEW_DELETE
 
-public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
+public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32_t script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
     void finalise(const Font *font, bool reverse=false);
     float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
@@ -176,17 +176,17 @@ private:
                     m_numGlyphs,
                     m_numCharinfo;      // size of the array and number of input characters
     int             m_defaultOriginal;  // number of whitespace chars in the string
-    int8            m_dir;
-    uint8           m_flags,            // General purpose flags
+    int8_t            m_dir;
+    uint8_t           m_flags,            // General purpose flags
                     m_passBits;         // if bit set then skip pass
 };
 
 inline
-int8 Segment::getSlotBidiClass(Slot *s) const
+int8_t Segment::getSlotBidiClass(Slot *s) const
 {
-    int8 res = s->getBidiClass();
+    int8_t res = s->getBidiClass();
     if (res != -1) return res;
-    res = int8(glyphAttr(s->gid(), m_silf->aBidi()));
+    res = int8_t(glyphAttr(s->gid(), m_silf->aBidi()));
     s->setBidiClass(res);
     return res;
 }
@@ -204,7 +204,7 @@ void Segment::finalise(const Font *font, bool reverse)
 }
 
 inline
-int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const {
+int32_t Segment::getGlyphMetric(Slot *iSlot, uint8_t metric, uint8_t attrLevel, bool rtl) const {
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);

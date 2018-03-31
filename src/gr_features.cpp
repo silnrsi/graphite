@@ -86,7 +86,7 @@ void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, gr_enc
         length = 0;
         return NULL;
     }
-    uint16 label = pfeatureref->getNameId();
+    uint16_t label = pfeatureref->getNameId();
     NameTable * names = pfeatureref->getFace().nameTable();
     if (!names)
     {
@@ -107,7 +107,7 @@ void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
         length = 0;
         return NULL;
     }
-    uint16 label = pfeatureref->getSettingName(setting);
+    uint16_t label = pfeatureref->getSettingName(setting);
     NameTable * names = pfeatureref->getFace().nameTable();
     if (!names)
     {

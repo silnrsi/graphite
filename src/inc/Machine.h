@@ -128,7 +128,7 @@ enum opcode {
 struct opcode_t
 {
     instr           impl[2];
-    uint8           param_sz;
+    uint8_t           param_sz;
     char            name[MAX_NAME_LEN];
 };
 
@@ -136,7 +136,7 @@ struct opcode_t
 class Machine
 {
 public:
-    typedef int32  stack_t;
+    typedef int32_t  stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
                         STACK_GUARD  = 2;
@@ -163,7 +163,7 @@ public:
 
 private:
     void    check_final_stack(const stack_t * const sp);
-    stack_t run(const instr * program, const byte * data,
+    stack_t run(const instr * program, const uint8_t * data,
                 slotref * & map) HOT;
 
     SlotMap       & _map;

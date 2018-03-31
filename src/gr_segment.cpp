@@ -33,7 +33,7 @@ using namespace graphite2;
 namespace
 {
 
-  gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
+  gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32_t script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
   {
       if (script == 0x20202020) script = 0;
       else if ((script & 0x00FFFFFF) == 0x00202020) script = script & 0xFF000000;
@@ -61,7 +61,7 @@ template <typename utf_iter>
 inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
 {
     size_t n_chars = 0;
-    uint32 usv = 0;
+    uint32_t usv = 0;
 
     if (last)
     {

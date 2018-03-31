@@ -42,7 +42,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
+Segment::Segment(size_t numchars, const Face* face, uint32_t script, int textDir)
 : m_freeSlots(NULL),
   m_freeJustifies(NULL),
   m_charinfo(new CharInfo[numchars]),
@@ -114,7 +114,7 @@ Slot *Segment::newSlot()
         if (m_face->logger()) ++numUser;
 #endif
         Slot *newSlots = grzeroalloc<Slot>(m_bufSize);
-        int16 *newAttrs = grzeroalloc<int16>(m_bufSize * numUser);
+        int16_t *newAttrs = grzeroalloc<int16_t>(m_bufSize * numUser);
         if (!newSlots || !newAttrs)
         {
             free(newSlots);
@@ -157,7 +157,7 @@ void Segment::freeSlot(Slot *aSlot)
     }
     // reset the slot incase it is reused
     ::new (aSlot) Slot(aSlot->userAttrs());
-    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16));
+    memset(aSlot->userAttrs(), 0, m_silf->numUser() * sizeof(int16_t));
     // Update generation counter for debug
 #if !defined GRAPHITE2_NTRACING
     if (m_face->logger())
@@ -176,7 +176,7 @@ SlotJustify *Segment::newJustify()
     if (!m_freeJustifies)
     {
         const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
-        byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
+        uint8_t *justs = grzeroalloc<uint8_t>(justSize * m_bufSize);
         if (!justs) return NULL;
         for (ptrdiff_t i = m_bufSize - 2; i >= 0; --i)
         {
@@ -198,7 +198,7 @@ void Segment::freeJustify(SlotJustify *aJustify)
     int numJust = m_silf->numJustLevels();
     if (m_silf->numJustLevels() <= 0) numJust = 1;
     aJustify->next = m_freeJustifies;
-    memset(aJustify->values, 0, numJust*SlotJustify::NUMJUSTPARAMS*sizeof(int16));
+    memset(aJustify->values, 0, numJust*SlotJustify::NUMJUSTPARAMS*sizeof(int16_t));
     m_freeJustifies = aJustify;
 }
 
@@ -375,8 +375,8 @@ inline void process_utf_data(Segment & seg, const Face & face, const int fid, ut
     const typename utf_iter::codeunit_type * const base = c;
     for (; n_chars; --n_chars, ++c, ++slotid)
     {
-        const uint32 usv = *c;
-        uint16 gid = cmap[usv];
+        const uint32_t usv = *c;
+        uint16_t gid = cmap[usv];
         if (!gid)   gid = face.findPseudo(usv);
         seg.appendSlot(slotid, usv, gid, fid, c - base);
     }
@@ -399,7 +399,7 @@ bool Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
     return true;
 }
 
-void Segment::doMirror(uint16 aMirror)
+void Segment::doMirror(uint16_t aMirror)
 {
     Slot * s;
     for (s = m_first; s; s = s->next())

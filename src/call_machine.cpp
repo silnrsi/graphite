@@ -46,7 +46,7 @@ of the License or (at your option) any later version.
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
-#define registers           const byte * & dp, vm::Machine::stack_t * & sp, \
+#define registers           const uint8_t * & dp, vm::Machine::stack_t * & sp, \
                             vm::Machine::stack_t * const sb, regbank & reg
 
 // These are required by opcodes.h and should not be changed
@@ -70,8 +70,8 @@ struct regbank  {
     SlotMap       & smap;
     slotref * const map_base;
     const instr * & ip;
-    uint8           direction;
-    int8            flags;
+    uint8_t           direction;
+    int8_t            flags;
     Machine::status_t & status;
 };
 
@@ -104,7 +104,7 @@ namespace {
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
-                               const byte    * data,
+                               const uint8_t    * data,
                                slotref     * & map)
 
 {
@@ -112,7 +112,7 @@ Machine::stack_t  Machine::run(const instr   * program,
 
     // Declare virtual machine registers
     const instr   * ip = program-1;
-    const byte    * dp = data;
+    const uint8_t    * dp = data;
     stack_t       * sp = _stack + Machine::STACK_GUARD,
             * const sb = sp;
     regbank         reg = {*map, map, _map, _map.begin()+_map.context(), ip, _map.dir(), 0, _status};

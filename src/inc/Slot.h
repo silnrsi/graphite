@@ -47,12 +47,12 @@ struct SlotJustify
     SlotJustify & operator = (const SlotJustify &);
 
 public:
-    static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16); }
+    static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16_t); }
 
     void LoadSlot(const Slot *s, const Segment *seg);
 
     SlotJustify *next;
-    int16 values[1];
+    int16_t values[1];
 };
 
 class Slot
@@ -76,18 +76,18 @@ public:
     Position advancePos() const { return m_advance; }
     int before() const { return m_before; }
     int after() const { return m_after; }
-    uint32 index() const { return m_index; }
-    void index(uint32 val) { m_index = val; }
+    uint32_t index() const { return m_index; }
+    void index(uint32_t val) { m_index = val; }
 
-    Slot(int16 *m_userAttr = NULL);
+    Slot(int16_t *m_userAttr = NULL);
     void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }
     Slot *prev() const { return m_prev; }
     void prev(Slot *s) { m_prev = s; }
-    uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
-    void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
+    uint16_t glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
+    void setGlyph(Segment *seg, uint16_t glyphid, const GlyphFace * theGlyph = NULL);
+    void setRealGid(uint16_t realGid) { m_realglyphid = realGid; }
     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
     void originate(int ind) { m_original = ind; }
@@ -96,7 +96,7 @@ public:
     void after(int ind) { m_after = ind; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment* seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
+    Position finalise(const Segment* seg, const Font* font, Position & base, Rect & bbox, uint8_t attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
     bool isCopied() const { return (m_flags & COPIED) ? true : false; }
@@ -104,18 +104,18 @@ public:
     bool isPositioned() const { return (m_flags & POSITIONED) ? true : false; }
     void markPositioned(bool state) { if (state) m_flags |= POSITIONED; else m_flags &= ~POSITIONED; }
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
-    uint8 getBidiLevel() const { return m_bidiLevel; }
-    void setBidiLevel(uint8 level) { m_bidiLevel = level; }
-    int8 getBidiClass(const Segment *seg);
-    int8 getBidiClass() const { return m_bidiCls; }
-    void setBidiClass(int8 cls) { m_bidiCls = cls; }
-    int16 *userAttrs() const { return m_userAttr; }
-    void userAttrs(int16 *p) { m_userAttr = p; }
+    uint8_t getBidiLevel() const { return m_bidiLevel; }
+    void setBidiLevel(uint8_t level) { m_bidiLevel = level; }
+    int8_t getBidiClass(const Segment *seg);
+    int8_t getBidiClass() const { return m_bidiCls; }
+    void setBidiClass(int8_t cls) { m_bidiCls = cls; }
+    int16_t *userAttrs() const { return m_userAttr; }
+    void userAttrs(int16_t *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
-    void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
-    int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
-    int getJustify(const Segment *seg, uint8 level, uint8 subindex) const;
-    void setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value);
+    void setAttr(Segment* seg, attrCode ind, uint8_t subindex, int16_t val, const SlotMap & map);
+    int getAttr(const Segment *seg, attrCode ind, uint8_t subindex) const;
+    int getJustify(const Segment *seg, uint8_t level, uint8_t subindex) const;
+    void setJustify(Segment *seg, uint8_t level, uint8_t subindex, int16_t value);
     bool isLocalJustify() const { return m_justs != NULL; };
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
@@ -127,7 +127,7 @@ public:
     void nextSibling(Slot *ap) { m_sibling = ap; }
     bool sibling(Slot *ap);
     bool removeChild(Slot *ap);
-    int32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel, bool rtl);
+    int32_t clusterMetric(const Segment* seg, uint8_t metric, uint8_t attrLevel, bool rtl);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
     float just() const { return m_just; }
@@ -141,11 +141,11 @@ private:
     Slot *m_next;           // linked list of slots
     Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
-    uint16 m_realglyphid;
-    uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)
-    uint32 m_before;        // charinfo index of before association
-    uint32 m_after;         // charinfo index of after association
-    uint32 m_index;         // slot index given to this slot during finalising
+    uint16_t m_realglyphid;
+    uint32_t m_original;      // charinfo that originated this slot (e.g. for feature values)
+    uint32_t m_before;        // charinfo index of before association
+    uint32_t m_after;         // charinfo index of after association
+    uint32_t m_index;         // slot index given to this slot during finalising
     Slot *m_parent;         // index to parent we are attached to
     Slot *m_child;          // index to first child slot that attaches to us
     Slot *m_sibling;        // index to next child that attaches to our parent
@@ -155,11 +155,11 @@ private:
     Position m_attach;      // attachment point on us
     Position m_with;        // attachment point position on parent
     float    m_just;        // Justification inserted space
-    uint8    m_flags;       // holds bit flags
-    byte     m_attLevel;    // attachment level
-    int8     m_bidiCls;     // bidirectional class
-    byte     m_bidiLevel;   // bidirectional level
-    int16   *m_userAttr;    // pointer to user attributes
+    uint8_t    m_flags;       // holds bit flags
+    uint8_t     m_attLevel;    // attachment level
+    int8_t     m_bidiCls;     // bidirectional class
+    uint8_t     m_bidiLevel;   // bidirectional level
+    int16_t   *m_userAttr;    // pointer to user attributes
     SlotJustify *m_justs;   // pointer to justification parameters
 
     friend class Segment;
