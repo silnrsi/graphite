@@ -14,9 +14,9 @@ controlled by setting _NS to a prefix that is then applied to the variable names
 _SOURCES, _PRIVATE_HEADERS and _PUBLIC_HEADERS. All files are listed relative to
 the variable _BASE (with its _NS expansion prefix). The _MACHINE variable with
 its _NS expansion prefix, must be set to 'call' or 'direct' depending on which
-kind of virtual machine to use inside the engine. gcc supports direct call,
-while all other compilers without a computed goto should use the call style
-virtual machine. See src/direct_machine.cpp and src/call_machine.cpp for
+kind of virtual machine to use inside the engine. gcc and clang support direct
+call, while all other compilers without a computed goto should use the call
+style virtual machine. See src/direct_machine.cpp and src/call_machine.cpp for
 details.
 
 Various C preprocessor definitions are also used as part of compiling graphite2:

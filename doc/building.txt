@@ -1,8 +1,11 @@
 == Building Graphite 2 ==
 
 Graphite 2 is made available as a source tarball from these urls:
-    https://github.com/silnrsi/graphite/releases
- or http://sf.net/projects/silgraphite/files/graphite2
+https://github.com/silnrsi/graphite/releases or +
+http://sf.net/projects/silgraphite/files/graphite2
+
+While Graphite 2 is written in C++11 it is written in a subset that ensures no
+runtime dependency on the language runtime.
 
 Graphite 2 uses cmake for its build system. The basic build procedure is to
 create a directory in which to build the library and executable products.
@@ -66,7 +69,7 @@ under. To do this pass the `-G <generator name>` option to the initial cmake
 configuration call, for example for Visual Studio 8:
 +
 ----
-cmake -G "Visual Studio 8 2005" -DCMAKE_BUILD_TYPE:STRING=Release ..
+cmake -G "Visual Studio 12 2013" -DCMAKE_BUILD_TYPE:STRING=Release ..
 ----
 +
 or for MinGW
@@ -173,6 +176,10 @@ There are some hard build dependencies:
 python::
     To run the make test and make fuzztest, the build system requires
     python v2.6 or later.
+
+Microsoft Visual C++::
+    You will need Microsoft Visual Studio 12 2013 or later as we use some
+    C++11 features.
 
 Other configuration related dependencies:
 
