@@ -36,7 +36,7 @@ void gr_stop_logging(SV* class, Text_Gr2_Face *face)
 MODULE = Text::Gr2  PACKAGE = Text::Gr2 PREFIX = gr_
 
 gr_uint32 gr_str_to_tag(SV* class, const char *str)
-    C_ARGS: 
+    C_ARGS:
         str
 
 char* gr_tag_to_str(SV* class, gr_uint32 tag)
@@ -202,4 +202,3 @@ int gr_slot_can_insert_before(Text_Gr2_Slot* p)
 int gr_slot_original(Text_Gr2_Slot* p)
 
 int gr_slot_attr(Text_Gr2_Slot* p, Text_Gr2_Segment* pSeg, enum gr_attrCode index, gr_uint8 subindex)
-

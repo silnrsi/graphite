@@ -34,7 +34,7 @@ int main(int /*argc*/, char ** /*argv*/)
 
     assert(stdVector.size() == grList.size());
 
-    for (size_t i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
     {
         stdVector[i] = i * 2;
         grList[i] = i * 2;
@@ -128,12 +128,12 @@ int main(int /*argc*/, char ** /*argv*/)
     assert(stdVector.size() == grList.size());
 
     // check that push_back still works after a complete erase
-    for (size_t i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
         stdVector.push_back(i*3);
         grList.push_back(i*3);
     }
-    
+
     assert(stdVector.size() == grList.size());
     for (size_t i = 0; i < stdVector.size(); i++)
     {
@@ -153,7 +153,7 @@ int main(int /*argc*/, char ** /*argv*/)
     printVector(stdVector2);
     printList(grList2);
 
-    for (size_t i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
         stdVector[i] = (i*4);
         grList[i] = (i*4);
@@ -165,7 +165,7 @@ int main(int /*argc*/, char ** /*argv*/)
     printVector(stdVector2);
     printList(grList2);
 
-    for (size_t i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
         stdVector[i] = (i*5);
         grList[i] = (i*5);
@@ -192,6 +192,6 @@ int main(int /*argc*/, char ** /*argv*/)
     {
         assert(grList3[i] == stdVector3[i]);
     }
-    
+
     return 0;
 }

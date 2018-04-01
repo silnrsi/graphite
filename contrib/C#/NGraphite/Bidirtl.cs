@@ -2,7 +2,7 @@ using System;
 
 namespace NGraphite
 {
-	public enum Bidirtl 
+	public enum Bidirtl
 	{
 		/// Underlying paragraph direction is RTL
 		Rtl = 1,
@@ -13,4 +13,3 @@ namespace NGraphite
 		Nomirror = 4
 	}
 }
-

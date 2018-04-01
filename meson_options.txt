@@ -1,9 +1,6 @@
 option('GRAPHITE2_VM_TYPE', type: 'combo',
         choices: ['auto', 'direct', 'call'],
         description: 'Choose the type of vm machine.')
-option('GRAPHITE2_NSEGCACHE', type: 'boolean',
-        value: false,
-        description: 'Compile out the gr_*_with_seg_cache APIs.')
 option('GRAPHITE2_NFILEFACE',  type: 'boolean',
         value: false,
         description: 'Compile out the gr_make_file_face* APIs.')

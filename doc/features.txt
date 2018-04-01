@@ -1,28 +1,33 @@
 == Font Features ==
 
 Graphite fonts have user features. These are values that can be set to control
-all kinds of rendering effects from choosing particular glyph styles for a
-group of languages to how bad sequences should be displayed to almost anything.
+all kinds of rendering effects from choosing particular glyph styles for a group
+of languages to how bad sequences should be displayed to almost anything.
 
-A font (strictly speaking a face) has a set of features. Each feature has an identifier which is a 32-bit
-number which can take the form of a tag (4 characters) or if the top byte is 0
-a number. Also each feature can take one of a set of values. Each feature has a
-UI name from the name table. In addition each value also has a UI name
-associated with it. This allows an application to list all the features in a
-font and to show their names and values in a user interface to allow user
-selection.
+A font (strictly speaking a face) has a set of features. Each feature has an
+identifier which is a 32-bit number which can take the form of a tag
+(4 characters) or if the top byte is 0 a number. Also each feature can take one
+of a set of values. Each feature has a UI name from the name table. In addition
+each value also has a UI name associated with it. This allows an application to
+list all the features in a font and to show their names and values in a user
+interface to allow user selection.
 
-Feature values are held in a FeatureVal which is a compressed map of feature id to value. The map is indexed via a FeatureRef which may be quered from a face given an id. It is also possible to iterate over all the FeatureRefs in a face.
+Feature values are held in a FeatureVal which is a compressed map of feature id
+to value. The map is indexed via a FeatureRef which may be quered from a face
+given an id. It is also possible to iterate over all the FeatureRefs in a face.
 
-A face has a default featureVal corresponding to each language the face supports along with a default for other languages. A face may be asked for a copy of one of these default featureVals and then it may be modified to account for the specific feature settings for a run.
+A face has a default featureVal corresponding to each language the face supports
+along with a default for other languages. A face may be asked for a copy of one
+of these default featureVals and then it may be modified to account for the
+specific feature settings for a run.
 
 [source, c]
 ----
 include::../tests/examples/features.c[]
 ----
 
-<1> The easiest way to turn a char[4] into a string is to append a nul,
-    hence we make a char[5].
+<1> The easiest way to turn a char[4] into a string is to append a nul, hence we
+    make a char[5].
 
 <2> Query the face for the default featureVal of the given lang or 0 for the
     default. The lang is a uint32 which has been converted from the string and
@@ -35,9 +40,9 @@ include::../tests/examples/features.c[]
 <5> Get the id for the feature name so that applications can refer to it.
     The id may be numeric or a string tag.
 
-<6> Iterate over all the possible values for this feature and find the one 
-    the is equal to the value for the feature in the default featureVal. Then
-    print out its details.
+<6> Iterate over all the possible values for this feature and find the one the
+    is equal to the value for the feature in the default featureVal. Then print
+    out its details.
 
 A sample run of.
 
@@ -69,4 +74,3 @@ Disable great nnya (nnya)
 Variant tta (vtta)
 	False (0)
 ----
-

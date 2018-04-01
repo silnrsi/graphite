@@ -41,7 +41,7 @@ Returns an explanatory string for a given value of this font feature.
 Please note that this takes an integer setting number, not a FeatureVal
 object.
 
-Reading the C<print_features> subroutine of F<examples/gr2fonttest.pl> 
+Reading the C<print_features> subroutine of F<examples/gr2fonttest.pl>
 will make this all bit more clear.
 
 =head1 INTERNAL METHODS

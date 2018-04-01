@@ -243,7 +243,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
 {
     FeatureMap testFeatureMap;
     dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
-    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
+    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
     if (!face) throw std::runtime_error("failed to load font");
     bool readStatus = testFeatureMap.readFeats(*face);
     testAssert("readFeats", readStatus);
@@ -258,7 +258,7 @@ template <class T> void testFeatTable(const T & table, const char * testName)
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);
         size_t settingsIndex = (table.m_defs[i].m_settingsOffset - sizeof(FeatHeader)
             - (sizeof(FeatDefn) * table.m_header.m_numFeat)) / sizeof(FeatSetting);
-        for (size_t j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
+        for (uint16 j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
         {
             testAssertEqual("setting label %hu %hu\n", ref->getSettingName(j),
                        table.m_settings[settingsIndex+j].m_label);
@@ -285,9 +285,8 @@ int main(int argc, char * argv[])
 		// test a bad settings offset stradling the end of the table
 		FeatureMap testFeatureMap;
 		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
-		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, gr_face_dumbRendering);
-		bool readStatus = testFeatureMap.readFeats(*face);
-		testAssert("fail gracefully on bad table", !readStatus);
+		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
+		testAssert("fail gracefully on bad table", !face);
 	}
 	catch (std::exception & e)
 	{

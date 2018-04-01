@@ -79,7 +79,6 @@ typedef enum {
     OptVerbose,
     OptAlternativeFont,
     OptIgnoreGlyphIdDifferences,
-    OptSegCache,
     OptTrace,
     OptDemand,
     OptFeatures,
@@ -108,7 +107,6 @@ static Option rendererOptions[] = {
     Option("-v", "--verbose", "Output lots of info", Option::OPTION_BOOL),
     Option("-a", "--alt-font", "Alternative font file", Option::OPTION_STRING),
     Option("", "--ignore-gid", "Ignore Glyph IDs in comparison (use with -c -a alt.ttf)", Option::OPTION_BOOL),
-    Option("", "--seg-cache", "Enable Segment Cache of given size", Option::OPTION_INT),
     Option("", "--trace", "JSON trace log file", Option::OPTION_STRING),
     Option("", "--demand", "Load glyphs on demand", Option::OPTION_BOOL),
     Option("", "--features", "Feature list", Option::OPTION_STRING),
@@ -166,4 +164,3 @@ bool parseOptions(int argc, char ** argv)
     }
     return true;
 }
-

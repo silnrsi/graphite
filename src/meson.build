@@ -1,13 +1,7 @@
-lib_version = '3.0.1'
+lib_version = '3.2.1'
 
 defns=[]
 extra_src=[]
-
-if segcache
-  extra_src += ['SegCache.cpp', 'SegCacheEntry.cpp', 'SegCacheStore.cpp']
-else
-  defns += ['-DGRAPHITE2_NSEGCACHE']
-endif
 
 if fileface
   extra_src += ['FileFace.cpp']
@@ -31,23 +25,24 @@ endif
 
 if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
   warns = [
+     '-Wall',
      '-Wctor-dtor-privacy',
      '-Wdouble-promotion',
      '-Wendif-labels',
      '-Wextra',
      '-Wno-unknown-pragmas',
+     '-Wnon-virtual-dtor',
      '-Wshadow'
   ]
   flags = [
     '-fno-exceptions',
     '-fno-rtti',
-     '-fno-stack-protector',
-     '-fvisibility=hidden',
-     '-fvisibility-inlines-hidden'
+    '-fvisibility=hidden',
+    '-fvisibility-inlines-hidden'
   ]
 
   if compiler.get_id() == 'clang'
-    warns += ['-Wimplicit-fallthrough','-Wno-double-promotion']
+    warns += ['-Wimplicit-fallthrough','-Wno-double-promotion','-Wshorten-64-to-32']
   endif
 
   if host_machine.system() == 'darwin'
@@ -55,7 +50,7 @@ if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
   endif
 
   if host_machine.cpu_family() == 'x86'
-    flags += ['-mfpmath=sse', '-msse2 ']
+    flags += ['-msse2', '-mfpmath=sse']
   endif
 endif
 
@@ -89,7 +84,6 @@ lib = library('graphite2',
     'gr_logging.cpp',
     'gr_segment.cpp',
     'gr_slot.cpp',
-    'CachedFace.cpp',
     'CmapCache.cpp',
     'Code.cpp',
     'Collider.cpp',

@@ -7,21 +7,21 @@ namespace NGraphite
 	public class Graphite2Api
 	{
 		public Graphite2Api()
-		{			
+		{
 		}
-				
+
 		#region Font methods
 		/// <summary>
 		/// Returns version information on this engine
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_engine_version")]
 		internal static extern void EngineVersion(out int nMajor, out int nMinor, out int nBugFix);
-					
+
 		/// <summary>
 		/// type describing function to retrieve font table information
 		/// </summary>
 		internal delegate /*gr_face*/ IntPtr GetTableFn(IntPtr appFaceHandle, uint name, out int len);
-			
+
 		/// <summary>
 		/// Create a gr_face object given application information and a getTable function
 		/// </summary>
@@ -41,7 +41,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_make_face")]
 		internal static extern /*gr_face*/ IntPtr MakeFace(IntPtr appFaceHandle, GetTableFn getTable, uint faceOptions);
-		
+
 		// This only exists if GRAPHITE2_NSEGCACHE was not defined when graphite was compiled.
 		/// <summary>
 		/// Create a gr_face object given application information, with subsegmental caching support
@@ -76,10 +76,10 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_str_to_tag")]
 		internal static extern UInt32 StrToTag(string str);
-		
+
 		/// <summary>
 		/// Convert a gr_uint32 tag into a string
-		/// </summary>		
+		/// </summary>
 		/// <param name='tag'>
 		///  contains the tag to convert
 		/// </param>
@@ -89,7 +89,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_tag_to_str")]
 		internal static extern void TagToStr(UInt32 tag, IntPtr str);
-						
+
 		/// <summary>
 		/// Get feature values for a given language or default
 		/// </summary>
@@ -108,7 +108,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_featureval_for_lang")]
 		internal static extern /*gr_feature_val */ IntPtr FaceFeaturevalForLang(/* gr_face */ IntPtr pFace, UInt32 langname);
-		
+
 		/// <summary>
 		/// Get feature reference for a given feature id from a face
 		/// </summary>
@@ -124,44 +124,44 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_find_fref")]
 		internal static extern /* gr_feature_ref*/ IntPtr FaceFindFref(/* gr_face */ IntPtr pFace, Int32 featid);
-		
+
 		/// <summary>
 		/// Returns number of feature references in a face
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_n_fref")]
 		internal static extern UInt16 FaceNFref(/* gr_face */ IntPtr pFace);
-		
+
 		/// <summary>
 		/// Returns feature reference at given index in face
-		/// </summary>	
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_fref")]
 		internal static extern /* gr_feature_ref */ IntPtr FaceFref(/*gr_face*/ IntPtr pFace, UInt16 i);
-		
+
 		/// <summary>
 		/// Return number of languages the face knows about
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_n_languages")]
 		internal static extern ushort FaceNLanguages(/*gr_face*/ IntPtr pFace);
-		
+
 		/// <summary>
 		/// Returns a language id corresponding to a language of given index in the face
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_lang_by_index")]
 		internal static extern UInt32 FaceLangByIndex(/*gr_face*/ IntPtr pFace, UInt16 i);
-		
+
 		/// <summary>
 		/// Destroy the given face and free its memory
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_destroy")]
 		internal static extern void FaceDestroy(/*gr_face*/ IntPtr pFace);
-		
+
 		/// <summary>
 		/// Returns the number of glyphs in the face
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_face_n_glyphs")]
 		internal static extern short FaceNGlyphs(/*gr_face*/ IntPtr pFace);
-		
-		
+
+
 		// Only exists if GRAPHITE2_NFILEFACE was not defined when libgraphite2 was compiled
 		/// <summary>
 		/// Create gr_face from a font file
@@ -177,7 +177,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_make_file_face")]
 		internal static extern /*gr_face*/ IntPtr MakeFileFace(string filename, FaceOptions faceOptions);
-		
+
 		// Only exists if GRAPHITE2_NFILEFACE was not defined when libgraphite2 was compiled
 		/// <summary>
 		/// Create gr_face from a font file, with subsegment caching support.
@@ -196,7 +196,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_make_file_face_with_seg_cache")]
 		internal static extern /*gr_face*/ IntPtr MakeFileFaceWithSegCache(string filename, uint segCacheMaxSize, FaceOptions faceOptions);
-			
+
 		/// <summary>
 		///  Create a font from a face
 		/// </summary>
@@ -211,12 +211,12 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_make_font")]
 		internal static extern /*gr_font*/ IntPtr MakeFont(float ppm, /*gr_face*/ IntPtr face);
-		
+
 		/// <summary>
 		/// query function to find the hinted advance width of a glyph
 		/// </summary>
 		internal delegate float AdvanceFn(IntPtr appFontHandle, UInt16 glyphid);
-		
+
 		/// <summary>
 		///  Creates a font with hinted advance width query function
 		/// </summary>
@@ -237,13 +237,13 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_make_font_with_advance_fn")]
 		internal static extern /*gr_font*/ IntPtr MakeFontWithAdvanceFn(float ppm, IntPtr appFontHandle, AdvanceFn advance, /*gr_face*/IntPtr face);
-		
+
 		/// <summary>
 		/// Free a font
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_font_destroy")]
 		internal static extern void FontDestroy(/*gr_font*/ IntPtr font);
-		
+
 		/// <summary>
 		/// get a feature value
 		/// </summary>
@@ -258,7 +258,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_feature_value")]
 		internal static extern UInt16 FrefFeatureValue(/*gr_feature_ref*/ IntPtr pfeatureref, /*gr_feature_val*/IntPtr feats);
-		
+
 		/// <summary>
 		/// set a feature value
 		/// </summary>
@@ -276,19 +276,19 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_set_feature_value")]
 		internal static extern int FrefSetFeatureValue(/*gr_feature_ref*/ IntPtr pfeatureref, UInt16 val, /*gr_feature_val*/IntPtr pDest);
-		
+
 		/// <summary>
 		/// Returns the id tag for a gr_feature_ref
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_id")]
 		internal static extern UInt32 FrefId(/*gr_feature_ref*/ IntPtr pfeatureref);
-				
+
 		/// <summary>
 		/// Returns number of values a feature may take, given a gr_feature_ref.
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_n_values")]
 		internal static extern UInt16 FrefNValues(/*gr_feature_ref*/ IntPtr pfeatureref);
-		
+
 		/// <summary>
 		/// Returns the value associated with a particular value in a feature
 		/// </summary>
@@ -303,7 +303,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_value")]
 		internal static extern UInt16 FrefValue(/*gr_feature_ref*/ IntPtr pfeatureref, UInt16 settingno);
-		
+
 		/// <summary>
 		///  Returns a string of the UI name of a feature
 		/// </summary>
@@ -325,7 +325,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_label", CharSet = CharSet.Ansi)]
 		internal static extern IntPtr FrefLabel(/*gr_feature_ref*/ IntPtr pfeatureref, ref UInt16 langid, Encform utf, out UInt32 length);
-		
+
 		/// <summary>
 		/// Return a UI string for a possible value of a feature
 		/// </summary>
@@ -351,32 +351,32 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_fref_value_label")]
 		internal static extern IntPtr FrefValueLabel(/*gr_feature_ref*/ IntPtr pfeatureref, UInt16 settingsno, ref UInt16 langId, Encform utf, out UInt32 length);
-		
+
 		/// <summary>
 		/// Destroy a previously returned label string
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_label_destroy")]
 		internal static extern void LabelDestroy(IntPtr label);
-		
+
 		/// <summary>
 		/// Copies a gr_feature_val
-		/// </summary>		
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_featureval_clone")]
 		internal static extern /*gr_feature_val*/ IntPtr FeaturevalClone(/*gr_feature_val*/ IntPtr pfeatures);
-		
+
 		/// <summary>
-		/// Destroys a gr_feature_val 
-		/// </summary>		
+		/// Destroys a gr_feature_val
+		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_featureval_destroy")]
 		internal static extern void FeatureValDestroy(/*gr_feature_val*/ IntPtr pfeatures);
-				
+
 		#endregion
-				
+
 		#region Segment methods
-		
+
 		/// <summary>
 		/// Returns Unicode character for a charinfo.
-		/// </summary>		
+		/// </summary>
 		/// <param name='p'>
 		/// Pointer to charinfo to return information on.
 		/// </param>
@@ -516,7 +516,7 @@ namespace NGraphite
 		/// </summary>
 		/// <returns>
 		/// Returns the width of the segment up to the next glyph origin after the segment
-		/// </returns>		
+		/// </returns>
 		[DllImport("graphite2.dll", EntryPoint="gr_seg_advance_X")]
 		internal static extern float SegAdvanceX(/*gr_segment**/IntPtr pSeg/*not NULL*/);
 
@@ -525,7 +525,7 @@ namespace NGraphite
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_seg_advance_Y")]
 		internal static extern float SegAdvanceY(/*gr_segment**/IntPtr pSeg/*not NULL*/);
-		
+
 		/// <summary>
 		/// Returns the number of gr_char_infos in the segment.
 		/// </summary>
@@ -546,7 +546,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the first gr_slot in the segment.
-		/// 
+		///
 		/// The first slot in a segment has a gr_slot_prev_in_segment() of NULL. Slots are owned
 		/// by their segment and are destroyed along with the segment.
 		/// </summary>
@@ -555,7 +555,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the last gr_slot in the segment.
-		/// 
+		///
 		/// The last slot in a segment has a gr_slot_next_in_segment() of NULL
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_seg_last_slot")]
@@ -563,7 +563,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Justifies a linked list of slots for a line to a given width
-		/// 
+		///
 		/// Passed a pointer to the start of a linked list of slots corresponding to a line, as
 		/// set up by gr_slot_linebreak_before, this function will position the glyphs in the line
 		/// to take up the given width. It is possible to specify a subrange within the line to process.
@@ -597,7 +597,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the next slot along in the segment.
-		/// 
+		///
 		/// Slots are held in a linked list. This returns the next in the linked list. The slot
 		/// may or may not be attached to another slot. Returns NULL at the end of the segment.
 		/// </summary>
@@ -606,7 +606,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the previous slot along in the segment.
-		/// 
+		///
 		/// Slots are held in a doubly linked list. This returns the previos slot in the linked
 		/// list. This slot may or may not be attached to it. Returns NULL at the start of the
 		/// segment.
@@ -616,7 +616,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the attachment parent slot of this slot.
-		/// 
+		///
 		/// Attached slots form a tree. This returns the parent of this slot in that tree. A
 		/// base glyph which is not attached to another glyph, always returns NULL.
 		/// </summary>
@@ -625,11 +625,11 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the first slot attached to this slot.
-		/// 
+		///
 		/// Attached slots form a singly linked list from the parent. This returns the first
 		/// slot in that list. Note that this is a reference to another slot that is also in
 		/// the main segment doubly linked list.
-		/// 
+		///
 		/// if gr_slot_first_attachment(p) != NULL then gr_slot_attached_to(gr_slot_first_attachment(p)) == p.
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_first_attachment")]
@@ -637,12 +637,12 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the next slot attached to our attachment parent.
-		/// 
+		///
 		/// This returns the next slot in the singly linked list of slots attached to this
 		/// slot's parent. If there are no more such slots, NULL is returned. If there is
 		/// no parent, i.e. the passed slot is a base, then the next base in graphical order
 		/// (ltr even for rtl text) is returned.
-		/// 
+		///
 		/// if gr_slot_next_sibling_attachment(p) != NULL then gr_slot_attached_to(gr_slot_next_sibling_attachment(p)) == gr_slot_attached_to(p).
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_next_sibling_attachment")]
@@ -650,19 +650,19 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns glyph id of the slot
-		/// 
+		///
 		/// Each slot has a glyphid which is rendered at the position given by the slot. This
 		/// glyphid is the real glyph to be rendered and never a pseudo glyph.
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_gid")]
-		internal static extern ushort SlotGid(/*gr_slot**/IntPtr p);		
-				
+		internal static extern ushort SlotGid(/*gr_slot**/IntPtr p);
+
 		/// <summary>
 		/// Returns X offset of glyph from start of segment
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_origin_X")]
 		internal static extern float SlotOriginX(/*gr_slot**/IntPtr p);
-		
+
 		/// <summary>
 		/// Returns Y offset of glyph from start of segment
 		/// </summary>
@@ -686,7 +686,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the vertical advance for the glyph in the slot adjusted for kerning
-		/// 
+		///
 		/// Returns design units unless font is not NULL in which case the pixel value is returned scaled for the given font
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_advance_Y")]
@@ -694,7 +694,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the gr_char_info index before us
-		/// 
+		///
 		/// Returns the index of the gr_char_info that a cursor before this slot, would put
 		/// an underlying cursor before.
 		/// </summary>
@@ -703,7 +703,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the gr_char_info index after us
-		/// 
+		///
 		/// Returns the index of the gr_char_info that a cursor after this slot would put an
 		/// underlying cursor after.
 		/// </summary>
@@ -712,7 +712,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the index of this slot in the segment
-		/// 
+		///
 		/// Returns the index given to this slot during final positioning. This corresponds to the value returned br gr_cinfo_before()
 		/// and gr_cinfo_after()
 		/// </summary>
@@ -721,7 +721,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Return a slot attribute value
-		/// 
+		///
 		/// Given a slot and an attribute along with a possible subattribute, return the
 		/// corresponding value in the slot. See enum gr_attrCode for details of each attribute.
 		/// </summary>
@@ -736,7 +736,7 @@ namespace NGraphite
 
 		/// <summary>
 		/// Returns the original gr_char_info index this slot refers to.
-		/// 
+		///
 		/// Each Slot has a gr_char_info that it originates from. This is that gr_char_info. The index is passed to gr_seg_cinfo(). This
 		/// information is useful for testing.
 		/// </summary>
@@ -745,17 +745,17 @@ namespace NGraphite
 
 		/// <summary>
 		/// Breaks a segment into lines.
-		/// 
+		///
 		/// Breaks the slot linked list at the given point in the linked list. It is up
 		/// to the application to keep track of the first slot on each line.
 		/// </summary>
 		[DllImport("graphite2.dll", EntryPoint="gr_slot_linebreak_before")]
 		internal static extern void SlotLinebreakBefore(/*gr_slot **/ IntPtr p/*not NULL*/);
-		
-		#endregion		
-		
+
+		#endregion
+
 		#region Log methods
-			
+
 		/// <summary>
 		/// Start logging all segment creation and updates on the provided face.  This
 		/// is logged to a JSON file, see "Segment JSON Schema.txt" for a precise
@@ -783,8 +783,7 @@ namespace NGraphite
 		/// </param>
 		[DllImport("graphite2.dll", EntryPoint="gr_stop_logging", CharSet = CharSet.Ansi)]
 		internal static extern void StopLogging(/*gr_face **/IntPtr face);
-		
+
 		#endregion
 	}
 }
-

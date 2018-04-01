@@ -1,5 +1,5 @@
-The android graphite integration project has been removed into its own repository.
+The android graphite integration project has been moved into its own repository.
 
-The repository is available via: hg clone http://hg.palaso.org/grandroid
-The project page is http://projects.palaso.org/grandroid
+The repository is available via: git clone https://github.com/silnrsi/grandroid
+The project page is https://github.com/silnrsi/grandroid
 

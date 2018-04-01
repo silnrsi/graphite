@@ -30,7 +30,7 @@
 *.jpg binary
 
 # Files to exclude from git archive
-.gitattributes export-ignore  
+.gitattributes export-ignore
 .gitignore export-ignore
 
 # Exclude the font sources in the test/fonts dir

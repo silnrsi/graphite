@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import graphite, random, resource, sys, os, time, itertools, math
 from multiprocessing import Pool, current_process
@@ -13,7 +13,7 @@ class Estimator:
         self.__st = self.__base
         self.__ct = 0
         self.modulus = 10
-    
+
     def sample(self, current):
         ct = time.time()
         if (ct - self.__st <= opts.status):
@@ -68,7 +68,7 @@ class MultiProc(object) :
 def multiproctest(val) :
     proc = current_process()
     return proc.inst.test()
-  
+
 
 class Test(object) :
     chars = u" %()-.3=[]A{}\u0627\u064b\u0663\u08f1\u200b\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069"

@@ -41,15 +41,15 @@ my $sized_font = $face->make_font($dpi/72*$point);
 my $seg = $sized_font->segment($face, $text);
 print "pos  gid   attach\t     x\t     y\tins bw\t chars\t\tUnicode\n";
 my $p = 0;
-my %map; 
+my %map;
 my @slots = $seg->slots;
 for (@slots) { $map{0+$_} = $p++ }
 $p = 0;
 for my $slot ($seg->slots) {
     printf("%02d  %4d %3d\@%d,%d\t%6.1f\t%6.1f\t%2d%4d\t%3d %3d\t",
             $p++, $slot->gid, $map{$slot->attached_to} || -1,
-            $slot->attr($seg, 3,0), 
-            $slot->attr($seg, 4,0), 
+            $slot->attr($seg, 3,0),
+            $slot->attr($seg, 4,0),
             $slot->origin_X,
             $slot->origin_Y,
             $slot->can_insert_before,
@@ -67,7 +67,7 @@ for (@cinfos) {
 sub print_features {
     my $face = shift;
     print $face->n_fref." features\n";
-    for my $f ($face->features) { 
+    for my $f ($face->features) {
         my $label = $f->label(0x0409, 1);
         my $fuid = $f->id;
         print $f->_id." ".$fuid." ".$label."\n";

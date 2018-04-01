@@ -1,10 +1,10 @@
-ft = dependency('freetype2')
+ft = dependency('freetype2', required: false)
 hb = dependency('harfbuzz', required: false)
 le = dependency('icu-le', required: false)
 uc = dependency('icu-uc', required: le.found())
 
 e = executable('comparerenderer', 'CompareRenderer.cpp',
-      dependencies: [gr2, ft, hb, le, uc])
+      dependencies: [gr2, ft, le, uc])
 
 tests = [
   ['charis', 'charis_r_gr', 'udhr_eng', ''],

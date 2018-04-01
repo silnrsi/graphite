@@ -4,7 +4,16 @@ fonts = join_paths(meson.source_root(), 'tests', 'fonts')
 stnds = join_paths(meson.source_root(), 'tests', 'standards')
 
 libsrc = include_directories(join_paths('../', 'src'))
-comparerenderer = get_option('GRAPHITE2_COMPARE_RENDERER') and segcache and fileface
+comparerenderer = get_option('GRAPHITE2_COMPARE_RENDERER') and fileface
+
+if not build_static
+  ctypes_void_p_size = ['-c', 'import ctypes; print(ctypes.sizeof(ctypes.c_void_p))']
+  r = run_command(python, ctypes_void_p_size)
+  python_ctypes_compatible = r.stdout().to_int() == compiler.sizeof('void *') and fileface
+  if not python_ctypes_compatible
+    message('Python ctypes is incompatible with built shared object. Disabling some tests.')
+  endif
+endif
 
 if comparerenderer
   subdir('comparerenderer')
@@ -18,9 +27,6 @@ subdir('featuremap')
 subdir('grlist')
 subdir('json')
 subdir('nametabletest')
-if segcache and fileface
-  subdir('segcache')
-endif
 subdir('sparsetest')
 subdir('utftest')
 if fileface
@@ -28,7 +34,7 @@ if fileface
 endif
 #subdir('fuzz-tests')
 
-if segcache and fileface
+if fileface
   fonttests = [
     ['padauk1', 'Padauk', ['1015', '102F', '100F', '1039', '100F', '1031', '1038']],
     ['padauk2', 'Padauk', ['1000', '103C', '102D', '102F']],
@@ -120,7 +126,7 @@ cmptests = [
   ['awamicmp2', 'Awami_compressed_test', 'awami_tests', ['-r', '-e', '1']],
 ]
 
-if fileface and not build_static
+if fileface and python_ctypes_compatible
   foreach t : cmptests
     testname = t[0]
     fontfile = t[1] + '.ttf'

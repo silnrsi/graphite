@@ -5,7 +5,7 @@ vm_test_common = static_library('vm-test-common', 'basic_test.cpp',
     objects: eo,
     cpp_args: '-DGRAPHITE2_NTRACING')
 
-test_args = [join_paths(fonts, 'tiny.ttf'), '1']
+test_args = [join_paths(fonts, 'small.ttf'), '1']
 ct = executable('vm-test-call',
     join_paths(meson.source_root(), 'src', 'call_machine.cpp'),
     include_directories: [inc, libsrc],

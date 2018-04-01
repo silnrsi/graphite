@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     gr_feature_val *features = NULL;
     gr_face *face = gr_make_file_face(argv[1], 0);
     int num = gr_face_n_fref(face);
-    
+
 
     if (!face) return 1;
     if (argc > 2) lang = gr_str_to_tag(argv[2]);
@@ -51,4 +51,3 @@ int main(int argc, char **argv)
     gr_face_destroy(face);
     return 0;
 }
-

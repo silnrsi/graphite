@@ -15,8 +15,8 @@
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -30,7 +30,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-namespace 
+namespace
 {
 
   gr_segment* makeAndInitialize(const Font *font, const Face *face, uint32 script, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void* pStart, size_t nChars, int dir)
@@ -42,7 +42,7 @@ namespace
       // if (!font) return NULL;
       Segment* pRes=new Segment(nChars, face, script, dir);
 
-      
+
       if (!pRes->read_text(face, pFeats, enc, pStart, nChars) || !pRes->runGraphite())
       {
         delete pRes;
@@ -103,7 +103,7 @@ gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, gr_uint32 scri
     if (pFeats == 0)
         pFeats = tmp_feats = static_cast<const gr_feature_val*>(face->theSill().cloneFeatures(0));
     gr_segment * seg = makeAndInitialize(font, face, script, pFeats, enc, pStart, nChars, dir);
-    delete tmp_feats;
+    delete static_cast<const FeatureVal*>(tmp_feats);
 
     return seg;
 }
@@ -111,7 +111,7 @@ gr_segment* gr_make_seg(const gr_font *font, const gr_face *face, gr_uint32 scri
 
 void gr_seg_destroy(gr_segment* p)
 {
-    delete p;
+    delete static_cast<Segment*>(p);
 }
 
 
@@ -132,7 +132,7 @@ float gr_seg_advance_Y(const gr_segment* pSeg/*not NULL*/)
 unsigned int gr_seg_n_cinfo(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return pSeg->charInfoCount();
+    return static_cast<unsigned int>(pSeg->charInfoCount());
 }
 
 
@@ -145,7 +145,7 @@ const gr_char_info* gr_seg_cinfo(const gr_segment* pSeg/*not NULL*/, unsigned in
 unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return pSeg->slotCount();
+    return static_cast<unsigned int>(pSeg->slotCount());
 }
 
 const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)

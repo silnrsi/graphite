@@ -1,11 +1,10 @@
 project('graphite2', 'cpp','c',
         version: '1.3.9',
         license: ['GPL2+', 'MPL'],
-        default_options : ['buildtype=release'])
+        default_options : ['buildtype=release','cpp_std=c++11'])
 
 compiler = meson.get_compiler('cpp')
 
-segcache = not get_option('GRAPHITE2_NSEGCACHE')
 fileface = not get_option('GRAPHITE2_NFILEFACE')
 tracing  = not get_option('GRAPHITE2_NTRACING')
 telemtry = get_option('GRAPHITE2_TELEMETRY')
@@ -21,12 +20,11 @@ if vm_type == 'direct' and not ['gcc','clang'].contains(compiler.get_id())
 endif
 
 message('''
-Segment Cache support: @0@
-File Face support:     @1@
-Tracing support:       @2@
-Memory telemtry:       @3@
-VM Machine type:       @4@
-'''.format(segcache, fileface, tracing, telemtry, vm_type))
+File Face support:     @0@
+Tracing support:       @1@
+Memory telemtry:       @2@
+VM Machine type:       @3@
+'''.format(fileface, tracing, telemtry, vm_type))
 
 py = import('python3')
 python = py.find_python()
@@ -39,7 +37,7 @@ inc = include_directories('include', is_system: true)
 
 subdir('include/graphite2')
 subdir('src')
-if segcache or fileface
+if fileface
     subdir('gr2fonttest')
 endif
 subdir('tests')

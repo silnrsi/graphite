@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from __future__ import print_function, unicode_literals
 try:
@@ -15,11 +15,11 @@ import json.encoder
 from xml.etree.ElementTree import parse
 
 class GrFont(object) :
-    def __init__(self, fname, size, rtl, feats = {}, script = 0, lang = 0, segcache = 0) :
+    def __init__(self, fname, size, rtl, feats = {}, script = 0, lang = 0) :
         self.fname = fname
         self.size = size
         self.rtl = int(rtl)
-        self.grface = gr.Face(fname, segcache=segcache)
+        self.grface = gr.Face(fname)
         self.feats = self.grface.get_featureval(lang)
         self.script = script
         for f,v in feats.items() :
@@ -229,7 +229,7 @@ if opts.feat :
 origargs = []
 fpaths = map(lambda x:os.path.relpath(x, start=(os.path.dirname(opts.output) if opts.output else '.')), args)
 
-font = GrFont(args[0], 0, opts.rtl, feats, opts.script, opts.lang, segcache=opts.cache)
+font = GrFont(args[0], 0, opts.rtl, feats, opts.script, opts.lang)
 tt = TTFont(args[0])
 
 reader = texttypes[opts.texttype](opts.text, spliton)

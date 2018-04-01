@@ -14,7 +14,7 @@ Text::Gr2::Font - Font handling methods
     my $seg = $font->segment($face, $text,
         # Some optional arguments:
             encoding => $enc, # "utf8" || "utf16" || "utf32"
-            features => $features, 
+            features => $features,
             script   => $script_tag
     );
 
@@ -28,7 +28,7 @@ sub segment {
     my $encoding = $options{encoding} || "utf8";
     if ($encoding eq "utf8") { _utf8_on($text) } # In case it isn't already
     my $a;
-    my $enc = $encoding =~ /8/ ? 1 : 
+    my $enc = $encoding =~ /8/ ? 1 :
               $encoding =~ /16/ ? 2 :
               $encoding =~ /32/ ? 4 : 1;
     my $script = $options{script} ? Text::Gr2->str_to_tag($options{script}) : 0;

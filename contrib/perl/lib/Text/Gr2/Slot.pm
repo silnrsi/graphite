@@ -68,7 +68,7 @@ Returns the glyph ID of the glyph in this slot.
 
 =head2 attr
 
-Returns a slot attribute value. 
+Returns a slot attribute value.
 
 =head2 can_insert_before
 

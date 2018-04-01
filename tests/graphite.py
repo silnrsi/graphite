@@ -14,7 +14,7 @@
 #    You should also have received a copy of the GNU Lesser General Public
 #    License along with this library in the file named "LICENSE".
 #    If not, write to the Free Software Foundation, 51 Franklin Street,
-#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 from __future__ import print_function, unicode_literals, division, absolute_import
@@ -27,7 +27,7 @@ import ctypes.util
 import sys, os, platform
 
 
-gr2 = cdll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH', 
+gr2 = cdll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
                                       ctypes.util.find_library("graphite2")))
 
 
@@ -54,7 +54,6 @@ advfn = CFUNCTYPE(c_float, c_void_p, c_ushort)
 
 fn('gr_engine_version', None, POINTER(c_int), POINTER(c_int), POINTER(c_int))
 fn('gr_make_face', c_void_p, c_void_p, tablefn, c_uint)
-#fn('gr_make_face_with_seg_cache', c_void_p, c_void_p, tablefn, c_uint, c_uint)
 fn('gr_str_to_tag', c_uint32, c_char_p)
 fn('gr_tag_to_str', None, c_uint32, POINTER(c_char))
 fn('gr_face_featureval_for_lang', c_void_p, c_void_p, c_uint32)
@@ -68,7 +67,6 @@ fn('gr_face_n_glyphs', c_ushort, c_void_p)
 fn('gr_face_info', POINTER(FaceInfo), c_void_p)
 fn('gr_face_is_char_supported', c_int, c_void_p, c_uint32, c_uint32)
 fn('gr_make_file_face', c_void_p, c_char_p, c_uint)
-#fn('gr_make_file_face_with_seg_cache', c_void_p, c_char_p, c_uint, c_uint)
 fn('gr_make_font', c_void_p, c_float, c_void_p)
 fn('gr_make_font_with_advance_fn', c_void_p, c_float, c_void_p, advfn, c_void_p)
 fn('gr_font_destroy', None, c_void_p)
@@ -124,7 +122,7 @@ if major > 1 or minor > 1 :
 else :
     fn('graphite_start_logging', c_int, c_void_p, c_int)
     fn('graphite_stop_logging', None)
- 
+
 def tag_to_str(num) :
     s = create_string_buffer('\000' * 5)
     gr2.gr_tag_to_str(num, s)
@@ -184,15 +182,10 @@ class FeatureRef(object) :
 
 
 class Face(object) :
-    def __init__(self, data, options = 0, fn=None, segcache=0) :
+    def __init__(self, data, options = 0, fn=None) :
         data = data.encode('utf8')
         if fn :
-            if segcache :
-                self.face = gr2.gr_make_face_with_seg_cache(data, fn, segcache, options)
-            else :
-                self.face = gr2.gr_make_face(data, fn, options)
-        elif segcache :
-            self.face = gr2.gr_make_file_face_with_seg_cache(data, segcache, options)
+            self.face = gr2.gr_make_face(data, fn, options)
         else :
             self.face = gr2.gr_make_file_face(data, options)
 

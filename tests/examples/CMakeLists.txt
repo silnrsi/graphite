@@ -10,8 +10,8 @@ add_definitions(-DSIZEOF_SIZE_T=${SIZEOF_SIZE_T})
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-	add_dependencies(${PROJECT_NAME}_copy_dll graphite2 iconv simple features clusters linebreak)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+    add_dependencies(${PROJECT_NAME}_copy_dll graphite2 simple features clusters linebreak)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
 macro(test_example TESTNAME SRCFILE)
@@ -44,7 +44,7 @@ macro(test_freetype TESTNAME SRCFILE)
             set_target_properties(${TESTNAME} PROPERTIES LINK_FLAGS "-fsanitize=address")
         endif (GRAPHITE2_ASAN)
         target_link_libraries(${TESTNAME} graphite2 ${FREETYPE_LIBRARIES})
-        
+
         add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
         set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
     endif (${FREETYPE_FOUND})

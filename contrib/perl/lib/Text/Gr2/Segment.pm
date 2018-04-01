@@ -17,7 +17,7 @@ segment.
 
 =head2 first_slot
 
-Returns the first C<Text::Gr2::Slot> object in this segment. 
+Returns the first C<Text::Gr2::Slot> object in this segment.
 
 =head2 last_slot
 
@@ -53,6 +53,5 @@ sub slots {
 }
 
 sub cinfos { map { $_[0]->cinfo($_) } 0..($_[0]->n_cinfo -1) }
-    
-1;
 
+1;

@@ -14,8 +14,8 @@ Responsibility: Keith Stribley, Martin Hosken
 
     You should also have received a copy of the GNU Lesser General Public
     License along with this library in the file named "LICENSE".
-    If not, write to the Free Software Foundation, 51 Franklin Street, 
-    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+    If not, write to the Free Software Foundation, 51 Franklin Street,
+    Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 
 Alternatively, the contents of this file may be used under the terms of the
@@ -24,8 +24,8 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 
 Description:
-A simple console app that creates a segment using FileFont and dumps a 
-diagnostic table of the resulting glyph vector to the console. 
+A simple console app that creates a segment using FileFont and dumps a
+diagnostic table of the resulting glyph vector to the console.
 If graphite has been built with -DTRACING then it will also produce a
 diagnostic log of the segment creation in grSegmentLog.txt
 -----------------------------------------------------------------------------*/
@@ -96,7 +96,6 @@ public:
     int useCodes;
     bool autoCodes;
     int justification;
-    bool enableCache;
     float width;
     int textArgIndex;
     unsigned int * pText32;
@@ -107,7 +106,7 @@ public:
     char * alltrace;
     int codesize;
     gr_face_options opts;
-    
+
 private :  //defensive since log should not be copied
     Parameters(const Parameters&);
     Parameters& operator=(const Parameters&);
@@ -142,7 +141,6 @@ void Parameters::clear()
     autoCodes = false;
     noprint = false;
     justification = 0;
-    enableCache = false;
     width = 100.0f;
     pText32 = NULL;
     textArgIndex = 0;
@@ -160,7 +158,7 @@ void Parameters::closeLog()
 {
   if (log==stdout)
     return ;
-  
+
   fclose(log);
   log = stdout;
 }
@@ -204,7 +202,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     codesize = 4;
     bool argError = false;
     char* pText = NULL;
-    typedef enum 
+    typedef enum
     {
         NONE,
         POINT_SIZE,
@@ -347,11 +345,6 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                     option = NONE;
                     ws = true;
                 }
-                else if (strcmp(argv[a], "-cache") == 0)
-                {
-                    option = NONE;
-                    enableCache = true;
-                }
                 else if (strcmp(argv[a], "-feat") == 0)
                 {
                     option = FEAT;
@@ -430,6 +423,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
                 if (code > 0)
                 {
 // convert text to utfOut using iconv because its easier to debug string placements
+                    assert(pText32);
                     pText32[charLength++] = code;
                     if (charLength % 10 == 0)
                         fprintf(log, "%4x\n",code);
@@ -463,7 +457,7 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             charLength = convertUtf<gr2::utf8>(pText, pText32);
             if (!pText32)
             {
-            	if (charLength == -1U)
+            	if (charLength == ~0)
             		perror("decoding utf-8 data failed");
             	else
             		perror("insufficent memory for text buffer");
@@ -483,8 +477,9 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
             }
             fprintf(log, "\n");
         }
-        else 
+        else
         {
+            assert(pText32);
             pText32[charLength] = 0;
             fprintf(log, "\n");
         }
@@ -577,6 +572,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
         {
             case ',':
             case '&':
+                assert(valueText);
                 value = atoi(valueText);
                 if (ref)
                 {
@@ -595,6 +591,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
                 }
                 if (!ref)
                 {
+                    assert(name);
                     feat_id = atoi(name);
                     ref = gr_face_find_fref(face, feat_id);
                 }
@@ -611,6 +608,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
         }
         if (ref)
         {
+            assert(valueText);
             value = atoi(valueText);
             gr_fref_set_feature_value(ref, value, featureList);
             if (feat_id > 0x20000000)
@@ -631,11 +629,17 @@ int Parameters::testFileFont() const
 //    try
     {
         gr_face *face = NULL;
-        if (alltrace) gr_start_logging(NULL, alltrace);
-        if (enableCache)
-            face = gr_make_file_face_with_seg_cache(fileName, 1000, opts | gr_face_dumbRendering);
+        FILE * testfile = fopen(fileName, "rb");
+        if (!testfile)
+        {
+            fprintf(stderr, "Unable to open font file\n");
+            return 4;
+        }
         else
-            face = gr_make_file_face(fileName, opts);
+            fclose(testfile);
+
+        if (alltrace) gr_start_logging(NULL, alltrace);
+        face = gr_make_file_face(fileName, opts);
 
         // use the -trace option to specify a file
     	if (trace)	gr_start_logging(face, trace);
@@ -684,6 +688,7 @@ int Parameters::testFileFont() const
             }
             *ui = 0;
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, (gr_encform)codesize, pText8, textSrc.getLength(), rtl ? 1 : 0);
+            free(pText8);
         }
         else
             pSeg = gr_make_seg(sizedFont, face, 0, features ? featureList : NULL, textSrc.utfEncodingForm(),
@@ -721,7 +726,7 @@ int Parameters::testFileFont() const
                         gr_slot_attr(slot, pSeg, gr_slatAttX, 0),
                         gr_slot_attr(slot, pSeg, gr_slatAttY, 0), orgX, orgY, gr_slot_can_insert_before(slot) ? 1 : 0,
                         cinfo ? gr_cinfo_break_weight(cinfo) : 0, gr_slot_before(slot), gr_slot_after(slot));
-               
+
                 if (pText32 != NULL && gr_slot_before(slot) + offset < charLength
                                     && gr_slot_after(slot) + offset < charLength)
                 {
@@ -740,7 +745,7 @@ int Parameters::testFileFont() const
             for (unsigned int j = 0; j < numchar; j++)
             {
                 const gr_char_info *c = gr_seg_cinfo(pSeg, j);
-                fprintf(log, "%d\t%04X\t%d\t%d\t%ld\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c), gr_cinfo_base(c));
+                fprintf(log, "%d\t%04X\t%d\t%d\t%d\n", j, gr_cinfo_unicode_char(c), gr_cinfo_before(c), gr_cinfo_after(c), int(gr_cinfo_base(c)));
             }
             free(map);
         }
@@ -764,9 +769,9 @@ int lookup(size_t *map, size_t val)
 
 int main(int argc, char *argv[])
 {
-    
+
     Parameters parameters;
-    
+
     if (!parameters.loadFromArgs(argc, argv))
     {
         fprintf(stderr,"Usage: %s [options] fontfile utf8text \n",argv[0]);
@@ -788,10 +793,8 @@ int main(int argc, char *argv[])
         fprintf(stderr,"-log out.log\tSet log file to use rather than stdout\n");
         fprintf(stderr,"-trace trace.json\tDefine a file for the JSON trace log\n");
         fprintf(stderr,"-demand\tDemand load glyphs and cmap cache\n");
-        fprintf(stderr,"-cache\tEnable Segment Cache\n");
         fprintf(stderr,"-bytes\tword size for character transfer [1,2,4] defaults to 4\n");
         return 1;
     }
     return parameters.testFileFont();
 }
-

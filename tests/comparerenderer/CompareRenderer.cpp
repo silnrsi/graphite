@@ -102,7 +102,7 @@ public:
             }
         }
     }
-    
+
     ~CompareRenderer()
     {
         delete [] m_fileBuffer;
@@ -319,7 +319,6 @@ int main(int argc, char ** argv)
     FeatureParser * featureSettings = NULL;
     FeatureParser * altFeatureSettings = NULL;
     bool direction = rendererOptions[OptRtl].exists();
-    int segCacheSize = rendererOptions[OptSegCache].getInt(argv);
     const std::string traceLogPath = rendererOptions[OptTrace].exists() ? rendererOptions[OptTrace].get(argv) : std::string();
 	  Gr2Face face(fontFile, traceLogPath, rendererOptions[OptDemand].get(argv));
 
