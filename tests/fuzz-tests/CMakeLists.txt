@@ -21,7 +21,8 @@ file(GLOB_RECURSE tfiles RELATIVE ${PROJECT_SOURCE_DIR} *.fuzz)
 set(lastfontname "")
 if (NOT GRAPHITE2_ASAN)
     set(noasan -t 20 --memory=8000 --valgrind)
-endif (NOT GRAPHITE2_ASAN)
+endif ()
+
 foreach (tfile IN LISTS tfiles)
     set(tpath ${tfile})
     trimtail(tpath tname)
@@ -38,3 +39,36 @@ foreach (tfile IN LISTS tfiles)
     add_custom_command(TARGET fuzztest POST_BUILD COMMAND test -s fuzzregress-demand-${fname}-${textname}-${tname}.log && echo demand test: ${fname} ${textname} ${tname} failed. || true)
 endforeach(tfile)
 
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  include_directories(${graphite2_core_SOURCE_DIR})
+  add_executable(graphite-fuzzer graphite-fuzzer.cpp)
+  set_target_properties(graphite-fuzzer PROPERTIES
+    LINKER_LANGUAGE C
+    COMPILE_FLAGS  "-fsanitize=fuzzer,address,undefined -g -O1" # -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
+  LINK_FLAGS "-fsanitize=fuzzer,address,undefined")
+  target_link_libraries(graphite-fuzzer graphite2 graphite2-base)
+
+  add_executable(graphite-fuzzer-dbg dbg-main.cpp graphite-fuzzer.cpp)
+  set_target_properties(graphite-fuzzer-dbg PROPERTIES
+    LINKER_LANGUAGE C
+    COMPILE_FLAGS  "-fsanitize=address -g -O0" # -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
+  LINK_FLAGS "-fsanitize=address")
+  target_link_libraries(graphite-fuzzer-dbg graphite2 graphite2-base)
+
+  add_executable(graphite-fuzzer-font-only graphite-fuzzer-font-only.cpp)
+  set_target_properties(graphite-fuzzer-font-only PROPERTIES
+    LINKER_LANGUAGE C
+    COMPILE_FLAGS  "-fsanitize=fuzzer,address,undefined -g -O1" # -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
+  LINK_FLAGS "-fsanitize=fuzzer,address,undefined")
+  target_link_libraries(graphite-fuzzer-font-only graphite2 graphite2-base)
+
+  add_executable(graphite-fuzzer-font-only-dbg dbg-main.cpp graphite-fuzzer-font-only.cpp)
+  set_target_properties(graphite-fuzzer-font-only-dbg PROPERTIES
+    LINKER_LANGUAGE C
+    COMPILE_FLAGS  "-fsanitize=address -g -O0" # -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
+  LINK_FLAGS "-fsanitize=address")
+  target_link_libraries(graphite-fuzzer-font-only-dbg graphite2 graphite2-base)
+endif ()
+
+#add_test(NAME graphite-fuzzer COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
+#set_tests_properties(graphite-fuzzer PROPERTIES TIMEOUT 30)
