@@ -77,7 +77,7 @@ int main(int argc, char * argv[])
 
     for (i = 0; i < numtests16; ++i)
     {
-        size_t res = gr_count_unicode_characters(gr_utf16, tests16[i].str, tests16[i].str + sizeof(tests16[i].str), &error);
+        size_t res = gr_count_unicode_characters(gr_utf16, tests16[i].str, tests16[i].str + sizeof tests16[i].str/sizeof tests16[i].str[0], &error);
         if (tests16[i].error >= 0)
         {
             if (!error)
