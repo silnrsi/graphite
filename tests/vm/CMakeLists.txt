@@ -50,7 +50,7 @@ if (GRAPHITE2_ASAN)
     set_property(TEST vm-test-call-threading APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
 endif (GRAPHITE2_ASAN)
 
-if  (${CMAKE_COMPILER_IS_GNUCXX})
+if  (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	add_test(vm-test-direct-threading vm-test-direct ${testing_SOURCE_DIR}/fonts/small.ttf 1)
 	set_tests_properties(vm-test-direct-threading PROPERTIES
 			PASS_REGULAR_EXPRESSION "simple program size:    14 bytes.*result of program: 42"
@@ -59,4 +59,4 @@ if  (${CMAKE_COMPILER_IS_GNUCXX})
         set_target_properties(vm-test-direct PROPERTIES LINK_FLAGS "-fsanitize=address")
         set_property(TEST vm-test-direct-threading APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
     endif (GRAPHITE2_ASAN)
-endif  (${CMAKE_COMPILER_IS_GNUCXX})
+endif ()
