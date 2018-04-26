@@ -21,10 +21,9 @@ enable_testing()
 
 set(GRAPHITE2_VM_TYPE auto CACHE STRING "Choose the type of vm machine: Auto, Direct or Call.")
 option(GRAPHITE2_NFILEFACE "Compile out the gr_make_file_face* APIs")
-option(GRAPHITE2_NTRACING "Compile out log segment tracing capability")
+option(GRAPHITE2_NTRACING "Compile out log segment tracing capability" ON)
 option(GRAPHITE2_TELEMETRY "Add memory usage telemetry")
-option(GRAPHITE2_ASAN "Enable Address Sanitizing")
-
+set(GRAPHITE2_SANITIZERS "" CACHE STRING "Set compiler sanitizers passed to -fsanitize")
 
 message(STATUS "Build: " ${CMAKE_BUILD_TYPE})
 string(REPLACE "ON"  "shared"  _LIB_OBJECT_TYPE ${BUILD_SHARED_LIBS})
@@ -37,12 +36,16 @@ message(STATUS "Building library: " ${_LIB_OBJECT_TYPE})
 message(STATUS "File Face support: " ${_FILEFACE_SUPPORT})
 message(STATUS "Tracing support: " ${_TRACING_SUPPORT})
 
-if (GRAPHITE2_ASAN)
-    add_definitions(-fsanitize=address -fno-omit-frame-pointer -g)
-    find_program(ASAN_SYMBOLIZER llvm-symbolizer
-            PATHS "/usr/lib" "/usr/local/lib"
-            PATH_SUFFIXES "llvm-3.5/bin" "llvm-3.4/bin" "llvm-3.3/bin")
-endif (GRAPHITE2_ASAN)
+if (GRAPHITE2_SANITIZERS)
+    string(STRIP ${GRAPHITE2_SANITIZERS} GRAPHITE2_SANITIZERS)
+    add_compile_options(-fsanitize=${GRAPHITE2_SANITIZERS} -fno-omit-frame-pointer -g -O1)
+    message(STATUS "Sanitizer support: " ${GRAPHITE2_SANITIZERS})
+    string(REGEX REPLACE "(,?fuzzer|fuzzer,?)" "" SANITIZERS_LINK  ${GRAPHITE2_SANITIZERS})
+    if (GRAPHITE2_SANITIZERS MATCHES "fuzzer")
+      set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -fsanitize-coverage=trace-pc-guard")
+    endif ()
+    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -fsanitize=${SANITIZERS_LINK}")
+endif ()
 
 string(TOLOWER ${GRAPHITE2_VM_TYPE} GRAPHITE2_VM_TYPE)
 if (NOT GRAPHITE2_VM_TYPE MATCHES "auto|direct|call")

@@ -15,7 +15,3 @@ add_executable(utftest utftest.cpp)
 target_link_libraries(utftest graphite2)
 
 add_test(NAME utftest COMMAND $<TARGET_FILE:utftest>)
-if (GRAPHITE2_ASAN)
-    set_target_properties(utftest PROPERTIES LINK_FLAGS "-fsanitize=address")
-    set_property(TEST utftest APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
-endif (GRAPHITE2_ASAN)

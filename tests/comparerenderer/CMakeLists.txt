@@ -18,10 +18,6 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     COMPILE_FLAGS   "-std=c++11")
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-if (GRAPHITE2_ASAN)
-    set_target_properties(comparerenderer PROPERTIES LINK_FLAGS "-fsanitize=address")
-endif (GRAPHITE2_ASAN)
-
 # rt is for timing
 target_link_libraries(comparerenderer graphite2-base graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
 
@@ -37,9 +33,6 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
     # comparision tests between old and new graphite
         add_test(NAME ${TESTNAME}_comparison COMMAND $<TARGET_FILE:comparerenderer>
         -t ${testing_SOURCE_DIR}/texts/${TEXTFILE} -f ${testing_SOURCE_DIR}/fonts/${FONTFILE} -s 12 -v -l ${PROJECT_BINARY_DIR}/${TESTNAME}.log -n --tolerance 0.0001 ${ARGN})
-        if (GRAPHITE2_ASAN)
-            set_property(TEST ${TESTNAME}_comparison APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ASAN_SYMBOLIZER}")
-        endif (GRAPHITE2_ASAN)
         set_tests_properties(${TESTNAME}_comparison PROPERTIES TIMEOUT 3)
         add_test(NAME ${TESTNAME}cmpOutput COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/../standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.log)
         set_tests_properties(${TESTNAME}cmpOutput PROPERTIES DEPENDS ${TESTNAME})

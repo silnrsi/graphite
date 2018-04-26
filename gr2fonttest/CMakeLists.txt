@@ -11,10 +11,6 @@ endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 add_executable(gr2fonttest gr2FontTest.cpp UtfCodec.cpp)
 target_link_libraries(gr2fonttest graphite2)
 
-if (GRAPHITE2_ASAN)
-    set_target_properties(gr2fonttest PROPERTIES LINK_FLAGS "-fsanitize=address")
-endif (GRAPHITE2_ASAN)
-
 if (BUILD_SHARED_LIBS)
     # copy the DLL so that gr2fonttest can find it
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
