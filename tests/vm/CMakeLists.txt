@@ -35,9 +35,10 @@ if  (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif  (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	add_definitions(-fno-rtti -fno-exceptions)
+	add_compile_options(-fno-rtti -fno-exceptions)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-		add_definitions(-DNDEBUG -fomit-frame-pointer)
+    add_definitions(-DNDEBUG)
+		add_compile_options(-fomit-frame-pointer)
 	endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
