@@ -112,7 +112,7 @@ public:
     {
         const ptrdiff_t n = e-s;
         if (n <= 0) return n == 0;
-        const uint32 u = *(s+(n-1)); // Get the last codepoint
+        const uint32 u = *(e-1); // Get the last codepoint
         return (u < 0xD800 || u > 0xDBFF);
     }
 };
@@ -175,7 +175,7 @@ public:
         if (*s >= 0xC0) return false;
         if (n == 1) return true;
         if (*--s < 0x80) return true;
-        if (*s >= 0xe0) return false;
+        if (*s >= 0xE0) return false;
         if (n == 2 || *s >= 0xC0) return true;
         if (*--s < 0x80) return true;
         if (*s >= 0xF0) return false;
@@ -225,6 +225,7 @@ public:
     operator codeunit_type * () const throw() { return cp; }
 
     bool error() const throw()  { return sl < 1; }
+    bool validate(const _utf_iterator & e)  { return codec::validate(cp, e.cp); }
 };
 
 template <typename C>

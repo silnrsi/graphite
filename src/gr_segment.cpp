@@ -65,6 +65,11 @@ inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const voi
 
     if (last)
     {
+        if (!first.validate(last))
+        {
+            if (error)  *error = last - 1;
+            return 0;
+        }
         for (;first != last; ++first, ++n_chars)
             if ((usv = *first) == 0 || first.error()) break;
     }
