@@ -101,8 +101,9 @@ public:
         l = 1;
 
         if (uh < 0xD800|| uh > 0xDFFF) { return uh; }
+        if (uh > 0xDBFF) { l = -1; return 0xFFFD; }
         const uint32 ul = cp[1];
-        if (uh > 0xDBFF || ul < 0xDC00 || ul > 0xDFFF) { l = -1; return 0xFFFD; }
+        if (ul < 0xDC00 || ul > 0xDFFF) { l = -1; return 0xFFFD; }
         ++l;
         return (uh<<10) + ul + surrogate_offset;
     }
