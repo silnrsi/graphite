@@ -4,7 +4,7 @@ Graphite 2 is made available as a source tarball from these urls:
 https://github.com/silnrsi/graphite/releases or +
 http://sf.net/projects/silgraphite/files/graphite2
 
-While Graphite 2 is written in C++11 it is written in a subset that ensures no
+While Graphite 2 is written in C++11, it is written in a subset that ensures no
 runtime dependency on the language runtime.
 
 Graphite 2 uses cmake for its build system. The basic build procedure is to
@@ -145,7 +145,7 @@ GRAPHITE2_NFILEFACE:BOOL::
 GRAPHITE2_NTRACING:BOOL::
     Turns off tracing support to save code space. Tracing support allows debug
     output of segment creation. +
-    The default is OFF.
+    The default is ON.
 
 GRAPHITE2_VM_TYPE:STRING::
     This value can be `auto`, `direct` or `call`. It specifies which type of
@@ -156,13 +156,12 @@ GRAPHITE2_VM_TYPE:STRING::
     based machine. +
     The default is auto.
 
-GRAPHITE2_ASAN:BOOL::
-    This turns on compile time support for Google's
-    https://code.google.com/p/address-sanitizer/[ASAN] Address Sanitizer.
-    This works with both gcc and clang, however under clang any tests driven by
-    Python will not be run. These tests require the ASAN runtime as a shared
-    library and currently clang only provides static version. +
-    The default is OFF.
+GRAPHITE2_SANITIZERS:STRING::
+    This turns on compile time support for the specified sanitizers. This works
+    with both gcc and clang, though there are some differences in which
+    sanitizers each offers. If fuzzer is one of them then it will cause the
+    libFuzzer based fuzzing targets to be built as well. +
+    The default is an empty string.
 
 Bear in mind that ASAN will not work with ulimit constraints so running the
 fuzztest may result in problems.
@@ -175,7 +174,7 @@ There are some hard build dependencies:
 
 python::
     To run the make test and make fuzztest, the build system requires
-    python v2.6 or later.
+    python v2.7 or later.
 
 Microsoft Visual C++::
     You will need Microsoft Visual Studio 12 2013 or later as we use some
@@ -194,5 +193,5 @@ g++-multilib::
 
 clang::
     To build with clang under linux you will need to ensure you have installed
-    libc++ and libc++abi packages. The easiest way to do on Debian & derivatives
-    is to install the libc++-dev and libc++abi-dev packages.
+    libc++ and libc++abi packages. The easiest way to do that on Debian &
+    derivatives is to install the libc++-dev and libc++abi-dev packages.

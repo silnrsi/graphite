@@ -106,3 +106,38 @@ bug description::
     A short description of the bug, this cannot contain any ":" characters or
     other characters forbidden by Windows or Unix filename schemes. For
     `class::member` references use an `_` e.g. `class_member`.
+
+=== LibFuzzer based fuzzing ===
+
+We now build a number of Clang libFuzzer test targets in
+`<src>/tests/fuzz-tests` whenever `fuzzer` is one of the sanitizers found in
+`GRAPHITE2_SANITIZERS`. There are a series of seed inputs in the
+`<src>/tests/fuzz-tests/libfuzzer-corpus` directory each one coresponding to
+one of the existing unit tests pairing a font with text and parameters. These
+are binary files which consist of:
+
+.libFuzzer target seed file-format for fuzz targets
+[cols="3,10",options="unbreakable,header,compact",width="90%",frame="topbot",grid="none"]
+|=============================================================================
+| Length        | Input parameter
+| <variable>    | TrueType file of font
+| utint16 * n   | Feature values (N = number of feature ids in the font)
+| uint32_t      | Text Script ID
+| uint8_t       | UTF encoding form uint size (1,2 or 4) see `gr_encform`
+| uint32_t      | Text directionality see `gr_bidirtl`
+| uint_8_t[128] | Text in the UTF encoding form specified
+|=============================================================================
+
+Run as follows:
+----
+cd <src>/build
+cp ../tests/fuzz-tests/libfuzzer-corpus corpus
+tests/fuzz-tests/gr-fuzz-font corpus
+----
+
+To rerun a test just do:
+----
+tests/fuzz-tests/gr-fuzz-font crash-test-case-produced-by-fuzzer
+----
+See the libFuzzer documentation for more advanced options standard to all
+libFuzzer produced fuzzing targets.
