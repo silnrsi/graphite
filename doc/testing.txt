@@ -121,7 +121,7 @@ are binary files which consist of:
 |=============================================================================
 | Length        | Input parameter
 | <variable>    | TrueType file of font
-| utint16 * n   | Feature values (N = number of feature ids in the font)
+| utint16 * N   | Feature values (N = number of feature ids in the font)
 | uint32_t      | Text Script ID
 | uint8_t       | UTF encoding form uint size (1,2 or 4) see `gr_encform`
 | uint32_t      | Text directionality see `gr_bidirtl`
