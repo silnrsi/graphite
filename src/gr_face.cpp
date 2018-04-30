@@ -74,6 +74,16 @@ namespace
         else
             return false;
     }
+
+    inline
+    uint32 zeropad(const uint32 x)
+    {
+        if (x == 0x20202020)                    return 0;
+        if ((x & 0x00FFFFFF) == 0x00202020)     return x & 0xFF000000;
+        if ((x & 0x0000FFFF) == 0x00002020)     return x & 0xFFFF0000;
+        if ((x & 0x000000FF) == 0x00000020)     return x & 0xFFFFFF00;
+        return x;
+    }
 }
 
 extern "C" {
@@ -132,16 +142,6 @@ void gr_tag_to_str(gr_uint32 tag, char *str)
     *str++ = char(tag >> 8);
     *str++ = char(tag);
     *str = '\0';
-}
-
-inline
-uint32 zeropad(const uint32 x)
-{
-    if (x == 0x20202020)                    return 0;
-    if ((x & 0x00FFFFFF) == 0x00202020)     return x & 0xFF000000;
-    if ((x & 0x0000FFFF) == 0x00002020)     return x & 0xFFFF0000;
-    if ((x & 0x000000FF) == 0x00000020)     return x & 0xFFFFFF00;
-    return x;
 }
 
 gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default

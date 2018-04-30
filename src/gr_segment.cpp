@@ -53,38 +53,36 @@ namespace
       return static_cast<gr_segment*>(pRes);
   }
 
+  template <typename utf_iter>
+  inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
+  {
+      size_t n_chars = 0;
+      uint32 usv = 0;
 
+      if (last)
+      {
+          if (!first.validate(last))
+          {
+              if (error)  *error = last - 1;
+              return 0;
+          }
+          for (;first != last; ++first, ++n_chars)
+              if ((usv = *first) == 0 || first.error()) break;
+      }
+      else
+      {
+          while ((usv = *first) != 0 && !first.error())
+          {
+              ++first;
+              ++n_chars;
+          }
+      }
+
+      if (error)  *error = first.error() ? first : 0;
+      return n_chars;
+  }
 }
 
-
-template <typename utf_iter>
-inline size_t count_unicode_chars(utf_iter first, const utf_iter last, const void **error)
-{
-    size_t n_chars = 0;
-    uint32 usv = 0;
-
-    if (last)
-    {
-        if (!first.validate(last))
-        {
-            if (error)  *error = last - 1;
-            return 0;
-        }
-        for (;first != last; ++first, ++n_chars)
-            if ((usv = *first) == 0 || first.error()) break;
-    }
-    else
-    {
-        while ((usv = *first) != 0 && !first.error())
-        {
-            ++first;
-            ++n_chars;
-        }
-    }
-
-    if (error)  *error = first.error() ? first : 0;
-    return n_chars;
-}
 
 extern "C" {
 

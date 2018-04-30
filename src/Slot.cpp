@@ -193,14 +193,7 @@ int32 Slot::clusterMetric(const Segment *seg, uint8 metric, uint8 attrLevel, boo
 
 int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
 {
-    if (ind == gr_slatUserDefnV1)
-    {
-        ind = gr_slatUserDefn;
-        subindex = 0;
-        if (seg->numAttrs() == 0)
-            return 0;
-    }
-    else if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
+    if (ind >= gr_slatJStretch && ind < gr_slatJStretch + 20 && ind != gr_slatJWidth)
     {
         int indx = ind - gr_slatJStretch;
         return getJustify(seg, indx / 5, indx % 5);
@@ -231,30 +224,32 @@ int Slot::getAttr(const Segment *seg, attrCode ind, uint8 subindex) const
     case gr_slatMeasureSol: return -1; // err what's this?
     case gr_slatMeasureEol: return -1;
     case gr_slatJWidth:     return int(m_just);
-    case gr_slatUserDefn :  return m_userAttr[subindex];
+    case gr_slatUserDefnV1: subindex = 0; GR_FALLTHROUGH;
+      // no break
+    case gr_slatUserDefn :  return subindex < seg->numAttrs() ?  m_userAttr[subindex] : 0;
     case gr_slatSegSplit :  return seg->charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
     case gr_slatColFlags :		{ SlotCollision *c = seg->collisionInfo(this); return c ? c->flags() : 0; }
-    case gr_slatColLimitblx :	SLOTGETCOLATTR(limit().bl.x)
-    case gr_slatColLimitbly :	SLOTGETCOLATTR(limit().bl.y)
-    case gr_slatColLimittrx :	SLOTGETCOLATTR(limit().tr.x)
-    case gr_slatColLimittry :	SLOTGETCOLATTR(limit().tr.y)
-    case gr_slatColShiftx :		SLOTGETCOLATTR(offset().x)
-    case gr_slatColShifty :		SLOTGETCOLATTR(offset().y)
-    case gr_slatColMargin :		SLOTGETCOLATTR(margin())
-    case gr_slatColMarginWt :	SLOTGETCOLATTR(marginWt())
-    case gr_slatColExclGlyph :	SLOTGETCOLATTR(exclGlyph())
-    case gr_slatColExclOffx :	SLOTGETCOLATTR(exclOffset().x)
-    case gr_slatColExclOffy :	SLOTGETCOLATTR(exclOffset().y)
-    case gr_slatSeqClass :		SLOTGETCOLATTR(seqClass())
-	case gr_slatSeqProxClass :	SLOTGETCOLATTR(seqProxClass())
-    case gr_slatSeqOrder :		SLOTGETCOLATTR(seqOrder())
-    case gr_slatSeqAboveXoff :	SLOTGETCOLATTR(seqAboveXoff())
-    case gr_slatSeqAboveWt :	SLOTGETCOLATTR(seqAboveWt())
-    case gr_slatSeqBelowXlim :	SLOTGETCOLATTR(seqBelowXlim())
-    case gr_slatSeqBelowWt :	SLOTGETCOLATTR(seqBelowWt())
-    case gr_slatSeqValignHt :	SLOTGETCOLATTR(seqValignHt())
-    case gr_slatSeqValignWt :	SLOTGETCOLATTR(seqValignWt())
+    case gr_slatColLimitblx:SLOTGETCOLATTR(limit().bl.x)
+    case gr_slatColLimitbly:SLOTGETCOLATTR(limit().bl.y)
+    case gr_slatColLimittrx:SLOTGETCOLATTR(limit().tr.x)
+    case gr_slatColLimittry:SLOTGETCOLATTR(limit().tr.y)
+    case gr_slatColShiftx :	SLOTGETCOLATTR(offset().x)
+    case gr_slatColShifty :	SLOTGETCOLATTR(offset().y)
+    case gr_slatColMargin :	SLOTGETCOLATTR(margin())
+    case gr_slatColMarginWt:SLOTGETCOLATTR(marginWt())
+    case gr_slatColExclGlyph:SLOTGETCOLATTR(exclGlyph())
+    case gr_slatColExclOffx:SLOTGETCOLATTR(exclOffset().x)
+    case gr_slatColExclOffy:SLOTGETCOLATTR(exclOffset().y)
+    case gr_slatSeqClass :	SLOTGETCOLATTR(seqClass())
+    case gr_slatSeqProxClass:SLOTGETCOLATTR(seqProxClass())
+    case gr_slatSeqOrder :	SLOTGETCOLATTR(seqOrder())
+    case gr_slatSeqAboveXoff:SLOTGETCOLATTR(seqAboveXoff())
+    case gr_slatSeqAboveWt: SLOTGETCOLATTR(seqAboveWt())
+    case gr_slatSeqBelowXlim:SLOTGETCOLATTR(seqBelowXlim())
+    case gr_slatSeqBelowWt:	SLOTGETCOLATTR(seqBelowWt())
+    case gr_slatSeqValignHt:SLOTGETCOLATTR(seqValignHt())
+    case gr_slatSeqValignWt:SLOTGETCOLATTR(seqValignWt())
     default : return 0;
     }
 }

@@ -14,11 +14,6 @@ add_library(vm-test-common STATIC
 target_link_libraries(vm-test-common graphite2 graphite2-file graphite2-base)
 add_definitions(-DGRAPHITE2_NTRACING)
 
-if  (CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
-endif  (CMAKE_COMPILER_IS_GNUCXX)
-
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
