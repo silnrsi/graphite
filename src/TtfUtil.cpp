@@ -1252,8 +1252,8 @@ size_t LocaLookup(gid16 nGlyphId,
 void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
 {
     const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
-        if (nGlyfOffset + pByte < pByte || nGlyfOffset >= nTableLen - sizeof(Sfnt::Glyph))
-            return NULL;
+    if (OVERFLOW_OFFSET_CHECK(pByte, nGlyfOffset) || nGlyfOffset >= nTableLen - sizeof(Sfnt::Glyph))
+        return NULL;
     return const_cast<uint8 *>(pByte + nGlyfOffset);
 }
 

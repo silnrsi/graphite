@@ -43,6 +43,8 @@ namespace graphite2
 namespace TtfUtil
 {
 
+#define OVERFLOW_OFFSET_CHECK(p, o) (o + reinterpret_cast<size_t>(p) < reinterpret_cast<size_t>(p))
+
 typedef long fontTableId32;
 typedef unsigned short gid16;
 
