@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import graphite, random, resource, sys, os, time, itertools, math
+import graphite2, random, resource, sys, os, time, itertools, math
 from multiprocessing import Pool, current_process
 from argparse import ArgumentParser
 
@@ -106,7 +106,7 @@ class Test(object) :
         if opts.memory :
             mem = opts.memory * 1024 * 1024
             resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
-        seg = graphite.Segment(self.font, self.grface, "", text, self.rtl, self.feats)
+        seg = graphite2.Segment(self.font, self.grface, "", text, self.rtl, self.feats)
         sys.exit(0)
 
 p = ArgumentParser()
@@ -118,11 +118,11 @@ p.add_argument('-s','--status', type=int, default=10, help="Update status every 
 p.add_argument('-j','--cpus', type=int, help="Number of threads to run in parallel [num cpus]")
 opts = p.parse_args()
 
-grface = graphite.Face(opts.fontname)
+grface = graphite2.Face(opts.fontname)
 if not grface.face :
     print "Failed to load font {}".format(opts.fontname)
     sys.exit(1)
-grfont = graphite.Font(grface, 16)
+grfont = graphite2.Font(grface, 16)
 
 m = MultiProc(Test, grface, grfont)
 
