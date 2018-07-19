@@ -187,6 +187,11 @@ public:
 	    _dir = _header + dir_off;
 	}
 
+	~face_handle()
+	{
+		delete [] _header;
+	}
+
 	void replace_table(const TtfUtil::Tag name, const void * const data, size_t len) throw() {
 		_tables[name] = std::make_pair(data, len);
 	}
