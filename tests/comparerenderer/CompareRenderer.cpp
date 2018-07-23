@@ -371,6 +371,7 @@ int main(int argc, char ** argv)
     {
         fprintf(stderr, "Please specify at least 1 renderer\n");
         showOptions();
+        if (rendererOptions[OptLogFile].exists()) fclose(log);
         return -3;
     }
 
