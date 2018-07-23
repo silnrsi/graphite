@@ -138,9 +138,8 @@ int main(int argc , char *argv[])
 	const size_t rounds = 1UL << atoi(argv[1]);
 	int r = 0;
 
-    if   (!test_swaps<uint64, uint32, uint16, uint8>()
-       || !test_swaps<int64, int32, int16, int8>())
-        return 5;
+	if (!test_swaps<uint64, uint32, uint16, uint8>() || !test_swaps<int64, int32, int16, int8>())
+		return 5;
 
 	if (r == 0) r = test_reads<uint64, uint32, uint16, uint8>(rounds);
 	if (r == 0) r = test_reads<int64, int32, int16, int8>(rounds);
