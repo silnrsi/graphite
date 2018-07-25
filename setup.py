@@ -15,6 +15,7 @@ setup(
     author           = 'SIL International',
     license          = 'LGPL-2.1',
     url              = 'https://github.com/silnrsi/graphite',
+    zip_safe         = False,
     py_modules       = ['graphite2'],
     install_requires = ['future'],
     long_description = long_description,
