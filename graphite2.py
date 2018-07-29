@@ -131,7 +131,7 @@ else :
     fn('graphite_stop_logging', None)
 
 def tag_to_str(num) :
-    s = create_string_buffer('\000' * 5)
+    s = create_string_buffer(40)
     gr2.gr_tag_to_str(num, s)
     return str(s.value)
 
