@@ -38,7 +38,7 @@ sparse classe is working correctly.
 
 using namespace graphite2;
 
-#if defined(__x86_64__) || defined(_WIN64)
+#if (defined(__x86_64__) && !defined(__ILP32__)) || defined(_WIN64)
 	#define HAS_64BIT
 #endif
 
