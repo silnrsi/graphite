@@ -13,11 +13,18 @@ setup(
     version          = '1.3.11',
     description      = 'SIL graphite2 smart font system python bindings',
     author           = 'SIL International',
-    license          = 'LGPL-2.1',
+    license          = 'LGPL-2.1+',
     url              = 'https://github.com/silnrsi/graphite',
     zip_safe         = False,
     py_modules       = ['graphite2'],
     install_requires = ['future'],
     long_description = long_description,
-    long_description_content_type = 'text/markdown'
+    long_description_content_type = 'text/markdown',
+    classifiers = [
+        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3'
+    ]
 )
