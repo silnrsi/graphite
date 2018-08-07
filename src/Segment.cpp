@@ -59,9 +59,7 @@ Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
   m_flags(((m_silf->flags() & 0x20) != 0) << 1),
   m_passBits(m_silf->aPassBits() ? -1 : 0)
 {
-    Slot *s = newSlot();
-    if (s)
-        freeSlot(s);
+    freeSlot(newSlot());
     m_bufSize = log_binary(numchars)+1;
 }
 
@@ -141,6 +139,7 @@ Slot *Segment::newSlot()
 
 void Segment::freeSlot(Slot *aSlot)
 {
+    if (aSlot == nullptr) return;
     if (m_last == aSlot) m_last = aSlot->prev();
     if (m_first == aSlot) m_first = aSlot->next();
     if (aSlot->attachedTo())
@@ -149,11 +148,11 @@ void Segment::freeSlot(Slot *aSlot)
     {
         if (aSlot->firstChild()->attachedTo() == aSlot)
         {
-            aSlot->firstChild()->attachTo(NULL);
+            aSlot->firstChild()->attachTo(nullptr);
             aSlot->removeChild(aSlot->firstChild());
         }
         else
-            aSlot->firstChild(NULL);
+            aSlot->firstChild(nullptr);
     }
     // reset the slot incase it is reused
     ::new (aSlot) Slot(aSlot->userAttrs());
@@ -165,7 +164,7 @@ void Segment::freeSlot(Slot *aSlot)
 #endif
     // update next pointer
     if (!m_freeSlots)
-        aSlot->next(NULL);
+        aSlot->next(nullptr);
     else
         aSlot->next(m_freeSlots);
     m_freeSlots = aSlot;
