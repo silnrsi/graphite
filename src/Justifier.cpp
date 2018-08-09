@@ -227,8 +227,10 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 
     if (silf()->flags() & 1)
     {
-        delLineEnd(m_first);
-        delLineEnd(m_last);
+        if (m_first)
+            delLineEnd(m_first);
+        if (m_last)
+            delLineEnd(m_last);
     }
     m_first = oldFirst;
     m_last = oldLast;
