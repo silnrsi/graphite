@@ -98,9 +98,9 @@ private:
   }
 };
 
+#pragma pack(push, 1)
 struct feature
 {
-  #pragma pack(1)
   uint32_t id;
   uint16_t value;
   uint16_t lang_id;
@@ -108,12 +108,12 @@ struct feature
 
 struct common_parameters
 {
-  #pragma pack(1)
   uint32_t    script_tag = 0;
   uint32_t    lang_tag = 0;
   feature     feat  = {0xffffffff,0xffff,0x0409};
   uint8_t     encoding = 1;
 };
+#pragma pack(pop)
 
 template <class payload_t>
 struct test_case

@@ -85,16 +85,19 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     width = width / scale;
     if ((jflags & gr_justEndInline) == 0)
     {
-        do {
+        while (pLast != pFirst && pLast)
+        {
             Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
             if (bbox.bl.x != 0.f || bbox.bl.y != 0.f || bbox.tr.x != 0.f || bbox.tr.y == 0.f)
                 break;
             pLast = pLast->prev();
-        } while (pLast != pFirst);
+        }
     }
 
-    end = pLast->nextSibling();
-    pFirst = pFirst->nextSibling();
+    if (pLast)
+        end = pLast->nextSibling();
+    if (pFirst)
+        pFirst = pFirst->nextSibling();
 
     int icount = 0;
     int numLevels = silf()->numJustLevels();
@@ -224,8 +227,10 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 
     if (silf()->flags() & 1)
     {
-        delLineEnd(m_first);
-        delLineEnd(m_last);
+        if (m_first)
+            delLineEnd(m_first);
+        if (m_last)
+            delLineEnd(m_last);
     }
     m_first = oldFirst;
     m_last = oldLast;
