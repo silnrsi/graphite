@@ -62,7 +62,7 @@ void JustifyTotal::accumulate(Slot *s, Segment *seg, int level)
 
 float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags jflags, Slot *pFirst, Slot *pLast)
 {
-    Slot *s, *end;
+    Slot *end = last();
     float currWidth = 0.0;
     const float scale = font ? font->scale() : 1.0f;
     Position res;
@@ -73,9 +73,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     if ((m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
     {
         reverseSlots();
-        s = pFirst;
-        pFirst = pLast;
-        pLast = s;
+        std::swap(pFirst, pLast);
     }
     if (!pFirst) pFirst = pSlot;
     while (!pFirst->isBase()) pFirst = pFirst->attachedTo();
@@ -103,7 +101,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
-        for (s = pSlot; s && s != end; s = s->nextSibling())
+        for (Slot *s = pSlot; s && s != end; s = s->nextSibling())
         {
             CharInfo *c = charinfo(s->before());
             if (isWhitespace(c->unicodeChar()))
@@ -116,7 +114,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         }
         if (!icount)
         {
-            for (s = pSlot; s && s != end; s = s->nextSibling())
+            for (Slot *s = pSlot; s && s != end; s = s->nextSibling())
             {
                 s->setJustify(this, 0, 3, 1);
                 s->setJustify(this, 0, 2, 1);
@@ -127,7 +125,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 
     Vector<JustifyTotal> stats(numLevels);
-    for (s = pFirst; s && s != end; s = s->nextSibling())
+    for (Slot *s = pFirst; s && s != end; s = s->nextSibling())
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
@@ -149,7 +147,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             diff = width - currWidth;
             diffpw = diff / tWeight;
             tWeight = 0;
-            for (s = pFirst; s && s != end; s = s->nextSibling()) // don't include final glyph
+            for (Slot *s = pFirst; s && s != end; s = s->nextSibling()) // don't include final glyph
             {
                 int w = s->getJustify(this, i, 3);
                 float pref = diffpw * w + error;
