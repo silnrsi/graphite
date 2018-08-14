@@ -275,15 +275,13 @@ uint16 Face::languageForLocale(const char * locale) const
 
 
 Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
-: _f(&face), _compressed(false)
+: _f(&face), _sz(0), _compressed(false)
 {
-    size_t sz = 0;
-    _p = static_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &sz));
-    _sz = uint32(sz);
+    _p = static_cast<const byte *>((*_f->m_ops.get_table)(_f->m_appFaceHandle, n, &_sz));
 
     if (!TtfUtil::CheckTable(n, _p, _sz))
     {
-        releaseBuffers();     // Make sure we release the table buffer even if the table failed its checks
+        release();     // Make sure we release the table buffer even if the table failed its checks
         return;
     }
 
@@ -291,7 +289,7 @@ Face::Table::Table(const Face & face, const Tag n, uint32 version) throw()
         decompress();
 }
 
-void Face::Table::releaseBuffers()
+void Face::Table::release()
 {
     if (_compressed)
         free(const_cast<byte *>(_p));
@@ -300,12 +298,11 @@ void Face::Table::releaseBuffers()
     _p = 0; _sz = 0;
 }
 
-Face::Table & Face::Table::operator = (const Table & rhs) throw()
+Face::Table & Face::Table::operator = (const Table && rhs) throw()
 {
-    if (_p == rhs._p)   return *this;
-
-    this->~Table();
-    new (this) Table(rhs);
+    if (this == &rhs)   return *this;
+    release();
+    new (this) Table(std::move(rhs));
     return *this;
 }
 
@@ -352,7 +349,7 @@ Error Face::Table::decompress()
 
     // Tell the provider to release the compressed form since were replacing
     //   it anyway.
-    releaseBuffers();
+    release();
 
     if (e)
     {

@@ -175,18 +175,18 @@ class Face::Table
 
     Error decompress();
 
-    void releaseBuffers();
+    void release();
 
 public:
     Table() throw();
     Table(const Face & face, const Tag n, uint32 version=0xffffffff) throw();
-    Table(const Table & rhs) throw();
     ~Table() throw();
+    Table(const Table && rhs) throw();
 
     operator const byte * () const throw();
 
-    Table & operator = (const Table & rhs) throw();
     size_t  size() const throw();
+    Table & operator = (const Table && rhs) throw();
 };
 
 inline
@@ -196,7 +196,7 @@ Face::Table::Table() throw()
 }
 
 inline
-Face::Table::Table(const Table & rhs) throw()
+Face::Table::Table(const Table && rhs) throw()
 : _f(rhs._f), _p(rhs._p), _sz(rhs._sz), _compressed(rhs._compressed)
 {
     rhs._p = 0;
@@ -205,7 +205,7 @@ Face::Table::Table(const Table & rhs) throw()
 inline
 Face::Table::~Table() throw()
 {
-    releaseBuffers();
+    release();
 }
 
 inline
