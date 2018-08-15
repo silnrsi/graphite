@@ -28,6 +28,7 @@ nmake*
 .pydevproject
 .settings
 .tags
+.tags_swap
 .libs/
 .deps/
 .externalToolBuilders
