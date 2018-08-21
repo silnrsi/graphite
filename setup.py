@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-from skbuild import setup
 from os import path
 from io import open
+try:
+    from skbuild import setup
+except ImportError:
+    from setuptools import setup
 
 here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
