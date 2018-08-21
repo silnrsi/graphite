@@ -6,7 +6,7 @@ Uploaders: Rene Engelhard <rene@debian.org>, Daniel Glassey <wdg@debian.org>
 Build-Depends: debhelper (>= 7.0), cmake, python (>= 2.7), fonttools,
                dh-python, python-setuptools, python3, python3-setuptools
 # perl: libmodule-build-perl
-Build-Depends-Indep: asciidoc, dblatex, doxygen, docbook-xsl, latex-xcolor, libxml2-utils
+Build-Depends-Indep: asciidoc, dblatex, doxygen, docbook-xsl, libxml2-utils
 Standards-Version: 3.9.1
 
 Package: libgraphite2-3
