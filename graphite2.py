@@ -24,12 +24,19 @@ except NameError:
     unicode = str
 from ctypes import *
 import ctypes.util
-import sys, os, platform
+import os
 
 
-gr2 = cdll.LoadLibrary(os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
-                                      ctypes.util.find_library("graphite2")))
-
+libpath = os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
+                         ctypes.util.find_library("graphite2"))
+if libpath is None:
+    # find wheel's library
+    wheel = os.path.dirname(__file__)
+    if os.name == 'nt':
+        libpath = os.path.join(wheel, 'bin', 'graphite2.dll')
+    else:
+        libpath = os.path.join(wheel, 'lib', 'libgraphite2.so')
+gr2 = cdll.LoadLibrary(libpath)
 
 
 def grversion() :
@@ -124,7 +131,7 @@ else :
     fn('graphite_stop_logging', None)
 
 def tag_to_str(num) :
-    s = create_string_buffer('\000' * 5)
+    s = create_string_buffer(40)
     gr2.gr_tag_to_str(num, s)
     return str(s.value)
 
@@ -151,7 +158,7 @@ class FeatureVal(object) :
 
     def set(self, fref, val) :
         if not gr2.gr_fref_set_feature_value(fref.fref, val, self.fval) :
-            raise Error
+            raise RuntimeError
 
 
 class FeatureRef(object) :
@@ -271,10 +278,6 @@ class Slot(object) :
             s = gr2.gr_slot_next_sibling_attachment(s)
 
     @property
-    def index(self) :
-        return gr2.gr_slot_index(self.slot)
-
-    @property
     def gid(self) :
         return gr2.gr_slot_gid(self.slot)
 
@@ -358,5 +361,5 @@ class Segment(object) :
             s = gr2.gr_slot_prev_in_segment(s)
         return res
 
-    def justify(start, font, width, flags, first = None, last = None) :
+    def justify(self, start, font, width, flags, first = None, last = None) :
         gr2.gr_seg_justify(self.seg, start.slot, font.font, width, flags, first.slot if first else 0, last.slot if last else 0)
