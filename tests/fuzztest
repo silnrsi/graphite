@@ -39,7 +39,12 @@ of the License or (at your option) any later version.
 '''
 import collections, operator, struct
 from contextlib import closing, contextmanager
-from itertools import chain, cycle, imap, islice, izip, repeat, starmap
+from itertools import chain, cycle, islice, repeat, starmap
+try:
+    import itertools.imap as map
+    import itertools.izip as zip
+except ImportError:
+    pass
 from random import uniform, seed
 
 import multiprocessing.dummy as multiprocessing
@@ -55,7 +60,7 @@ tablerecord = collections.namedtuple("tablerecord", "tag start end")
 
 class font:
     __recm = re.compile('^(?:-?\d+)?\s*,\s*(0[xX][\da-fA-F]+)\s*,\s*(0[xX][\da-fA-F]+|\d+)\s*')
-    random_bytes = imap(int, starmap(uniform, repeat((0,256))))
+    random_bytes = map(int, starmap(uniform, repeat((0,256))))
 
     @staticmethod
     def __initialise_worker(fnt):
@@ -91,19 +96,19 @@ class font:
         return sum(tr.end-tr.start for tr in self.__table_dir)
 
     def input(self,path):
-        return [(int(m.group(1),0), int(m.group(2),0)) for m in imap(self.__recm.match, open(path, "rt")) if m]
+        return [(int(m.group(1),0), int(m.group(2),0)) for m in map(self.__recm.match, open(path, "rt")) if m]
 
 
     def linear(self, value=[], start=0, passes=0):
         tables = chain.from_iterable(repeat(self.__table_dir, passes)) if passes else cycle(self.__table_dir)
-        locs = chain.from_iterable(xrange(tr.start, tr.end) for tr in tables)
+        locs = chain.from_iterable(list(range(tr.start, tr.end)) for tr in tables)
         vals = cycle(value) if value else self.random_bytes
         next(islice(locs, start, start),None)
         next(islice(vals, start, start),None)
-        return izip(locs, vals)
+        return zip(locs, vals)
 
     def position(self, loc, val=[]):
-        return zip(repeat(loc), val if val else [next(random_bytes)])
+        return zip(repeat(loc), val if val else [next(self.random_bytes)])
 
     def read_tabledir(self):
         import mmap
@@ -271,10 +276,10 @@ if __name__ == '__main__':
                     if rv < 0 or errlog :
                         exitrv = 2
                     if rv < 0 :
-                        (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
+                        (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen) #FIXME fontlen undefined
                         log.write("{0:d},{1[0]:#010X},{1[1]: >3d},{2!s}{3:#010X}\n".format(rv, cr, t + '+' if t else '', cr[0]-s))
                     elif opts.verbose and errlog:
-                        (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen)
+                        (t,s,_) = fnt.table_from_offset(cr[0]) or (0,0,fontlen) #FIXME fontlen undefined
                         log.write(",{0[0]:#010X},{0[1]: >3d},{1!s}{2:#010X}\n".format(cr, t + '+' if t else '', cr[0]-s))
                         log.flush()
                         if errlog :

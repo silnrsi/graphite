@@ -40,7 +40,12 @@ of the License or (at your option) any later version.
 import argparse, collections, errno, operator, os, re, struct, sys, time
 
 from contextlib import closing
-from itertools import chain, groupby, imap, islice, izip_longest, repeat, starmap
+from itertools import chain, groupby, islice, repeat, starmap
+try:
+    import itertools.imap as map
+    import itertools.izip_longest as zip_longest
+except ImportError:
+    pass
 from functools import partial
 from random import uniform, seed
 from pprint import pprint
@@ -76,7 +81,7 @@ class fuzz_log(collections.defaultdict):
     def __init__(self, fileobj):
         super(fuzz_log,self).__init__(list)
         cs = chain.from_iterable(self.__recs(ls) if r else (valgm.sub(r'\1', ''.join(ls)).lstrip(),) for r,ls in groupby(fileobj, self.__is_rec))
-        for rec in izip_longest(cs,cs):
+        for rec in zip_longest(cs,cs):
             self[rec[1]].append(rec[0])
         for rs in self.itervalues():
             rs.sort(key=operator.itemgetter(1))
@@ -99,7 +104,7 @@ if __name__ == '__main__':
         with closing(args.log), closing(args.out):
             for err, rs in sorted(fuzz_log(args.log).iteritems(),
                                   key=record_sort_key):
-                args.out.write('\n'.join(imap(str, rs)) + '\n')
+                args.out.write('\n'.join(map(str, rs)) + '\n')
                 if err:
                     args.out.write(err)
                 args.out.flush()

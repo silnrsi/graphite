@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import graphite, random, resource, sys, os, time, itertools, math
 from multiprocessing import Pool, current_process
@@ -51,7 +52,7 @@ class MultiProc(object) :
         if top == 0 :
             myiter = itertools.repeat(1)
         else :
-            myiter = xrange(top)
+            myiter = list(range(top))
         e = Estimator(top)
         try :
             for count, res in enumerate(self.pool.imap_unordered(multiproctest, myiter, self.chunksize)) :
@@ -86,10 +87,10 @@ class Test(object) :
     def test(self) :
         length = int(self.random.betavariate(2, 50) * 1000)
         lenchars = len(self.chars) - 1
-        text = "".join(map(lambda x:self.chars[self.random.randint(0, lenchars)], xrange(length)))
+        text = "".join(map(lambda x:self.chars[self.random.randint(0, lenchars)], list(range(length))))
         pid = os.fork()
         if pid < 0 :
-            print "Failed to fork"
+            print("Failed to fork")
             return (-1, text)
         elif pid > 0 :
             (respid, status) = os.waitpid(pid, 0)
@@ -120,12 +121,12 @@ opts = p.parse_args()
 
 grface = graphite.Face(opts.fontname)
 if not grface.face :
-    print "Failed to load font {}".format(opts.fontname)
+    print("Failed to load font {}".format(opts.fontname))
     sys.exit(1)
 grfont = graphite.Font(grface, 16)
 
 m = MultiProc(Test, grface, grfont)
 
 for (count, res) in m.execute(opts.max) :
-    if res[0] : print "{0},{1}".format(res[0], repr(res[1]))
+    if res[0] : print("{0},{1}".format(res[0], repr(res[1])))
 sys.stdout.write("\n")
