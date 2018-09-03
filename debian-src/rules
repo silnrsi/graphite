@@ -1,7 +1,10 @@
 #!/usr/bin/make -f
 
+export PYBUILD_NAME=graphite2
+
 %:
 	dh $@ --builddirectory=build
+	dh $@ --with python2,python3 --buildsystem=pybuild
 
 override_dh_strip:
 	dh_strip --dbg-package=libgraphite2-3-dbg

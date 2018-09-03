@@ -206,7 +206,7 @@ rounding = 0.1 ** opts.dp
 
 # Import this here to allow the graphite module to see the modified environment
 #  if --graphite_library is used.
-import graphite as gr
+import graphite2 as gr
 
 outfile = codecs.getwriter("utf_8")(open(opts.output, mode="wb") if opts.output else sys.stdout)
 
