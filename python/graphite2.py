@@ -32,9 +32,17 @@ from ctypes import (byref,
                     CFUNCTYPE, POINTER, Structure,
                     create_string_buffer, string_at)
 
-gr2 = ctypes.cdll.LoadLibrary(
-        os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
-                       ctypes.util.find_library("graphite2")))
+
+libpath = os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
+                         ctypes.util.find_library("graphite2"))
+if libpath is None:
+    # find wheel's library
+    wheel = os.path.dirname(__file__)
+    if os.name == 'nt':
+        libpath = os.path.join(wheel, 'bin', 'graphite2.dll')
+    else:
+        libpath = os.path.join(wheel, 'lib', 'libgraphite2.so')
+gr2 = ctypes.cdll.LoadLibrary(libpath)
 
 
 def grversion():
