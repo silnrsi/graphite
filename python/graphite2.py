@@ -42,7 +42,7 @@ if libpath is None:
         libpath = os.path.join(wheel, 'bin', 'graphite2.dll')
     else:
         libpath = os.path.join(wheel, 'lib', 'libgraphite2.so')
-gr2 = cdll.LoadLibrary(libpath)
+gr2 = ctypes.cdll.LoadLibrary(libpath)
 
 
 def grversion():
