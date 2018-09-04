@@ -232,7 +232,8 @@ class Face(object):
             if not os.path.isfile(data):
                 raise FileNotFoundError(errno.ENOENT,
                                         os.strerror(errno.ENOENT), data)
-            self.face = gr2.gr_make_file_face(bytes(data, 'utf_8'), options)
+            if hasattr(data, '__fspath__'): data = os.fspath(data)
+            self.face = gr2.gr_make_file_face(data.encode('utf_8'), options)
 
     def __del__(self, __gr2=gr2):
         __gr2.gr_face_destroy(self.face)
@@ -372,7 +373,7 @@ class Segment(object):
                                    scriptid,
                                    feats and feats.fval,
                                    1,
-                                   bytes(string, 'utf_8'), length, rtl)
+                                   string.encode('utf_8'), length, rtl)
 
     def __del__(self, __gr2=gr2):
         __gr2.gr_seg_destroy(self.seg)
