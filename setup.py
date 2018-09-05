@@ -20,7 +20,7 @@ setup(
     url              = 'https://github.com/silnrsi/graphite',
     zip_safe         = False,
     package_dir      = {'': 'python'},
-    py_modules       = ['graphite2'],
+    packages         = ['graphite2'],
     install_requires = ['future'],
     long_description = long_description,
     long_description_content_type = 'text/markdown',
