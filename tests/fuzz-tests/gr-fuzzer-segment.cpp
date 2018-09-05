@@ -28,12 +28,14 @@ of the License or (at your option) any later version.
 
 #include "graphite-fuzzer.hpp"
 
+#pragma pack(push,1)
 struct segment_parameters : public common_parameters
 {
-  #pragma pack(1)
   uint8_t   direction = 0;
   uint8_t   test_text[128] = "Hello World!စက္ခုန္ဒ";
 };
+#pragma pack(pop)
+
 
 // This fuzzer target tests Segment API, and by necesity parts of the Font API
 // This includes the entire gr_cinfo_* and gr_slot_* family of functions

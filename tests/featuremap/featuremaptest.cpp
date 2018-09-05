@@ -31,9 +31,9 @@
 #include "inc/FeatureMap.h"
 #include "inc/TtfUtil.h"
 
-#pragma pack(push, 1)
-
 using namespace graphite2;
+
+#pragma pack(push, 1)
 
 template<typename T> class _be
 {
@@ -75,6 +75,7 @@ struct FeatTableTestA
     FeatDefn m_defs[1];
     FeatSetting m_settings[2];
 };
+#pragma pack(pop)
 
 const FeatTableTestA testDataA = {
     { 2, 0, 1, 0, 0},
@@ -162,7 +163,6 @@ const FeatTableTestE testBadOffset = {
     {{0,10},{1,11},{0,12},{10,13},{0,14},{1,15},{2,16},{2,17},{4,18},{1,19},{2,20}}
 };
 
-#pragma pack(pop)
 
 class face_handle
 {

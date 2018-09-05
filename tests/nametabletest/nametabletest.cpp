@@ -29,10 +29,9 @@
 #include "inc/TtfTypes.h"
 #include "inc/NameTable.h"
 
-#pragma pack(push, 1)
-
 using namespace graphite2;
 
+#pragma pack(push, 1)
 struct NameTestA
 {
     TtfUtil::Sfnt::FontNames m_nameHeader;
@@ -48,6 +47,8 @@ struct NameTestB
     TtfUtil::Sfnt::LangTagRecord m_languages[2];
     uint8 m_textData[59];
 };
+#pragma pack(pop)
+
 
 NameTestA testA = {
     {0, 6, (5 * sizeof(TtfUtil::Sfnt::NameRecord)) +
@@ -97,8 +98,6 @@ NameTestB testB = {
      0,0x6d,0,0x6e,0,0x77,0,0x2d,0,0x4d,0,0x4d
     }
 };
-
-#pragma pack(pop)
 
 void testName(void * data, size_t length, uint16 langId,
               uint16 actualLang, uint16 nameId, const char * utf8Text)

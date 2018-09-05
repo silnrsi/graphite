@@ -113,7 +113,6 @@ struct common_parameters
   feature     feat  = {0xffffffff,0xffff,0x0409};
   uint8_t     encoding = 1;
 };
-#pragma pack(pop)
 
 template <class payload_t>
 struct test_case
@@ -154,5 +153,6 @@ struct test_case
     return block;
   }
 };
+#pragma pack(pop)
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);

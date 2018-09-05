@@ -19,7 +19,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   if (face)
   {
     gr_face_n_glyphs(face);
-    const auto n_langs = gr_face_n_languages(face);
+    gr_face_n_languages(face);
     const auto n_frefs = gr_face_n_fref(face);
 
     gr_face_lang_by_index(face, 0);
@@ -41,7 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gr_fref_set_feature_value(fref, test.params.feat.value, features);
     gr_featureval_destroy(features);
   }
-  
+
   gr_face_destroy(face);
 
   return 0;
