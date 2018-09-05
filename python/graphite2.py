@@ -29,8 +29,7 @@ from ctypes import (byref,
                     c_uint,  c_uint8, c_uint16, c_uint32,
                     c_ushort,
                     c_void_p,
-                    CFUNCTYPE, POINTER, Structure,
-                    create_string_buffer, string_at)
+                    CFUNCTYPE, POINTER, Structure)
 
 
 libpath = os.environ.get('PYGRAPHITE2_LIBRARY_PATH',
@@ -164,14 +163,16 @@ else:
 
 
 def tag_to_str(num):
-    s = create_string_buffer('\000' * 5)
+    s = ctypes.create_string_buffer('\000' * 5)
     gr2.gr_tag_to_str(num, s)
     return bytes(s.value)
 
 
 class Label(str):
     def __new__(typename, ref, size):
-        return super(Label, typename).__new__(typename, string_at(ref, size))
+        return super(Label, typename).__new__(
+                        typename,
+                        ctypes.string_at(ref, size))
 
     def __init__(self, ref, size):
         self.ref = ref

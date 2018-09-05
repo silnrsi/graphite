@@ -1,8 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import graphite2, random, resource, sys, os, time, itertools, math
+import graphite2
+import itertools
+import math
+import os
+import random
+import resource
+import sys
+import time
 from multiprocessing import Pool, current_process
 from argparse import ArgumentParser
+
 
 class Estimator:
     def __init__(self, max):
@@ -18,8 +26,10 @@ class Estimator:
         ct = time.time()
         if (ct - self.__st <= opts.status):
             return None
-        else :
-            self.modulus = int(round(math.pow(10,math.floor(math.log10(current - self.__ct)))))
+        else:
+            self.modulus = int(round(math.pow(
+                                10,
+                                math.floor(math.log10(current - self.__ct)))))
         self.__ct = current
         x = current / (ct-self.__base)
         k = (ct-self.__base)/opts.status+1
@@ -37,44 +47,53 @@ class Estimator:
         return m*s/st + x*t/st
 
 
-class MultiProc(object) :
+class MultiProc(object):
     chunksize = 10
 
-    def __init__(self, doclass, *args) :
-        self.pool = Pool(initializer = self.initialize, initargs = [doclass, args], processes = opts.cpus)
+    def __init__(self, doclass, *args):
+        self.pool = Pool(initializer=self.initialize,
+                         initargs=[doclass, args],
+                         processes=opts.cpus)
 
-    def initialize(self, doclass, args) :
+    def initialize(self, doclass, args):
         proc = current_process()
         proc.inst = doclass(*args)
 
-    def execute(self, top) :
-        if top == 0 :
+    def execute(self, top):
+        if top == 0:
             myiter = itertools.repeat(1)
-        else :
-            myiter = xrange(top)
+        else:
+            myiter = range(top)
         e = Estimator(top)
-        try :
-            for count, res in enumerate(self.pool.imap_unordered(multiproctest, myiter, self.chunksize)) :
-                if count % e.modulus == 0 :
+        try:
+            results = self.pool.imap_unordered(multiproctest, myiter,
+                                               self.chunksize)
+            for count, res in enumerate(results):
+                if count % e.modulus == 0:
                     sam = e.sample(count)
-                    if sam :
-                        sys.stdout.write("{0} - {1:8.2f}: {2}\r".format(count, sam[0], (sam[1] if top else "")))
+                    if sam:
+                        sys.stdout.write("{0} - {1:8.2f}: {2}\r".format(
+                                    count,
+                                    sam[0],
+                                    (sam[1] if top else "")))
                         sys.stdout.flush()
                 yield (count, res)
-        except KeyboardInterrupt :
+        except KeyboardInterrupt:
             sys.stdout.write("\n")
             sys.exit(0)
 
-def multiproctest(val) :
+
+def multiproctest(val):
     proc = current_process()
     return proc.inst.test()
 
 
-class Test(object) :
-    chars = u" %()-.3=[]A{}\u0627\u064b\u0663\u08f1\u200b\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069"
+class Test(object):
+    chars = " %()-.3=[]A{}\u0627\u064b\u0663\u08f1" \
+            "\u200b\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069"
     seed = None
 
-    def __init__(self, grface, grfont) :
+    def __init__(self, grface, grfont):
         self.random = random.Random()
         self.random.seed(self.seed)
         Test.seed = self.random.random()
@@ -83,49 +102,62 @@ class Test(object) :
         self.rtl = 1
         self.feats = {}
 
-    def test(self) :
+    def test(self):
         length = int(self.random.betavariate(2, 50) * 1000)
         lenchars = len(self.chars) - 1
-        text = "".join(map(lambda x:self.chars[self.random.randint(0, lenchars)], xrange(length)))
+
+        def g(x): return self.chars[self.random.randint(0, lenchars)]
+        text = "".join(map(g, range(length)))
         pid = os.fork()
-        if pid < 0 :
-            print "Failed to fork"
+        if pid < 0:
+            print("Failed to fork")
             return (-1, text)
-        elif pid > 0 :
+        elif pid > 0:
             (respid, status) = os.waitpid(pid, 0)
-            if (status & 0xFF) :
+            if (status & 0xFF):
                 return (status & 0x7F, text)  # don't care abut the core
-            else :
+            else:
                 return (0, text)
-        else :
+        else:
             self.subtest(text)
 
-    def subtest(self, text) :
-        if opts.timeout :
-            resource.setrlimit(resource.RLIMIT_CPU, (opts.timeout, opts.timeout))
-        if opts.memory :
+    def subtest(self, text):
+        if opts.timeout:
+            resource.setrlimit(resource.RLIMIT_CPU,
+                               (opts.timeout, opts.timeout))
+        if opts.memory:
             mem = opts.memory * 1024 * 1024
             resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
-        seg = graphite2.Segment(self.font, self.grface, "", text, self.rtl, self.feats)
+        graphite2.Segment(self.font, self.grface, "", text, self.rtl,
+                          self.feats)
         sys.exit(0)
+
 
 p = ArgumentParser()
 p.add_argument('fontname', help='font file')
-p.add_argument('-m','--max', type=int, default=0, help="Number of tests to run [infinite]")
-p.add_argument('--timeout', type=int, help="limit subprocess time in seconds")
-p.add_argument('--memory', type=int, help="memory limit for subprocesses in MB")
-p.add_argument('-s','--status', type=int, default=10, help="Update status every n seconds")
-p.add_argument('-j','--cpus', type=int, help="Number of threads to run in parallel [num cpus]")
+p.add_argument('-m', '--max', type=int, default=0,
+               help="Number of tests to run [infinite]")
+p.add_argument('--timeout', type=int,
+               help="limit subprocess time in seconds")
+p.add_argument('--memory', type=int,
+               help="memory limit for subprocesses in MB")
+p.add_argument('-s', '--status', type=int, default=10,
+               help="Update status every n seconds")
+p.add_argument('-j', '--cpus', type=int,
+               help="Number of threads to run in parallel [num cpus]")
 opts = p.parse_args()
 
-grface = graphite2.Face(opts.fontname)
-if not grface.face :
-    print "Failed to load font {}".format(opts.fontname)
+try:
+    grface = graphite2.Face(opts.fontname)
+except Exception as err:
+    print("Failed to load font {}: {}".format(opts.fontname, err),
+          file=sys.stderr, flush=True)
     sys.exit(1)
 grfont = graphite2.Font(grface, 16)
 
 m = MultiProc(Test, grface, grfont)
 
-for (count, res) in m.execute(opts.max) :
-    if res[0] : print "{0},{1}".format(res[0], repr(res[1]))
-sys.stdout.write("\n")
+for (count, res) in m.execute(opts.max):
+    if res[0]: print("{0},{1}".format(res[0], repr(res[1])))
+
+print("\n")

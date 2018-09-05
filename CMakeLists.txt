@@ -1,8 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 cmake_policy(SET CMP0012 NEW)
 include(TestBigEndian)
-include(FindPythonInterp)
-
+find_package(PythonInterp 3.6)
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 if (NOT CMAKE_BUILD_TYPE)
@@ -69,7 +68,9 @@ if (BUILD_SHARED_LIBS)
         EXEC_PROGRAM(${PYTHON_EXECUTABLE}
             ARGS -c \"import ctypes\; print(ctypes.sizeof(ctypes.c_void_p)) \"
             OUTPUT_VARIABLE PYTHON_SIZEOF_VOID_P)
-        if ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX))
+        if (NOT (PYTHON_VERSION_MAJOR GREATER 2 AND PYTHON_VERSION_MINOR GREATER 5))
+            message(WARNING "Python version 3.6 or greater required. Disabling some tests.")
+        elseif ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX))
             set(PYTHON_CTYPES_COMPATBILE TRUE)
         else ()
             if ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX)

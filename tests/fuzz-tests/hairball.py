@@ -1,72 +1,85 @@
 #!/usr/bin/env python3
 
-import argparse, codecs, struct, io, os.path, operator
-from functools import partial
+import argparse
+import pathlib
+import struct
+from typing import List, Tuple
 
-def map_common(args):
-    return (struct.pack("<3L2HB", args.script, args.lang,
-                        tag4cc(args.feat[0]), args.feat[1], 0x409, _encodings[args.encoding]),
-            [os.path.splitext(os.path.basename(args.font.name))[0],
+ParamBlock = bytes
+Names = List[str]
+
+
+def map_common(args) -> Tuple[ParamBlock, Names]:
+    return (struct.pack("<3L2HB",
+                        args.scriptid,
+                        args.langid,
+                        tag4cc(args.feat[0]), args.feat[1],
+                        0x409,
+                        _encodings[args.encoding]),
+            [args.font.stem,
              args.feat[0] and '{0[0]!s}={0[1]:d}'.format(args.feat),
              args.encoding])
 
-def map_segment(args):
-    ps,ns = map_common(args)
-    text = args.text.read().encode(args.encoding)
+
+def map_segment(args) -> Tuple[ParamBlock, Names]:
+    ps, ns = map_common(args)
+    text = args.text.read_text(encoding=args.encoding)
     return (ps + struct.pack("<B128s", _bidi[args.direction], text),
-            ns + [os.path.splitext(os.path.basename(args.text.name))[0], args.direction])
+            ns + [args.text.stem, args.direction])
 
-_formats = {
-    'font'      : map_common,
-    'segment'   : map_segment,
+
+_encodings = {
+    'utf8':  1,
+    'utf16': 2,
+    'utf32': 4
 }
 
-_encodings =  {
-    'utf8'  : 1,
-    'utf16' : 2,
-    'utf32' : 4
-}
+_bidi = {'ltr': 0, 'rtl': 1}
 
-_bidi = { 'ltr' : 0, 'rtl':1 }
 
-def feature(arg: str):
-    k,v = [x.strip() for x in arg.split('=')]
-    return (k, int(v,0))
+def feature(arg: str) -> Tuple[str, int]:
+    k, v = arg.split('=')
+    return (k.strip(), int(v.strip(), 0))
 
-def tag4cc(arg: str):
+
+def tag4cc(arg: str) -> int:
     return struct.unpack_from('>L', bytes(arg, 'ascii') + b'\0'*4)[0]
 
+
 parser = argparse.ArgumentParser(description='Generate fuzzer seed file')
-formatparsers = parser.add_subparsers(metavar='FUZZER-TARGET',
-                            dest='format_spec',
-                            help='Which fuzzer to generate a seed file for.')
-font_parser = formatparsers.add_parser('font', help='font API fuzzer')
+formatparsers = parser.add_subparsers(metavar='fuzzer-target',
+                                      dest='format_spec')
 
-seg_parser = formatparsers.add_parser('segment', help='segment API fuzzer')
-seg_parser.add_argument('text', metavar='TEXT-FILE',
-                        type=argparse.FileType('r',encoding='utf-8'),
+common_parser = argparse.ArgumentParser(add_help=False)
+common_parser.add_argument('font', type=pathlib.Path,
+                           help='Graphite enabled font file.')
+common_parser.add_argument('langid', type=tag4cc,
+                           help='Language Id tag')
+common_parser.add_argument('scriptid', type=tag4cc,
+                           help='Script Id tag')
+common_parser.add_argument('encoding', choices=_encodings,
+                           help='UTF encoding form')
+common_parser.add_argument('--feat', type=feature, default=('', 0xffff),
+                           help='A feature to set')
+
+font_parser = formatparsers.add_parser('font', help='font API fuzzer',
+                                       parents=[common_parser])
+font_parser.set_defaults(format_spec=map_common)
+
+seg_parser = formatparsers.add_parser('segment', help='segment API fuzzer',
+                                      aliases=['seg'],
+                                      parents=[common_parser])
+seg_parser.add_argument('text', type=pathlib.Path,
                         help='Text file to fill test string from')
-seg_parser.add_argument('direction', metavar='DIR', nargs='?',
-                        choices=_bidi, default='ltr',
+seg_parser.add_argument('direction', nargs='?', choices=_bidi, default='ltr',
                         help='Text direction')
-
-parser.add_argument('font', metavar='FONT', type=argparse.FileType('rb'),
-                    help='Graphite enabled font file.')
-parser.add_argument('lang', metavar='LANGID', type=tag4cc,
-                    help='Language Id')
-parser.add_argument('script', metavar='SCRIPTID', type=tag4cc,
-                    help='Script Id')
-parser.add_argument('encoding', metavar='UTF-FORM',
-                    choices=_encodings,
-                    help='UTF encoding form')
-parser.add_argument('--feat', type=feature, default=('',0xffff),
-                    help='A feature to set')
+seg_parser.set_defaults(format_spec=map_segment)
 
 args = parser.parse_args()
 
-params,names = _formats[args.format_spec](args)
-outname = '_'.join(filter(bool,names)) + '.fuzz'
+params, names = args.format_spec(args)
+outname = '_'.join(filter(bool, names)) + '.fuzz'
 
-with io.open(outname, "wb") as f:
-    f.write(args.font.read())
+with open(outname, "wb") as f:
+    f.write(args.font.read_bytes())
     f.write(params)
