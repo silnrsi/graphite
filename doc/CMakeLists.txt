@@ -18,7 +18,7 @@ if(A2X)
                                    ${PROJECT_SOURCE_DIR}/OpCodes.txt
                            COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.txt)
         set(DOC_DEPENDS ${PROJECT_BINARY_DIR}/manual.pdf ${PROJECT_BINARY_DIR}/GTF.pdf)
-    endif(DBLATEX)
+    endif()
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/manual.html
                        DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.txt ${PROJECT_SOURCE_DIR}/graphite.css
                        COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.txt)
@@ -28,7 +28,7 @@ if(A2X)
                                ${PROJECT_SOURCE_DIR}/graphite.css
                        COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.txt)
     set(DOC_DEPENDS ${DOC_DEPENDS} ${PROJECT_BINARY_DIR}/manual.html ${PROJECT_BINARY_DIR}/GTF.html)
-endif(A2X)
+endif()
 
 if(DOXYGEN AND LATEX)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/doxygen/latex/refman.pdf
@@ -37,6 +37,6 @@ if(DOXYGEN AND LATEX)
                         COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/${GRAPHITE2_DOXYGEN_CONFIG}.cfg
                         COMMAND make -C ${PROJECT_BINARY_DIR}/doxygen/latex)
     set(DOC_DEPENDS ${DOC_DEPENDS} ${PROJECT_BINARY_DIR}/doxygen/latex/refman.pdf)
-endif(DOXYGEN AND LATEX)
+endif()
 
 add_custom_target(docs DEPENDS ${DOC_DEPENDS})

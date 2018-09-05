@@ -12,7 +12,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(${PROJECT_NAME}_copy_dll graphite2 simple features clusters linebreak)
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+endif()
 
 macro(test_example TESTNAME SRCFILE)
     add_executable(${TESTNAME} ${SRCFILE})
@@ -21,14 +21,14 @@ macro(test_example TESTNAME SRCFILE)
 
     add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
     set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
-endmacro(test_example)
+endmacro()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_package(Freetype)
     if (${FREETYPE_FOUND})
         include_directories(${FREETYPE_INCLUDE_DIRS})
-    endif (${FREETYPE_FOUND})
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    endif()
+endif()
 
 macro(test_freetype TESTNAME SRCFILE)
     if (${FREETYPE_FOUND})
@@ -38,8 +38,8 @@ macro(test_freetype TESTNAME SRCFILE)
 
         add_test(NAME ${TESTNAME} COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
         set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
-    endif (${FREETYPE_FOUND})
-endmacro(test_freetype)
+    endif()
+endmacro()
 
 test_example(simple simple.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf "Hello World!")
 test_example(features features.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf)

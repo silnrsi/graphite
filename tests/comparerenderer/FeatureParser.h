@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cstring>
+#include <cstdlib>
 
 union FeatID
 {

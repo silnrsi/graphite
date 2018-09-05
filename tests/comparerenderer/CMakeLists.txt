@@ -2,7 +2,7 @@ project(comparerenderer)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(RT_LDFLAGS "rt")
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+endif()
 
 include_directories(../common ${PROJECT_SOURCE_DIR}/../../src)
 
@@ -16,7 +16,7 @@ add_executable(comparerenderer
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set_target_properties(comparerenderer PROPERTIES
     COMPILE_FLAGS   "-std=c++11")
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+endif()
 
 # rt is for timing
 target_link_libraries(comparerenderer graphite2-base graphite2 ${FREETYPE_LIBRARIES} ${GLIB_LD_FLAGS} ${HB_LDFLAGS} ${HB1_LDFLAGS} ${GR_LDFLAGS} ${ICU_LDFLAGS} ${RT_LDFLAGS})
@@ -26,7 +26,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(${PROJECT_NAME}_copy_dll graphite2 iconv comparerenderer)
-endif  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+endif()
 
 macro(comparetest TESTNAME FONTFILE TEXTFILE)
     if (${GR_FOUND})
@@ -36,8 +36,8 @@ macro(comparetest TESTNAME FONTFILE TEXTFILE)
         set_tests_properties(${TESTNAME}_comparison PROPERTIES TIMEOUT 3)
         add_test(NAME ${TESTNAME}cmpOutput COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/${TESTNAME}.log ${PROJECT_SOURCE_DIR}/../standards/${TESTNAME}${PLATFORM_TEST_SUFFIX}.log)
         set_tests_properties(${TESTNAME}cmpOutput PROPERTIES DEPENDS ${TESTNAME})
-    endif (${GR_FOUND})
-endmacro(comparetest)
+    endif()
+endmacro()
 
 comparetest(charis charis_r_gr.ttf udhr_eng.txt)
 comparetest(padauk Padauk.ttf my_HeadwordSyllables.txt)

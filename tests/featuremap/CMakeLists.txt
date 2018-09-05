@@ -7,13 +7,13 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_target(${PROJECT_NAME}_copy_dll ALL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${graphite2_core_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}graphite2${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
     add_dependencies(${PROJECT_NAME}_copy_dll graphite2 featuremaptest)
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+endif()
 
 set(S ${graphite2_core_SOURCE_DIR})
 add_executable(featuremaptest featuremaptest.cpp)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 #    set_target_properties(featuremaptest PROPERTIES COMPILE_DEFINITIONS "GRAPHITE2_STATIC")
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+endif()
 
 target_link_libraries(featuremaptest graphite2 graphite2-base graphite2-file graphite2-base)
 

@@ -35,7 +35,7 @@ add_library(graphite2-file STATIC
 set(TELEMETRY)
 if (GRAPHITE2_TELEMETRY)
     set(TELEMETRY ";GRAPHITE2_TELEMETRY")
-endif (GRAPHITE2_TELEMETRY)
+endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2-base PROPERTIES
@@ -54,16 +54,16 @@ else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         COMPILE_DEFINITIONS "GRAPHITE2_NTRACING${TELEMETRY}"
         LINK_FLAGS          "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE     C)
-endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+endif()
 
 if (GRAPHITE2_COMPARE_RENDERER)
     add_subdirectory(comparerenderer)
-endif (GRAPHITE2_COMPARE_RENDERER)
+endif()
 add_subdirectory(endian)
 add_subdirectory(bittwiddling)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(examples)
-endif (NOT GRAPHITE2_NFILEFACE)
+endif()
 add_subdirectory(featuremap)
 add_subdirectory(grlist)
 add_subdirectory(json)
@@ -72,7 +72,7 @@ add_subdirectory(sparsetest)
 add_subdirectory(utftest)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(vm)
-endif (NOT GRAPHITE2_NFILEFACE)
+endif()
 add_subdirectory(fuzz-tests)
 
 enable_testing()
