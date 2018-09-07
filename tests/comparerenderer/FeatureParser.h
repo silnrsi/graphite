@@ -47,8 +47,10 @@ public:
     {
         const char * pLang = NULL;
         m_lang.uId = 0;
+        if (!features)
+            return;
         size_t featuresLength = strlen(features);
-        if (!features || featuresLength == 0)
+        if (featuresLength == 0)
             return;
         m_featureCount = 1;
         if (features && (pLang = strstr(features, "lang=")))

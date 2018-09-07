@@ -54,7 +54,7 @@ class CompareRenderer
 {
 public:
     CompareRenderer(const char * testFile, Renderer** renderers, bool verbose)
-        : m_fileBuffer(NULL), m_numLines(0), m_lineOffsets(NULL),
+        : m_fileBuffer(NULL), m_fileLength(0), m_numLines(0), m_lineOffsets(NULL),
         m_renderers(renderers), m_verbose(verbose), m_cfMask(ALL_DIFFERENCE_TYPES)
     {
         // read the file into memory for fast access

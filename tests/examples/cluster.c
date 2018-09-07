@@ -42,7 +42,6 @@ int main(int argc, char **argv)
     for (is = gr_seg_first_slot(seg), ic = 0; is; is = gr_slot_next_in_segment(is), ic++)
     {
         size_t before = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_before(is)));
-        size_t after = gr_cinfo_base(gr_seg_cinfo(seg, gr_slot_after(is)));
         int    nAfter;
         size_t cAfter;
         while (clusters[ci].base_char > before && ci)                               /*<2>*/
