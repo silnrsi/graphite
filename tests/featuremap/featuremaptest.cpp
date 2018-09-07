@@ -19,13 +19,16 @@
     Suite 500, Boston, MA 02110-1335, USA or visit their web page on the
     internet at http://www.fsf.org/licenses/lgpl.html.
 */
+#include <cassert>
 #include <cstdlib>
-#include <stdexcept>
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <string>
+#include <memory>
+#include <vector>
+//
 #include <graphite2/Font.h>
+//
 #include "inc/Endian.h"
 #include "inc/Face.h"
 #include "inc/FeatureMap.h"
@@ -33,15 +36,105 @@
 
 using namespace graphite2;
 
+
+class face_handle : public gr_face_ops
+{
+public:
+  using table_t = std::pair<void const *, size_t>;
+  static const table_t no_table;
+
+
+private:
+  std::vector<uint8_t> _ttf;
+  void const *    _table_dir;
+  void const *    _header_tbl;
+  mutable std::map<const TtfUtil::Tag, table_t> _tables;
+
+  static
+  decltype(_ttf) buffer_from_file(std::string const & backing_font_path) {
+    std::ifstream f(backing_font_path, std::ifstream::binary);
+    decltype(_ttf) result(size_t(f.seekg(0, std::ios::end).tellg()));
+    f.seekg(0, std::ios::beg);
+
+    result.assign(std::istreambuf_iterator<char>(f),
+                  std::istreambuf_iterator<char>());
+    return result;
+  }
+
+public:
+  face_handle() noexcept
+  : gr_face_ops({sizeof(gr_face_ops), get_table_fn, nullptr}),
+    _table_dir(nullptr), _header_tbl(nullptr) {}
+
+  face_handle(std::string const & backing_font_path)
+  : gr_face_ops({sizeof(gr_face_ops), get_table_fn, nullptr}),
+    _ttf(buffer_from_file(backing_font_path)),
+    _table_dir(nullptr),
+    _header_tbl(nullptr)
+  {
+    size_t tbl_offset, tbl_len;
+
+    // Get the header
+    if (!TtfUtil::GetHeaderInfo(tbl_offset, tbl_len)
+        || tbl_len > _ttf.size()
+        || tbl_offset > _ttf.size() - tbl_len
+        || !TtfUtil::CheckHeader(_header_tbl = _ttf.data() + tbl_offset))
+      throw std::runtime_error(backing_font_path + ": invalid font.");
+
+      // Get the table directory
+    if (!TtfUtil::GetTableDirInfo(_header_tbl, tbl_offset, tbl_len)
+        || tbl_len > _ttf.size()
+        || tbl_offset > _ttf.size() - tbl_len)
+      throw std::runtime_error(backing_font_path + ": invalid font");
+    _table_dir = _ttf.data() + tbl_offset;
+  }
+
+  inline
+  void replace_table(TtfUtil::Tag name, void const * data, size_t len) noexcept
+  {
+    _tables[name] = {data, len};
+  }
+
+  table_t const & operator [] (TtfUtil::Tag name) const noexcept
+  {
+    assert(_header_tbl);
+    assert(_table_dir);
+    auto & table = _tables[name];
+
+    if (!table.first)
+    {
+      size_t tbl_offset, tbl_len;
+      if (TtfUtil::GetTableInfo(name, _header_tbl, _table_dir,
+            tbl_offset, tbl_len))
+          table = {_ttf.data() + tbl_offset, tbl_len};
+    }
+
+    return table;
+  }
+
+private:
+  static const void * get_table_fn(const void *afh, unsigned int name,
+                                  size_t *len) {
+    assert(afh != nullptr);
+
+    face_handle const & fh = *static_cast<decltype(&fh)>(afh);
+    auto & t = fh[name];
+    *len = t.second;
+    return t.first;
+  }
+};
+const face_handle::table_t face_handle::no_table = {0,0};
+
+
 #pragma pack(push, 1)
 
 template<typename T> class _be
 {
 	T _v;
-public:
-	_be(const T & t) throw() 				{_v = be::swap<T>(t);}
 
-	operator T () const throw()				{return be::swap<T>(_v); }
+public:
+  _be(const T & t) noexcept               {_v = be::swap<T>(t);}
+  constexpr operator T () const noexcept  {return be::swap<T>(_v); }
 };
 
 struct FeatHeader
@@ -71,8 +164,8 @@ struct FeatSetting
 
 struct FeatTableTestA
 {
-    FeatHeader m_header;
-    FeatDefn m_defs[1];
+    FeatHeader  m_header;
+    FeatDefn    m_defs[1];
     FeatSetting m_settings[2];
 };
 #pragma pack(pop)
@@ -85,8 +178,8 @@ const FeatTableTestA testDataA = {
 
 struct FeatTableTestB
 {
-    FeatHeader m_header;
-    FeatDefn m_defs[2];
+    FeatHeader  m_header;
+    FeatDefn    m_defs[2];
     FeatSetting m_settings[4];
 };
 
@@ -163,68 +256,9 @@ const FeatTableTestE testBadOffset = {
     {{0,10},{1,11},{0,12},{10,13},{0,14},{1,15},{2,16},{2,17},{4,18},{1,19},{2,20}}
 };
 
-
-class face_handle
-{
-public:
-	typedef std::pair<const void *, size_t>		table_t;
-	static const table_t						no_table;
-
-	face_handle(const char *backing_font_path = 0)
-	: _header(0), _dir(0)
-	{
-		if (!backing_font_path) return;
-		std::ifstream 	font_file(backing_font_path, std::ifstream::binary);
-		const size_t	font_size = size_t(font_file.seekg(0, std::ios::end).tellg());
-		font_file.seekg(0, std::ios::beg);
-		_header = new char [font_size];
-		font_file.read(const_cast<char *>(_header), font_size);
-	    if (!TtfUtil::CheckHeader(_header))
-	    	throw std::runtime_error(std::string(backing_font_path) + ": invalid font");
-	    size_t dir_off, dir_sz;
-	    if (!TtfUtil::GetTableDirInfo(_header, dir_off, dir_sz))
-	    	throw std::runtime_error(std::string(backing_font_path) + ": invalid font");
-	    _dir = _header + dir_off;
-	}
-
-	~face_handle()
-	{
-		delete [] _header;
-	}
-
-	void replace_table(const TtfUtil::Tag name, const void * const data, size_t len) throw() {
-		_tables[name] = std::make_pair(data, len);
-	}
-
-	const table_t & operator [] (const TtfUtil::Tag name) const throw() {
-		const table_t & table = _tables[name];
-		if (table.first)	return table;
-
-		size_t off, len;
-		if (!TtfUtil::GetTableInfo(name, _header, _dir, off, len))
-			return no_table;
-		return _tables[name] = table_t(_header + off, len);
-	}
-
-	static const gr_face_ops ops;
-private:
-	static const void * get_table_fn(const void* afh, unsigned int name, size_t *len) {
-		const face_handle & fh = *reinterpret_cast<const face_handle *>(afh);
-		const table_t & t = fh[name];
-		*len = t.second;
-		return t.first;
-	}
-
-    const char 						  * _header,
-									  * _dir;
-	mutable std::map<const TtfUtil::Tag, table_t> _tables;
-};
-
-const face_handle::table_t	face_handle::no_table = face_handle::table_t(reinterpret_cast<void *>(0),0);
-const gr_face_ops face_handle::ops = { sizeof(gr_face_ops), face_handle::get_table_fn, 0 };
-
-
-template <typename T> void testAssert(const char * msg, const T b)
+template <typename T>
+inline
+void testAssert(const char * msg, const T b)
 {
     if (!b)
     {
@@ -233,7 +267,9 @@ template <typename T> void testAssert(const char * msg, const T b)
     }
 }
 
-template <typename T, typename R> void testAssertEqual(const char * msg, const T a, const R b)
+template <typename T, typename R>
+inline
+void testAssertEqual(const char * msg, const T a, const R b)
 {
     if (a != T(b))
     {
@@ -242,18 +278,25 @@ template <typename T, typename R> void testAssertEqual(const char * msg, const T
     }
 }
 
-face_handle dummyFace;
 
-template <class T> void testFeatTable(const T & table, const char * testName)
+face_handle dummyFace;
+using face_ptr = std::unique_ptr<gr_face, decltype(&gr_face_destroy)>;
+
+template <class T> void testFeatTable(T const & table, std::string const & testName)
 {
     FeatureMap testFeatureMap;
     dummyFace.replace_table(TtfUtil::Tag::Feat, &table, sizeof(T));
-    gr_face * face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
-    if (!face) throw std::runtime_error("failed to load font");
-    bool readStatus = testFeatureMap.readFeats(*face);
-    testAssert("readFeats", readStatus);
-    fprintf(stderr, testName, NULL);
-    testAssertEqual("test num features %hu,%hu\n", testFeatureMap.numFeats(), table.m_header.m_numFeat);
+    face_ptr face(gr_make_face_with_ops(&dummyFace, &dummyFace, 0),
+                  gr_face_destroy);
+    if (!face)
+      throw std::runtime_error("failed to load font");
+
+    testAssert("readFeats", testFeatureMap.readFeats(*face));
+
+    std::cerr << testName << std::endl;
+    testAssertEqual("test num features %hu,%hu\n",
+                    testFeatureMap.numFeats(),
+                    table.m_header.m_numFeat);
 
     for (size_t i = 0; i < sizeof(table.m_defs) / sizeof(FeatDefn); i++)
     {
@@ -263,43 +306,42 @@ template <class T> void testFeatTable(const T & table, const char * testName)
         testAssertEqual("test feat label %hu %hu\n", ref->getNameId(), table.m_defs[i].m_label);
         size_t settingsIndex = (table.m_defs[i].m_settingsOffset - sizeof(FeatHeader)
             - (sizeof(FeatDefn) * table.m_header.m_numFeat)) / sizeof(FeatSetting);
-        for (uint16 j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
+        for (uint16_t j = 0; j < table.m_defs[i].m_numFeatSettings; j++)
         {
             testAssertEqual("setting label %hu %hu\n", ref->getSettingName(j),
                        table.m_settings[settingsIndex+j].m_label);
         }
     }
-    gr_face_destroy(face);
 }
+
 
 int main(int argc, char * argv[])
 {
-    gr_face * face = 0;
-    try
-	{
-		if (argc != 2)	throw std::length_error("not enough arguments: need a backing font");
+  try
+  {
+    if (argc != 2)
+      throw std::length_error("not enough arguments: need a backing font");
 
-		dummyFace = face_handle(argv[1]);
-		testFeatTable<FeatTableTestA>(testDataA, "A\n");
-		testFeatTable<FeatTableTestB>(testDataB, "B\n");
-		testFeatTable<FeatTableTestB>(testDataBunsorted, "Bu\n");
-		testFeatTable<FeatTableTestC>(testDataCunsorted, "C\n");
-		testFeatTable<FeatTableTestD>(testDataDunsorted, "D\n");
-		testFeatTable<FeatTableTestE>(testDataE, "E\n");
+    dummyFace = face_handle(argv[1]);
+    testFeatTable<FeatTableTestA>(testDataA, "A\n");
+    testFeatTable<FeatTableTestB>(testDataB, "B\n");
+    testFeatTable<FeatTableTestB>(testDataBunsorted, "Bu\n");
+    testFeatTable<FeatTableTestC>(testDataCunsorted, "C\n");
+    testFeatTable<FeatTableTestD>(testDataDunsorted, "D\n");
+    testFeatTable<FeatTableTestE>(testDataE, "E\n");
 
-		// test a bad settings offset stradling the end of the table
-		FeatureMap testFeatureMap;
-		dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
-		face = gr_make_face_with_ops(&dummyFace, &face_handle::ops, 0);
+    // test a bad settings offset stradling the end of the table
+    FeatureMap testFeatureMap;
+    dummyFace.replace_table(TtfUtil::Tag::Feat, &testBadOffset, sizeof testBadOffset);
+    face_ptr face(gr_make_face_with_ops(&dummyFace, &dummyFace, 0),
+                  gr_face_destroy);
 		testAssert("fail gracefully on bad table", !face);
-	}
-	catch (std::exception & e)
-	{
-		fprintf(stderr, "%s: %s\n", argv[0], e.what());
-		gr_face_destroy(face);
-		return 1;
-	}
+  }
+  catch (std::exception & e)
+  {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    return 1;
+  }
 
-    gr_face_destroy(face);
-    return 0;
+  return 0;
 }
