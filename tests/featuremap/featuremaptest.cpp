@@ -25,10 +25,11 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
-//
+
 #include <graphite2/Font.h>
-//
+
 #include "inc/Endian.h"
 #include "inc/Face.h"
 #include "inc/FeatureMap.h"
