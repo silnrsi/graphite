@@ -64,7 +64,6 @@ public:
         || tbl_len > size
         || tbl_offset > size - tbl_len) return;
     _table_dir = data + tbl_offset;
-    return;
   }
 
   operator bool () const noexcept {
