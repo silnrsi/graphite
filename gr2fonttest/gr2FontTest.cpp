@@ -130,6 +130,7 @@ void Parameters::clear()
 {
     closeLog() ;
     fileName = "";
+    features = nullptr;
     pointSize = 12.0f;
     dpi = 72;
     lineStart = false;
