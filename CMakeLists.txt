@@ -23,6 +23,7 @@ option(GRAPHITE2_NFILEFACE "Compile out the gr_make_file_face* APIs")
 option(GRAPHITE2_NTRACING "Compile out log segment tracing capability" ON)
 option(GRAPHITE2_TELEMETRY "Add memory usage telemetry")
 set(GRAPHITE2_SANITIZERS "" CACHE STRING "Set compiler sanitizers passed to -fsanitize")
+set(GRAPHITE2_FUZZING_ENGINE libFuzzer.a CACHE STRING "Fuzzing engine to link against for the fuzzers")
 
 message(STATUS "Build: " ${CMAKE_BUILD_TYPE})
 string(REPLACE "ON"  "shared"  _LIB_OBJECT_TYPE ${BUILD_SHARED_LIBS})

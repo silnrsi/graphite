@@ -48,14 +48,14 @@ if (GRAPHITE2_SANITIZERS MATCHES "fuzzer")
     LINKER_LANGUAGE C
     COMPILE_FLAGS  "-fsanitize=address,${GRAPHITE2_SANITIZERS} -g -O1 -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor"
     LINK_FLAGS "-fsanitize=address,${GRAPHITE2_SANITIZERS}")
-  target_link_libraries(gr-fuzzer-segment graphite2 graphite2-base libFuzzer.a)
+  target_link_libraries(gr-fuzzer-segment graphite2 graphite2-base ${GRAPHITE2_FUZZING_ENGINE})
 
   add_executable(gr-fuzzer-font gr-fuzzer-font.cpp)
   set_target_properties(gr-fuzzer-font PROPERTIES
     LINKER_LANGUAGE C
     COMPILE_FLAGS  "-fsanitize=address,${GRAPHITE2_SANITIZERS} -g -O1 -Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wctor-dtor-privacy -Wnon-virtual-dtor "
     LINK_FLAGS "-fsanitize=address,${GRAPHITE2_SANITIZERS}")
-  target_link_libraries(gr-fuzzer-font graphite2 graphite2-base libFuzzer.a)
+  target_link_libraries(gr-fuzzer-font graphite2 graphite2-base ${GRAPHITE2_FUZZING_ENGINE})
 endif ()
 
 #add_test(NAME graphite-fuzzer COMMAND $<TARGET_FILE:${TESTNAME}> ${ARGN})
