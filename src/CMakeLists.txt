@@ -136,9 +136,12 @@ endif()
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     set_target_properties(graphite2 PROPERTIES
-        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wimplicit-fallthrough -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -mfpmath=sse -msse2"
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -mfpmath=sse -msse2"
         LINK_FLAGS      "-nodefaultlibs"
         LINKER_LANGUAGE C)
+    if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+        add_definitions(-Wimplicit-fallthrough)
+    endif()
     target_link_libraries(graphite2 c)
     include(Graphite)
     nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
