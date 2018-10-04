@@ -137,7 +137,6 @@ endif()
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     set_target_properties(graphite2 PROPERTIES
         COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
-        LINK_FLAGS      "-nodefaultlibs"
         LINKER_LANGUAGE C)
     if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86")
         add_definitions(-mfpmath=sse -msse2)
