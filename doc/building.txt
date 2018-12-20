@@ -159,8 +159,8 @@ GRAPHITE2_VM_TYPE:STRING::
 GRAPHITE2_SANITIZERS:STRING::
     This turns on compile time support for the specified sanitizers. This works
     with both gcc and clang, though there are some differences in which
-    sanitizers each offers. If fuzzer is one of them then it will cause the
-    libFuzzer based fuzzing targets to be built as well. +
+    sanitizers each offers. The fuzzer sanitizer causes libFuzzer based fuzzing
+    targets to be built as well, but this currently only works under clang. +
     The default is an empty string.
 
 Bear in mind that ASAN will not work with ulimit constraints so running the

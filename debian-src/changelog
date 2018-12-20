@@ -1,3 +1,9 @@
+graphite2 (1.3.13~palaso1ubuntu1) bionic; urgency=medium
+
+  * Minor bug fixes release
+
+ -- Martin Hosken <martin_hosken@sil.org>  Mon, 20 Dec 2018 13:04:23 +0700
+
 graphite2 (1.3.12~palaso1ubuntu1) bionic; urgency=medium
 
   * Minor bug fixes release
