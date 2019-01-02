@@ -7,13 +7,21 @@ try:
     from skbuild import setup
 except ImportError:
     from setuptools import setup
+from setuptools import Distribution
+
+
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
+
 
 here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 with open(path.join(here, 'include/graphite2/Font.h')) as f:
     c_header = f.read()
-major, minor, bug = findall('define GR2_VERSION_[A-X]+\s+(\d+)', c_header)
+major, minor, bug = findall(r'define GR2_VERSION_[A-X]+\s+(\d+)', c_header)
 version = major + "." + minor + "." + bug
 
 setup(
@@ -26,7 +34,9 @@ setup(
     zip_safe         = False,
     package_dir      = {'': 'python'},
     packages         = ['graphite2'],
-    install_requires = ['future'],
+    package_data     = {
+        'graphite2' : ['libgraphite2.so']
+    },
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
