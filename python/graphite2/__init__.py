@@ -21,6 +21,7 @@ import ctypes
 import ctypes.util
 import errno
 import os
+import sys
 from ctypes import (byref,
                     c_char, c_char_p,
                     c_double, c_float,
@@ -170,9 +171,11 @@ def tag_to_str(num):
 
 class Label(str):
     def __new__(typename, ref, size):
+        v = ctypes.string_at(ref, size)
+        if sys.version_info.major > 2:
+            v = v.decode("utf-8")
         return super(Label, typename).__new__(
-                        typename,
-                        ctypes.string_at(ref, size))
+                        typename, v)
 
     def __init__(self, ref, size):
         self.ref = ref
