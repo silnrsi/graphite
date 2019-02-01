@@ -163,7 +163,7 @@ else:
 
 
 def tag_to_str(num):
-    s = ctypes.create_string_buffer('\000' * 5)
+    s = ctypes.create_string_buffer(b'\000' * 5)
     gr2.gr_tag_to_str(num, s)
     return bytes(s.value)
 

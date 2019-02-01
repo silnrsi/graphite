@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from re import findall
+import os
 from os import path
 from io import open
 try:
@@ -23,6 +24,12 @@ with open(path.join(here, 'include/graphite2/Font.h')) as f:
     c_header = f.read()
 major, minor, bug = findall(r'define GR2_VERSION_[A-X]+\s+(\d+)', c_header)
 version = major + "." + minor + "." + bug
+for sdir in ('build', '/usr/local/lib'):
+    grso = path.join(sdir, 'src', ('libgraphite2.so' if os.name != 'nt' else 'graphite2.dll'))
+    if path.exists(grso):
+        while path.islink(grso):
+            grso = path.join(sdir, 'src', os.readlink(grso))
+print(grso)
 
 setup(
     name             = 'graphite2',
@@ -35,8 +42,10 @@ setup(
     package_dir      = {'': 'python'},
     packages         = ['graphite2'],
     package_data     = {
-        'graphite2' : ['libgraphite2.so']
+        'graphite2' : [grso]
     },
+    data_files = [('', [grso])],
+    distclass       = BinaryDistribution,
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
