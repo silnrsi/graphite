@@ -24,8 +24,8 @@ The release is done by:
 . `git archive -o graphite2-<ver>.tgz --prefix=graphite2-<ver>/ <ver>`
 . `git archive -o graphite2-minimal-<ver>.tgz --prefix=graphite2-<ver>/ <ve>
    include src LICENSE COPYING README.md`
-. `sha1sum graphite2-<ver>.tgz graphite2-minimal-<ver>.tgz >
-   graphite2-<ver>.sha1sum`
+. `sha256sum graphite2-<ver>.tgz graphite2-minimal-<ver>.tgz >
+   graphite2-<ver>.sha256sum`
 . Then push up to http://sf.net/projects/silgraphite/files/graphite2 and
   https://github.com/silnrsi/graphite/releases
 
