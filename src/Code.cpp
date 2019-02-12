@@ -681,7 +681,14 @@ bool Machine::Code::decoder::test_ref(int8 index) const throw()
         }
     }
     else
-        return valid_upto(_max.rule_length, _slotref + _max.pre_context + index);
+    {
+      if (_max.rule_length == 0
+          || (_slotref + _max.pre_context + index >= _max.rule_length))
+      {
+        failure(out_of_range_data);
+        return false;
+      }
+    }
     return true;
 }
 
