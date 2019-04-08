@@ -233,12 +233,13 @@ STARTOP(put_subs_8bit_obs)
     const int           slot_ref     = int8(param[0]);
     const unsigned int  input_class  = uint8(param[1]),
                         output_class = uint8(param[2]);
-    uint16 index;
+    int index;
     slotref slot = slotat(slot_ref);
     if (slot)
     {
         index = seg.findClassIndex(input_class, slot->gid());
-        is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+        assert(index > 0);
+        is->setGlyph(&seg, seg.getClassGlyph(output_class, static_cast<uint16>(index));
     }
 ENDOP
 
@@ -601,7 +602,8 @@ STARTOP(put_subs)
     if (slot)
     {
         int index = seg.findClassIndex(input_class, slot->gid());
-        is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+        assert(index > 0);
+        is->setGlyph(&seg, seg.getClassGlyph(output_class, static_cast<uint16>(index)));
     }
 ENDOP
 

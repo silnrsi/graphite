@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #include <cstdlib>
+#include <cassert>
 #include "graphite2/Segment.h"
 #include "inc/debug.h"
 #include "inc/Endian.h"
@@ -309,7 +310,7 @@ uint16 Silf::findPseudo(uint32 uid) const
     return 0;
 }
 
-uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
+int Silf::findClassIndex(uint16 cid, uint16 gid) const
 {
     if (cid > m_nClass) return -1;
 

@@ -76,7 +76,7 @@ public:
 
     bool readGraphite(const byte * const pSilf, size_t lSilf, Face &face, uint32 version);
     bool runGraphite(Segment *seg, uint8 firstPass=0, uint8 lastPass=0, int dobidi = 0) const;
-    uint16 findClassIndex(uint16 cid, uint16 gid) const;
+    int findClassIndex(uint16 cid, uint16 gid) const;
     uint16 getClassGlyph(uint16 cid, unsigned int index) const;
     uint16 findPseudo(uint32 uid) const;
     uint8 numUser() const { return m_aUser; }
