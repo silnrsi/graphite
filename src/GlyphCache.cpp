@@ -357,7 +357,7 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         if (_glyf)
         {
             int xMin, yMin, xMax, yMax;
-            size_t locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
+            int locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
             void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
 
             if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))

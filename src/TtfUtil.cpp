@@ -1211,7 +1211,7 @@ unsigned int CmapSubtable12NextCodepoint(const void *pCmap310, unsigned int nUni
     Technically this method should return an unsigned long but it is unlikely the offset will
         exceed 2^31.
 ----------------------------------------------------------------------------------------------*/
-size_t LocaLookup(gid16 nGlyphId,
+int LocaLookup(gid16 nGlyphId,
         const void * pLoca, size_t lLocaSize,
         const void * pHead) // throw (std::out_of_range)
 {
@@ -1249,7 +1249,7 @@ size_t LocaLookup(gid16 nGlyphId,
     Return a pointer into the glyf table based on the given offset (from LocaLookup).
     Return NULL on error.
 ----------------------------------------------------------------------------------------------*/
-void * GlyfLookup(const void * pGlyf, size_t nGlyfOffset, size_t nTableLen)
+void * GlyfLookup(const void * pGlyf, int nGlyfOffset, size_t nTableLen)
 {
     const uint8 * pByte = reinterpret_cast<const uint8 *>(pGlyf);
     if (OVERFLOW_OFFSET_CHECK(pByte, nGlyfOffset) || nGlyfOffset >= nTableLen - sizeof(Sfnt::Glyph))
