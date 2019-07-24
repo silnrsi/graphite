@@ -76,12 +76,14 @@ def parsecg(fname):
 modes = {
     'ot': (
         'ot',
-        {'ot': 'hb_shape_plan_execute',
+#        {'ot': 'hb_shape_plan_execute',
+        {'ot': '_hb_ot_shape',
          'ot_GSUB': 'hb_ot_map_t::substitute(hb_ot_shape_plan_t const*, hb_font_t*, hb_buffer_t*) const',
          'ot_GPOS': 'hb_ot_map_t::position(hb_ot_shape_plan_t const*, hb_font_t*, hb_buffer_t*) const'}),
     'gr': (
         'graphite2',
-        {'hbgr': 'hb_shape_plan_execute',
+#        {'hbgr': 'hb_shape_plan_execute',
+        {'hbgr': '_hb_graphite2_shape',
          'gr': 'gr_make_seg',
          'grcoll': 'graphite2::Pass::collisionShift(graphite2::Segment*, int, graphite2::json*) const',
          'grkern': 'graphite2::Pass::collisionKern(graphite2::Segment*, int, graphite2::json*) const'}),
