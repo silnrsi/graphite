@@ -430,6 +430,10 @@ Deprecated values will not be removed from the structure, but their meaning is
 lost, they become reserved values that will not be reassigned. Each
 justification level has several glyph attributes associated with it.
 
+Notice that reserved values do not have to be 0. In addition, some values that were
+transitioned from reserved to having a meaning, may also be used in Silf tables
+whose version number is lower than the version in which the meaning was introduced.
+
 This structure was new as of version 2.0.
 
 .JustificationLevel
