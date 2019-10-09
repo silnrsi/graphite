@@ -101,6 +101,7 @@ private:
     bool        valid_upto(const uint16 limit, const uint16 x) const throw();
     bool        test_context() const throw();
     bool        test_ref(int8 index) const throw();
+    bool        test_attr(attrCode attr) const throw();
     void        failure(const status_t s) const throw() { _code.failure(s); }
 
     Code              & _code;
@@ -381,6 +382,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             valid_upto(gr_slatMax, bc[0]);
             if (attrCode(bc[0]) == gr_slatUserDefn)     // use IATTR for user attributes
                 failure(out_of_range_data);
+            test_attr(attrCode(bc[0]));
             test_context();
             break;
         case IATTR_SET_SLOT :
@@ -388,6 +390,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
                 failure(underfull_stack);
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
+            test_attr(attrCode(bc[0]));
             test_context();
             break;
         case PUSH_SLOT_ATTR :
@@ -396,6 +399,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             test_ref(int8(bc[1]));
             if (attrCode(bc[0]) == gr_slatUserDefn)     // use IATTR for user attributes
                 failure(out_of_range_data);
+            test_attr(attrCode(bc[0]));
             break;
         case PUSH_GLYPH_ATTR_OBS :
         case PUSH_ATT_TO_GATTR_OBS :
@@ -422,6 +426,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
                 test_ref(int8(bc[1]));
                 valid_upto(_max.attrid[bc[0]], bc[2]);
             }
+            test_attr(attrCode(bc[0]));
             break;
         case PUSH_IGLYPH_ATTR :// not implemented
             ++_stack_depth;
@@ -441,6 +446,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
                 failure(underfull_stack);
             if (valid_upto(gr_slatMax, bc[0]))
                 valid_upto(_max.attrid[bc[0]], bc[1]);
+            test_attr(attrCode(bc[0]));
             test_context();
             break;
         case PUSH_PROC_STATE :  // dummy: dp[0] no check necessary
@@ -699,6 +705,20 @@ bool Machine::Code::decoder::test_context() const throw()
     {
         failure(out_of_range_data);
         return false;
+    }
+    return true;
+}
+
+bool Machine::Code::decoder::test_attr(attrCode attr) const throw()
+{
+    if (_passtype < PASS_TYPE_POSITIONING)
+    {
+        if (attr != gr_slatBreak && attr != gr_slatDir && attr != gr_slatUserDefn
+                                 && attr != gr_slatCompRef)
+        {
+            failure(out_of_range_data);
+            return false;
+        }
     }
     return true;
 }
