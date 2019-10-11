@@ -30,6 +30,7 @@ add_library(graphite2-file STATIC
     ${S}/Segment.cpp
     ${S}/Silf.cpp
     ${S}/Slot.cpp
+    ${S}/SlotBuffer.cpp
     )
 
 set(TELEMETRY)

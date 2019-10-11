@@ -89,6 +89,7 @@ add_library(graphite2
     Segment.cpp
     Silf.cpp
     Slot.cpp
+    SlotBuffer.cpp
     Sparse.cpp
     TtfUtil.cpp
     UtfCodec.cpp
