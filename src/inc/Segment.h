@@ -36,6 +36,7 @@ of the License or (at your option) any later version.
 #include "inc/GlyphCache.h"
 #include "inc/GlyphFace.h"
 #include "inc/Slot.h"
+#include "inc/SlotBuffer.h"
 #include "inc/Position.h"
 #include "inc/List.h"
 #include "inc/Collider.h"
@@ -45,8 +46,8 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 typedef Vector<Features>        FeatureList;
-typedef Vector<Slot *>          SlotRope;
-typedef Vector<int16 *>         AttributeRope;
+//typedef Vector<Slot *>          SlotRope;
+//typedef Vector<int16 *>         AttributeRope;
 typedef Vector<SlotJustify *>   JustifyRope;
 
 class Font;
@@ -78,6 +79,8 @@ public:
         SEG_HASCOLLISIONS = 2
     };
 
+    SlotBuffer const & slots() const    { return m_srope; }
+    SlotBuffer &       slots()          { return m_srope; }
     size_t slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(ptrdiff_t num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
@@ -92,18 +95,18 @@ public:
     ~Segment();
     uint8 flags() const { return m_flags; }
     void flags(uint8 f) { m_flags = f; }
-    Slot *first() { return m_first; }
-    void first(Slot *p) { m_first = p; }
-    Slot *last() { return m_last; }
-    void last(Slot *p) { m_last = p; }
+    SlotBuffer::iterator first() { return m_srope.first(); }
+    void first(Slot *p) { m_srope.first(p); }
+    SlotBuffer::iterator last() { return m_srope.last(); }
+    void last(Slot *p) { m_srope.last(p); }
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     Slot *newSlot();
     void freeSlot(Slot *);
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
-    Position positionSlots(const Font *font=0, Slot *first=0, Slot *last=0, bool isRtl = false, bool isFinal = true);
+    Position positionSlots(Font const * font=nullptr, SlotBuffer::iterator first=nullptr, SlotBuffer::iterator last=nullptr, bool isRtl = false, bool isFinal = true);
     void associateChars(int offset, size_t num);
-    void linkClusters(Slot *first, Slot *last);
+    void linkClusters(SlotBuffer::iterator, SlotBuffer::iterator last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return int(m_feats.size()) - 1; }
@@ -132,14 +135,14 @@ public:
     void bidiPass(int paradir, uint8 aMirror);
     int8 getSlotBidiClass(Slot *s) const;
     void doMirror(uint16 aMirror);
-    Slot *addLineEnd(Slot *nSlot);
-    void delLineEnd(Slot *s);
+    SlotBuffer::iterator addLineEnd(SlotBuffer::iterator nSlot);
+    void delLineEnd(SlotBuffer::iterator s);
     bool hasJustification() const { return m_justifies.size() != 0; }
     void reverseSlots();
 
     bool isWhitespace(const int cid) const;
     bool hasCollisionInfo() const { return (m_flags & SEG_HASCOLLISIONS) && m_collisions; }
-    SlotCollision *collisionInfo(const Slot *s) const { return m_collisions ? m_collisions + s->index() : 0; }
+    SlotCollision *collisionInfo(Slot const & s) const { return m_collisions ? m_collisions + s.index() : nullptr; }
     CLASS_NEW_DELETE
 
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
@@ -149,9 +152,10 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     bool initCollisions();
 
 private:
+    SlotBuffer      m_srope;
     Position        m_advance;          // whole segment advance
-    SlotRope        m_slots;            // Vector of slot buffers
-    AttributeRope   m_userAttrs;        // Vector of userAttrs buffers
+ //   SlotRope        m_slots;            // Vector of slot buffers
+ //   AttributeRope   m_userAttrs;        // Vector of userAttrs buffers
     JustifyRope     m_justifies;        // Slot justification info buffers
     FeatureList     m_feats;            // feature settings referenced by charinfos in this segment
     Slot          * m_freeSlots;        // linked list of free slots
@@ -160,8 +164,8 @@ private:
     SlotCollision * m_collisions;
     const Face    * m_face;             // GrFace
     const Silf    * m_silf;
-    Slot          * m_first;            // first slot in segment
-    Slot          * m_last;             // last slot in segment
+    // Slot          * m_first;            // first slot in segment
+    // Slot          * m_last;             // last slot in segment
     size_t          m_bufSize,          // how big a buffer to create when need more slots
                     m_numGlyphs,
                     m_numCharinfo;      // size of the array and number of input characters
@@ -184,13 +188,13 @@ int8 Segment::getSlotBidiClass(Slot *s) const
 inline
 void Segment::finalise(const Font *font, bool reverse)
 {
-    if (!m_first || !m_last) return;
+    if (!first() || !last()) return;
 
-    m_advance = positionSlots(font, m_first, m_last, m_silf->dir(), true);
+    m_advance = positionSlots(font, first(), last(), m_silf->dir(), true);
     //associateChars(0, m_numCharinfo);
     if (reverse && currdir() != (m_dir & 1))
         reverseSlots();
-    linkClusters(m_first, m_last);
+    linkClusters(first(), last());
 }
 
 inline
@@ -198,7 +202,7 @@ int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool r
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);
-        return is->clusterMetric(this, metric, attrLevel, rtl);
+        return is->clusterMetric(*this, metric, attrLevel, rtl);
     }
     else
         return m_face->getGlyphMetric(iSlot->gid(), metric);

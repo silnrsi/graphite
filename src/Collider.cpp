@@ -47,20 +47,20 @@ using namespace graphite2;
 
 // Initialize the Collider to hold the basic movement limits for the
 // target slot, the one we are focusing on fixing.
-bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin, float marginWeight,
+bool ShiftCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, float margin, float marginWeight,
     const Position &currShift, const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int i;
     float mx, mn;
     float a, shift;
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    unsigned short gid = aSlot->gid();
+    const GlyphCache &gc = seg.getFace()->glyphs();
+    unsigned short gid = aSlot.gid();
     if (!gc.check(gid))
         return false;
     const BBox &bb = gc.getBoundingBBox(gid);
     const SlantBox &sb = gc.getBoundingSlantBox(gid);
-    //float sx = aSlot->origin().x + currShift.x;
-    //float sy = aSlot->origin().y + currShift.y;
+    //float sx = aSlot.origin().x + currShift.x;
+    //float sy = aSlot.origin().y + currShift.y;
     if (currOffset.x != 0.f || currOffset.y != 0.f)
         _limit = Rect(limit.bl - currOffset, limit.tr - currOffset);
     else
@@ -105,7 +105,7 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
         }
     }
 
-	_target = aSlot;
+	_target = &aSlot;
     if ((dir & 1) == 0)
     {
         // For LTR, switch and negate x limits.
@@ -114,12 +114,12 @@ bool ShiftCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float
     }
     _currOffset = currOffset;
     _currShift = currShift;
-    _origin = aSlot->origin() - currOffset;     // the original anchor position of the glyph
+    _origin = aSlot.origin() - currOffset;     // the original anchor position of the glyph
 
 	_margin = margin;
 	_marginWt = marginWeight;
 
-    SlotCollision *c = seg->collisionInfo(aSlot);
+    SlotCollision *c = seg.collisionInfo(aSlot);
     _seqClass = c->seqClass();
 	_seqProxClass = c->seqProxClass();
     _seqOrder = c->seqOrder();
@@ -262,27 +262,27 @@ inline void ShiftCollider::removeBox(const Rect &box, const BBox &bb, const Slan
 // Adjust the movement limits for the target to avoid having it collide
 // with the given neighbor slot. Also determine if there is in fact a collision
 // between the target and the given slot.
-bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const SlotCollision *cslot, const Position &currShift,
+bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *cslot, const Position &currShift,
 		bool isAfter,  // slot is logically after _target
 		bool sameCluster, bool &hasCol, bool isExclusion,
         GR_MAYBE_UNUSED json * const dbgout )
 {
     bool isCol = false;
-    const float sx = slot->origin().x - _origin.x + currShift.x;
-    const float sy = slot->origin().y - _origin.y + currShift.y;
+    const float sx = slot.origin().x - _origin.x + currShift.x;
+    const float sy = slot.origin().y - _origin.y + currShift.y;
     const float sd = sx - sy;
     const float ss = sx + sy;
     float vmin, vmax;
     float omin, omax, otmin, otmax;
     float cmin, cmax;   // target limits
     float torg;
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    const unsigned short gid = slot->gid();
+    const GlyphCache &gc = seg.getFace()->glyphs();
+    auto const gid = slot.gid();
     if (!gc.check(gid))
         return false;
     const BBox &bb = gc.getBoundingBBox(gid);
 
-    // SlotCollision * cslot = seg->collisionInfo(slot);
+    // SlotCollision * cslot = seg.collisionInfo(slot);
     int orderFlags = 0;
     bool sameClass = _seqProxClass == 0 && cslot->seqClass() == _seqClass;
     if (sameCluster && _seqClass
@@ -557,15 +557,15 @@ bool ShiftCollider::mergeSlot(Segment *seg, Slot *slot, const SlotCollision *csl
     if (cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
     {
         // Set up the bogus slot representing the exclusion glyph.
-        Slot *exclSlot = seg->newSlot();
+        auto exclSlot = seg.newSlot();
         if (!exclSlot)
             return res;
         exclSlot->setGlyph(seg, cslot->exclGlyph());
-        Position exclOrigin(slot->origin() + cslot->exclOffset());
+        Position exclOrigin(slot.origin() + cslot->exclOffset());
         exclSlot->origin(exclOrigin);
-        SlotCollision exclInfo(seg, exclSlot);
-        res &= mergeSlot(seg, exclSlot, &exclInfo, currShift, isAfter, sameCluster, isCol, true, dbgout );
-        seg->freeSlot(exclSlot);
+        SlotCollision exclInfo(seg, *exclSlot);
+        res &= mergeSlot(seg, *exclSlot, &exclInfo, currShift, isAfter, sameCluster, isCol, true, dbgout );
+        seg.freeSlot(exclSlot);
     }
     hasCol |= isCol;
     return res;
@@ -655,8 +655,8 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
             << "target" << json::object
                 << "origin" << _target->origin()
                 << "margin" << _margin
-                << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                << "slantbox" << seg->getFace()->glyphs().slant(_target->gid())
+                << "bbox" << seg.theGlyphBBoxTemporary(_target->gid())
+                << "slantbox" << seg.getFace()->glyphs().slant(_target->gid())
                 << json::close; // target object
         *dbgout << "ranges" << json::array;
         axis = 0;
@@ -684,9 +684,9 @@ void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment *seg)
                 << "target" << json::object
                     << "origin" << _origin
                     << "currShift" << _currShift
-                    << "currOffset" << seg->collisionInfo(_target)->offset()
-                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "currOffset" << seg.collisionInfo(_target)->offset()
+                    << "bbox" << seg.theGlyphBBoxTemporary(_target->gid())
+                    << "slantBox" << seg.getFace()->glyphs().slant(_target->gid())
                     << "fix" << "shift";
         *dbgout     << json::close; // target object
 }
@@ -760,12 +760,12 @@ static float localmin(float al, float au, float bl, float bu, float x)
 }
 
 // Return the given edge of the glyph at height y, taking any slant box into account.
-static float get_edge(Segment *seg, const Slot *s, const Position &shift, float y, float width, float margin, bool isRight)
+static float get_edge(Segment & seg, const Slot & s, const Position &shift, float y, float width, float margin, bool isRight)
 {
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    unsigned short gid = s->gid();
-    float sx = s->origin().x + shift.x;
-    float sy = s->origin().y + shift.y;
+    const GlyphCache &gc = seg.getFace()->glyphs();
+    unsigned short gid = s.gid();
+    float sx = s.origin().x + shift.x;
+    float sy = s.origin().y + shift.y;
     uint8 numsub = gc.numSubBounds(gid);
     float res = isRight ? (float)-1e38 : (float)1e38;
 
@@ -820,14 +820,12 @@ static float get_edge(Segment *seg, const Slot *s, const Position &shift, float 
 }
 
 
-bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float margin,
+bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, float margin,
     const Position &currShift, const Position &offsetPrev, int dir,
     float ymin, float ymax, GR_MAYBE_UNUSED json * const dbgout)
 {
-    const GlyphCache &gc = seg->getFace()->glyphs();
-    const Slot *base = aSlot;
-    // const Slot *last = aSlot;
-    const Slot *s;
+    auto & gc = seg.getFace()->glyphs();
+    auto base = &aSlot;
     int numSlices;
     while (base->attachedTo())
         base = base->attachedTo();
@@ -889,9 +887,9 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 #endif
 
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
-    for (s = base; s; s = s->nextInCluster(s))
+    for (auto s = base; s; s = s->nextInCluster(s))
     {
-        SlotCollision *c = seg->collisionInfo(s);
+        SlotCollision *c = seg.collisionInfo(*s);
         if (!gc.check(s->gid()))
             return false;
         const BBox &bs = gc.getBoundingBBox(s->gid());
@@ -907,7 +905,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
             if ((dir & 1) && x < _edges[i])
             {
-                t = get_edge(seg, s, c->shift(), y, _sliceWidth, margin, false);
+                t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, false);
                 if (t < _edges[i])
                 {
                     _edges[i] = t;
@@ -917,7 +915,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
             }
             else if (!(dir & 1) && x > _edges[i])
             {
-                t = get_edge(seg, s, c->shift(), y, _sliceWidth, margin, true);
+                t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, true);
                 if (t > _edges[i])
                 {
                     _edges[i] = t;
@@ -929,7 +927,7 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
     }
     done:
     _mingap = (float)1e37;      // less than 1e38 s.t. 1e38-_mingap is really big
-    _target = aSlot;
+    _target = &aSlot;
     _margin = margin;
     _currShift = currShift;
     return true;
@@ -940,19 +938,19 @@ bool KernCollider::initSlot(Segment *seg, Slot *aSlot, const Rect &limit, float 
 // In other words, merge information from given slot's position with what the target slot knows
 // about how it can kern.
 // Return false if we know there is no collision, true if we think there might be one.
-bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, GR_MAYBE_UNUSED json * const dbgout)
+bool KernCollider::mergeSlot(Segment & seg, Slot & slot, const Position &currShift, float currSpace, int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     int rtl = (dir & 1) * 2 - 1;
-    if (!seg->getFace()->glyphs().check(slot->gid()))
+    if (!seg.getFace()->glyphs().check(slot.gid()))
         return false;
-    const Rect &bb = seg->theGlyphBBoxTemporary(slot->gid());
-    const float sx = slot->origin().x + currShift.x;
+    const Rect &bb = seg.theGlyphBBoxTemporary(slot.gid());
+    const float sx = slot.origin().x + currShift.x;
     float x = (sx + (rtl > 0 ? bb.tr.x : bb.bl.x)) * rtl;
     // this isn't going to reduce _mingap so skip
     if (_hit && x < rtl * (_xbound - _mingap - currSpace))
         return false;
 
-    const float sy = slot->origin().y + currShift.y;
+    const float sy = slot.origin().y + currShift.y;
     int smin = max(1, int((bb.bl.y + (1 - _miny + sy)) / _sliceWidth + 1)) - 1;
     int smax = min((int)_edges.size() - 2, int((bb.tr.y + (1 - _miny + sy)) / _sliceWidth + 1)) + 1;
     if (smin > smax)
@@ -1002,7 +1000,7 @@ bool KernCollider::mergeSlot(Segment *seg, Slot *slot, const Position &currShift
 
 
 // Return the amount to kern by.
-Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slot *slot,
+Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Slot & slot,
         int dir, GR_MAYBE_UNUSED json * const dbgout)
 {
     float resultNeeded = (1 - 2 * (dir & 1)) * _mingap;
@@ -1023,8 +1021,8 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment *seg, GR_MAYBE_UNUSED Slo
                     << "origin" << _target->origin()
                     //<< "currShift" << _currShift
                     << "offsetPrev" << _offsetPrev
-                    << "bbox" << seg->theGlyphBBoxTemporary(_target->gid())
-                    << "slantBox" << seg->getFace()->glyphs().slant(_target->gid())
+                    << "bbox" << seg.theGlyphBBoxTemporary(_target->gid())
+                    << "slantBox" << seg.getFace()->glyphs().slant(_target->gid())
                     << "fix" << "kern"
                     << json::close; // target object
 
@@ -1064,19 +1062,19 @@ void KernCollider::shift(const Position &mv, int dir)
 ////    SLOT-COLLISION    ////
 
 // Initialize the collision attributes for the given slot.
-SlotCollision::SlotCollision(Segment *seg, Slot *slot)
+SlotCollision::SlotCollision(Segment &seg, Slot &slot)
 {
     initFromSlot(seg, slot);
 }
 
-void SlotCollision::initFromSlot(Segment *seg, Slot *slot)
+void SlotCollision::initFromSlot(Segment &seg, Slot &slot)
 {
     // Initialize slot attributes from glyph attributes.
 	// The order here must match the order in the grcompiler code,
 	// GrcSymbolTable::AssignInternalGlyphAttrIDs.
-    uint16 gid = slot->gid();
-    uint16 aCol = seg->silf()->aCollision(); // flags attr ID
-    const GlyphFace * glyphFace = seg->getFace()->glyphs().glyphSafe(gid);
+    uint16 gid = slot.gid();
+    uint16 aCol = seg.silf()->aCollision(); // flags attr ID
+    const GlyphFace * glyphFace = seg.getFace()->glyphs().glyphSafe(gid);
     if (!glyphFace)
         return;
     const sparse &p = glyphFace->attrs();

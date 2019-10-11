@@ -51,7 +51,7 @@ struct SlotJustify
 public:
     static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16); }
 
-    void LoadSlot(const Slot *s, const Segment *seg);
+    void LoadSlot(const Slot &s, const Segment & seg);
 
     SlotJustify *next;
     int16 values[1];
@@ -88,7 +88,7 @@ public:
     Slot *prev() const { return m_prev; }
     void prev(Slot *s) { m_prev = s; }
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(Segment *seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
+    void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     void origin(const Position &pos) { m_position = pos + m_shift; }
@@ -98,7 +98,7 @@ public:
     void after(int ind) { m_after = ind; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment* seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
+    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
     bool isCopied() const { return (m_flags & COPIED) ? true : false; }
@@ -108,16 +108,16 @@ public:
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
-    int8 getBidiClass(const Segment *seg);
+    int8 getBidiClass(const Segment &seg);
     int8 getBidiClass() const { return m_bidiCls; }
     void setBidiClass(int8 cls) { m_bidiCls = cls; }
     int16 *userAttrs() const { return m_userAttr; }
     void userAttrs(int16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
-    void setAttr(Segment* seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
-    int getAttr(const Segment *seg, attrCode ind, uint8 subindex) const;
-    int getJustify(const Segment *seg, uint8 level, uint8 subindex) const;
-    void setJustify(Segment *seg, uint8 level, uint8 subindex, int16 value);
+    void setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
+    int getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
+    int getJustify(const Segment &seg, uint8 level, uint8 subindex) const;
+    void setJustify(Segment &seg, uint8 level, uint8 subindex, int16 value);
     bool isLocalJustify() const { return m_justs != NULL; };
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
@@ -129,7 +129,7 @@ public:
     void nextSibling(Slot *ap) { m_sibling = ap; }
     bool sibling(Slot *ap);
     bool removeChild(Slot *ap);
-    int32 clusterMetric(const Segment* seg, uint8 metric, uint8 attrLevel, bool rtl);
+    int32 clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
     float just() const { return m_just; }

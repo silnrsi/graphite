@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 
 #include <cstdlib>
 #include "inc/Code.h"
+#include "inc/SlotBuffer.h"
 
 namespace graphite2 {
 
@@ -60,8 +61,8 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    void    findNDoRule(Slot* & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
-    int     doAction(const vm::Machine::Code* codeptr, Slot * & slot_out, vm::Machine &) const;
+    void    findNDoRule(SlotBuffer::iterator & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    int     doAction(const vm::Machine::Code* codeptr, SlotBuffer::iterator & slot_out, vm::Machine &) const;
     bool    testPassConstraint(vm::Machine & m) const;
     bool    testConstraint(const Rule & r, vm::Machine &) const;
     bool    readRules(const byte * rule_map, const size_t num_entries,
@@ -72,17 +73,17 @@ private:
     bool    readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
     bool    readRanges(const byte * ranges, size_t num_ranges, Error &e);
     uint16  glyphToCol(const uint16 gid) const;
-    bool    runFSM(FiniteStateMachine & fsm, Slot * slot) const;
+    bool    runFSM(FiniteStateMachine & fsm, SlotBuffer::iterator slot) const;
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
     void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
-    void    adjustSlot(int delta, Slot * & slot_out, SlotMap &) const;
-    bool    collisionShift(Segment *seg, int dir, json * const dbgout) const;
-    bool    collisionKern(Segment *seg, int dir, json * const dbgout) const;
-    bool    collisionFinish(Segment *seg, GR_MAYBE_UNUSED json * const dbgout) const;
-    bool    resolveCollisions(Segment *seg, Slot *slot, Slot *start, ShiftCollider &coll, bool isRev,
+    void    adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap &) const;
+    bool    collisionShift(Segment & seg, int dir, json * const dbgout) const;
+    bool    collisionKern(Segment & seg, int dir, json * const dbgout) const;
+    bool    collisionFinish(Segment & seg, GR_MAYBE_UNUSED json * const dbgout) const;
+    bool    resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix, SlotBuffer::iterator start, ShiftCollider &coll, bool isRev,
                      int dir, bool &moved, bool &hasCol, json * const dbgout) const;
-    float   resolveKern(Segment *seg, Slot *slot, Slot *start, int dir,
-                     float &ymin, float &ymax, json *const dbgout) const;
+    float   resolveKern(Segment & seg, SlotBuffer::iterator const slotFix, GR_MAYBE_UNUSED SlotBuffer::iterator start, int dir,
+    float &ymin, float &ymax, json *const dbgout) const;
 
     const Silf        * m_silf;
     uint16            * m_cols;

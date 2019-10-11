@@ -28,9 +28,11 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include "inc/Code.h"
-#include "inc/Slot.h"
+#include "inc/SlotMap.h"
 
 namespace graphite2 {
+
+class json;
 
 struct Rule {
   const vm::Machine::Code * constraint,
@@ -98,42 +100,6 @@ bool State::empty() const
 }
 
 
-class SlotMap
-{
-public:
-  enum {MAX_SLOTS=64};
-  SlotMap(Segment & seg, uint8 direction, size_t maxSize);
-
-  Slot       * * begin();
-  Slot       * * end();
-  size_t         size() const;
-  unsigned short context() const;
-  void           reset(Slot &, unsigned short);
-
-  Slot * const & operator[](int n) const;
-  Slot       * & operator [] (int);
-  void           pushSlot(Slot * const slot);
-  void           collectGarbage(Slot *& aSlot);
-
-  Slot         * highwater() { return m_highwater; }
-  void           highwater(Slot *s) { m_highwater = s; m_highpassed = false; }
-  bool           highpassed() const { return m_highpassed; }
-  void           highpassed(bool v) { m_highpassed = v; }
-
-  uint8          dir() const { return m_dir; }
-  int            decMax() { return --m_maxSize; }
-
-  Segment &    segment;
-private:
-  Slot         * m_slot_map[MAX_SLOTS+1];
-  unsigned short m_size;
-  unsigned short m_precontext;
-  Slot         * m_highwater;
-  int            m_maxSize;
-  uint8          m_dir;
-  bool           m_highpassed;
-};
-
 
 class FiniteStateMachine
 {
@@ -160,7 +126,7 @@ private:
 
 public:
   FiniteStateMachine(SlotMap & map, json * logger);
-  void      reset(Slot * & slot, const short unsigned int max_pre_ctxt);
+  void      reset(SlotBuffer::iterator & slot, const short unsigned int max_pre_ctxt);
 
   Rules     rules;
   SlotMap   & slots;
@@ -176,11 +142,11 @@ FiniteStateMachine::FiniteStateMachine(SlotMap& map, json * logger)
 }
 
 inline
-void FiniteStateMachine::reset(Slot * & slot, const short unsigned int max_pre_ctxt)
+void FiniteStateMachine::reset(SlotBuffer::iterator & slot, const short unsigned int max_pre_ctxt)
 {
   rules.clear();
   int ctxt = 0;
-  for (; ctxt != max_pre_ctxt && slot->prev(); ++ctxt, slot = slot->prev());
+  for (; ctxt != max_pre_ctxt && slot->prev(); ++ctxt, --slot);
   slots.reset(*slot, ctxt);
 }
 
@@ -243,63 +209,5 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
   m_end = out;
 }
 
-inline
-SlotMap::SlotMap(Segment & seg, uint8 direction, size_t maxSize)
-: segment(seg), m_size(0), m_precontext(0), m_highwater(0),
-    m_maxSize(int(maxSize)), m_dir(direction), m_highpassed(false)
-{
-    m_slot_map[0] = 0;
-}
-
-inline
-Slot * * SlotMap::begin()
-{
-  return &m_slot_map[1]; // allow map to go 1 before slot_map when inserting
-                         // at start of segment.
-}
-
-inline
-Slot * * SlotMap::end()
-{
-  return m_slot_map + m_size + 1;
-}
-
-inline
-size_t SlotMap::size() const
-{
-  return m_size;
-}
-
-inline
-short unsigned int SlotMap::context() const
-{
-  return m_precontext;
-}
-
-inline
-void SlotMap::reset(Slot & slot, short unsigned int ctxt)
-{
-  m_size = 0;
-  m_precontext = ctxt;
-  *m_slot_map = slot.prev();
-}
-
-inline
-void SlotMap::pushSlot(Slot*const slot)
-{
-  m_slot_map[++m_size] = slot;
-}
-
-inline
-Slot * const & SlotMap::operator[](int n) const
-{
-  return m_slot_map[n + 1];
-}
-
-inline
-Slot * & SlotMap::operator[](int n)
-{
-  return m_slot_map[n + 1];
-}
 
 } // namespace graphite2

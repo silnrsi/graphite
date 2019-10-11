@@ -225,7 +225,7 @@ ENDOP
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
+    is->setGlyph(seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -238,7 +238,7 @@ STARTOP(put_subs_8bit_obs)
     if (slot)
     {
         index = seg.findClassIndex(input_class, slot->gid());
-        is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+        is->setGlyph(seg, seg.getClassGlyph(output_class, index));
     }
 ENDOP
 
@@ -277,8 +277,10 @@ STARTOP(insert)
     while (iss && iss->isDeleted()) iss = iss->next();
     if (!iss)
     {
+        // At last slot
         if (seg.last())
         {
+            // Append a slot on the end
             seg.last()->next(newSlot);
             newSlot->prev(seg.last());
             newSlot->before(seg.last()->before());
@@ -286,25 +288,30 @@ STARTOP(insert)
         }
         else
         {
+            // Append a slot on the end special case for empty segment
             seg.first(newSlot);
             seg.last(newSlot);
         }
     }
     else if (iss->prev())
     {
+        // Partial insert new slot before iss
         iss->prev()->next(newSlot);
         newSlot->prev(iss->prev());
         newSlot->before(iss->prev()->after());
     }
     else
     {
+        // Insert new slot at the start of the segment
         newSlot->prev(NULL);
         newSlot->before(iss->before());
         seg.first(newSlot);
     }
+    // Forward link to iss
     newSlot->next(iss);
     if (iss)
     {
+        // back link from iss to new slot
         iss->prev(newSlot);
         newSlot->originate(iss->original());
         newSlot->after(iss->before());
@@ -388,7 +395,7 @@ STARTOP(attr_set)
     declare_params(1);
     const attrCode      slat = attrCode(uint8(*param));
     const          int  val  = pop();
-    is->setAttr(&seg, slat, 0, val, smap);
+    is->setAttr(seg, slat, 0, val, smap);
 ENDOP
 
 STARTOP(attr_add)
@@ -400,8 +407,8 @@ STARTOP(attr_add)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(is->getAttr(&seg, slat, 0));
-    is->setAttr(&seg, slat, 0, int32_t(val + res), smap);
+    uint32_t res = uint32_t(is->getAttr(seg, slat, 0));
+    is->setAttr(seg, slat, 0, int32_t(val + res), smap);
 ENDOP
 
 STARTOP(attr_sub)
@@ -413,8 +420,8 @@ STARTOP(attr_sub)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(is->getAttr(&seg, slat, 0));
-    is->setAttr(&seg, slat, 0, int32_t(res - val), smap);
+    uint32_t res = uint32_t(is->getAttr(seg, slat, 0));
+    is->setAttr(seg, slat, 0, int32_t(res - val), smap);
 ENDOP
 
 STARTOP(attr_set_slot)
@@ -422,7 +429,7 @@ STARTOP(attr_set_slot)
     const attrCode  slat   = attrCode(uint8(*param));
     const int       offset = int(map - smap.begin())*int(slat == gr_slatAttTo);
     const int       val    = pop()  + offset;
-    is->setAttr(&seg, slat, offset, val, smap);
+    is->setAttr(seg, slat, offset, val, smap);
 ENDOP
 
 STARTOP(iattr_set_slot)
@@ -430,7 +437,7 @@ STARTOP(iattr_set_slot)
     const attrCode  slat = attrCode(uint8(param[0]));
     const uint8     idx  = uint8(param[1]);
     const int       val  = int(pop()  + (map - smap.begin())*int(slat == gr_slatAttTo));
-    is->setAttr(&seg, slat, idx, val, smap);
+    is->setAttr(seg, slat, idx, val, smap);
 ENDOP
 
 STARTOP(push_slot_attr)
@@ -445,7 +452,7 @@ STARTOP(push_slot_attr)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        int res = slot->getAttr(&seg, slat, 0);
+        int res = slot->getAttr(seg, slat, 0);
         push(res);
     }
 ENDOP
@@ -521,7 +528,7 @@ STARTOP(push_islot_attr)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        int res = slot->getAttr(&seg, slat, idx);
+        int res = slot->getAttr(seg, slat, idx);
         push(res);
     }
 ENDOP
@@ -550,7 +557,7 @@ STARTOP(iattr_set)
     const attrCode      slat = attrCode(uint8(param[0]));
     const uint8         idx  = uint8(param[1]);
     const          int  val  = pop();
-    is->setAttr(&seg, slat, idx, val, smap);
+    is->setAttr(seg, slat, idx, val, smap);
 ENDOP
 
 STARTOP(iattr_add)
@@ -563,8 +570,8 @@ STARTOP(iattr_add)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(is->getAttr(&seg, slat, idx));
-    is->setAttr(&seg, slat, idx, int32_t(val + res), smap);
+    uint32_t res = uint32_t(is->getAttr(seg, slat, idx));
+    is->setAttr(seg, slat, idx, int32_t(val + res), smap);
 ENDOP
 
 STARTOP(iattr_sub)
@@ -577,8 +584,8 @@ STARTOP(iattr_sub)
         seg.positionSlots(0, *smap.begin(), *(smap.end()-1), seg.currdir());
         flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(is->getAttr(&seg, slat, idx));
-    is->setAttr(&seg, slat, idx, int32_t(res - val), smap);
+    uint32_t res = uint32_t(is->getAttr(seg, slat, idx));
+    is->setAttr(seg, slat, idx, int32_t(res - val), smap);
 ENDOP
 
 STARTOP(push_proc_state)
@@ -601,7 +608,7 @@ STARTOP(put_subs)
     if (slot)
     {
         int index = seg.findClassIndex(input_class, slot->gid());
-        is->setGlyph(&seg, seg.getClassGlyph(output_class, index));
+        is->setGlyph(seg, seg.getClassGlyph(output_class, index));
     }
 ENDOP
 
@@ -619,7 +626,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    is->setGlyph(&seg, seg.getClassGlyph(output_class, 0));
+    is->setGlyph(seg, seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)
@@ -649,11 +656,13 @@ ENDOP
 STARTOP(temp_copy)
     slotref newSlot = seg.newSlot();
     if (!newSlot || !is) DIE;
+    // copy slot is into new slot
     int16 *tempUserAttrs = newSlot->userAttrs();
     memcpy(newSlot, is, sizeof(Slot));
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->userAttrs(tempUserAttrs);
     newSlot->markCopied(true);
+    
     *map = newSlot;
 ENDOP
 

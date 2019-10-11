@@ -72,8 +72,8 @@ public:
         SEQ_ORDER_NORIGHT = 32
     };
 
-    SlotCollision(Segment *seg, Slot *slot);
-    void initFromSlot(Segment *seg, Slot *slot);
+    SlotCollision(Segment &seg, Slot &slot);
+    void initFromSlot(Segment &seg, Slot &slot);
 
     const Rect &limit() const { return _limit; }
     void setLimit(const Rect &r) { _limit = r; }
@@ -131,10 +131,10 @@ public:
     ShiftCollider(json *dbgout);
     ~ShiftCollider() throw() { };
 
-    bool initSlot(Segment *seg, Slot *aSlot, const Rect &constraint,
+    bool initSlot(Segment & seg, Slot & aSlot, const Rect &constraint,
                 float margin, float marginMin, const Position &currShift,
                 const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout);
-    bool mergeSlot(Segment *seg, Slot *slot, const SlotCollision *cinfo, const Position &currShift, bool isAfter,
+    bool mergeSlot(Segment & seg, Slot & slot, const SlotCollision *cinfo, const Position &currShift, bool isAfter,
                 bool sameCluster, bool &hasCol, bool isExclusion, GR_MAYBE_UNUSED json * const dbgout);
     Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
     void addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int mode);
@@ -190,11 +190,11 @@ class KernCollider
 public:
     KernCollider(json *dbg);
     ~KernCollider() throw() { };
-    bool initSlot(Segment *seg, Slot *aSlot, const Rect &constraint, float margin,
+    bool initSlot(Segment & seg, Slot & aSlot, const Rect &constraint, float margin,
             const Position &currShift, const Position &offsetPrev, int dir,
             float ymin, float ymax, json * const dbgout);
-    bool mergeSlot(Segment *seg, Slot *slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
-    Position resolve(Segment *seg, Slot *slot, int dir, json * const dbgout);
+    bool mergeSlot(Segment & seg, Slot & slot, const Position &currShift, float currSpace, int dir, json * const dbgout);
+    Position resolve(Segment & seg, Slot & slot, int dir, json * const dbgout);
     void shift(const Position &mv, int dir);
 
     CLASS_NEW_DELETE;

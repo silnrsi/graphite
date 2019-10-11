@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/Decompressor.h"
 #include "inc/Endian.h"
 #include "inc/Face.h"
+#include "inc/Font.h"
 #include "inc/FileFace.h"
 #include "inc/GlyphFace.h"
 #include "inc/json.h"
@@ -194,7 +195,7 @@ bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
                             << json::close // Close up the passes array
                 << "outputdir" << (seg->currdir() ? "rtl" : "ltr")
                 << "output" << json::array;
-        for(Slot * s = seg->first(); s; s = s->next())
+        for(auto & s: seg.slots())
             *dbgout     << dslot(seg, s);
         *dbgout         << json::close
                 << "advance" << seg->advance()

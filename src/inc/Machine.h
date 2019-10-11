@@ -34,7 +34,9 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <limits>
 #include <graphite2/Types.h>
+
 #include "inc/Main.h"
+#include "inc/SlotBuffer.h"
 
 #if defined(__GNUC__)
 #if defined(__clang__) || (__GNUC__ * 100 + __GNUC_MINOR__ * 10) < 430
@@ -77,7 +79,7 @@ namespace vm
 
 
 typedef void * instr;
-typedef Slot * slotref;
+typedef SlotBuffer::iterator slotref;
 
 enum {VARARGS = 0xff, MAX_NAME_LEN=32};
 
