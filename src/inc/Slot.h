@@ -26,10 +26,9 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include "graphite2/Types.h"
 #include "graphite2/Segment.h"
+
 #include "inc/Main.h"
-#include "inc/Font.h"
 #include "inc/Position.h"
 
 namespace graphite2 {
@@ -38,6 +37,9 @@ typedef gr_attrCode attrCode;
 
 class GlyphFace;
 class Segment;
+class Slot;
+class SlotMap;
+class Font;
 
 struct SlotJustify
 {

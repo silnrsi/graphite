@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#include <iterator>
 #include <utility>
 
 #include "inc/Main.h"

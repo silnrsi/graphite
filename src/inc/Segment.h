@@ -64,16 +64,6 @@ enum justFlags {
     gr_justEndInline = 2
 };
 
-class SegmentScopeState
-{
-private:
-    friend class Segment;
-    Slot * realFirstSlot;
-    Slot * slotBeforeScope;
-    Slot * slotAfterScope;
-    Slot * realLastSlot;
-    size_t numGlyphsOutsideScope;
-};
 
 class Segment
 {
