@@ -205,7 +205,7 @@ STARTOP(next)
     {
         if (is == smap.highwater())
             smap.highpassed(true);
-        is = is->next();
+        ++is;
     }
     ++map;
 ENDOP
@@ -218,7 +218,7 @@ ENDOP
 //ENDOP
 
 //STARTOP(copy_next)
-//     if (is) is = is->next();
+//     if (is) ++is;
 //     ++map;
 // ENDOP
 
@@ -247,13 +247,13 @@ STARTOP(put_copy)
     const int  slot_ref = int8(*param);
     if (is && !is->isDeleted())
     {
-        slotref ref = slotat(slot_ref);
+        auto ref = slotat(slot_ref);
         if (ref && ref != is)
         {
             int16 *tempUserAttrs = is->userAttrs();
             if (is->attachedTo() || is->firstChild()) DIE
-            Slot *prev = is->prev();
-            Slot *next = is->next();
+            auto prev = std::prev(is);
+            auto next = std::next(is);
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
             memcpy(is, ref, sizeof(Slot));
             is->firstChild(NULL);
@@ -271,10 +271,10 @@ ENDOP
 
 STARTOP(insert)
     if (smap.decMax() <= 0) DIE;
-    Slot *newSlot = seg.newSlot();
+    auto newSlot = seg.newSlot();
     if (!newSlot) DIE;
-    Slot *iss = is;
-    while (iss && iss->isDeleted()) iss = iss->next();
+    auto iss = is;
+    while (iss != seg.slots().end() && iss->isDeleted()) ++iss;
     if (!iss)
     {
         // At last slot
@@ -293,12 +293,12 @@ STARTOP(insert)
             seg.last(newSlot);
         }
     }
-    else if (iss->prev())
+    else if (std::prev(iss))
     {
         // Partial insert new slot before iss
-        iss->prev()->next(newSlot);
-        newSlot->prev(iss->prev());
-        newSlot->before(iss->prev()->after());
+        std::prev(iss)->next(newSlot);
+        newSlot->prev(std::prev(iss));
+        newSlot->before(std::prev(iss)->after());
     }
     else
     {
@@ -336,21 +336,20 @@ ENDOP
 STARTOP(delete_)
     if (!is || is->isDeleted()) DIE
     is->markDeleted(true);
-    if (is->prev())
-        is->prev()->next(is->next());
+    if (std::prev(is))
+        std::prev(is)->next(std::next(is));
     else
-        seg.first(is->next());
+        seg.first(std::next(is));
 
-    if (is->next())
-        is->next()->prev(is->prev());
+    if (std::next(is))
+        std::next(is)->prev(std::prev(is));
     else
-        seg.last(is->prev());
+        seg.last(std::prev(is));
 
 
     if (is == smap.highwater())
-            smap.highwater(is->next());
-    if (is->prev())
-        is = is->prev();
+            smap.highwater(std::next(is));
+    if (std::prev(is)) --is;
     seg.extendLength(-1);
 ENDOP
 

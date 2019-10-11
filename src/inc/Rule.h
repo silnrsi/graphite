@@ -146,7 +146,7 @@ void FiniteStateMachine::reset(SlotBuffer::iterator & slot, const short unsigned
 {
   rules.clear();
   int ctxt = 0;
-  for (; ctxt != max_pre_ctxt && slot->prev(); ++ctxt, --slot);
+  for (; ctxt != max_pre_ctxt && std::prev(slot); ++ctxt, --slot);
   slots.reset(*slot, ctxt);
 }
 

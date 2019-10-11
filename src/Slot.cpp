@@ -290,16 +290,16 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
         const uint16 idx = uint16(value);
         if (idx < map.size() && map[idx])
         {
-            Slot *other = map[idx];
-            if (other == this || other == m_parent || other->isCopied()) break;
+            auto other = map[idx];
+            if (other.ptr() == this || other.ptr() == m_parent || other->isCopied()) break;
             if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
-            Slot *pOther = other;
+            auto pOther = other;
             int count = 0;
             bool foundOther = false;
             while (pOther)
             {
                 ++count;
-                if (pOther == this) foundOther = true;
+                if (pOther.ptr() == this) foundOther = true;
                 pOther = pOther->attachedTo();
             }
             for (pOther = m_child; pOther; pOther = pOther->m_child)

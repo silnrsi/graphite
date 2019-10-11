@@ -78,8 +78,8 @@ namespace vm
 {
 
 
-typedef void * instr;
-typedef SlotBuffer::iterator slotref;
+using instr = void *;
+using slotref = SlotBuffer::iterator;
 
 enum {VARARGS = 0xff, MAX_NAME_LEN=32};
 

@@ -75,7 +75,7 @@ private:
     uint16  glyphToCol(const uint16 gid) const;
     bool    runFSM(FiniteStateMachine & fsm, SlotBuffer::iterator slot) const;
     void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
-    void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, Slot * os) const;
+    void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, SlotBuffer::iterator os) const;
     void    adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap &) const;
     bool    collisionShift(Segment & seg, int dir, json * const dbgout) const;
     bool    collisionKern(Segment & seg, int dir, json * const dbgout) const;

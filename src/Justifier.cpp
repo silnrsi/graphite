@@ -89,7 +89,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
             if (bbox.bl.x != 0.f || bbox.bl.y != 0.f || bbox.tr.x != 0.f || bbox.tr.y == 0.f)
                 break;
-            pLast = pLast->prev();
+            --pLast;
         }
     }
 
@@ -249,7 +249,7 @@ SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator nSlot)
     if (nSlot)
     {
         eSlot->next(nSlot);
-        eSlot->prev(nSlot->prev());
+        eSlot->prev(std::prev(nSlot));
         nSlot->prev(eSlot);
         eSlot->before(nSlot->before());
         if (eSlot->prev())
@@ -270,14 +270,14 @@ SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator nSlot)
 
 void Segment::delLineEnd(SlotBuffer::iterator s)
 {
-    auto nSlot = s->next();
+    auto nSlot = std::next(s);
     if (nSlot)
     {
-        nSlot->prev(s->prev());
-        if (s->prev())
-            s->prev()->next(nSlot);
+        nSlot->prev(std::prev(s));
+        if (std::prev(s))
+            std::prev(s)->next(nSlot);
     }
     else
-        s->prev()->next(NULL);
+        std::prev(s)->next(nullptr);
     freeSlot(s);
 }

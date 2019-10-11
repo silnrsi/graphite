@@ -425,7 +425,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) 
                     s = m.slotMap().highwater();
                 lc = m_iMaxLoop;
                 if (s)
-                    m.slotMap().highwater(s->next());
+                    m.slotMap().highwater(std::next(s));
             }
         } while (s);
     }
@@ -474,7 +474,7 @@ bool Pass::runFSM(FiniteStateMachine& fsm, SlotBuffer::iterator slot) const
         if (state >= m_successStart)
             fsm.rules.accumulate_rules(m_states[state]);
 
-        slot = slot->next();
+        ++slot;
     } while (state != 0 && slot);
 
     fsm.slots.pushSlot(slot);
@@ -489,9 +489,9 @@ SlotBuffer::iterator input_slot(const SlotMap &  slots, const int n)
     auto s = slots[slots.context() + n];
     if (!s->isCopied())     return s;
 
-    return s->prev() 
+    return std::prev(s) 
         ? std::next(std::prev(s)) 
-        : (s->next() 
+        : (std::next(s) 
             ? std::prev(std::next(s)) 
             : slots.segment.last());
 }
@@ -543,7 +543,7 @@ void Pass::findNDoRule(SlotBuffer::iterator & slot, Machine &m, FiniteStateMachi
                 {
                     *fsm.dbgout << json::close  // close "considered" array
                             << "output" << json::null
-                            << "cursor" << objectid(dslot(&fsm.slots.segment, slot->next()))
+                            << "cursor" << objectid(dslot(&fsm.slots.segment, std::next(slot)))
                             << json::close;
                 }
             }
@@ -562,7 +562,7 @@ void Pass::findNDoRule(SlotBuffer::iterator & slot, Machine &m, FiniteStateMachi
         }
     }
 
-    slot = slot->next();
+    ++slot;
     return;
 }
 
@@ -671,7 +671,7 @@ void SlotMap::collectGarbage(SlotBuffer::iterator &aSlot)
         if(slot && (slot->isDeleted() || slot->isCopied()))
         {
             if (slot == aSlot)
-                aSlot = slot->prev() ? slot->prev() : slot->next();
+                aSlot = std::prev(slot) ? std::prev(slot) : std::next(slot);
             segment.freeSlot(slot);
         }
     }
@@ -722,7 +722,7 @@ void Pass::adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap & smap
     {
         while (++delta <= 0 && slot_out)
         {
-            slot_out = slot_out->prev();
+            --slot_out;
             if (smap.highpassed() && smap.highwater() == slot_out)
                 smap.highpassed(false);
         }
@@ -733,7 +733,7 @@ void Pass::adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap & smap
         {
             if (slot_out.ptr() == smap.highwater() && slot_out)
                 smap.highpassed(true);
-            slot_out = slot_out->next();
+            ++slot_out;
         }
     }
 }
@@ -769,7 +769,7 @@ bool Pass::collisionShift(Segment & seg, int dir, json * const dbgout) const
                 return false;
             if (s != start && (c->flags() & SlotCollision::COLL_END))
             {
-                end = s->next();
+                end = std::next(s);
                 break;
             }
         }
@@ -805,7 +805,7 @@ bool Pass::collisionShift(Segment & seg, int dir, json * const dbgout) const
                     }
                     #endif
                     SlotBuffer::iterator lend = end ? std::prev(end) : seg.last();
-                    SlotBuffer::iterator lstart = start->prev();
+                    SlotBuffer::iterator lstart = std::prev(start);
                     for (auto s = lend; s != lstart; --s)
                     {
                         SlotCollision * c = seg.collisionInfo(*s);
@@ -855,7 +855,7 @@ bool Pass::collisionShift(Segment & seg, int dir, json * const dbgout) const
         if (!end)
             break;
         start = nullptr;
-        for (auto s = end->prev(); s != seg.slots().end(); ++s)
+        for (auto s = std::prev(end); s != seg.slots().end(); ++s)
         {
             if (seg.collisionInfo(*s)->flags() & SlotCollision::COLL_START)
             {
@@ -970,7 +970,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     Position zero(0., 0.);
 
     // Look for collisions with the neighboring glyphs.
-    for (auto nbor = start; nbor; nbor = isRev ? nbor->prev() : nbor->next())
+    for (auto nbor = start; nbor; nbor = isRev ? std::prev(nbor) : std::next(nbor))
     {
         SlotCollision *cNbor = seg.collisionInfo(*nbor);
         bool sameCluster = nbor->isChildOf(base);
@@ -1059,7 +1059,7 @@ float Pass::resolveKern(Segment & seg, SlotBuffer::iterator const slotFix, GR_MA
 
     ymax = max(by + bbb.tr.y, ymax);
     ymin = min(by + bbb.bl.y, ymin);
-    for (auto nbor = slotFix->next(); nbor; nbor = nbor->next())
+    for (auto nbor = std::next(slotFix); nbor; ++nbor)
     {
         if (nbor->isChildOf(base))
             continue;
