@@ -21,11 +21,13 @@ nmake*
 *.kdev4
 *.orig
 *.pyc
+*.egg-info
 .atom-build.yml
 .atom-dbg.cson
 .cproject
 .project
 .pydevproject
+.vscode
 .settings
 .tags
 .tags_swap
