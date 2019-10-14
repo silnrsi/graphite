@@ -318,7 +318,7 @@ bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *c
 
 #if !defined GRAPHITE2_NTRACING
         if (dbgout)
-            dbgout->setenv(0, slot);
+            dbgout->setenv(0, &slot);
 #endif
 
         // Process main bounding octabox.
@@ -574,7 +574,7 @@ bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *c
 
 
 // Figure out where to move the target glyph to, and return the amount to shift by.
-Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
+Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment &seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout)
 {
     float tbase;
     float totalCost = (float)(std::numeric_limits<float>::max() / 2);
@@ -645,7 +645,7 @@ Position ShiftCollider::resolve(GR_MAYBE_UNUSED Segment *seg, bool &isCol, GR_MA
 
 #if !defined GRAPHITE2_NTRACING
 
-void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
+void ShiftCollider::outputJsonDbg(json * const dbgout, Segment & seg, int axis)
 {
     int axisMax = axis;
     if (axis < 0) // output all axes
@@ -675,16 +675,16 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment *seg, int axis)
         *dbgout << json::close; // ranges array
 }
 
-void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment *seg)
+void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment &seg)
 {
         *dbgout << json::object // slot - not closed till the end of the caller method
-                << "slot" << objectid(dslot(seg, _target))
+                << "slot" << objectid(dslot(&seg, _target))
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "target" << json::object
                     << "origin" << _origin
                     << "currShift" << _currShift
-                    << "currOffset" << seg.collisionInfo(_target)->offset()
+                    << "currOffset" << seg.collisionInfo(*_target)->offset()
                     << "bbox" << seg.theGlyphBBoxTemporary(_target->gid())
                     << "slantBox" << seg.getFace()->glyphs().slant(_target->gid())
                     << "fix" << "shift";
@@ -702,7 +702,7 @@ void ShiftCollider::outputJsonDbgEndSlot(GR_MAYBE_UNUSED json * const dbgout,
     << json::close; // slot object
 }
 
-void ShiftCollider::outputJsonDbgOneVector(json * const dbgout, Segment *seg, int axis,
+void ShiftCollider::outputJsonDbgOneVector(json * const dbgout, Segment &seg, int axis,
 	float tleft, float bestCost, float bestVal)
 {
 	const char * label;
@@ -729,7 +729,7 @@ void ShiftCollider::outputJsonDbgOneVector(json * const dbgout, Segment *seg, in
         << json::close; // vectors object
 }
 
-void ShiftCollider::outputJsonDbgRemovals(json * const dbgout, int axis, Segment *seg)
+void ShiftCollider::outputJsonDbgRemovals(json * const dbgout, int axis, Segment &seg)
 {
     *dbgout << "removals" << json::array;
     _ranges[axis].jsonDbgOut(seg);
@@ -879,7 +879,7 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
 
 #if !defined GRAPHITE2_NTRACING
     // Debugging
-    _seg = seg;
+    _seg = &seg;
     _slotNear.clear();
     _slotNear.insert(_slotNear.begin(), numSlices, NULL);
     _nearEdges.clear();
@@ -982,7 +982,7 @@ bool KernCollider::mergeSlot(Segment & seg, Slot & slot, const Position &currShi
             // Debugging - remember the closest neighboring edge for this slice.
             if (m > rtl * _nearEdges[i])
             {
-                _slotNear[i] = slot;
+                _slotNear[i] = &slot;
                 _nearEdges[i] = m * rtl;
             }
 #endif
@@ -1011,7 +1011,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
     if (dbgout)
     {
         *dbgout << json::object // slot
-                << "slot" << objectid(dslot(seg, _target))
+                << "slot" << objectid(dslot(&seg, _target))
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "miny" << _miny
@@ -1032,7 +1032,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
             *dbgout << json::flat << json::object
                 << "i" << is
                 << "targetEdge" << _edges[is]
-                << "neighbor" << objectid(dslot(seg, _slotNear[is]))
+                << "neighbor" << objectid(dslot(&seg, _slotNear[is]))
                 << "nearEdge" << _nearEdges[is]
                 << json::close;
         }

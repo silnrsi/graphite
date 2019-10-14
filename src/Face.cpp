@@ -161,47 +161,47 @@ bool Face::readFeatures()
     return m_Sill.readFace(*this);
 }
 
-bool Face::runGraphite(Segment *seg, const Silf *aSilf) const
+bool Face::runGraphite(Segment & seg, const Silf *aSilf) const
 {
 #if !defined GRAPHITE2_NTRACING
     json * dbgout = logger();
     if (dbgout)
     {
         *dbgout << json::object
-                    << "id"         << objectid(seg)
+                    << "id"         << objectid(&seg)
                     << "passes"     << json::array;
     }
 #endif
 
-//    if ((seg->dir() & 1) != aSilf->dir())
-//        seg->reverseSlots();
-    if ((seg->dir() & 3) == 3 && aSilf->bidiPass() == 0xFF)
-        seg->doMirror(aSilf->aMirror());
+//    if ((seg.dir() & 1) != aSilf->dir())
+//        seg.reverseSlots();
+    if ((seg.dir() & 3) == 3 && aSilf->bidiPass() == 0xFF)
+        seg.doMirror(aSilf->aMirror());
     bool res = aSilf->runGraphite(seg, 0, aSilf->positionPass(), true);
     if (res)
     {
-        seg->associateChars(0, seg->charInfoCount());
+        seg.associateChars(0, seg.charInfoCount());
         if (aSilf->flags() & 0x20)
-            res &= seg->initCollisions();
+            res &= seg.initCollisions();
         if (res)
             res &= aSilf->runGraphite(seg, aSilf->positionPass(), aSilf->numPasses(), false);
     }
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
-{
-        seg->positionSlots(0, 0, 0, seg->currdir());
+    {
+        seg.positionSlots(0, 0, 0, seg.currdir());
         *dbgout             << json::item
                             << json::close // Close up the passes array
-                << "outputdir" << (seg->currdir() ? "rtl" : "ltr")
+                << "outputdir" << (seg.currdir() ? "rtl" : "ltr")
                 << "output" << json::array;
         for(auto & s: seg.slots())
-            *dbgout     << dslot(seg, s);
+            *dbgout     << dslot(&seg, &s);
         *dbgout         << json::close
-                << "advance" << seg->advance()
+                << "advance" << seg.advance()
                 << "chars"   << json::array;
-        for(size_t i = 0, n = seg->charInfoCount(); i != n; ++i)
-            *dbgout     << json::flat << *seg->charinfo(int(i));
+        for(size_t i = 0, n = seg.charInfoCount(); i != n; ++i)
+            *dbgout     << json::flat << *seg.charinfo(int(i));
         *dbgout         << json::close  // Close up the chars array
                     << json::close;     // Close up the segment object
     }

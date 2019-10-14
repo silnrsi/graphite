@@ -186,7 +186,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     assert(ds.second);
     const Segment & seg = *ds.first;
     const Slot & s = *ds.second;
-    const SlotCollision *cslot = seg.collisionInfo(ds.second);
+    const SlotCollision *cslot = seg.collisionInfo(s);
 
     j << json::object
         << "id"             << objectid(ds)
@@ -197,11 +197,11 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
             << "after"          << s.after()
             << json::close
         << "origin"         << s.origin()
-        << "shift"          << Position(float(s.getAttr(0, gr_slatShiftX, 0)),
-                                        float(s.getAttr(0, gr_slatShiftY, 0)))
+        << "shift"          << Position(float(s.getAttr(seg, gr_slatShiftX, 0)),
+                                        float(s.getAttr(seg, gr_slatShiftY, 0)))
         << "advance"        << s.advancePos()
         << "insert"         << s.isInsertBefore()
-        << "break"          << s.getAttr(&seg, gr_slatBreak, 0);
+        << "break"          << s.getAttr(seg, gr_slatBreak, 0);
     if (s.just() > 0)
         j << "justification"    << s.just();
     if (s.getBidiLevel() > 0)
@@ -209,7 +209,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     if (!s.isBase())
         j << "parent" << json::flat << json::object
             << "id"             << objectid(dslot(&seg, s.attachedTo()))
-            << "level"          << s.getAttr(0, gr_slatAttLevel, 0)
+            << "level"          << s.getAttr(seg, gr_slatAttLevel, 0)
             << "offset"         << s.attachOffset()
             << json::close;
     j << "user" << json::flat << json::array;
