@@ -32,6 +32,15 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+namespace 
+{
+#if defined(GRAPHITE2_NTRACING)
+    constexpr size_t const EXTRA_ATTRS = 0;
+#else
+    constexpr size_t const EXTRA_ATTRS = 1;
+#endif
+}
+
 SlotBuffer::SlotBuffer(size_t chunk_size, size_t num_user)
 : m_first(nullptr),
   m_last(nullptr),
@@ -109,7 +118,7 @@ Slot * SlotBuffer::newSlot()
     if (!m_free)
     {
         // check that the segment doesn't grow indefinintely
-        int numUser = m_attrs_size;
+        int numUser = m_attrs_size + EXTRA_ATTRS;
         Slot *newSlots = grzeroalloc<Slot>(m_chunk_size);
         int16 *newAttrs = grzeroalloc<int16>(m_chunk_size * numUser);
         if (!newSlots || !newAttrs)
@@ -154,6 +163,9 @@ void SlotBuffer::freeSlot(pointer aSlot)
     // reset the slot incase it is reused
     ::new (aSlot) Slot(aSlot->userAttrs());
     memset(aSlot->userAttrs(), 0, m_attrs_size * sizeof(int16));
+#if !defined GRAPHITE2_NTRACING
+    ++aSlot->userAttrs()[m_attrs_size];
+#endif
     // update next pointer
     aSlot->next(m_free);
     m_free = aSlot;
