@@ -136,18 +136,18 @@ public:
                 const Position &currOffset, int dir, GR_MAYBE_UNUSED json * const dbgout);
     bool mergeSlot(Segment & seg, Slot & slot, const SlotCollision *cinfo, const Position &currShift, bool isAfter,
                 bool sameCluster, bool &hasCol, bool isExclusion, GR_MAYBE_UNUSED json * const dbgout);
-    Position resolve(Segment *seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
+    Position resolve(Segment &seg, bool &isCol, GR_MAYBE_UNUSED json * const dbgout);
     void addBox_slope(bool isx, const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, float weight, float m, bool minright, int mode);
     void removeBox(const Rect &box, const BBox &bb, const SlantBox &sb, const Position &org, int mode);
     const Position &origin() const { return _origin; }
 
 #if !defined GRAPHITE2_NTRACING
-	void outputJsonDbg(json * const dbgout, Segment *seg, int axis);
-	void outputJsonDbgStartSlot(json * const dbgout, Segment *seg);
+	void outputJsonDbg(json * const dbgout, Segment &seg, int axis);
+	void outputJsonDbgStartSlot(json * const dbgout, Segment &seg);
 	void outputJsonDbgEndSlot(json * const dbgout, Position resultPos, int bestAxis, bool isCol);
-	void outputJsonDbgOneVector(json * const dbgout, Segment *seg, int axis, float tleft, float bestCost, float bestVal);
+	void outputJsonDbgOneVector(json * const dbgout, Segment &seg, int axis, float tleft, float bestCost, float bestVal);
 	void outputJsonDbgRawRanges(json * const dbgout, int axis);
-	void outputJsonDbgRemovals(json * const dbgout, int axis, Segment *seg);
+	void outputJsonDbgRemovals(json * const dbgout, int axis, Segment &seg);
 #endif
 
     CLASS_NEW_DELETE;

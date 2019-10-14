@@ -274,14 +274,14 @@ float Zones::Exclusion::test_position(float origin) const {
 
 #if !defined GRAPHITE2_NTRACING
 
-void Zones::jsonDbgOut(Segment *seg) const {
+void Zones::jsonDbgOut(Segment &seg) const {
 
     if (_dbg)
     {
         for (Zones::idebugs s = dbgs_begin(), e = dbgs_end(); s != e; ++s)
         {
             *_dbg << json::flat << json::array
-                << objectid(dslot(seg, static_cast<Slot *>(s->_env[0])))
+                << objectid(dslot(&seg, static_cast<Slot *>(s->_env[0])))
                 << reinterpret_cast<ptrdiff_t>(s->_env[1]);
             if (s->_isdel)
                 *_dbg << "remove" << Position(s->_excl.x, s->_excl.xm);

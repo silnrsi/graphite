@@ -995,7 +995,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     bool isCol = false;
     if (collides || cFix->shift().x != 0.f || cFix->shift().y != 0.f)
     {
-        Position shift = coll.resolve(&seg, isCol, dbgout);
+        Position shift = coll.resolve(seg, isCol, dbgout);
         // isCol has been set to true if a collision remains.
         if (std::fabs(shift.x) < 1e38f && std::fabs(shift.y) < 1e38f)
         {
@@ -1018,7 +1018,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
         if (dbgout)
         {
             *dbgout << json::object
-                            << "missed" << objectid(dslot(seg, slotFix));
+                            << "missed" << objectid(dslot(&seg, slotFix));
             coll.outputJsonDbg(dbgout, seg, -1);
             *dbgout << json::close;
         }

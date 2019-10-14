@@ -84,7 +84,7 @@ public:
     size_t slotCount() const { return m_numGlyphs; }      //one slot per glyph
     void extendLength(ptrdiff_t num) { m_numGlyphs += num; }
     Position advance() const { return m_advance; }
-    bool runGraphite() { if (m_silf) return m_face->runGraphite(this, m_silf); else return true;};
+    bool runGraphite() { if (m_silf) return m_face->runGraphite(*this, m_silf); else return true;};
     void chooseSilf(uint32 script) { m_silf = m_face->chooseSilf(script); }
     const Silf *silf() const { return m_silf; }
     size_t charInfoCount() const { return m_numCharinfo; }

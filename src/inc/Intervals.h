@@ -104,7 +104,7 @@ public:
     void setdebug(json *dbgout) { _dbg = dbgout; }
     idebugs dbgs_begin() const { return _dbgs.begin(); }
     idebugs dbgs_end() const { return _dbgs.end(); }
-    void jsonDbgOut(Segment *seg) const;
+    void jsonDbgOut(Segment &seg) const;
     Position position() const { return Position(_pos, _posm); }
 #endif
 

@@ -207,7 +207,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
 #endif
 
     if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0.f || (silf()->flags() & 1)))
-        m_silf->runGraphite(this, m_silf->justificationPass(), m_silf->positionPass());
+        m_silf->runGraphite(*this, m_silf->justificationPass(), m_silf->positionPass());
 
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)

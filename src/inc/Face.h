@@ -63,7 +63,7 @@ public:
     Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     virtual ~Face();
 
-    virtual bool        runGraphite(Segment *seg, const Silf *silf) const;
+    virtual bool        runGraphite(Segment &seg, const Silf *silf) const;
 
 public:
     bool                readGlyphs(uint32 faceOptions);
