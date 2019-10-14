@@ -55,6 +55,8 @@ tables = {
 
 
 def roundfloat(f: float, res: float) -> float:
+    if not scalecmp(int(f), f, res):
+        return int(f)
     try:
         return (int(f / res) * res)
     except ValueError:
@@ -140,6 +142,7 @@ def cmpgls(tests, bases, epsilon):
 
 
 # Have the JSONEncoder use ftostr to render floats to 2dp rather than lots
+# This doesn't work in python3 :(
 json.encoder.FLOAT_REPR = ftostr
 
 

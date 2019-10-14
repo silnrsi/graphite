@@ -121,7 +121,7 @@ public:
     bool isLocalJustify() const { return m_justs != NULL; };
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
-    Position attachOffset() const { return m_attach - m_with; }
+    Position attachOffset() const { return m_attachat; }
     Slot* firstChild() const { return m_child; }
     void firstChild(Slot *ap) { m_child = ap; }
     bool child(Slot *ap);
@@ -154,8 +154,7 @@ private:
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
-    Position m_attach;      // attachment point on us
-    Position m_with;        // attachment point position on parent
+    Position m_attachat;    // position relative to base
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     byte     m_attLevel;    // attachment level

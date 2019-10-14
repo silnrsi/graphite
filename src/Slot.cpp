@@ -40,7 +40,7 @@ Slot::Slot(int16 *user_attrs) :
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
-    m_attach(0, 0), m_with(0, 0), m_just(0.),
+    m_attachat(0, 0), m_just(0.),
     m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0),
     m_userAttr(user_attrs), m_justs(NULL)
 {
@@ -67,8 +67,7 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     m_position = orig.m_position;
     m_shift = orig.m_shift;
     m_advance = orig.m_advance;
-    m_attach = orig.m_attach;
-    m_with = orig.m_with;
+    m_attachat = orig.m_attachat;
     m_flags = orig.m_flags;
     m_attLevel = orig.m_attLevel;
     m_bidiCls = orig.m_bidiCls;
@@ -120,7 +119,7 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
     else
     {
         float tAdv;
-        m_position += (m_attach - m_with) * scale;
+        m_position += m_attachat * scale;
         tAdv = m_advance.x >= 0.5f ? m_position.x + tAdvance - shift.x : 0.f;
         res = Position(tAdv, 0);
         if ((m_advance.x >= 0.5f || m_position.x < 0) && m_position.x < clusterMin) clusterMin = m_position.x;
@@ -205,12 +204,12 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     case gr_slatAdvX :      return int(m_advance.x);
     case gr_slatAdvY :      return int(m_advance.y);
     case gr_slatAttTo :     return m_parent ? 1 : 0;
-    case gr_slatAttX :      return int(m_attach.x);
-    case gr_slatAttY :      return int(m_attach.y);
+    case gr_slatAttX :      return int(m_attachat.x);
+    case gr_slatAttY :      return int(m_attachat.y);
     case gr_slatAttXOff :
     case gr_slatAttYOff :   return 0;
-    case gr_slatAttWithX :  return int(m_with.x);
-    case gr_slatAttWithY :  return int(m_with.y);
+    case gr_slatAttWithX :  return 0;
+    case gr_slatAttWithY :  return 0;
     case gr_slatAttWithXOff:
     case gr_slatAttWithYOff:return 0;
     case gr_slatAttLevel :  return m_attLevel;
@@ -309,20 +308,17 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
             if (count < 100 && !foundOther && other->child(this))
             {
                 attachTo(other);
-                if ((map.dir() != 0) ^ (idx > subindex))
-                    m_with = Position(advance(), 0);
-                else        // normal match to previous root
-                    m_attach = Position(other->advance(), 0);
+                m_attachat = Position(0, 0);
             }
         }
         break;
     }
-    case gr_slatAttX :          m_attach.x = value; break;
-    case gr_slatAttY :          m_attach.y = value; break;
+    case gr_slatAttX :          m_attachat.x += value; break;
+    case gr_slatAttY :          m_attachat.y += value; break;
     case gr_slatAttXOff :
     case gr_slatAttYOff :       break;
-    case gr_slatAttWithX :      m_with.x = value; break;
-    case gr_slatAttWithY :      m_with.y = value; break;
+    case gr_slatAttWithX :      m_attachat.x -= value; break;
+    case gr_slatAttWithY :      m_attachat.y -= value; break;
     case gr_slatAttWithXOff :
     case gr_slatAttWithYOff :   break;
     case gr_slatAttLevel :
