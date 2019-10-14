@@ -290,6 +290,8 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
         if (idx < map.size() && map[idx])
         {
             auto other = map[idx];
+            markAttachedX(false);
+            markAttachedY(false);
             if (other.ptr() == this || other.ptr() == m_parent || other->isCopied()) break;
             if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
             auto pOther = other;
@@ -308,17 +310,21 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
             if (count < 100 && !foundOther && other->child(this))
             {
                 attachTo(other);
-                m_attachat = Position(0, 0);
+                if ((map.dir() != 0) ^ (idx > subindex))
+                    m_attachat = Position(-advance(), 0);
+                else        // normal match to previous root
+                    m_attachat = Position(other->advance(), 0);
+//                m_attachat = Position(0, 0);
             }
         }
         break;
     }
-    case gr_slatAttX :          m_attachat.x += value; break;
-    case gr_slatAttY :          m_attachat.y += value; break;
+    case gr_slatAttX :          if (isAttachedX()) m_attachat.x += value; else { m_attachat.x = value; markAttachedX(true); } break;
+    case gr_slatAttY :          if (isAttachedY()) m_attachat.y += value; else { m_attachat.y = value; markAttachedY(true); } break;
     case gr_slatAttXOff :
     case gr_slatAttYOff :       break;
-    case gr_slatAttWithX :      m_attachat.x -= value; break;
-    case gr_slatAttWithY :      m_attachat.y -= value; break;
+    case gr_slatAttWithX :      if (isAttachedX()) m_attachat.x -= value; else { m_attachat.x = -value; markAttachedX(true); } break;
+    case gr_slatAttWithY :      if (isAttachedY()) m_attachat.y -= value; else { m_attachat.y = -value; markAttachedY(true); } break;
     case gr_slatAttWithXOff :
     case gr_slatAttWithYOff :   break;
     case gr_slatAttLevel :

@@ -65,7 +65,8 @@ class Slot
         INSERTED    = 2,
         COPIED      = 4,
         POSITIONED  = 8,
-        ATTACHED    = 16
+        ATTACHEDX   = 16,
+        ATTACHEDY   = 32
     };
 
 public:
@@ -105,6 +106,10 @@ public:
     void markCopied(bool state) { if (state) m_flags |= COPIED; else m_flags &= ~COPIED; }
     bool isPositioned() const { return (m_flags & POSITIONED) ? true : false; }
     void markPositioned(bool state) { if (state) m_flags |= POSITIONED; else m_flags &= ~POSITIONED; }
+    bool isAttachedX() const { return (m_flags & ATTACHEDX) ? true : false; }
+    void markAttachedX(bool state) { if (state) m_flags |= ATTACHEDX; else m_flags &= ~ATTACHEDX; }
+    bool isAttachedY() const { return (m_flags & ATTACHEDY) ? true : false; }
+    void markAttachedY(bool state) { if (state) m_flags |= ATTACHEDY; else m_flags &= ~ATTACHEDY; }
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
