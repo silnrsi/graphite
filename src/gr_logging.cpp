@@ -204,8 +204,6 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         << "break"          << s.getAttr(seg, gr_slatBreak, 0);
     if (s.just() > 0)
         j << "justification"    << s.just();
-    if (s.getBidiLevel() > 0)
-        j << "bidi"     << s.getBidiLevel();
     if (!s.isBase())
         j << "parent" << json::flat << json::object
             << "id"             << objectid(dslot(&seg, s.attachedTo()))

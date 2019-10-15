@@ -41,7 +41,7 @@ Slot::Slot(int16 *user_attrs) :
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attachat(0, 0), m_just(0.),
-    m_flags(0), m_bidiCls(-1), m_bidiLevel(0),
+    m_flags(0), m_bidiCls(-1),
     m_userAttr(user_attrs), m_justs(NULL)
 {
 }
@@ -70,7 +70,6 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     m_attachat = orig.m_attachat;
     m_flags = orig.m_flags;
     m_bidiCls = orig.m_bidiCls;
-    m_bidiLevel = orig.m_bidiLevel;
     if (m_userAttr && orig.m_userAttr)
         memcpy(m_userAttr, orig.m_userAttr, sizeAttr * sizeof(*m_userAttr));
     if (m_justs && orig.m_justs)
@@ -227,7 +226,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
       // no break
     case gr_slatUserDefn :  return subindex < seg.numAttrs() ?  m_userAttr[subindex] : 0;
     case gr_slatSegSplit :  return seg.charinfo(m_original)->flags() & 3;
-    case gr_slatBidiLevel:  return m_bidiLevel;
+    case gr_slatBidiLevel:  return 0;
     case gr_slatColFlags :		{ SlotCollision *c = seg.collisionInfo(*this); return c ? c->flags() : 0; }
     case gr_slatColLimitblx:SLOTGETCOLATTR(limit().bl.x)
     case gr_slatColLimitbly:SLOTGETCOLATTR(limit().bl.y)

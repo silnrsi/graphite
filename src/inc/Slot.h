@@ -111,8 +111,6 @@ public:
     bool isAttachedY() const { return (m_flags & ATTACHEDY) ? true : false; }
     void markAttachedY(bool state) { if (state) m_flags |= ATTACHEDY; else m_flags &= ~ATTACHEDY; }
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
-    uint8 getBidiLevel() const { return m_bidiLevel; }
-    void setBidiLevel(uint8 level) { m_bidiLevel = level; }
     int8 getBidiClass(const Segment &seg);
     int8 getBidiClass() const { return m_bidiCls; }
     void setBidiClass(int8 cls) { m_bidiCls = cls; }
@@ -163,7 +161,6 @@ private:
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     int8     m_bidiCls;     // bidirectional class
-    byte     m_bidiLevel;   // bidirectional level
     int16   *m_userAttr;    // pointer to user attributes
     SlotJustify *m_justs;   // pointer to justification parameters
 
