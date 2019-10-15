@@ -99,7 +99,7 @@ public:
     void after(int ind) { m_after = ind; }
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
+    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
     bool isCopied() const { return (m_flags & COPIED) ? true : false; }
@@ -134,7 +134,7 @@ public:
     void nextSibling(Slot *ap) { m_sibling = ap; }
     bool sibling(Slot *ap);
     bool removeChild(Slot *ap);
-    int32 clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl);
+    int32 clusterMetric(const Segment & seg, uint8 metric, bool rtl);
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
     float just() const { return m_just; }
@@ -162,7 +162,6 @@ private:
     Position m_attachat;    // position relative to base
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
-    byte     m_attLevel;    // attachment level
     int8     m_bidiCls;     // bidirectional class
     byte     m_bidiLevel;   // bidirectional level
     int16   *m_userAttr;    // pointer to user attributes

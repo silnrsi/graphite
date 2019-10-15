@@ -202,7 +202,7 @@ int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool r
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);
-        return is->clusterMetric(*this, metric, attrLevel, rtl);
+        return is->clusterMetric(*this, metric, rtl);
     }
     else
         return m_face->getGlyphMetric(iSlot->gid(), metric);

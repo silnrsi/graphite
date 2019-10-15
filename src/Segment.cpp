@@ -260,7 +260,7 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         for (auto s = last, end = --first; s != end; --s)
         {
             if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
+                currpos = s->finalise(*this, font, currpos, bbox, clusterMin = currpos.x, isRtl, isFinal);
         }
     }
     else
@@ -268,7 +268,7 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         for (auto s = first, end = ++last; s != end; ++s)
         {
             if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
+                currpos = s->finalise(*this, font, currpos, bbox, clusterMin = currpos.x, isRtl, isFinal);
         }
     }
     if (reorder)
