@@ -159,7 +159,7 @@ int gr_slot_original(const gr_slot* p/*not NULL*/)
 void gr_slot_linebreak_before(gr_slot* p/*not NULL*/)
 {
     assert(p);
-    gr_slot *prev = static_cast<gr_slot *>(std::prev(p));
+    gr_slot *prev = static_cast<gr_slot *>(p->prev());
     prev->sibling(nullptr);
     prev->next(nullptr);
     p->prev(nullptr);

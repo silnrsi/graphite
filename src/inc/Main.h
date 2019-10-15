@@ -193,6 +193,16 @@ inline T max(const T a, const T b)
     #define GR_FALLTHROUGH /* fallthrough */
 #endif
 
+
+// TODO: Remove these sepcialisations once full refactor of SlotBuffer and iterators is done.
+#include <iterator>
+class gr_slot;
+
+template<> gr_slot * std::prev<gr_slot*>(gr_slot *, ptrdiff_t);
+template<> gr_slot const * std::prev<gr_slot const*>(gr_slot const *, ptrdiff_t);
+template<> gr_slot * std::next<gr_slot*>(gr_slot *, ptrdiff_t);
+template<> gr_slot const * std::next<gr_slot const*>(gr_slot const *, ptrdiff_t);
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4800)
 #pragma warning(disable: 4355)
