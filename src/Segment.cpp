@@ -165,37 +165,17 @@ void Segment::reverseSlots()
     Slot *tfirst;
     Slot *out = nullptr;
 
-    while (curr && curr->getBidiClass() == 16) ++curr;
     if (!curr) return;
     tfirst = std::prev(curr);
     tlast = curr;
 
     while (curr)
     {
-        if (curr->getBidiClass() == 16)
-        {
-            auto d = std::next(curr);
-            while (d && d->getBidiClass() == 16) ++d;
-
-            d = d ? std::prev(d) : last();
-            Slot *p = out->next();    // one after the diacritics. out can't be null
-            if (p)
-                p->prev(d);
-            else
-                tlast = d;
-            t = std::next(d);
-            d->next(p);
-            curr->prev(out);
-            out->next(curr);
-        }
-        else    // will always fire first time round the loop
-        {
-            if (out)
-                out->prev(curr);
-            t = std::next(curr);
-            curr->next(out);
-            out = curr;
-        }
+        if (out)
+            out->prev(curr);
+        t = std::next(curr);
+        curr->next(out);
+        out = curr;
         curr = t;
     }
     out->prev(tfirst);

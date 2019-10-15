@@ -41,7 +41,7 @@ Slot::Slot(int16 *user_attrs) :
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attachat(0, 0), m_just(0.),
-    m_flags(0), m_bidiCls(-1),
+    m_flags(0),
     m_userAttr(user_attrs), m_justs(NULL)
 {
 }
@@ -69,7 +69,6 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     m_advance = orig.m_advance;
     m_attachat = orig.m_attachat;
     m_flags = orig.m_flags;
-    m_bidiCls = orig.m_bidiCls;
     if (m_userAttr && orig.m_userAttr)
         memcpy(m_userAttr, orig.m_userAttr, sizeAttr * sizeof(*m_userAttr));
     if (m_justs && orig.m_justs)
@@ -451,7 +450,6 @@ bool Slot::removeChild(Slot *ap)
 void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
-    m_bidiCls = -1;
     if (!theGlyph)
     {
         theGlyph = seg.getFace()->glyphs().glyphSafe(glyphid);
