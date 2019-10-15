@@ -133,7 +133,6 @@ public:
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void bidiPass(int paradir, uint8 aMirror);
-    int8 getSlotBidiClass(Slot *s) const;
     void doMirror(uint16 aMirror);
     SlotBuffer::iterator addLineEnd(SlotBuffer::iterator nSlot);
     void delLineEnd(SlotBuffer::iterator s);
@@ -176,16 +175,6 @@ private:
 };
 
 inline
-int8 Segment::getSlotBidiClass(Slot *s) const
-{
-    int8 res = s->getBidiClass();
-    if (res != -1) return res;
-    res = int8(glyphAttr(s->gid(), m_silf->aBidi()));
-    s->setBidiClass(res);
-    return res;
-}
-
-inline
 void Segment::finalise(const Font *font, bool reverse)
 {
     if (!first() || !last()) return;
@@ -202,7 +191,7 @@ int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool r
     if (attrLevel > 0)
     {
         Slot *is = findRoot(iSlot);
-        return is->clusterMetric(*this, metric, attrLevel, rtl);
+        return is->clusterMetric(*this, metric, rtl);
     }
     else
         return m_face->getGlyphMetric(iSlot->gid(), metric);

@@ -1007,7 +1007,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
                 Rect bbox;
                 Position here = slotFix->origin() + shift;
                 float clusterMin = here.x;
-                slotFix->firstChild()->finalise(seg, nullptr, here, bbox, 0, clusterMin, rtl, false);
+                slotFix->firstChild()->finalise(seg, nullptr, here, bbox, clusterMin, rtl, false);
             }
         }
     }

@@ -41,7 +41,7 @@ Slot::Slot(int16 *user_attrs) :
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attachat(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0),
+    m_flags(0),
     m_userAttr(user_attrs), m_justs(NULL)
 {
 }
@@ -69,9 +69,6 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     m_advance = orig.m_advance;
     m_attachat = orig.m_attachat;
     m_flags = orig.m_flags;
-    m_attLevel = orig.m_attLevel;
-    m_bidiCls = orig.m_bidiCls;
-    m_bidiLevel = orig.m_bidiLevel;
     if (m_userAttr && orig.m_userAttr)
         memcpy(m_userAttr, orig.m_userAttr, sizeAttr * sizeof(*m_userAttr));
     if (m_justs && orig.m_justs)
@@ -85,10 +82,10 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_position = m_position + relpos;
 }
 
-Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
+Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, float & clusterMin, bool rtl, bool isFinal, int depth)
 {
     SlotCollision *coll = NULL;
-    if (depth > 100 || (attrLevel && m_attLevel > attrLevel)) return Position(0, 0);
+    if (depth > 100) return Position(0, 0);
     float scale = font ? font->scale() : 1.0f;
     Position shift(m_shift.x * (rtl * -2 + 1) + m_just, m_shift.y);
     float tAdvance = m_advance.x + m_just;
@@ -133,13 +130,13 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
 
     if (m_child && m_child != this && m_child->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        Position tRes = m_child->finalise(seg, font, m_position, bbox, clusterMin, rtl, isFinal, depth + 1);
         if ((!m_parent || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
     }
 
     if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        Position tRes = m_sibling->finalise(seg, font, base, bbox, clusterMin, rtl, isFinal, depth + 1);
         if (tRes.x > res.x) res = tRes;
     }
 
@@ -153,14 +150,14 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
     return res;
 }
 
-int32 Slot::clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl)
+int32 Slot::clusterMetric(const Segment & seg, uint8 metric, bool rtl)
 {
     Position base;
     if (glyph() >= seg.getFace()->glyphs().numGlyphs())
         return 0;
     Rect bbox = seg.theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);
+    Position res = finalise(seg, NULL, base, bbox, clusterMin, rtl, false);
 
     switch (metrics(metric))
     {
@@ -212,7 +209,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     case gr_slatAttWithY :  return 0;
     case gr_slatAttWithXOff:
     case gr_slatAttWithYOff:return 0;
-    case gr_slatAttLevel :  return m_attLevel;
+    case gr_slatAttLevel :  return 0;
     case gr_slatBreak :     return seg.charinfo(m_original)->breakWeight();
     case gr_slatCompRef :   return 0;
     case gr_slatDir :       return seg.dir() & 1;
@@ -228,7 +225,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
       // no break
     case gr_slatUserDefn :  return subindex < seg.numAttrs() ?  m_userAttr[subindex] : 0;
     case gr_slatSegSplit :  return seg.charinfo(m_original)->flags() & 3;
-    case gr_slatBidiLevel:  return m_bidiLevel;
+    case gr_slatBidiLevel:  return 0;
     case gr_slatColFlags :		{ SlotCollision *c = seg.collisionInfo(*this); return c ? c->flags() : 0; }
     case gr_slatColLimitblx:SLOTGETCOLATTR(limit().bl.x)
     case gr_slatColLimitbly:SLOTGETCOLATTR(limit().bl.y)
@@ -327,9 +324,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
     case gr_slatAttWithY :      if (isAttachedY()) m_attachat.y -= value; else { m_attachat.y = -value; markAttachedY(true); } break;
     case gr_slatAttWithXOff :
     case gr_slatAttWithYOff :   break;
-    case gr_slatAttLevel :
-        m_attLevel = byte(value);
-        break;
+    case gr_slatAttLevel :      break;
     case gr_slatBreak :
         seg.charinfo(m_original)->breakWeight(value);
         break;
@@ -455,7 +450,6 @@ bool Slot::removeChild(Slot *ap)
 void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
-    m_bidiCls = -1;
     if (!theGlyph)
     {
         theGlyph = seg.getFace()->glyphs().glyphSafe(glyphid);
