@@ -1062,7 +1062,9 @@ void KernCollider::shift(const Position &mv, int dir)
 ////    SLOT-COLLISION    ////
 
 // Initialize the collision attributes for the given slot.
-SlotCollision::SlotCollision(Segment &seg, Slot &slot)
+SlotCollision::SlotCollision(Segment &seg, Slot &slot) :
+    _shift(Position()),
+    _offset(Position())
 {
     initFromSlot(seg, slot);
 }

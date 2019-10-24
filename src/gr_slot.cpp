@@ -119,14 +119,14 @@ float gr_slot_advance_Y(const gr_slot *p/*not NULL*/, GR_MAYBE_UNUSED const gr_f
 int gr_slot_before(const gr_slot* p/*not NULL*/)
 {
     assert(p);
-    return p->before();
+    return p->cluster();
 }
 
 
 int gr_slot_after(const gr_slot* p/*not NULL*/)
 {
     assert(p);
-    return p->after();
+    return p->cluster();
 }
 
 unsigned int gr_slot_index(const gr_slot *p/*not NULL*/)

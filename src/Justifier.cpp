@@ -104,7 +104,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     {
         for (auto s = pSlot; s && s != end; s = s->nextSibling())
         {
-            CharInfo *c = charinfo(s->before());
+            CharInfo *c = charinfo(s->cluster());
             if (isWhitespace(c->unicodeChar()))
             {
                 s->setJustify(*this, 0, 3, 1);
@@ -251,19 +251,14 @@ SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator nSlot)
         eSlot->next(nSlot);
         eSlot->prev(std::prev(nSlot));
         nSlot->prev(eSlot);
-        eSlot->before(nSlot->before());
-        if (eSlot->prev())
-            eSlot->after(eSlot->prev()->after());
-        else
-            eSlot->after(nSlot->before());
+        eSlot->cluster(nSlot->cluster());
     }
     else
     {
         nSlot = last();
         eSlot->prev(nSlot);
         nSlot->next(eSlot);
-        eSlot->after(eSlot->prev()->after());
-        eSlot->before(nSlot->after());
+        eSlot->cluster(nSlot->cluster());
     }
     return eSlot;
 }

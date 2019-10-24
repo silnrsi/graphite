@@ -37,6 +37,7 @@ of the License or (at your option) any later version.
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
 #include "inc/Collider.h"
+#include "inc/Font.h"
 #include "graphite2/Segment.h"
 
 
@@ -90,8 +91,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->child(NULL);
     aSlot->setGlyph(*this, gid, theGlyph);
     aSlot->originate(id);
-    aSlot->before(id);
-    aSlot->after(id);
+    aSlot->cluster(id);
     if (last()) last()->next(aSlot);
     aSlot->prev(last());
     last(aSlot);
@@ -218,9 +218,12 @@ void Segment::linkClusters(SlotBuffer::iterator s, SlotBuffer::iterator  end)
 Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, SlotBuffer::iterator last, bool isRtl, bool isFinal)
 {
     Position currpos(0., 0.);
-    float clusterMin = 0.;
-    Rect bbox;
+    Position newpos;
+    Position tpos;
     bool reorder = (currdir() != isRtl);
+    uint32 cluster = 0;
+    uint32 count = 0;
+    float scale = font ? font->scale() : 1.0f;
 
     if (reorder)
     {
@@ -230,7 +233,7 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         last = temp;
     }
     if (!first)    first = slots().begin();
-    if (!last)     last   = &slots().back();
+    if (!last)     last  = &slots().back();
 
     if (!first || !last)   // only true for empty segments
         return currpos;
@@ -239,20 +242,39 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
     {
         for (auto s = last, end = --first; s != end; --s)
         {
-            if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, clusterMin = currpos.x, isRtl, isFinal);
+            s->index(count++);
+            s->resetGuard();
+            s->origin(Position());
+            s->markPositioned(false);
+        }
+        for (auto s = last, end = first; s != end; --s)
+            s->position_1(0., 0., s->cluster(), isRtl, 0);
+        for (auto s = last, end = first; s != end; --s)
+        {
+            newpos = s->position_2(tpos, cluster, currpos, font, this, isRtl, isFinal, 0);
+            currpos = Position(std::max(currpos.x, newpos.x), 0.);
         }
     }
     else
     {
         for (auto s = first, end = ++last; s != end; ++s)
         {
-            if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, clusterMin = currpos.x, isRtl, isFinal);
+            s->index(count++);
+            s->resetGuard();
+            s->origin(Position());
+            s->markPositioned(false);
+        }
+        for (auto s = first, end = last; s != end; ++s)
+            s->position_1(0., 0., s->cluster(), isRtl, 0);
+        for (auto s = first, end = last; s != end; ++s)
+        {
+            newpos = s->position_2(tpos, cluster, currpos, font, this, isRtl, isFinal, 0);
+            currpos = Position(std::max(currpos.x, newpos.x), 0.);
         }
     }
     if (reorder)
         reverseSlots();
+    m_advance = Position(currpos.x / scale, currpos.y / scale);
     return currpos;
 }
 
@@ -268,28 +290,42 @@ void Segment::associateChars(int offset, size_t numChars)
     }
     for (auto & s: slots())
     {
-        j = s.before();
+        j = s.cluster();
         if (j >= 0)  {
-            for (const int after = s.after(); j <= after; ++j)
-            {
-                c = charinfo(j);
-                if (c->before() == -1 || i < c->before())   c->before(i);
-                if (c->after() < i)                         c->after(i);
-            }
+            c = charinfo(j);
+            if (c->before() == -1 || i < c->before())   c->before(i);
+            if (c->after() < i)                         c->after(i);
         }
         s.index(i++);
     }
+    int lastb = 0;
+    int lasta = 0;
+    for (uint a = offset; a < offset + numChars; ++a)
+    {
+        c = charinfo(a);
+        if (c->before() < 0)
+        {
+            c->before(lastb);
+            c->after(lasta);
+        }
+        else
+        {
+            lastb = c->before();
+            lasta = c->after();
+        }
+    }
+#if 0
     for (auto & s: slots())
     {
         int a;
-        for (a = s.after() + 1; a < offset + int(numChars) && charinfo(a)->after() < 0; ++a)
+        for (a = s.cluster() + 1; a < offset + int(numChars) && charinfo(a)->after() < 0; ++a)
             charinfo(a)->after(s.index());
-        s.after(--a);
 
-        for (a = s.before() - 1; a >= offset && charinfo(a)->before() < 0; --a)
+        for (a = s.cluster() - 1; a >= offset && charinfo(a)->before() < 0; --a)
             charinfo(a)->before(s.index());
-        s.before(++a);
+//        s.cluster(++a);
     }
+#endif
 }
 
 

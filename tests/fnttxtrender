@@ -270,14 +270,14 @@ tt = TTFont(opts.font[0])
 count = 0
 errors = 0
 log = None
-for label, words in reader:
+for count, inf in enumerate(reader):
+    label, words = inf
     if words[0] is None: continue
-    count += 1
     wcount = 0
     for s in words:
         wcount += 1
 
-        t = makelabel(label, count, wcount)
+        t = makelabel(label, count+1, wcount)
         gls = [list(map(partial(name, tt, rounding=rounding),
                         font.glyphs(s, includewidth=True)))]
         if gls[-1][-1][0] is None:
@@ -289,7 +289,7 @@ for label, words in reader:
         if log is None:
             log = JsonLog(outfile, fpaths, opts, opts.font)
         bases = [(cmaplookup(tt, x), (0, 0)) for x in s]
-        log.logentry(label, count, wcount, s, gls, bases)
+        log.logentry(label, count+1, wcount, s, gls, bases)
 if log is not None: log.logend()
 outfile.close()
 sys.exit(errors)

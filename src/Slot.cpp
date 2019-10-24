@@ -37,7 +37,7 @@ using namespace graphite2;
 
 Slot::Slot(int16 *user_attrs) :
     m_next(NULL), m_prev(NULL),
-    m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
+    m_glyphid(0), m_realglyphid(0), m_original(0), m_cluster(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attachat(0, 0), m_just(0.),
@@ -47,20 +47,16 @@ Slot::Slot(int16 *user_attrs) :
 }
 
 // take care, this does not copy any of the GrSlot pointer fields
-void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLevels, size_t numChars)
+void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLevels)
 {
     // leave m_next and m_prev unchanged
     m_glyphid = orig.m_glyphid;
     m_realglyphid = orig.m_realglyphid;
     m_original = orig.m_original + charOffset;
-    if (charOffset + int(orig.m_before) < 0)
-        m_before = 0;
+    if (charOffset + int(orig.m_cluster) < 0)
+        m_cluster = 0;
     else
-        m_before = orig.m_before + charOffset;
-    if (charOffset <= 0 && orig.m_after + charOffset >= numChars)
-        m_after = int(numChars) - 1;
-    else
-        m_after = orig.m_after + charOffset;
+        m_cluster = orig.m_cluster + charOffset;
     m_parent = NULL;
     m_child = NULL;
     m_sibling = NULL;
@@ -77,8 +73,7 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
 
 void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
 {
-    m_before += numCharInfo;
-    m_after += numCharInfo;
+    m_cluster += numCharInfo;
     m_position = m_position + relpos;
 }
 
@@ -148,6 +143,90 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
         if (m_child) m_child->floodShift(adj);
     }
     return res;
+}
+
+void Slot::position_1(float clusterMin, float clusterMax, uint32 cluster, bool rtl, int depth)
+{
+    // int rtlm = rtl ? -1 : 1;
+    bool force_recurse = false;
+    if (depth > 100) return;
+    if (m_advance.x >= 0.5f)
+    {
+        if (clusterMin > 0)
+        {
+            clusterMin = 0;
+            force_recurse = true;
+        }
+        if (clusterMax < m_advance.x)
+        {
+            clusterMax = m_advance.x;
+            force_recurse = true;
+        }
+    }
+    m_guard_shift = std::min(m_guard_shift, clusterMin);
+    m_guard_adv = std::max(m_guard_adv, clusterMax);
+    m_cluster = std::min(m_cluster, cluster);
+
+    if (m_parent && (force_recurse || m_parent->index() > m_index))
+    {
+        if (m_advance.x >= 0.5f)
+            m_parent->position_1(m_guard_shift + m_attachat.x, m_guard_adv + m_attachat.x, std::min(cluster, m_cluster), rtl, depth+1);
+        else
+            m_parent->position_1(m_guard_shift, m_guard_adv, std::min(cluster, m_cluster), rtl, depth+1);
+    }
+}
+
+Position Slot::position_2(Position &base, uint32 &cluster, Position origin, const Font *font, Segment *seg, bool rtl, bool isFinal, int depth)
+{
+    if (!isPositioned())
+    {
+        float scale = font ? font->scale() : 1.0f;
+        int rtlm = rtl ? -1 : 1;
+        Position shift;
+        if (!m_parent && m_guard_shift < -m_shift.x)
+        {
+            shift = Position(m_guard_shift * rtlm * scale, m_shift.y * scale);
+            m_guard_adv = (m_guard_adv > m_advance.x ? m_guard_adv : m_advance.x) * scale;
+        }
+        else
+        {
+            shift = Position(m_shift.x * (rtl * -2 + 1) * scale, m_shift.y * scale);
+            m_guard_adv = (m_guard_adv > m_advance.x ? m_guard_adv : m_advance.x) * scale - shift.x;
+        }
+        SlotCollision *coll = NULL;
+        if (isFinal && (coll = seg->collisionInfo(*this)))
+        {
+            const Position &collshift = coll->offset();
+            if (!(coll->flags() & SlotCollision::COLL_KERN) || rtl)
+                shift = shift + collshift * scale;
+        }
+
+        if (!m_parent)
+        {
+            shift.x += m_just * scale;
+            m_guard_adv += m_just * scale;
+            m_position = origin + shift;
+        }
+        else
+        {
+            if (depth < 100)
+            {
+                // if (isInsertBefore())
+                //     origin += m_attachat;
+                Position pNewBase = m_parent->position_2(base, cluster, origin, font, seg, rtl, isFinal, depth + 1);
+                if (m_advance.x < 0.5f || !isInsertBefore() || (m_guard_adv + base.x + m_attachat.x * scale) <= pNewBase.x)
+                {
+                    m_cluster = cluster;
+                    m_guard_adv = pNewBase.x - base.x - m_attachat.x * scale - shift.x;
+                }
+            }
+            m_position = base + m_attachat * scale + shift;
+        }
+        markPositioned(true);
+    }
+    base = m_position;
+    cluster = m_cluster;
+    return Position(base.x + m_guard_adv, 0.);
 }
 
 int32 Slot::clusterMetric(const Segment & seg, uint8 metric, bool rtl)
@@ -227,26 +306,26 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     case gr_slatSegSplit :  return seg.charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return 0;
     case gr_slatColFlags :		{ SlotCollision *c = seg.collisionInfo(*this); return c ? c->flags() : 0; }
-    case gr_slatColLimitblx:SLOTGETCOLATTR(limit().bl.x)
-    case gr_slatColLimitbly:SLOTGETCOLATTR(limit().bl.y)
-    case gr_slatColLimittrx:SLOTGETCOLATTR(limit().tr.x)
-    case gr_slatColLimittry:SLOTGETCOLATTR(limit().tr.y)
-    case gr_slatColShiftx :	SLOTGETCOLATTR(offset().x)
-    case gr_slatColShifty :	SLOTGETCOLATTR(offset().y)
-    case gr_slatColMargin :	SLOTGETCOLATTR(margin())
-    case gr_slatColMarginWt:SLOTGETCOLATTR(marginWt())
-    case gr_slatColExclGlyph:SLOTGETCOLATTR(exclGlyph())
-    case gr_slatColExclOffx:SLOTGETCOLATTR(exclOffset().x)
-    case gr_slatColExclOffy:SLOTGETCOLATTR(exclOffset().y)
-    case gr_slatSeqClass :	SLOTGETCOLATTR(seqClass())
-    case gr_slatSeqProxClass:SLOTGETCOLATTR(seqProxClass())
-    case gr_slatSeqOrder :	SLOTGETCOLATTR(seqOrder())
-    case gr_slatSeqAboveXoff:SLOTGETCOLATTR(seqAboveXoff())
-    case gr_slatSeqAboveWt: SLOTGETCOLATTR(seqAboveWt())
-    case gr_slatSeqBelowXlim:SLOTGETCOLATTR(seqBelowXlim())
-    case gr_slatSeqBelowWt:	SLOTGETCOLATTR(seqBelowWt())
-    case gr_slatSeqValignHt:SLOTGETCOLATTR(seqValignHt())
-    case gr_slatSeqValignWt:SLOTGETCOLATTR(seqValignWt())
+    case gr_slatColLimitblx:    SLOTGETCOLATTR(limit().bl.x)
+    case gr_slatColLimitbly:    SLOTGETCOLATTR(limit().bl.y)
+    case gr_slatColLimittrx:    SLOTGETCOLATTR(limit().tr.x)
+    case gr_slatColLimittry:    SLOTGETCOLATTR(limit().tr.y)
+    case gr_slatColShiftx :	    SLOTGETCOLATTR(offset().x)
+    case gr_slatColShifty :	    SLOTGETCOLATTR(offset().y)
+    case gr_slatColMargin :	    SLOTGETCOLATTR(margin())
+    case gr_slatColMarginWt:    SLOTGETCOLATTR(marginWt())
+    case gr_slatColExclGlyph:   SLOTGETCOLATTR(exclGlyph())
+    case gr_slatColExclOffx:    SLOTGETCOLATTR(exclOffset().x)
+    case gr_slatColExclOffy:    SLOTGETCOLATTR(exclOffset().y)
+    case gr_slatSeqClass :	    SLOTGETCOLATTR(seqClass())
+    case gr_slatSeqProxClass:   SLOTGETCOLATTR(seqProxClass())
+    case gr_slatSeqOrder :	    SLOTGETCOLATTR(seqOrder())
+    case gr_slatSeqAboveXoff:   SLOTGETCOLATTR(seqAboveXoff())
+    case gr_slatSeqAboveWt:     SLOTGETCOLATTR(seqAboveWt())
+    case gr_slatSeqBelowXlim:   SLOTGETCOLATTR(seqBelowXlim())
+    case gr_slatSeqBelowWt:	    SLOTGETCOLATTR(seqBelowWt())
+    case gr_slatSeqValignHt:    SLOTGETCOLATTR(seqValignHt())
+    case gr_slatSeqValignWt:    SLOTGETCOLATTR(seqValignWt())
     default : return 0;
     }
 }

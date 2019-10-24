@@ -283,7 +283,7 @@ STARTOP(insert)
             // Append a slot on the end
             seg.last()->next(newSlot);
             newSlot->prev(seg.last());
-            newSlot->before(seg.last()->before());
+            newSlot->cluster(seg.last()->cluster());
             seg.last(newSlot);
         }
         else
@@ -298,13 +298,13 @@ STARTOP(insert)
         // Partial insert new slot before iss
         std::prev(iss)->next(newSlot);
         newSlot->prev(std::prev(iss));
-        newSlot->before(std::prev(iss)->after());
+        newSlot->cluster(std::prev(iss)->cluster());
     }
     else
     {
         // Insert new slot at the start of the segment
         newSlot->prev(NULL);
-        newSlot->before(iss->before());
+        newSlot->cluster(iss->cluster());
         seg.first(newSlot);
     }
     // Forward link to iss
@@ -314,12 +314,10 @@ STARTOP(insert)
         // back link from iss to new slot
         iss->prev(newSlot);
         newSlot->originate(iss->original());
-        newSlot->after(iss->before());
     }
     else if (newSlot->prev())
     {
         newSlot->originate(newSlot->prev()->original());
-        newSlot->after(newSlot->prev()->after());
     }
     else
     {
@@ -358,21 +356,31 @@ STARTOP(assoc)
     unsigned int  num = uint8(*param);
     const int8 *  assocs = reinterpret_cast<const int8 *>(param+1);
     use_params(num);
-    int max = -1;
-    int min = -1;
+    int rmin = 0;
+    int rmax = 0;
+    slotref tsmin = is;
+    slotref tsmax = std::next(is);
+    int min = tsmin->cluster();
 
     while (num-- > 0)
     {
         int sr = *assocs++;
         slotref ts = slotat(sr);
-        if (ts && (min == -1 || ts->before() < min)) min = ts->before();
-        if (ts && ts->after() > max) max = ts->after();
+        if (sr < rmin)
+        {
+            rmin = sr;
+            tsmin = ts;
+        }
+        if (sr > rmax)
+        {
+            rmax = sr;
+            tsmax = std::next(ts);
+        }
     }
-    if (min > -1)   // implies max > -1
-    {
-        is->before(min);
-        is->after(max);
-    }
+    for (slotref ts = tsmin; ts != tsmax; ts = std::next(ts))
+        min = std::min(min, ts->cluster());
+    for (slotref ts = tsmin; ts != tsmax; ts = std::next(ts))
+        ts->cluster(min);
 ENDOP
 
 STARTOP(cntxt_item)

@@ -77,13 +77,12 @@ public:
     float advance() const { return m_advance.x; }
     void advance(Position &val) { m_advance = val; }
     Position advancePos() const { return m_advance; }
-    int before() const { return m_before; }
-    int after() const { return m_after; }
+    int cluster() const { return m_cluster; }
     uint32 index() const { return m_index; }
     void index(uint32 val) { m_index = val; }
 
     Slot(int16 *m_userAttr = NULL);
-    void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
+    void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels);
     Slot *next() const { return m_next; }
     void next(Slot *s) { m_next = s; }
     Slot *prev() const { return m_prev; }
@@ -92,14 +91,18 @@ public:
     void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
-    void origin(const Position &pos) { m_position = pos + m_shift; }
+    void origin(const Position &pos) { m_position = pos; }
     void originate(int ind) { m_original = ind; }
     int original() const { return m_original; }
-    void before(int ind) { m_before = ind; }
-    void after(int ind) { m_after = ind; }
+    void cluster(int ind) { m_cluster = ind; }
     bool isBase() const { return (!m_parent); }
+    void resetGuard() { m_guard_shift = 0.; m_guard_adv = 0.; }
+    float guardShift() const { return m_guard_shift; }
+    float guardAdv() const { return m_guard_adv; }
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
+    void position_1(float clusterMin, float clusterMax, uint32 cluster, bool rtl, int depth);
+    Position position_2(Position &base, uint32 &cluster, Position origin, const Font *font, Segment *seg, bool rtl, bool isFinal, int depth);
     bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
     bool isCopied() const { return (m_flags & COPIED) ? true : false; }
@@ -145,8 +148,7 @@ private:
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)
-    uint32 m_before;        // charinfo index of before association
-    uint32 m_after;         // charinfo index of after association
+    uint32 m_cluster;       // charinfo index for this slot
     uint32 m_index;         // slot index given to this slot during finalising
     Slot *m_parent;         // index to parent we are attached to
     Slot *m_child;          // index to first child slot that attaches to us
@@ -155,6 +157,8 @@ private:
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute
     Position m_attachat;    // position relative to base
+    float    m_guard_adv;   // Extra guard advance
+    float    m_guard_shift; // Extra guard shift
     float    m_just;        // Justification inserted space
     uint8    m_flags;       // holds bit flags
     int16   *m_userAttr;    // pointer to user attributes

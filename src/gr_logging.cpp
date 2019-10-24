@@ -193,8 +193,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         << "gid"            << s.gid()
         << "charinfo" << json::flat << json::object
             << "original"       << s.original()
-            << "before"         << s.before()
-            << "after"          << s.after()
+            << "cluster"        << s.cluster()
             << json::close
         << "origin"         << s.origin()
         << "shift"          << Position(float(s.getAttr(seg, gr_slatShiftX, 0)),
@@ -242,6 +241,12 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 				<< "seqvalign" << Position(cslot->seqValignHt(), cslot->seqValignWt());
 		}
         j << json::close;
+    }
+    if (s.cluster() || s.guardAdv() || s.guardShift())
+    {
+        j << "cluster" << s.cluster()
+          << "guard_advance" << s.guardAdv()
+          << "guard_shift" << s.guardShift();
     }
     return j << json::close;
 }
