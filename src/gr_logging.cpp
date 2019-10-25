@@ -200,6 +200,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
                                         float(s.getAttr(seg, gr_slatShiftY, 0)))
         << "advance"        << s.advancePos()
         << "insert"         << s.isInsertBefore()
+        << "index"          << s.index()
         << "break"          << s.getAttr(seg, gr_slatBreak, 0);
     if (s.just() > 0)
         j << "justification"    << s.just();

@@ -298,7 +298,7 @@ STARTOP(insert)
         // Partial insert new slot before iss
         std::prev(iss)->next(newSlot);
         newSlot->prev(std::prev(iss));
-        newSlot->cluster(std::prev(iss)->cluster());
+        newSlot->cluster(iss->cluster());
     }
     else
     {
@@ -377,9 +377,9 @@ STARTOP(assoc)
             tsmax = std::next(ts);
         }
     }
-    for (slotref ts = tsmin; ts != tsmax; ts = std::next(ts))
+    for (slotref ts = tsmin; ts != tsmax; ++ts)
         min = std::min(min, ts->cluster());
-    for (slotref ts = tsmin; ts != tsmax; ts = std::next(ts))
+    for (slotref ts = tsmin; ts != tsmax; ++ts)
         ts->cluster(min);
 ENDOP
 

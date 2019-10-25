@@ -2,8 +2,8 @@ Text codes
 1004	103a	1039	
 Segment length: 2
 pos  gid   attach	     x	     y	ins bw	  chars		Unicode	
-00   368  -1@0,0	   0.0	   0.0	 1 -30	  0   2	   1004	   1039
-01   111   0@410,-2	   4.8	  -0.0	 0 -30	  0   2	   1004	   1039
+00   368  -1@0,0	   0.0	   0.0	 1 -30	  0   0	   1004	   1004
+01   111   0@410,-2	   4.8	  -0.0	 0 -30	  0   0	   1004	   1004
 Advance width =    7.5
 
 Char	Unicode	Before	After	Base

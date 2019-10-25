@@ -215,10 +215,9 @@ Position Slot::position_2(Position &base, uint32 &cluster, Position origin, cons
                 //     origin += m_attachat;
                 Position pNewBase = m_parent->position_2(base, cluster, origin, font, seg, rtl, isFinal, depth + 1);
                 if (m_advance.x < 0.5f || !isInsertBefore() || (m_guard_adv + base.x + m_attachat.x * scale) <= pNewBase.x)
-                {
-                    m_cluster = cluster;
                     m_guard_adv = pNewBase.x - base.x - m_attachat.x * scale - shift.x;
-                }
+                if (!isInsertBefore())
+                    m_cluster = cluster;
             }
             m_position = base + m_attachat * scale + shift;
         }

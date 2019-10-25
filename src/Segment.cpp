@@ -222,7 +222,6 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
     Position tpos;
     bool reorder = (currdir() != isRtl);
     uint32 cluster = 0;
-    uint32 count = 0;
     float scale = font ? font->scale() : 1.0f;
 
     if (reorder)
@@ -242,7 +241,6 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
     {
         for (auto s = last, end = --first; s != end; --s)
         {
-            s->index(count++);
             s->resetGuard();
             s->origin(Position());
             s->markPositioned(false);
@@ -259,7 +257,6 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
     {
         for (auto s = first, end = ++last; s != end; ++s)
         {
-            s->index(count++);
             s->resetGuard();
             s->origin(Position());
             s->markPositioned(false);
