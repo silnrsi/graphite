@@ -379,6 +379,10 @@ STARTOP(assoc)
     }
     for (slotref ts = tsmin; ts != tsmax; ++ts)
         min = std::min(min, ts->cluster());
+    for (tsmin = is; tsmin && rmin < 0; --tsmin, ++rmin) ;
+    if (!tsmin)
+        tsmin = seg.first();
+    for (tsmax = is; tsmax && rmax >= 0; ++tsmax, --rmax) ;
     for (slotref ts = tsmin; ts != tsmax; ++ts)
         ts->cluster(min);
 ENDOP

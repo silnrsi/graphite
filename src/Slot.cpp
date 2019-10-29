@@ -31,6 +31,7 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Silf.h"
 #include "inc/Rule.h"
+#include "math.h"
 
 
 using namespace graphite2;
@@ -180,9 +181,9 @@ Position Slot::position_2(Position &base, uint32 &cluster, Position origin, cons
 {
     if (!isPositioned())
     {
+        Position shift;
         float scale = font ? font->scale() : 1.0f;
         int rtlm = rtl ? -1 : 1;
-        Position shift;
         if (!m_parent && m_guard_shift < -m_shift.x)
         {
             shift = Position(m_guard_shift * rtlm * scale, m_shift.y * scale);
@@ -198,7 +199,11 @@ Position Slot::position_2(Position &base, uint32 &cluster, Position origin, cons
         {
             const Position &collshift = coll->offset();
             if (!(coll->flags() & SlotCollision::COLL_KERN) || rtl)
+            {
+                if (fabs(m_advance.x * scale - shift.x - m_guard_adv) < 1e-4f)
+                    m_guard_adv = (m_advance.x - collshift.x) * scale;
                 shift = shift + collshift * scale;
+            }
         }
 
         if (!m_parent)
