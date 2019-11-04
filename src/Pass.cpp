@@ -1002,12 +1002,16 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
             if (sqr(shift.x-cFix->shift().x) + sqr(shift.y-cFix->shift().y) >= m_colThreshold * m_colThreshold)
                 moved = true;
             cFix->setShift(shift);
-            if (slotFix->firstChild())
+            Position here = slotFix->origin() + shift;
+            Position origin = base->origin();
+            for (auto nbor = slotFix; nbor && nbor->isChildOf(base); nbor = isRev ? std::prev(nbor) : std::next(nbor))
             {
-                Rect bbox;
-                Position here = slotFix->origin() + shift;
-                float clusterMin = here.x;
-                slotFix->firstChild()->finalise(seg, nullptr, here, bbox, clusterMin, rtl, false);
+                if (nbor->isChildOf(slotFix))
+                {
+                    Position basepos = here;
+                    uint32 cluster = 0;
+                    nbor->position_2(basepos, cluster, origin, nullptr, &seg, rtl, false, 0);
+                }
             }
         }
     }

@@ -106,7 +106,6 @@ public:
     void freeJustify(SlotJustify *aJustify);
     Position positionSlots(Font const * font=nullptr, SlotBuffer::iterator first=nullptr, SlotBuffer::iterator last=nullptr, bool isRtl = false, bool isFinal = true);
     void associateChars(int offset, size_t num);
-    void linkClusters(SlotBuffer::iterator, SlotBuffer::iterator last);
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return int(m_feats.size()) - 1; }
@@ -183,7 +182,6 @@ void Segment::finalise(const Font *font, bool reverse)
     //associateChars(0, m_numCharinfo);
     if (reverse && currdir() != (m_dir & 1))
         reverseSlots();
-    linkClusters(first(), last());
 }
 
 inline

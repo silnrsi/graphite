@@ -100,9 +100,8 @@ public:
     float guardShift() const { return m_guard_shift; }
     float guardAdv() const { return m_guard_adv; }
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     void position_1(float clusterMin, float clusterMax, uint32 cluster, bool rtl, int depth);
-    Position position_2(Position &base, uint32 &cluster, Position origin, const Font *font, Segment *seg, bool rtl, bool isFinal, int depth);
+    Position position_2(Position &base, uint32 &cluster, Position origin, const Font *font, const Segment *seg, bool rtl, bool isFinal, int depth);
     bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
     bool isCopied() const { return (m_flags & COPIED) ? true : false; }
@@ -125,16 +124,8 @@ public:
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     Position attachOffset() const { return m_attachat; }
-    Slot* firstChild() const { return m_child; }
-    void firstChild(Slot *ap) { m_child = ap; }
-    bool child(Slot *ap);
-    Slot* nextSibling() const { return m_sibling; }
-    void nextSibling(Slot *ap) { m_sibling = ap; }
-    bool sibling(Slot *ap);
-    bool removeChild(Slot *ap);
     int32 clusterMetric(const Segment & seg, uint8 metric, bool rtl);
     void positionShift(Position a) { m_position += a; }
-    void floodShift(Position adj, int depth = 0);
     float just() const { return m_just; }
     void just(float j) { m_just = j; }
     Slot *nextInCluster(const Slot *s) const;
@@ -151,8 +142,6 @@ private:
     uint32 m_cluster;       // charinfo index for this slot
     uint32 m_index;         // slot index given to this slot during finalising
     Slot *m_parent;         // index to parent we are attached to
-    Slot *m_child;          // index to first child slot that attaches to us
-    Slot *m_sibling;        // index to next child that attaches to our parent
     Position m_position;    // absolute position of glyph
     Position m_shift;       // .shift slot attribute
     Position m_advance;     // .advance slot attribute

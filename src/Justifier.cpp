@@ -61,6 +61,14 @@ void JustifyTotal::accumulate(Slot &s, Segment &seg, int level)
     m_tWeight  += s.getJustify(seg, level, 3);
 }
 
+SlotBuffer::iterator nextBase(SlotBuffer::iterator pSlot)
+{
+    auto s = pSlot->next();
+    while (s && s->attachedTo())
+        s = s->next();
+    return s;
+}
+ 
 float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags jflags, Slot *pFirst, Slot *pLast)
 {
     auto end = last();
@@ -94,15 +102,15 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 
     if (pLast)
-        end = pLast->nextSibling();
+        end = nextBase(pLast);
     if (pFirst)
-        pFirst = pFirst->nextSibling();
+        pFirst = nextBase(pFirst);
 
     int icount = 0;
     int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
-        for (auto s = pSlot; s && s != end; s = s->nextSibling())
+        for (auto s = pSlot; s && s != end; s = nextBase(s))
         {
             CharInfo *c = charinfo(s->cluster());
             if (isWhitespace(c->unicodeChar()))
@@ -115,7 +123,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
         }
         if (!icount)
         {
-            for (auto s = pSlot; s && s != end; s = s->nextSibling())
+            for (auto s = pSlot; s && s != end; s = nextBase(s))
             {
                 s->setJustify(*this, 0, 3, 1);
                 s->setJustify(*this, 0, 2, 1);
@@ -126,7 +134,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     }
 
     Vector<JustifyTotal> stats(numLevels);
-    for (auto s = pFirst; s && s != end; s = s->nextSibling())
+    for (auto s = pFirst; s && s != end; s = nextBase(s))
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
@@ -148,7 +156,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
             diff = width - currWidth;
             diffpw = diff / tWeight;
             tWeight = 0;
-            for (auto s = pFirst; s && s != end; s = s->nextSibling()) // don't include final glyph
+            for (auto s = pFirst; s && s != end; s = nextBase(s)) // don't include final glyph
             {
                 int w = s->getJustify(*this, i, 3);
                 float pref = diffpw * w + error;
@@ -214,7 +222,7 @@ float Segment::justify(Slot *pSlot, const Font *font, float width, GR_MAYBE_UNUS
     {
         *dbgout     << json::item << json::close; // Close up the passes array
         positionSlots(NULL, pSlot, pLast, m_dir);
-        SlotBuffer::iterator lEnd = pLast->nextSibling();
+        SlotBuffer::iterator lEnd = nextBase(pLast);
         *dbgout << "output" << json::array;
         for(decltype(lEnd) t = pSlot; t != lEnd; ++t)
             *dbgout     << dslot(this, t);

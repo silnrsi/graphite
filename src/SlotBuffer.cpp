@@ -148,18 +148,6 @@ void SlotBuffer::freeSlot(pointer aSlot)
     if (aSlot == nullptr) return;
     if (m_last == aSlot) last(aSlot->prev());
     if (m_first == aSlot) first(aSlot->next());
-    if (aSlot->attachedTo())
-        aSlot->attachedTo()->removeChild(aSlot);
-    while (aSlot->firstChild())
-    {
-        if (aSlot->firstChild()->attachedTo() == aSlot)
-        {
-            aSlot->firstChild()->attachTo(nullptr);
-            aSlot->removeChild(aSlot->firstChild());
-        }
-        else
-            aSlot->firstChild(nullptr);
-    }
     // reset the slot incase it is reused
     ::new (aSlot) Slot(aSlot->userAttrs());
     memset(aSlot->userAttrs(), 0, m_attrs_size * sizeof(int16));

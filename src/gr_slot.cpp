@@ -57,14 +57,14 @@ const gr_slot* gr_slot_attached_to(const gr_slot* p/*not NULL*/)        //return
 const gr_slot* gr_slot_first_attachment(const gr_slot* p/*not NULL*/)        //returns NULL iff no attachments.
 {        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
     assert(p);
-    return static_cast<const gr_slot*>(p->firstChild());
+    return NULL;
 }
 
 
 const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p/*not NULL*/)        //returns NULL iff no more attachments.
 {        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
     assert(p);
-    return static_cast<const gr_slot*>(p->nextSibling());
+    return NULL;
 }
 
 
@@ -160,7 +160,6 @@ void gr_slot_linebreak_before(gr_slot* p/*not NULL*/)
 {
     assert(p);
     gr_slot *prev = static_cast<gr_slot *>(p->prev());
-    prev->sibling(nullptr);
     prev->next(nullptr);
     p->prev(nullptr);
 }

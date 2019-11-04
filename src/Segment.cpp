@@ -88,7 +88,6 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     m_charinfo[id].breakWeight(theGlyph ? theGlyph->attrs()[m_silf->aBreak()] : 0);
 
-    aSlot->child(NULL);
     aSlot->setGlyph(*this, gid, theGlyph);
     aSlot->originate(id);
     aSlot->cluster(id);
@@ -184,35 +183,6 @@ void Segment::reverseSlots()
     else
         first(out);
     last(tlast);
-}
-
-void Segment::linkClusters(SlotBuffer::iterator s, SlotBuffer::iterator  end)
-{
-    ++end;
-
-    for (; s != end && !s->isBase(); ++s);
-    auto ls = s;
-
-    if (m_dir & 1)
-    {
-        for (; s != end; ++s)
-        {
-            if (!s->isBase())   continue;
-
-            s->sibling(ls);
-            ls = s;
-        }
-    }
-    else
-    {
-        for (; s != end; ++s)
-        {
-            if (!s->isBase())   continue;
-
-            ls->sibling(s);
-            ls = s;
-        }
-    }
 }
 
 Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, SlotBuffer::iterator last, bool isRtl, bool isFinal)

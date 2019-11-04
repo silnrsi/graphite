@@ -39,7 +39,7 @@ using namespace graphite2;
 Slot::Slot(int16 *user_attrs) :
     m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_cluster(0),
-    m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
+    m_index(0), m_parent(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
     m_attachat(0, 0), m_just(0.),
     m_flags(0),
@@ -59,8 +59,6 @@ void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLe
     else
         m_cluster = orig.m_cluster + charOffset;
     m_parent = NULL;
-    m_child = NULL;
-    m_sibling = NULL;
     m_position = orig.m_position;
     m_shift = orig.m_shift;
     m_advance = orig.m_advance;
@@ -76,74 +74,6 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
 {
     m_cluster += numCharInfo;
     m_position = m_position + relpos;
-}
-
-Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, float & clusterMin, bool rtl, bool isFinal, int depth)
-{
-    SlotCollision *coll = NULL;
-    if (depth > 100) return Position(0, 0);
-    float scale = font ? font->scale() : 1.0f;
-    Position shift(m_shift.x * (rtl * -2 + 1) + m_just, m_shift.y);
-    float tAdvance = m_advance.x + m_just;
-    if (isFinal && (coll = seg.collisionInfo(*this)))
-    {
-        const Position &collshift = coll->offset();
-        if (!(coll->flags() & SlotCollision::COLL_KERN) || rtl)
-            shift = shift + collshift;
-    }
-    const GlyphFace * glyphFace = seg.getFace()->glyphs().glyphSafe(glyph());
-    if (font)
-    {
-        scale = font->scale();
-        shift *= scale;
-        if (font->isHinted() && glyphFace)
-            tAdvance = (m_advance.x - glyphFace->theAdvance().x + m_just) * scale + font->advance(glyph());
-        else
-            tAdvance *= scale;
-    }
-    Position res;
-
-    m_position = base + shift;
-    if (!m_parent)
-    {
-        res = base + Position(tAdvance, m_advance.y * scale);
-        clusterMin = m_position.x;
-    }
-    else
-    {
-        float tAdv;
-        m_position += m_attachat * scale;
-        tAdv = m_advance.x >= 0.5f ? m_position.x + tAdvance - shift.x : 0.f;
-        res = Position(tAdv, 0);
-        if ((m_advance.x >= 0.5f || m_position.x < 0) && m_position.x < clusterMin) clusterMin = m_position.x;
-    }
-
-    if (glyphFace)
-    {
-        Rect ourBbox = glyphFace->theBBox() * scale + m_position;
-        bbox = bbox.widen(ourBbox);
-    }
-
-    if (m_child && m_child != this && m_child->attachedTo() == this)
-    {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, clusterMin, rtl, isFinal, depth + 1);
-        if ((!m_parent || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
-    }
-
-    if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
-    {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, clusterMin, rtl, isFinal, depth + 1);
-        if (tRes.x > res.x) res = tRes;
-    }
-
-    if (!m_parent && clusterMin < base.x)
-    {
-        Position adj = Position(m_position.x - clusterMin, 0.);
-        res += adj;
-        m_position += adj;
-        if (m_child) m_child->floodShift(adj);
-    }
-    return res;
 }
 
 void Slot::position_1(float clusterMin, float clusterMax, uint32 cluster, bool rtl, int depth)
@@ -177,7 +107,7 @@ void Slot::position_1(float clusterMin, float clusterMax, uint32 cluster, bool r
     }
 }
 
-Position Slot::position_2(Position &base, uint32 &cluster, Position origin, const Font *font, Segment *seg, bool rtl, bool isFinal, int depth)
+Position Slot::position_2(Position &base, uint32 &cluster, Position origin, const Font *font, const Segment *seg, bool rtl, bool isFinal, int depth)
 {
     if (!isPositioned())
     {
@@ -235,19 +165,22 @@ Position Slot::position_2(Position &base, uint32 &cluster, Position origin, cons
 
 int32 Slot::clusterMetric(const Segment & seg, uint8 metric, bool rtl)
 {
-    Position base;
     if (glyph() >= seg.getFace()->glyphs().numGlyphs())
         return 0;
     Rect bbox = seg.theGlyphBBoxTemporary(glyph());
-    float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, clusterMin, rtl, false);
+    Slot *base = this;
+    while (base->attachedTo())
+        base = base->attachedTo();
+    Position basepos = base->origin();
+    uint32 tcluster;
+    position_2(basepos, tcluster, basepos, NULL, &seg, rtl, false, 0);
 
     switch (metrics(metric))
     {
     case kgmetLsb :
         return int32(bbox.bl.x);
     case kgmetRsb :
-        return int32(res.x - bbox.tr.x);
+        return int32(basepos.x - bbox.tr.x);
     case kgmetBbTop :
         return int32(bbox.tr.y);
     case kgmetBbBottom :
@@ -261,9 +194,9 @@ int32 Slot::clusterMetric(const Segment & seg, uint8 metric, bool rtl)
     case kgmetBbHeight :
         return int32(bbox.tr.y - bbox.bl.y);
     case kgmetAdvWidth :
-        return int32(res.x);
+        return int32(basepos.x);
     case kgmetAdvHeight :
-        return int32(res.y);
+        return int32(basepos.y);
     default :
         return 0;
     }
@@ -373,7 +306,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
             markAttachedX(false);
             markAttachedY(false);
             if (other.ptr() == this || other.ptr() == m_parent || other->isCopied()) break;
-            if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
+            if (m_parent) { attachTo(NULL); }
             auto pOther = other;
             int count = 0;
             bool foundOther = false;
@@ -383,11 +316,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
                 if (pOther.ptr() == this) foundOther = true;
                 pOther = pOther->attachedTo();
             }
-            for (pOther = m_child; pOther; pOther = pOther->m_child)
-                ++count;
-            for (pOther = m_sibling; pOther; pOther = pOther->m_sibling)
-                ++count;
-            if (count < 100 && !foundOther && other->child(this))
+            if (count < 100 && !foundOther)
             {
                 attachTo(other);
                 if ((map.dir() != 0) ^ (idx > subindex))
@@ -486,50 +415,6 @@ void Slot::setJustify(Segment & seg, uint8 level, uint8 subindex, int16 value)
     m_justs->values[level * SlotJustify::NUMJUSTPARAMS + subindex] = value;
 }
 
-bool Slot::child(Slot *ap)
-{
-    if (this == ap) return false;
-    else if (ap == m_child) return true;
-    else if (!m_child)
-        m_child = ap;
-    else
-        return m_child->sibling(ap);
-    return true;
-}
-
-bool Slot::sibling(Slot *ap)
-{
-    if (this == ap) return false;
-    else if (ap == m_sibling) return true;
-    else if (!m_sibling || !ap)
-        m_sibling = ap;
-    else
-        return m_sibling->sibling(ap);
-    return true;
-}
-
-bool Slot::removeChild(Slot *ap)
-{
-    if (this == ap || !m_child || !ap) return false;
-    else if (ap == m_child)
-    {
-        Slot *nSibling = m_child->nextSibling();
-        m_child->nextSibling(NULL);
-        m_child = nSibling;
-        return true;
-    }
-    for (Slot *p = m_child; p; p = p->m_sibling)
-    {
-        if (p->m_sibling && p->m_sibling == ap)
-        {
-            p->m_sibling = p->m_sibling->m_sibling;
-            ap->nextSibling(NULL);
-            return true;
-        }
-    }
-    return false;
-}
-
 void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
@@ -561,15 +446,6 @@ void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
     }
 }
 
-void Slot::floodShift(Position adj, int depth)
-{
-    if (depth > 100)
-        return;
-    m_position += adj;
-    if (m_child) m_child->floodShift(adj, depth + 1);
-    if (m_sibling) m_sibling->floodShift(adj, depth + 1);
-}
-
 void SlotJustify::LoadSlot(const Slot & s, const Segment & seg)
 {
     for (int i = seg.silf()->numJustLevels() - 1; i >= 0; --i)
@@ -585,18 +461,12 @@ void SlotJustify::LoadSlot(const Slot & s, const Segment & seg)
 
 Slot * Slot::nextInCluster(const Slot *s) const
 {
-    Slot *base;
-    if (s->firstChild())
-        return s->firstChild();
-    else if (s->nextSibling())
-        return s->nextSibling();
-    while ((base = s->attachedTo()))
-    {
-        // if (base->firstChild() == s && base->nextSibling())
-        if (base->nextSibling())
-            return base->nextSibling();
-        s = base;
-    }
+    auto base = s;
+    while (base->attachedTo())
+        base = base->attachedTo();
+    ++s;
+    if (s->isChildOf(base))
+        return const_cast<Slot *>(s);
     return NULL;
 }
 

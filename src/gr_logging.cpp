@@ -214,13 +214,6 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     for (int n = 0; n!= seg.numAttrs(); ++n)
         j   << s.userAttrs()[n];
     j       << json::close;
-    if (s.firstChild())
-    {
-        j   << "children" << json::flat << json::array;
-        for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
-            j   << objectid(dslot(&seg, c));
-        j       << json::close;
-    }
     if (cslot)
     {
 		// Note: the reason for using Positions to lump together related attributes is to make the

@@ -251,18 +251,14 @@ STARTOP(put_copy)
         if (ref && ref != is)
         {
             int16 *tempUserAttrs = is->userAttrs();
-            if (is->attachedTo() || is->firstChild()) DIE
+            if (is->attachedTo()) DIE
             auto prev = std::prev(is);
             auto next = std::next(is);
             memcpy(tempUserAttrs, ref->userAttrs(), seg.numAttrs() * sizeof(uint16));
             memcpy(is, ref, sizeof(Slot));
-            is->firstChild(NULL);
-            is->nextSibling(NULL);
             is->userAttrs(tempUserAttrs);
             is->next(next);
             is->prev(prev);
-            if (is->attachedTo())
-                is->attachedTo()->child(is);
         }
         is->markCopied(false);
         is->markDeleted(false);
