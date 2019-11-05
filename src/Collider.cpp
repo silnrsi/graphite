@@ -887,40 +887,43 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
 #endif
 
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
-    for (auto s = base; s; s = s->nextInCluster(s))
+    for (int loop = 0; loop < 2; ++loop)
     {
-        SlotCollision *c = seg.collisionInfo(*s);
-        if (!gc.check(s->gid()))
-            return false;
-        const BBox &bs = gc.getBoundingBBox(s->gid());
-        float x = s->origin().x + c->shift().x + ((dir & 1) ? bs.xi : bs.xa);
-        // Loop over slices.
-        // Note smin might not be zero if glyph s is not at the bottom of the cluster; similarly for smax.
-        float toffset = c->shift().y - _miny + 1 + s->origin().y;
-        int smin = max(0, int((bs.yi + toffset) / _sliceWidth));
-        int smax = min(numSlices - 1, int((bs.ya + toffset) / _sliceWidth + 1));
-        for (int i = smin; i <= smax; ++i)
+        for (auto s = base; s; s = s->nextInCluster(s, loop))
         {
-            float t;
-            float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
-            if ((dir & 1) && x < _edges[i])
+            SlotCollision *c = seg.collisionInfo(*s);
+            if (!gc.check(s->gid()))
+                return false;
+            const BBox &bs = gc.getBoundingBBox(s->gid());
+            float x = s->origin().x + c->shift().x + ((dir & 1) ? bs.xi : bs.xa);
+            // Loop over slices.
+            // Note smin might not be zero if glyph s is not at the bottom of the cluster; similarly for smax.
+            float toffset = c->shift().y - _miny + 1 + s->origin().y;
+            int smin = max(0, int((bs.yi + toffset) / _sliceWidth));
+            int smax = min(numSlices - 1, int((bs.ya + toffset) / _sliceWidth + 1));
+            for (int i = smin; i <= smax; ++i)
             {
-                t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, false);
-                if (t < _edges[i])
+                float t;
+                float y = _miny - 1 + (i + .5f) * _sliceWidth; // vertical center of slice
+                if ((dir & 1) && x < _edges[i])
                 {
-                    _edges[i] = t;
-                    if (t < _xbound)
-                        _xbound = t;
+                    t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, false);
+                    if (t < _edges[i])
+                    {
+                        _edges[i] = t;
+                        if (t < _xbound)
+                            _xbound = t;
+                    }
                 }
-            }
-            else if (!(dir & 1) && x > _edges[i])
-            {
-                t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, true);
-                if (t > _edges[i])
+                else if (!(dir & 1) && x > _edges[i])
                 {
-                    _edges[i] = t;
-                    if (t > _xbound)
-                        _xbound = t;
+                    t = get_edge(seg, *s, c->shift(), y, _sliceWidth, margin, true);
+                    if (t > _edges[i])
+                    {
+                        _edges[i] = t;
+                        if (t > _xbound)
+                            _xbound = t;
+                    }
                 }
             }
         }

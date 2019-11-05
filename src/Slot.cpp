@@ -459,14 +459,18 @@ void SlotJustify::LoadSlot(const Slot & s, const Segment & seg)
     }
 }
 
-Slot * Slot::nextInCluster(const Slot *s) const
+Slot * Slot::nextInCluster(const Slot *s, int dir) const
 {
     auto base = s;
+    auto nexts = s;
     while (base->attachedTo())
         base = base->attachedTo();
-    ++s;
-    if (s->isChildOf(base))
-        return const_cast<Slot *>(s);
+    if (dir)
+        nexts = s->prev();
+    else
+        nexts = s->next();
+    if (nexts && nexts->isChildOf(base))
+        return const_cast<Slot *>(nexts);
     return NULL;
 }
 

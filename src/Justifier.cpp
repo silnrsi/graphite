@@ -63,9 +63,9 @@ void JustifyTotal::accumulate(Slot &s, Segment &seg, int level)
 
 SlotBuffer::iterator nextBase(SlotBuffer::iterator pSlot)
 {
-    auto s = pSlot->next();
+    auto s = std::next(pSlot);
     while (s && s->attachedTo())
-        s = s->next();
+        ++s;
     return s;
 }
  
