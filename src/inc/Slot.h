@@ -128,7 +128,6 @@ public:
     void positionShift(Position a) { m_position += a; }
     float just() const { return m_just; }
     void just(float j) { m_just = j; }
-    Slot *nextInCluster(const Slot *s, int dir) const;
     bool isChildOf(const Slot *base) const;
 
     CLASS_NEW_DELETE

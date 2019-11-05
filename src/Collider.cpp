@@ -889,8 +889,10 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
     for (int loop = 0; loop < 2; ++loop)
     {
-        for (auto s = base; s; s = s->nextInCluster(s, loop))
+        for (auto s = base; s; s = loop ? s->next() : s->prev())
         {
+            if (!s->isChildOf(base))
+                break;
             SlotCollision *c = seg.collisionInfo(*s);
             if (!gc.check(s->gid()))
                 return false;
