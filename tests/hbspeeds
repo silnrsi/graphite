@@ -232,8 +232,8 @@ else:
          else (x['uspnorm'] / x['char'], ) for x in res],
         [(x['ot'], ) if args.normalize
          else (x['ot'] / x['char'], ) for x in res],
-        [(x['gr'], ) if args.normalize
-         else (x['gr'] / x['char'], ) for x in res]]
+        [(x['gr'] or x['hbgr'], ) if args.normalize
+         else ((x['gr'] or x['hbgr']) / x['char'], ) for x in res]]
 #         [(x['usp_GSUB'], x['usp_GSUB'] + x['usp_GPOS'] - x['abc'],
 #           x['uspnorm']) for x in res],
 #         [(x['ot_GSUB'], x['ot_GSUB'] + x['ot_GPOS'], x['ot']) for x in res],
