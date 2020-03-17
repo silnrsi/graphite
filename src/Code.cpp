@@ -709,8 +709,9 @@ bool Machine::Code::decoder::test_context() const throw()
     return true;
 }
 
-bool Machine::Code::decoder::test_attr(attrCode attr) const throw()
+bool Machine::Code::decoder::test_attr(attrCode) const throw()
 {
+#if 0   // This code is coming but causes backward compatibility problems.
     if (_passtype < PASS_TYPE_POSITIONING)
     {
         if (attr != gr_slatBreak && attr != gr_slatDir && attr != gr_slatUserDefn
@@ -720,6 +721,7 @@ bool Machine::Code::decoder::test_attr(attrCode attr) const throw()
             return false;
         }
     }
+#endif
     return true;
 }
 
