@@ -75,6 +75,7 @@ public:
     uint16 getNumSettings() const { return m_numSet; }
     uint16 getSettingName(uint16 index) const { return m_nameValues[index].label(); }
     int16  getSettingValue(uint16 index) const { return m_nameValues[index].value(); }
+    uint16 getFlags() const { return m_flags; }
     uint32 maxVal() const { return m_max; }
     const Face & getFace() const { assert(m_face); return *m_face;}
     const FeatureMap* getFeatureMap() const;// { return m_pFace;}
