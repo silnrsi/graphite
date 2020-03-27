@@ -165,7 +165,7 @@ unsigned short gr_face_n_fref(const gr_face* pFace)
     assert(pFace);
     int res = 0;
     for (int i = 0; i < pFace->numFeatures(); ++i)
-        if (!(pFace->feature(i)->getFlags() & 0x0800))
+        if (!(pFace->feature(i)->getFlags() & FeatureRef::HIDDEN))
             ++res;
     return res;
 }
@@ -177,7 +177,7 @@ const gr_feature_ref* gr_face_fref(const gr_face* pFace, gr_uint16 i) //When fin
     for (int j = 0; j < pFace->numFeatures(); ++j)
     {
         const FeatureRef* pRef = pFace->feature(j);
-        if (!(pRef->getFlags() & 0x0800))
+        if (!(pRef->getFlags() & FeatureRef::HIDDEN))
             if (count++ == i)
                 return static_cast<const gr_feature_ref*>(pRef);
     }
