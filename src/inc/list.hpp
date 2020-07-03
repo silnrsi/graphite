@@ -258,7 +258,7 @@ template <class I>
 auto list<T>::insert(const_iterator pos, I first, I last) -> iterator
 {
     assert(last._p);
-    auto r = iterator((--pos)._p);
+    auto r = --iterator(pos._p);
     while (first != last) insert(pos, *first++);
     return ++r;
 }
