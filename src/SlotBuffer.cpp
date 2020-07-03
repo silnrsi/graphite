@@ -34,20 +34,22 @@ using namespace graphite2;
 
 namespace 
 {
+    // @DEBUG_ATTRS: The number of extra per-slot user attributes beyond the
+    // number declared in by the font. Used to store persistent debug
+    // information that is not zeroed by SlotBuffer::_free_node(). 
 #if defined(GRAPHITE2_NTRACING)
-    constexpr size_t const EXTRA_ATTRS = 0;
+    constexpr size_t const DEBUG_ATTRS = 0;
 #else
-    constexpr size_t const EXTRA_ATTRS = 1;
+    constexpr size_t const DEBUG_ATTRS = 1;
 #endif
 }
 
 SlotBuffer::SlotBuffer(size_t chunk_size, size_t num_user)
-: m_first(nullptr),
-  m_last(nullptr),
-  m_free(nullptr),
-  m_size(0),
-  m_attrs_size(num_user),
-  m_chunk_size(chunk_size)
+: _free_list{nullptr},
+  _head{&_head,&_head},
+  _size{0},
+  _attrs_size{num_user},
+  _chunk_size{chunk_size}
 {
 }
 
@@ -63,164 +65,155 @@ SlotBuffer::SlotBuffer(size_t chunk_size, size_t num_user)
 
 SlotBuffer::~SlotBuffer()
 {
-    for (auto&& buf: m_slots) free(buf);
-    for (auto&& buf: m_attrs) free(buf);
+    for (auto&& buf: _slots_storage) free(buf);
+    for (auto&& buf: _attrs_storage) free(buf);
 }
 
-// SlotBuffer::pointer SlotBuffer::link(pointer pos, reference val)
-// {
-//     pointer const prev = pos ? pos->prev() : m_last;
-
-//     val.next(pos);
-//     val.prev(prev);
-//     if (prev)   prev->next(&val);
-//     else        m_first = &val;
-
-//     if (pos)  pos->prev(&val);
-//     else      m_last = &val;
-    
-//     ++m_size;
-
-//     return &val;
-// }
-
-// SlotBuffer::pointer SlotBuffer::unlink(reference val)
-// {
-//     pointer const prev = val.prev();
-//     pointer const next = val.next();
-
-//     val.next(nullptr);
-//     val.prev(nullptr);
-
-//     if (prev)   prev->next(next);
-//     else        m_first = next;
-
-//     if (next)  next->prev(prev);
-//     else      m_last = prev;
-    
-//     --m_size;
-
-//     return next;
-// }
-
-
-// void SlotBuffer::push_back(const_reference slot)
-// {
-//     Slot *slot_ptr = newSlot();
-//     if (!slot_ptr) return;
-
-//     slot_ptr->set(slot, 0, m_attrs_size, 0, slot.after()+1);
-//     link(m_last, *slot_ptr);
-// }
-
-Slot * SlotBuffer::newSlot()
+void SlotBuffer::_node_linkage::splice(_node_linkage & start, _node_linkage & end)
 {
-    if (!m_free)
-    {
-        // check that the segment doesn't grow indefinintely
-        int numUser = m_attrs_size + EXTRA_ATTRS;
-        Slot *newSlots = grzeroalloc<Slot>(m_chunk_size);
-        int16 *newAttrs = grzeroalloc<int16>(m_chunk_size * numUser);
-        if (!newSlots || !newAttrs)
-        {
-            free(newSlots);
-            free(newAttrs);
-            return NULL;
-        }
-        for (size_t i = 0; i < m_chunk_size; i++)
-        {
-            ::new (newSlots + i) Slot(newAttrs + i * numUser);
-            newSlots[i].next(newSlots + i + 1);
-        }
-        newSlots[m_chunk_size - 1].next(NULL);
-        m_slots.push_back(newSlots);
-        m_attrs.push_back(newAttrs);
-        m_free = newSlots;
-    }
-    Slot *res = m_free;
-    m_free = m_free->next();
-    res->next(nullptr);
-    return res;
+    // Unlink from current position
+    start._prev->_next = end._next;
+    end._next->_prev = start._prev;
+
+    // Link in before this node.
+    start._prev = this->_prev;
+    end._next = this;
+    start._prev->_next = &start;
+    end._next->_prev = &end;
 }
 
-void SlotBuffer::freeSlot(pointer aSlot)
+inline 
+void SlotBuffer::_node_linkage::link(_node_linkage & pos)
 {
-    if (aSlot == nullptr) return;
-    if (m_last == aSlot) last(aSlot->prev());
-    if (m_first == aSlot) first(aSlot->next());
-    if (aSlot->attachedTo())
-        aSlot->attachedTo()->removeChild(aSlot);
-    while (aSlot->firstChild())
+    pos.splice(*this, *this);
+}
+
+void SlotBuffer::_node_linkage::unlink()
+{
+    _prev->_next = _next;
+    _next->_prev = _prev;
+    _prev = _next = this;
+}
+
+SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & slot)
+{
+    assert(pos._p);
+    auto node = _allocate_node();
+    if (!node) return end();
+
+    node->_value.set(slot, 0, _attrs_size, 0, slot.after()+1);
+    node->link(*const_cast<_node_linkage *>(pos._p));
+
+    ++_size;
+    return iterator(node);
+}
+
+SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
+{
+    assert(pos._p);
+    auto node = _allocate_node();
+    if (!node) return end();
+
+    node->_value.set(slot, 0, _attrs_size, 0, slot.after()+1);
+    node->link(*const_cast<_node_linkage *>(pos._p));
+
+    ++_size;
+    return iterator(node);
+}
+
+void SlotBuffer::push_back(value_type const & slot)
+{
+    insert(end(), slot);
+}
+
+void SlotBuffer::push_back(value_type && slot)
+{
+    insert(end(), slot);
+}
+
+auto SlotBuffer::erase(iterator pos) -> iterator
+{
+    assert(pos._p);
+    auto node = iterator::node(pos++);
+    node->unlink();
+    _free_node(node);
+    --_size;
+    return pos;
+}
+
+auto SlotBuffer::erase(iterator first, iterator const last) -> iterator
+{
+    assert(last._p);
+    while (first != last) erase(first++);
+    return first;
+}
+
+SlotBuffer::_node<Slot> * SlotBuffer::_allocate_node()
+{
+    if (!_free_list)
     {
-        if (aSlot->firstChild()->attachedTo() == aSlot)
+        // This is the actual per-slot allocated space, which can be different
+        // from the user attributes availble to the action & constraint code.
+        auto const real_attr_size = _attrs_size + DEBUG_ATTRS;
+        auto nodes = grzeroalloc<_node<value_type>>(_chunk_size);
+        auto attrs = grzeroalloc<int16>(_chunk_size * real_attr_size);
+        if (!nodes || !attrs)
         {
-            aSlot->firstChild()->attachTo(nullptr);
-            aSlot->removeChild(aSlot->firstChild());
+            free(nodes);
+            free(attrs);
+            return nullptr;
         }
-        else
-            aSlot->firstChild(nullptr);
+
+        for (size_t i = 0; i != _chunk_size; ++i)
+        {
+            ::new (&nodes[i]._value) Slot(attrs + i*real_attr_size);
+            nodes[i]._next = nodes + i + 1;
+        }
+        nodes[_chunk_size - 1]._next = nullptr;
+        _slots_storage.push_back(nodes);
+        _attrs_storage.push_back(attrs);
+        _free_list = nodes;
     }
-    // reset the slot incase it is reused
-    ::new (aSlot) Slot(aSlot->userAttrs());
-    memset(aSlot->userAttrs(), 0, m_attrs_size * sizeof(int16));
+    auto node = _free_list;
+    _free_list = _free_list->_next;
+    node->_next = node->_prev = node;
+    return static_cast<_node<value_type> *>(node);
+}
+
+void SlotBuffer::_free_node(_node<value_type> * const node)
+{
+    if (!node) return;
+
+    // Destroy the slot
+    node->_value.Slot::~Slot();
+    // reset the slot in case it is reused
+    ::new (&node->_value) Slot(node->_value.userAttrs());
+    // Do NOT clear attr above DEBUG_ATTRS above _attr_size.
+    memset(node->_value.userAttrs(), 0, _attrs_size * sizeof(int16));
 #if !defined GRAPHITE2_NTRACING
-    ++aSlot->userAttrs()[m_attrs_size];
+    ++node->_value.userAttrs()[_attrs_size];
 #endif
     // update next pointer
-    aSlot->next(m_free);
-    m_free = aSlot;
+    node->_next = _free_list;
+    node->_prev = nullptr;
+    _free_list = node;
 }
 
+namespace {
+    constexpr int8_t BIDI_MARK = 0x10;
+}
 
-// // reverse the slots but keep diacritics in their same position after their bases
-// void SlotBuffer::reverse()
-// {
-//     if (m_first == m_last) return;      // skip 0 or 1 glyph runs
+// reverse the clusters: keep diacritics in their original order w.r.t their base character.
+void SlotBuffer::reverse()
+{
+    auto s = begin();
+    while (s != end() && s->getBidiClass() == BIDI_MARK) ++s;
 
-//     Slot *t = 0;
-//     Slot *curr = m_first;
-//     Slot *tlast;
-//     Slot *tfirst;
-//     Slot *out = nullptr;
-
-//     while (curr && curr->getBidiClass() == 16) curr = curr->next();
-//     if (!curr) return;
-//     tfirst = curr->prev();
-//     tlast = curr;
-
-//     while (curr)
-//     {
-//         if (curr->getBidiClass() == 16)
-//         {
-//             Slot *d = curr->next();
-//             while (d && d->getBidiClass() == 16) d = d->next();
-
-//             d = d ? d->prev() : m_last;
-//             Slot *p = out->next();    // one after the diacritics. out can't be null
-//             if (p)
-//                 p->prev(d);
-//             else
-//                 tlast = d;
-//             t = d->next();
-//             d->next(p);
-//             curr->prev(out);
-//             out->next(curr);
-//         }
-//         else    // will always fire first time round the loop
-//         {
-//             if (out)
-//                 out->prev(curr);
-//             t = curr->next();
-//             curr->next(out);
-//             out = curr;
-//         }
-//         curr = t;
-//     }
-//     out->prev(tfirst);
-//     if (tfirst)
-//         tfirst->next(out);
-//     else
-//         m_first = out;
-//     m_last = tlast;
-// }
+    while (s != end())
+    {
+        auto const c = s++;
+        while (s != end() && s->getBidiClass() == BIDI_MARK) ++s;
+        _head._next->splice(*iterator::node(c),*iterator::node(std::prev(s)));
+    }
+}
 

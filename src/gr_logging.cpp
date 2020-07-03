@@ -189,7 +189,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     const SlotCollision *cslot = seg.collisionInfo(s);
 
     j << json::object
-        << "id"             << objectid(ds)
+        << "id"             << objectid(ds.first, ds.second)
         << "gid"            << s.gid()
         << "charinfo" << json::flat << json::object
             << "original"       << s.original()
@@ -208,7 +208,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         j << "bidi"     << s.getBidiLevel();
     if (!s.isBase())
         j << "parent" << json::flat << json::object
-            << "id"             << objectid(dslot(&seg, s.attachedTo()))
+            << "id"             << objectid(&seg, s.attachedTo())
             << "level"          << s.getAttr(seg, gr_slatAttLevel, 0)
             << "offset"         << s.attachOffset()
             << json::close;
@@ -220,7 +220,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     {
         j   << "children" << json::flat << json::array;
         for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
-            j   << objectid(dslot(&seg, c));
+            j   << objectid(&seg, c);
         j       << json::close;
     }
     if (cslot)
@@ -249,18 +249,17 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
 }
 
 
-graphite2::objectid::objectid(const dslot & ds) throw()
+graphite2::objectid::objectid(const Segment * const seg, Slot const * s) noexcept
 {
-    const Slot * const p = ds.second;
-    uint32 s = uint32(reinterpret_cast<size_t>(p));
-    sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), uint16(p ? p->userAttrs()[ds.first->silf()->numUser()] : 0), uint16(s));
-    name[sizeof name-1] = 0;
-}
-
-graphite2::objectid::objectid(const Segment * const p) throw()
-{
-    uint32 s = uint32(reinterpret_cast<size_t>(p));
-    sprintf(name, "%.4x-%.2x-%.4hx", uint16(s >> 16), 0, uint16(s));
+    void const * o = seg;
+    uint16       g = 0;
+    if (s) 
+    {
+        o = SlotBuffer::const_iterator::from(s).handle();
+        g = o ? s->userAttrs()[seg->silf()->numUser()] : 0;
+    }
+    uint32 const p = uint32(reinterpret_cast<size_t>(o));
+    sprintf(name, "%.4x-%.2x-%.4hx", uint16(p >> 16), g, uint16(p));
     name[sizeof name-1] = 0;
 }
 

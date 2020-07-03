@@ -33,65 +33,75 @@ of the License or (at your option) any later version.
 extern "C" {
 
 
-const gr_slot* gr_slot_next_in_segment(const gr_slot* p/*not NULL*/)
+const gr_slot* gr_slot_next_in_segment(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
-    auto _p = ++graphite2::SlotBuffer::const_iterator(p);
-    return static_cast<const gr_slot*>(_p.ptr());
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
+    return (++p).handle();
 }
 
-const gr_slot* gr_slot_prev_in_segment(const gr_slot* p/*not NULL*/)
+const gr_slot* gr_slot_prev_in_segment(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
-    auto _p = --graphite2::SlotBuffer::const_iterator(p);
-    return static_cast<const gr_slot*>(_p.ptr());
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
+    return (--p).handle();
 }
 
-const gr_slot* gr_slot_attached_to(const gr_slot* p/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
+const gr_slot* gr_slot_attached_to(const gr_slot* h/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
 {
-    assert(p);
-    return static_cast<const gr_slot*>(p->attachedTo());
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
+    auto slot = p->attachedTo();
+    return slot ? decltype(p)::from(slot).handle() : nullptr;
 }
 
 
-const gr_slot* gr_slot_first_attachment(const gr_slot* p/*not NULL*/)        //returns NULL iff no attachments.
+const gr_slot* gr_slot_first_attachment(const gr_slot* h/*not NULL*/)        //returns NULL iff no attachments.
 {        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
-    assert(p);
-    return static_cast<const gr_slot*>(p->firstChild());
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
+    auto slot = p->firstChild();
+    return slot ? decltype(p)::from(slot).handle() : nullptr;
 }
 
 
-const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* p/*not NULL*/)        //returns NULL iff no more attachments.
+const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* h/*not NULL*/)        //returns NULL iff no more attachments.
 {        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
-    assert(p);
-    return static_cast<const gr_slot*>(p->nextSibling());
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
+    auto slot = p->nextSibling();
+    return slot ? decltype(p)::from(slot).handle() : nullptr;
 }
 
 
-unsigned short gr_slot_gid(const gr_slot* p/*not NULL*/)
+unsigned short gr_slot_gid(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     return p->glyph();
 }
 
 
-float gr_slot_origin_X(const gr_slot* p/*not NULL*/)
+float gr_slot_origin_X(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     return p->origin().x;
 }
 
 
-float gr_slot_origin_Y(const gr_slot* p/*not NULL*/)
+float gr_slot_origin_Y(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     return p->origin().y;
 }
 
 
-float gr_slot_advance_X(const gr_slot* p/*not NULL*/, const gr_face *face, const gr_font *font)
+float gr_slot_advance_X(const gr_slot* h/*not NULL*/, const gr_face *face, const gr_font *font)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     float scale = 1.0;
     float res = p->advance();
     if (font)
@@ -106,9 +116,10 @@ float gr_slot_advance_X(const gr_slot* p/*not NULL*/, const gr_face *face, const
     return res;
 }
 
-float gr_slot_advance_Y(const gr_slot *p/*not NULL*/, GR_MAYBE_UNUSED const gr_face *face, const gr_font *font)
+float gr_slot_advance_Y(const gr_slot *h/*not NULL*/, GR_MAYBE_UNUSED const gr_face *face, const gr_font *font)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     float res = p->advancePos().y;
     if (font)
         return res * font->scale();
@@ -116,53 +127,60 @@ float gr_slot_advance_Y(const gr_slot *p/*not NULL*/, GR_MAYBE_UNUSED const gr_f
         return res;
 }
 
-int gr_slot_before(const gr_slot* p/*not NULL*/)
+int gr_slot_before(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     return p->before();
 }
 
 
-int gr_slot_after(const gr_slot* p/*not NULL*/)
+int gr_slot_after(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;   
     return p->after();
 }
 
-unsigned int gr_slot_index(const gr_slot *p/*not NULL*/)
+unsigned int gr_slot_index(const gr_slot *h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
     return p->index();
 }
 
-int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, gr_attrCode index, gr_uint8 subindex)
+int gr_slot_attr(const gr_slot* h/*not NULL*/, const gr_segment* pSeg/*not NULL*/, gr_attrCode index, gr_uint8 subindex)
 {
-    assert(p);
+    assert(h);
     assert(pSeg);
+    graphite2::SlotBuffer::const_iterator p = h;
     return p->getAttr(*pSeg, index, subindex);
 }
 
 
-int gr_slot_can_insert_before(const gr_slot* p/*not NULL*/)
+int gr_slot_can_insert_before(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
     return (p->isInsertBefore())? 1 : 0;
 }
 
 
-int gr_slot_original(const gr_slot* p/*not NULL*/)
+int gr_slot_original(const gr_slot* h/*not NULL*/)
 {
-    assert(p);
+    assert(h);
+    graphite2::SlotBuffer::const_iterator p = h;
     return p->original();
 }
 
-void gr_slot_linebreak_before(gr_slot* p/*not NULL*/)
+void gr_slot_linebreak_before(gr_slot* h/*not NULL*/)
 {
-    assert(p);
-    gr_slot *prev = static_cast<gr_slot *>(p->prev());
+    assert(h);
+    graphite2::SlotBuffer::iterator p = h;
+    auto prev = std::prev(p);
     prev->sibling(nullptr);
-    prev->next(nullptr);
-    p->prev(nullptr);
+    prev.next(nullptr);
+    p.prev(nullptr);
 }
 
 #if 0       //what should this be

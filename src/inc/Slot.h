@@ -71,6 +71,8 @@ class Slot
 public:
     struct iterator;
 
+    Slot & operator=(Slot const & rhs) noexcept;
+
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
     float advance() const { return m_advance.x; }
@@ -83,10 +85,10 @@ public:
 
     Slot(int16 *m_userAttr = NULL);
     void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
-    Slot *next() const { return m_next; }
-    void next(Slot *s) { m_next = s; }
-    Slot *prev() const { return m_prev; }
-    void prev(Slot *s) { m_prev = s; }
+    // Slot *next() const { return m_next; }
+    // void next(Slot *s) { m_next = s; }
+    // Slot *prev() const { return m_prev; }
+    // void prev(Slot *s) { m_prev = s; }
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
@@ -169,4 +171,5 @@ private:
 
 } // namespace graphite2
 
-struct gr_slot : public graphite2::Slot {};
+//TODO: remove
+//struct gr_slot : public graphite2::Slot {};

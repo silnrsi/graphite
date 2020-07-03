@@ -678,7 +678,7 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment & seg, int axis)
 void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment &seg)
 {
         *dbgout << json::object // slot - not closed till the end of the caller method
-                << "slot" << objectid(dslot(&seg, _target))
+                << "slot" << objectid(&seg, _target)
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "target" << json::object
@@ -1011,7 +1011,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
     if (dbgout)
     {
         *dbgout << json::object // slot
-                << "slot" << objectid(dslot(&seg, _target))
+                << "slot" << objectid(&seg, _target)
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "miny" << _miny
@@ -1032,7 +1032,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
             *dbgout << json::flat << json::object
                 << "i" << is
                 << "targetEdge" << _edges[is]
-                << "neighbor" << objectid(dslot(&seg, _slotNear[is]))
+                << "neighbor" << objectid(&seg, _slotNear[is])
                 << "nearEdge" << _nearEdges[is]
                 << json::close;
         }

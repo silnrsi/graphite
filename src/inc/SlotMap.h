@@ -54,7 +54,7 @@ public:
     iterator        end();
     size_type       size() const;
     size_type       context() const;
-    void            reset(Slot &, unsigned short);
+    void            reset(SlotBuffer::iterator, unsigned short);
 
     const_reference operator[](int n) const;
     reference       operator [] (int);
@@ -114,11 +114,11 @@ SlotMap::size_type SlotMap::context() const
 }
 
 inline
-void SlotMap::reset(Slot & slot, short unsigned int ctxt)
+void SlotMap::reset(SlotBuffer::iterator i, short unsigned int ctxt)
 {
   m_size = 0;
   m_precontext = ctxt;
-  *m_slot_map = slot.prev();
+  *m_slot_map = std::prev(i);
 }
 
 inline

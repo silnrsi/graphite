@@ -157,13 +157,13 @@ unsigned int gr_seg_n_slots(const gr_segment* pSeg/*not NULL*/)
 const gr_slot* gr_seg_first_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return static_cast<const gr_slot*>(pSeg->first().ptr());
+    return pSeg->first().handle();
 }
 
 const gr_slot* gr_seg_last_slot(gr_segment* pSeg/*not NULL*/)
 {
     assert(pSeg);
-    return static_cast<const gr_slot*>(pSeg->last().ptr());
+    return pSeg->last().handle();
 }
 
 float gr_seg_justify(gr_segment* pSeg/*not NULL*/, const gr_slot* pSlot/*not NULL*/, const gr_font *pFont, double width, enum gr_justFlags flags, const gr_slot *pFirst, const gr_slot *pLast)

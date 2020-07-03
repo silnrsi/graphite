@@ -60,8 +60,9 @@ Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
   m_flags(((m_silf->flags() & 0x20) != 0) << 1),
   m_passBits(m_silf->aPassBits() ? -1 : 0)
 {
-    freeSlot(newSlot());
     m_bufSize = log_binary(numchars)+1;
+    first(nullptr);
+    last(nullptr);
 }
 
 Segment::~Segment()
@@ -78,7 +79,7 @@ Segment::~Segment()
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
-    Slot *aSlot = newSlot();
+    auto aSlot = newSlot();
 
     if (!aSlot) return;
     m_charinfo[id].init(cid);
@@ -92,8 +93,8 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot->originate(id);
     aSlot->before(id);
     aSlot->after(id);
-    if (last()) last()->next(aSlot);
-    aSlot->prev(last());
+    if (last()) last().next(aSlot);
+    aSlot.prev(last());
     last(aSlot);
     if (!first()) first(aSlot);
     if (theGlyph && m_silf->aPassBits())
@@ -101,17 +102,17 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
                     | (m_silf->numPasses() > 16 ? (theGlyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
 }
 
-Slot *Segment::newSlot()
+SlotBuffer::iterator Segment::newSlot()
 {
-    if (m_srope.grow() && m_numGlyphs > m_numCharinfo * MAX_SEG_GROWTH_FACTOR)
+    if (m_numGlyphs > m_numCharinfo * MAX_SEG_GROWTH_FACTOR)
         return nullptr;
     
     return m_srope.newSlot();
 }
 
-void Segment::freeSlot(Slot *aSlot)
+void Segment::freeSlot(SlotBuffer::iterator i)
 {
-    m_srope.freeSlot(aSlot);
+    m_srope.freeSlot(i);
 }
 
 SlotJustify *Segment::newJustify()
@@ -159,11 +160,11 @@ void Segment::reverseSlots()
 
     if (first() == last()) return;      // skip 0 or 1 glyph runs
 
-    Slot *t = 0;
-    auto curr = first();
-    Slot *tlast;
-    Slot *tfirst;
-    Slot *out = nullptr;
+    SlotBuffer::iterator curr = first(), 
+          t,
+          tlast,
+          tfirst,
+          out;
 
     while (curr && curr->getBidiClass() == 16) ++curr;
     if (!curr) return;
@@ -178,29 +179,29 @@ void Segment::reverseSlots()
             while (d && d->getBidiClass() == 16) ++d;
 
             d = d ? std::prev(d) : last();
-            Slot *p = out->next();    // one after the diacritics. out can't be null
+            auto p = std::next(out);    // one after the diacritics. out can't be null
             if (p)
-                p->prev(d);
+                p.prev(d);
             else
                 tlast = d;
             t = std::next(d);
-            d->next(p);
-            curr->prev(out);
-            out->next(curr);
+            d.next(p);
+            curr.prev(out);
+            out.next(curr);
         }
         else    // will always fire first time round the loop
         {
             if (out)
-                out->prev(curr);
+                out.prev(curr);
             t = std::next(curr);
-            curr->next(out);
+            curr.next(out);
             out = curr;
         }
         curr = t;
     }
-    out->prev(tfirst);
+    out.prev(tfirst);
     if (tfirst)
-        tfirst->next(out);
+        tfirst.next(out);
     else
         first(out);
     last(tlast);
@@ -249,8 +250,8 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         first = last;
         last = temp;
     }
-    if (!first)    first = slots().begin();
-    if (!last)     last   = &slots().back();
+    if (!first)    first = this->first();
+    if (!last)     last  = this->last();
 
     if (!first || !last)   // only true for empty segments
         return currpos;

@@ -7,6 +7,7 @@
 #include "inc/Rule.h"
 #include "inc/Silf.h"
 #include "inc/Face.h"
+#include "inc/SlotBuffer.h"
 
 using namespace graphite2;
 using namespace vm;
@@ -102,11 +103,12 @@ int main(int argc, char *argv[])
 
     // run the program
     Segment seg;
-    Slot s1;
+    SlotBuffer sb;
+//    sb.push_back(Slot());
     uint32 ret = 0;
     SlotMap smap(seg, 0, 0);
     Machine m(smap);
-    smap.pushSlot(&s1);
+    smap.pushSlot(sb.newSlot());
     slotref * map = smap.begin();
     for(size_t n = repeats; n; --n) {
         ret = prog.run(m, map);

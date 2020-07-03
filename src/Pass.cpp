@@ -420,7 +420,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) 
         {
             findNDoRule(s, m, fsm);
             if (m.status() != Machine::finished) return false;
-            if (s && (s.ptr() == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
+            if (s && (s == m.slotMap().highwater() || m.slotMap().highpassed() || --lc == 0)) {
                 if (!lc)
                     s = m.slotMap().highwater();
                 lc = m_iMaxLoop;
@@ -439,7 +439,7 @@ bool Pass::runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) 
     {
         if (!(m.slotMap().segment.flags() & Segment::SEG_INITCOLLISIONS))
         {
-            m.slotMap().segment.positionSlots(0, 0, 0, m.slotMap().dir(), true);
+            m.slotMap().segment.positionSlots(0, nullptr, nullptr, m.slotMap().dir(), true);
 //            m.slotMap().segment.flags(m.slotMap().segment.flags() | Segment::SEG_INITCOLLISIONS);
         }
         if (!collisionShift(m.slotMap().segment, m.slotMap().dir(), fsm.dbgout))
@@ -486,7 +486,7 @@ bool Pass::runFSM(FiniteStateMachine& fsm, SlotBuffer::iterator slot) const
 inline
 SlotBuffer::iterator input_slot(const SlotMap &  slots, const int n)
 {
-    auto s = slots[slots.context() + n];
+    auto s = slots[int(slots.context()) + n];
     if (!s->isCopied())     return s;
 
     return std::prev(s) 
@@ -499,7 +499,7 @@ SlotBuffer::iterator input_slot(const SlotMap &  slots, const int n)
 inline
 SlotBuffer::iterator  output_slot(const SlotMap &  slots, const int n)
 {
-    auto s = slots[slots.context() + n - 1];
+    auto s = slots[int(slots.context()) + n - 1];
     return s ? std::next(s) : slots.segment.first();
 }
 
@@ -534,7 +534,7 @@ void Pass::findNDoRule(SlotBuffer::iterator & slot, Machine &m, FiniteStateMachi
                     dumpRuleEventOutput(fsm, *r->rule, slot);
                     if (r->rule->action->deletes()) fsm.slots.collectGarbage(slot);
                     adjustSlot(adv, slot, fsm.slots);
-                    *fsm.dbgout << "cursor" << objectid(dslot(&fsm.slots.segment, slot))
+                    *fsm.dbgout << "cursor" << objectid(&fsm.slots.segment, slot)
                             << json::close; // Close RuelEvent object
 
                     return;
@@ -543,7 +543,7 @@ void Pass::findNDoRule(SlotBuffer::iterator & slot, Machine &m, FiniteStateMachi
                 {
                     *fsm.dbgout << json::close  // close "considered" array
                             << "output" << json::null
-                            << "cursor" << objectid(dslot(&fsm.slots.segment, std::next(slot)))
+                            << "cursor" << objectid(&fsm.slots.segment, std::next(slot))
                             << json::close;
                 }
             }
@@ -579,7 +579,7 @@ void Pass::dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEnt
                     << "id" << r->rule - m_rules
                     << "failed" << true
                     << "input" << json::flat << json::object
-                        << "start" << objectid(dslot(&fsm.slots.segment, input_slot(fsm.slots, -r->rule->preContext)))
+                        << "start" << objectid(&fsm.slots.segment, input_slot(fsm.slots, -r->rule->preContext))
                         << "length" << r->rule->sort
                         << json::close  // close "input"
                     << json::close; // close Rule object
@@ -593,19 +593,19 @@ void Pass::dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, S
                         << "id"     << &r - m_rules
                         << "failed" << false
                         << "input" << json::flat << json::object
-                            << "start" << objectid(dslot(&fsm.slots.segment, input_slot(fsm.slots, 0)))
+                            << "start" << objectid(&fsm.slots.segment, input_slot(fsm.slots, 0))
                             << "length" << r.sort - r.preContext
                             << json::close // close "input"
                         << json::close  // close Rule object
                 << json::close // close considered array
                 << "output" << json::object
                     << "range" << json::flat << json::object
-                        << "start"  << objectid(dslot(&fsm.slots.segment, input_slot(fsm.slots, 0)))
-                        << "end"    << objectid(dslot(&fsm.slots.segment, last_slot))
+                        << "start"  << objectid(&fsm.slots.segment, input_slot(fsm.slots, 0))
+                        << "end"    << objectid(&fsm.slots.segment, last_slot)
                     << json::close // close "input"
                     << "slots"  << json::array;
     const Position rsb_prepos = last_slot ? last_slot->origin() : fsm.slots.segment.advance();
-    fsm.slots.segment.positionSlots(0, 0, 0, fsm.slots.segment.currdir());
+    fsm.slots.segment.positionSlots(0, nullptr, nullptr, fsm.slots.segment.currdir());
 
     for(auto slot = output_slot(fsm.slots, 0); slot != last_slot; ++slot)
         *fsm.dbgout     << dslot(&fsm.slots.segment, slot);
@@ -625,7 +625,7 @@ bool Pass::testPassConstraint(Machine & m) const
 
     assert(m_cPConstraint.constraint());
 
-    m.slotMap().reset(*m.slotMap().segment.first(), 0);
+    m.slotMap().reset(m.slotMap().segment.first(), 0);
     m.slotMap().pushSlot(m.slotMap().segment.first());
     vm::slotref * map = m.slotMap().begin();
     const uint32 ret = m_cPConstraint.run(m, map);
@@ -647,7 +647,7 @@ bool Pass::testConstraint(const Rule & r, Machine & m) const
         || curr_context - r.preContext < 0) return false;
 
     auto map = m.slotMap().begin() + curr_context - r.preContext;
-    if (map[r.sort - 1].ptr() == nullptr)
+    if (!map[r.sort - 1])
         return false;
 
     if (!*r.constraint) return true;
@@ -691,8 +691,8 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
 
     if (m.status() != Machine::finished)
     {
-        slot_out = NULL;
-        smap.highwater(0);
+        slot_out = nullptr;
+        smap.highwater(slot_out);
         return 0;
     }
 
@@ -705,7 +705,7 @@ void Pass::adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap & smap
 {
     if (!slot_out)
     {
-        if (smap.highpassed() || slot_out.ptr() == smap.highwater())
+        if (smap.highpassed() || slot_out == smap.highwater())
         {
             slot_out = smap.segment.last();
             ++delta;
@@ -731,7 +731,7 @@ void Pass::adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap & smap
     {
         while (--delta >= 0 && slot_out)
         {
-            if (slot_out.ptr() == smap.highwater() && slot_out)
+            if (slot_out == smap.highwater() && slot_out)
                 smap.highpassed(true);
             ++slot_out;
         }
@@ -965,8 +965,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     bool ignoreForKern = !isRev;
     bool rtl = dir & 1;
     auto base = slotFix;
-    while (base->attachedTo())
-        base = base->attachedTo();
+    base.to_cluster_root();
     Position zero(0., 0.);
 
     // Look for collisions with the neighboring glyphs.
@@ -1018,7 +1017,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
         if (dbgout)
         {
             *dbgout << json::object
-                            << "missed" << objectid(dslot(&seg, slotFix));
+                            << "missed" << objectid(&seg, slotFix);
             coll.outputJsonDbg(dbgout, seg, -1);
             *dbgout << json::close;
         }
@@ -1041,8 +1040,7 @@ float Pass::resolveKern(Segment & seg, SlotBuffer::iterator const slotFix, GR_MA
     bool collides = false;
     unsigned int space_count = 0;
     auto base = slotFix;
-    while (base->attachedTo())
-        base = base->attachedTo();
+    base.to_cluster_root();
     SlotCollision *cFix = seg.collisionInfo(*base);
     const GlyphCache &gc = seg.getFace()->glyphs();
     const Rect &bbb = seg.theGlyphBBoxTemporary(slotFix->gid());

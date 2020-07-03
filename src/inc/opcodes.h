@@ -259,8 +259,8 @@ STARTOP(put_copy)
             is->firstChild(NULL);
             is->nextSibling(NULL);
             is->userAttrs(tempUserAttrs);
-            is->next(next);
-            is->prev(prev);
+            is.next(next);
+            is.prev(prev);
             if (is->attachedTo())
                 is->attachedTo()->child(is);
         }
@@ -281,8 +281,8 @@ STARTOP(insert)
         if (seg.last())
         {
             // Append a slot on the end
-            seg.last()->next(newSlot);
-            newSlot->prev(seg.last());
+            seg.last().next(newSlot);
+            newSlot.prev(seg.last());
             newSlot->before(seg.last()->before());
             seg.last(newSlot);
         }
@@ -296,30 +296,30 @@ STARTOP(insert)
     else if (std::prev(iss))
     {
         // Partial insert new slot before iss
-        std::prev(iss)->next(newSlot);
-        newSlot->prev(std::prev(iss));
+        std::prev(iss).next(newSlot);
+        newSlot.prev(std::prev(iss));
         newSlot->before(std::prev(iss)->after());
     }
     else
     {
         // Insert new slot at the start of the segment
-        newSlot->prev(NULL);
+        newSlot.prev(nullptr);
         newSlot->before(iss->before());
         seg.first(newSlot);
     }
     // Forward link to iss
-    newSlot->next(iss);
+    newSlot.next(iss);
     if (iss)
     {
         // back link from iss to new slot
-        iss->prev(newSlot);
+        iss.prev(newSlot);
         newSlot->originate(iss->original());
         newSlot->after(iss->before());
     }
-    else if (newSlot->prev())
+    else if (newSlot.prev())
     {
-        newSlot->originate(newSlot->prev()->original());
-        newSlot->after(newSlot->prev()->after());
+        newSlot->originate(std::prev(newSlot)->original());
+        newSlot->after(std::prev(newSlot)->after());
     }
     else
     {
@@ -337,12 +337,12 @@ STARTOP(delete_)
     if (!is || is->isDeleted()) DIE
     is->markDeleted(true);
     if (std::prev(is))
-        std::prev(is)->next(std::next(is));
+        std::prev(is).next(std::next(is));
     else
         seg.first(std::next(is));
 
     if (std::next(is))
-        std::next(is)->prev(std::prev(is));
+        std::next(is).prev(std::prev(is));
     else
         seg.last(std::prev(is));
 
@@ -494,9 +494,9 @@ STARTOP(push_att_to_gattr_obs)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachedTo();
-        if (att) slot = att;
-        push(int32(seg.glyphAttr(slot->gid(), glyph_attr)));
+        auto att = slot->attachedTo();
+        auto ref = att ? *att : *slot;
+        push(int32(seg.glyphAttr(ref.gid(), glyph_attr)));
     }
 ENDOP
 
@@ -508,8 +508,9 @@ STARTOP(push_att_to_glyph_metric)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachedTo();
-        if (att) slot = att;
+        // TODO review this
+        // slotref att = slot->attachedTo();
+        // if (att) slot = att;
         push(int32(seg.getGlyphMetric(slot, glyph_attr, attr_level, dir)));
     }
 ENDOP
@@ -646,9 +647,9 @@ STARTOP(push_att_to_glyph_attr)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        slotref att = slot->attachedTo();
-        if (att) slot = att;
-        push(int32(seg.glyphAttr(slot->gid(), glyph_attr)));
+        auto att = slot->attachedTo();
+        auto ref = att ? *att : *slot;
+        push(int32(seg.glyphAttr(ref.gid(), glyph_attr)));
     }
 ENDOP
 

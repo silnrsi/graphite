@@ -69,8 +69,8 @@ enum justFlags {
 class Segment
 {
     // Prevent copying of any kind.
-    Segment(const Segment&);
-    Segment& operator=(const Segment&);
+    Segment(const Segment&) = delete;
+    Segment& operator=(const Segment&) = delete;
 
 public:
 
@@ -95,13 +95,13 @@ public:
     ~Segment();
     uint8 flags() const { return m_flags; }
     void flags(uint8 f) { m_flags = f; }
-    SlotBuffer::iterator first() { return m_srope.first(); }
-    void first(Slot *p) { m_srope.first(p); }
-    SlotBuffer::iterator last() { return m_srope.last(); }
-    void last(Slot *p) { m_srope.last(p); }
+    SlotBuffer::iterator first() { return m_srope.head()._next; }
+    void first(SlotBuffer::iterator i) { SlotBuffer::iterator(&m_srope.head()).next(i); }
+    SlotBuffer::iterator last() { return m_srope.head()._prev; }
+    void last(SlotBuffer::iterator i) { SlotBuffer::iterator(&m_srope.head()).prev(i); }
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
-    Slot *newSlot();
-    void freeSlot(Slot *);
+    SlotBuffer::iterator newSlot();
+    void freeSlot(SlotBuffer::iterator);
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
     Position positionSlots(Font const * font=nullptr, SlotBuffer::iterator first=nullptr, SlotBuffer::iterator last=nullptr, bool isRtl = false, bool isFinal = true);
@@ -148,7 +148,7 @@ public:
 public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, const GrFace *face, uint32 script, const FeaturesHandle& pFeats/*must not be IsNull*/, encform enc, const void* pStart, size_t nChars, int dir);
     bool read_text(const Face *face, const Features* pFeats/*must not be NULL*/, gr_encform enc, const void*pStart, size_t nChars);
     void finalise(const Font *font, bool reverse=false);
-    float justify(Slot *pSlot, const Font *font, float width, enum justFlags flags, Slot *pFirst, Slot *pLast);
+    float justify(SlotBuffer::iterator pSlot, const Font *font, float width, enum justFlags flags, SlotBuffer::iterator pFirst, SlotBuffer::iterator pLast);
     bool initCollisions();
 
 private:
@@ -175,6 +175,7 @@ private:
                     m_passBits;         // if bit set then skip pass
 };
 
+
 inline
 int8 Segment::getSlotBidiClass(Slot *s) const
 {
@@ -185,10 +186,11 @@ int8 Segment::getSlotBidiClass(Slot *s) const
     return res;
 }
 
+
 inline
 void Segment::finalise(const Font *font, bool reverse)
 {
-    if (!first() || !last()) return;
+    if (slots().empty()) return;
 
     m_advance = positionSlots(font, first(), last(), m_silf->dir(), true);
     //associateChars(0, m_numCharinfo);

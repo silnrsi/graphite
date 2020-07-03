@@ -194,9 +194,9 @@ inline T max(const T a, const T b)
 #endif
 
 
-// TODO: Remove these sepcialisations once full refactor of SlotBuffer and iterators is done.
+// TODO: Remove these specialisations once full refactor of SlotBuffer and iterators is done.
 #include <iterator>
-class gr_slot;
+struct gr_slot;
 
 template<> gr_slot * std::prev<gr_slot*>(gr_slot *, ptrdiff_t);
 template<> gr_slot const * std::prev<gr_slot const*>(gr_slot const *, ptrdiff_t);
