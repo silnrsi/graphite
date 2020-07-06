@@ -508,10 +508,9 @@ STARTOP(push_att_to_glyph_metric)
     slotref slot = slotat(slot_ref);
     if (slot)
     {
-        // TODO review this
-        // slotref att = slot->attachedTo();
-        // if (att) slot = att;
-        push(int32(seg.getGlyphMetric(slot, glyph_attr, attr_level, dir)));
+        auto parent = slot->attachedTo();
+        if (!parent) parent = slot;
+        push(int32(seg.getGlyphMetric(parent, glyph_attr, attr_level, dir)));
     }
 ENDOP
 
@@ -662,7 +661,10 @@ STARTOP(temp_copy)
     memcpy(tempUserAttrs, is->userAttrs(), seg.numAttrs() * sizeof(uint16));
     newSlot->userAttrs(tempUserAttrs);
     newSlot->markCopied(true);
-    
+    // TODO: remove this once we're using gr::list methods. This is the
+    // hack that, that enables the hack, that enables debug output.
+    newSlot.prev(is.prev());
+    newSlot.next(is.next());
     *map = newSlot;
 ENDOP
 
