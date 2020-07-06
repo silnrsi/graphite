@@ -253,7 +253,8 @@ cjson = json.load(opts.compare.open()) if opts.compare else None
 fpaths = map(partial(os.path.relpath,
                      start=(opts.output.parent if opts.output else os.curdir)),
              opts.font)
-if opts.bits:   opts.epsilon = 0.5 ** opts.bits
+if opts.bits:
+    opts.epsilon = 0.5 ** opts.bits
 
 # Import graphite here to allow the graphite module to see the modified
 # environment if --graphite_library is used.
@@ -268,7 +269,8 @@ count = 0
 errors = 0
 log = None
 for label, words in reader:
-    if words[0] is None: continue
+    if words[0] is None:
+        continue
     count += 1
     wcount = 0
     for s in words:
@@ -282,11 +284,13 @@ for label, words in reader:
         if cjson is not None and cmpgls(gls[0], cjson[t][0], opts.epsilon):
             errors += 1
             print(t + " Failed")
-        if opts.quiet: continue
+        if opts.quiet:
+            continue
         if log is None:
             log = JsonLog(outfile, fpaths, opts, opts.font)
         bases = [(cmaplookup(tt, x), (0, 0)) for x in s]
         log.logentry(label, count, wcount, s, gls, bases)
-if log is not None: log.logend()
+if log is not None:
+    log.logend()
 outfile.close()
 sys.exit(errors)
