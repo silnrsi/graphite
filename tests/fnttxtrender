@@ -275,8 +275,8 @@ for label, words in reader:
         wcount += 1
 
         t = makelabel(label, count, wcount)
-        gls = [list(map(partial(name, tt, rounding=rounding),
-                        font.glyphs(s, includewidth=True)))]
+        gls = [[name(tt, g, rounding)
+                for g in font.glyphs(s, includewidth=True)]]
         if gls[-1][-1][0] is None:
             gls[-1] = ('_adv_', gls[-1][-1][1], gls[-1][-1][2])
         if cjson is not None and cmpgls(gls[0], cjson[t][0], opts.epsilon):
