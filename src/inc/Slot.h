@@ -142,8 +142,8 @@ public:
     CLASS_NEW_DELETE
 
 private:
-    Slot *m_next;           // linked list of slots
-    Slot *m_prev;
+    // Slot *m_next;           // linked list of slots
+    // Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)

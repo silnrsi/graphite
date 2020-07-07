@@ -117,7 +117,7 @@ public:
     reference       back()          { assert(!empty()); return static_cast<_node<Slot> *>(_head._prev)->_value; }
     const_reference back() const    { assert(!empty()); return static_cast<_node<const Slot> *>(_head._prev)->_value; }
 
-    bool empty() const noexcept { return _head._next == _head._prev; }
+    bool empty() const noexcept { return _head._next == &_head || _head._next == nullptr; }
     size_t size() const noexcept { return _size; }
 
     iterator insert(const_iterator pos, value_type const &);
