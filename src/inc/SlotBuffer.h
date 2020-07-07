@@ -30,7 +30,7 @@ of the License or (at your option) any later version.
 #include <iterator>
 #include <type_traits>
 
-#include "inc/List.h"
+#include "inc/vector.hpp"
 #include "inc/Main.h"
 #include "inc/Slot.h"
 
@@ -65,8 +65,8 @@ private:
         T _value;
     };
 
-    Vector<_node_linkage *> _slots_storage;
-    Vector<int16 *>     _attrs_storage;
+    vector<_node_linkage *> _slots_storage;
+    vector<int16 *>     _attrs_storage;
     _node_linkage    *  _free_list;
     _node_linkage       _head;
     size_type           _size;
@@ -259,7 +259,7 @@ inline void SlotBuffer::pop_back() { erase(iterator(_head._prev)); }
 
 // #include <iterator>
 
-// #include "inc/List.h"
+// #include "inc/vector.hpp"
 // #include "inc/Main.h"
 // #include "inc/Slot.h"
 
@@ -302,8 +302,8 @@ inline void SlotBuffer::pop_back() { erase(iterator(_head._prev)); }
 //         operator pointer() const { return _p; }
 //     };
 
-//     using SlotStore = Vector<Slot *>;
-//     using AttributeStore = Vector<int16 *>;
+//     using SlotStore = vector<Slot *>;
+//     using AttributeStore = vector<int16 *>;
 
 //     // // Prevent copying of any kind.
 //     // SlotBuffer& operator=(const SlotBuffer&);
@@ -359,8 +359,8 @@ inline void SlotBuffer::pop_back() { erase(iterator(_head._prev)); }
 //     // pointer link(pointer pos, reference val);
 //     pointer unlink(reference pos);
 
-//     SlotStore       m_slots;        // Vector of slot buffers
-//     AttributeStore  m_attrs;        // Vector of userAttrs buffers
+//     SlotStore       m_slots;        // vector of slot buffers
+//     AttributeStore  m_attrs;        // vector of userAttrs buffers
 //     pointer         m_first,        // first slot in segment
 //                     m_last,         // last slot in segment
 //                     m_free;         // linked list of free slots

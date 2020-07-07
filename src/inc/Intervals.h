@@ -30,7 +30,7 @@ of the License or (at your option) any later version.
 #include <utility>
 
 #include "inc/Main.h"
-#include "inc/List.h"
+#include "inc/vector.hpp"
 #include "inc/json.h"
 #include "inc/Position.h"
 
@@ -74,7 +74,7 @@ class Zones
         float cost(float x) const;
      };
 
-    typedef Vector<Exclusion>                   exclusions;
+    typedef vector<Exclusion>                   exclusions;
 
     typedef exclusions::iterator                iterator;
     typedef Exclusion *                         pointer;
@@ -92,12 +92,12 @@ public:
     {
         Exclusion       _excl;
         bool            _isdel;
-        Vector<void *>  _env;
+        vector<void *>  _env;
 
         Debug(Exclusion *e, bool isdel, json *dbg) : _excl(*e), _isdel(isdel), _env(dbg->getenvs()) { };
     };
 
-    typedef Vector<Debug>                       debugs;
+    typedef vector<Debug>                       debugs;
     typedef debugs::const_iterator                    idebugs;
     void addDebug(Exclusion *e);
     void removeDebug(float pos, float posm);

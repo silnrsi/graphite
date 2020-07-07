@@ -34,7 +34,7 @@ of the License or (at your option) any later version.
 #include <cassert>
 #include <cstdio>
 #include <cstdint>
-#include "inc/List.h"
+#include "inc/vector.hpp"
 
 namespace graphite2 {
 
@@ -51,7 +51,7 @@ class json
                   * _context,       // current context (top of stack)
                   * _flatten;       // if !0 points to context above which
                                     //  pretty printed output should occur.
-    Vector<void *>  _env;
+    vector<void *>  _env;
 
     void context(const char current) throw();
     void indent(const int d=0) throw();
@@ -70,7 +70,7 @@ public:
 
     void setenv(unsigned int index, void *val) { _env.reserve(index + 1); if (index >= _env.size()) _env.insert(_env.end(), _env.size() - index + 1, 0); _env[index] = val; }
     void *getenv(unsigned int index) const { return _env[index]; }
-    const Vector<void *> &getenvs() const { return _env; }
+    const vector<void *> &getenvs() const { return _env; }
 
     static void flat(json &) throw();
     static void close(json &) throw();

@@ -28,21 +28,21 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include <cassert>
 #include "inc/Main.h"
-#include "inc/List.h"
+#include "inc/vector.hpp"
 
 namespace graphite2 {
 
 class FeatureRef;
 class FeatureMap;
 
-class FeatureVal : public Vector<uint32>
+class FeatureVal : public vector<uint32>
 {
 public:
     FeatureVal() : m_pMap(0) { }
-    FeatureVal(int num, const FeatureMap & pMap) : Vector<uint32>(num), m_pMap(&pMap) {}
-    FeatureVal(const FeatureVal & rhs) : Vector<uint32>(rhs), m_pMap(rhs.m_pMap) {}
+    FeatureVal(int num, const FeatureMap & pMap) : vector<uint32>(num), m_pMap(&pMap) {}
+    FeatureVal(const FeatureVal & rhs) : vector<uint32>(rhs), m_pMap(rhs.m_pMap) {}
 
-    FeatureVal & operator = (const FeatureVal & rhs) { Vector<uint32>::operator = (rhs); m_pMap = rhs.m_pMap; return *this; }
+    FeatureVal & operator = (const FeatureVal & rhs) { vector<uint32>::operator = (rhs); m_pMap = rhs.m_pMap; return *this; }
 
     bool operator ==(const FeatureVal & b) const
     {

@@ -89,7 +89,6 @@ add_library(graphite2
     Segment.cpp
     Silf.cpp
     Slot.cpp
-    list.cpp
     SlotBuffer.cpp
     Sparse.cpp
     TtfUtil.cpp

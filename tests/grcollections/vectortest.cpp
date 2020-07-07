@@ -4,7 +4,7 @@
 #include "inc/Main.h"
 
 #include <vector>
-#include "inc/List.h"
+#include "inc/vector.hpp"
 
 namespace gr2 = graphite2;
 
@@ -17,7 +17,7 @@ void printVector(std::vector<int> & v)
     printf("\n");
 }
 
-void printList(gr2::Vector<int> & v)
+void printList(gr2::vector<int> & v)
 {
     for (size_t i = 0; i < v.size(); i++)
     {
@@ -30,7 +30,7 @@ void printList(gr2::Vector<int> & v)
 int main(int /*argc*/, char ** /*argv*/)
 {
     std::vector<int> stdVector(10, 0);
-    gr2::Vector<int> grList(10, 0);
+    gr2::vector<int> grList(10, 0);
 
     assert(stdVector.size() == grList.size());
 
@@ -141,7 +141,7 @@ int main(int /*argc*/, char ** /*argv*/)
     }
 
     std::vector<int> stdVector2;
-    gr2::Vector<int> grList2;
+    gr2::vector<int> grList2;
 
     stdVector2.reserve(8);
     grList2.reserve(8);
@@ -183,7 +183,7 @@ int main(int /*argc*/, char ** /*argv*/)
     }
 
     std::vector <int> stdVector3;
-    gr2::Vector <int> grList3;
+    gr2::vector <int> grList3;
 
 //    stdVector3.assign(10, 123);
 //    grList3.assign(10, 123);

@@ -27,7 +27,7 @@ of the License or (at your option) any later version.
 #pragma once
 #include <iterator>
 
-#include "inc/List.h"
+#include "inc/vector.hpp"
 #include "inc/Position.h"
 #include "inc/Intervals.h"
 #include "inc/debug.h"
@@ -125,7 +125,7 @@ class ShiftCollider
 {
 public:
     typedef std::pair<float, float> fpair;
-    typedef Vector<fpair> vfpairs;
+    typedef vector<fpair> vfpairs;
     typedef vfpairs::iterator ivfpairs;
 
     ShiftCollider(json *dbgout);
@@ -207,7 +207,7 @@ private:
     Position _currShift;    // NOT USED??
     float _miny;	        // y-coordinates offset by global slot position
     float _maxy;
-    Vector<float> _edges;   // edges of horizontal slices
+    vector<float> _edges;   // edges of horizontal slices
     float _sliceWidth;      // width of each slice
     float _mingap;
     float _xbound;        // max or min edge
@@ -216,8 +216,8 @@ private:
 #if !defined GRAPHITE2_NTRACING
     // Debugging
     Segment * _seg;
-    Vector<float> _nearEdges; // closest potential collision in each slice
-    Vector<Slot*> _slotNear;
+    vector<float> _nearEdges; // closest potential collision in each slice
+    vector<Slot*> _slotNear;
 #endif
 };	// end of class KernCollider
 

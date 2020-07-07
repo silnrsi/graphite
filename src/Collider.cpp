@@ -855,7 +855,7 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
                 _edges.insert(_edges.begin(), -numSlices, (dir & 1) ? 1e38f : -1e38f);
             else if ((unsigned)numSlices < _edges.size())    // this shouldn't fire since we always grow the range
             {
-                Vector<float>::iterator e = _edges.begin();
+                vector<float>::iterator e = _edges.begin();
                 while (numSlices--)
                     ++e;
                 _edges.erase(_edges.begin(), e);
@@ -1054,7 +1054,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
 
 void KernCollider::shift(const Position &mv, int dir)
 {
-    for (Vector<float>::iterator e = _edges.begin(); e != _edges.end(); ++e)
+    for (vector<float>::iterator e = _edges.begin(); e != _edges.end(); ++e)
         *e += mv.x;
     _xbound += (1 - 2 * (dir & 1)) * mv.x;
 }

@@ -38,17 +38,17 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/SlotBuffer.h"
 #include "inc/Position.h"
-#include "inc/List.h"
+#include "inc/vector.hpp"
 #include "inc/Collider.h"
 
 #define MAX_SEG_GROWTH_FACTOR  64
 
 namespace graphite2 {
 
-typedef Vector<Features>        FeatureList;
-//typedef Vector<Slot *>          SlotRope;
-//typedef Vector<int16 *>         AttributeRope;
-typedef Vector<SlotJustify *>   JustifyRope;
+typedef vector<Features>        FeatureList;
+//typedef vector<Slot *>          SlotRope;
+//typedef vector<int16 *>         AttributeRope;
+typedef vector<SlotJustify *>   JustifyRope;
 
 class Font;
 class Segment;
@@ -154,8 +154,8 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
 private:
     SlotBuffer      m_srope;
     Position        m_advance;          // whole segment advance
- //   SlotRope        m_slots;            // Vector of slot buffers
- //   AttributeRope   m_userAttrs;        // Vector of userAttrs buffers
+ //   SlotRope        m_slots;            // vector of slot buffers
+ //   AttributeRope   m_userAttrs;        // vector of userAttrs buffers
     JustifyRope     m_justifies;        // Slot justification info buffers
     FeatureList     m_feats;            // feature settings referenced by charinfos in this segment
     Slot          * m_freeSlots;        // linked list of free slots

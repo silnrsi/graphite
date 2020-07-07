@@ -89,7 +89,7 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/GlyphCache.h \
     $($(_NS)_BASE)/src/inc/GlyphFace.h \
     $($(_NS)_BASE)/src/inc/Intervals.h \
-    $($(_NS)_BASE)/src/inc/List.h \
+    $($(_NS)_BASE)/src/inc/list.hpp \
     $($(_NS)_BASE)/src/inc/locale2lcid.h \
     $($(_NS)_BASE)/src/inc/Machine.h \
     $($(_NS)_BASE)/src/inc/Main.h \
@@ -105,7 +105,8 @@ $(_NS)_PRIVATE_HEADERS = \
     $($(_NS)_BASE)/src/inc/Sparse.h \
     $($(_NS)_BASE)/src/inc/TtfTypes.h \
     $($(_NS)_BASE)/src/inc/TtfUtil.h \
-    $($(_NS)_BASE)/src/inc/UtfCodec.h
+    $($(_NS)_BASE)/src/inc/UtfCodec.h \
+    $($(_NS)_BASE)/src/inc/vector.hpp
 
 $(_NS)_PUBLIC_HEADERS = \
     $($(_NS)_BASE)/include/graphite2/Font.h \

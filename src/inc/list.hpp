@@ -45,7 +45,7 @@ public:
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;
-    using const_nodeointer = const value_type*;
+    using const_pointer = const value_type*;
 
 private:
     template <typename> class _iterator;
@@ -175,6 +175,7 @@ public:
 
 
 
+// 
 template<typename T>
 auto list<T>::_node_linkage::splice(_node_linkage & start, _node_linkage & end) -> void
 {
