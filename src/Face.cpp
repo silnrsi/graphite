@@ -168,7 +168,7 @@ bool Face::runGraphite(Segment & seg, const Silf *aSilf) const
     if (dbgout)
     {
         *dbgout << json::object
-                    << "id"         << objectid(&seg)
+                    << "id"         << objectid(seg)
                     << "passes"     << json::array;
     }
 #endif
@@ -190,7 +190,7 @@ bool Face::runGraphite(Segment & seg, const Silf *aSilf) const
 #if !defined GRAPHITE2_NTRACING
     if (dbgout)
     {
-        seg.positionSlots(nullptr, nullptr, nullptr, seg.currdir());
+        seg.positionSlots(nullptr, seg.slots().begin(), seg.slots().end(), seg.currdir());
         *dbgout             << json::item
                             << json::close // Close up the passes array
                 << "outputdir" << (seg.currdir() ? "rtl" : "ltr")

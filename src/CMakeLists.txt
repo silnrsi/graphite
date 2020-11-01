@@ -87,6 +87,7 @@ add_library(graphite2
     Pass.cpp
     Position.cpp
     Segment.cpp
+    ShapingContext.cpp
     Silf.cpp
     Slot.cpp
     SlotBuffer.cpp

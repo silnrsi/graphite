@@ -37,14 +37,15 @@ const gr_slot* gr_slot_next_in_segment(const gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;
-    return (++p).handle();
+    return p->isEndOfLine() ? nullptr : (++p).handle();
 }
 
 const gr_slot* gr_slot_prev_in_segment(const gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;
-    return (--p).handle();
+    h = (--p).handle();
+    return h && p->isEndOfLine() ? nullptr : h;
 }
 
 const gr_slot* gr_slot_attached_to(const gr_slot* h/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
@@ -177,10 +178,8 @@ void gr_slot_linebreak_before(gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::iterator p = h;
-    auto prev = std::prev(p);
-    prev->sibling(nullptr);
-    prev.next(nullptr);
-    p.prev(nullptr);
+    p->markEndOfLine(true);
+    std::prev(p)->nextSibling(nullptr);
 }
 
 #if 0       //what should this be

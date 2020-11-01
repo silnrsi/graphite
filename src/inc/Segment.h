@@ -95,18 +95,21 @@ public:
     ~Segment();
     uint8 flags() const { return m_flags; }
     void flags(uint8 f) { m_flags = f; }
-    SlotBuffer::iterator first() { return m_srope.head()._next; }
-    void first(SlotBuffer::iterator i) { SlotBuffer::iterator(&m_srope.head()).next(i); }
-    SlotBuffer::iterator last() { return m_srope.head()._prev; }
-    void last(SlotBuffer::iterator i) { SlotBuffer::iterator(&m_srope.head()).prev(i); }
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     SlotBuffer::iterator newSlot();
     void freeSlot(SlotBuffer::iterator);
     SlotJustify *newJustify();
     void freeJustify(SlotJustify *aJustify);
-    Position positionSlots(Font const * font=nullptr, SlotBuffer::iterator first=nullptr, SlotBuffer::iterator last=nullptr, bool isRtl = false, bool isFinal = true);
+
+    Position positionSlots(
+        Font const * font, 
+        SlotBuffer::iterator first, 
+        SlotBuffer::iterator last, 
+        bool isRtl = false, 
+        bool isFinal = true);
+
     void associateChars(int offset, size_t num);
-    void linkClusters(SlotBuffer::iterator, SlotBuffer::iterator last);
+    void linkClusters();
     uint16 getClassGlyph(uint16 cid, uint16 offset) const { return m_silf->getClassGlyph(cid, offset); }
     uint16 findClassIndex(uint16 cid, uint16 gid) const { return m_silf->findClassIndex(cid, gid); }
     int addFeatures(const Features& feats) { m_feats.push_back(feats); return int(m_feats.size()) - 1; }
@@ -151,21 +154,21 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
     float justify(SlotBuffer::iterator pSlot, const Font *font, float width, enum justFlags flags, SlotBuffer::iterator pFirst, SlotBuffer::iterator pLast);
     bool initCollisions();
 
+    template<typename Callable>
+    typename std::result_of<Callable()>::type
+    subsegment(SlotBuffer::const_iterator first, SlotBuffer::const_iterator last, Callable body);
+
 private:
     SlotBuffer      m_srope;
     Position        m_advance;          // whole segment advance
- //   SlotRope        m_slots;            // vector of slot buffers
- //   AttributeRope   m_userAttrs;        // vector of userAttrs buffers
     JustifyRope     m_justifies;        // Slot justification info buffers
     FeatureList     m_feats;            // feature settings referenced by charinfos in this segment
-    Slot          * m_freeSlots;        // linked list of free slots
+    //TODO: rm Slot          * m_freeSlots;        // linked list of free slots
     SlotJustify   * m_freeJustifies;    // Slot justification blocks free list
     CharInfo      * m_charinfo;         // character info, one per input character
     SlotCollision * m_collisions;
     const Face    * m_face;             // GrFace
     const Silf    * m_silf;
-    // Slot          * m_first;            // first slot in segment
-    // Slot          * m_last;             // last slot in segment
     size_t          m_bufSize,          // how big a buffer to create when need more slots
                     m_numGlyphs,
                     m_numCharinfo;      // size of the array and number of input characters
@@ -192,11 +195,11 @@ void Segment::finalise(const Font *font, bool reverse)
 {
     if (slots().empty()) return;
 
-    m_advance = positionSlots(font, first(), last(), m_silf->dir(), true);
+    m_advance = positionSlots(font, slots().begin(), slots().end(), m_silf->dir(), true);
     //associateChars(0, m_numCharinfo);
     if (reverse && currdir() != (m_dir & 1))
         reverseSlots();
-    linkClusters(first(), last());
+    linkClusters();
 }
 
 inline

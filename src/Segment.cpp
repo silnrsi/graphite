@@ -43,15 +43,13 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
-: m_srope(max(log_binary(numchars)+1, 8U), face->chooseSilf(script)->numUser()),
-  m_freeSlots(NULL),
+: m_srope(face->chooseSilf(script)->numUser()),
+// TODO:rm m_freeSlots(NULL),
   m_freeJustifies(NULL),
   m_charinfo(new CharInfo[numchars]),
   m_collisions(NULL),
   m_face(face),
   m_silf(face->chooseSilf(script)),
-//   m_first(NULL),
-//   m_last(NULL),
   m_bufSize(numchars + 10),
   m_numGlyphs(numchars),
   m_numCharinfo(numchars),
@@ -61,16 +59,10 @@ Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
   m_passBits(m_silf->aPassBits() ? -1 : 0)
 {
     m_bufSize = log_binary(numchars)+1;
-    first(nullptr);
-    last(nullptr);
 }
 
 Segment::~Segment()
 {
-    // for (SlotRope::iterator i = m_slots.begin(); i != m_slots.end(); ++i)
-    //     free(*i);
-    // for (AttributeRope::iterator i = m_userAttrs.begin(); i != m_userAttrs.end(); ++i)
-    //     free(*i);
     for (JustifyRope::iterator i = m_justifies.begin(); i != m_justifies.end(); ++i)
         free(*i);
     delete[] m_charinfo;
@@ -79,33 +71,30 @@ Segment::~Segment()
 
 void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
 {
-    auto aSlot = newSlot();
-
-    if (!aSlot) return;
+    auto const glyph = m_face->glyphs().glyphSafe(gid);
+    
     m_charinfo[id].init(cid);
     m_charinfo[id].feats(iFeats);
     m_charinfo[id].base(coffset);
-    const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
-    m_charinfo[id].breakWeight(theGlyph ? theGlyph->attrs()[m_silf->aBreak()] : 0);
+    m_charinfo[id].breakWeight(glyph ? glyph->attrs()[m_silf->aBreak()] : 0);
 
-    aSlot->child(NULL);
-    aSlot->setGlyph(*this, gid, theGlyph);
-    aSlot->originate(id);
-    aSlot->before(id);
-    aSlot->after(id);
-    if (last()) last().next(aSlot);
-    aSlot.prev(last());
-    last(aSlot);
-    if (!first()) first(aSlot);
-    if (theGlyph && m_silf->aPassBits())
-        m_passBits &= theGlyph->attrs()[m_silf->aPassBits()]
-                    | (m_silf->numPasses() > 16 ? (theGlyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
+    Slot aSlot;
+    aSlot.child(NULL);
+    aSlot.setGlyph(*this, gid, glyph);
+    aSlot.originate(id);
+    aSlot.before(id);
+    aSlot.after(id);
+
+    slots().push_back(aSlot);
+    if (glyph && m_silf->aPassBits())
+        m_passBits &= glyph->attrs()[m_silf->aPassBits()]
+                    | (m_silf->numPasses() > 16 ? (glyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
 }
 
 SlotBuffer::iterator Segment::newSlot()
 {
     if (m_numGlyphs > m_numCharinfo * MAX_SEG_GROWTH_FACTOR)
-        return nullptr;
+        return m_srope.end();
     
     return m_srope.newSlot();
 }
@@ -150,110 +139,56 @@ void Segment::freeJustify(SlotJustify *aJustify)
 void Segment::reverseSlots()
 {
     m_dir = m_dir ^ 64;                 // invert the reverse flag
-    // if (first() == last()) return;      // skip 0 or 1 glyph runs
+    if (slots().empty()) return;      // skip 0 or 1 glyph runs
 
-    // for (auto && s: slots())
-    // {
-    //     if (s.getBidiClass() == -1)
-    //         s.setBidiClass(int8(glyphAttr(s.gid(), m_silf->aBidi())));
-    // }
-
-    if (first() == last()) return;      // skip 0 or 1 glyph runs
-
-    SlotBuffer::iterator curr = first(), 
-          t,
-          tlast,
-          tfirst,
-          out;
-
-    while (curr && curr->getBidiClass() == 16) ++curr;
-    if (!curr) return;
-    tfirst = std::prev(curr);
-    tlast = curr;
-
-    while (curr)
-    {
-        if (curr->getBidiClass() == 16)
-        {
-            auto d = std::next(curr);
-            while (d && d->getBidiClass() == 16) ++d;
-
-            d = d ? std::prev(d) : last();
-            auto p = std::next(out);    // one after the diacritics. out can't be null
-            if (p)
-                p.prev(d);
-            else
-                tlast = d;
-            t = std::next(d);
-            d.next(p);
-            curr.prev(out);
-            out.next(curr);
-        }
-        else    // will always fire first time round the loop
-        {
-            if (out)
-                out.prev(curr);
-            t = std::next(curr);
-            curr.next(out);
-            out = curr;
-        }
-        curr = t;
-    }
-    out.prev(tfirst);
-    if (tfirst)
-        tfirst.next(out);
-    else
-        first(out);
-    last(tlast);
+    m_srope.reverse();
 }
 
-void Segment::linkClusters(SlotBuffer::iterator s, SlotBuffer::iterator  end)
+void Segment::linkClusters()
 {
-    ++end;
+    if (slots().empty())  return;
 
-    for (; s != end && !s->isBase(); ++s);
-    auto ls = s;
-
+    auto ls = &slots().front();
     if (m_dir & 1)
     {
-        for (; s != end; ++s)
+        for (auto &&s: slots())
         {
-            if (!s->isBase())   continue;
+            if (!s.isBase()) continue;
 
-            s->sibling(ls);
-            ls = s;
+            s.sibling(ls);
+            ls = &s;
         }
     }
     else
     {
-        for (; s != end; ++s)
+        for (auto && s: slots())
         {
-            if (!s->isBase())   continue;
+            if (!s.isBase()) continue;
 
-            ls->sibling(s);
-            ls = s;
+            ls->sibling(&s);
+            ls = &s;
         }
     }
 }
 
 Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, SlotBuffer::iterator last, bool isRtl, bool isFinal)
 {
+    assert(first.is_valid() || first == slots().end());
     Position currpos(0., 0.);
     float clusterMin = 0.;
     Rect bbox;
     bool reorder = (currdir() != isRtl);
 
+    --last; // TODO remove once converted to half-open interval
     if (reorder)
     {
         reverseSlots();
-        auto temp = first;
-        first = last;
-        last = temp;
+        std::swap(first, last);
     }
-    if (!first)    first = this->first();
-    if (!last)     last  = this->last();
+//    if (first == slots().end())    first = slots().begin();
+    if (last == slots().end())     last = --slots().end();
 
-    if (!first || !last)   // only true for empty segments
+    if (slots().empty())   // only true for empty segments
         return currpos;
 
     if (isRtl)

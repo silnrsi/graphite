@@ -37,17 +37,18 @@ of the License or (at your option) any later version.
 #include <graphite2/Segment.h>
 #include "inc/Machine.h"
 #include "inc/Segment.h"
+#include "inc/ShapingContext.hpp"
 #include "inc/Slot.h"
 #include "inc/Rule.h"
 
-// Disable the unused parameter warning as th compiler is mistaken since dp
+// Disable the unused parameter warning as the compiler is mistaken since dp
 // is always updated (even if by 0) on every opcode.
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
 #define registers           const byte * & dp, vm::Machine::stack_t * & sp, \
-                            vm::Machine::stack_t * const sb, regbank & reg
+                            vm::Machine::stack_t * const sb, vm::Machine::regbank & reg
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)       bool name(registers) REGPARM(4);\
@@ -64,43 +65,13 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 using namespace vm;
 
-struct regbank  {
-    slotref         is;
-    slotref *       map;
-    SlotMap       & smap;
-    slotref * const map_base;
-    const instr * & ip;
-    uint8           direction;
-    int8            flags;
-    Machine::status_t & status;
-};
-
 typedef bool        (* ip_t)(registers);
 
 // Pull in the opcode definitions
 // We pull these into a private namespace so these otherwise common names dont
 // pollute the toplevel namespace.
-namespace {
-#define smap    reg.smap
-#define seg     smap.segment
-#define is      reg.is
-#define ip      reg.ip
-#define map     reg.map
-#define mapb    reg.map_base
-#define flags   reg.flags
-#define dir     reg.direction
-#define status  reg.status
-
-#include "inc/opcodes.h"
-
-#undef smap
-#undef seg
-#undef is
-#undef ip
-#undef map
-#undef mapb
-#undef flags
-#undef dir
+namespace { 
+#include "inc/opcodes.h" 
 }
 
 Machine::stack_t  Machine::run(const instr   * program,
@@ -108,20 +79,28 @@ Machine::stack_t  Machine::run(const instr   * program,
                                slotref     * & map)
 
 {
-    assert(program != 0);
+    assert(program != nullptr);
 
     // Declare virtual machine registers
-    const instr   * ip = program-1;
-    const byte    * dp = data;
-    stack_t       * sp = _stack + Machine::STACK_GUARD,
-            * const sb = sp;
-    regbank         reg = {*map, map, _map, _map.begin()+_map.context(), ip, _map.dir(), 0, _status};
+    regbank reg = {
+        program-1,                          // reg.ip
+        data,                               // reg.dp
+        _stack + Machine::STACK_GUARD,      // reg.sp
+        _stack + Machine::STACK_GUARD,      // reg.sb
+        _status,                            // reg.status
+        _ctxt,                              // reg.ctxt
+        _ctxt.segment,                      // reg.seg
+        map,                                // reg.map
+        _ctxt.map.begin()+_ctxt.context(),  // reg.mapb
+        *map,                               // reg.is
+        0,                                  // reg.flags
+    };
 
     // Run the program
-    while ((reinterpret_cast<ip_t>(*++ip))(dp, sp, sb, reg)) {}
-    const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
+    while ((reinterpret_cast<ip_t>(*++reg.ip))(reg.dp, reg.sp, reg.sb, reg)) {}
+    const stack_t ret = reg.sp == _stack+STACK_GUARD+1 ? *reg.sp-- : 0;
 
-    check_final_stack(sp);
+    check_final_stack(reg.sp);
     map = reg.map;
     *map = reg.is;
     return ret;

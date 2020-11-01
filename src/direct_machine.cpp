@@ -41,11 +41,12 @@ of the License or (at your option) any later version.
 #include <cstring>
 #include "inc/Machine.h"
 #include "inc/Segment.h"
+#include "inc/ShapingContext.hpp"
 #include "inc/Slot.h"
 #include "inc/Rule.h"
 
 #define STARTOP(name)           name: {
-#define ENDOP                   }; goto *((sp - sb)/Machine::STACK_MAX ? &&end : *++ip);
+#define ENDOP                   }; goto *((reg.sp - reg.sb)/Machine::STACK_MAX ? &&end : *++reg.ip);
 #define EXIT(status)            { push(status); goto end; }
 
 #define do_(name)               &&name
@@ -76,53 +77,29 @@ namespace {
 // So all in all, we need at least the __noinline__ attribute. __noclone__
 // is not supported by clang.
 __attribute__((__noinline__))
-const void * direct_run(const bool          get_table_mode,
-                        const instr       * program,
-                        const byte        * data,
-                        Machine::stack_t  * stack,
-                        slotref         * & __map,
-                        uint8                _dir,
-                        Machine::status_t & status,
-                        SlotMap           * __smap=0)
+const void * direct_run(Machine::regbank * _reg = nullptr)
 {
     // We need to define and return to opcode table from within this function
     // other inorder to take the addresses of the instruction bodies.
     #include "inc/opcode_table.h"
-    if (get_table_mode)
+    if (_reg == nullptr)
         return opcode_table;
 
-    // Declare virtual machine registers
-    const instr           * ip = program;
-    const byte            * dp = data;
-    Machine::stack_t      * sp = stack + Machine::STACK_GUARD,
-                    * const sb = sp;
-    SlotMap             & smap = *__smap;
-    Segment              & seg = smap.segment;
-    slotref                 is = *__map,
-                         * map = __map,
-                  * const mapb = smap.begin()+smap.context();
-    uint8                  dir = _dir;
-    int8                 flags = 0;
-
+    auto & reg = *_reg;
     // start the program
-    goto **ip;
+    goto **reg.ip;
 
     // Pull in the opcode definitions
     #include "inc/opcodes.h"
 
-    end:
-    __map  = map;
-    *__map = is;
-    return sp;
+    end: return nullptr;
 }
 
 }
 
 const opcode_t * Machine::getOpcodeTable() throw()
 {
-    slotref * dummy;
-    Machine::status_t dumstat = Machine::finished;
-    return static_cast<const opcode_t *>(direct_run(true, 0, 0, 0, dummy, 0, dumstat));
+    return static_cast<const opcode_t *>(direct_run());
 }
 
 
@@ -132,9 +109,25 @@ Machine::stack_t  Machine::run(const instr   * program,
 {
     assert(program != 0);
 
-    const stack_t *sp = static_cast<const stack_t *>(
-                direct_run(false, program, data, _stack, is, _map.dir(), _status, &_map));
-    const stack_t ret = sp == _stack+STACK_GUARD+1 ? *sp-- : 0;
-    check_final_stack(sp);
+    // Declare virtual machine registers
+    regbank reg = {
+        program,                                // reg.ip
+        data,                                   // reg.dp
+        _stack + Machine::STACK_GUARD,          // reg.sp
+        _stack + Machine::STACK_GUARD,          // reg.sb
+        _status,                                // reg.status
+        _ctxt,                                  // reg.ctxt
+        _ctxt.segment,                          // reg.seg
+        is,                                     // reg.map
+        _ctxt.map.begin()+_ctxt.context(),      // reg.mapb
+        *is,                                    // reg.is
+        0,                                      // reg.flags
+    };
+
+    direct_run(&reg);
+    is = reg.map;
+    *is = reg.is;
+    const stack_t ret = reg.sp == _stack+STACK_GUARD+1 ? *reg.sp-- : 0;
+    check_final_stack(reg.sp);
     return ret;
 }

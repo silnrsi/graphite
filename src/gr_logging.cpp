@@ -189,7 +189,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     const SlotCollision *cslot = seg.collisionInfo(s);
 
     j << json::object
-        << "id"             << objectid(ds.first, ds.second)
+        << "id"             << objectid(ds.second)
         << "gid"            << s.gid()
         << "charinfo" << json::flat << json::object
             << "original"       << s.original()
@@ -208,7 +208,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         j << "bidi"     << s.getBidiLevel();
     if (!s.isBase())
         j << "parent" << json::flat << json::object
-            << "id"             << objectid(&seg, s.attachedTo())
+            << "id"             << objectid(s.attachedTo())
             << "level"          << s.getAttr(seg, gr_slatAttLevel, 0)
             << "offset"         << s.attachOffset()
             << json::close;
@@ -220,7 +220,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     {
         j   << "children" << json::flat << json::array;
         for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
-            j   << objectid(&seg, c);
+            j   << objectid(c);
         j       << json::close;
     }
     if (cslot)
@@ -248,19 +248,12 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     return j << json::close;
 }
 
-
-graphite2::objectid::objectid(const Segment * const seg, Slot const * s) noexcept
+void graphite2::objectid::set_name(void const * addr, uint16 generation) noexcept
 {
-    void const * o = seg;
-    uint16       g = 0;
-    if (s) 
-    {
-        o = SlotBuffer::const_iterator::from(s).handle();
-        g = o ? s->userAttrs()[seg->silf()->numUser()] : 0;
-    }
-    uint32 const p = uint32(reinterpret_cast<size_t>(o));
-    sprintf(name, "%.4x-%.2x-%.4hx", uint16(p >> 16), g, uint16(p));
+    uint32 const p = uint32(reinterpret_cast<size_t>(addr));
+    sprintf(name, "%.4x-%.2x-%.4hx", uint16(p >> 16), generation, uint16(p));
     name[sizeof name-1] = 0;
 }
+
 
 #endif

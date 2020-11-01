@@ -8,6 +8,8 @@
 #include "inc/Silf.h"
 #include "inc/Face.h"
 #include "inc/SlotBuffer.h"
+#include "inc/ShapingContext.hpp"
+#include "inc/Segment.h"
 
 using namespace graphite2;
 using namespace vm;
@@ -49,7 +51,7 @@ const char * run_error_msg[] = {
     _msg(died_early)
 };
 
-class graphite2::Segment {};
+// class graphite2::Segment {};
 
 //std::vector<byte> fuzzer(int);
 
@@ -102,14 +104,13 @@ int main(int argc, char *argv[])
               << prog.instructionCount() << " instructions" << std::endl;
 
     // run the program
-    Segment seg;
-    SlotBuffer sb;
-//    sb.push_back(Slot());
+    auto dummy_segment = grzeroalloc<Segment>(1);
+    SlotBuffer sb(32);
     uint32 ret = 0;
-    SlotMap smap(seg, 0, 0);
-    Machine m(smap);
-    smap.pushSlot(sb.newSlot());
-    slotref * map = smap.begin();
+    ShapingContext ctxt(*dummy_segment, 0, 0);
+    Machine m(ctxt);
+    ctxt.pushSlot(sb.newSlot());
+    slotref * map = ctxt.map.begin();
     for(size_t n = repeats; n; --n) {
         ret = prog.run(m, map);
         switch (m.status()) {

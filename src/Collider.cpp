@@ -557,15 +557,11 @@ bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *c
     if (cslot->exclGlyph() > 0 && gc.check(cslot->exclGlyph()) && !isExclusion)
     {
         // Set up the bogus slot representing the exclusion glyph.
-        auto exclSlot = seg.newSlot();
-        if (!exclSlot)
-            return res;
-        exclSlot->setGlyph(seg, cslot->exclGlyph());
-        Position exclOrigin(slot.origin() + cslot->exclOffset());
-        exclSlot->origin(exclOrigin);
-        SlotCollision exclInfo(seg, *exclSlot);
-        res &= mergeSlot(seg, *exclSlot, &exclInfo, currShift, isAfter, sameCluster, isCol, true, dbgout );
-        seg.freeSlot(exclSlot);
+        Slot exclSlot;
+        exclSlot.setGlyph(seg, cslot->exclGlyph());
+        exclSlot.origin(slot.origin() + cslot->exclOffset());
+        SlotCollision exclInfo(seg, exclSlot);
+        res &= mergeSlot(seg, exclSlot, &exclInfo, currShift, isAfter, sameCluster, isCol, true, dbgout);
     }
     hasCol |= isCol;
     return res;
@@ -678,7 +674,7 @@ void ShiftCollider::outputJsonDbg(json * const dbgout, Segment & seg, int axis)
 void ShiftCollider::outputJsonDbgStartSlot(json * const dbgout, Segment &seg)
 {
         *dbgout << json::object // slot - not closed till the end of the caller method
-                << "slot" << objectid(&seg, _target)
+                << "slot" << objectid(_target)
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "target" << json::object
@@ -1011,7 +1007,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
     if (dbgout)
     {
         *dbgout << json::object // slot
-                << "slot" << objectid(&seg, _target)
+                << "slot" << objectid(_target)
 				<< "gid" << _target->gid()
                 << "limit" << _limit
                 << "miny" << _miny
@@ -1032,7 +1028,7 @@ Position KernCollider::resolve(GR_MAYBE_UNUSED Segment & seg, GR_MAYBE_UNUSED Sl
             *dbgout << json::flat << json::object
                 << "i" << is
                 << "targetEdge" << _edges[is]
-                << "neighbor" << objectid(&seg, _slotNear[is])
+                << "neighbor" << objectid(_slotNear[is])
                 << "nearEdge" << _nearEdges[is]
                 << json::close;
         }

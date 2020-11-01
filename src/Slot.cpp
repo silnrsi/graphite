@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include "inc/CharInfo.h"
 #include "inc/Collider.h"
 #include "inc/Font.h"
+#include "inc/ShapingContext.hpp"
 #include "inc/Slot.h"
 #include "inc/Silf.h"
 #include "inc/Rule.h"
@@ -36,7 +37,6 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 Slot::Slot(int16 *user_attrs) :
-    // m_next(NULL), m_prev(NULL),
     m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
     m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
     m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
@@ -266,7 +266,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
         c-> x ; c->setFlags(c->flags() & ~SlotCollision::COLL_KNOWN); } \
         break; }
 
-void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, const SlotMap & map)
+void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, const ShapingContext & ctxt)
 {
     if (ind == gr_slatUserDefnV1)
     {
@@ -288,9 +288,9 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
     case gr_slatAttTo :
     {
         const uint16 idx = uint16(value);
-        if (idx < map.size() && map[idx])
+        if (idx < ctxt.map.size() && ctxt.map[idx].is_valid())
         {
-            auto other = &*map[idx];
+            auto other = &*ctxt.map[idx];
             if (other == this || other == m_parent || other->isCopied()) break;
             if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
             auto pOther = other;
@@ -309,7 +309,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
             if (count < 100 && !foundOther && other->child(this))
             {
                 attachTo(other);
-                if ((map.dir() != 0) ^ (idx > subindex))
+                if ((ctxt.dir != 0) ^ (idx > subindex))
                     m_with = Position(advance(), 0);
                 else        // normal match to previous root
                     m_attach = Position(other->advance(), 0);

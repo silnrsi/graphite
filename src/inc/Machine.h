@@ -36,6 +36,7 @@ of the License or (at your option) any later version.
 #include <graphite2/Types.h>
 
 #include "inc/Main.h"
+#include "inc/ShapingContext.hpp"
 #include "inc/SlotBuffer.h"
 
 #if defined(__GNUC__)
@@ -71,7 +72,7 @@ namespace graphite2 {
 // Forward declarations
 class Segment;
 class Slot;
-class SlotMap;
+class ShapingContext;
 
 
 namespace vm
@@ -138,6 +139,7 @@ struct opcode_t
 class Machine
 {
 public:
+    struct regbank;
     typedef int32  stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
@@ -154,27 +156,42 @@ public:
         died_early
     };
 
-    Machine(SlotMap &) throw();
+    Machine(ShapingContext &) throw();
     static const opcode_t *   getOpcodeTable() throw();
 
     CLASS_NEW_DELETE;
 
-    SlotMap   & slotMap() const throw();
+    ShapingContext   & shaping_context() const throw();
     status_t    status() const throw();
 //    operator bool () const throw();
+
 
 private:
     void    check_final_stack(const stack_t * const sp);
     stack_t run(const instr * program, const byte * data,
                 slotref * & map) HOT;
 
-    SlotMap       & _map;
-    stack_t         _stack[STACK_MAX + 2*STACK_GUARD];
-    status_t        _status;
+    ShapingContext    & _ctxt;
+    stack_t             _stack[STACK_MAX + 2*STACK_GUARD];
+    status_t            _status;
 };
 
-inline Machine::Machine(SlotMap & map) throw()
-: _map(map), _status(finished)
+struct Machine::regbank  {
+    instr const           * ip;
+    byte const            * dp;
+    Machine::stack_t      * sp,
+                    * const sb;
+    Machine::status_t     & status;
+    ShapingContext        & ctxt;
+    Segment               & seg;
+    slotref *               map;
+    slotref *         const mapb;
+    slotref                 is;
+    int8                    flags;
+};
+
+inline Machine::Machine(ShapingContext & ctxt) throw()
+: _ctxt(ctxt), _status(finished)
 {
     // Initialise stack guard +1 entries as the stack pointer points to the
     //  current top of stack, hence the first push will never write entry 0.
@@ -184,9 +201,9 @@ inline Machine::Machine(SlotMap & map) throw()
     for (size_t n = STACK_GUARD + 1; n; --n)  _stack[n-1] = 0;
 }
 
-inline SlotMap& Machine::slotMap() const throw()
+inline ShapingContext& Machine::shaping_context() const throw()
 {
-    return _map;
+    return _ctxt;
 }
 
 inline Machine::status_t Machine::status() const throw()

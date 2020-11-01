@@ -32,6 +32,7 @@ of the License or (at your option) any later version.
 #include "inc/Segment.h"
 #include "inc/Rule.h"
 #include "inc/Error.h"
+#include "inc/ShapingContext.hpp"
 
 
 using namespace graphite2;
@@ -357,9 +358,8 @@ uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
 bool Silf::runGraphite(Segment &seg, uint8 firstPass, uint8 lastPass, int dobidi) const
 {
     size_t             maxSize = seg.slotCount() * MAX_SEG_GROWTH_FACTOR;
-    SlotMap            map(seg, m_dir, maxSize);
-    FiniteStateMachine fsm(map, seg.getFace()->logger());
-    vm::Machine        m(map);
+    ShapingContext     ctxt(seg, m_dir, maxSize);
+    vm::Machine        m(ctxt);
     uint8              lbidi = m_bPass;
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = seg.getFace()->logger();
@@ -390,7 +390,7 @@ bool Silf::runGraphite(Segment &seg, uint8 firstPass, uint8 lastPass, int dobidi
                             << "slotsdir" << (seg.currdir() ? "rtl" : "ltr")
                             << "passdir" << (m_dir & 1 ? "rtl" : "ltr")
                             << "slots"  << json::array;
-                seg.positionSlots(nullptr, nullptr, nullptr, seg.currdir());
+                seg.positionSlots(nullptr, seg.slots().begin(), seg.slots().end(), seg.currdir());
                 for(auto & s: seg.slots())
                     *dbgout     << dslot(&seg, &s);
                 *dbgout         << json::close
@@ -417,7 +417,7 @@ bool Silf::runGraphite(Segment &seg, uint8 firstPass, uint8 lastPass, int dobidi
                         << "slotsdir" << (seg.currdir() ? "rtl" : "ltr")
                         << "passdir" << ((m_dir & 1) ^ m_passes[i].reverseDir() ? "rtl" : "ltr")
                         << "slots"  << json::array;
-            seg.positionSlots(nullptr, nullptr, nullptr, seg.currdir());
+            seg.positionSlots(nullptr, seg.slots().begin(), seg.slots().end(), seg.currdir());
             for(auto & s: seg.slots())
                 *dbgout     << dslot(&seg, &s);
             *dbgout         << json::close;
@@ -427,7 +427,7 @@ bool Silf::runGraphite(Segment &seg, uint8 firstPass, uint8 lastPass, int dobidi
         // test whether to reorder, prepare for positioning
         bool reverse = (lbidi == 0xFF) && (seg.currdir() != ((m_dir & 1) ^ m_passes[i].reverseDir()));
         if ((i >= 32 || (seg.passBits() & (1 << i)) == 0 || m_passes[i].collisionLoops())
-                && !m_passes[i].runGraphite(m, fsm, reverse))
+                && !m_passes[i].runGraphite(m, ctxt, reverse))
             return false;
         // only subsitution passes can change segment length, cached subsegments are short for their text
         if (m.status() != vm::Machine::finished

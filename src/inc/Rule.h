@@ -28,7 +28,6 @@ of the License or (at your option) any later version.
 #pragma once
 
 #include "inc/Code.h"
-#include "inc/SlotMap.h"
 
 namespace graphite2 {
 
@@ -36,7 +35,7 @@ class json;
 
 struct Rule {
   const vm::Machine::Code * constraint,
-                 * action;
+                          * action;
   unsigned short   sort;
   byte             preContext;
 #ifndef NDEBUG
@@ -65,132 +64,79 @@ Rule::Rule()
 #endif
 }
 
+class State;
 
-struct RuleEntry
+class Rules
 {
-  const Rule   * rule;
+public:
+  struct Entry  
+  { 
+    const Rule   * rule; 
+    
+    bool operator == (const Entry &r) const;
+    bool operator < (const Entry &r) const;
+  };
 
-  inline
-  bool operator < (const RuleEntry &r) const
-  {
-    const unsigned short lsort = rule->sort, rsort = r.rule->sort;
-    return lsort > rsort || (lsort == rsort && rule < r.rule);
-  }
+  static constexpr size_t MAX_RULES=128;
+  using iterator = Entry *;
+  using const_iterator = Entry const *;
 
-  inline
-  bool operator == (const RuleEntry &r) const
-  {
-    return rule == r.rule;
-  }
+
+  Rules();
+  void            clear()       { m_end = m_begin; }
+  const_iterator  begin() const { return m_begin; }
+  const_iterator  end() const   { return m_end; }
+  bool            empty() const { return m_begin == m_end; }
+  size_t          size() const  { return m_end - m_begin; }
+
+  void accumulate_rules(const State &state);
+
+private:
+  Entry * m_begin,
+        * m_end,
+          m_rules[MAX_RULES*2];
 };
 
 
 struct State
 {
-  const RuleEntry     * rules,
+  const Rules::Entry  * rules,
                       * rules_end;
 
-  bool   empty() const;
-};
-
-inline
-bool State::empty() const
-{
-    return rules_end == rules;
-}
-
-
-
-class FiniteStateMachine
-{
-public:
-  enum {MAX_RULES=128};
-
-private:
-  class Rules
-  {
-  public:
-      Rules();
-      void              clear();
-      const RuleEntry * begin() const;
-      const RuleEntry * end() const;
-      size_t            size() const;
-
-      void accumulate_rules(const State &state);
-
-  private:
-      RuleEntry * m_begin,
-                * m_end,
-                  m_rules[MAX_RULES*2];
-  };
-
-public:
-  FiniteStateMachine(SlotMap & map, json * logger);
-  void      reset(SlotBuffer::iterator & slot, const short unsigned int max_pre_ctxt);
-
-  Rules     rules;
-  SlotMap   & slots;
-  json    * const dbgout;
+  bool   empty() const  { return rules_end == rules; }
 };
 
 
 inline
-FiniteStateMachine::FiniteStateMachine(SlotMap& map, json * logger)
-: slots(map),
-  dbgout(logger)
-{
+bool Rules::Entry::operator == (const Entry &r) const 
+{ 
+  return rule == r.rule; 
 }
 
 inline
-void FiniteStateMachine::reset(SlotBuffer::iterator & slot, const short unsigned int max_pre_ctxt)
-{
-  rules.clear();
-  int ctxt = 0;
-  for (; ctxt != max_pre_ctxt && std::prev(slot); ++ctxt, --slot);
-  slots.reset(slot, ctxt);
+bool Rules::Entry::operator < (const Entry &r) const {
+  const unsigned short lsort = rule->sort,
+                        rsort = r.rule->sort;
+  return lsort > rsort || (lsort == rsort && rule < r.rule);
 }
 
 inline
-FiniteStateMachine::Rules::Rules()
+Rules::Rules()
   : m_begin(m_rules), m_end(m_rules)
 {
 }
 
 inline
-void FiniteStateMachine::Rules::clear()
-{
-  m_end = m_begin;
-}
-
-inline
-const RuleEntry * FiniteStateMachine::Rules::begin() const
-{
-  return m_begin;
-}
-
-inline
-const RuleEntry * FiniteStateMachine::Rules::end() const
-{
-  return m_end;
-}
-
-inline
-size_t FiniteStateMachine::Rules::size() const
-{
-  return m_end - m_begin;
-}
-
-inline
-void FiniteStateMachine::Rules::accumulate_rules(const State &state)
+void Rules::accumulate_rules(const State &state)
 {
   // Only bother if there are rules in the State object.
   if (state.empty()) return;
 
   // Merge the new sorted rules list into the current sorted result set.
-  const RuleEntry * lre = begin(), * rre = state.rules;
-  RuleEntry * out = m_rules + (m_begin == m_rules)*MAX_RULES;
-  const RuleEntry * const lrend = out + MAX_RULES,
-                  * const rrend = state.rules_end;
+  auto const * lre = begin(), * rre = state.rules;
+  auto       * out = m_rules + (m_begin == m_rules)*MAX_RULES;
+  auto const * const lrend = out + MAX_RULES,
+             * const rrend = state.rules_end;
   m_begin = out;
   while (lre != end() && out != lrend)
   {
@@ -208,6 +154,5 @@ void FiniteStateMachine::Rules::accumulate_rules(const State &state)
   while (rre != rrend && out != lrend) { *out++ = *rre++; }
   m_end = out;
 }
-
 
 } // namespace graphite2

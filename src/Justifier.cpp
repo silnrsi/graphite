@@ -36,10 +36,26 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
+template<typename Callable>
+typename std::result_of<Callable()>::type
+Segment::subsegment(SlotBuffer::const_iterator first, SlotBuffer::const_iterator last, Callable body)
+{
+    SlotBuffer sub_slots(m_srope.num_user_attrs());
+    sub_slots.splice(sub_slots.end(), m_srope, first, last);
+    m_srope.swap(sub_slots);
+
+    auto retval = body();
+
+    m_srope.swap(sub_slots);
+    m_srope.splice(last, sub_slots);
+
+    return retval;
+}
+
 class JustifyTotal {
 public:
     JustifyTotal() : m_numGlyphs(0), m_tStretch(0), m_tShrink(0), m_tStep(0), m_tWeight(0) {}
-    void accumulate(Slot &s, Segment &seg, int level);
+    void accumulate(Slot const &s, Segment const &seg, int level);
     int weight() const { return m_tWeight; }
 
     CLASS_NEW_DELETE
@@ -52,7 +68,7 @@ private:
     int m_tWeight;
 };
 
-void JustifyTotal::accumulate(Slot &s, Segment &seg, int level)
+void JustifyTotal::accumulate(Slot const &s, Segment const &seg, int level)
 {
     ++m_numGlyphs;
     m_tStretch += s.getJustify(seg, level, 0);
@@ -61,30 +77,30 @@ void JustifyTotal::accumulate(Slot &s, Segment &seg, int level)
     m_tWeight  += s.getJustify(seg, level, 3);
 }
 
-float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width, GR_MAYBE_UNUSED justFlags jflags, SlotBuffer::iterator pFirst, SlotBuffer::iterator pLast)
+float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width, 
+                       GR_MAYBE_UNUSED justFlags jflags, 
+                       SlotBuffer::iterator pFirst, 
+                       SlotBuffer::iterator pLast)
 {
-    auto end = last();
     float currWidth = 0.0;
     const float scale = font ? font->scale() : 1.0f;
     Position res;
 
     if (width < 0 && !(silf()->flags()))
         return width;
-
+    --pLast;
     if ((m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
     {
         reverseSlots();
         std::swap(pFirst, pLast);
     }
-    if (!pFirst) pFirst = pSlot;
     pFirst.to_cluster_root();
-    if (!pLast) pLast = last();
     pLast.to_cluster_root();
     const float base = pFirst->origin().x / scale;
     width = width / scale;
     if ((jflags & gr_justEndInline) == 0)
     {
-        while (pLast != pFirst && pLast)
+        while (pLast != pFirst && pLast != slots().end())
         {
             Rect bbox = theGlyphBBoxTemporary(pLast->glyph());
             if (bbox.bl.x != 0.f || bbox.bl.y != 0.f || bbox.tr.x != 0.f || bbox.tr.y == 0.f)
@@ -92,12 +108,11 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
             --pLast;
         }
     }
-
+    
     // TODO: Fix up
-    if (pLast)
-        end = decltype(end)::from(pLast->nextSibling());
-    if (pFirst)
-        pFirst = decltype(end)::from(pFirst->nextSibling());
+    auto const end = pLast != slots().end() ? pLast->nextSibling() : &*pLast;
+    if (pFirst != slots().end())
+        pFirst = decltype(pFirst)::from(pFirst->nextSibling());
 
     int icount = 0;
     int numLevels = silf()->numJustLevels();
@@ -184,101 +199,77 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         } while (i == 0 && int(std::abs(error)) > 0 && tWeight);
     }
 
-    auto oldFirst = first(),
-         oldLast = last();
-    if (silf()->flags() & 1)
+    // Temporarily swap rope buffer.
+    auto rv = subsegment(pSlot, std::next(pLast), [&]()->float
     {
-        first(pSlot = addLineEnd(pSlot));
-        last(pLast = addLineEnd(end));
-        if (!first() || !last()) return -1.0;
-    }
-    else
-    {
-        first(pSlot);
-        last(pLast);
-    }
+        if (silf()->flags() & 1)
+        {
+            if (addLineEnd(slots().begin()) == slots().end()
+                || addLineEnd(slots().end()) == slots().end())
+                return -1.0;
+        }
 
-    // run justification passes here
-#if !defined GRAPHITE2_NTRACING
-    json * const dbgout = m_face->logger();
-    if (dbgout)
-        *dbgout << json::object
-                    << "justifies"  << objectid(this)
-                    << "passes"     << json::array;
-#endif
+        // run justification passes here
+    #if !defined GRAPHITE2_NTRACING
+        json * const dbgout = m_face->logger();
+        if (dbgout)
+            *dbgout << json::object
+                        << "justifies"  << objectid(*this)
+                        << "passes"     << json::array;
+    #endif
 
-    if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0.f || (silf()->flags() & 1)))
-        m_silf->runGraphite(*this, m_silf->justificationPass(), m_silf->positionPass());
+        if (m_silf->justificationPass() != m_silf->positionPass() && (width >= 0.f || (silf()->flags() & 1)))
+            m_silf->runGraphite(*this, m_silf->justificationPass(), m_silf->positionPass());
 
-#if !defined GRAPHITE2_NTRACING
-    if (dbgout)
-    {
-        *dbgout     << json::item << json::close; // Close up the passes array
-        positionSlots(NULL, pSlot, pLast, m_dir);
-        auto lEnd = pLast->nextSibling() ? decltype(pSlot)::from(pLast->nextSibling()) : nullptr; // TODO: Review
-        *dbgout << "output" << json::array;
-        for(auto t = pSlot; t != lEnd; ++t)
-            *dbgout     << dslot(this, t);
-        *dbgout         << json::close << json::close;
-    }
-#endif
+    #if !defined GRAPHITE2_NTRACING
+        if (dbgout)
+        {
+            *dbgout     << json::item << json::close; // Close up the passes array
+            positionSlots(nullptr, pSlot, std::next(pLast), m_dir);
+            auto lEnd = end ? decltype(pSlot)::from(end) : slots().end();
+            *dbgout << "output" << json::array;
+            for(auto t = pSlot; t != lEnd; ++t)
+                *dbgout     << dslot(this, &*t);
+            *dbgout         << json::close << json::close;
+        }
+    #endif
 
-    res = positionSlots(font, pSlot, pLast, m_dir);
-
-    if (silf()->flags() & 1)
-    {
-        if (first())
-            delLineEnd(first());
-        if (last())
-            delLineEnd(last());
-    }
-    first(oldFirst);
-    last(oldLast);
+        return positionSlots(font, pSlot, std::next(pLast), m_dir).x;
+    });
 
     if ((m_dir & 1) != m_silf->dir() && m_silf->bidiPass() != m_silf->numPasses())
         reverseSlots();
-    return res.x;
+    return rv;
 }
 
 SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator pos)
 {
-    auto eSlot = newSlot();
-    if (!eSlot) return nullptr;
+    auto eSlot = slots().insert(pos, Slot());
+    if (eSlot == slots().end()) return eSlot;
+
     const uint16 gid = silf()->endLineGlyphid();
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     eSlot->setGlyph(*this, gid, theGlyph);
-    if (pos)
+
+    if (pos != slots().end())
     {
-        eSlot.next(pos);
-        eSlot.prev(std::prev(pos));
-        pos.prev(eSlot);
         eSlot->before(pos->before());
-        if (std::prev(eSlot))
+        if (eSlot != slots().begin())
             eSlot->after(std::prev(eSlot)->after());
         else
             eSlot->after(pos->before());
     }
     else
     {
-        pos = last();
-        eSlot.prev(pos);
-        pos.next(eSlot);
+        pos = --slots().end();
         eSlot->after(std::prev(eSlot)->after());
         eSlot->before(pos->after());
     }
+
     return eSlot;
 }
 
 void Segment::delLineEnd(SlotBuffer::iterator s)
 {
-    auto nSlot = std::next(s);
-    if (nSlot)
-    {
-        nSlot.prev(std::prev(s));
-        if (std::prev(s))
-            std::prev(s).next(nSlot);
-    }
-    else
-        std::prev(s).next(nullptr);
-    freeSlot(s);
+    slots().erase(s);
 }

@@ -38,7 +38,7 @@ typedef gr_attrCode attrCode;
 class GlyphFace;
 class Segment;
 class Slot;
-class SlotMap;
+class ShapingContext;
 class Font;
 
 struct SlotJustify
@@ -65,12 +65,14 @@ class Slot
         INSERTED    = 2,
         COPIED      = 4,
         POSITIONED  = 8,
-        ATTACHED    = 16
+        ATTACHED    = 16,
+        END_OF_LINE = 32
     };
 
 public:
     struct iterator;
 
+    Slot(Slot const &) = default;
     Slot & operator=(Slot const & rhs) noexcept;
 
     unsigned short gid() const { return m_glyphid; }
@@ -85,10 +87,6 @@ public:
 
     Slot(int16 *m_userAttr = NULL);
     void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
-    // Slot *next() const { return m_next; }
-    // void next(Slot *s) { m_next = s; }
-    // Slot *prev() const { return m_prev; }
-    // void prev(Slot *s) { m_prev = s; }
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
@@ -101,12 +99,14 @@ public:
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
-    bool isDeleted() const { return (m_flags & DELETED) ? true : false; }
+    bool isDeleted() const { return m_flags & DELETED; }
     void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
-    bool isCopied() const { return (m_flags & COPIED) ? true : false; }
+    bool isCopied() const { return m_flags & COPIED; }
     void markCopied(bool state) { if (state) m_flags |= COPIED; else m_flags &= ~COPIED; }
-    bool isPositioned() const { return (m_flags & POSITIONED) ? true : false; }
+    bool isPositioned() const { return m_flags; }
     void markPositioned(bool state) { if (state) m_flags |= POSITIONED; else m_flags &= ~POSITIONED; }
+    bool isEndOfLine() const { return m_flags & END_OF_LINE; }
+    void markEndOfLine(bool state) { if (state) m_flags |= END_OF_LINE; else m_flags &= ~END_OF_LINE; }
     bool isInsertBefore() const { return !(m_flags & INSERTED); }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
@@ -116,7 +116,7 @@ public:
     int16 *userAttrs() const { return m_userAttr; }
     void userAttrs(int16 *p) { m_userAttr = p; }
     void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
-    void setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const SlotMap & map);
+    void setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
     int getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
     int getJustify(const Segment &seg, uint8 level, uint8 subindex) const;
     void setJustify(Segment &seg, uint8 level, uint8 subindex, int16 value);
@@ -142,8 +142,6 @@ public:
     CLASS_NEW_DELETE
 
 private:
-    // Slot *m_next;           // linked list of slots
-    // Slot *m_prev;
     unsigned short m_glyphid;        // glyph id
     uint16 m_realglyphid;
     uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)
@@ -170,6 +168,3 @@ private:
 };
 
 } // namespace graphite2
-
-//TODO: remove
-//struct gr_slot : public graphite2::Slot {};

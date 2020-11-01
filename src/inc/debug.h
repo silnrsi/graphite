@@ -36,6 +36,7 @@ of the License or (at your option) any later version.
 #include <utility>
 #include "inc/json.h"
 #include "inc/Position.h"
+#include "inc/SlotBuffer.h"
 
 namespace graphite2
 {
@@ -48,8 +49,19 @@ typedef std::pair<Segment const * const, Slot const * const>    dslot;
 struct objectid
 {
     char name[16];
-    objectid(const Segment * const p, Slot const * s=nullptr) noexcept;
+    objectid(SlotBuffer::const_iterator const s) noexcept;
+    objectid(Slot const * s) noexcept: objectid(SlotBuffer::const_iterator::from(s)) {}
+    objectid(Segment const & seg)  noexcept { set_name(&seg, 0); }
+private:
+    void set_name(void const * addr, uint16 generation) noexcept;
 };
+
+inline
+objectid::objectid(SlotBuffer::const_iterator const s) noexcept
+{
+    void const * o = s.handle();
+    set_name(o, o ? size_t(s->userAttrs()) : 0);
+}
 
 
 json & operator << (json & j, const Position &) throw();
@@ -58,8 +70,6 @@ json & operator << (json & j, const CharInfo &) throw();
 json & operator << (json & j, const dslot &) throw();
 json & operator << (json & j, const objectid &) throw();
 json & operator << (json & j, const telemetry &) throw();
-
-
 
 inline
 json & operator << (json & j, const Position & p) throw()

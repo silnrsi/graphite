@@ -41,6 +41,7 @@ of the License or (at your option) any later version.
 #include "inc/Machine.h"
 #include "inc/Rule.h"
 #include "inc/Silf.h"
+#include "inc/ShapingContext.hpp"
 
 #include <cstdio>
 
@@ -768,8 +769,8 @@ int32 Machine::Code::run(Machine & m, slotref * & map) const
 //    assert(_own);
     assert(*this);          // Check we are actually runnable
 
-    if (m.slotMap().size() <= size_t(_max_ref + m.slotMap().context())
-        || !m.slotMap()[_max_ref + m.slotMap().context()])
+    if (m.shaping_context().map.size() <= size_t(_max_ref + m.shaping_context().context())
+        || !m.shaping_context().map[_max_ref + m.shaping_context().context()].is_valid())
     {
         m._status = Machine::slot_offset_out_bounds;
         return 1;

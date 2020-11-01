@@ -28,6 +28,7 @@ add_library(graphite2-file STATIC
     ${S}/gr_logging.cpp
     ${S}/Pass.cpp
     ${S}/Segment.cpp
+    ${S}/ShapingContext.cpp
     ${S}/Silf.cpp
     ${S}/Slot.cpp
     ${S}/SlotBuffer.cpp

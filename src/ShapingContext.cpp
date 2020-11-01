@@ -1,6 +1,6 @@
 /*  GRAPHITE2 LICENSING
 
-    Copyright 2010, SIL International
+    Copyright 2020, SIL International
     All rights reserved.
 
     This library is free software; you can redistribute it and/or modify
@@ -24,45 +24,43 @@ Mozilla Public License (http://mozilla.org/MPL) or the GNU General Public
 License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
-#pragma once
-#include <cstring>
-#include <cassert>
-#include "inc/Main.h"
-#include "inc/vector.hpp"
 
-namespace graphite2 {
+#include "inc/Segment.h"
+#include "inc/ShapingContext.hpp"
 
-class FeatureRef;
-class FeatureMap;
+using namespace graphite2;
 
-class FeatureVal : public vector<uint32>
+ShapingContext::ShapingContext(Segment & seg, uint8 direction, size_t maxSize)
+: segment(seg),
+  dbgout(seg.getFace() ? seg.getFace()->logger() : nullptr),
+  in(seg.slots().num_user_attrs()),
+  dir(direction),
+  _max_size(int(maxSize)),
+  _precontext(0),
+  _highpassed(false)
 {
-public:
-    FeatureVal() : m_pMap(0) { }
-    FeatureVal(size_t num, const FeatureMap & pMap) : vector<uint32>(num), m_pMap(&pMap) {}
-    FeatureVal(const FeatureVal & rhs) : vector<uint32>(rhs), m_pMap(rhs.m_pMap) {}
+    map.reserve(MAX_SLOTS);
+}
 
-    FeatureVal & operator = (const FeatureVal & rhs) { vector<uint32>::operator = (rhs); m_pMap = rhs.m_pMap; return *this; }
+void ShapingContext::reset(SlotBuffer::iterator & slot, short unsigned int max_pre_ctxt)
+{
+    int pre_ctxt = 0;
+    for (; pre_ctxt != max_pre_ctxt && slot != segment.slots().begin(); ++pre_ctxt, --slot);
+    _precontext = pre_ctxt; 
+    segment.slots().collect_garbage();
+    map.clear();
+    in.clear();
+}
 
-    bool operator ==(const FeatureVal & b) const
-    {
-        size_t n = size();
-        if (n != b.size())      return false;
-
-        for(const_iterator l = begin(), r = b.begin(); n && *l == *r; --n, ++l, ++r);
-
-        return n == 0;
+void ShapingContext::collectGarbage(slotref &aSlot)
+{
+    for(auto s = map.begin(), se = map.end(); s != se; ++s) {
+        auto & slot = *s;
+        if(slot != segment.slots().end() && (slot->isDeleted() || slot->isCopied()))
+        {
+            if (slot == aSlot)
+                aSlot = slot != segment.slots().begin() ? std::prev(slot) : std::next(slot);
+            segment.freeSlot(slot);
+        }
     }
-
-    CLASS_NEW_DELETE
-private:
-    friend class FeatureRef;        //so that FeatureRefs can manipulate m_vec directly
-    const FeatureMap* m_pMap;
-};
-
-typedef FeatureVal Features;
-
-} // namespace graphite2
-
-
-struct gr_feature_val : public graphite2::FeatureVal {};
+}

@@ -29,8 +29,8 @@ void printList(gr2::vector<int> & v)
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    std::vector<int> stdVector(10, 0);
-    gr2::vector<int> grList(10, 0);
+    std::vector<int> stdVector(10u, 0);
+    gr2::vector<int> grList(10u, 0);
 
     assert(stdVector.size() == grList.size());
 
@@ -46,11 +46,11 @@ int main(int /*argc*/, char ** /*argv*/)
     }
 
     // test erase in middle
-    stdVector.erase(stdVector.begin()+8);
-    grList.erase(grList.begin()+8);
+    stdVector.erase(std::next(stdVector.begin(),8));
+    grList.erase(std::next(grList.begin(),8));
 
-    stdVector.erase(stdVector.begin()+2, stdVector.begin()+4);
-    grList.erase(grList.begin()+2, grList.begin()+4);
+    stdVector.erase(std::next(stdVector.begin(),2), std::next(stdVector.begin(),4));
+    grList.erase(std::next(grList.begin(),2), std::next(grList.begin(),4));
 
     assert(stdVector.size() == grList.size());
     for (size_t i = 0; i < stdVector.size(); i++)
@@ -59,26 +59,26 @@ int main(int /*argc*/, char ** /*argv*/)
     }
 
     // insert in middle
-    stdVector.insert(stdVector.begin()+3, 20);
-    grList.insert(grList.begin()+3, 20);
+    stdVector.insert(std::next(stdVector.begin(),3), 20);
+    grList.insert(std::next(grList.begin(),3), 20);
 
     // insert multiple in middle
-    stdVector.insert(stdVector.begin()+1, 4, 22);
-    grList.insert(grList.begin()+1, 4, 22);
+    stdVector.insert(std::next(stdVector.begin(),1), 4u, 22);
+    grList.insert(std::next(grList.begin(),1), 4u, 22);
 
     // insert at end
     stdVector.insert(stdVector.end(), 24);
     grList.insert(grList.end(), 24);
 
     stdVector.insert(stdVector.end(), 2, 25);
-    grList.insert(grList.end(), 2, 25);
+    grList.insert(grList.end(), 2u, 25);
 
     // insert at start
     stdVector.insert(stdVector.begin(), 26);
     grList.insert(grList.begin(), 26);
 
     stdVector.insert(stdVector.begin(), 3, 27);
-    grList.insert(grList.begin(), 3, 27);
+    grList.insert(grList.begin(), 3u, 27);
 
     // test erase at start
     stdVector.erase(stdVector.begin(), stdVector.begin() + 1);
@@ -116,8 +116,8 @@ int main(int /*argc*/, char ** /*argv*/)
     stdVector.erase(stdVector.begin());
     grList.erase(grList.begin());
 
-    stdVector.insert(stdVector.begin(), 1, 31);
-    grList.insert(grList.begin(), 1, 31);
+    stdVector.insert(stdVector.begin(), 1u, 31);
+    grList.insert(grList.begin(), 1u, 31);
 
     assert(stdVector.size() == grList.size());
     assert(stdVector[0] == grList[0]);

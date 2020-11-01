@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 
 #include <cstdlib>
 #include "inc/Code.h"
+#include "inc/Rule.h"
 #include "inc/SlotBuffer.h"
 
 namespace graphite2 {
@@ -35,8 +36,6 @@ namespace graphite2 {
 class Segment;
 class Face;
 class Silf;
-struct Rule;
-struct RuleEntry;
 struct State;
 class FiniteStateMachine;
 class Error;
@@ -53,15 +52,15 @@ public:
     ~Pass();
 
     bool readPass(const byte * pPass, size_t pass_length, size_t subtable_base, Face & face,
-        enum passtype pt, uint32 version, Error &e);
-    bool runGraphite(vm::Machine & m, FiniteStateMachine & fsm, bool reverse) const;
+                  enum passtype pt, uint32 version, Error &e);
+    bool runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) const;
     void init(Silf *silf) { m_silf = silf; }
     byte collisionLoops() const { return m_numCollRuns; }
     bool reverseDir() const { return m_isReverseDir; }
 
     CLASS_NEW_DELETE
 private:
-    void    findNDoRule(SlotBuffer::iterator & iSlot, vm::Machine &, FiniteStateMachine& fsm) const;
+    void    findNDoRule(SlotBuffer::iterator & iSlot, vm::Machine &, ShapingContext & ctxt) const;
     int     doAction(const vm::Machine::Code* codeptr, SlotBuffer::iterator & slot_out, vm::Machine &) const;
     bool    testPassConstraint(vm::Machine & m) const;
     bool    testConstraint(const Rule & r, vm::Machine &) const;
@@ -73,10 +72,10 @@ private:
     bool    readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
     bool    readRanges(const byte * ranges, size_t num_ranges, Error &e);
     uint16  glyphToCol(const uint16 gid) const;
-    bool    runFSM(FiniteStateMachine & fsm, SlotBuffer::iterator slot) const;
-    void    dumpRuleEventConsidered(const FiniteStateMachine & fsm, const RuleEntry & re) const;
-    void    dumpRuleEventOutput(const FiniteStateMachine & fsm, const Rule & r, SlotBuffer::iterator os) const;
-    void    adjustSlot(int delta, SlotBuffer::iterator & slot_out, SlotMap &) const;
+    bool    runFSM(ShapingContext & ctxt, SlotBuffer::iterator slot, Rules &rules) const;
+    void    dumpRuleEventConsidered(ShapingContext const & ctxt, Rules::const_iterator first, Rules::const_iterator const & last) const;
+    void    dumpRuleEventOutput(ShapingContext const & ctxt, Rule const & r, SlotBuffer::const_iterator const, SlotBuffer::const_iterator const) const;
+    void    adjustSlot(int delta, SlotBuffer::iterator & slot_out, ShapingContext &) const;
     bool    collisionShift(Segment & seg, int dir, json * const dbgout) const;
     bool    collisionKern(Segment & seg, int dir, json * const dbgout) const;
     bool    collisionFinish(Segment & seg, GR_MAYBE_UNUSED json * const dbgout) const;
@@ -88,7 +87,7 @@ private:
     const Silf        * m_silf;
     uint16            * m_cols;
     Rule              * m_rules; // rules
-    RuleEntry         * m_ruleMap;
+    Rules::Entry      * m_ruleMap;
     uint16            * m_startStates; // prectxt length
     uint16            * m_transitions;
     State             * m_states;
