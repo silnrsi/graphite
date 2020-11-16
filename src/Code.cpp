@@ -764,7 +764,7 @@ void Machine::Code::release_buffers() throw()
 }
 
 
-int32 Machine::Code::run(Machine & m, slotref * & map) const
+int32 Machine::Code::run(Machine & m, const_slotref * & slot_in, slotref & slot_out) const
 {
 //    assert(_own);
     assert(*this);          // Check we are actually runnable
@@ -777,5 +777,5 @@ int32 Machine::Code::run(Machine & m, slotref * & map) const
 //        return m.run(_code, _data, map);
     }
 
-    return  m.run(_code, _data, map);
+    return  m.run(_code, _data, slot_in, slot_out);
 }
