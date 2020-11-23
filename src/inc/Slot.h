@@ -26,6 +26,7 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#include <cstring>
 #include "graphite2/Segment.h"
 
 #include "inc/Main.h"
@@ -41,39 +42,52 @@ class Slot;
 class ShapingContext;
 class Font;
 
-struct SlotJustify
-{
-    static const int NUMJUSTPARAMS = 5;
-
-    SlotJustify(const SlotJustify &);
-    SlotJustify & operator = (const SlotJustify &);
-
-public:
-    static size_t size_of(size_t levels) { return sizeof(SlotJustify) + ((levels > 1 ? levels : 1)*NUMJUSTPARAMS - 1)*sizeof(int16); }
-
-    void LoadSlot(const Slot &s, const Segment & seg);
-
-    SlotJustify *next;
-    int16 values[1];
-};
-
 class Slot
 {
-    enum Flag
-    {
-        DELETED     = 1,
-        INSERTED    = 2,
-        COPIED      = 4,
-        POSITIONED  = 8,
-        ATTACHED    = 16,
-        END_OF_LINE = 32
+    static constexpr int NUMJUSTPARAMS = 5;
+
+    union attributes {
+    private:
+        struct {
+            uint8_t size;
+            int16_t data[sizeof(uintptr_t)/sizeof(int16_t)-1];
+        }   local;
+        struct { 
+            uint8_t n_attrs, n_justs; 
+            int16_t data[1]; 
+        } * external;
+
+        bool is_inline() const { return !external || uintptr_t(external) & 0x3;}
+
+    public:
+        attributes(size_t n_attrs, size_t n_justs = 0): external(nullptr) { reserve(n_attrs, n_justs); }
+        attributes(attributes const & rhs): external{rhs.external} { operator = (rhs); }
+        attributes(attributes && rhs) noexcept : external{rhs.external} { rhs.external = nullptr; }
+        ~attributes() noexcept { if (!is_inline()) free(external); }
+
+        void reserve(size_t target_num_attrs, size_t target_num_justs);
+        attributes & operator = (attributes const & rhs);
+        attributes & operator = (attributes && rhs) noexcept;
+
+        size_t num_attrs() const { return is_inline() ? local.size : external->n_attrs + 1; }
+        size_t num_justs() const { return is_inline() ? 0 : external->n_justs; }
+
+        int16_t       * user_attributes() { return is_inline() ? local.data : external->data; }
+        int16_t const * user_attributes() const { return is_inline() ? local.data : external->data; }
+        int16_t       * just_info() { return is_inline() ? nullptr : external->data + external->n_attrs; }
+        int16_t const * just_info() const { return is_inline() ? nullptr : external->data + external->n_attrs; }
     };
+
+    bool has_justify() const { return m_attrs.num_justs() != 0; };
+    void init_just_infos(Segment const & seg);
 
 public:
     struct iterator;
 
-    Slot(Slot const &) = default;
-    Slot & operator=(Slot const & rhs) noexcept;
+    Slot(Slot const &) = delete;
+    Slot(Slot &&);
+    Slot & operator=(Slot const &) noexcept;
+    Slot & operator=(Slot &&) noexcept;
 
     unsigned short gid() const { return m_glyphid; }
     Position origin() const { return m_position; }
@@ -85,8 +99,7 @@ public:
     uint32 index() const { return m_index; }
     void index(uint32 val) { m_index = val; }
 
-    Slot(int16 *m_userAttr = NULL);
-    void set(const Slot & slot, int charOffset, size_t numUserAttr, size_t justLevels, size_t numChars);
+    Slot(size_t num_attrs = 0);
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
@@ -99,28 +112,27 @@ public:
     bool isBase() const { return (!m_parent); }
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
-    bool isDeleted() const { return m_flags & DELETED; }
-    void markDeleted(bool state) { if (state) m_flags |= DELETED; else m_flags &= ~DELETED; }
-    bool isCopied() const { return m_flags & COPIED; }
-    void markCopied(bool state) { if (state) m_flags |= COPIED; else m_flags &= ~COPIED; }
-    bool isPositioned() const { return m_flags; }
-    void markPositioned(bool state) { if (state) m_flags |= POSITIONED; else m_flags &= ~POSITIONED; }
-    bool isEndOfLine() const { return m_flags & END_OF_LINE; }
-    void markEndOfLine(bool state) { if (state) m_flags |= END_OF_LINE; else m_flags &= ~END_OF_LINE; }
-    bool isInsertBefore() const { return !(m_flags & INSERTED); }
+    bool isDeleted() const { return m_flags.deleted; }
+    void markDeleted(bool state) { m_flags.deleted = state; }
+    bool isCopied() const { return m_flags.copied; }
+    void markCopied(bool state) { m_flags.copied = state; }
+    bool isPositioned() const { return m_flags.positioned; }
+    void markPositioned(bool state) { m_flags.positioned = state; }
+    bool isEndOfLine() const { return m_flags.eol; }
+    void markEndOfLine(bool state) { m_flags.eol = state; }
+    bool isInsertBefore() const { return !m_flags.inserted; }
+    void markInsertBefore(bool state) { m_flags.inserted = !state; }
     uint8 getBidiLevel() const { return m_bidiLevel; }
     void setBidiLevel(uint8 level) { m_bidiLevel = level; }
     int8 getBidiClass(const Segment &seg);
     int8 getBidiClass() const { return m_bidiCls; }
     void setBidiClass(int8 cls) { m_bidiCls = cls; }
-    int16 *userAttrs() const { return m_userAttr; }
-    void userAttrs(int16 *p) { m_userAttr = p; }
-    void markInsertBefore(bool state) { if (!state) m_flags |= INSERTED; else m_flags &= ~INSERTED; }
+    int16 const *userAttrs() const { return m_attrs.user_attributes(); }
+    // void userAttrs(int16 *p) { m_userAttr = p; }
     void setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
     int getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
     int getJustify(const Segment &seg, uint8 level, uint8 subindex) const;
     void setJustify(Segment &seg, uint8 level, uint8 subindex, int16 value);
-    bool isLocalJustify() const { return m_justs != NULL; };
     void attachTo(Slot *ap) { m_parent = ap; }
     Slot *attachedTo() const { return m_parent; }
     Position attachOffset() const { return m_attach - m_with; }
@@ -139,31 +151,43 @@ public:
     Slot *nextInCluster(const Slot *s) const;
     bool isChildOf(const Slot *base) const;
 
+#if !defined GRAPHITE2_NTRACING
+    ~Slot() noexcept { ++m_gen; }
+    uintptr_t generation() const { return m_gen; }
+#endif
     CLASS_NEW_DELETE
 
 private:
-    unsigned short m_glyphid;        // glyph id
-    uint16 m_realglyphid;
-    uint32 m_original;      // charinfo that originated this slot (e.g. for feature values)
-    uint32 m_before;        // charinfo index of before association
-    uint32 m_after;         // charinfo index of after association
-    uint32 m_index;         // slot index given to this slot during finalising
-    Slot *m_parent;         // index to parent we are attached to
-    Slot *m_child;          // index to first child slot that attaches to us
-    Slot *m_sibling;        // index to next child that attaches to our parent
-    Position m_position;    // absolute position of glyph
-    Position m_shift;       // .shift slot attribute
-    Position m_advance;     // .advance slot attribute
-    Position m_attach;      // attachment point on us
-    Position m_with;        // attachment point position on parent
-    float    m_just;        // Justification inserted space
-    uint8    m_flags;       // holds bit flags
-    byte     m_attLevel;    // attachment level
-    int8     m_bidiCls;     // bidirectional class
-    byte     m_bidiLevel;   // bidirectional level
-    int16   *m_userAttr;    // pointer to user attributes
-    SlotJustify *m_justs;   // pointer to justification parameters
-
+    Slot      * m_parent;   // index to parent we are attached to
+    Slot      * m_child;    // index to first child slot that attaches to us
+    Slot      * m_sibling;  // index to next child that attaches to our parent
+    Position    m_position; // absolute position of glyph
+    Position    m_shift;    // .shift slot attribute
+    Position    m_advance;  // .advance slot attribute
+    Position    m_attach;   // attachment point on us
+    Position    m_with;     // attachment point position on parent
+    attributes  m_attrs;
+    float       m_just;     // Justification inserted space
+    uint32      m_original; // charinfo that originated this slot (e.g. for feature values)
+    uint32      m_before;   // charinfo index of before association
+    uint32      m_after;    // charinfo index of after association
+    uint32      m_index;    // slot index given to this slot during finalising
+    uint16      m_glyphid;  // glyph id
+    uint16      m_realglyphid;
+    byte        m_attLevel;    // attachment level
+    byte        m_bidiLevel;   // bidirectional level
+    int8        m_bidiCls;     // bidirectional class
+    struct {
+        bool    deleted: 1,
+                inserted: 1,
+                copied: 1,
+                positioned: 1,
+                attached: 1,
+                eol:1;
+    }        m_flags;       // holds bit flags
+#if !defined GRAPHITE2_NTRACING
+    uint8_t   m_gen;
+#endif
     friend class Segment;
 };
 

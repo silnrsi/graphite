@@ -60,7 +60,7 @@ inline
 objectid::objectid(SlotBuffer::const_iterator const s) noexcept
 {
     void const * o = s.handle();
-    set_name(o, o ? size_t(s->userAttrs()) : 0);
+    set_name(o, o ? s->generation() : 0);
 }
 
 

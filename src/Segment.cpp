@@ -43,9 +43,7 @@ of the License or (at your option) any later version.
 using namespace graphite2;
 
 Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
-: m_srope(face->chooseSilf(script)->numUser()),
-// TODO:rm m_freeSlots(NULL),
-  m_freeJustifies(NULL),
+: //m_srope(face->chooseSilf(script)->numUser(), face->chooseSilf(script)->numJustLevels()),
   m_charinfo(new CharInfo[numchars]),
   m_collisions(NULL),
   m_face(face),
@@ -63,8 +61,6 @@ Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
 
 Segment::~Segment()
 {
-    for (JustifyRope::iterator i = m_justifies.begin(); i != m_justifies.end(); ++i)
-        free(*i);
     delete[] m_charinfo;
     free(m_collisions);
 }
@@ -78,14 +74,14 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_charinfo[id].base(coffset);
     m_charinfo[id].breakWeight(glyph ? glyph->attrs()[m_silf->aBreak()] : 0);
 
-    Slot aSlot;
-    aSlot.child(NULL);
+    slots().push_back(Slot(numAttrs()));
+    auto & aSlot = slots().back();
+    aSlot.child(nullptr);
     aSlot.setGlyph(*this, gid, glyph);
     aSlot.originate(id);
     aSlot.before(id);
     aSlot.after(id);
 
-    slots().push_back(aSlot);
     if (glyph && m_silf->aPassBits())
         m_passBits &= glyph->attrs()[m_silf->aPassBits()]
                     | (m_silf->numPasses() > 16 ? (glyph->attrs()[m_silf->aPassBits() + 1] << 16) : 0);
@@ -102,37 +98,6 @@ SlotBuffer::iterator Segment::newSlot()
 void Segment::freeSlot(SlotBuffer::iterator i)
 {
     m_srope.freeSlot(i);
-}
-
-SlotJustify *Segment::newJustify()
-{
-    if (!m_freeJustifies)
-    {
-        const size_t justSize = SlotJustify::size_of(m_silf->numJustLevels());
-        byte *justs = grzeroalloc<byte>(justSize * m_bufSize);
-        if (!justs) return NULL;
-        for (ptrdiff_t i = m_bufSize - 2; i >= 0; --i)
-        {
-            SlotJustify *p = reinterpret_cast<SlotJustify *>(justs + justSize * i);
-            SlotJustify *next = reinterpret_cast<SlotJustify *>(justs + justSize * (i + 1));
-            p->next = next;
-        }
-        m_freeJustifies = (SlotJustify *)justs;
-        m_justifies.push_back(m_freeJustifies);
-    }
-    SlotJustify *res = m_freeJustifies;
-    m_freeJustifies = m_freeJustifies->next;
-    res->next = NULL;
-    return res;
-}
-
-void Segment::freeJustify(SlotJustify *aJustify)
-{
-    int numJust = m_silf->numJustLevels();
-    if (m_silf->numJustLevels() <= 0) numJust = 1;
-    aJustify->next = m_freeJustifies;
-    memset(aJustify->values, 0, numJust*SlotJustify::NUMJUSTPARAMS*sizeof(int16));
-    m_freeJustifies = aJustify;
 }
 
 // reverse the slots but keep diacritics in their same position after their bases

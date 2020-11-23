@@ -45,15 +45,16 @@ namespace
 }
 
 
-SlotBuffer::SlotBuffer(size_t num_user)
-: _size{0},
-  _attrs_size{num_user}
+SlotBuffer::SlotBuffer(/*size_t num_user, size_t num_justs*/)
+: _size{0}
+//   _attrs_size{num_user},
+//   _justs_size{num_justs}
 {
 }
 
 SlotBuffer::SlotBuffer(SlotBuffer && rhs)
-: _size{rhs._size},
-  _attrs_size{rhs._attrs_size}
+: _size{rhs._size}
+//   _attrs_size{rhs._attrs_size}
 {
     if (!rhs.empty())
         _head.splice(*rhs._head._next, *rhs._head._prev);
@@ -97,10 +98,10 @@ void SlotBuffer::_node_linkage::unlink()
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & slot)
 {
     assert(pos._p);
-    auto node = _allocate_node();
+    auto node = _allocate_node(Slot());
     if (!node) return end();
 
-    node->_value.set(slot, 0, _attrs_size, 0, slot.after()+1);
+    node->_value = slot;
     node->link(*const_cast<_node_linkage *>(pos._p));
 
     ++_size;
@@ -110,10 +111,9 @@ SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & s
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
 {
     assert(pos._p);
-    auto node = _allocate_node();
+    auto node = _allocate_node(std::move(slot));
     if (!node) return end();
 
-    node->_value.set(slot, 0, _attrs_size, 0, slot.after()+1);
     node->link(*const_cast<_node_linkage *>(pos._p));
 
     ++_size;
@@ -175,16 +175,16 @@ void SlotBuffer::collect_garbage(bool only_marked)
     _garbage._next = _garbage._prev = &_garbage;
 }
 
-auto SlotBuffer::_allocate_node() -> SlotBuffer::_node<value_type> * 
+auto SlotBuffer::_allocate_node(value_type && v) -> SlotBuffer::_node<value_type> * 
 {
-    auto const real_attr_size = _attrs_size + DEBUG_ATTRS;
-    auto attrs = grzeroalloc<int16>(real_attr_size);
-    auto node = attrs ? new _node<value_type>() : nullptr;
+    // auto const real_attr_size = _attrs_size + DEBUG_ATTRS;
+    // auto attrs = grzeroalloc<int16>(real_attr_size);
+    auto node = new _node<value_type>{std::forward<value_type>(v)};
     if (!node) { 
-        free(attrs); 
+        // free(attrs); 
         return nullptr;
     }
-    node->_value.userAttrs(attrs);
+    // node->_value.userAttrs(attrs);
     return static_cast<_node<value_type> *>(node);
 }
 

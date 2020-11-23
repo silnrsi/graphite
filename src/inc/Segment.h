@@ -46,9 +46,6 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 typedef vector<Features>        FeatureList;
-//typedef vector<Slot *>          SlotRope;
-//typedef vector<int16 *>         AttributeRope;
-typedef vector<SlotJustify *>   JustifyRope;
 
 class Font;
 class Segment;
@@ -98,8 +95,6 @@ public:
     void appendSlot(int i, int cid, int gid, int fid, size_t coffset);
     SlotBuffer::iterator newSlot();
     void freeSlot(SlotBuffer::iterator);
-    SlotJustify *newJustify();
-    void freeJustify(SlotJustify *aJustify);
 
     Position positionSlots(
         Font const * font, 
@@ -140,7 +135,6 @@ public:
     void doMirror(uint16 aMirror);
     SlotBuffer::iterator addLineEnd(SlotBuffer::iterator nSlot);
     void delLineEnd(SlotBuffer::iterator s);
-    bool hasJustification() const { return m_justifies.size() != 0; }
     void reverseSlots();
 
     bool isWhitespace(const int cid) const;
@@ -161,10 +155,7 @@ public:       //only used by: GrSegment* makeAndInitialize(const GrFont *font, c
 private:
     SlotBuffer      m_srope;
     Position        m_advance;          // whole segment advance
-    JustifyRope     m_justifies;        // Slot justification info buffers
     FeatureList     m_feats;            // feature settings referenced by charinfos in this segment
-    //TODO: rm Slot          * m_freeSlots;        // linked list of free slots
-    SlotJustify   * m_freeJustifies;    // Slot justification blocks free list
     CharInfo      * m_charinfo;         // character info, one per input character
     SlotCollision * m_collisions;
     const Face    * m_face;             // GrFace

@@ -250,13 +250,8 @@ STARTOP(put_copy)
         auto ref = slotat(slot_ref);
         if (ref != reg.seg.slots().end() && ref != reg.os)
         {
-            int16 *tempUserAttrs = reg.is->userAttrs();
             if (reg.os->attachedTo() || reg.os->firstChild()) DIE
-            memcpy(tempUserAttrs, ref->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
-            memcpy(&*reg.is, &*ref, sizeof(Slot));
-            reg.is->firstChild(NULL);
-            reg.is->nextSibling(NULL);
-            reg.is->userAttrs(tempUserAttrs);
+            *reg.os = *ref;
             if (reg.os->attachedTo())
                 reg.os->attachedTo()->child(&*reg.os);
         }
@@ -632,10 +627,7 @@ STARTOP(temp_copy)
     auto slot = reg.seg.newSlot();
     if (slot == reg.seg.slots().end() || reg.os == reg.seg.slots().end()) DIE;
     // copy slot reg.os into new slot
-    int16 *tempUserAttrs = slot->userAttrs();
-    memcpy(&*slot, &*reg.is, sizeof(Slot));
-    memcpy(tempUserAttrs, reg.is->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
-    slot->userAttrs(tempUserAttrs);
+    *slot = *reg.os;
     slot->markCopied(true);
     // TODO: remove this once we're using gr::list methods. This is the
     // hack that, that enables the hack, that enables debug output.

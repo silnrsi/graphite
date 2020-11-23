@@ -33,7 +33,7 @@ using namespace graphite2;
 ShapingContext::ShapingContext(Segment & seg, uint8 direction, size_t maxSize)
 : segment(seg),
   dbgout(seg.getFace() ? seg.getFace()->logger() : nullptr),
-  in(seg.slots().num_user_attrs()),
+  //in(seg.slots().num_user_attrs(), seg.slots().num_just_levels()),
   dir(direction),
   _max_size(int(maxSize)),
   _precontext(0),

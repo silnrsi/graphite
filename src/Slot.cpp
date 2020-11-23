@@ -36,47 +36,182 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Slot::Slot(int16 *user_attrs) :
-    m_glyphid(0), m_realglyphid(0), m_original(0), m_before(0), m_after(0),
-    m_index(0), m_parent(NULL), m_child(NULL), m_sibling(NULL),
-    m_position(0, 0), m_shift(0, 0), m_advance(0, 0),
-    m_attach(0, 0), m_with(0, 0), m_just(0.),
-    m_flags(0), m_attLevel(0), m_bidiCls(-1), m_bidiLevel(0),
-    m_userAttr(user_attrs), m_justs(NULL)
-{
+auto Slot::attributes::operator = (attributes const & rhs) -> attributes & {
+    if (this != &rhs) {
+        reserve(rhs.num_attrs(), rhs.num_justs());
+        if (!rhs.is_inline() && external) {
+            auto const sz = external->n_attrs + external->n_justs*NUMJUSTPARAMS + 1;
+            memcpy(external, rhs.external, sz);
+        } else local = rhs.local;
+    }
+    return *this;
 }
 
-// take care, this does not copy any of the GrSlot pointer fields
-void Slot::set(const Slot & orig, int charOffset, size_t sizeAttr, size_t justLevels, size_t numChars)
+auto Slot::attributes::operator = (attributes && rhs) noexcept -> attributes & {
+    if (!is_inline()) free(external);
+    external = rhs.external;
+    rhs.external = nullptr;
+    return *this;
+}
+
+void Slot::attributes::reserve(size_t target_num_attrs, size_t target_num_justs) {
+    assert(target_num_attrs <  256);
+    assert(target_num_justs <  256);
+
+    if (num_attrs() >= target_num_attrs 
+        && num_justs() >= target_num_justs)
+        return;
+
+    if (target_num_justs > 0 
+        || target_num_attrs > sizeof local.data/sizeof *local.data)
+    {
+        auto const sz = target_num_attrs + target_num_justs*NUMJUSTPARAMS + 1;
+
+        if (is_inline()) {  // Convert to non-inline form.
+            auto box = reinterpret_cast<decltype(external)>(grzeroalloc<int16_t>(sz));
+            if (box) {
+                if (local.size) memcpy(box->data, local.data, local.size*sizeof *local.data);
+                external = box;
+                external->n_attrs = target_num_attrs-1;
+                external->n_justs = target_num_justs;
+            }
+        } else { // Grow the existing buffer.
+            external = static_cast<decltype(external)>(realloc(external, sz*sizeof *local.data));
+            external->n_attrs = target_num_attrs-1;
+            external->n_justs = target_num_justs;
+        }
+    }
+    else local.size = target_num_attrs;
+}
+
+
+void Slot::init_just_infos(Segment const & seg)
 {
-    // leave m_next and m_prev unchanged
-    m_glyphid = orig.m_glyphid;
-    m_realglyphid = orig.m_realglyphid;
-    m_original = orig.m_original + charOffset;
-    if (charOffset + int(orig.m_before) < 0)
-        m_before = 0;
-    else
-        m_before = orig.m_before + charOffset;
-    if (charOffset <= 0 && orig.m_after + charOffset >= numChars)
-        m_after = int(numChars) - 1;
-    else
-        m_after = orig.m_after + charOffset;
-    m_parent = NULL;
-    m_child = NULL;
-    m_sibling = NULL;
-    m_position = orig.m_position;
-    m_shift = orig.m_shift;
-    m_advance = orig.m_advance;
-    m_attach = orig.m_attach;
-    m_with = orig.m_with;
-    m_flags = orig.m_flags;
-    m_attLevel = orig.m_attLevel;
-    m_bidiCls = orig.m_bidiCls;
-    m_bidiLevel = orig.m_bidiLevel;
-    if (m_userAttr && orig.m_userAttr)
-        memcpy(m_userAttr, orig.m_userAttr, sizeAttr * sizeof(*m_userAttr));
-    if (m_justs && orig.m_justs)
-        memcpy(m_justs, orig.m_justs, SlotJustify::size_of(justLevels));
+    auto const target_num_justs = seg.silf()->numJustLevels();
+
+    for (int i = target_num_justs - 1; i >= 0; --i)
+    {
+        Justinfo *justs = seg.silf()->justAttrs() + i;
+        int16 *v = m_attrs.just_info() + i * NUMJUSTPARAMS;
+        v[0] = seg.glyphAttr(gid(), justs->attrStretch());
+        v[1] = seg.glyphAttr(gid(), justs->attrShrink());
+        v[2] = seg.glyphAttr(gid(), justs->attrStep());
+        v[3] = seg.glyphAttr(gid(), justs->attrWeight());
+    }
+}
+
+Slot::Slot(size_t num_attrs) :
+    m_parent{nullptr}, 
+    m_child{nullptr}, 
+    m_sibling{nullptr},
+    m_position{0, 0}, 
+    m_shift{0, 0}, 
+    m_advance{0, 0},
+    m_attach{0, 0}, 
+    m_with{0, 0}, 
+    m_attrs{num_attrs},
+    m_just{0},
+    m_original{0},
+    m_before{0},
+    m_after{0},
+    m_index{0},
+    m_glyphid{0}, 
+    m_realglyphid{0}, 
+    m_attLevel{0}, 
+    m_bidiLevel{0},
+    m_bidiCls{-1},
+    m_flags{false, false, false, false, false, false}
+{
+    assert(sizeof m_flags == 1);
+}
+
+Slot::Slot(Slot && rhs) noexcept
+: m_parent{nullptr},
+  m_child{nullptr},
+  m_sibling{nullptr},
+  m_position{std::move(rhs.m_position)},
+  m_shift{std::move(rhs.m_shift)},
+  m_advance{std::move(rhs.m_advance)},
+  m_attach{std::move(rhs.m_attach)},
+  m_with{std::move(rhs.m_with)},
+  m_attrs{std::move(rhs.m_attrs)},
+  m_just{std::move(rhs.m_just)},
+  m_original{std::move(rhs.m_original)},
+  m_before{std::move(rhs.m_before)},
+  m_after{std::move(rhs.m_after)},
+  m_index{std::move(rhs.m_index)},
+  m_glyphid{std::move(rhs.m_glyphid)},
+  m_realglyphid{std::move(rhs.m_realglyphid)},
+  m_attLevel{std::move(rhs.m_attLevel)},
+  m_bidiLevel{std::move(rhs.m_bidiLevel)},
+  m_bidiCls{std::move(rhs.m_bidiCls)},
+  m_flags{std::move(rhs.m_flags)}
+#if !defined GRAPHITE2_NTRACING
+  , m_gen{std::move(rhs.m_gen)}
+#endif
+{}
+
+Slot & Slot::operator = (Slot && rhs) noexcept 
+{
+    if (this != &rhs)
+    {
+        m_parent = nullptr;
+        m_child = nullptr;
+        m_sibling = nullptr;
+        m_attrs = std::move(rhs.m_attrs);
+        m_glyphid = std::move(rhs.m_glyphid);
+        m_realglyphid = std::move(rhs.m_realglyphid);
+        m_original = std::move(rhs.m_original);
+        m_before = std::move(rhs.m_before);
+        m_after = std::move(rhs.m_after);
+        m_index = std::move(rhs.m_index);
+        m_position = std::move(rhs.m_position);
+        m_shift = std::move(rhs.m_shift);
+        m_advance = std::move(rhs.m_advance);
+        m_attach = std::move(rhs.m_attach);
+        m_with = std::move(rhs.m_with);
+        m_just = std::move(rhs.m_just);
+        m_flags = std::move(rhs.m_flags);
+        m_attLevel = std::move(rhs.m_attLevel);
+        m_bidiCls = std::move(rhs.m_bidiCls);
+        m_bidiLevel = std::move(rhs.m_bidiLevel);
+#if !defined GRAPHITE2_NTRACING
+        m_gen = std::move(rhs.m_gen);
+#endif
+    }
+    return *this;
+}
+
+Slot & Slot::operator = (Slot const & rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        m_parent = nullptr;
+        m_child = nullptr;
+        m_sibling = nullptr;
+        m_attrs = rhs.m_attrs;
+        m_glyphid = rhs.m_glyphid;
+        m_realglyphid = rhs.m_realglyphid;
+        m_original = rhs.m_original;
+        m_before = rhs.m_before;
+        m_after = rhs.m_after;
+        m_index = rhs.m_index;
+        m_position = rhs.m_position;
+        m_shift = rhs.m_shift;
+        m_advance = rhs.m_advance;
+        m_attach = rhs.m_attach;
+        m_with = rhs.m_with;
+        m_just = rhs.m_just;
+        m_flags = rhs.m_flags;
+        m_attLevel = rhs.m_attLevel;
+        m_bidiCls = rhs.m_bidiCls;
+        m_bidiLevel = rhs.m_bidiLevel;
+#if !defined GRAPHITE2_NTRACING
+        m_gen = rhs.m_gen;
+#endif
+    }
+
+    return *this;
 }
 
 void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
@@ -227,7 +362,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     case gr_slatJWidth:     return int(m_just);
     case gr_slatUserDefnV1: subindex = 0; GR_FALLTHROUGH;
       // no break
-    case gr_slatUserDefn :  return subindex < seg.numAttrs() ?  m_userAttr[subindex] : 0;
+    case gr_slatUserDefn :  return subindex < m_attrs.num_attrs() ? m_attrs.user_attributes()[subindex] : 0;
     case gr_slatSegSplit :  return seg.charinfo(m_original)->flags() & 3;
     case gr_slatBidiLevel:  return m_bidiLevel;
     case gr_slatColFlags :		{ SlotCollision *c = seg.collisionInfo(*this); return c ? c->flags() : 0; }
@@ -344,7 +479,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
     case gr_slatMeasureEol :    break;
     case gr_slatJWidth :    just(value); break;
     case gr_slatSegSplit :  seg.charinfo(m_original)->addflags(value & 3); break;
-    case gr_slatUserDefn :  m_userAttr[subindex] = value; break;
+    case gr_slatUserDefn :  assert(subindex < m_attrs.num_attrs()); m_attrs.user_attributes()[subindex] = value; break;
     case gr_slatColFlags :  {
         SlotCollision *c = seg.collisionInfo(*this);
         if (c)
@@ -377,8 +512,8 @@ int Slot::getJustify(const Segment & seg, uint8 level, uint8 subindex) const
 {
     if (level && level >= seg.silf()->numJustLevels()) return 0;
 
-    if (m_justs)
-        return m_justs->values[level * SlotJustify::NUMJUSTPARAMS + subindex];
+    if (has_justify())
+        return m_attrs.just_info()[level * Slot::NUMJUSTPARAMS + subindex];
 
     if (level >= seg.silf()->numJustLevels()) return 0;
     Justinfo *jAttrs = seg.silf()->justAttrs() + level;
@@ -396,14 +531,12 @@ int Slot::getJustify(const Segment & seg, uint8 level, uint8 subindex) const
 void Slot::setJustify(Segment & seg, uint8 level, uint8 subindex, int16 value)
 {
     if (level && level >= seg.silf()->numJustLevels()) return;
-    if (!m_justs)
-    {
-        SlotJustify *j = seg.newJustify();
-        if (!j) return;
-        j->LoadSlot(*this, seg);
-        m_justs = j;
+    if (!has_justify()) {
+        m_attrs.reserve(m_attrs.num_attrs(), std::max(1ul,seg.silf()->numJustLevels()));
+        init_just_infos(seg);
     }
-    m_justs->values[level * SlotJustify::NUMJUSTPARAMS + subindex] = value;
+    
+    m_attrs.just_info()[level * Slot::NUMJUSTPARAMS + subindex] = value;
 }
 
 bool Slot::child(Slot *ap)
@@ -489,19 +622,6 @@ void Slot::floodShift(Position adj, int depth)
     m_position += adj;
     if (m_child) m_child->floodShift(adj, depth + 1);
     if (m_sibling) m_sibling->floodShift(adj, depth + 1);
-}
-
-void SlotJustify::LoadSlot(const Slot & s, const Segment & seg)
-{
-    for (int i = seg.silf()->numJustLevels() - 1; i >= 0; --i)
-    {
-        Justinfo *justs = seg.silf()->justAttrs() + i;
-        int16 *v = values + i * NUMJUSTPARAMS;
-        v[0] = seg.glyphAttr(s.gid(), justs->attrStretch());
-        v[1] = seg.glyphAttr(s.gid(), justs->attrShrink());
-        v[2] = seg.glyphAttr(s.gid(), justs->attrStep());
-        v[3] = seg.glyphAttr(s.gid(), justs->attrWeight());
-    }
 }
 
 Slot * Slot::nextInCluster(const Slot *s) const

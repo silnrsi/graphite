@@ -95,7 +95,7 @@ public:
     uint16 numClasses() const { return m_nClass; }
     byte  flags() const { return m_flags; }
     byte  dir() const { return m_dir; }
-    uint8 numJustLevels() const { return m_numJusts; }
+    size_t numJustLevels() const { return m_numJusts; }
     Justinfo *justAttrs() const { return m_justs; }
     uint16 endLineGlyphid() const { return m_gEndLine; }
     const gr_faceinfo *silfInfo() const { return &m_silfinfo; }

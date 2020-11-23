@@ -64,6 +64,11 @@ private:
         T _value;
 
         CLASS_NEW_DELETE;
+        
+        _node(T && v) : _value(std::forward<T>(v)) {}
+
+        template<typename... Args> 
+        _node(Args &&... args) { new (&_value) T(std::forward<Args>(args)...); }
     };
 
     struct _head_node : public _node_linkage {
@@ -91,11 +96,12 @@ private:
     _head_node          _head;
     _node_linkage       _garbage;   // TODO: Move into slot map or merge slotmap into here.
     size_type           _size;
-    size_type           _attrs_size;
+    // uint8_t             _attrs_size,
+    //                     _justs_size;
 
     template<typename T> class _iterator;
 
-    _node<Slot> *   _allocate_node();
+    _node<Slot> *   _allocate_node(value_type &&);
     void            _free_node(_node<Slot> * const);
     void            _reverse_range(_node_linkage * const start, _node_linkage * const end);
 
@@ -115,10 +121,11 @@ public:
     iterator newSlot();
     void     freeSlot(iterator i);
 
-    SlotBuffer(size_t num_user);
+    SlotBuffer(/*size_t num_user, size_t num_justs*/);
     ~SlotBuffer()   { clear(); }
 
-    size_type       num_user_attrs() const noexcept { return _attrs_size; }
+    // size_type       num_user_attrs() const noexcept { return _attrs_size; }
+    // size_type       num_just_levels() const noexcept { return _justs_size; }
 
     iterator        begin() noexcept;
     const_iterator  begin() const noexcept;
@@ -145,9 +152,14 @@ public:
 
     iterator insert(const_iterator pos, value_type const &);
     iterator insert(const_iterator pos, value_type &&);
+    template <typename... Args>
+    iterator emplace(const_iterator pos, Args &&... args);
 
-    void push_back(value_type const &);
-    void push_back(value_type &&);
+    void push_back(value_type const &v);
+    void push_back(value_type &&v);
+
+    template <typename... Args>
+    void emplace_back(Args &&... args) { emplace(end(), std::forward(args)...); }
 
     void pop_back();
 
@@ -246,6 +258,17 @@ public:
     operator _iterator<T const>() const noexcept { return _iterator<T const>(_p); }
 };
 
+template <typename... Args>
+inline
+auto SlotBuffer::emplace(const_iterator pos, Args &&... args) -> iterator {
+    assert(pos._p);
+    auto node = new _node<value_type>(std::forward<Args>(args)...);
+    if (!node) return end();
+    node->link(*const_cast<_node_linkage *>(pos._p));
+    ++_size;
+    return iterator(node);
+}
+
 inline
 void SlotBuffer::swap(SlotBuffer & rhs) {
     SlotBuffer tmp{std::move(rhs)};
@@ -255,7 +278,7 @@ void SlotBuffer::swap(SlotBuffer & rhs) {
 
 inline 
 auto SlotBuffer::newSlot() -> iterator { 
-    auto r = _allocate_node(); 
+    auto r = _allocate_node(Slot()); 
     if (!r) return end();
     r->_next = r->_prev = nullptr; 
     return iterator(r); 

@@ -40,7 +40,7 @@ template<typename Callable>
 typename std::result_of<Callable()>::type
 Segment::subsegment(SlotBuffer::const_iterator first, SlotBuffer::const_iterator last, Callable body)
 {
-    SlotBuffer sub_slots(m_srope.num_user_attrs());
+    SlotBuffer sub_slots/*(m_srope.num_user_attrs(), m_srope.num_just_levels())*/;
     sub_slots.splice(sub_slots.end(), m_srope, first, last);
     m_srope.swap(sub_slots);
 
@@ -244,7 +244,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
 
 SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator pos)
 {
-    auto eSlot = slots().insert(pos, Slot());
+    auto eSlot = slots().insert(pos, Slot(numAttrs()));
     if (eSlot == slots().end()) return eSlot;
 
     const uint16 gid = silf()->endLineGlyphid();

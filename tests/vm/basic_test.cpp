@@ -105,14 +105,15 @@ int main(int argc, char *argv[])
 
     // run the program
     auto dummy_segment = grzeroalloc<Segment>(1);
-    SlotBuffer sb(32);
+    SlotBuffer sb;
     uint32 ret = 0;
     ShapingContext ctxt(*dummy_segment, 0, 0);
     Machine m(ctxt);
     ctxt.pushSlot(sb.newSlot());
     slotref * map = ctxt.map.begin();
+    auto slot_out = *map;
     for(size_t n = repeats; n; --n) {
-        ret = prog.run(m, map);
+        ret = prog.run(m, map, slot_out);
         switch (m.status()) {
             case Machine::stack_underflow:
             case Machine::stack_overflow:
