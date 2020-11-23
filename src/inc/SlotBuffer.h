@@ -116,7 +116,7 @@ public:
     void     freeSlot(iterator i);
 
     SlotBuffer(size_t num_user);
-    ~SlotBuffer();
+    ~SlotBuffer()   { clear(); }
 
     size_type       num_user_attrs() const noexcept { return _attrs_size; }
 

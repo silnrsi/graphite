@@ -81,6 +81,7 @@ namespace vm
 
 using instr = void *;
 using slotref = SlotBuffer::iterator;
+using const_slotref = SlotBuffer::iterator;
 
 enum {VARARGS = 0xff, MAX_NAME_LEN=32};
 
@@ -169,7 +170,8 @@ public:
 private:
     void    check_final_stack(const stack_t * const sp);
     stack_t run(const instr * program, const byte * data,
-                slotref * & map) HOT;
+                const_slotref *& slot_in,
+                slotref & slot_out) HOT;
 
     ShapingContext    & _ctxt;
     stack_t             _stack[STACK_MAX + 2*STACK_GUARD];
@@ -184,9 +186,9 @@ struct Machine::regbank  {
     Machine::status_t     & status;
     ShapingContext        & ctxt;
     Segment               & seg;
-    slotref *               map;
-    slotref *         const mapb;
-    slotref                 is;
+    slotref *               is;
+    slotref *         const isb;
+    slotref                 os;
     int8                    flags;
 };
 

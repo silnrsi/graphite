@@ -41,19 +41,12 @@ of the License or (at your option) any later version.
 #include "inc/Slot.h"
 #include "inc/Rule.h"
 
-// Disable the unused parameter warning as the compiler is mistaken since dp
-// is always updated (even if by 0) on every opcode.
-#ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
-
-#define registers           const byte * & dp, vm::Machine::stack_t * & sp, \
-                            vm::Machine::stack_t * const sb, vm::Machine::regbank & reg
+#define registers           vm::Machine::regbank & reg
 
 // These are required by opcodes.h and should not be changed
 #define STARTOP(name)       bool name(registers) REGPARM(4);\
                             bool name(registers) {
-#define ENDOP                   return (sp - sb)/Machine::STACK_MAX==0; \
+#define ENDOP                   return (reg.sp - reg.sb)/Machine::STACK_MAX==0; \
                             }
 
 #define EXIT(status)        { push(status); return false; }
@@ -76,7 +69,8 @@ namespace {
 
 Machine::stack_t  Machine::run(const instr   * program,
                                const byte    * data,
-                               slotref     * & map)
+                               const_slotref *& slot_in,
+                               slotref       & slot_out)
 
 {
     assert(program != nullptr);
@@ -90,19 +84,19 @@ Machine::stack_t  Machine::run(const instr   * program,
         _status,                            // reg.status
         _ctxt,                              // reg.ctxt
         _ctxt.segment,                      // reg.seg
-        map,                                // reg.map
-        _ctxt.map.begin()+_ctxt.context(),  // reg.mapb
-        *map,                               // reg.is
+        slot_in,                            // reg.is
+        _ctxt.map.begin()+_ctxt.context(),  // reg.isb
+        slot_out,                           // reg.os
         0,                                  // reg.flags
     };
 
     // Run the program
-    while ((reinterpret_cast<ip_t>(*++reg.ip))(reg.dp, reg.sp, reg.sb, reg)) {}
+    while ((reinterpret_cast<ip_t>(*++reg.ip))(reg)) {}
     const stack_t ret = reg.sp == _stack+STACK_GUARD+1 ? *reg.sp-- : 0;
 
     check_final_stack(reg.sp);
-    map = reg.map;
-    *map = reg.is;
+    slot_in = reg.is;
+    slot_out = reg.os;
     return ret;
 }
 

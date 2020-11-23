@@ -103,9 +103,10 @@ const opcode_t * Machine::getOpcodeTable() throw()
 }
 
 
-Machine::stack_t  Machine::run(const instr   * program,
-                               const byte    * data,
-                               slotref     * & is)
+Machine::stack_t  Machine::run(const instr   *   program,
+                               const byte    *   data,
+                               const_slotref * & slot_in,
+                               slotref         & slot_out)
 {
     assert(program != 0);
 
@@ -118,15 +119,15 @@ Machine::stack_t  Machine::run(const instr   * program,
         _status,                                // reg.status
         _ctxt,                                  // reg.ctxt
         _ctxt.segment,                          // reg.seg
-        is,                                     // reg.map
-        _ctxt.map.begin()+_ctxt.context(),      // reg.mapb
-        *is,                                    // reg.is
+        slot_in,                                     // reg.is
+        _ctxt.map.begin()+_ctxt.context(),      // reg.isb
+        slot_out,                                    // reg.os
         0,                                      // reg.flags
     };
 
     direct_run(&reg);
-    is = reg.map;
-    *is = reg.is;
+    slot_in = reg.is;
+    slot_out = reg.os;
     const stack_t ret = reg.sp == _stack+STACK_GUARD+1 ? *reg.sp-- : 0;
     check_final_stack(reg.sp);
     return ret;

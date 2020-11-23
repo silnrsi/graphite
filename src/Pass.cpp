@@ -410,14 +410,12 @@ bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) con
 
     if (m_numRules)
     {
-        SlotBuffer::iterator currHigh = std::next(s);
-
 #if !defined GRAPHITE2_NTRACING
         if (ctxt.dbgout)  *ctxt.dbgout << "rules" << json::array;
         json::closer rules_array_closer(ctxt.dbgout);
 #endif
 
-        ctxt.highwater(currHigh);
+        ctxt.highwater(std::next(s));
         int lc = m_iMaxLoop;
         do
         {
@@ -648,7 +646,7 @@ bool Pass::testPassConstraint(Machine & m) const
     ctxt.reset(dummy, 0);
     ctxt.pushSlot(ctxt.segment.slots().begin());
     auto map = ctxt.map.begin();
-    const uint32 ret = m_cPConstraint.run(m, map);
+    const uint32 ret = m_cPConstraint.run(m, map, dummy);
 
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = ctxt.segment.getFace()->logger();
@@ -676,7 +674,8 @@ bool Pass::testConstraint(const Rule & r, Machine & m) const
     for (int n = r.sort; n && map; --n, ++map)
     {
         if (!map[0].is_valid()) continue;
-        const int32 ret = r.constraint->run(m, map);
+        auto slot_out = *map;
+        const int32 ret = r.constraint->run(m, map, slot_out);
         if (!ret || m.status() != Machine::finished)
             return false;
     }
@@ -691,9 +690,10 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
     if (!*codeptr) return 0;
     ShapingContext   & ctxt = m.shaping_context();
     auto map = &ctxt.map[ctxt.context()];
+    slot_out = *map;
     ctxt.highpassed(false);
 
-    int32 ret = codeptr->run(m, map);
+    int32 ret = codeptr->run(m, map, slot_out);
 
     if (m.status() != Machine::finished)
     {
@@ -701,8 +701,6 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
         ctxt.highwater(slot_out);
         return 0;
     }
-
-    slot_out = *map;
     return ret;
 }
 

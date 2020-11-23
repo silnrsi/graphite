@@ -76,8 +76,8 @@ of the License or (at your option) any later version.
 
 #define push(n)             { *++reg.sp = n; }
 #define pop()               (*reg.sp--)
-#define slotat(x)           (reg.map[(x)])
-#define DIE                 { reg.is=reg.seg.slots().end(); reg.status = Machine::died_early; EXIT(1); }
+#define slotat(x)           (reg.is[(x)])
+#define DIE                 { reg.os=reg.seg.slots().end(); reg.status = Machine::died_early; EXIT(1); }
 #define POSITIONED          1
 
 STARTOP(nop)
@@ -200,14 +200,14 @@ STARTOP(gtr_eq)
 ENDOP
 
 STARTOP(next)
-    if (reg.map - &reg.ctxt.map[0] >= int(reg.ctxt.map.size())) DIE
-    if (reg.is != reg.seg.slots().end())
+    if (reg.is - &reg.ctxt.map[0] >= int(reg.ctxt.map.size())) DIE
+    if (reg.os != reg.seg.slots().end())
     {
-        if (reg.is == reg.ctxt.highwater())
+        if (reg.os == reg.ctxt.highwater())
             reg.ctxt.highpassed(true);
-        ++reg.is;
+        ++reg.os;
     }
-    ++reg.map;
+    ++reg.is;
 ENDOP
 
 //STARTOP(next_n)
@@ -218,14 +218,14 @@ ENDOP
 //ENDOP
 
 //STARTOP(copy_next)
-//     if (reg.is) ++reg.is;
-//     ++reg.map;
+//     if (reg.os) ++reg.os;
+//     ++reg.is;
 // ENDOP
 
 STARTOP(put_glyph_8bit_obs)
     declare_params(1);
     const unsigned int output_class = uint8(*param);
-    reg.is->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, 0));
+    reg.os->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(put_subs_8bit_obs)
@@ -238,39 +238,39 @@ STARTOP(put_subs_8bit_obs)
     if (slot != reg.seg.slots().end())
     {
         index = reg.seg.findClassIndex(input_class, slot->gid());
-        reg.is->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, index));
+        reg.os->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, index));
     }
 ENDOP
 
 STARTOP(put_copy)
     declare_params(1);
     const int  slot_ref = int8(*param);
-    if (reg.is != reg.seg.slots().end() && !reg.is->isDeleted())
+    if (reg.os != reg.seg.slots().end() && !reg.os->isDeleted())
     {
         auto ref = slotat(slot_ref);
-        if (ref != reg.seg.slots().end() && ref != reg.is)
+        if (ref != reg.seg.slots().end() && ref != reg.os)
         {
             int16 *tempUserAttrs = reg.is->userAttrs();
-            if (reg.is->attachedTo() || reg.is->firstChild()) DIE
+            if (reg.os->attachedTo() || reg.os->firstChild()) DIE
             memcpy(tempUserAttrs, ref->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
             memcpy(&*reg.is, &*ref, sizeof(Slot));
             reg.is->firstChild(NULL);
             reg.is->nextSibling(NULL);
             reg.is->userAttrs(tempUserAttrs);
-            if (reg.is->attachedTo())
-                reg.is->attachedTo()->child(&*reg.is);
+            if (reg.os->attachedTo())
+                reg.os->attachedTo()->child(&*reg.os);
         }
-        reg.is->markCopied(false);
-        reg.is->markDeleted(false);
+        reg.os->markCopied(false);
+        reg.os->markDeleted(false);
     }
 ENDOP
 
 STARTOP(insert)
     if (reg.ctxt.decMax() <= 0) DIE;
-    auto iss = reg.is;
+    auto iss = reg.os;
     while (iss != reg.seg.slots().end() && iss->isDeleted()) ++iss;
 
-    auto slot = reg.seg.slots().insert(iss, Slot());
+    auto slot = reg.seg.slots().insert(iss, Slot(reg.seg.numAttrs()));
     if (slot == reg.seg.slots().end()) DIE;
 
     switch ((slot == reg.seg.slots().begin()) << 1 | (iss == reg.seg.slots().end()))
@@ -295,23 +295,23 @@ STARTOP(insert)
             break;
     }
 
-    if (reg.is == reg.ctxt.highwater())
+    if (reg.os == reg.ctxt.highwater())
         reg.ctxt.highpassed(false);
-    reg.is = slot;
+    reg.os = slot;
     reg.seg.extendLength(1);
-    if (reg.map >= reg.ctxt.map.begin())
-        --reg.map;
+    if (reg.is >= reg.ctxt.map.begin())
+        --reg.is;
 ENDOP
 
 STARTOP(delete_)
-    if (reg.is == reg.seg.slots().end() || reg.is->isDeleted()) DIE
+    if (reg.os == reg.seg.slots().end() || reg.os->isDeleted()) DIE
     reg.seg.extendLength(-1);
-    reg.is->markDeleted(true);
-    if (reg.is == reg.ctxt.highwater())
-        reg.ctxt.highwater(std::next(reg.is));
+    reg.os->markDeleted(true);
+    if (reg.os == reg.ctxt.highwater())
+        reg.ctxt.highwater(std::next(reg.os));
 
-    auto n = reg.is;
-    if (reg.is != reg.seg.slots().begin()) --reg.is;
+    auto n = reg.os;
+    if (reg.os != reg.seg.slots().begin()) --reg.os;
 
     // reg.seg.slots().erase(n);
     std::prev(n).next(std::next(n));
@@ -335,8 +335,8 @@ STARTOP(assoc)
     }
     if (min > -1)   // implies max > -1
     {
-        reg.is->before(min);
-        reg.is->after(max);
+        reg.os->before(min);
+        reg.os->after(max);
     }
 ENDOP
 
@@ -347,7 +347,7 @@ STARTOP(cntxt_item)
     const size_t    iskip  = uint8(param[1]),
                     dskip  = uint8(param[2]);
 
-    if (reg.mapb + is_arg != reg.map)
+    if (reg.isb + is_arg != reg.is)
     {
         reg.ip += iskip;
         reg.dp += dskip;
@@ -359,7 +359,7 @@ STARTOP(attr_set)
     declare_params(1);
     const attrCode      slat = attrCode(uint8(*param));
     const          int  val  = pop();
-    reg.is->setAttr(reg.seg, slat, 0, val, reg.ctxt);
+    reg.os->setAttr(reg.seg, slat, 0, val, reg.ctxt);
 ENDOP
 
 STARTOP(attr_add)
@@ -371,8 +371,8 @@ STARTOP(attr_add)
         reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
         reg.flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(reg.is->getAttr(reg.seg, slat, 0));
-    reg.is->setAttr(reg.seg, slat, 0, int32_t(val + res), reg.ctxt);
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+    reg.os->setAttr(reg.seg, slat, 0, int32_t(val + res), reg.ctxt);
 ENDOP
 
 STARTOP(attr_sub)
@@ -384,24 +384,24 @@ STARTOP(attr_sub)
         reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
         reg.flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(reg.is->getAttr(reg.seg, slat, 0));
-    reg.is->setAttr(reg.seg, slat, 0, int32_t(res - val), reg.ctxt);
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+    reg.os->setAttr(reg.seg, slat, 0, int32_t(res - val), reg.ctxt);
 ENDOP
 
 STARTOP(attr_set_slot)
     declare_params(1);
     const attrCode  slat   = attrCode(uint8(*param));
-    const int       offset = int(reg.map - reg.ctxt.map.begin())*int(slat == gr_slatAttTo);
+    const int       offset = int(reg.is - reg.ctxt.map.begin())*int(slat == gr_slatAttTo);
     const int       val    = pop()  + offset;
-    reg.is->setAttr(reg.seg, slat, offset, val, reg.ctxt);
+    reg.os->setAttr(reg.seg, slat, offset, val, reg.ctxt);
 ENDOP
 
 STARTOP(iattr_set_slot)
     declare_params(2);
     const attrCode  slat = attrCode(uint8(param[0]));
     const uint8     idx  = uint8(param[1]);
-    const int       val  = int(pop()  + (reg.map - reg.ctxt.map.begin())*int(slat == gr_slatAttTo));
-    reg.is->setAttr(reg.seg, slat, idx, val, reg.ctxt);
+    const int       val  = int(pop()  + (reg.is - reg.ctxt.map.begin())*int(slat == gr_slatAttTo));
+    reg.os->setAttr(reg.seg, slat, idx, val, reg.ctxt);
 ENDOP
 
 STARTOP(push_slot_attr)
@@ -460,7 +460,7 @@ STARTOP(push_att_to_gattr_obs)
     if (slot != reg.seg.slots().end())
     {
         auto att = slot->attachedTo();
-        auto ref = att ? *att : *slot;
+        auto & ref = att ? *att : *slot;
         push(int32(reg.seg.glyphAttr(ref.gid(), glyph_attr)));
     }
 ENDOP
@@ -521,7 +521,7 @@ STARTOP(iattr_set)
     const attrCode      slat = attrCode(uint8(param[0]));
     const uint8         idx  = uint8(param[1]);
     const          int  val  = pop();
-    reg.is->setAttr(reg.seg, slat, idx, val, reg.ctxt);
+    reg.os->setAttr(reg.seg, slat, idx, val, reg.ctxt);
 ENDOP
 
 STARTOP(iattr_add)
@@ -534,8 +534,8 @@ STARTOP(iattr_add)
         reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
         reg.flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(reg.is->getAttr(reg.seg, slat, idx));
-    reg.is->setAttr(reg.seg, slat, idx, int32_t(val + res), reg.ctxt);
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+    reg.os->setAttr(reg.seg, slat, idx, int32_t(val + res), reg.ctxt);
 ENDOP
 
 STARTOP(iattr_sub)
@@ -548,8 +548,8 @@ STARTOP(iattr_sub)
         reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
         reg.flags |= POSITIONED;
     }
-    uint32_t res = uint32_t(reg.is->getAttr(reg.seg, slat, idx));
-    reg.is->setAttr(reg.seg, slat, idx, int32_t(res - val), reg.ctxt);
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+    reg.os->setAttr(reg.seg, slat, idx, int32_t(res - val), reg.ctxt);
 ENDOP
 
 STARTOP(push_proc_state)
@@ -572,7 +572,7 @@ STARTOP(put_subs)
     if (slot != reg.seg.slots().end())
     {
         int index = reg.seg.findClassIndex(input_class, slot->gid());
-        reg.is->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, index));
+        reg.os->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, index));
     }
 ENDOP
 
@@ -590,7 +590,7 @@ STARTOP(put_glyph)
     declare_params(2);
     const unsigned int output_class  = uint8(param[0]) << 8
                                      | uint8(param[1]);
-    reg.is->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, 0));
+    reg.os->setGlyph(reg.seg, reg.seg.getClassGlyph(output_class, 0));
 ENDOP
 
 STARTOP(push_glyph_attr)
@@ -612,7 +612,7 @@ STARTOP(push_att_to_glyph_attr)
     if (slot != reg.seg.slots().end())
     {
         auto att = slot->attachedTo();
-        auto ref = att ? *att : *slot;
+        auto & ref = att ? *att : *slot;
         push(int32(reg.seg.glyphAttr(ref.gid(), glyph_attr)));
     }
 ENDOP
@@ -622,16 +622,16 @@ STARTOP(temp_copy)
     reg.seg.slots().push_back(Slot());
     auto slot = --reg.seg.slots().end();
     int16 *tempUserAttrs = slot->userAttrs();
-    memcpy(&reg.seg.slots().back(), &*reg.is, sizeof(Slot));
-    memcpy(tempUserAttrs, reg.is->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
+    memcpy(&reg.seg.slots().back(), &*reg.os, sizeof(Slot));
+    memcpy(tempUserAttrs, reg.os->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
     slot->userAttrs(tempUserAttrs);
     slot->markCopied(true);
     reg.seg.slots().erase(slot);
-    *reg.map = slot;
+    *reg.is = slot;
 #else
     auto slot = reg.seg.newSlot();
-    if (slot == reg.seg.slots().end() || reg.is == reg.seg.slots().end()) DIE;
-    // copy slot reg.is into new slot
+    if (slot == reg.seg.slots().end() || reg.os == reg.seg.slots().end()) DIE;
+    // copy slot reg.os into new slot
     int16 *tempUserAttrs = slot->userAttrs();
     memcpy(&*slot, &*reg.is, sizeof(Slot));
     memcpy(tempUserAttrs, reg.is->userAttrs(), reg.seg.numAttrs() * sizeof(uint16));
@@ -639,9 +639,9 @@ STARTOP(temp_copy)
     slot->markCopied(true);
     // TODO: remove this once we're using gr::list methods. This is the
     // hack that, that enables the hack, that enables debug output.
-    slot.prev(std::prev(reg.is));
-    slot.next(std::next(reg.is));
-    *reg.map = slot;
+    slot.prev(std::prev(reg.os));
+    slot.next(std::next(reg.os));
+    *reg.is = slot;
 #endif
 ENDOP
 

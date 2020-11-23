@@ -62,11 +62,6 @@ SlotBuffer::SlotBuffer(SlotBuffer && rhs)
         _garbage.splice(*rhs._garbage._next, *rhs._garbage._prev);
 }
 
-SlotBuffer::~SlotBuffer()
-{
-    clear();
-}
-
 SlotBuffer & SlotBuffer::operator = (SlotBuffer && rhs) {
     clear();
     ::new (this) SlotBuffer(std::move(rhs));
@@ -125,14 +120,14 @@ SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
     return iterator(node);
 }
 
-void SlotBuffer::push_back(value_type const & slot)
+void SlotBuffer::push_back(value_type const & v)
 {
-    insert(end(), slot);
+    insert(end(), v);
 }
 
-void SlotBuffer::push_back(value_type && slot)
+void SlotBuffer::push_back(value_type && v)
 {
-    insert(end(), slot);
+    insert(end(), std::forward<value_type>(v));
 }
 
 void SlotBuffer::splice(const_iterator pos, SlotBuffer &other, const_iterator first, const_iterator last)

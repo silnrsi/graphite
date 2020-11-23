@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 #include <cmath>
 #include <limits>
 
+#include "inc/Main.h"
 #include "inc/Intervals.h"
 #include "inc/Segment.h"
 #include "inc/Slot.h"
@@ -274,7 +275,7 @@ float Zones::Exclusion::test_position(float origin) const {
 
 #if !defined GRAPHITE2_NTRACING
 
-void Zones::jsonDbgOut(Segment &seg) const {
+void Zones::jsonDbgOut(Segment &) const {
 
     if (_dbg)
     {
