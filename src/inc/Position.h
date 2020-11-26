@@ -31,7 +31,7 @@ namespace graphite2 {
 class Position
 {
 public:
-    Position() : x(0), y(0) { }
+    constexpr Position() : x(0), y(0) { }
     Position(const float inx, const float iny) : x(inx), y(iny) {}
     Position operator + (const Position& a) const { return Position(x + a.x, y + a.y); }
     Position operator - (const Position& a) const { return Position(x - a.x, y - a.y); }

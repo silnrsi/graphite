@@ -122,11 +122,11 @@ public:
     uint8 passBits() const { return m_passBits; }
     void mergePassBits(const uint8 val) { m_passBits &= val; }
     int16 glyphAttr(uint16 gid, uint16 gattr) const { const GlyphFace * p = m_face->glyphs().glyphSafe(gid); return p ? p->attrs()[gattr] : 0; }
-    int32 getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
+    int32 getGlyphMetric(Slot const *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
     float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
-    Slot *findRoot(Slot *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
-    int numAttrs() const { return m_silf->numUser(); }
+    Slot const *findRoot(Slot const *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
+    size_t numAttrs() const { return m_silf->numUser(); }
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
@@ -194,10 +194,10 @@ void Segment::finalise(const Font *font, bool reverse)
 }
 
 inline
-int32 Segment::getGlyphMetric(Slot *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const {
+int32 Segment::getGlyphMetric(Slot const * iSlot, uint8 metric, uint8 attrLevel, bool rtl) const {
     if (attrLevel > 0)
     {
-        Slot *is = findRoot(iSlot);
+        auto is = findRoot(iSlot);
         return is->clusterMetric(*this, metric, attrLevel, rtl);
     }
     else

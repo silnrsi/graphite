@@ -100,6 +100,11 @@ public:
     void                pop_back()              { assert(size() > 0); --m_last; }
     void                push_back(const value_type &v)   { if (m_last == m_end) reserve(size()+1); new (m_last++) value_type(v); }
 
+    template<typename... Args>
+    iterator            emplace(iterator p, Args &&... args) { p = _insert_default(p, 1); new (p) value_type(std::forward<Args>(args)...); return p; }
+    template<typename... Args>
+    reference           emplace_back(Args &&... args) { if (m_last == m_end) reserve(size()+1); return *new (m_last++) value_type(std::forward<Args>(args)...); }
+
     void                clear()                 { erase(begin(), end()); }
     iterator            erase(iterator p)       { return erase(p, std::next(p)); }
     iterator            erase(iterator first, iterator last);
@@ -154,7 +159,7 @@ typename vector<T>::iterator vector<T>::_insert_default(iterator p, size_type n)
     reserve(((size() + n + 7) >> 3) << 3);
     p = begin() + i;
     // Move tail if there is one
-    if (p != end()) memmove(p + n, p, distance(p,end())*sizeof(value_type));
+    if (p != end()) memmove(p + n, p, distance(p, end())*sizeof(value_type));
     m_last += n;
     return p;
 }

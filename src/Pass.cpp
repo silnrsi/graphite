@@ -51,6 +51,21 @@ enum KernCollison
     reserved   = 3
 };
 
+#if 0
+#include <iostream>
+namespace {
+
+    void dump_slotbuffer(SlotBuffer const & buf) {
+        std::cout << '[';
+        for (auto &s :buf) { std::cout << s.gid() << ", "; }
+        std::cout << ']' << std::endl;
+    }
+}
+#else
+namespace { void dump_slotbuffer(SlotBuffer const & ) {} }
+#endif
+
+
 Pass::Pass()
 : m_silf(0),
   m_cols(0),
@@ -399,14 +414,10 @@ bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) const
 {
     auto & segment = ctxt.segment;
-    auto s = segment.slots().begin();
-    if (s == segment.slots().end() || !testPassConstraint(m)) 
+    if (segment.slots().empty() || !testPassConstraint(m)) 
         return true;
     if (reverse)
-    {
         segment.reverseSlots();
-        s = segment.slots().begin();
-    }
 
     if (m_numRules)
     {
@@ -415,20 +426,24 @@ bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) con
         json::closer rules_array_closer(ctxt.dbgout);
 #endif
 
-        ctxt.highwater(std::next(s));
+        auto slot = segment.slots().begin();
+        ctxt.highwater(std::next(slot));
         int lc = m_iMaxLoop;
         do
         {
-            findNDoRule(s, m, ctxt);
+            dump_slotbuffer(ctxt.in);
+            findNDoRule(m, ctxt, slot);
+            dump_slotbuffer(ctxt.segment.slots());
             if (m.status() != Machine::finished) return false;
-            if (s != segment.slots().end() && (s == ctxt.highwater() || ctxt.highpassed() || --lc == 0)) {
+            if (slot != segment.slots().end() && (slot == ctxt.highwater() || ctxt.highpassed() || --lc == 0)) {
                 if (!lc)
-                    s = ctxt.highwater();
+                    slot = ctxt.highwater();
                 lc = m_iMaxLoop;
-                if (s != segment.slots().end())
-                    ctxt.highwater(std::next(s));
+                if (slot != segment.slots().end()) {
+                    ctxt.highwater(std::next(slot));
+                }
             }
-        } while (s != segment.slots().end());
+        } while (slot != segment.slots().end());
     }
     //TODO: Use enums for flags
     const bool collisions = m_numCollRuns || m_kernColls;
@@ -456,7 +471,7 @@ bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) con
     return true;
 }
 
-bool Pass::runFSM(ShapingContext& ctxt, SlotBuffer::iterator slot, Rules & rules) const
+bool Pass::runFSM(ShapingContext& ctxt, vm::const_slotref slot, Rules & rules) const
 {
     ctxt.reset(slot, m_maxPreCtxt);
     if (m_maxPreCtxt < m_minPreCtxt)
@@ -466,15 +481,17 @@ bool Pass::runFSM(ShapingContext& ctxt, SlotBuffer::iterator slot, Rules & rules
     uint8  free_slots = ShapingContext::MAX_SLOTS;
     do
     {
+        assert(!slot->isDeleted());
         ctxt.pushSlot(slot);
-        if (slot->gid() >= m_numGlyphs
-         || m_cols[slot->gid()] == 0xffffU
+        auto const gid = slot->gid();
+        if (gid >= m_numGlyphs
+         || m_cols[gid] == 0xffffU
          || --free_slots == 0
          || state >= m_numTransition)
             return free_slots != 0;
 
         const uint16 * transitions = &m_transitions[state*m_numColumns];
-        state = transitions[m_cols[slot->gid()]];
+        state = transitions[m_cols[gid]];
         if (state >= m_successStart)
             rules.accumulate_rules(m_states[state]);
 
@@ -485,7 +502,7 @@ bool Pass::runFSM(ShapingContext& ctxt, SlotBuffer::iterator slot, Rules & rules
     return true;
 }
 
-#if !defined GRAPHITE2_NTRACING
+#if !defined(GRAPHITE2_NTRACING)
 
 inline
 SlotBuffer::iterator input_slot(const ShapingContext &  ctxt, const int n)
@@ -502,7 +519,7 @@ SlotBuffer::iterator input_slot(const ShapingContext &  ctxt, const int n)
 
 #endif //!defined GRAPHITE2_NTRACING
 
-void Pass::findNDoRule(SlotBuffer::iterator & slot, Machine &m, ShapingContext & ctxt) const
+void Pass::findNDoRule(Machine &m, ShapingContext & ctxt, vm::const_slotref &slot) const
 {
     Rules rules;
 
@@ -661,7 +678,7 @@ bool Pass::testPassConstraint(Machine & m) const
 bool Pass::testConstraint(const Rule & r, Machine & m) const
 {
     auto & ctxt = m.shaping_context();
-    const uint16 curr_context = ctxt.context();
+    ptrdiff_t const curr_context = ctxt.context();
     if (unsigned(r.sort + curr_context - r.preContext) > ctxt.map.size()
         || curr_context - r.preContext < 0) return false;
 
@@ -705,39 +722,39 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
 }
 
 
-void Pass::adjustSlot(int delta, SlotBuffer::iterator & slot_out, ShapingContext & smap) const
+void Pass::adjustSlot(int delta, vm::const_slotref & slot, ShapingContext & smap) const
 {
-    if (slot_out == smap.segment.slots().end())
+    if (slot == smap.segment.slots().end())
     {
-        if (smap.highpassed() || slot_out == smap.highwater())
+        if (smap.highpassed() || slot == smap.highwater())
         {
-            slot_out = --smap.segment.slots().end();
+            slot = --smap.segment.slots().end();
             ++delta;
             if (smap.highwater() == smap.segment.slots().end())
                 smap.highpassed(false);
         }
         else
         {
-            slot_out = smap.segment.slots().begin();
+            slot = smap.segment.slots().begin();
             --delta;
         }
     }
     if (delta < 0)
     {
-        while (++delta <= 0 && slot_out != smap.segment.slots().end())
+        while (++delta <= 0 && slot != smap.segment.slots().end())
         {
-            --slot_out;
-            if (smap.highpassed() && smap.highwater() == slot_out)
+            --slot;
+            if (smap.highpassed() && smap.highwater() == slot)
                 smap.highpassed(false);
         }
     }
     else if (delta > 0)
     {
-        while (--delta >= 0 && slot_out != smap.segment.slots().end())
+        while (--delta >= 0 && slot != smap.segment.slots().end())
         {
-            if (slot_out == smap.highwater() && slot_out != smap.segment.slots().end())
+            if (slot == smap.highwater() && slot != smap.segment.slots().end())
                 smap.highpassed(true);
-            ++slot_out;
+            ++slot;
         }
     }
 }

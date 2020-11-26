@@ -42,7 +42,54 @@ class Slot;
 class ShapingContext;
 class Font;
 
-class Slot
+class Slot_data {
+protected:
+    constexpr Slot_data();
+    Slot_data(Slot_data const &) = default;
+    Slot_data(Slot_data &&) noexcept = default;
+    
+    Slot_data & operator = (Slot_data const &) = default;
+    Slot_data & operator = (Slot_data &&) noexcept = default;
+
+    Slot      * m_parent;   // index to parent we are attached to
+    Slot      * m_child;    // index to first child slot that attaches to us
+    Slot      * m_sibling;  // index to next child that attaches to our parent
+    Position    m_position; // absolute position of glyph
+    Position    m_shift;    // .shift slot attribute
+    Position    m_advance;  // .advance slot attribute
+    Position    m_attach;   // attachment point on us
+    Position    m_with;     // attachment point position on parent
+    float       m_just;     // Justification inserted space
+    uint32      m_original; // charinfo that originated this slot (e.g. for feature values)
+    uint32      m_before;   // charinfo index of before association
+    uint32      m_after;    // charinfo index of after association
+    uint32      m_index;    // slot index given to this slot during finalising
+    uint16      m_glyphid;  // glyph id
+    uint16      m_realglyphid;
+    byte        m_attLevel;    // attachment level
+    byte        m_bidiLevel;   // bidirectional level
+    int8        m_bidiCls;     // bidirectional class
+    struct {
+        bool    deleted: 1,
+                inserted: 1,
+                copied: 1,
+                positioned: 1,
+                attached: 1,
+                eol:1;
+    }        m_flags;       // holds bit flags
+    friend class Segment;
+};
+
+constexpr Slot_data::Slot_data()
+: m_parent{nullptr}, m_child{nullptr}, m_sibling{0}, 
+  m_just{0},
+  m_original{0}, m_before{0}, m_after{0}, m_index{0},
+  m_glyphid{0}, m_realglyphid{0},
+  m_attLevel{0}, m_bidiLevel{0}, m_bidiCls{0},
+  m_flags{false, false, false, false, false, false}
+{}
+
+class Slot : private Slot_data
 {
     static constexpr int NUMJUSTPARAMS = 5;
 
@@ -81,12 +128,18 @@ class Slot
     bool has_justify() const { return m_attrs.num_justs() != 0; };
     void init_just_infos(Segment const & seg);
 
+    attributes  m_attrs;
+#if !defined GRAPHITE2_NTRACING
+    uint8_t     m_gen;
+#endif
+
 public:
     struct iterator;
 
-    Slot(Slot const &) = delete;
-    Slot(Slot &&);
-    Slot & operator=(Slot const &) noexcept;
+    Slot(size_t num_attrs = 0) : m_attrs{num_attrs} {}
+    Slot(Slot const &);
+    Slot(Slot &&) noexcept;
+    Slot & operator=(Slot const &);
     Slot & operator=(Slot &&) noexcept;
 
     unsigned short gid() const { return m_glyphid; }
@@ -99,7 +152,6 @@ public:
     uint32 index() const { return m_index; }
     void index(uint32 val) { m_index = val; }
 
-    Slot(size_t num_attrs = 0);
     uint16 glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
     void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
@@ -143,7 +195,7 @@ public:
     void nextSibling(Slot *ap) { m_sibling = ap; }
     bool sibling(Slot *ap);
     bool removeChild(Slot *ap);
-    int32 clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl);
+    int32 clusterMetric(Segment const & seg, uint8 metric, uint8 attrLevel, bool rtl) const;
     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
     float just() const { return m_just; }
@@ -156,39 +208,29 @@ public:
     uintptr_t generation() const { return m_gen; }
 #endif
     CLASS_NEW_DELETE
-
-private:
-    Slot      * m_parent;   // index to parent we are attached to
-    Slot      * m_child;    // index to first child slot that attaches to us
-    Slot      * m_sibling;  // index to next child that attaches to our parent
-    Position    m_position; // absolute position of glyph
-    Position    m_shift;    // .shift slot attribute
-    Position    m_advance;  // .advance slot attribute
-    Position    m_attach;   // attachment point on us
-    Position    m_with;     // attachment point position on parent
-    attributes  m_attrs;
-    float       m_just;     // Justification inserted space
-    uint32      m_original; // charinfo that originated this slot (e.g. for feature values)
-    uint32      m_before;   // charinfo index of before association
-    uint32      m_after;    // charinfo index of after association
-    uint32      m_index;    // slot index given to this slot during finalising
-    uint16      m_glyphid;  // glyph id
-    uint16      m_realglyphid;
-    byte        m_attLevel;    // attachment level
-    byte        m_bidiLevel;   // bidirectional level
-    int8        m_bidiCls;     // bidirectional class
-    struct {
-        bool    deleted: 1,
-                inserted: 1,
-                copied: 1,
-                positioned: 1,
-                attached: 1,
-                eol:1;
-    }        m_flags;       // holds bit flags
-#if !defined GRAPHITE2_NTRACING
-    uint8_t   m_gen;
-#endif
-    friend class Segment;
 };
+
+inline
+Slot::Slot(Slot && rhs) noexcept
+: Slot_data(std::move(rhs)),
+  m_attrs(std::move(rhs.m_attrs))
+#if !defined GRAPHITE2_NTRACING
+  ,m_gen(rhs.m_gen)
+#endif
+{
+  m_parent = m_child = m_sibling = nullptr;
+}
+
+
+inline
+Slot::Slot(Slot const & rhs) 
+: Slot_data(rhs),
+  m_attrs(rhs.m_attrs)
+#if !defined GRAPHITE2_NTRACING
+  ,m_gen(rhs.m_gen)
+#endif
+{
+  m_parent = m_child = m_sibling = nullptr;
+}
 
 } // namespace graphite2

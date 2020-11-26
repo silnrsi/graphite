@@ -69,7 +69,7 @@ of the License or (at your option) any later version.
 
 #define binop(op)           const uint32 a = pop(); *reg.sp = uint32(*reg.sp) op a
 #define sbinop(op)          const int32 a = pop(); *reg.sp = int32(*reg.sp) op a
-#define use_params(n)       reg.dp += n
+#define use_params(n)       reg.dp += (n)
 
 #define declare_params(n)   const byte * param = reg.dp; \
                             use_params(n);

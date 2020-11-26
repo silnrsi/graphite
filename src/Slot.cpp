@@ -100,112 +100,27 @@ void Slot::init_just_infos(Segment const & seg)
     }
 }
 
-Slot::Slot(size_t num_attrs) :
-    m_parent{nullptr}, 
-    m_child{nullptr}, 
-    m_sibling{nullptr},
-    m_position{0, 0}, 
-    m_shift{0, 0}, 
-    m_advance{0, 0},
-    m_attach{0, 0}, 
-    m_with{0, 0}, 
-    m_attrs{num_attrs},
-    m_just{0},
-    m_original{0},
-    m_before{0},
-    m_after{0},
-    m_index{0},
-    m_glyphid{0}, 
-    m_realglyphid{0}, 
-    m_attLevel{0}, 
-    m_bidiLevel{0},
-    m_bidiCls{-1},
-    m_flags{false, false, false, false, false, false}
-{
-    assert(sizeof m_flags == 1);
-}
-
-Slot::Slot(Slot && rhs) noexcept
-: m_parent{nullptr},
-  m_child{nullptr},
-  m_sibling{nullptr},
-  m_position{std::move(rhs.m_position)},
-  m_shift{std::move(rhs.m_shift)},
-  m_advance{std::move(rhs.m_advance)},
-  m_attach{std::move(rhs.m_attach)},
-  m_with{std::move(rhs.m_with)},
-  m_attrs{std::move(rhs.m_attrs)},
-  m_just{std::move(rhs.m_just)},
-  m_original{std::move(rhs.m_original)},
-  m_before{std::move(rhs.m_before)},
-  m_after{std::move(rhs.m_after)},
-  m_index{std::move(rhs.m_index)},
-  m_glyphid{std::move(rhs.m_glyphid)},
-  m_realglyphid{std::move(rhs.m_realglyphid)},
-  m_attLevel{std::move(rhs.m_attLevel)},
-  m_bidiLevel{std::move(rhs.m_bidiLevel)},
-  m_bidiCls{std::move(rhs.m_bidiCls)},
-  m_flags{std::move(rhs.m_flags)}
-#if !defined GRAPHITE2_NTRACING
-  , m_gen{std::move(rhs.m_gen)}
-#endif
-{}
-
 Slot & Slot::operator = (Slot && rhs) noexcept 
 {
     if (this != &rhs)
     {
-        m_parent = nullptr;
-        m_child = nullptr;
-        m_sibling = nullptr;
+        Slot_data::operator=(std::move(rhs));
+        m_parent = m_child = m_sibling = nullptr;
         m_attrs = std::move(rhs.m_attrs);
-        m_glyphid = std::move(rhs.m_glyphid);
-        m_realglyphid = std::move(rhs.m_realglyphid);
-        m_original = std::move(rhs.m_original);
-        m_before = std::move(rhs.m_before);
-        m_after = std::move(rhs.m_after);
-        m_index = std::move(rhs.m_index);
-        m_position = std::move(rhs.m_position);
-        m_shift = std::move(rhs.m_shift);
-        m_advance = std::move(rhs.m_advance);
-        m_attach = std::move(rhs.m_attach);
-        m_with = std::move(rhs.m_with);
-        m_just = std::move(rhs.m_just);
-        m_flags = std::move(rhs.m_flags);
-        m_attLevel = std::move(rhs.m_attLevel);
-        m_bidiCls = std::move(rhs.m_bidiCls);
-        m_bidiLevel = std::move(rhs.m_bidiLevel);
 #if !defined GRAPHITE2_NTRACING
-        m_gen = std::move(rhs.m_gen);
+        m_gen = rhs.m_gen;
 #endif
     }
     return *this;
 }
 
-Slot & Slot::operator = (Slot const & rhs) noexcept
+Slot & Slot::operator = (Slot const & rhs)
 {
     if (this != &rhs)
     {
-        m_parent = nullptr;
-        m_child = nullptr;
-        m_sibling = nullptr;
+        Slot_data::operator=(rhs);
+        m_parent = m_child = m_sibling = nullptr;
         m_attrs = rhs.m_attrs;
-        m_glyphid = rhs.m_glyphid;
-        m_realglyphid = rhs.m_realglyphid;
-        m_original = rhs.m_original;
-        m_before = rhs.m_before;
-        m_after = rhs.m_after;
-        m_index = rhs.m_index;
-        m_position = rhs.m_position;
-        m_shift = rhs.m_shift;
-        m_advance = rhs.m_advance;
-        m_attach = rhs.m_attach;
-        m_with = rhs.m_with;
-        m_just = rhs.m_just;
-        m_flags = rhs.m_flags;
-        m_attLevel = rhs.m_attLevel;
-        m_bidiCls = rhs.m_bidiCls;
-        m_bidiLevel = rhs.m_bidiLevel;
 #if !defined GRAPHITE2_NTRACING
         m_gen = rhs.m_gen;
 #endif
@@ -289,14 +204,14 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
     return res;
 }
 
-int32 Slot::clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl)
+int32 Slot::clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl) const
 {
     Position base;
     if (glyph() >= seg.getFace()->glyphs().numGlyphs())
         return 0;
     Rect bbox = seg.theGlyphBBoxTemporary(glyph());
     float clusterMin = 0.;
-    Position res = finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);
+    Position res = const_cast<Slot *>(this)->finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);
 
     switch (metrics(metric))
     {

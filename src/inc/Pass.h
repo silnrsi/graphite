@@ -60,7 +60,7 @@ public:
 
     CLASS_NEW_DELETE
 private:
-    void    findNDoRule(SlotBuffer::iterator & iSlot, vm::Machine &, ShapingContext & ctxt) const;
+    void    findNDoRule(vm::Machine &, ShapingContext & ctxt, vm::const_slotref &slot) const;
     int     doAction(const vm::Machine::Code* codeptr, SlotBuffer::iterator & slot_out, vm::Machine &) const;
     bool    testPassConstraint(vm::Machine & m) const;
     bool    testConstraint(const Rule & r, vm::Machine &) const;
@@ -72,10 +72,10 @@ private:
     bool    readStates(const byte * starts, const byte * states, const byte * o_rule_map, Face &, Error &e);
     bool    readRanges(const byte * ranges, size_t num_ranges, Error &e);
     uint16  glyphToCol(const uint16 gid) const;
-    bool    runFSM(ShapingContext & ctxt, SlotBuffer::iterator slot, Rules &rules) const;
+    bool    runFSM(ShapingContext & ctxt, vm::const_slotref slot, Rules &rules) const;
     void    dumpRuleEventConsidered(ShapingContext const & ctxt, Rules::const_iterator first, Rules::const_iterator const & last) const;
     void    dumpRuleEventOutput(ShapingContext const & ctxt, Rule const & r, SlotBuffer::const_iterator const, SlotBuffer::const_iterator const) const;
-    void    adjustSlot(int delta, SlotBuffer::iterator & slot_out, ShapingContext &) const;
+    void    adjustSlot(int delta, vm::const_slotref & slot, ShapingContext &) const;
     bool    collisionShift(Segment & seg, int dir, json * const dbgout) const;
     bool    collisionKern(Segment & seg, int dir, json * const dbgout) const;
     bool    collisionFinish(Segment & seg, GR_MAYBE_UNUSED json * const dbgout) const;

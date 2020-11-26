@@ -177,7 +177,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
         bytecode_end,
         pre_context,
         rule_length,
-        silf.numClasses(),
+        uint16_t(silf.numClasses()),
         face.glyphs().numAttrs(),
         face.numFeatures(),
         {1,1,1,1,1,1,1,1,
@@ -186,7 +186,7 @@ Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte 
          1,1,1,1,1,1,0,0,
          0,0,0,0,0,0,0,0,
          0,0,0,0,0,0,0,0,
-         0,0,0,0,0,0,0, silf.numUser()}
+         0,0,0,0,0,0,0, byte(silf.numUser())}
     };
 
     decoder dec(lims, *this, pt);

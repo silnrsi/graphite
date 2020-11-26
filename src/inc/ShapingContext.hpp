@@ -40,7 +40,8 @@ public:
     static constexpr size_t MAX_SLOTS=64;
  
     using slotref = SlotBuffer::iterator;
-    using map_t = vector<slotref>;
+    using const_slotref = SlotBuffer::iterator;
+    using map_t = vector<const_slotref>;
 
 
     ShapingContext(Segment & seg, uint8_t direction, size_t maxSize);
@@ -51,8 +52,8 @@ public:
     void        pushSlot(slotref slot);
     void        collectGarbage(slotref & aSlot);
 
-    slotref     highwater() const;
-    void        highwater(slotref s);
+    const_slotref highwater() const;
+    void        highwater(const_slotref s);
     bool        highpassed() const;
     void        highpassed(bool v);
 
@@ -65,10 +66,10 @@ public:
     uint8 const dir;
 
 private:
-    SlotBuffer::iterator    _highwater;
-    int                     _max_size;
-    unsigned short          _precontext;
-    bool                    _highpassed;
+    const_slotref   _highwater;
+    int             _max_size;
+    unsigned short  _precontext;
+    bool            _highpassed;
 };
 
 
@@ -78,12 +79,12 @@ size_t ShapingContext::context() const {
 }
 
 inline
-auto ShapingContext::highwater() const -> slotref {
+auto ShapingContext::highwater() const -> const_slotref {
     return _highwater; 
 }
 
 inline
-void ShapingContext::highwater(slotref s) {
+void ShapingContext::highwater(const_slotref s) {
     _highwater = s; _highpassed = false; 
 }
 
