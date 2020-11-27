@@ -65,10 +65,8 @@ private:
 
         CLASS_NEW_DELETE;
         
-        _node(T && v) : _value(std::forward<T>(v)) {}
-
         template<typename... Args> 
-        _node(Args &&... args) { new (&_value) T(std::forward<Args>(args)...); }
+        _node(Args &&... args): _value(std::forward<Args>(args)...) {}
     };
 
     struct _head_node : public _node_linkage {
@@ -159,7 +157,7 @@ public:
     void push_back(value_type &&v);
 
     template <typename... Args>
-    void emplace_back(Args &&... args) { emplace(end(), std::forward(args)...); }
+    reference emplace_back(Args &&... args) { emplace(end(), std::forward<Args>(args)...); return back(); }
 
     void pop_back();
 

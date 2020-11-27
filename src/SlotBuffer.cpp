@@ -98,10 +98,9 @@ void SlotBuffer::_node_linkage::unlink()
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & slot)
 {
     assert(pos._p);
-    auto node = _allocate_node(Slot());
+    auto node = new _node<value_type>(std::forward<value_type const>(slot));
     if (!node) return end();
 
-    node->_value = slot;
     node->link(*const_cast<_node_linkage *>(pos._p));
 
     ++_size;
@@ -111,7 +110,7 @@ SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & s
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
 {
     assert(pos._p);
-    auto node = _allocate_node(std::move(slot));
+    auto node = new _node<value_type>(std::forward<value_type>(slot));
     if (!node) return end();
 
     node->link(*const_cast<_node_linkage *>(pos._p));
@@ -122,7 +121,7 @@ SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
 
 void SlotBuffer::push_back(value_type const & v)
 {
-    insert(end(), v);
+    insert(end(), std::forward<value_type const>(v));
 }
 
 void SlotBuffer::push_back(value_type && v)

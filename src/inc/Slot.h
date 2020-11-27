@@ -96,19 +96,24 @@ class Slot : private Slot_data
     union attributes {
     private:
         struct {
-            uint8_t size;
+            #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+            uint8_t n_attrs;
+            #endif
             int16_t data[sizeof(uintptr_t)/sizeof(int16_t)-1];
+            #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            uint8_t n_attrs;
+            #endif
         }   local;
         struct { 
-            uint8_t n_attrs, n_justs; 
+            uint8_t n_attrs, n_justs;
             int16_t data[1]; 
         } * external;
 
         bool is_inline() const { return !external || uintptr_t(external) & 0x3;}
 
     public:
-        attributes(size_t n_attrs, size_t n_justs = 0): external(nullptr) { reserve(n_attrs, n_justs); }
-        attributes(attributes const & rhs): external{rhs.external} { operator = (rhs); }
+        attributes(size_t n_attrs, size_t n_justs = 0): external{nullptr} { reserve(n_attrs, n_justs); }
+        attributes(attributes const & rhs): external{nullptr} { operator = (rhs); }
         attributes(attributes && rhs) noexcept : external{rhs.external} { rhs.external = nullptr; }
         ~attributes() noexcept { if (!is_inline()) free(external); }
 
@@ -116,7 +121,7 @@ class Slot : private Slot_data
         attributes & operator = (attributes const & rhs);
         attributes & operator = (attributes && rhs) noexcept;
 
-        size_t num_attrs() const { return is_inline() ? local.size : external->n_attrs + 1; }
+        size_t num_attrs() const { return is_inline() ? local.n_attrs : external->n_attrs; }
         size_t num_justs() const { return is_inline() ? 0 : external->n_justs; }
 
         int16_t       * user_attributes() { return is_inline() ? local.data : external->data; }

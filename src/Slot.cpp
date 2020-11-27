@@ -40,8 +40,9 @@ auto Slot::attributes::operator = (attributes const & rhs) -> attributes & {
     if (this != &rhs) {
         reserve(rhs.num_attrs(), rhs.num_justs());
         if (!rhs.is_inline() && external) {
-            auto const sz = external->n_attrs + external->n_justs*NUMJUSTPARAMS + 1;
-            memcpy(external, rhs.external, sz);
+            auto const sz = external->n_attrs 
+                            + external->n_justs*NUMJUSTPARAMS + 1;
+            memcpy(external, rhs.external, sz+sizeof(uint16_t));
         } else local = rhs.local;
     }
     return *this;
@@ -70,18 +71,18 @@ void Slot::attributes::reserve(size_t target_num_attrs, size_t target_num_justs)
         if (is_inline()) {  // Convert to non-inline form.
             auto box = reinterpret_cast<decltype(external)>(grzeroalloc<int16_t>(sz));
             if (box) {
-                if (local.size) memcpy(box->data, local.data, local.size*sizeof *local.data);
+                if (local.n_attrs) memcpy(box->data, local.data, local.n_attrs*sizeof *local.data);
                 external = box;
-                external->n_attrs = target_num_attrs-1;
+                external->n_attrs = target_num_attrs;
                 external->n_justs = target_num_justs;
             }
         } else { // Grow the existing buffer.
             external = static_cast<decltype(external)>(realloc(external, sz*sizeof *local.data));
-            external->n_attrs = target_num_attrs-1;
+            external->n_attrs = target_num_attrs;
             external->n_justs = target_num_justs;
         }
     }
-    else local.size = target_num_attrs;
+    else local.n_attrs = target_num_attrs;
 }
 
 
