@@ -11,22 +11,22 @@ set(DOC_DEPENDS)
 if(A2X)
     if(DBLATEX)
         add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/manual.pdf
-                           DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.asc
-                           COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.asc)
+                           DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.adoc
+                           COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.adoc)
         add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/GTF.pdf
-                           DEPENDS ${PROJECT_SOURCE_DIR}/GTF.asc
-                                   ${PROJECT_SOURCE_DIR}/OpCodes.asc
-                           COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.asc)
+                           DEPENDS ${PROJECT_SOURCE_DIR}/GTF.adoc
+                                   ${PROJECT_SOURCE_DIR}/OpCodes.adoc
+                           COMMAND ${A2X} --icons -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.adoc)
         set(DOC_DEPENDS ${PROJECT_BINARY_DIR}/manual.pdf ${PROJECT_BINARY_DIR}/GTF.pdf)
     endif()
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/manual.html
-                       DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.asc ${PROJECT_SOURCE_DIR}/graphite.css
-                       COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.asc)
+                       DEPENDS ${PROJECT_SOURCE_DIR}/[a-z]*.adoc ${PROJECT_SOURCE_DIR}/graphite.css
+                       COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/manual.adoc)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/GTF.html
-                       DEPENDS ${PROJECT_SOURCE_DIR}/GTF.asc
-                               ${PROJECT_SOURCE_DIR}/OpCodes.asc
+                       DEPENDS ${PROJECT_SOURCE_DIR}/GTF.adoc
+                               ${PROJECT_SOURCE_DIR}/OpCodes.adoc
                                ${PROJECT_SOURCE_DIR}/graphite.css
-                       COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.asc)
+                       COMMAND ${A2X} -f xhtml --stylesheet=graphite.css -D ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/GTF.adoc)
     set(DOC_DEPENDS ${DOC_DEPENDS} ${PROJECT_BINARY_DIR}/manual.html ${PROJECT_BINARY_DIR}/GTF.html)
 endif()
 

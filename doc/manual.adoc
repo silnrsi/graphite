@@ -1,0 +1,12 @@
+= Graphite2 Manual =
+Martin Hosken <martin_hosken@sil.org>
+
+:numbered:
+
+include::intro.adoc[]
+include::building.adoc[]
+include::calling.adoc[]
+include::features.adoc[]
+include::font.adoc[]
+include::hacking.adoc[]
+include::testing.adoc[]
