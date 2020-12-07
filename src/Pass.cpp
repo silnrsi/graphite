@@ -50,19 +50,34 @@ enum KernCollison
     InWord     = 2,
     reserved   = 3
 };
+#undef DUMP_SLOTS
 
-#if 0
+#if defined(DUMP_SLOTS)
 #include <iostream>
+#include <unordered_map>
 namespace {
 
-    void dump_slotbuffer(SlotBuffer const & buf) {
+    void dump_slotbuffer(SlotBuffer const & buf, SlotBuffer::const_iterator cursor) {
         std::cout << '[';
-        for (auto &s :buf) { std::cout << s.gid() << ", "; }
+        std::unordered_map<decltype(cursor)::pointer, int> map = {{nullptr, -1}};
+        { auto n = 0; for (auto &s :buf) map[&s] = n++; }
+        for (auto &s :buf) {
+            assert(0 <= map[&s] && size_t(map[&s]) < buf.size());
+            if (&*cursor == &s) std::cout << "|";
+            std::cout << s.gid() << (u8"\u02df" + 2*int(!s.isDeleted()))
+                << "(<" 
+                        << (s.attachedTo() ? map[s.attachedTo()]-map[&s] : 0) 
+                        << '@'
+                        << s.attachOffset().x <<','<< s.attachOffset().y 
+                    << ">,"
+                    << s.before() << ',' << s.after()
+                << "), ";
+        }
         std::cout << ']' << std::endl;
     }
 }
 #else
-namespace { void dump_slotbuffer(SlotBuffer const & ) {} }
+namespace { void dump_slotbuffer(SlotBuffer const &, SlotBuffer::const_iterator  ) {} }
 #endif
 
 
@@ -429,11 +444,11 @@ bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) con
         auto slot = segment.slots().begin();
         ctxt.highwater(std::next(slot));
         int lc = m_iMaxLoop;
+        dump_slotbuffer(ctxt.segment.slots(), slot);
         do
         {
-            dump_slotbuffer(ctxt.in);
             findNDoRule(m, ctxt, slot);
-            dump_slotbuffer(ctxt.segment.slots());
+            dump_slotbuffer(ctxt.segment.slots(), slot);
             if (m.status() != Machine::finished) return false;
             if (slot != segment.slots().end() && (slot == ctxt.highwater() || ctxt.highpassed() || --lc == 0)) {
                 if (!lc)
