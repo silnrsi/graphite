@@ -166,7 +166,7 @@ class JsonLog(object):
 
 
 def LineReader(infile, spliton=None):
-    f = codecs.open(infile, encoding="utf_8")
+    f = codecs.open(infile, encoding="utf_8_sig")
     for t in f.readlines():
         s = t.strip()
         if spliton is not None:
