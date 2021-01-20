@@ -106,7 +106,7 @@ public:
     size_t        maxRef() const throw()            { return _max_ref; }
     void          externalProgramMoved(ptrdiff_t) throw();
 
-    int32 run(Machine &m, const_slotref * & slot_in, slotref & slot_out) const;
+    int32 run(Machine &m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const;
 
     CLASS_NEW_DELETE;
 };

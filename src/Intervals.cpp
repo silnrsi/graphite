@@ -282,7 +282,7 @@ void Zones::jsonDbgOut(Segment &) const {
         for (Zones::idebugs s = dbgs_begin(), e = dbgs_end(); s != e; ++s)
         {
             *_dbg << json::flat << json::array
-                << objectid(static_cast<Slot *>(s->_env[0]))
+                << objectid(SlotBuffer::const_iterator::from(static_cast<Slot *>(s->_env[0])))
                 << reinterpret_cast<ptrdiff_t>(s->_env[1]);
             if (s->_isdel)
                 *_dbg << "remove" << Position(s->_excl.x, s->_excl.xm);

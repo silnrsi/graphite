@@ -189,7 +189,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     const SlotCollision *cslot = seg.collisionInfo(s);
 
     j << json::object
-        << "id"             << objectid(ds.second)
+        << "id"             << objectid(SlotBuffer::const_iterator::from(ds.second))
         << "gid"            << s.gid()
         << "charinfo" << json::flat << json::object
             << "original"       << s.original()
@@ -208,7 +208,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         j << "bidi"     << s.getBidiLevel();
     if (!s.isBase())
         j << "parent" << json::flat << json::object
-            << "id"             << objectid(s.attachedTo())
+            << "id"             << objectid(SlotBuffer::const_iterator::from(s.attachedTo()))
             << "level"          << s.getAttr(seg, gr_slatAttLevel, 0)
             << "offset"         << s.attachOffset()
             << json::close;
@@ -220,7 +220,7 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     {
         j   << "children" << json::flat << json::array;
         for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
-            j   << objectid(c);
+            j   << objectid(SlotBuffer::const_iterator::from(c));
         j       << json::close;
     }
     if (cslot)

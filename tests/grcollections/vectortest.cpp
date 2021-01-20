@@ -8,21 +8,12 @@
 
 namespace gr2 = graphite2;
 
-void printVector(std::vector<int> & v)
+template<typename T>
+void printVector(T & v)
 {
     for (size_t i = 0; i < v.size(); i++)
     {
         printf("%d ", v[i]);
-    }
-    printf("\n");
-}
-
-void printList(gr2::vector<int> & v)
-{
-    for (size_t i = 0; i < v.size(); i++)
-    {
-        printf("%d ", v[i]);
-        fflush(stdout);
     }
     printf("\n");
 }
@@ -93,7 +84,7 @@ int main(int /*argc*/, char ** /*argv*/)
 
 
     printVector(stdVector);
-    printList(grList);
+    printVector(grList);
     assert(stdVector.size() == grList.size());
     for (size_t i = 0; i < stdVector.size(); i++)
     {
@@ -149,9 +140,9 @@ int main(int /*argc*/, char ** /*argv*/)
     stdVector2.insert(stdVector2.begin(), stdVector.begin(), stdVector.end());
     grList2.insert(grList2.begin(), grList.begin(), grList.end());
 
-    printList(grList);
+    printVector(grList);
     printVector(stdVector2);
-    printList(grList2);
+    printVector(grList2);
 
     for (int i = 0; i < 4; i++)
     {
@@ -161,9 +152,9 @@ int main(int /*argc*/, char ** /*argv*/)
     stdVector2.insert(stdVector2.begin(), stdVector.begin(), stdVector.end());
     grList2.insert(grList2.begin(), grList.begin(), grList.end());
 
-    printList(grList);
+    printVector(grList);
     printVector(stdVector2);
-    printList(grList2);
+    printVector(grList2);
 
     for (int i = 0; i < 4; i++)
     {
@@ -173,9 +164,9 @@ int main(int /*argc*/, char ** /*argv*/)
     stdVector2.insert(stdVector2.end(), stdVector.begin(), stdVector.end());
     grList2.insert(grList2.end(), grList.begin(), grList.end());
 
-    printList(grList);
+    printVector(grList);
     printVector(stdVector2);
-    printList(grList2);
+    printVector(grList2);
     assert(stdVector2.size() == grList2.size());
     for (size_t i = 0; i < stdVector2.size(); i++)
     {

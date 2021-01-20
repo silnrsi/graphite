@@ -42,14 +42,13 @@ class Slot;
 class ShapingContext;
 class Font;
 
-class Slot_data {
-protected:
-    constexpr Slot_data();
-    Slot_data(Slot_data const &) = default;
-    Slot_data(Slot_data &&) noexcept = default;
+struct Slot_data {
+    // constexpr Slot_data() = default;
+    // Slot_data(Slot_data const &) = default;
+    // Slot_data(Slot_data &&) noexcept = default;
     
-    Slot_data & operator = (Slot_data const &) = default;
-    Slot_data & operator = (Slot_data &&) noexcept = default;
+    // Slot_data & operator = (Slot_data const &) = default;
+    // Slot_data & operator = (Slot_data &&) noexcept = default;
 
     Slot      * m_parent;   // index to parent we are attached to
     Slot      * m_child;    // index to first child slot that attaches to us
@@ -80,14 +79,15 @@ protected:
     friend class Segment;
 };
 
-constexpr Slot_data::Slot_data()
-: m_parent{nullptr}, m_child{nullptr}, m_sibling{0}, 
-  m_just{0},
-  m_original{0}, m_before{0}, m_after{0}, m_index{0},
-  m_glyphid{0}, m_realglyphid{0},
-  m_attLevel{0}, m_bidiLevel{0}, m_bidiCls{0},
-  m_flags{false, false, false, false, false, false}
-{}
+
+// constexpr Slot_data::Slot_data()
+// : m_parent{nullptr}, m_child{nullptr}, m_sibling{nullptr}, 
+//   m_just{0},
+//   m_original{0}, m_before{0}, m_after{0}, m_index{0},
+//   m_glyphid{0}, m_realglyphid{0},
+//   m_attLevel{0}, m_bidiLevel{0}, m_bidiCls{0},
+//   m_flags{false, false, false, false, false, false}
+// {}
 
 class Slot : private Slot_data
 {
@@ -112,6 +112,7 @@ class Slot : private Slot_data
         bool is_inline() const { return !external || uintptr_t(external) & 0x3;}
 
     public:
+        constexpr attributes(): external{nullptr} {}
         attributes(size_t n_attrs, size_t n_justs = 0): external{nullptr} { reserve(n_attrs, n_justs); }
         attributes(attributes const & rhs): external{nullptr} { operator = (rhs); }
         attributes(attributes && rhs) noexcept : external{rhs.external} { rhs.external = nullptr; }
@@ -139,9 +140,19 @@ class Slot : private Slot_data
 #endif
 
 public:
+    struct sentinal {};
+
     struct iterator;
 
-    Slot(size_t num_attrs = 0) : m_attrs{num_attrs} {}
+    constexpr Slot(sentinal const &)
+    : Slot_data{nullptr, nullptr, nullptr, {}, {}, {}, {}, {}, 0, 0, 0, 0, -1u, uint16_t(-1), uint16_t(-1), 0, 0, 0, {true,false,false,true,false,true}},
+      m_attrs{}
+#if !defined GRAPHITE2_NTRACING
+      , m_gen{0}
+#endif
+    {}
+
+    Slot(size_t num_attrs = 0) : Slot_data{}, m_attrs{num_attrs} {}
     Slot(Slot const &);
     Slot(Slot &&) noexcept;
     Slot & operator=(Slot const &);

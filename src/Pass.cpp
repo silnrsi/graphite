@@ -440,6 +440,7 @@ bool Pass::runGraphite(vm::Machine & m, ShapingContext & ctxt, bool reverse) con
         if (ctxt.dbgout)  *ctxt.dbgout << "rules" << json::array;
         json::closer rules_array_closer(ctxt.dbgout);
 #endif
+        segment.slots().reserve(segment.slots().size()*10);
 
         auto slot = segment.slots().begin();
         ctxt.highwater(std::next(slot));
@@ -562,17 +563,12 @@ void Pass::findNDoRule(Machine &m, ShapingContext & ctxt, vm::const_slotref &slo
                     // We need to record the slot preceeding this one as the
                     // current slot could be inserted before, deleted or
                     // replaced during action code execution.
-                    auto last_context_slot = slot == ctxt.segment.slots().begin() 
-                        ? SlotBuffer::const_iterator() 
-                        : --slot;
+                    auto last_context_index = std::distance(ctxt.segment.slots().begin(), slot);
                     const int adv = doAction(r->rule->action, slot, m);
                     dumpRuleEventOutput(
                             ctxt, 
                             *r->rule,
-                            // The begining slot can be different if insertion/deletion has occured.
-                            last_context_slot.is_valid() 
-                                ? ++last_context_slot 
-                                : ctxt.segment.slots().begin(), 
+                            std::next(ctxt.segment.slots().begin(), last_context_index),
                             slot);
                     if (r->rule->action->deletes()) ctxt.collectGarbage(slot);
                     adjustSlot(adv, slot, ctxt);
@@ -739,24 +735,9 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
 
 void Pass::adjustSlot(int delta, vm::const_slotref & slot, ShapingContext & smap) const
 {
-    if (slot == smap.segment.slots().end())
-    {
-        if (smap.highpassed() || slot == smap.highwater())
-        {
-            slot = --smap.segment.slots().end();
-            ++delta;
-            if (smap.highwater() == smap.segment.slots().end())
-                smap.highpassed(false);
-        }
-        else
-        {
-            slot = smap.segment.slots().begin();
-            --delta;
-        }
-    }
     if (delta < 0)
     {
-        while (++delta <= 0 && slot != smap.segment.slots().end())
+        while (++delta <= 0 && slot != smap.segment.slots().begin())
         {
             --slot;
             if (smap.highpassed() && smap.highwater() == slot)
@@ -1005,7 +986,8 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     Position zero(0., 0.);
 
     // Look for collisions with the neighboring glyphs.
-    for (auto nbor = start; nbor != seg.slots().end(); isRev ? --nbor : ++nbor)
+    auto const last = isRev ? std::prev(seg.slots().cbegin()) : seg.slots().cend();
+    for (auto nbor = start; nbor != last; isRev ? --nbor : ++nbor)
     {
         SlotCollision *cNbor = seg.collisionInfo(*nbor);
         bool sameCluster = nbor->isChildOf(&*base);

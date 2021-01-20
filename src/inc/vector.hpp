@@ -32,15 +32,16 @@ of the License or (at your option) any later version.
 #include <cassert>
 #include <cstring>
 #include <cstdlib>
+#include <iterator>
 #include <new>
 
 #include "Main.h"
 
 namespace graphite2 {
 
-template <typename T>
-inline
-ptrdiff_t distance(T* first, T* last) { return last-first; }
+// template <typename T>
+// inline
+// ptrdiff_t distance(T* first, T* last) { return last-first; }
 
 
 template <typename T>
@@ -52,11 +53,15 @@ public:
     using size_type = size_t;
     using difference_type = ptrdiff_t;
     using reference = T&;
-    using const_reference = const T&;
+    using const_reference = T const &;
+    using pointer = T*;
+    using const_pointer = T const *;
     using iterator = T*;
-    using const_iterator = const T*;
+    using const_iterator = T const *;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    vector() : m_first{nullptr}, m_last{nullptr}, m_end{nullptr} {}
+    constexpr vector() : m_first{nullptr}, m_last{nullptr}, m_end{nullptr} {}
     vector(size_type n, const value_type& value) : vector<T>() { insert(begin(), n, value); }
     explicit vector(size_type n) : vector<T>(n, T()) {}
     template<class It>
@@ -67,9 +72,11 @@ public:
     ~vector() { clear(); free(m_first); }
 
     iterator            begin()         { return m_first; }
+    const_iterator      cbegin() const  { return m_first; }
     const_iterator      begin() const   { return m_first; }
 
     iterator            end()           { return m_last; }
+    const_iterator      cend() const    { return m_last; }          
     const_iterator      end() const     { return m_last; }
 
     bool                empty() const   { return m_first == m_last; }
@@ -93,24 +100,26 @@ public:
     template<class It>
     void                assign(It first, It last)      { clear(); insert(begin(), first, last); }
     void                assign(std::initializer_list<T> ilist)  { assign(ilist.begin(), ilist.end()); }
-    iterator            insert(iterator p, const value_type & x) { p = _insert_default(p, 1); new (p) value_type(x); return p; }
-    void                insert(iterator p, size_type n, const T & x);
+    iterator            insert(const_iterator p, const value_type & x) { auto n = _insert_default(p, 1); new (n) value_type(x); return n; }
+    iterator            insert(const_iterator p, value_type && x) { auto n = _insert_default(p, 1); new (n) value_type(std::move(x)); return n; }
+    iterator            insert(const_iterator p, size_type n, const T & x);
     template<class It>
-    void                insert(iterator p, It first, It last);
+    iterator            insert(const_iterator p, It first, It last);
     void                pop_back()              { assert(size() > 0); --m_last; }
     void                push_back(const value_type &v)   { if (m_last == m_end) reserve(size()+1); new (m_last++) value_type(v); }
+    void                push_back(value_type && v)       { if (m_last == m_end) reserve(size()+1); new (m_last++) value_type(std::move(v)); }
 
     template<typename... Args>
-    iterator            emplace(iterator p, Args &&... args) { p = _insert_default(p, 1); new (p) value_type(std::forward<Args>(args)...); return p; }
+    iterator            emplace(const_iterator p, Args &&... args) { auto n = _insert_default(p, 1); new (n) value_type(std::forward<Args>(args)...); return n; }
     template<typename... Args>
     reference           emplace_back(Args &&... args) { if (m_last == m_end) reserve(size()+1); return *new (m_last++) value_type(std::forward<Args>(args)...); }
 
     void                clear()                 { erase(begin(), end()); }
-    iterator            erase(iterator p)       { return erase(p, std::next(p)); }
-    iterator            erase(iterator first, iterator last);
+    iterator            erase(const_iterator p)       { return erase(p, std::next(p)); }
+    iterator            erase(const_iterator first, const_iterator last);
 
 private:
-    iterator            _insert_default(iterator p, size_type n);
+    iterator            _insert_default(const_iterator p, size_type n);
 };
 
 template <typename T>
@@ -152,49 +161,55 @@ vector<T> & vector<T>::operator = (vector<T> && rhs) {
 
 template<typename T>
 inline
-typename vector<T>::iterator vector<T>::_insert_default(iterator p, size_type n)
+auto vector<T>::_insert_default(const_iterator p, size_type n) -> iterator 
 {
     assert(begin() <= p && p <= end());
-    const ptrdiff_t i = p - begin();
+    const ptrdiff_t d = p - begin();
     reserve(((size() + n + 7) >> 3) << 3);
-    p = begin() + i;
+    auto i = begin() + d;
     // Move tail if there is one
-    if (p != end()) memmove(p + n, p, distance(p, end())*sizeof(value_type));
+    if (i != end()) memmove(i + n, i, std::distance(i, end())*sizeof(value_type));
     m_last += n;
-    return p;
+    return i;
 }
 
 template<typename T>
 inline
-void vector<T>::insert(iterator p, size_type n, const T & x)
+auto vector<T>::insert(const_iterator p, size_type n, const T & x) -> iterator 
 {
-    p = _insert_default(p, n);
+    auto const i = _insert_default(p, n);
     // Copy in elements
-    for (; n; --n, ++p) { new (p) value_type(x); }
+    for (auto u = i; n; --n, ++u) { new (u) value_type(x); }
+    return i;
 }
 
 template<typename T>
 template<class It>
 inline
-void vector<T>::insert(iterator p, It first, It last)
+auto vector<T>::insert(const_iterator p, It first, It last) -> iterator
 {
-    p = _insert_default(p, distance(first, last));
+    auto const i = _insert_default(p, std::distance(first, last));
     // Copy in elements
-    for (;first != last; ++first, ++p) { new (p) value_type(*first); }
+    for (auto u = i;first != last; ++first, ++u) { new (u) value_type(*first); }
+    return i;
 }
 
 template<typename T>
 inline
-typename vector<T>::iterator vector<T>::erase(iterator first, iterator last)
+auto vector<T>::erase(const_iterator first, const_iterator last) -> iterator
 {
     if (first != last)
     {
-        for (iterator e = first; e != last; ++e) e->~value_type();
-        auto const sz = distance(first, last);
-        if (m_last != last) memmove(first, last, distance(last,end())*sizeof(value_type));
+        
+        for (iterator e = const_cast<iterator>(first); e != last; ++e) 
+            e->~value_type();
+        auto const sz = std::distance(first, last);
+        if (m_last != last) memmove(const_cast<iterator>(first), 
+                                    last, 
+                                    std::distance(last, cend())*sizeof(value_type));
         m_last -= sz;
     }
-    return first;
+    return const_cast<iterator>(first);
 }
 
 } // namespace graphite2

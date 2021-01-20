@@ -47,20 +47,18 @@ void ShapingContext::reset(SlotBuffer::iterator & slot, short unsigned int max_p
     int pre_ctxt = 0;
     for (; pre_ctxt != max_pre_ctxt && slot != segment.slots().begin(); ++pre_ctxt, --slot);
     _precontext = pre_ctxt; 
-    segment.slots().collect_garbage();
     map.clear();
     in.clear();
 }
 
-void ShapingContext::collectGarbage(slotref &aSlot)
+void ShapingContext::collectGarbage(slotref &)
 {
-    for(auto s = map.begin(), se = map.end(); s != se; ++s) {
-        auto & slot = *s;
-        if(slot != segment.slots().end() && (slot->isDeleted() || slot->isCopied()))
-        {
-            if (slot == aSlot)
-                aSlot = slot != segment.slots().begin() ? std::prev(slot) : std::next(slot);
+    auto const end = map.begin()-1;
+    auto si = map.end()-1;
+    for(;si != end; --si) {
+        auto slot = *si;
+        if (slot != segment.slots().end() 
+        &&  slot->isCopied()) 
             segment.freeSlot(slot);
-        }
     }
 }

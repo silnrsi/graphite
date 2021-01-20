@@ -44,89 +44,25 @@ namespace
 // #endif
 }
 
-
-SlotBuffer::SlotBuffer(/*size_t num_user, size_t num_justs*/)
-: _size{0}
-//   _attrs_size{num_user},
-//   _justs_size{num_justs}
-{
-}
-
 SlotBuffer::SlotBuffer(SlotBuffer && rhs)
-: _size{rhs._size}
+: _values{std::move(rhs._values)}
 //   _attrs_size{rhs._attrs_size}
 {
-    if (!rhs.empty())
-        _head.splice(*rhs._head._next, *rhs._head._prev);
-
-    if (rhs._garbage._next != &rhs._garbage)
-        _garbage.splice(*rhs._garbage._next, *rhs._garbage._prev);
 }
 
 SlotBuffer & SlotBuffer::operator = (SlotBuffer && rhs) {
-    clear();
-    ::new (this) SlotBuffer(std::move(rhs));
+    _values = std::move(rhs._values);
     return *this;
-}
-
-void SlotBuffer::_node_linkage::splice(_node_linkage & start, _node_linkage & end)
-{
-    // Unlink from current position
-    start._prev->_next = end._next;
-    end._next->_prev = start._prev;
-
-    // Link in before this node.
-    start._prev = this->_prev;
-    end._next = this;
-    start._prev->_next = &start;
-    end._next->_prev = &end;
-}
-
-inline 
-void SlotBuffer::_node_linkage::link(_node_linkage & pos)
-{
-    pos.splice(*this, *this);
-}
-
-void SlotBuffer::_node_linkage::unlink()
-{
-    _prev->_next = _next;
-    _next->_prev = _prev;
-    _prev = _next = this;
 }
 
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type const & slot)
 {
-    assert(pos._p);
-    auto node = new _node<value_type>(std::forward<value_type const>(slot));
-    if (!node) return end();
-
-    node->link(*const_cast<_node_linkage *>(pos._p));
-
-    ++_size;
-    return iterator(node);
+    return _values.insert(pos._i, slot);
 }
 
 SlotBuffer::iterator SlotBuffer::insert(const_iterator pos, value_type && slot)
 {
-    assert(pos._p);
-    auto node = new _node<value_type>(std::forward<value_type>(slot));
-    if (!node) return end();
-
-    node->link(*const_cast<_node_linkage *>(pos._p));
-
-    ++_size;
-    return iterator(node);
-}
-
-void SlotBuffer::push_back(value_type const & v)
-{
-    insert(end(), std::forward<value_type const>(v));
-}
-
-void SlotBuffer::push_back(value_type && v)
-{
-    insert(end(), std::forward<value_type>(v));
+    return _values.insert(pos._i, std::forward<value_type>(slot));
 }
 
 void SlotBuffer::splice(const_iterator pos, SlotBuffer &other, const_iterator first, const_iterator last)
@@ -134,62 +70,20 @@ void SlotBuffer::splice(const_iterator pos, SlotBuffer &other, const_iterator fi
     if (first != last)
     {
         auto l = std::distance(first, last);
-        const_cast<_node_linkage *>(pos._p)->splice(const_cast<_node_linkage &>(*first._p), 
-                                                    const_cast<_node_linkage &>(*(last._p->_prev)));
-        other._size -= l;
-        _size += l;
+        auto i = _values.insert(pos._i, l, Slot());
+        while (first != last) *i = std::move(*first++);
+        other.erase(first, last);
     }
 }
 
-auto SlotBuffer::erase(iterator pos) -> iterator
+auto SlotBuffer::erase(const_iterator pos) -> iterator
 {
-    assert(pos._p);
-    auto node = iterator::node(pos++);
-    _garbage.splice(*node, *node);
-    --_size;
-    return pos;
+    return _values.erase(pos._i);
 }
 
-auto SlotBuffer::erase(iterator first, iterator const last) -> iterator
+auto SlotBuffer::erase(const_iterator first, const_iterator const last) -> iterator
 {
-    assert(last._p);
-    if (first != last)
-    {
-        _size -= std::distance(first, last);
-        _garbage.splice(const_cast<_node_linkage &>(*first._p), 
-                        const_cast<_node_linkage &>(*last._p->_prev));
-    }
-    return last;
-}
-
-void SlotBuffer::collect_garbage(bool only_marked)
-{
-    auto node = _garbage._next;
-    while (node != &_garbage)
-    {
-        auto n = iterator::node(node);
-        node = node->_next;
-        _free_node(n);
-    }
-    _garbage._next = _garbage._prev = &_garbage;
-}
-
-auto SlotBuffer::_allocate_node(value_type && v) -> SlotBuffer::_node<value_type> * 
-{
-    // auto const real_attr_size = _attrs_size + DEBUG_ATTRS;
-    // auto attrs = grzeroalloc<int16>(real_attr_size);
-    auto node = new _node<value_type>{std::forward<value_type>(v)};
-    if (!node) { 
-        // free(attrs); 
-        return nullptr;
-    }
-    // node->_value.userAttrs(attrs);
-    return static_cast<_node<value_type> *>(node);
-}
-
-void SlotBuffer::_free_node(_node<value_type> * const node)
-{
-    free(node);
+    return _values.erase(first._i, last._i);
 }
 
 namespace {
@@ -203,20 +97,23 @@ namespace {
 
 }
 
-// reverse the clusters: keep diacritics in their original order w.r.t their base character.
+// reverse the clusters, but keep diacritics in their original order w.r.t their base character.
 void SlotBuffer::reverse()
 {
-    _node_linkage out;
+    assert(!empty());
+    _storage out;
+    out.reserve(_values.size());
 
-    auto s = skip_bidi_mark(begin(), end());
-    if (s == end()) return;
+    auto s = skip_bidi_mark(cbegin(), cend());
+    if (s == cend()) return;
 
-    while (s != end())
+    while (s != cend())
     {
-        auto const c = const_cast<_node_linkage *>(s._p);
-        s = skip_bidi_mark(++s, end());
-        out._next->splice(*c, *(s._p->_prev));
+        auto const c = s;
+        s = skip_bidi_mark(++s, cend());
+        out.insert(out.cbegin(), c, s);
     }
-    _head.splice(*out._next, *out._prev);
+    out.emplace_back(Slot(Slot::sentinal()));
+    _values = std::move(out);
 }
 

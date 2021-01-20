@@ -74,8 +74,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_charinfo[id].base(coffset);
     m_charinfo[id].breakWeight(glyph ? glyph->attrs()[m_silf->aBreak()] : 0);
 
-    slots().push_back(Slot(numAttrs()));
-    auto & aSlot = slots().back();
+    auto & aSlot = slots().emplace_back(numAttrs());
     aSlot.child(nullptr);
     aSlot.setGlyph(*this, gid, glyph);
     aSlot.originate(id);

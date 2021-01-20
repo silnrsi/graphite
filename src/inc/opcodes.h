@@ -79,6 +79,7 @@ of the License or (at your option) any later version.
 #define slotat(x)           (reg.is[(x)])
 #define DIE                 { reg.os=reg.seg.slots().end(); reg.status = Machine::died_early; EXIT(1); }
 #define POSITIONED          1
+//#define next_slot(x, op)        { op x; while(x -> isDeleted()) { op x;}; }
 
 STARTOP(nop)
     do {} while (0);
@@ -218,8 +219,8 @@ ENDOP
 //ENDOP
 
 //STARTOP(copy_next)
-//     if (reg.os) ++reg.os;
-//     ++reg.is;
+//     if (reg.os) next_slot(reg.os,++);
+//     next_slot(reg.is, ++);
 // ENDOP
 
 STARTOP(put_glyph_8bit_obs)
@@ -265,7 +266,7 @@ STARTOP(insert)
     auto iss = reg.os;
     while (iss != reg.seg.slots().end() && iss->isDeleted()) ++iss;
 
-    auto slot = reg.seg.slots().insert(iss, Slot(reg.seg.numAttrs()));
+    auto slot = reg.seg.slots().emplace(iss++, reg.seg.numAttrs());
     if (slot == reg.seg.slots().end()) DIE;
 
     switch ((slot == reg.seg.slots().begin()) << 1 | (iss == reg.seg.slots().end()))
@@ -294,6 +295,8 @@ STARTOP(insert)
         reg.ctxt.highpassed(false);
     reg.os = slot;
     reg.seg.extendLength(1);
+    
+    for (auto i = reg.is; i != reg.ctxt.map.end(); ++i) ++*i;
     if (reg.is >= reg.ctxt.map.begin())
         --reg.is;
 ENDOP
@@ -305,12 +308,17 @@ STARTOP(delete_)
     if (reg.os == reg.ctxt.highwater())
         reg.ctxt.highwater(std::next(reg.os));
 
-    auto n = reg.os;
-    if (reg.os != reg.seg.slots().begin()) --reg.os;
+    if (!(*reg.is)->isCopied()) {
+        *reg.is = slotref::from(new Slot(std::move(*reg.os)));
+        (*reg.is)->markCopied(true);
+    }
+    else { **reg.is = std::move(*reg.os); }
 
-    // reg.seg.slots().erase(n);
-    std::prev(n).next(std::next(n));
-    std::next(n).prev(std::prev(n));
+    reg.os = reg.seg.slots().erase(reg.os);
+    // if (reg.os != reg.seg.slots().begin())
+        --reg.os;
+
+    for (auto i = reg.is+1; i != reg.ctxt.map.end(); ++i) --*i;
 ENDOP
 
 STARTOP(assoc)
@@ -631,8 +639,8 @@ STARTOP(temp_copy)
     slot->markCopied(true);
     // TODO: remove this once we're using gr::list methods. This is the
     // hack that, that enables the hack, that enables debug output.
-    slot.prev(std::prev(reg.os));
-    slot.next(std::next(reg.os));
+    // slot.prev(std::prev(reg.os));
+    // slot.next(std::next(reg.os));
     *reg.is = slot;
 #endif
 ENDOP

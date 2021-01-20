@@ -40,14 +40,14 @@ template<typename Callable>
 typename std::result_of<Callable()>::type
 Segment::subsegment(SlotBuffer::const_iterator first, SlotBuffer::const_iterator last, Callable body)
 {
-    SlotBuffer sub_slots/*(m_srope.num_user_attrs(), m_srope.num_just_levels())*/;
-    sub_slots.splice(sub_slots.end(), m_srope, first, last);
-    m_srope.swap(sub_slots);
+    // SlotBuffer sub_slots/*(m_srope.num_user_attrs(), m_srope.num_just_levels())*/;
+    // sub_slots.splice(sub_slots.end(), m_srope, first, last);
+    // m_srope.swap(sub_slots);
 
     auto retval = body();
 
-    m_srope.swap(sub_slots);
-    m_srope.splice(last, sub_slots);
+    // m_srope.swap(sub_slots);
+    // m_srope.splice(last, sub_slots);
 
     return retval;
 }

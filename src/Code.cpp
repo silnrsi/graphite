@@ -764,7 +764,7 @@ void Machine::Code::release_buffers() throw()
 }
 
 
-int32 Machine::Code::run(Machine & m, const_slotref * & slot_in, slotref & slot_out) const
+int32 Machine::Code::run(Machine & m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const
 {
 //    assert(_own);
     assert(*this);          // Check we are actually runnable

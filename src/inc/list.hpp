@@ -223,7 +223,7 @@ auto list<T>::insert(const_iterator pos, value_type const & value) -> iterator
     if (!node) return end();
 
     node->link(*const_cast<_node_linkage *>(pos._p));
-    new (&node->_value) T(std::forward<T const>(value));
+    new (&node->_value) T(value);
 
     ++_size;
     return iterator(node);
@@ -237,7 +237,7 @@ auto list<T>::insert(const_iterator pos, value_type && value) -> iterator
     if (!node) return end();
 
     node->link(*const_cast<_node_linkage *>(pos._p));
-    new (&node->_value) T(std::forward<T const>(std::move(value)));
+    new (&node->_value) T(std::move(value));
 
     ++_size;
     return iterator(node);

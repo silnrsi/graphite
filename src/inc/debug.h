@@ -50,7 +50,6 @@ struct objectid
 {
     char name[16];
     objectid(SlotBuffer::const_iterator const s) noexcept;
-    objectid(Slot const * s) noexcept: objectid(SlotBuffer::const_iterator::from(s)) {}
     objectid(Segment const & seg)  noexcept { set_name(&seg, 0); }
 private:
     void set_name(void const * addr, uint16 generation) noexcept;
