@@ -821,7 +821,7 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
     float ymin, float ymax, GR_MAYBE_UNUSED json * const dbgout)
 {
     auto & gc = seg.getFace()->glyphs();
-    auto base = &aSlot;
+    auto const * base = &aSlot;
     int numSlices;
     while (base->attachedTo())
         base = base->attachedTo();

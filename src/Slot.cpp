@@ -106,7 +106,7 @@ Slot & Slot::operator = (Slot && rhs) noexcept
     if (this != &rhs)
     {
         Slot_data::operator=(std::move(rhs));
-        m_parent = m_child = m_sibling = nullptr;
+        m_parent_offset = m_child_offset = m_sibling_offset = 0;
         m_attrs = std::move(rhs.m_attrs);
 #if !defined GRAPHITE2_NTRACING
         m_gen = rhs.m_gen;
@@ -120,7 +120,7 @@ Slot & Slot::operator = (Slot const & rhs)
     if (this != &rhs)
     {
         Slot_data::operator=(rhs);
-        m_parent = m_child = m_sibling = nullptr;
+        m_parent_offset = m_child_offset = m_sibling_offset = 0;
         m_attrs = rhs.m_attrs;
 #if !defined GRAPHITE2_NTRACING
         m_gen = rhs.m_gen;
@@ -163,7 +163,7 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
     Position res;
 
     m_position = base + shift;
-    if (!m_parent)
+    if (isBase())
     {
         res = base + Position(tAdvance, m_advance.y * scale);
         clusterMin = m_position.x;
@@ -183,24 +183,24 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
         bbox = bbox.widen(ourBbox);
     }
 
-    if (m_child && m_child != this && m_child->attachedTo() == this)
+    if (isParent() && firstChild()->attachedTo() == this)
     {
-        Position tRes = m_child->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
-        if ((!m_parent || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
+        Position tRes = firstChild()->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        if ((isBase() || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
     }
 
-    if (m_parent && m_sibling && m_sibling != this && m_sibling->attachedTo() == m_parent)
+    if (!isBase() && hasSibling() && nextSibling()->attachedTo() == attachedTo())
     {
-        Position tRes = m_sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        Position tRes = nextSibling()->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
         if (tRes.x > res.x) res = tRes;
     }
 
-    if (!m_parent && clusterMin < base.x)
+    if (isBase() && clusterMin < base.x)
     {
         Position adj = Position(m_position.x - clusterMin, 0.);
         res += adj;
         m_position += adj;
-        if (m_child) m_child->floodShift(adj);
+        if (isParent()) firstChild()->floodShift(adj);
     }
     return res;
 }
@@ -255,7 +255,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     {
     case gr_slatAdvX :      return int(m_advance.x);
     case gr_slatAdvY :      return int(m_advance.y);
-    case gr_slatAttTo :     return m_parent ? 1 : 0;
+    case gr_slatAttTo :     return m_parent_offset ? 1 : 0;
     case gr_slatAttX :      return int(m_attach.x);
     case gr_slatAttY :      return int(m_attach.y);
     case gr_slatAttXOff :
@@ -342,8 +342,8 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
         if (idx < ctxt.map.size() && ctxt.map[idx].is_valid())
         {
             auto other = &*ctxt.map[idx];
-            if (other == this || other == m_parent || other->isCopied()) break;
-            if (m_parent) { m_parent->removeChild(this); attachTo(NULL); }
+            if (other == this || other == attachedTo() || other->isCopied()) break;
+            if (!isBase()) { attachedTo()->removeChild(this); attachTo(nullptr); }
             auto pOther = other;
             int count = 0;
             bool foundOther = false;
@@ -353,9 +353,9 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
                 if (pOther == this) foundOther = true;
                 pOther = pOther->attachedTo();
             }
-            for (pOther = m_child; pOther; pOther = pOther->m_child)
+            for (pOther = firstChild(); pOther; pOther = pOther->firstChild())
                 ++count;
-            for (pOther = m_sibling; pOther; pOther = pOther->m_sibling)
+            for (pOther = nextSibling(); pOther; pOther = pOther->nextSibling())
                 ++count;
             if (count < 100 && !foundOther && other->child(this))
             {
@@ -458,40 +458,40 @@ void Slot::setJustify(Segment & seg, uint8 level, uint8 subindex, int16 value)
 bool Slot::child(Slot *ap)
 {
     if (this == ap) return false;
-    else if (ap == m_child) return true;
-    else if (!m_child)
-        m_child = ap;
+    else if (ap == firstChild()) return true;
+    else if (!isParent())
+        firstChild(ap);
     else
-        return m_child->sibling(ap);
+        return firstChild()->sibling(ap);
     return true;
 }
 
 bool Slot::sibling(Slot *ap)
 {
     if (this == ap) return false;
-    else if (ap == m_sibling) return true;
-    else if (!m_sibling || !ap)
-        m_sibling = ap;
+    else if (ap == nextSibling()) return true;
+    else if (!hasSibling() || !ap)
+        nextSibling(ap);
     else
-        return m_sibling->sibling(ap);
+        return nextSibling()->sibling(ap);
     return true;
 }
 
 bool Slot::removeChild(Slot *ap)
 {
-    if (this == ap || !m_child || !ap) return false;
-    else if (ap == m_child)
+    if (this == ap || !isParent() || !ap) return false;
+    else if (ap == firstChild())
     {
-        Slot *nSibling = m_child->nextSibling();
-        m_child->nextSibling(NULL);
-        m_child = nSibling;
+        auto nSibling = firstChild()->nextSibling();
+        firstChild()->nextSibling(nullptr);
+        firstChild(nSibling);
         return true;
     }
-    for (Slot *p = m_child; p; p = p->m_sibling)
+    for (auto p = firstChild(); p; p = p->nextSibling())
     {
-        if (p->m_sibling && p->m_sibling == ap)
+        if (p->hasSibling() && p->nextSibling() == ap)
         {
-            p->m_sibling = p->m_sibling->m_sibling;
+            p->nextSibling(p->nextSibling()->nextSibling());
             ap->nextSibling(NULL);
             return true;
         }
@@ -536,13 +536,13 @@ void Slot::floodShift(Position adj, int depth)
     if (depth > 100)
         return;
     m_position += adj;
-    if (m_child) m_child->floodShift(adj, depth + 1);
-    if (m_sibling) m_sibling->floodShift(adj, depth + 1);
+    if (isParent()) firstChild()->floodShift(adj, depth + 1);
+    if (hasSibling()) nextSibling()->floodShift(adj, depth + 1);
 }
 
-Slot * Slot::nextInCluster(const Slot *s) const
+Slot const * Slot::nextInCluster(const Slot *s) const
 {
-    Slot *base;
+    Slot const *base;
     if (s->firstChild())
         return s->firstChild();
     else if (s->nextSibling())
@@ -554,12 +554,12 @@ Slot * Slot::nextInCluster(const Slot *s) const
             return base->nextSibling();
         s = base;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool Slot::isChildOf(const Slot *base) const
 {
-    for (Slot *p = m_parent; p; p = p->m_parent)
+    for (auto p = attachedTo(); p; p = p->attachedTo())
         if (p == base)
             return true;
     return false;
