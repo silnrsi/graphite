@@ -58,8 +58,8 @@ private:
 inline
 objectid::objectid(SlotBuffer::const_iterator const s) noexcept
 {
-    void const * o = s.handle();
-    set_name(o, o ? s->generation() : 0);
+    void const * o = s.handle() ? reinterpret_cast<void const *>(s->original()+1) : nullptr;
+    set_name(0, o ? s->generation() : 0);
 }
 
 

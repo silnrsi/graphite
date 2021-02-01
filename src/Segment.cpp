@@ -80,6 +80,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot.originate(id);
     aSlot.before(id);
     aSlot.after(id);
+    aSlot.generation() = slots().size();
 
     if (glyph && m_silf->aPassBits())
         m_passBits &= glyph->attrs()[m_silf->aPassBits()]

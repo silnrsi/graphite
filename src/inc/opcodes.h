@@ -252,7 +252,10 @@ STARTOP(put_copy)
         if (ref != reg.seg.slots().end() && ref != reg.os)
         {
             if (reg.os->attachedTo() || reg.os->firstChild()) DIE
+
+            auto g = reg.os->generation();
             *reg.os = *ref;
+            reg.os->generation() = g;
             if (reg.os->attachedTo())
                 reg.os->attachedTo()->child(&*reg.os);
         }
@@ -269,6 +272,7 @@ STARTOP(insert)
     auto slot = reg.seg.slots().emplace(iss++, reg.seg.numAttrs());
     if (slot == reg.seg.slots().end()) DIE;
 
+    slot->generation() += reg.seg.slots().size();
     switch ((slot == reg.seg.slots().begin()) << 1 | (iss == reg.seg.slots().end()))
     {
         case 0: // Medial insertion
@@ -295,7 +299,7 @@ STARTOP(insert)
         reg.ctxt.highpassed(false);
     reg.os = slot;
     reg.seg.extendLength(1);
-    
+
     for (auto i = reg.is; i != reg.ctxt.map.end(); ++i) ++*i;
     if (reg.is >= reg.ctxt.map.begin())
         --reg.is;
