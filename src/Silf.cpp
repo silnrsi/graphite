@@ -309,7 +309,7 @@ uint16 Silf::findPseudo(uint32 uid) const
     return 0;
 }
 
-uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
+int Silf::findClassIndex(uint16 cid, uint16 gid) const
 {
     if (cid > m_nClass) return -1;
 

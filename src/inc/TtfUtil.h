@@ -153,7 +153,7 @@ public:
         const void * pHhea, int & nLsb, unsigned int & nAdvWid);
 
     ////////////////////////////////// primitives for loca and glyf lookup
-    size_t LocaLookup(gid16 nGlyphId, const void * pLoca, size_t lLocaSize,
+    int LocaLookup(gid16 nGlyphId, const void * pLoca, size_t lLocaSize,
         const void * pHead); // throw (std::out_of_range);
     void * GlyfLookup(const void * pGlyf, size_t lGlyfOffset, size_t lTableLen);
 

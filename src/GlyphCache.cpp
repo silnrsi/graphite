@@ -32,6 +32,7 @@ of the License or (at your option) any later version.
 #include "inc/GlyphFace.h"
 #include "inc/Endian.h"
 #include "inc/bits.h"
+#include <cassert>
 
 using namespace graphite2;
 
@@ -357,8 +358,9 @@ const GlyphFace * GlyphCache::Loader::read_glyph(unsigned short glyphid, GlyphFa
         if (_glyf)
         {
             int xMin, yMin, xMax, yMax;
-            size_t locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
-            void *pGlyph = TtfUtil::GlyfLookup(_glyf, locidx, _glyf.size());
+            int locidx = TtfUtil::LocaLookup(glyphid, _loca, _loca.size(), _head);
+            assert(locidx >= 0);
+            void *pGlyph = TtfUtil::GlyfLookup(_glyf, static_cast<size_t>(locidx), _glyf.size());
 
             if (pGlyph && TtfUtil::GlyfBox(pGlyph, xMin, yMin, xMax, yMax))
             {
