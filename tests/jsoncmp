@@ -20,7 +20,8 @@ def walktree(tree, path="", parent=None):
 
 def settreeval(parent, path, value):
     p = path.split("/")[-1]
-    if p.isdigit():  p = int(p)
+    if p.isdigit():
+        p = int(p)
     parent[p] = value
 
 
@@ -61,9 +62,15 @@ def canonids(j):
 
 
 def trimtelemetry(j):
-    if not isinstance(j, list): return
-    if not isinstance(j[0], dict) or 'type' not in j[0]: return
-    if j[0]['type'] == 'telemetry': del j[0]
+    if not isinstance(j, list):
+        return
+
+    if not isinstance(j[0], dict) or 'type' not in j[0]:
+        return
+
+    if j[0]['type'] == 'telemetry':
+        del j[0]
+
     return
 
 
