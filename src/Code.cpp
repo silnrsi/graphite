@@ -54,6 +54,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 using namespace vm;
+using attrCode = gr_attrCode;
 
 namespace {
 

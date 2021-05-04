@@ -75,9 +75,8 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     m_charinfo[id].breakWeight(glyph ? glyph->attrs()[m_silf->aBreak()] : 0);
 
     auto & aSlot = slots().emplace_back(numAttrs());
-    aSlot.child(nullptr);
-    aSlot.setGlyph(*this, gid, glyph);
-    aSlot.originate(id);
+    aSlot.glyph(*this, gid, glyph);
+    aSlot.original(id);
     aSlot.before(id);
     aSlot.after(id);
     aSlot.generation() = slots().size();
@@ -111,6 +110,7 @@ void Segment::reverseSlots()
 
 void Segment::linkClusters()
 {
+#if 0
     if (slots().empty())  return;
 
     auto ls = &slots().front();
@@ -134,13 +134,14 @@ void Segment::linkClusters()
             ls = &s;
         }
     }
+#endif
 }
 
 Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, SlotBuffer::iterator last, bool isRtl, bool isFinal)
 {
     assert(first.is_valid() || first == slots().end());
     Position currpos(0., 0.);
-    float clusterMin = 0.;
+//    float clusterMin = 0.;
     Rect bbox;
     bool reorder = (currdir() != isRtl);
 
@@ -150,28 +151,48 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         reverseSlots();
         std::swap(first, last);
     }
-//    if (first == slots().end())    first = slots().begin();
     if (last == slots().end())     last = --slots().end();
 
     if (slots().empty())   // only true for empty segments
         return currpos;
 
+    // Accumulate cluster widths and min x positions.
+    ++last;
+    auto slot = first;
+    auto base = first;
+    do 
+    {
+        auto curr_base = base;
+        auto cmin = 0.f, adv = 0.f;
+        do base = slot++->update_cluster_metric(*this, isRtl, cmin, adv, isFinal);
+        while (base == curr_base);
+    } while (slot != last);
+
+    // Position each cluster either.
     if (isRtl)
     {
-        for (auto s = last, end = --first; s != end; --s)
+        
+        for (slot = --last, last=--first; slot != last; --slot)
         {
-            if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
+            if (slot->isBase())
+            {
+                slot->origin(currpos);
+                currpos.x += slot->advance();
+            }
         }
     }
     else
     {
-        for (auto s = first, end = ++last; s != end; ++s)
+        for (slot = first; slot != last; ++slot)
         {
-            if (s->isBase())
-                currpos = s->finalise(*this, font, currpos, bbox, 0, clusterMin = currpos.x, isRtl, isFinal);
+            if (slot->isBase())
+            {
+                slot->origin(currpos);
+                currpos.x += slot->advance();
+            }
         }
     }
+
     if (reorder)
         reverseSlots();
     return currpos;
@@ -253,7 +274,7 @@ void Segment::doMirror(uint16 aMirror)
     {
         unsigned short g = glyphAttr(s.gid(), aMirror);
         if (g && (!(dir() & 4) || !glyphAttr(s.gid(), aMirror + 1)))
-            s.setGlyph(*this, g);
+            s.glyph(*this, g);
     }
 }
 

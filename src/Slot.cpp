@@ -106,7 +106,7 @@ Slot & Slot::operator = (Slot && rhs) noexcept
     if (this != &rhs)
     {
         Slot_data::operator=(std::move(rhs));
-        m_parent_offset = m_child_offset = m_sibling_offset = 0;
+        m_parent_offset =  0;
         m_attrs = std::move(rhs.m_attrs);
 #if !defined GRAPHITE2_NTRACING
         m_gen = rhs.m_gen;
@@ -120,7 +120,7 @@ Slot & Slot::operator = (Slot const & rhs)
     if (this != &rhs)
     {
         Slot_data::operator=(rhs);
-        m_parent_offset = m_child_offset = m_sibling_offset = 0;
+        m_parent_offset = 0;
         m_attrs = rhs.m_attrs;
 #if !defined GRAPHITE2_NTRACING
         m_gen = rhs.m_gen;
@@ -136,6 +136,33 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
     m_after += numCharInfo;
     m_position = m_position + relpos;
 }
+
+
+Slot const * Slot::update_cluster_metric(Segment const & seg, bool const rtl, float &cmin, float &adv, bool is_final, unsigned depth)
+{
+    // Bail out early if the attachment chain is too deep.
+    if (depth == 0) { cmin = adv = 0; return nullptr; }
+
+    Position shift = {m_shift.x * (rtl * -2 + 1) + m_just, m_shift.y};
+    auto const collision_info = seg.collisionInfo(*this);
+    if (is_final && collision_info) {
+        if (!(collision_info->flags() & SlotCollision::COLL_KERN) || rtl)
+            shift += collision_info->offset();
+    }
+
+    auto relative = m_attach - m_with + shift;
+    auto slot_adv = m_advance.x + m_just;
+    cmin += m_position.x;
+
+    if (isBase()) {
+        m_position.x = min(m_position.x, cmin);
+        m_advance.x = max(m_advance.x, adv);
+        return this;
+    } else {
+        return attachedTo()->update_cluster_metric(seg, rtl, cmin += relative.x, slot_adv, --depth);
+    }
+}
+
 
 Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
 {
@@ -183,15 +210,21 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
         bbox = bbox.widen(ourBbox);
     }
 
-    if (isParent() && firstChild()->attachedTo() == this)
+    for (auto c = children(); c != end(); ++c) 
     {
-        Position tRes = firstChild()->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        auto tRes = c->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        if ((isBase() || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
+    }
+    if (isParent())
+    {
+        Position tRes = children()->finalise(seg, font, m_position, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
         if ((isBase() || m_advance.x >= 0.5f) && tRes.x > res.x) res = tRes;
     }
 
-    if (!isBase() && hasSibling() && nextSibling()->attachedTo() == attachedTo())
+    auto sibling = child_iterator(this);
+    if (!isBase() && ++sibling != end())
     {
-        Position tRes = nextSibling()->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
+        Position tRes = sibling->finalise(seg, font, base, bbox, attrLevel, clusterMin, rtl, isFinal, depth + 1);
         if (tRes.x > res.x) res = tRes;
     }
 
@@ -200,7 +233,7 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
         Position adj = Position(m_position.x - clusterMin, 0.);
         res += adj;
         m_position += adj;
-        if (isParent()) firstChild()->floodShift(adj);
+        if (isParent()) children()->floodShift(adj);
     }
     return res;
 }
@@ -268,7 +301,7 @@ int Slot::getAttr(const Segment & seg, attrCode ind, uint8 subindex) const
     case gr_slatBreak :     return seg.charinfo(m_original)->breakWeight();
     case gr_slatCompRef :   return 0;
     case gr_slatDir :       return seg.dir() & 1;
-    case gr_slatInsert :    return isInsertBefore();
+    case gr_slatInsert :    return insertBefore();
     case gr_slatPosX :      return int(m_position.x); // but need to calculate it
     case gr_slatPosY :      return int(m_position.y);
     case gr_slatShiftX :    return int(m_shift.x);
@@ -342,8 +375,8 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
         if (idx < ctxt.map.size() && ctxt.map[idx].is_valid())
         {
             auto other = &*ctxt.map[idx];
-            if (other == this || other == attachedTo() || other->isCopied()) break;
-            if (!isBase()) { attachedTo()->removeChild(this); attachTo(nullptr); }
+            if (other == this || other == attachedTo() || other->copied()) break;
+            if (!isBase()) { attachedTo()->remove_child(this); }
             auto pOther = other;
             int count = 0;
             bool foundOther = false;
@@ -353,11 +386,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
                 if (pOther == this) foundOther = true;
                 pOther = pOther->attachedTo();
             }
-            for (pOther = firstChild(); pOther; pOther = pOther->firstChild())
-                ++count;
-            for (pOther = nextSibling(); pOther; pOther = pOther->nextSibling())
-                ++count;
-            if (count < 100 && !foundOther && other->child(this))
+            if (count < 100 && !foundOther && other->add_child(this))
             {
                 attachTo(other);
                 if ((ctxt.dir != 0) ^ (idx > subindex))
@@ -385,7 +414,7 @@ void Slot::setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 value, con
     case gr_slatCompRef :   break;      // not sure what to do here
     case gr_slatDir : break;
     case gr_slatInsert :
-        markInsertBefore(value? true : false);
+        insertBefore(value? true : false);
         break;
     case gr_slatPosX :      break; // can't set these here
     case gr_slatPosY :      break;
@@ -455,51 +484,28 @@ void Slot::setJustify(Segment & seg, uint8 level, uint8 subindex, int16 value)
     m_attrs.just_info()[level * Slot::NUMJUSTPARAMS + subindex] = value;
 }
 
-bool Slot::child(Slot *ap)
+bool Slot::add_child(Slot *ap)
 {
-    if (this == ap) return false;
-    else if (ap == firstChild()) return true;
-    else if (!isParent())
-        firstChild(ap);
-    else
-        return firstChild()->sibling(ap);
+    if (this == ap || ap->attachedTo() == this) 
+        return false;
+    ap->attachTo(this);
+    m_flags.children = true;
+    if (ap->m_parent_offset > 0)
+        m_flags.forwardrefered = true; 
     return true;
 }
 
-bool Slot::sibling(Slot *ap)
-{
-    if (this == ap) return false;
-    else if (ap == nextSibling()) return true;
-    else if (!hasSibling() || !ap)
-        nextSibling(ap);
-    else
-        return nextSibling()->sibling(ap);
-    return true;
-}
-
-bool Slot::removeChild(Slot *ap)
+bool Slot::remove_child(Slot *ap)
 {
     if (this == ap || !isParent() || !ap) return false;
-    else if (ap == firstChild())
-    {
-        auto nSibling = firstChild()->nextSibling();
-        firstChild()->nextSibling(nullptr);
-        firstChild(nSibling);
-        return true;
-    }
-    for (auto p = firstChild(); p; p = p->nextSibling())
-    {
-        if (p->hasSibling() && p->nextSibling() == ap)
-        {
-            p->nextSibling(p->nextSibling()->nextSibling());
-            ap->nextSibling(NULL);
-            return true;
-        }
-    }
-    return false;
+    if (ap->m_parent_offset > 0)
+        m_flags.forwardrefered = false;
+    ap->m_parent_offset = 0;
+    m_flags.children = m_flags.forwardrefered || (children() != end());
+    return true;
 }
 
-void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
+void Slot::glyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
 {
     m_glyphid = glyphid;
     m_bidiCls = -1;
@@ -531,33 +537,18 @@ void Slot::setGlyph(Segment & seg, uint16 glyphid, const GlyphFace * theGlyph)
     }
 }
 
+
 void Slot::floodShift(Position adj, int depth)
 {
     if (depth > 100)
         return;
     m_position += adj;
-    if (isParent()) firstChild()->floodShift(adj, depth + 1);
-    if (hasSibling()) nextSibling()->floodShift(adj, depth + 1);
+    for (auto c = children(); c != end(); ++c)
+        c->floodShift(adj, depth + 1);
 }
 
-Slot const * Slot::nextInCluster(const Slot *s) const
-{
-    Slot const *base;
-    if (s->firstChild())
-        return s->firstChild();
-    else if (s->nextSibling())
-        return s->nextSibling();
-    while ((base = s->attachedTo()))
-    {
-        // if (base->firstChild() == s && base->nextSibling())
-        if (base->nextSibling())
-            return base->nextSibling();
-        s = base;
-    }
-    return nullptr;
-}
 
-bool Slot::isChildOf(const Slot *base) const
+bool Slot::has_base(const Slot *base) const
 {
     for (auto p = attachedTo(); p; p = p->attachedTo())
         if (p == base)

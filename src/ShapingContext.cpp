@@ -58,7 +58,7 @@ void ShapingContext::collectGarbage(slotref &)
     for(;si != end; --si) {
         auto slot = *si;
         if (slot != segment.slots().end() 
-        &&  slot->isCopied()) 
+        &&  slot->copied()) 
             segment.freeSlot(slot);
     }
 }

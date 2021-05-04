@@ -125,7 +125,6 @@ public:
     int32 getGlyphMetric(Slot const *iSlot, uint8 metric, uint8 attrLevel, bool rtl) const;
     float glyphAdvance(uint16 gid) const { return m_face->glyphs().glyph(gid)->theAdvance().x; }
     const Rect &theGlyphBBoxTemporary(uint16 gid) const { return m_face->glyphs().glyph(gid)->theBBox(); }   //warning value may become invalid when another glyph is accessed
-    Slot const *findRoot(Slot const *is) const { return is->attachedTo() ? findRoot(is->attachedTo()) : is; }
     size_t numAttrs() const { return m_silf->numUser(); }
     int defaultOriginal() const { return m_defaultOriginal; }
     const Face * getFace() const { return m_face; }
@@ -173,10 +172,10 @@ private:
 inline
 int8 Segment::getSlotBidiClass(Slot *s) const
 {
-    int8 res = s->getBidiClass();
+    int8 res = s->bidiClass();
     if (res != -1) return res;
     res = int8(glyphAttr(s->gid(), m_silf->aBidi()));
-    s->setBidiClass(res);
+    s->bidiClass(res);
     return res;
 }
 
@@ -197,7 +196,7 @@ inline
 int32 Segment::getGlyphMetric(Slot const * iSlot, uint8 metric, uint8 attrLevel, bool rtl) const {
     if (attrLevel > 0)
     {
-        auto is = findRoot(iSlot);
+        auto is = iSlot->base();
         return is->clusterMetric(*this, metric, attrLevel, rtl);
     }
     else

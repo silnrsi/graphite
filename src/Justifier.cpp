@@ -110,15 +110,15 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
     }
     
     // TODO: Fix up
-    auto const end = pLast != slots().end() ? pLast->nextSibling() : &*pLast;
+    auto const end = pLast != slots().end() ? &*++Slot::const_child_iterator(&*pLast) : &*pLast;
     if (pFirst != slots().end())
-        pFirst = decltype(pFirst)::from(pFirst->nextSibling());
+        pFirst = decltype(pFirst)::from(&*++Slot::child_iterator(&*pFirst));
 
     int icount = 0;
     int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
-        for (auto s = &*pSlot; s && s != end; s = s->nextSibling())
+        for (auto s = pSlot->children(); s != end; ++s)
         {
             CharInfo *c = charinfo(s->before());
             if (isWhitespace(c->unicodeChar()))
@@ -131,7 +131,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         }
         if (!icount)
         {
-            for (auto s = &*pSlot; s && s != end; s = s->nextSibling())
+            for (auto s = pSlot->children(); s != end; ++s)
             {
                 s->setJustify(*this, 0, 3, 1);
                 s->setJustify(*this, 0, 2, 1);
@@ -142,7 +142,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
     }
 
     vector<JustifyTotal> stats(numLevels);
-    for (auto s = &*pFirst; s && s != end; s = s->nextSibling())
+    for (auto s = pFirst->children(); s != end; ++s)
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
@@ -164,7 +164,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
             diff = width - currWidth;
             diffpw = diff / tWeight;
             tWeight = 0;
-            for (auto s = &*pFirst; s && s != end; s = s->nextSibling()) // don't include final glyph
+            for (auto s = pFirst->children(); s != end; ++s) // don't include final glyph
             {
                 int w = s->getJustify(*this, i, 3);
                 float pref = diffpw * w + error;
@@ -226,7 +226,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         {
             *dbgout     << json::item << json::close; // Close up the passes array
             positionSlots(nullptr, pSlot, std::next(pLast), m_dir);
-            auto lEnd = end ? decltype(pSlot)::from(end) : slots().end();
+            auto lEnd = end ? decltype(slots().cend())::from(end) : slots().cend();
             *dbgout << "output" << json::array;
             for(auto t = pSlot; t != lEnd; ++t)
                 *dbgout     << dslot(this, &*t);
@@ -249,7 +249,7 @@ SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator pos)
 
     const uint16 gid = silf()->endLineGlyphid();
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
-    eSlot->setGlyph(*this, gid, theGlyph);
+    eSlot->glyph(*this, gid, theGlyph);
 
     if (pos != slots().end())
     {

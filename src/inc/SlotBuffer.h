@@ -26,12 +26,9 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
-#include <array>
 #include <iterator>
-#include <type_traits>
-
 #include "inc/vector.hpp"
-#include "inc/Main.h"
+
 #include "inc/Slot.h"
 
 
@@ -134,10 +131,7 @@ class SlotBuffer::_iterator
 
     friend SlotBuffer;
 
-    _iterator(std::nullptr_t)  noexcept: _i{nullptr} {}
-    friend Segment;
-
-    _iterator(_storage::const_iterator i) : _i{const_cast<_storage::iterator>(i)} {}
+    constexpr _iterator(std::nullptr_t)  noexcept: _i{nullptr} {}
     _iterator(_storage::iterator i) : _i{i} {}
     // operator _storage::const_iterator() const noexcept { return _i; }
 
@@ -154,14 +148,15 @@ public:
     }
 
     void to_cluster_root() noexcept {
-        while(!_i->isBase())  _i = _i->attachedTo();
+        _i = _i->base();
     }
 
     _iterator(): _iterator{nullptr} {}
+    _iterator(_storage::const_iterator i) : _i{const_cast<_storage::iterator>(i)} {}
     _iterator(opaque_type p): _iterator{reinterpret_cast<T *>(const_cast<gr_slot*>(p))} {}
 
-    bool operator==(_iterator<T const> rhs) const noexcept { return _i == rhs._i; }
-    bool operator!=(_iterator<T const> rhs) const noexcept { return !operator==(rhs); }
+    bool operator==(_iterator<T const> const & rhs) const noexcept { return _i == rhs._i; }
+    bool operator!=(_iterator<T const> const & rhs) const noexcept { return !operator==(rhs); }
 
     reference operator*() const noexcept { return *_i; }
     pointer operator->() const  noexcept { return &operator*(); }
@@ -178,7 +173,7 @@ public:
 
     opaque_type handle() const noexcept { 
         return _i 
-            ? _i->isEndOfLine() && _i->gid() == 0xffff && _i->isDeleted() 
+            ? _i->last() && _i->gid() == 0xffff && _i->deleted() 
                 ? nullptr 
                 : reinterpret_cast<opaque_type>(_i) 
             : nullptr;
@@ -186,7 +181,7 @@ public:
     
     // operator bool() const         noexcept { return _p != nullptr; }
     // operator pointer() const      noexcept { return operator->(); }
-    operator _iterator<T const>() const noexcept { return *reinterpret_cast<_iterator<T const> const *>(this); }
+    operator _iterator<T const> const &() const noexcept { return *reinterpret_cast<_iterator<T const> const *>(this); }
 };
 
 template <typename... Args>

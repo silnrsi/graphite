@@ -64,7 +64,7 @@ namespace {
         for (auto &s :buf) {
             assert(0 <= map[&s] && size_t(map[&s]) < buf.size());
             if (&*cursor == &s) std::cout << "|";
-            std::cout << s.gid() << (u8"\u02df" + 2*int(!s.isDeleted()))
+            std::cout << s.gid() << (u8"\u02df" + 2*int(!s.deleted()))
                 << "(<" 
                         << (s.attachedTo() ? map[s.attachedTo()]-map[&s] : 0) 
                         << '@'
@@ -497,7 +497,7 @@ bool Pass::runFSM(ShapingContext& ctxt, vm::const_slotref slot, Rules & rules) c
     uint8  free_slots = ShapingContext::MAX_SLOTS;
     do
     {
-        assert(!slot->isDeleted());
+        assert(!slot->deleted());
         ctxt.pushSlot(slot);
         auto const gid = slot->gid();
         if (gid >= m_numGlyphs
@@ -524,7 +524,7 @@ inline
 SlotBuffer::iterator input_slot(const ShapingContext &  ctxt, const int n)
 {
     auto s = ctxt.map[int(ctxt.context()) + n];
-    if (!s->isCopied())     return s;
+    if (!s->copied())     return s;
 
     return s != ctxt.segment.slots().begin()
         ? std::next(std::prev(s)) 
@@ -990,7 +990,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     for (auto nbor = start; nbor != last; isRev ? --nbor : ++nbor)
     {
         SlotCollision *cNbor = seg.collisionInfo(*nbor);
-        bool sameCluster = nbor->isChildOf(&*base);
+        bool sameCluster = nbor->has_base(&*base);
         if (nbor != slotFix         						// don't process if this is the slot of interest
                       && !(cNbor->ignore())    				// don't process if ignoring
                       && (nbor == base || sameCluster       // process if in the same cluster as slotFix
@@ -1019,12 +1019,12 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
             if (sqr(shift.x-cFix->shift().x) + sqr(shift.y-cFix->shift().y) >= m_colThreshold * m_colThreshold)
                 moved = true;
             cFix->setShift(shift);
-            if (slotFix->firstChild())
+            if (slotFix->isParent())
             {
                 Rect bbox;
                 Position here = slotFix->origin() + shift;
                 float clusterMin = here.x;
-                slotFix->firstChild()->finalise(seg, nullptr, here, bbox, 0, clusterMin, rtl, false);
+                slotFix->children()->finalise(seg, nullptr, here, bbox, 0, clusterMin, rtl, false);
             }
         }
     }
@@ -1077,7 +1077,7 @@ float Pass::resolveKern(Segment & seg, SlotBuffer::iterator const slotFix, GR_MA
     ymin = min(by + bbb.bl.y, ymin);
     for (auto nbor = std::next(slotFix); nbor != seg.slots().end(); ++nbor)
     {
-        if (nbor->isChildOf(&*base))
+        if (nbor->has_base(&*base))
             continue;
         if (!gc.check(nbor->gid()))
             return 0.;

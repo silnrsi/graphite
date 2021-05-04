@@ -37,15 +37,14 @@ const gr_slot* gr_slot_next_in_segment(const gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;
-    return p->isEndOfLine() ? nullptr : (++p).handle();
+    return p->index() == -1u ? nullptr : (++p).handle();
 }
 
 const gr_slot* gr_slot_prev_in_segment(const gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;
-    h = (--p).handle();
-    return h && p->isEndOfLine() ? nullptr : h;
+    return p->index() == 0 ? nullptr : (--p).handle();
 }
 
 const gr_slot* gr_slot_attached_to(const gr_slot* h/*not NULL*/)        //returns NULL iff base. If called repeatedly on result, will get to a base
@@ -61,17 +60,15 @@ const gr_slot* gr_slot_first_attachment(const gr_slot* h/*not NULL*/)        //r
 {        //if slot_first_attachment(p) is not NULL, then slot_attached_to(slot_first_attachment(p))==p.
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;   
-    auto slot = p->firstChild();
-    return slot ? decltype(p)::from(slot).handle() : nullptr;
+    return p->children().handle();
 }
 
 
 const gr_slot* gr_slot_next_sibling_attachment(const gr_slot* h/*not NULL*/)        //returns NULL iff no more attachments.
 {        //if slot_next_sibling_attachment(p) is not NULL, then slot_attached_to(slot_next_sibling_attachment(p))==slot_attached_to(p).
     assert(h);
-    graphite2::SlotBuffer::const_iterator p = h;
-    auto slot = p->nextSibling();
-    return slot ? decltype(p)::from(slot).handle() : nullptr;
+    graphite2::Slot::const_child_iterator p = h;
+    return (++p).handle();
 }
 
 
@@ -163,7 +160,7 @@ int gr_slot_can_insert_before(const gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::const_iterator p = h;
-    return (p->isInsertBefore())? 1 : 0;
+    return (p->insertBefore())? 1 : 0;
 }
 
 
@@ -178,8 +175,7 @@ void gr_slot_linebreak_before(gr_slot* h/*not NULL*/)
 {
     assert(h);
     graphite2::SlotBuffer::iterator p = h;
-    p->markEndOfLine(true);
-    std::prev(p)->nextSibling(nullptr);
+    p->last(true);
 }
 
 #if 0       //what should this be

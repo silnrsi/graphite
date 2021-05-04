@@ -26,7 +26,10 @@ of the License or (at your option) any later version.
 */
 #pragma once
 
+#include <cassert>
 #include <cstring>
+#include <type_traits>
+
 #include "graphite2/Segment.h"
 
 #include "inc/Main.h"
@@ -34,25 +37,14 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-typedef gr_attrCode attrCode;
-
 class GlyphFace;
 class Segment;
-class Slot;
+// class Slot;
 class ShapingContext;
 class Font;
 
 struct Slot_data {
-    // constexpr Slot_data() = default;
-    // Slot_data(Slot_data const &) = default;
-    // Slot_data(Slot_data &&) noexcept = default;
-    
-    // Slot_data & operator = (Slot_data const &) = default;
-    // Slot_data & operator = (Slot_data &&) noexcept = default;
-
-    int8_t      m_parent_offset,   // index to parent we are attached to
-                m_child_offset,    // index to first child slot that attaches to us
-                m_sibling_offset;  // index to next child that attaches to our parent
+    int8_t      m_parent_offset;   // index to parent we are attached to
     Position    m_position; // absolute position of glyph
     Position    m_shift;    // .shift slot attribute
     Position    m_advance;  // .advance slot attribute
@@ -73,21 +65,12 @@ struct Slot_data {
                 inserted: 1,
                 copied: 1,
                 positioned: 1,
-                attached: 1,
-                eol:1;
+                forwardrefered:1,
+                last:1,
+                children:1;
     }        m_flags;       // holds bit flags
-    friend class Segment;
 };
 
-
-// constexpr Slot_data::Slot_data()
-// : m_parent_offset{0}, m_child_offset{0}, m_sibling_offset{0}, 
-//   m_just{0},
-//   m_original{0}, m_before{0}, m_after{0}, m_index{0},
-//   m_glyphid{0}, m_realglyphid{0},
-//   m_attLevel{0}, m_bidiLevel{0}, m_bidiCls{0},
-//   m_flags{false, false, false, false, false, false}
-// {}
 
 class Slot : private Slot_data
 {
@@ -133,19 +116,33 @@ class Slot : private Slot_data
 
     bool has_justify() const { return m_attrs.num_justs() != 0; };
     void init_just_infos(Segment const & seg);
+    void attachTo(Slot *ap);
 
     attributes  m_attrs;
 #if !defined GRAPHITE2_NTRACING
     uint8_t     m_gen;
 #endif
 
+    template<class S> class _cluster_iterator;
+    template<class S> class _child_iterator;
+
 public:
+    using cluster_iterator = _cluster_iterator<Slot>;
+    using const_cluster_iterator = _cluster_iterator<Slot const>;
+    using child_iterator = _child_iterator<Slot>;
+    using const_child_iterator = _child_iterator<Slot const>;
     struct sentinal {};
+    using attrCode = gr_attrCode;
 
-    struct iterator;
+//     static bool is_sentinal(Slot const & s) noexcept {
+//         return s.m_index == 0xffffffff 
+//             && s.m_glyphid == 0xffff
+//             && s.m_realglyphid == 0xffff;
+//     }
 
+//     template<class T>
     constexpr Slot(sentinal const &)
-    : Slot_data{0, 0, 0, {}, {}, {}, {}, {}, 0, 0, 0, 0, -1u, uint16_t(-1), uint16_t(-1), 0, 0, 0, {true,false,false,true,false,true}},
+    : Slot_data{0, {}, {}, {}, {}, {}, 0, 0, 0, 0, -1u, uint16_t(-1), uint16_t(-1), 0, 0, 0, {true,false,false,false,false,true,false}},
       m_attrs{}
 #if !defined GRAPHITE2_NTRACING
       , m_gen{0}
@@ -155,90 +152,91 @@ public:
     Slot(size_t num_attrs = 0) : Slot_data{}, m_attrs{num_attrs} {}
     Slot(Slot const &);
     Slot(Slot &&) noexcept;
+
     Slot & operator=(Slot const &);
     Slot & operator=(Slot &&) noexcept;
 
     // Glyph
-    uint16_t gid() const { return m_glyphid; }
-    uint16_t glyph() const { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void setGlyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = NULL);
-    void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
+    uint16_t    gid() const     { return m_glyphid; }
+    uint16_t    glyph() const   { return m_realglyphid ? m_realglyphid : m_glyphid; }
+    void        glyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = nullptr);
+//     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
 
     // Positioning
-    Position origin() const { return m_position; }
-    void origin(const Position &pos) { m_position = pos + m_shift; }
-    void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
+    Position const & origin() const { return m_position; }
+    void             origin(const Position &pos) { m_position = pos + m_shift; }
+//     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     float advance() const { return m_advance.x; }
     void advance(Position &val) { m_advance = val; }
     Position attachOffset() const { return m_attach - m_with; }
     Position const & advancePos() const { return m_advance; }
-    void positionShift(Position a) { m_position += a; }
+//     void positionShift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
 
     // Slot ordering
-    uint32 index() const { return m_index; }
-    void index(uint32 val) { m_index = val; }
-    int before() const { return m_before; }
-    void before(int ind) { m_before = ind; }
-    int after() const { return m_after; }
-    void after(int ind) { m_after = ind; }
-    void originate(int ind) { m_original = ind; }
-    int original() const { return m_original; }
+    uint32  index() const       { return m_index; }
+    void    index(uint32 val)   { m_index = val; }
+    int     before() const      { return m_before; }
+    void    before(int ind)     { m_before = ind; }
+    int     after() const       { return m_after; }
+    void    after(int ind)      { m_after = ind; }
+    int     original() const    { return m_original; }
+    void    original(int ind)   { m_original = ind; }
 
-    // Flags
-    bool isDeleted() const { return m_flags.deleted; }
-    void markDeleted(bool state) { m_flags.deleted = state; }
-    bool isCopied() const { return m_flags.copied; }
-    void markCopied(bool state) { m_flags.copied = state; }
-    bool isPositioned() const { return m_flags.positioned; }
-    void markPositioned(bool state) { m_flags.positioned = state; }
-    bool isEndOfLine() const { return m_flags.eol; }
-    void markEndOfLine(bool state) { m_flags.eol = state; }
-    bool isInsertBefore() const { return !m_flags.inserted; }
-    void markInsertBefore(bool state) { m_flags.inserted = !state; }
+//     // Flags
+    bool deleted() const     { return m_flags.deleted; }
+    void deleted(bool state) { m_flags.deleted = state; }
+    bool copied() const      { return m_flags.copied; }
+    void copied(bool state)  { m_flags.copied = state; }
+//     bool positioned() const { return m_flags.positioned; }
+//     void positioned(bool state) { m_flags.positioned = state; }
+    bool last() const        { return m_flags.last; }
+    void last(bool state)    { m_flags.last = state; }
+    bool insertBefore() const { return !m_flags.inserted; }
+    void insertBefore(bool state) { m_flags.inserted = !state; }
 
     // Bidi
-    uint8 getBidiLevel() const { return m_bidiLevel; }
-    void setBidiLevel(uint8 level) { m_bidiLevel = level; }
-    int8 getBidiClass(const Segment &seg);
-    int8 getBidiClass() const { return m_bidiCls; }
-    void setBidiClass(int8 cls) { m_bidiCls = cls; }
+    uint8   bidiLevel() const        { return m_bidiLevel; }
+    void    bidiLevel(uint8 level)   { m_bidiLevel = level; }
+    int8    bidiClass() const        { return m_bidiCls; }
+    void    bidiClass(int8 cls)      { m_bidiCls = cls; }
 
     // Operations
+    Slot const * update_cluster_metric(Segment const & seg, bool const rtl, float &cmin, float &adv, bool is_final=false, unsigned depth=100);
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     int32 clusterMetric(Segment const & seg, uint8 metric, uint8 attrLevel, bool rtl) const;
 
     // Attributes
-    void setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
-    int getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
+    void    setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
+    int     getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
     int16 const *userAttrs() const { return m_attrs.user_attributes(); }
-    // void userAttrs(int16 *p) { m_userAttr = p; }
 
-    // Justification
+//     // Justification
     int getJustify(const Segment &seg, uint8 level, uint8 subindex) const;
     void setJustify(Segment &seg, uint8 level, uint8 subindex, int16 value);
     float just() const { return m_just; }
     void just(float j) { m_just = j; }
 
-    // Attachment
-    bool isBase() const { return !m_parent_offset; }
-    bool isParent() const { return m_child_offset; }
-    bool hasSibling() const { return m_sibling_offset; }
-    bool isChildOf(const Slot *base) const;
-    Slot const * attachedTo() const { return m_parent_offset ? this + m_parent_offset : nullptr; }
-    Slot * attachedTo() { return m_parent_offset ? this + m_parent_offset : nullptr; }
-    void attachTo(Slot *ap) { m_parent_offset = ap ? ap - this : 0; }
-    Slot const * firstChild() const { return m_child_offset ? this + m_child_offset : nullptr; }
-    Slot * firstChild() { return m_child_offset ? this + m_child_offset : nullptr; }
-    void firstChild(Slot *ap) { m_child_offset = ap ? ap - this : 0; }
-    bool child(Slot *ap);
-    Slot const * nextSibling() const { return m_sibling_offset ? this + m_sibling_offset : nullptr; }
-    Slot * nextSibling() { return m_sibling_offset ? this + m_sibling_offset : nullptr; }
-    void nextSibling(Slot *ap) { m_sibling_offset = ap ? ap - this : 0; }
-    bool sibling(Slot *ap);
-    bool removeChild(Slot *ap);
-    Slot const *nextInCluster(const Slot *s) const;
+    // Clustering
+    cluster_iterator cluster();
+    const_cluster_iterator cluster() const;
+    child_iterator children();
+    const_child_iterator children() const;
+    const_cluster_iterator end() const noexcept;
+
+    bool isBase() const             { return !m_parent_offset; }
+    bool isParent() const           { return m_flags.children; }
+    bool isForwardReferent() const  { return !m_flags.forwardrefered; }
+    Slot const * base() const noexcept;
+    Slot * base() noexcept { return const_cast<Slot*>(const_cast<Slot const *>(this)->base()); }
+
+    Slot const * attachedTo() const;
+    Slot * attachedTo() { return const_cast<Slot *>(const_cast<Slot const *>(this)->attachedTo());}
+
+    bool add_child(Slot *ap);
+    bool remove_child(Slot *ap);
+    bool has_base(const Slot *base) const;
 
 
 #if !defined GRAPHITE2_NTRACING
@@ -251,6 +249,137 @@ public:
     CLASS_NEW_DELETE
 };
 
+template<class S>
+class Slot::_cluster_iterator {
+protected:
+    S* _s;
+    S const * _b;
+
+    void _validate() noexcept;
+
+public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = S;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    constexpr _cluster_iterator() noexcept: _s{nullptr}, _b{nullptr} {}
+    _cluster_iterator(pointer s) noexcept;
+
+    bool operator == (_cluster_iterator<S const> const & rhs) const noexcept;
+    bool operator != (_cluster_iterator<S const> const & rhs) const noexcept;
+
+    reference operator*() const noexcept            { return *_s;  }
+    pointer   operator->() const  noexcept          { return &operator*(); }
+
+    _cluster_iterator<S> &  operator++() noexcept       { assert(_s); ++_s; _validate(); return *this; }
+    _cluster_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
+
+    _cluster_iterator<S> &  operator--() noexcept       { assert(_s); --_s; _validate(); return *this; }
+    _cluster_iterator<S>    operator--(int) noexcept    { auto tmp(*this); operator--(); return tmp; }
+
+    operator _cluster_iterator<S const> const &() const noexcept { return *reinterpret_cast<_cluster_iterator<S const> const *>(this); }
+};
+
+template<class S>
+inline
+Slot::_cluster_iterator<S>::_cluster_iterator(S * s) noexcept
+: _s{s}, _b{nullptr} {
+    if (!_s) return;
+    _b = _s->base();
+    if (!_b) _b = _s;
+    if (_s->isForwardReferent()) {
+        for (auto i = *this; i._s; _s = i._s, --i );
+        assert(_s != s);
+    }
+}
+
+template<class S>
+inline
+void Slot::_cluster_iterator<S>::_validate() noexcept {
+    auto b = _s->base();
+    if (b != _b) _b = _s = nullptr;
+}
+
+template<class S>
+inline
+bool Slot::_cluster_iterator<S>::operator == (_cluster_iterator<S const> const & rhs) const noexcept { 
+    return _s == rhs._s && _b == rhs._b; 
+}
+
+template<class S>
+inline
+bool Slot::_cluster_iterator<S>::operator != (_cluster_iterator<S const> const & rhs) const noexcept {
+    return !rhs.operator==(*this);
+}
+
+
+
+template<class S>
+class Slot::_child_iterator: public _cluster_iterator<S> {
+    using base_t = Slot::_cluster_iterator<S>;
+
+    void _next_child(base_t & (base_t::*advfn)()) noexcept { 
+        assert(base_t::_s);
+        auto parent = base_t::_s->attachedTo();
+        do { 
+            (this->*advfn)(); 
+        } while (base_t::_s && base_t::_s->attachedTo() != parent);
+    }
+
+public:
+    using base_t::iterator_category;
+    using base_t::value_type;
+    using base_t::pointer;
+    using base_t::reference;
+
+    constexpr _child_iterator(): _cluster_iterator<S>{} {}
+    _child_iterator(S * s): base_t{s} { if (base_t::_s && base_t::_s == base_t::_b)   operator++(); }
+
+    _child_iterator<S> &  operator++() noexcept       { _next_child(&base_t::operator++); return *this; }
+    _child_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
+
+    _child_iterator<S> &  operator--() noexcept       { _next_child(&base_t::operator--); return *this; }
+    _child_iterator<S>    operator--(int) noexcept    { auto tmp(*this); operator--(); return tmp; }
+
+    gr_slot const * handle() const noexcept {
+        return base_t::_s 
+            ? base_t::_s->last() && base_t::_s->gid() == 0xffff && base_t::_s->deleted() 
+                ? nullptr 
+                : static_cast<gr_slot const *>(base_t::_s)
+            : nullptr;
+    }
+
+        operator _child_iterator<S const>() const noexcept { return *reinterpret_cast<_child_iterator<S const> const *>(this); }
+};
+
+
+inline
+auto Slot::cluster() -> cluster_iterator { 
+    return cluster_iterator(this); 
+}
+
+inline
+auto Slot::cluster() const -> const_cluster_iterator { 
+    return const_cluster_iterator(this); 
+}
+
+inline
+auto Slot::children() -> child_iterator { 
+    return child_iterator(this); 
+}
+
+inline
+auto Slot::children() const -> const_child_iterator { 
+    return const_child_iterator(this); 
+}
+
+inline
+auto Slot::end() const noexcept -> const_cluster_iterator {
+    return const_cluster_iterator();
+}
+
+
 inline
 Slot::Slot(Slot && rhs) noexcept
 : Slot_data(std::move(rhs)),
@@ -259,7 +388,7 @@ Slot::Slot(Slot && rhs) noexcept
   ,m_gen(rhs.m_gen)
 #endif
 {
-  m_parent_offset = m_child_offset = m_sibling_offset = 0;
+  m_parent_offset = 0;
 }
 
 
@@ -271,7 +400,25 @@ Slot::Slot(Slot const & rhs)
   ,m_gen(rhs.m_gen)
 #endif
 {
-  m_parent_offset = m_child_offset = m_sibling_offset = 0;
+  m_parent_offset = 0;
+}
+
+inline
+Slot const * Slot::base() const noexcept { 
+    auto s = this; while (s->m_parent_offset) s += s->m_parent_offset; 
+    return s; 
+}
+
+inline 
+auto Slot::attachedTo() const -> Slot const * {
+    return m_parent_offset ? this + m_parent_offset : nullptr;
+}
+
+inline 
+void Slot::attachTo(Slot *ap) {
+    m_parent_offset = ap ? ap - this : 0;
 }
 
 } // namespace graphite2
+
+struct gr_slot : public graphite2::Slot {};

@@ -200,12 +200,12 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
         << "shift"          << Position(float(s.getAttr(seg, gr_slatShiftX, 0)),
                                         float(s.getAttr(seg, gr_slatShiftY, 0)))
         << "advance"        << s.advancePos()
-        << "insert"         << s.isInsertBefore()
+        << "insert"         << s.insertBefore()
         << "break"          << s.getAttr(seg, gr_slatBreak, 0);
     if (s.just() > 0)
         j << "justification"    << s.just();
-    if (s.getBidiLevel() > 0)
-        j << "bidi"     << s.getBidiLevel();
+    if (s.bidiLevel() > 0)
+        j << "bidi"     << s.bidiLevel();
     if (!s.isBase())
         j << "parent" << json::flat << json::object
             << "id"             << objectid(SlotBuffer::const_iterator::from(s.attachedTo()))
@@ -219,8 +219,8 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     if (s.isParent())
     {
         j   << "children" << json::flat << json::array;
-        for (const Slot *c = s.firstChild(); c; c = c->nextSibling())
-            j   << objectid(SlotBuffer::const_iterator::from(c));
+        for (auto c = s.children(); c != s.end(); ++c)
+            j   << objectid(SlotBuffer::const_iterator::from(&*c));
         j       << json::close;
     }
     if (cslot)

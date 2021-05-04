@@ -558,7 +558,7 @@ bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *c
     {
         // Set up the bogus slot representing the exclusion glyph.
         Slot exclSlot;
-        exclSlot.setGlyph(seg, cslot->exclGlyph());
+        exclSlot.glyph(seg, cslot->exclGlyph());
         exclSlot.origin(slot.origin() + cslot->exclOffset());
         SlotCollision exclInfo(seg, exclSlot);
         res &= mergeSlot(seg, exclSlot, &exclInfo, currShift, isAfter, sameCluster, isCol, true, dbgout);
@@ -821,10 +821,8 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
     float ymin, float ymax, GR_MAYBE_UNUSED json * const dbgout)
 {
     auto & gc = seg.getFace()->glyphs();
-    auto const * base = &aSlot;
+    auto const * base = aSlot.base();
     int numSlices;
-    while (base->attachedTo())
-        base = base->attachedTo();
     if (margin < 10) margin = 10;
 
     _limit = limit;
@@ -883,7 +881,7 @@ bool KernCollider::initSlot(Segment & seg, Slot & aSlot, const Rect &limit, floa
 #endif
 
     // Determine the trailing edge of each slice (ie, left edge for a RTL glyph).
-    for (auto s = base; s; s = s->nextInCluster(s))
+    for (auto s = base->cluster(), end = base->end(); s != end; ++s)
     {
         SlotCollision *c = seg.collisionInfo(*s);
         if (!gc.check(s->gid()))
