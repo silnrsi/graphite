@@ -171,7 +171,7 @@ float gr_seg_justify(gr_segment* pSeg/*not NULL*/, const gr_slot* pSlot/*not NUL
     assert(pSeg);
     assert(pSlot);
     auto const first = pFirst == nullptr ? pSeg->slots().begin() : const_cast<gr_slot *>(pFirst),
-               last = pFirst == nullptr ? pSeg->slots().end() : ++SlotBuffer::iterator(const_cast<gr_slot *>(pLast));
+               last = pLast == nullptr ? pSeg->slots().end() : ++SlotBuffer::iterator(const_cast<gr_slot *>(pLast));
     return pSeg->justify(const_cast<gr_slot *>(pSlot), pFont, float(width), justFlags(flags), first, last);
 }
 

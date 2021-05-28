@@ -417,7 +417,7 @@ STARTOP(push_slot_attr)
     int const   slot_ref = int8(param[1]);
     if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
     {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
+        reg.seg.positionSlots(nullptr, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
         reg.flags |= POSITIONED;
     }
     slotref slot = slotat(slot_ref);

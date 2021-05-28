@@ -33,6 +33,7 @@ of the License or (at your option) any later version.
 #include "graphite2/Font.h"
 #include "inc/CharInfo.h"
 #include "inc/debug.h"
+#include "inc/Font.h"
 #include "inc/Slot.h"
 #include "inc/Main.h"
 #include "inc/CmapCache.h"
@@ -140,62 +141,86 @@ void Segment::linkClusters()
 Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, SlotBuffer::iterator last, bool isRtl, bool isFinal)
 {
     assert(first.is_valid() || first == slots().end());
-    Position currpos(0., 0.);
-//    float clusterMin = 0.;
-    Rect bbox;
+    if (slots().empty())   // only true for empty segments
+        return Position(0.,0.);
+
     bool reorder = (currdir() != isRtl);
 
-    --last; // TODO remove once converted to half-open interval
     if (reorder)
     {
         reverseSlots();
-        std::swap(first, last);
+        --last; std::swap(first, last); ++last; 
     }
-    if (last == slots().end())     last = --slots().end();
-
-    if (slots().empty())   // only true for empty segments
-        return currpos;
-
-    // Accumulate cluster widths and min x positions.
-    ++last;
-    auto slot = first;
-    auto base = first;
-    do 
-    {
-        auto curr_base = base;
-        auto cmin = 0.f, adv = 0.f;
-        do base = slot++->update_cluster_metric(*this, isRtl, cmin, adv, isFinal);
-        while (base == curr_base);
-    } while (slot != last);
 
     // Position each cluster either.
+    Slot const * base = nullptr;
+    Position offset(0,0);
+    float range[2] = {0.f,0.f};
     if (isRtl)
     {
-        
-        for (slot = --last, last=--first; slot != last; --slot)
+        auto cluster = --last;
+        for (auto slot = last, end=--first; slot != end; --slot)
         {
-            if (slot->isBase())
+            slot->reset_origin();
+            auto const slot_base = slot->base();
+            if (base !=  slot_base)
             {
-                slot->origin(currpos);
-                currpos.x += slot->advance();
+                base = slot_base;
+                offset.x += -range[0];
+                for (auto s = cluster; s != slot; --s)
+                    s->origin(offset + s->origin());
+                cluster = slot;
+                offset.x += range[1];
+                range[0] = std::numeric_limits<float>::infinity();
+                range[1] = 0;
             }
+            slot->update_cluster_metric(*this, isRtl, isFinal, range);
         }
+        offset.x += -range[0];
+        for (auto s = cluster; s != first; --s)
+            s->position_shift(offset);
+        offset.x += range[1];
+        ++last; ++first;
     }
     else
     {
-        for (slot = first; slot != last; ++slot)
+        // Accumulate cluster widths and min x positions.
+        auto cluster = first;
+        for (auto slot = first; slot != last; ++slot)
         {
-            if (slot->isBase())
+            slot->reset_origin();
+            auto const slot_base = slot->base();
+            if (base !=  slot_base)
             {
-                slot->origin(currpos);
-                currpos.x += slot->advance();
+                offset.x += -range[0];
+                for (auto s = cluster; s != slot; ++s)
+                    s->origin(offset + s->origin());
+                offset.x += range[1];
+                base = slot_base;
+                cluster = slot;
+                range[0] = std::numeric_limits<float>::infinity();
+                range[1] = 0;
             }
+            slot->update_cluster_metric(*this, isRtl, isFinal, range);
         }
+        offset.x += -range[0];
+        for (auto s = cluster; s != last; ++s)
+            s->position_shift(offset);
+        offset.x += range[1];
+    }
+
+    if (font && font->scale() != 1)
+    {
+        auto const scale = font->scale();
+        for (auto slot = first; slot != last; ++slot)
+            slot->scale_by(scale);
+        offset *= scale;
     }
 
     if (reorder)
         reverseSlots();
-    return currpos;
+
+    return offset;
 }
 
 

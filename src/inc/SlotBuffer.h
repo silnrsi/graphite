@@ -171,12 +171,10 @@ public:
 
     bool        is_valid() const noexcept { return _i != nullptr; }
 
-    opaque_type handle() const noexcept { 
-        return _i 
-            ? _i->last() && _i->gid() == 0xffff && _i->deleted() 
-                ? nullptr 
-                : reinterpret_cast<opaque_type>(_i) 
-            : nullptr;
+    opaque_type handle() const noexcept {
+        if (_i == nullptr || (_i->last() && _i->gid() == 0xffff && _i->deleted()))
+            return nullptr;
+        return reinterpret_cast<opaque_type>(_i);
     }
     
     // operator bool() const         noexcept { return _p != nullptr; }

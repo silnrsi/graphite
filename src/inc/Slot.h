@@ -28,6 +28,7 @@ of the License or (at your option) any later version.
 
 #include <cassert>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 
 #include "graphite2/Segment.h"
@@ -165,13 +166,15 @@ public:
     // Positioning
     Position const & origin() const { return m_position; }
     void             origin(const Position &pos) { m_position = pos + m_shift; }
+    void             reset_origin() { m_position = {0,0}; }
 //     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     float advance() const { return m_advance.x; }
     void advance(Position &val) { m_advance = val; }
     Position attachOffset() const { return m_attach - m_with; }
     Position const & advancePos() const { return m_advance; }
-//     void positionShift(Position a) { m_position += a; }
+    void position_shift(Position a) { m_position += a; }
     void floodShift(Position adj, int depth = 0);
+    void scale_by(float scale) { m_position *= scale; /*m_advance *= scale; m_shift *= scale; m_with *= scale; m_attach *= scale; */}
 
     // Slot ordering
     uint32  index() const       { return m_index; }
@@ -202,7 +205,7 @@ public:
     void    bidiClass(int8 cls)      { m_bidiCls = cls; }
 
     // Operations
-    Slot const * update_cluster_metric(Segment const & seg, bool const rtl, float &cmin, float &adv, bool is_final=false, unsigned depth=100);
+    Position update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float range[2], unsigned depth=100);
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     int32 clusterMetric(Segment const & seg, uint8 metric, uint8 attrLevel, bool rtl) const;
@@ -227,7 +230,7 @@ public:
 
     bool isBase() const             { return !m_parent_offset; }
     bool isParent() const           { return m_flags.children; }
-    bool isForwardReferent() const  { return !m_flags.forwardrefered; }
+    bool isForwardReferent() const  { return m_flags.forwardrefered; }
     Slot const * base() const noexcept;
     Slot * base() noexcept { return const_cast<Slot*>(const_cast<Slot const *>(this)->base()); }
 
@@ -334,7 +337,7 @@ public:
     using base_t::reference;
 
     constexpr _child_iterator(): _cluster_iterator<S>{} {}
-    _child_iterator(S * s): base_t{s} { if (base_t::_s && base_t::_s == base_t::_b)   operator++(); }
+    _child_iterator(S * s): base_t{s} { if (base_t::_s && base_t::_s == base_t::_b) base_t::operator++(); }
 
     _child_iterator<S> &  operator++() noexcept       { _next_child(&base_t::operator++); return *this; }
     _child_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
@@ -404,7 +407,7 @@ Slot::Slot(Slot const & rhs)
 }
 
 inline
-Slot const * Slot::base() const noexcept { 
+Slot const * Slot::base() const noexcept {
     auto s = this; while (s->m_parent_offset) s += s->m_parent_offset; 
     return s; 
 }
