@@ -147,7 +147,7 @@ public:
         return _iterator<T>(r);
     }
 
-    void to_cluster_root() noexcept {
+    void to_base() noexcept {
         _i = _i->base();
     }
 

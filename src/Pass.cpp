@@ -982,7 +982,7 @@ bool Pass::resolveCollisions(Segment & seg, SlotBuffer::iterator const & slotFix
     bool ignoreForKern = !isRev;
     bool rtl = dir & 1;
     auto base = slotFix;
-    base.to_cluster_root();
+    base.to_base();
     Position zero(0., 0.);
 
     // Look for collisions with the neighboring glyphs.
@@ -1058,7 +1058,7 @@ float Pass::resolveKern(Segment & seg, SlotBuffer::iterator const slotFix, GR_MA
     bool collides = false;
     unsigned int space_count = 0;
     auto base = slotFix;
-    base.to_cluster_root();
+    base.to_base();
     SlotCollision *cFix = seg.collisionInfo(*base);
     const GlyphCache &gc = seg.getFace()->glyphs();
     const Rect &bbb = seg.theGlyphBBoxTemporary(slotFix->gid());

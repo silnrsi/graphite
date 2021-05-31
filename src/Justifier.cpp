@@ -94,8 +94,8 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         reverseSlots();
         std::swap(pFirst, pLast);
     }
-    pFirst.to_cluster_root();
-    pLast.to_cluster_root();
+    pFirst.to_base();
+    pLast.to_base();
     const float base = pFirst->origin().x / scale;
     width = width / scale;
     if ((jflags & gr_justEndInline) == 0)
@@ -109,16 +109,11 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         }
     }
     
-    // TODO: Fix up
-    auto const end = pLast != slots().end() ? &*++Slot::const_child_iterator(&*pLast) : &*pLast;
-    if (pFirst != slots().end())
-        pFirst = decltype(pFirst)::from(&*++Slot::child_iterator(&*pFirst));
-
     int icount = 0;
     int numLevels = silf()->numJustLevels();
     if (!numLevels)
     {
-        for (auto s = pSlot->children(); s != end; ++s)
+        for (auto s = pSlot->children(); s != pSlot->end(); ++s)
         {
             CharInfo *c = charinfo(s->before());
             if (isWhitespace(c->unicodeChar()))
@@ -131,7 +126,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
         }
         if (!icount)
         {
-            for (auto s = pSlot->children(); s != end; ++s)
+            for (auto s = pSlot->children(); s != pSlot->end(); ++s)
             {
                 s->setJustify(*this, 0, 3, 1);
                 s->setJustify(*this, 0, 2, 1);
@@ -142,7 +137,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
     }
 
     vector<JustifyTotal> stats(numLevels);
-    for (auto s = pFirst->children(); s != end; ++s)
+    for (auto s = pFirst->children(); s != pFirst->end(); ++s)
     {
         float w = s->origin().x / scale + s->advance() - base;
         if (w > currWidth) currWidth = w;
@@ -164,7 +159,7 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
             diff = width - currWidth;
             diffpw = diff / tWeight;
             tWeight = 0;
-            for (auto s = pFirst->children(); s != end; ++s) // don't include final glyph
+            for (auto s = pFirst->children(); s != pFirst->end(); ++s) // don't include final glyph
             {
                 int w = s->getJustify(*this, i, 3);
                 float pref = diffpw * w + error;

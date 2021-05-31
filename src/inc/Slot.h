@@ -286,13 +286,13 @@ public:
 
 template<class S>
 inline
-Slot::_cluster_iterator<S>::_cluster_iterator(S * s) noexcept
+Slot::_cluster_iterator<S>::_cluster_iterator(pointer s) noexcept
 : _s{s}, _b{nullptr} {
     if (!_s) return;
     _b = _s->base();
     if (!_b) _b = _s;
     if (_s->isForwardReferent()) {
-        for (auto i = *this; i._s; _s = i._s, --i );
+        for (auto i = *this; i._b; _s = i._s, --i);
         assert(_s != s);
     }
 }
@@ -301,13 +301,13 @@ template<class S>
 inline
 void Slot::_cluster_iterator<S>::_validate() noexcept {
     auto b = _s->base();
-    if (b != _b) _b = _s = nullptr;
+    if (b != _b) _b = nullptr;
 }
 
 template<class S>
 inline
 bool Slot::_cluster_iterator<S>::operator == (_cluster_iterator<S const> const & rhs) const noexcept { 
-    return _s == rhs._s && _b == rhs._b; 
+    return (!_b && _b == rhs._b) || (_b == rhs._b && _s == rhs._s); 
 }
 
 template<class S>
@@ -327,7 +327,7 @@ class Slot::_child_iterator: public _cluster_iterator<S> {
         auto parent = base_t::_s->attachedTo();
         do { 
             (this->*advfn)(); 
-        } while (base_t::_s && base_t::_s->attachedTo() != parent);
+        } while (base_t::_b && base_t::_s->attachedTo() != parent);
     }
 
 public:
@@ -337,7 +337,7 @@ public:
     using base_t::reference;
 
     constexpr _child_iterator(): _cluster_iterator<S>{} {}
-    _child_iterator(S * s): base_t{s} { if (base_t::_s && base_t::_s == base_t::_b) base_t::operator++(); }
+    _child_iterator(S * s): base_t{s} {}
 
     _child_iterator<S> &  operator++() noexcept       { _next_child(&base_t::operator++); return *this; }
     _child_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
@@ -353,7 +353,7 @@ public:
             : nullptr;
     }
 
-        operator _child_iterator<S const>() const noexcept { return *reinterpret_cast<_child_iterator<S const> const *>(this); }
+    operator _child_iterator<S const>() const noexcept { return *reinterpret_cast<_child_iterator<S const> const *>(this); }
 };
 
 
@@ -369,12 +369,16 @@ auto Slot::cluster() const -> const_cluster_iterator {
 
 inline
 auto Slot::children() -> child_iterator { 
-    return child_iterator(this); 
+    auto ci = child_iterator(this);
+    if (isBase()) ++ci;
+    return ci;
 }
 
 inline
 auto Slot::children() const -> const_child_iterator { 
-    return const_child_iterator(this); 
+    auto ci = const_child_iterator(this);
+    if (isBase()) ++ci;
+    return ci;
 }
 
 inline
@@ -408,7 +412,9 @@ Slot::Slot(Slot const & rhs)
 
 inline
 Slot const * Slot::base() const noexcept {
-    auto s = this; while (s->m_parent_offset) s += s->m_parent_offset; 
+    auto s = this; 
+    while (s->m_parent_offset) 
+        s += s->m_parent_offset; 
     return s; 
 }
 
