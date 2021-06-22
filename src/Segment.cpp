@@ -165,12 +165,19 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             auto const slot_base = slot->base();
             if (base !=  slot_base)
             {
-                base = slot_base;
                 offset.x += -range[0];
                 for (auto s = cluster; s != slot; --s)
+                {
                     s->origin(offset + s->origin());
-                cluster = slot;
+                    if (s->origin().x < 0) 
+                    {
+                        offset.x += -s->origin().x;
+                        s->position_shift({-s->origin().x,0.f});
+                    }
+                }
                 offset.x += range[1];
+                base = slot_base;
+                cluster = slot;
                 range[0] = std::numeric_limits<float>::infinity();
                 range[1] = 0;
             }
@@ -194,7 +201,14 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             {
                 offset.x += -range[0];
                 for (auto s = cluster; s != slot; ++s)
+                {
                     s->origin(offset + s->origin());
+                    if (s->origin().x < 0) 
+                    {
+                        offset.x += -s->origin().x;
+                        s->position_shift({-s->origin().x,0.f});
+                    }
+                }
                 offset.x += range[1];
                 base = slot_base;
                 cluster = slot;

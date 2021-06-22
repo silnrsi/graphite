@@ -158,7 +158,7 @@ Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool c
     } else {
         auto base = parent->update_cluster_metric(seg, rtl, is_final, range, depth-1);
         m_position = (pos += base + m_attach - m_with);
-        if (m_advance.x >= 0.5f || pos.x < 0)
+        if (m_advance.x >= 0.5f)
             range[0] = min(pos.x, range[0]);
     }
 
