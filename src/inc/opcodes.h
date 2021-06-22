@@ -78,8 +78,18 @@ of the License or (at your option) any later version.
 #define pop()               (*reg.sp--)
 #define slotat(x)           (reg.is[(x)])
 #define DIE                 { reg.os=reg.seg.slots().end(); reg.status = Machine::died_early; EXIT(1); }
-#define POSITIONED          1
 //#define next_slot(x, op)        { op x; while(x -> deleted()) { op x;}; }
+// TODO: Find out if Pass::runFSM can be made smarter when finishing building the map to avoid the need for this check.
+// TODO: Move more common code into an opcodes_preamble.hxx, to avoid macros as functions.
+#define position_context(slat) { \
+    if (!reg.positioned && (slat == gr_slatPosX || slat == gr_slatPosY)) \
+    { \
+        auto last = reg.ctxt.map.back(); \
+        if (last != reg.seg.slots().end())  ++last; \
+        reg.seg.positionSlots(nullptr, reg.ctxt.map.front(), last, reg.seg.currdir()); \
+        reg.positioned = true; \
+    } \
+}
 
 STARTOP(nop)
     do {} while (0);
@@ -373,12 +383,7 @@ STARTOP(attr_add)
     declare_params(1);
     auto const      slat = Slot::attrCode(uint8(*param));
     uint32_t const  val  = pop();
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+ position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
     reg.os->setAttr(reg.seg, slat, 0, int32_t(val + res), reg.ctxt);
 ENDOP
 
@@ -386,12 +391,7 @@ STARTOP(attr_sub)
     declare_params(1);
     auto const      slat = Slot::attrCode(uint8(*param));
     uint32_t const  val  = pop();
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+ position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
     reg.os->setAttr(reg.seg, slat, 0, int32_t(res - val), reg.ctxt);
 ENDOP
 
@@ -415,12 +415,7 @@ STARTOP(push_slot_attr)
     declare_params(2);
     auto const  slat     = Slot::attrCode(uint8(param[0]));
     int const   slot_ref = int8(param[1]);
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(nullptr, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    slotref slot = slotat(slot_ref);
+    position_context(slat)   slotref slot = slotat(slot_ref);
     if (slot != reg.seg.slots().end())
     {
         int res = slot->getAttr(reg.seg, slat, 0);
@@ -491,12 +486,7 @@ STARTOP(push_islot_attr)
     auto const  slat     = Slot::attrCode(uint8(param[0]));
     int const   slot_ref = int8(param[1]),
                 idx      = uint8(param[2]);
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    slotref slot = slotat(slot_ref);
+ position_context(slat)   slotref slot = slotat(slot_ref);
     if (slot != reg.seg.slots().end())
     {
         int res = slot->getAttr(reg.seg, slat, idx);
@@ -536,12 +526,7 @@ STARTOP(iattr_add)
     auto const      slat = Slot::attrCode(uint8(param[0]));
     uint8 const     idx  = uint8(param[1]);
     uint32_t const  val  = pop();
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+ position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
     reg.os->setAttr(reg.seg, slat, idx, int32_t(val + res), reg.ctxt);
 ENDOP
 
@@ -550,12 +535,7 @@ STARTOP(iattr_sub)
     auto const      slat = Slot::attrCode(uint8(param[0]));
     uint8 const     idx  = uint8(param[1]);
     uint32_t const  val  = pop();
-    if ((slat == gr_slatPosX || slat == gr_slatPosY) && (reg.flags & POSITIONED) == 0)
-    {
-        reg.seg.positionSlots(0, reg.ctxt.map.front(), std::next(reg.ctxt.map.back()), reg.seg.currdir());
-        reg.flags |= POSITIONED;
-    }
-    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+ position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
     reg.os->setAttr(reg.seg, slat, idx, int32_t(res - val), reg.ctxt);
 ENDOP
 

@@ -189,7 +189,7 @@ struct Machine::regbank  {
     slotref *               is;
     slotref *         const isb;
     slotref                 os;
-    int8                    flags;
+    int8                    positioned;
 };
 
 inline Machine::Machine(ShapingContext & ctxt) throw()
