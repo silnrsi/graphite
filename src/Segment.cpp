@@ -81,6 +81,7 @@ void Segment::appendSlot(int id, int cid, int gid, int iFeats, size_t coffset)
     aSlot.before(id);
     aSlot.after(id);
     aSlot.generation() = slots().size();
+    aSlot.clusterhead(true);
 
     if (glyph && m_silf->aPassBits())
         m_passBits &= glyph->attrs()[m_silf->aPassBits()]
@@ -199,24 +200,34 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             auto const slot_base = slot->base();
             if (base !=  slot_base)
             {
-                offset.x += -range[0];
-                for (auto s = cluster; s != slot; ++s)
+                if (slot->clusterhead())
                 {
-                    s->origin(offset + s->origin());
-                    if (s->origin().x < 0) 
+                    // Close current cluster
+                    offset.x += -range[0];
+                    for (auto s = cluster; s != slot; ++s)
                     {
-                        offset.x += -s->origin().x;
-                        s->position_shift({-s->origin().x,0.f});
+                        s->origin(offset + s->origin());
+                        if (s->origin().x < 0) 
+                        {
+                            offset.x += -s->origin().x;
+                            s->position_shift({-s->origin().x,0.f});
+                        }
                     }
+                    // Open new cluster
+                    offset.x += range[1];
+                    base = slot_base;
+                    cluster = slot;
+                    range[0] = std::numeric_limits<float>::infinity();
+                    range[1] = 0;
+                } 
+                else if (slot->isBase())
+                {
+                    slot->position_shift({range[1], 0.f});
                 }
-                offset.x += range[1];
-                base = slot_base;
-                cluster = slot;
-                range[0] = std::numeric_limits<float>::infinity();
-                range[1] = 0;
             }
             slot->update_cluster_metric(*this, isRtl, isFinal, range);
         }
+        // Close last cluster
         offset.x += -range[0];
         for (auto s = cluster; s != last; ++s)
             s->position_shift(offset);

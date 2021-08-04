@@ -170,6 +170,7 @@ Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool c
 
 Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
 {
+    assert(false);
     SlotCollision *coll = NULL;
     if (depth > 100 || (attrLevel && m_attLevel > attrLevel)) return Position(0, 0);
     float scale = font ? font->scale() : 1.0f;
@@ -242,7 +243,7 @@ Position Slot::finalise(const Segment & seg, const Font *font, Position & base, 
     return res;
 }
 
-int32 Slot::clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bool rtl) const
+int32 Slot::clusterMetric(const Segment & seg, metrics metric, uint8 attrLevel, bool rtl) const
 {
     if (glyph() >= seg.getFace()->glyphs().numGlyphs())
         return 0;
@@ -257,7 +258,7 @@ int32 Slot::clusterMetric(const Segment & seg, uint8 metric, uint8 attrLevel, bo
     Position res = {range[1], m_advance.y};
     // Position res = const_cast<Slot *>(this)->finalise(seg, NULL, base, bbox, attrLevel, clusterMin, rtl, false);
 
-    switch (metrics(metric))
+    switch (metric)
     {
     case kgmetLsb :
         return int32(bbox.bl.x);
@@ -500,18 +501,30 @@ bool Slot::add_child(Slot *ap)
         return false;
     ap->attachTo(this);
     m_flags.children = true;
-    if (ap->m_parent_offset > 0)
-        m_flags.forwardrefered = true; 
+
+    for(auto first = min(ap, this)+1, last = max(ap, this)+1; first != last; ++first)
+        first->clusterhead(false);
+
     return true;
 }
 
 bool Slot::remove_child(Slot *ap)
 {
     if (this == ap || !isParent() || !ap) return false;
-    if (ap->m_parent_offset > 0)
-        m_flags.forwardrefered = false;
+    if (ap->m_parent_offset > 0 && ap->m_flags.clusterhead)
+    {
+        for (auto first = min(ap, this)+1, last = max(ap, this)+1; first != last; ++first)
+        {
+            if (first->base() != ap)
+            {
+                first->clusterhead(true);
+                break;
+            }
+        }
+    }
     ap->m_parent_offset = 0;
-    m_flags.children = m_flags.forwardrefered || (children() != end());
+    ap->m_flags.clusterhead = true;
+    m_flags.children = !m_flags.clusterhead || (children() != end());
     return true;
 }
 

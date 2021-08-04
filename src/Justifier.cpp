@@ -217,16 +217,16 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
             m_silf->runGraphite(*this, m_silf->justificationPass(), m_silf->positionPass());
 
     #if !defined GRAPHITE2_NTRACING
-        if (dbgout)
-        {
-            *dbgout     << json::item << json::close; // Close up the passes array
-            positionSlots(nullptr, pSlot, std::next(pLast), m_dir);
-            auto lEnd = end ? decltype(slots().cend())::from(end) : slots().cend();
-            *dbgout << "output" << json::array;
-            for(auto t = pSlot; t != lEnd; ++t)
-                *dbgout     << dslot(this, &*t);
-            *dbgout         << json::close << json::close;
-        }
+        // FIX ME if (dbgout)
+        // {
+        //     *dbgout     << json::item << json::close; // Close up the passes array
+        //     positionSlots(nullptr, pSlot, std::next(pLast), m_dir);
+        //     auto lEnd = end ? decltype(slots().cend())::from(end) : slots().cend();
+        //     *dbgout << "output" << json::array;
+        //     for(auto t = pSlot; t != lEnd; ++t)
+        //         *dbgout     << dslot(this, &*t);
+        //     *dbgout         << json::close << json::close;
+        // }
     #endif
 
         return positionSlots(font, pSlot, std::next(pLast), m_dir).x;

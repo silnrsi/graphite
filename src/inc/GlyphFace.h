@@ -32,7 +32,7 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-enum metrics {
+enum metrics: uint8_t {
     kgmetLsb = 0, kgmetRsb,
     kgmetBbTop, kgmetBbBottom, kgmetBbLeft, kgmetBbRight,
     kgmetBbHeight, kgmetBbWidth,

@@ -45,7 +45,7 @@ ShapingContext::ShapingContext(Segment & seg, uint8 direction, size_t maxSize)
 void ShapingContext::reset(SlotBuffer::iterator & slot, short unsigned int max_pre_ctxt)
 {
     int pre_ctxt = 0;
-    for (; pre_ctxt != max_pre_ctxt && slot != segment.slots().begin(); ++pre_ctxt, --slot);
+    for (auto const end = segment.slots().begin(); pre_ctxt != max_pre_ctxt && slot != end; ++pre_ctxt, --slot);
     _precontext = pre_ctxt; 
     map.clear();
     in.clear();

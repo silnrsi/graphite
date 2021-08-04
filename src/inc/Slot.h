@@ -33,12 +33,12 @@ of the License or (at your option) any later version.
 
 #include "graphite2/Segment.h"
 
+#include "inc/GlyphFace.h"
 #include "inc/Main.h"
 #include "inc/Position.h"
 
 namespace graphite2 {
 
-class GlyphFace;
 class Segment;
 // class Slot;
 class ShapingContext;
@@ -66,7 +66,7 @@ struct Slot_data {
                 inserted: 1,
                 copied: 1,
                 positioned: 1,
-                forwardrefered:1,
+                clusterhead:1,
                 last:1,
                 children:1;
     }        m_flags;       // holds bit flags
@@ -143,7 +143,7 @@ public:
 
 //     template<class T>
     constexpr Slot(sentinal const &)
-    : Slot_data{0, {}, {}, {}, {}, {}, 0, 0, 0, 0, -1u, uint16_t(-1), uint16_t(-1), 0, 0, 0, {true,false,false,false,false,true,false}},
+    : Slot_data{0, {}, {}, {}, {}, {}, 0, 0, 0, 0, -1u, uint16_t(-1), uint16_t(-1), 0, 0, 0, {true,false,false,false,true,true,false}},
       m_attrs{}
 #if !defined GRAPHITE2_NTRACING
       , m_gen{0}
@@ -197,6 +197,8 @@ public:
     void last(bool state)    { m_flags.last = state; }
     bool insertBefore() const { return !m_flags.inserted; }
     void insertBefore(bool state) { m_flags.inserted = !state; }
+    void clusterhead(bool state) { m_flags.clusterhead = state; }
+    bool clusterhead() const { return m_flags.clusterhead ;}
 
     // Bidi
     uint8   bidiLevel() const        { return m_bidiLevel; }
@@ -208,7 +210,7 @@ public:
     Position update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float range[2], unsigned depth=100);
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
-    int32 clusterMetric(Segment const & seg, uint8 metric, uint8 attrLevel, bool rtl) const;
+    int32 clusterMetric(Segment const & seg, metrics metric, uint8 attrLevel, bool rtl) const;
 
     // Attributes
     void    setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
@@ -230,7 +232,6 @@ public:
 
     bool isBase() const             { return !m_parent_offset; }
     bool isParent() const           { return m_flags.children; }
-    bool isForwardReferent() const  { return m_flags.forwardrefered; }
     Slot const * base() const noexcept;
     Slot * base() noexcept { return const_cast<Slot*>(const_cast<Slot const *>(this)->base()); }
 
@@ -267,7 +268,7 @@ public:
     using reference = value_type&;
 
     constexpr _cluster_iterator() noexcept: _s{nullptr}, _b{nullptr} {}
-    _cluster_iterator(pointer s) noexcept;
+    _cluster_iterator(pointer s) noexcept : _s{s}, _b{s} {}
 
     bool operator == (_cluster_iterator<S const> const & rhs) const noexcept;
     bool operator != (_cluster_iterator<S const> const & rhs) const noexcept;
@@ -275,10 +276,10 @@ public:
     reference operator*() const noexcept            { return *_s;  }
     pointer   operator->() const  noexcept          { return &operator*(); }
 
-    _cluster_iterator<S> &  operator++() noexcept       { assert(_s); ++_s; _validate(); return *this; }
+    _cluster_iterator<S> &  operator++() noexcept       { assert(_s); if ((++_s)->base() != _b) _b = nullptr; return *this; }
     _cluster_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
 
-    _cluster_iterator<S> &  operator--() noexcept       { assert(_s); --_s; _validate(); return *this; }
+    _cluster_iterator<S> &  operator--() noexcept       { assert(_s); --_s; return *this; }
     _cluster_iterator<S>    operator--(int) noexcept    { auto tmp(*this); operator--(); return tmp; }
 
     operator _cluster_iterator<S const> const &() const noexcept { return *reinterpret_cast<_cluster_iterator<S const> const *>(this); }
@@ -286,28 +287,8 @@ public:
 
 template<class S>
 inline
-Slot::_cluster_iterator<S>::_cluster_iterator(pointer s) noexcept
-: _s{s}, _b{nullptr} {
-    if (!_s) return;
-    _b = _s->base();
-    if (!_b) _b = _s;
-    if (_s->isForwardReferent()) {
-        for (auto i = *this; i._b; _s = i._s, --i);
-        assert(_s != s);
-    }
-}
-
-template<class S>
-inline
-void Slot::_cluster_iterator<S>::_validate() noexcept {
-    auto b = _s->base();
-    if (b != _b) _b = nullptr;
-}
-
-template<class S>
-inline
 bool Slot::_cluster_iterator<S>::operator == (_cluster_iterator<S const> const & rhs) const noexcept { 
-    return (!_b && _b == rhs._b) || (_b == rhs._b && _s == rhs._s); 
+    return (_b == nullptr && rhs._b == nullptr) || (_b == rhs._b && _s == rhs._s); 
 }
 
 template<class S>
@@ -358,27 +339,31 @@ public:
 
 
 inline
-auto Slot::cluster() -> cluster_iterator { 
-    return cluster_iterator(this); 
+auto Slot::cluster() -> cluster_iterator {
+    Slot const * r = base();
+    while (!r->clusterhead()) --r;
+    return const_cast<Slot *>(r);
 }
 
 inline
 auto Slot::cluster() const -> const_cluster_iterator { 
-    return const_cluster_iterator(this); 
+    auto r = base();
+    while (!r->clusterhead()) --r;
+    return const_cast<Slot *>(r);
 }
 
 inline
-auto Slot::children() -> child_iterator { 
-    auto ci = child_iterator(this);
-    if (isBase()) ++ci;
-    return ci;
+auto Slot::children() -> child_iterator {
+    auto ci = cluster();
+    while (ci->attachedTo() != this) ++ci;
+    return child_iterator(&*ci);
 }
 
 inline
 auto Slot::children() const -> const_child_iterator { 
-    auto ci = const_child_iterator(this);
-    if (isBase()) ++ci;
-    return ci;
+    auto ci = cluster();
+    while (ci->attachedTo() != this) ++ci;
+    return const_child_iterator(&*ci);
 }
 
 inline

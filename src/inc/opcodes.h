@@ -283,6 +283,7 @@ STARTOP(insert)
     if (slot == reg.seg.slots().end()) DIE;
 
     slot->generation() += reg.seg.slots().size();
+    slot->clusterhead(true);
     switch ((slot == reg.seg.slots().begin()) << 1 | (iss == reg.seg.slots().end()))
     {
         case 0: // Medial insertion
@@ -434,7 +435,7 @@ ENDOP
 
 STARTOP(push_glyph_metric)
     declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]);
+    const auto          glyph_attr  = metrics(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
     slotref slot = slotat(slot_ref);
@@ -469,7 +470,7 @@ ENDOP
 
 STARTOP(push_att_to_glyph_metric)
     declare_params(3);
-    const unsigned int  glyph_attr  = uint8(param[0]);
+    const auto          glyph_attr  = metrics(param[0]);
     const int           slot_ref    = int8(param[1]);
     const signed int    attr_level  = uint8(param[2]);
     slotref slot = slotat(slot_ref);
