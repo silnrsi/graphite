@@ -167,14 +167,16 @@ public:
     Position const & origin() const { return m_position; }
     void             origin(const Position &pos) { m_position = pos + m_shift; }
     void             reset_origin() { m_position = {0,0}; }
+    Position const & shift() const { return m_shift; }
 //     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     float advance() const { return m_advance.x; }
     void advance(Position &val) { m_advance = val; }
     Position attachOffset() const { return m_attach - m_with; }
     Position const & advancePos() const { return m_advance; }
-    void position_shift(Position a) { m_position += a; }
+    void position_shift(Position const & p) { m_position += p; }
     void floodShift(Position adj, int depth = 0);
     void scale_by(float scale) { m_position *= scale; /*m_advance *= scale; m_shift *= scale; m_with *= scale; m_attach *= scale; */}
+
 
     // Slot ordering
     uint32  index() const       { return m_index; }
@@ -207,7 +209,7 @@ public:
     void    bidiClass(int8 cls)      { m_bidiCls = cls; }
 
     // Operations
-    Position update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float range[2], unsigned depth=100);
+    Position update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float & clsb, float & crsb, unsigned depth=100);
     void update(int numSlots, int numCharInfo, Position &relpos);
     Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
     int32 clusterMetric(Segment const & seg, metrics metric, uint8 attrLevel, bool rtl) const;

@@ -153,12 +153,23 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         --last; std::swap(first, last); ++last; 
     }
 
+    // Phase one collect ranges.
+    for (auto slot = first; slot != last; ++slot)
+    {
+        slot->reset_origin();
+        auto const base = slot->base();
+        auto & clsb = const_cast<float &>(base->origin().x);
+        auto & crsb = const_cast<float &>(base->origin().y);
+        slot->update_cluster_metric(*this, isRtl, isFinal, clsb, crsb);
+    }
+
+
     // Position each cluster either.
-    Slot const * base = nullptr;
     Position offset(0,0);
-    float range[2] = {0.f,0.f};
     if (isRtl)
     {
+        Slot * base = nullptr;
+        float clsb = 0.f, crsb = 0.f;
         auto cluster = --last;
         for (auto slot = last, end=--first; slot != end; --slot)
         {
@@ -166,72 +177,52 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             auto const slot_base = slot->base();
             if (base !=  slot_base)
             {
-                offset.x += -range[0];
+                offset.x += -clsb;
                 for (auto s = cluster; s != slot; --s)
                 {
                     s->origin(offset + s->origin());
                     if (s->origin().x < 0) 
                     {
                         offset.x += -s->origin().x;
-                        s->position_shift({-s->origin().x,0.f});
+                        s->position_shift({-s->origin().x, 0.f});
                     }
                 }
-                offset.x += range[1];
+                offset.x += crsb;
                 base = slot_base;
                 cluster = slot;
-                range[0] = std::numeric_limits<float>::infinity();
-                range[1] = 0;
+                clsb = std::numeric_limits<float>::infinity();
+                crsb = 0;
             }
-            slot->update_cluster_metric(*this, isRtl, isFinal, range);
+            slot->update_cluster_metric(*this, isRtl, isFinal, clsb, crsb);
         }
-        offset.x += -range[0];
+        offset.x += -clsb;
         for (auto s = cluster; s != first; --s)
             s->position_shift(offset);
-        offset.x += range[1];
+        offset.x += crsb;
         ++last; ++first;
     }
     else
     {
-        // Accumulate cluster widths and min x positions.
-        auto cluster = first;
+        // Adjust all cluster bases
         for (auto slot = first; slot != last; ++slot)
         {
+            if (!slot->isBase()) continue;
+
+            auto const clsb = slot->origin().x;
+            auto const crsb = slot->origin().y;
             slot->reset_origin();
-            auto const slot_base = slot->base();
-            if (base !=  slot_base)
-            {
-                if (slot->clusterhead())
-                {
-                    // Close current cluster
-                    offset.x += -range[0];
-                    for (auto s = cluster; s != slot; ++s)
-                    {
-                        s->origin(offset + s->origin());
-                        if (s->origin().x < 0) 
-                        {
-                            offset.x += -s->origin().x;
-                            s->position_shift({-s->origin().x,0.f});
-                        }
-                    }
-                    // Open new cluster
-                    offset.x += range[1];
-                    base = slot_base;
-                    cluster = slot;
-                    range[0] = std::numeric_limits<float>::infinity();
-                    range[1] = 0;
-                } 
-                else if (slot->isBase())
-                {
-                    slot->position_shift({range[1], 0.f});
-                }
-            }
-            slot->update_cluster_metric(*this, isRtl, isFinal, range);
+            offset.x += -clsb;
+            slot->origin(offset);
+            offset.x += crsb;
         }
-        // Close last cluster
-        offset.x += -range[0];
-        for (auto s = cluster; s != last; ++s)
-            s->position_shift(offset);
-        offset.x += range[1];
+
+        // Shift all attached slots
+        for (auto slot = first; slot != last; ++slot)
+        {
+            if (slot->isBase()) continue;
+            auto base = slot->base();
+            slot->position_shift(base->origin());
+        }
     }
 
     if (font && font->scale() != 1)

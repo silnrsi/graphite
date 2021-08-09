@@ -138,32 +138,37 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
 }
 
 
-Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float range[2], unsigned depth)
+Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float & clsb, float & crsb, unsigned depth)
 {
     // Bail out early if the attachment chain is too deep.
     if (depth == 0) return Position();
 
-    Position pos = {m_just,0.f};
+    // Incorporate shift into positioning, and cluster rsb calculations.
+    Position shift = {m_shift.x + m_just, m_shift.y};
     auto const collision_info = seg.collisionInfo(*this);
     if (is_final && collision_info) {
         if (!(collision_info->flags() & SlotCollision::COLL_KERN) || rtl)
-            pos += collision_info->offset();
+            shift += collision_info->offset();
     }
 
     // Only consider if design space advance is a non-zero whole unit.
     auto const slot_adv = m_advance.x + m_just;
     auto const parent = attachedTo();
+    auto pos = shift;
     if (!parent) {
-        range[0] = min(0.0f, range[0]);
+        clsb = min(0.0f, clsb);
+        pos -= m_shift;
+        shift -= m_shift;
     } else {
-        auto base = parent->update_cluster_metric(seg, rtl, is_final, range, depth-1);
+        auto base = parent->update_cluster_metric(seg, rtl, is_final, clsb, crsb, depth-1);
         m_position = (pos += base + m_attach - m_with);
         if (m_advance.x >= 0.5f)
-            range[0] = min(pos.x, range[0]);
+            clsb = min(pos.x, clsb);
     }
 
     if (m_advance.x >= 0.5f)
-        range[1] = max(pos.x + slot_adv, range[1]);
+        // We only consider shift for attached glyphs not ourselves.
+        crsb = max(pos.x - shift.x + slot_adv, crsb);
     return pos;
 }
 
@@ -252,7 +257,7 @@ int32 Slot::clusterMetric(const Segment & seg, metrics metric, uint8 attrLevel, 
     float range[2] = {0, 0};
     for (auto s = cluster(); s != end(); ++s)
     {
-        auto base = slot.update_cluster_metric(seg, rtl, false, range);
+        auto base = slot.update_cluster_metric(seg, rtl, false, range[0], range[1]);
         bbox.widen(seg.getFace()->glyphs().glyphSafe(glyph())->theBBox() + base);
     }
     Position res = {range[1], m_advance.y};
