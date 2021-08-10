@@ -155,8 +155,10 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
 
     // Phase one collect ranges.
     for (auto slot = first; slot != last; ++slot)
-    {
         slot->reset_origin();
+
+    for (auto slot = first; slot != last; ++slot)
+    {
         auto const base = slot->base();
         auto & clsb = const_cast<float &>(base->origin().x);
         auto & crsb = const_cast<float &>(base->origin().y);
@@ -165,9 +167,10 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
 
 
     // Position each cluster either.
-    Position offset(0,0);
+    Position offset = {0.f, 0.f};
     if (isRtl)
     {
+#if 0
         Slot * base = nullptr;
         float clsb = 0.f, crsb = 0.f;
         auto cluster = --last;
@@ -200,9 +203,55 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             s->position_shift(offset);
         offset.x += crsb;
         ++last; ++first;
+#else
+        // For the first visual cluster ensure initial x positions are
+        //  never negative.
+        float clsb = 0.f;
+        for (auto slot = --last, end=--first; slot != end; --slot)
+        {
+            if (slot->isBase())
+                clsb = slot->origin().x;
+            if (-slot->origin().x > offset.x)
+                offset.x = -slot->origin().x;
+            if (slot->clusterhead()) break;
+        }
+        offset.x += clsb;
+
+        // Adjust all cluster bases
+        for (auto slot = last, end=first; slot != end; --slot)
+        {
+            if (!slot->isBase()) continue;
+
+            auto const clsb = slot->origin().x;
+            auto const crsb = slot->origin().y;
+            auto const shifts = slot->collision_shift(*this);
+            slot->reset_origin();
+            offset.x += -clsb;
+            slot->origin(offset + shifts);
+            offset.x += crsb + shifts.x;
+        }
+        ++last; ++first;
+
+        // Shift all attached slots
+        for (auto slot = first; slot != last; ++slot)
+        {
+            if (slot->isBase()) continue;
+            auto base = slot->base();
+            slot->position_shift(base->origin());
+        }
+#endif
     }
     else
     {
+        // For the first visual cluster ensure initial x positions are
+        //  never negative.
+        for (auto slot = first; slot != last; ++slot)
+        {
+            if (-slot->origin().x > offset.x)
+                offset.x = -slot->origin().x;
+            if (slot->clusterhead()) break;
+        }
+
         // Adjust all cluster bases
         for (auto slot = first; slot != last; ++slot)
         {
@@ -210,10 +259,11 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
 
             auto const clsb = slot->origin().x;
             auto const crsb = slot->origin().y;
+            auto const shifts = slot->collision_shift(*this);
             slot->reset_origin();
             offset.x += -clsb;
-            slot->origin(offset);
-            offset.x += crsb;
+            slot->origin(offset + shifts);
+            offset.x += crsb + shifts.x;
         }
 
         // Shift all attached slots

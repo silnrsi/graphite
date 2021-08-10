@@ -138,6 +138,13 @@ void Slot::update(int /*numGrSlots*/, int numCharInfo, Position &relpos)
 }
 
 
+Position Slot::collision_shift(Segment const & seg) const
+{
+    auto const cinfo = seg.collisionInfo(*this);
+    return cinfo ? cinfo->offset() : Position{};
+}
+
+
 Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float & clsb, float & crsb, unsigned depth)
 {
     // Bail out early if the attachment chain is too deep.
@@ -147,7 +154,7 @@ Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool c
     Position shift = {m_shift.x + m_just, m_shift.y};
     auto const collision_info = seg.collisionInfo(*this);
     if (is_final && collision_info) {
-        if (!(collision_info->flags() & SlotCollision::COLL_KERN) || rtl)
+        // if (!(collision_info->flags() & SlotCollision::COLL_KERN) || rtl)
             shift += collision_info->offset();
     }
 
@@ -157,8 +164,8 @@ Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool c
     auto pos = shift;
     if (!parent) {
         clsb = min(0.0f, clsb);
-        pos -= m_shift;
-        shift -= m_shift;
+        pos = {0,0};
+        shift = {0,0};
     } else {
         auto base = parent->update_cluster_metric(seg, rtl, is_final, clsb, crsb, depth-1);
         m_position = (pos += base + m_attach - m_with);
@@ -175,7 +182,7 @@ Position Slot::update_cluster_metric(Segment const & seg, bool const rtl, bool c
 
 Position Slot::finalise(const Segment & seg, const Font *font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth)
 {
-    assert(false);
+    // assert(false);
     SlotCollision *coll = NULL;
     if (depth > 100 || (attrLevel && m_attLevel > attrLevel)) return Position(0, 0);
     float scale = font ? font->scale() : 1.0f;

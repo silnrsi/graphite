@@ -165,7 +165,7 @@ public:
 
     // Positioning
     Position const & origin() const { return m_position; }
-    void             origin(const Position &pos) { m_position = pos + m_shift; }
+    void             origin(const Position &pos) { m_position = pos + m_shift + Position{m_just,0.f}; }
     void             reset_origin() { m_position = {0,0}; }
     Position const & shift() const { return m_shift; }
 //     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
@@ -176,6 +176,7 @@ public:
     void position_shift(Position const & p) { m_position += p; }
     void floodShift(Position adj, int depth = 0);
     void scale_by(float scale) { m_position *= scale; /*m_advance *= scale; m_shift *= scale; m_with *= scale; m_attach *= scale; */}
+    Position collision_shift(Segment const & seg) const;
 
 
     // Slot ordering
@@ -259,9 +260,6 @@ template<class S>
 class Slot::_cluster_iterator {
 protected:
     S* _s;
-    S const * _b;
-
-    void _validate() noexcept;
 
 public:
     using iterator_category = std::bidirectional_iterator_tag;
@@ -269,8 +267,8 @@ public:
     using pointer = value_type*;
     using reference = value_type&;
 
-    constexpr _cluster_iterator() noexcept: _s{nullptr}, _b{nullptr} {}
-    _cluster_iterator(pointer s) noexcept : _s{s}, _b{s} {}
+    constexpr _cluster_iterator() noexcept: _s{nullptr} {}
+    _cluster_iterator(pointer s) noexcept : _s{s} {}
 
     bool operator == (_cluster_iterator<S const> const & rhs) const noexcept;
     bool operator != (_cluster_iterator<S const> const & rhs) const noexcept;
@@ -278,7 +276,7 @@ public:
     reference operator*() const noexcept            { return *_s;  }
     pointer   operator->() const  noexcept          { return &operator*(); }
 
-    _cluster_iterator<S> &  operator++() noexcept       { assert(_s); if ((++_s)->base() != _b) _b = nullptr; return *this; }
+    _cluster_iterator<S> &  operator++() noexcept       { assert(_s); if ((++_s)->clusterhead()) _s = nullptr; return *this; }
     _cluster_iterator<S>    operator++(int) noexcept    { auto tmp(*this); operator++(); return tmp; }
 
     _cluster_iterator<S> &  operator--() noexcept       { assert(_s); --_s; return *this; }
@@ -290,7 +288,7 @@ public:
 template<class S>
 inline
 bool Slot::_cluster_iterator<S>::operator == (_cluster_iterator<S const> const & rhs) const noexcept { 
-    return (_b == nullptr && rhs._b == nullptr) || (_b == rhs._b && _s == rhs._s); 
+    return _s == rhs._s; 
 }
 
 template<class S>
@@ -310,7 +308,7 @@ class Slot::_child_iterator: public _cluster_iterator<S> {
         auto parent = base_t::_s->attachedTo();
         do { 
             (this->*advfn)(); 
-        } while (base_t::_b && base_t::_s->attachedTo() != parent);
+        } while (base_t::_s && base_t::_s->attachedTo() != parent);
     }
 
 public:
@@ -342,30 +340,30 @@ public:
 
 inline
 auto Slot::cluster() -> cluster_iterator {
-    Slot const * r = base();
+    auto r = this;
     while (!r->clusterhead()) --r;
     return const_cast<Slot *>(r);
 }
 
 inline
 auto Slot::cluster() const -> const_cluster_iterator { 
-    auto r = base();
+    auto r = this;
     while (!r->clusterhead()) --r;
     return const_cast<Slot *>(r);
 }
 
 inline
 auto Slot::children() -> child_iterator {
-    auto ci = cluster();
-    while (ci->attachedTo() != this) ++ci;
-    return child_iterator(&*ci);
+    for (auto ci = cluster(), end = cluster_iterator(); ci != end; ++ci)
+        if (ci->attachedTo() == this) return child_iterator(&*ci);
+    return child_iterator();
 }
 
 inline
 auto Slot::children() const -> const_child_iterator { 
-    auto ci = cluster();
-    while (ci->attachedTo() != this) ++ci;
-    return const_child_iterator(&*ci);
+    for (auto ci = cluster(), end = const_cluster_iterator(); ci != end; ++ci)
+        if (ci->attachedTo() == this) return const_child_iterator(&*ci);
+    return const_child_iterator();
 }
 
 inline
