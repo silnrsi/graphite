@@ -42,7 +42,7 @@ auto Slot::attributes::operator = (attributes const & rhs) -> attributes & {
         if (!rhs.is_inline() && external) {
             auto const sz = external->n_attrs 
                             + external->n_justs*NUMJUSTPARAMS + 1;
-            memcpy(external, rhs.external, sz+sizeof(uint16_t));
+            memcpy(external, rhs.external, sz*sizeof(uint16_t));
         } else local = rhs.local;
     }
     return *this;

@@ -909,7 +909,7 @@ bool Pass::collisionKern(Segment & seg, int dir, json * const dbgout) const
             ymax = max(y + bbox.tr.y, ymax);
             ymin = min(y + bbox.bl.y, ymin);
         }
-        if (start != seg.slots().end() && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
+        if (start != end && (c->flags() & (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
                         == (SlotCollision::COLL_KERN | SlotCollision::COLL_FIX))
             resolveKern(seg, s, start, dir, ymin, ymax, dbgout);
         if (c->flags() & SlotCollision::COLL_END)
