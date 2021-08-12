@@ -107,6 +107,12 @@ void Segment::reverseSlots()
     m_dir = m_dir ^ 64;                 // invert the reverse flag
     if (slots().empty()) return;      // skip 0 or 1 glyph runs
 
+    // Ensure any unkown bidi classes are set for the reversal algorithm.
+    for (auto & slot: m_srope) {
+        if (slot.bidiClass() == -1)
+            slot.bidiClass(int8(glyphAttr(slot.gid(), m_silf->aBidi())));
+    }
+
     m_srope.reverse();
 }
 

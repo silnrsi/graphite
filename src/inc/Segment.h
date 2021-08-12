@@ -130,7 +130,6 @@ public:
     const Face * getFace() const { return m_face; }
     const Features & getFeatures(unsigned int /*charIndex*/) { assert(m_feats.size() == 1); return m_feats[0]; }
     void bidiPass(int paradir, uint8 aMirror);
-    int8 getSlotBidiClass(Slot *s) const;
     void doMirror(uint16 aMirror);
     SlotBuffer::iterator addLineEnd(SlotBuffer::iterator nSlot);
     void delLineEnd(SlotBuffer::iterator s);
@@ -167,17 +166,6 @@ private:
     uint8           m_flags,            // General purpose flags
                     m_passBits;         // if bit set then skip pass
 };
-
-
-inline
-int8 Segment::getSlotBidiClass(Slot *s) const
-{
-    int8 res = s->bidiClass();
-    if (res != -1) return res;
-    res = int8(glyphAttr(s->gid(), m_silf->aBidi()));
-    s->bidiClass(res);
-    return res;
-}
 
 
 inline
