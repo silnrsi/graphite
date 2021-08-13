@@ -165,8 +165,7 @@ public:
 
     // Positioning
     Position const & origin() const { return m_position; }
-    void             origin(const Position &pos) { m_position = pos + m_shift + Position{m_just,0.f}; }
-    void             reset_origin() { m_position = {0,0}; }
+    Position & origin() { return m_position; }
     Position const & shift() const { return m_shift; }
 //     void adjKern(const Position &pos) { m_shift = m_shift + pos; m_advance = m_advance + pos; }
     float advance() const { return m_advance.x; }

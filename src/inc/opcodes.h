@@ -384,7 +384,8 @@ STARTOP(attr_add)
     declare_params(1);
     auto const      slat = Slot::attrCode(uint8(*param));
     uint32_t const  val  = pop();
- position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+    position_context(slat)
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
     reg.os->setAttr(reg.seg, slat, 0, int32_t(val + res), reg.ctxt);
 ENDOP
 
@@ -392,7 +393,8 @@ STARTOP(attr_sub)
     declare_params(1);
     auto const      slat = Slot::attrCode(uint8(*param));
     uint32_t const  val  = pop();
- position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
+    position_context(slat)
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, 0));
     reg.os->setAttr(reg.seg, slat, 0, int32_t(res - val), reg.ctxt);
 ENDOP
 
@@ -416,7 +418,8 @@ STARTOP(push_slot_attr)
     declare_params(2);
     auto const  slat     = Slot::attrCode(uint8(param[0]));
     int const   slot_ref = int8(param[1]);
-    position_context(slat)   slotref slot = slotat(slot_ref);
+    position_context(slat)
+    slotref slot = slotat(slot_ref);
     if (slot != reg.seg.slots().end())
     {
         int res = slot->getAttr(reg.seg, slat, 0);
@@ -487,7 +490,8 @@ STARTOP(push_islot_attr)
     auto const  slat     = Slot::attrCode(uint8(param[0]));
     int const   slot_ref = int8(param[1]),
                 idx      = uint8(param[2]);
- position_context(slat)   slotref slot = slotat(slot_ref);
+    position_context(slat)
+    slotref slot = slotat(slot_ref);
     if (slot != reg.seg.slots().end())
     {
         int res = slot->getAttr(reg.seg, slat, idx);
@@ -527,7 +531,8 @@ STARTOP(iattr_add)
     auto const      slat = Slot::attrCode(uint8(param[0]));
     uint8 const     idx  = uint8(param[1]);
     uint32_t const  val  = pop();
- position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+    position_context(slat)
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
     reg.os->setAttr(reg.seg, slat, idx, int32_t(val + res), reg.ctxt);
 ENDOP
 
@@ -536,7 +541,8 @@ STARTOP(iattr_sub)
     auto const      slat = Slot::attrCode(uint8(param[0]));
     uint8 const     idx  = uint8(param[1]);
     uint32_t const  val  = pop();
- position_context(slat)   uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
+    position_context(slat)
+    uint32_t res = uint32_t(reg.os->getAttr(reg.seg, slat, idx));
     reg.os->setAttr(reg.seg, slat, idx, int32_t(res - val), reg.ctxt);
 ENDOP
 

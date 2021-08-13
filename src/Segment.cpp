@@ -159,10 +159,11 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
         --last; std::swap(first, last); ++last; 
     }
 
-    // Phase one collect ranges.
+    // Reset all the positions.
     for (auto slot = first; slot != last; ++slot)
-        slot->reset_origin();
+        slot->origin() = Position();
 
+    // Phase one collect ranges.
     for (auto slot = first; slot != last; ++slot)
     {
         auto const base = slot->base();
@@ -231,20 +232,12 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             auto const clsb = slot->origin().x;
             auto const crsb = slot->origin().y;
             auto const shifts = slot->collision_shift(*this);
-            slot->reset_origin();
             offset.x += -clsb;
-            slot->origin(offset + shifts);
-            offset.x += crsb + shifts.x;
+            // Subtract the slot shift as this is RtL.
+            slot->origin() = offset + shifts - slot->shift();
+            offset.x += crsb + shifts.x - slot->shift().x;
         }
         ++last; ++first;
-
-        // Shift all attached slots
-        for (auto slot = first; slot != last; ++slot)
-        {
-            if (slot->isBase()) continue;
-            auto base = slot->base();
-            slot->position_shift(base->origin());
-        }
 #endif
     }
     else
@@ -266,19 +259,18 @@ Position Segment::positionSlots(Font const * font, SlotBuffer::iterator first, S
             auto const clsb = slot->origin().x;
             auto const crsb = slot->origin().y;
             auto const shifts = slot->collision_shift(*this);
-            slot->reset_origin();
             offset.x += -clsb;
-            slot->origin(offset + shifts);
+            slot->origin() = offset + shifts + slot->shift();
             offset.x += crsb + shifts.x;
         }
+    }
 
-        // Shift all attached slots
-        for (auto slot = first; slot != last; ++slot)
-        {
-            if (slot->isBase()) continue;
-            auto base = slot->base();
-            slot->position_shift(base->origin());
-        }
+    // Shift all attached slots
+    for (auto slot = first; slot != last; ++slot)
+    {
+        if (slot->isBase()) continue;
+        auto base = slot->base();
+        slot->position_shift({base->origin().x, 0});
     }
 
     if (font && font->scale() != 1)
