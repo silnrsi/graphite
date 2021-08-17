@@ -35,7 +35,7 @@ using namespace graphite2;
 extern "C" {
 
 
-gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats)    //returns 0 if either pointer is NULL
+uint16_t gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats)    //returns 0 if either pointer is NULL
 {
     if (!pfeatureref || !feats) return 0;
 
@@ -43,7 +43,7 @@ gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feat
 }
 
 
-int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest)
+int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, uint16_t val, gr_feature_val* pDest)
 {
     if (!pfeatureref || !pDest) return 0;
 
@@ -51,7 +51,7 @@ int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, 
 }
 
 
-gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref)    //returns 0 if pointer is NULL
+uint32_t gr_fref_id(const gr_feature_ref* pfeatureref)    //returns 0 if pointer is NULL
 {
   if (!pfeatureref)
     return 0;
@@ -60,7 +60,7 @@ gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref)    //returns 0 if pointe
 }
 
 
-gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref)
+uint16_t gr_fref_n_values(const gr_feature_ref* pfeatureref)
 {
     if(!pfeatureref)
         return 0;
@@ -68,7 +68,7 @@ gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref)
 }
 
 
-gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno)
+int16_t gr_fref_value(const gr_feature_ref* pfeatureref, uint16_t settingno)
 {
     if(!pfeatureref || (settingno >= pfeatureref->getNumSettings()))
     {
@@ -78,7 +78,7 @@ gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno)
 }
 
 
-void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, gr_encform utf, gr_uint32 *length)
+void* gr_fref_label(const gr_feature_ref* pfeatureref, uint16_t *langId, gr_encform utf, uint32_t *length)
 {
     if(!pfeatureref)
     {
@@ -86,7 +86,7 @@ void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, gr_enc
         length = 0;
         return NULL;
     }
-    uint16 label = pfeatureref->getNameId();
+    uint16_t label = pfeatureref->getNameId();
     NameTable * names = pfeatureref->getFace().nameTable();
     if (!names)
     {
@@ -98,8 +98,8 @@ void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, gr_enc
 }
 
 
-void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
-    gr_uint16 *langId, gr_encform utf, gr_uint32 *length)
+void* gr_fref_value_label(const gr_feature_ref*pfeatureref, uint16_t setting,
+    uint16_t *langId, gr_encform utf, uint32_t *length)
 {
     if(!pfeatureref || (setting >= pfeatureref->getNumSettings()))
     {
@@ -107,7 +107,7 @@ void* gr_fref_value_label(const gr_feature_ref*pfeatureref, gr_uint16 setting,
         length = 0;
         return NULL;
     }
-    uint16 label = pfeatureref->getSettingName(setting);
+    uint16_t label = pfeatureref->getSettingName(setting);
     NameTable * names = pfeatureref->getFace().nameTable();
     if (!names)
     {

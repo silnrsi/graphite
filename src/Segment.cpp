@@ -43,7 +43,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-Segment::Segment(size_t numchars, const Face* face, uint32 script, int textDir)
+Segment::Segment(size_t numchars, const Face* face, uint32_t script, int textDir)
 : //m_srope(face->chooseSilf(script)->numUser(), face->chooseSilf(script)->numJustLevels()),
   m_charinfo(new CharInfo[numchars]),
   m_collisions(NULL),
@@ -110,7 +110,7 @@ void Segment::reverseSlots()
     // Ensure any unkown bidi classes are set for the reversal algorithm.
     for (auto & slot: m_srope) {
         if (slot.bidiClass() == -1)
-            slot.bidiClass(int8(glyphAttr(slot.gid(), m_silf->aBidi())));
+            slot.bidiClass(int8_t(glyphAttr(slot.gid(), m_silf->aBidi())));
     }
 
     m_srope.reverse();
@@ -333,8 +333,8 @@ inline void process_utf_data(Segment & seg, const Face & face, const int fid, ut
     const typename utf_iter::codeunit_type * const base = c;
     for (; n_chars; --n_chars, ++c, ++slotid)
     {
-        const uint32 usv = *c;
-        uint16 gid = cmap[usv];
+        const uint32_t usv = *c;
+        uint16_t gid = cmap[usv];
         if (!gid)   gid = face.findPseudo(usv);
         seg.appendSlot(slotid, usv, gid, fid, c - base);
     }
@@ -357,7 +357,7 @@ bool Segment::read_text(const Face *face, const Features* pFeats/*must not be NU
     return true;
 }
 
-void Segment::doMirror(uint16 aMirror)
+void Segment::doMirror(uint16_t aMirror)
 {
     for (auto & s: slots())
     {

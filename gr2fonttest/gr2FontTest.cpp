@@ -47,13 +47,13 @@ class Gr2TextSrc
 {
 
 public:
-    Gr2TextSrc(const gr_uint32* base, size_t len) : m_buff(base), m_len(len) { }
+    Gr2TextSrc(const uint32_t* base, size_t len) : m_buff(base), m_len(len) { }
     gr_encform utfEncodingForm() const { return gr_utf32; }
     size_t getLength() const { return m_len; }
     const void* get_utf_buffer_begin() const { return m_buff; }
 
 private:
-    const gr_uint32* m_buff;
+    const uint32_t* m_buff;
     size_t m_len;
 };
 
@@ -488,17 +488,17 @@ bool Parameters::loadFromArgs(int argc, char *argv[])
     return (argError) ? false : true;
 }
 
-typedef gr_uint32 tag_t;
+typedef uint32_t tag_t;
 
 void Parameters::printFeatures(const gr_face * face) const
 {
-    gr_uint16 numFeatures = gr_face_n_fref(face);
+    uint16_t numFeatures = gr_face_n_fref(face);
     fprintf(log, "%d features\n", numFeatures);
-    gr_uint16 langId = 0x0409;
-    for (gr_uint16 i = 0; i < numFeatures; i++)
+    uint16_t langId = 0x0409;
+    for (uint16_t i = 0; i < numFeatures; i++)
     {
         const gr_feature_ref * f = gr_face_fref(face, i);
-        gr_uint32 length = 0;
+        uint32_t length = 0;
         char * label = reinterpret_cast<char *>(gr_fref_label(f, &langId, gr_utf8, &length));
         const tag_t featId = gr_fref_id(f);
         if (label)
@@ -516,19 +516,19 @@ void Parameters::printFeatures(const gr_face * face) const
         else
             fprintf(log, "%d\n", featId);
         gr_label_destroy(reinterpret_cast<void*>(label));
-        gr_uint16 numSettings = gr_fref_n_values(f);
-        for (gr_uint16 j = 0; j < numSettings; j++)
+        uint16_t numSettings = gr_fref_n_values(f);
+        for (uint16_t j = 0; j < numSettings; j++)
         {
-            gr_int16 value = gr_fref_value(f, j);
+            int16_t value = gr_fref_value(f, j);
             label = reinterpret_cast<char *>(gr_fref_value_label
                 (f, j, &langId, gr_utf8, &length));
             fprintf(log, "\t%d\t%s\n", value, label);
             gr_label_destroy(reinterpret_cast<void*>(label));
         }
     }
-    gr_uint16 numLangs = gr_face_n_languages(face);
+    uint16_t numLangs = gr_face_n_languages(face);
     fprintf(log, "Feature Languages:");
-    for (gr_uint16 i = 0; i < numLangs; i++)
+    for (uint16_t i = 0; i < numLangs; i++)
     {
     	const tag_t lang_id = gr_face_lang_by_index(face, i);
         fprintf(log, "\t");
@@ -564,7 +564,7 @@ gr_feature_val * Parameters::parseFeatures(const gr_face * face) const
     const char * name = features;
     const char * valueText = NULL;
     size_t nameLength = 0;
-    gr_int32 value = 0;
+    int32_t value = 0;
     const gr_feature_ref* ref = NULL;
     tag_t feat_id = 0;
     for (size_t i = 0; i < featureLength; i++)

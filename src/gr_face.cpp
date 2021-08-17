@@ -76,7 +76,7 @@ namespace
     }
 
     inline
-    uint32 zeropad(const uint32 x)
+    uint32_t zeropad(const uint32_t x)
     {
         if (x == 0x20202020)                    return 0;
         if ((x & 0x00FFFFFF) == 0x00202020)     return x & 0xFF000000;
@@ -119,9 +119,9 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
   return gr_make_face_with_ops(appFaceHandle, &ops, faceOptions);
 }
 
-gr_uint32 gr_str_to_tag(const char *str)
+uint32_t gr_str_to_tag(const char *str)
 {
-    uint32 res = 0;
+    uint32_t res = 0;
     switch(max(strlen(str),size_t(4)))
     {
         case 4: res |= str[3];       GR_FALLTHROUGH;
@@ -133,7 +133,7 @@ gr_uint32 gr_str_to_tag(const char *str)
     return res;
 }
 
-void gr_tag_to_str(gr_uint32 tag, char *str)
+void gr_tag_to_str(uint32_t tag, char *str)
 {
     if (!str) return;
 
@@ -144,7 +144,7 @@ void gr_tag_to_str(gr_uint32 tag, char *str)
     *str = '\0';
 }
 
-gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
+gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, uint32_t langname/*0 means clone default*/) //clones the features. if none for language, clones the default
 {
     assert(pFace);
     langname = zeropad(langname);
@@ -152,7 +152,7 @@ gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 lang
 }
 
 
-const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId)  //When finished with the FeatureRef, call destroy_FeatureRef
+const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, uint32_t featId)  //When finished with the FeatureRef, call destroy_FeatureRef
 {
     assert(pFace);
     featId = zeropad(featId);
@@ -166,7 +166,7 @@ unsigned short gr_face_n_fref(const gr_face* pFace)
     return pFace->numFeatures();
 }
 
-const gr_feature_ref* gr_face_fref(const gr_face* pFace, gr_uint16 i) //When finished with the FeatureRef, call destroy_FeatureRef
+const gr_feature_ref* gr_face_fref(const gr_face* pFace, uint16_t i) //When finished with the FeatureRef, call destroy_FeatureRef
 {
     assert(pFace);
     const FeatureRef* pRef = pFace->feature(i);
@@ -179,7 +179,7 @@ unsigned short gr_face_n_languages(const gr_face* pFace)
     return pFace->theSill().numLanguages();
 }
 
-gr_uint32 gr_face_lang_by_index(const gr_face* pFace, gr_uint16 i)
+uint32_t gr_face_lang_by_index(const gr_face* pFace, uint16_t i)
 {
     assert(pFace);
     return pFace->theSill().getLangName(i);
@@ -192,7 +192,7 @@ void gr_face_destroy(gr_face *face)
 }
 
 
-gr_uint16 gr_face_name_lang_for_locale(gr_face *face, const char * locale)
+uint16_t gr_face_name_lang_for_locale(gr_face *face, const char * locale)
 {
     if (face)
     {
@@ -206,7 +206,7 @@ unsigned short gr_face_n_glyphs(const gr_face* pFace)
     return pFace->glyphs().numGlyphs();
 }
 
-const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script)
+const gr_faceinfo *gr_face_info(const gr_face *pFace, uint32_t script)
 {
     if (!pFace) return 0;
     const Silf *silf = pFace->chooseSilf(script);
@@ -214,10 +214,10 @@ const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script)
     return 0;
 }
 
-int gr_face_is_char_supported(const gr_face* pFace, gr_uint32 usv, gr_uint32 script)
+int gr_face_is_char_supported(const gr_face* pFace, uint32_t usv, uint32_t script)
 {
     const Cmap & cmap = pFace->cmap();
-    gr_uint16 gid = cmap[usv];
+    uint16_t gid = cmap[usv];
     if (!gid)
     {
         const Silf * silf = pFace->chooseSilf(script);

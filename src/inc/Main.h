@@ -35,14 +35,7 @@ of the License or (at your option) any later version.
 
 namespace graphite2 {
 
-typedef gr_uint8        uint8;
-typedef gr_uint8        byte;
-typedef gr_uint16       uint16;
-typedef gr_uint32       uint32;
-typedef gr_int8         int8;
-typedef gr_int16        int16;
-typedef gr_int32        int32;
-typedef size_t          uintptr;
+typedef uint8_t        byte;
 
 #ifdef GRAPHITE2_TELEMETRY
 struct telemetry

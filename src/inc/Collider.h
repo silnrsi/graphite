@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #pragma once
+#include <cstdint>
 #include <iterator>
 
 #include "inc/vector.hpp"
@@ -38,8 +39,8 @@ class json;
 class Slot;
 class Segment;
 
-#define SLOTCOLSETUINTPROP(x, y) uint16 x() const { return _ ##x; } void y (uint16 v) { _ ##x = v; }
-#define SLOTCOLSETINTPROP(x, y) int16 x() const { return _ ##x; } void y (int16 v) { _ ##x = v; }
+#define SLOTCOLSETUINTPROP(x, y) uint16_t x() const { return _ ##x; } void y (uint16_t v) { _ ##x = v; }
+#define SLOTCOLSETINTPROP(x, y) int16_t x() const { return _ ##x; } void y (int16_t v) { _ ##x = v; }
 #define SLOTCOLSETPOSITIONPROP(x, y) const Position &x() const { return _ ##x; } void y (const Position &v) { _ ##x = v; }
 
 // Slot attributes related to collision-fixing
@@ -102,19 +103,19 @@ private:
     Position    _shift;     // adjustment within the given pass
     Position    _offset;    // total adjustment for collisions
     Position    _exclOffset;
-    uint16		_margin;
-    uint16		_marginWt;
-    uint16		_flags;
-    uint16		_exclGlyph;
-    uint16		_seqClass;
-	uint16		_seqProxClass;
-    uint16		_seqOrder;
-    int16		_seqAboveXoff;
-    uint16		_seqAboveWt;
-    int16		_seqBelowXlim;
-    uint16		_seqBelowWt;
-    uint16		_seqValignHt;
-    uint16		_seqValignWt;
+    uint16_t		_margin;
+    uint16_t		_marginWt;
+    uint16_t		_flags;
+    uint16_t		_exclGlyph;
+    uint16_t		_seqClass;
+	uint16_t		_seqProxClass;
+    uint16_t		_seqOrder;
+    int16_t		_seqAboveXoff;
+    uint16_t		_seqAboveWt;
+    int16_t		_seqBelowXlim;
+    uint16_t		_seqBelowWt;
+    uint16_t		_seqValignHt;
+    uint16_t		_seqValignWt;
 
 };  // end of class SlotColllision
 
@@ -162,9 +163,9 @@ protected:
     float   _margin;
 	float	_marginWt;
     float   _len[4];
-    uint16  _seqClass;
-	uint16	_seqProxClass;
-    uint16  _seqOrder;
+    uint16_t  _seqClass;
+	uint16_t	_seqProxClass;
+    uint16_t  _seqOrder;
 
 	//bool _scraping[4];
 

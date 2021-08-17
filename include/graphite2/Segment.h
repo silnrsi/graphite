@@ -266,7 +266,7 @@ GR2_API size_t gr_count_unicode_characters(enum gr_encform enc, const void* buff
   *            right (0) and whether to run the internal bidi pass, if a font requests it.
   *            See enum gr_bidirtl for details.
   */
-GR2_API gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, gr_uint32 script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
+GR2_API gr_segment* gr_make_seg(const gr_font* font, const gr_face* face, uint32_t script, const gr_feature_val* pFeats, enum gr_encform enc, const void* pStart, size_t nChars, int dir);
 
 /** Destroys a segment, freeing the memory.
   *
@@ -431,7 +431,7 @@ GR2_API unsigned int gr_slot_index(const gr_slot* p/*not NULL*/);
   * Given a slot and an attribute along with a possible subattribute, return the
   * corresponding value in the slot. See enum gr_attrCode for details of each attribute.
   */
-GR2_API int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, enum gr_attrCode index, gr_uint8 subindex); //tbd - do we need to expose this?
+GR2_API int gr_slot_attr(const gr_slot* p/*not NULL*/, const gr_segment* pSeg/*not NULL*/, enum gr_attrCode index, uint8_t subindex); //tbd - do we need to expose this?
 
 /** Returns whether text may be inserted before this glyph.
   *

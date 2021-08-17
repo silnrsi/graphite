@@ -37,7 +37,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-namespace { static const uint32 ERROROFFSET = 0xFFFFFFFF; }
+namespace { static const uint32_t ERROROFFSET = 0xFFFFFFFF; }
 
 Silf::Silf() throw()
 : m_passes(0),
@@ -90,7 +90,7 @@ void Silf::releaseBuffers() throw()
 }
 
 
-bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face, uint32 version)
+bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face, uint32_t version)
 {
     const byte * p = silf_start,
                * const silf_end = p + lSilf;
@@ -103,28 +103,28 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     if (version >= 0x00030000)
     {
         if (e.test(lSilf < 28, E_BADSIZE)) { releaseBuffers(); return face.error(e); }
-        be::skip<int32>(p);    // ruleVersion
-        be::skip<uint16>(p,2); // passOffset & pseudosOffset
+        be::skip<int32_t>(p);    // ruleVersion
+        be::skip<uint16_t>(p,2); // passOffset & pseudosOffset
     }
     else if (e.test(lSilf < 20, E_BADSIZE)) { releaseBuffers(); return face.error(e); }
-    const uint16 maxGlyph = be::read<uint16>(p);
-    m_silfinfo.extra_ascent = be::read<uint16>(p);
-    m_silfinfo.extra_descent = be::read<uint16>(p);
-    m_numPasses = be::read<uint8>(p);
-    m_sPass     = be::read<uint8>(p);
-    m_pPass     = be::read<uint8>(p);
-    m_jPass     = be::read<uint8>(p);
-    m_bPass     = be::read<uint8>(p);
-    m_flags     = be::read<uint8>(p);
-    be::skip<uint8>(p,2); //  max{Pre,Post}Context.
-    m_aPseudo   = be::read<uint8>(p);
-    m_aBreak    = be::read<uint8>(p);
-    m_aBidi     = be::read<uint8>(p);
-    m_aMirror   = be::read<uint8>(p);
-    m_aPassBits = be::read<uint8>(p);
+    const uint16_t maxGlyph = be::read<uint16_t>(p);
+    m_silfinfo.extra_ascent = be::read<uint16_t>(p);
+    m_silfinfo.extra_descent = be::read<uint16_t>(p);
+    m_numPasses = be::read<uint8_t>(p);
+    m_sPass     = be::read<uint8_t>(p);
+    m_pPass     = be::read<uint8_t>(p);
+    m_jPass     = be::read<uint8_t>(p);
+    m_bPass     = be::read<uint8_t>(p);
+    m_flags     = be::read<uint8_t>(p);
+    be::skip<uint8_t>(p,2); //  max{Pre,Post}Context.
+    m_aPseudo   = be::read<uint8_t>(p);
+    m_aBreak    = be::read<uint8_t>(p);
+    m_aBidi     = be::read<uint8_t>(p);
+    m_aMirror   = be::read<uint8_t>(p);
+    m_aPassBits = be::read<uint8_t>(p);
 
     // Read Justification levels.
-    m_numJusts  = be::read<uint8>(p);
+    m_numJusts  = be::read<uint8_t>(p);
     if (e.test(maxGlyph >= face.glyphs().numGlyphs(), E_BADMAXGLYPH)
         || e.test(p + m_numJusts * 8 >= silf_end, E_BADNUMJUSTS))
     {
@@ -136,28 +136,28 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         m_justs = gralloc<Justinfo>(m_numJusts);
         if (e.test(!m_justs, E_OUTOFMEM)) return face.error(e);
 
-        for (uint8 i = 0; i < m_numJusts; i++)
+        for (uint8_t i = 0; i < m_numJusts; i++)
         {
             ::new(m_justs + i) Justinfo(p[0], p[1], p[2], p[3]);
             be::skip<byte>(p,8);
         }
     }
 
-    if (e.test(p + sizeof(uint16) + sizeof(uint8)*8 >= silf_end, E_BADENDJUSTS)) { releaseBuffers(); return face.error(e); }
-    m_aLig       = be::read<uint16>(p);
-    m_aUser      = be::read<uint8>(p);
-    m_iMaxComp   = be::read<uint8>(p);
-    m_dir        = be::read<uint8>(p) - 1;
-    m_aCollision = be::read<uint8>(p);
+    if (e.test(p + sizeof(uint16_t) + sizeof(uint8_t)*8 >= silf_end, E_BADENDJUSTS)) { releaseBuffers(); return face.error(e); }
+    m_aLig       = be::read<uint16_t>(p);
+    m_aUser      = be::read<uint8_t>(p);
+    m_iMaxComp   = be::read<uint8_t>(p);
+    m_dir        = be::read<uint8_t>(p) - 1;
+    m_aCollision = be::read<uint8_t>(p);
     be::skip<byte>(p,3);
-    be::skip<uint16>(p, be::read<uint8>(p));    // don't need critical features yet
+    be::skip<uint16_t>(p, be::read<uint8_t>(p));    // don't need critical features yet
     be::skip<byte>(p);                          // reserved
     if (e.test(p >= silf_end, E_BADCRITFEATURES))   { releaseBuffers(); return face.error(e); }
-    be::skip<uint32>(p, be::read<uint8>(p));    // don't use scriptTag array.
-    if (e.test(p + sizeof(uint16) + sizeof(uint32) >= silf_end, E_BADSCRIPTTAGS)) { releaseBuffers(); return face.error(e); }
-    m_gEndLine  = be::read<uint16>(p);          // lbGID
+    be::skip<uint32_t>(p, be::read<uint8_t>(p));    // don't use scriptTag array.
+    if (e.test(p + sizeof(uint16_t) + sizeof(uint32_t) >= silf_end, E_BADSCRIPTTAGS)) { releaseBuffers(); return face.error(e); }
+    m_gEndLine  = be::read<uint16_t>(p);          // lbGID
     const byte * o_passes = p;
-    uint32 passes_start = be::read<uint32>(p);
+    uint32_t passes_start = be::read<uint32_t>(p);
 
     const size_t num_attrs = face.glyphs().numAttrs();
     if (e.test(m_aPseudo   >= num_attrs, E_BADAPSEUDO)
@@ -174,20 +174,20 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
         releaseBuffers();
         return face.error(e);
     }
-    be::skip<uint32>(p, m_numPasses);
-    if (e.test(unsigned(p - silf_start) + sizeof(uint16) >= passes_start, E_BADPASSESSTART)) { releaseBuffers(); return face.error(e); }
-    m_numPseudo = be::read<uint16>(p);
-    be::skip<uint16>(p, 3); // searchPseudo, pseudoSelector, pseudoShift
+    be::skip<uint32_t>(p, m_numPasses);
+    if (e.test(unsigned(p - silf_start) + sizeof(uint16_t) >= passes_start, E_BADPASSESSTART)) { releaseBuffers(); return face.error(e); }
+    m_numPseudo = be::read<uint16_t>(p);
+    be::skip<uint16_t>(p, 3); // searchPseudo, pseudoSelector, pseudoShift
     m_pseudos = new Pseudo[m_numPseudo];
-    if (e.test(unsigned(p - silf_start) + m_numPseudo*(sizeof(uint32) + sizeof(uint16)) >= passes_start, E_BADNUMPSEUDO)
+    if (e.test(unsigned(p - silf_start) + m_numPseudo*(sizeof(uint32_t) + sizeof(uint16_t)) >= passes_start, E_BADNUMPSEUDO)
         || e.test(!m_pseudos, E_OUTOFMEM))
     {
         releaseBuffers(); return face.error(e);
     }
     for (int i = 0; i < m_numPseudo; i++)
     {
-        m_pseudos[i].uid = be::read<uint32>(p);
-        m_pseudos[i].gid = be::read<uint16>(p);
+        m_pseudos[i].uid = be::read<uint32_t>(p);
+        m_pseudos[i].gid = be::read<uint16_t>(p);
     }
 
     const size_t clen = readClassMap(p, passes_start + silf_start - p, version, e);
@@ -198,8 +198,8 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
 
     for (size_t i = 0; i < m_numPasses; ++i)
     {
-        uint32 pass_start = be::read<uint32>(o_passes);
-        uint32 pass_end = be::peek<uint32>(o_passes);
+        uint32_t pass_start = be::read<uint32_t>(o_passes);
+        uint32_t pass_end = be::peek<uint32_t>(o_passes);
         face.error_context((face.error_context() & 0xFF00) + EC_ASILF + unsigned(i << 16));
         if (e.test(pass_start > pass_end, E_BADPASSSTART)
                 || e.test(pass_start < passes_start, E_BADPASSSTART)
@@ -231,45 +231,45 @@ bool Silf::readGraphite(const byte * const silf_start, size_t lSilf, Face& face,
     return true;
 }
 
-template<typename T> inline uint32 Silf::readClassOffsets(const byte *&p, size_t data_len, Error &e)
+template<typename T> inline uint32_t Silf::readClassOffsets(const byte *&p, size_t data_len, Error &e)
 {
-    const T cls_off = 2*sizeof(uint16) + sizeof(T)*(m_nClass+1);
-    const uint32 max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16);
+    const T cls_off = 2*sizeof(uint16_t) + sizeof(T)*(m_nClass+1);
+    const uint32_t max_off = (be::peek<T>(p + sizeof(T)*m_nClass) - cls_off)/sizeof(uint16_t);
     // Check that the last+1 offset is less than or equal to the class map length.
     if (e.test(be::peek<T>(p) != cls_off, E_MISALIGNEDCLASSES)
-            || e.test(max_off > (data_len - cls_off)/sizeof(uint16), E_HIGHCLASSOFFSET))
+            || e.test(max_off > (data_len - cls_off)/sizeof(uint16_t), E_HIGHCLASSOFFSET))
         return ERROROFFSET;
 
     // Read in all the offsets.
-    m_classOffsets = gralloc<uint32>(m_nClass+1);
+    m_classOffsets = gralloc<uint32_t>(m_nClass+1);
     if (e.test(!m_classOffsets, E_OUTOFMEM)) return ERROROFFSET;
-    for (uint32 * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
+    for (uint32_t * o = m_classOffsets, * const o_end = o + m_nClass + 1; o != o_end; ++o)
     {
-        *o = (be::read<T>(p) - cls_off)/sizeof(uint16);
+        *o = (be::read<T>(p) - cls_off)/sizeof(uint16_t);
         if (e.test(*o > max_off, E_HIGHCLASSOFFSET))
             return ERROROFFSET;
     }
     return max_off;
 }
 
-size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version, Error &e)
+size_t Silf::readClassMap(const byte *p, size_t data_len, uint32_t version, Error &e)
 {
-    if (e.test(data_len < sizeof(uint16)*2, E_BADCLASSSIZE)) return ERROROFFSET;
+    if (e.test(data_len < sizeof(uint16_t)*2, E_BADCLASSSIZE)) return ERROROFFSET;
 
-    m_nClass  = be::read<uint16>(p);
-    m_nLinear = be::read<uint16>(p);
+    m_nClass  = be::read<uint16_t>(p);
+    m_nLinear = be::read<uint16_t>(p);
 
     // Check that numLinear < numClass,
     // that there is at least enough data for numClasses offsets.
     if (e.test(m_nLinear > m_nClass, E_TOOMANYLINEAR)
-     || e.test((m_nClass + 1) * (version >= 0x00040000 ? sizeof(uint32) : sizeof(uint16)) > (data_len - 4), E_CLASSESTOOBIG))
+     || e.test((m_nClass + 1) * (version >= 0x00040000 ? sizeof(uint32_t) : sizeof(uint16_t)) > (data_len - 4), E_CLASSESTOOBIG))
         return ERROROFFSET;
 
-    uint32 max_off;
+    uint32_t max_off;
     if (version >= 0x00040000)
-        max_off = readClassOffsets<uint32>(p, data_len, e);
+        max_off = readClassOffsets<uint32_t>(p, data_len, e);
     else
-        max_off = readClassOffsets<uint16>(p, data_len, e);
+        max_off = readClassOffsets<uint16_t>(p, data_len, e);
 
     if (max_off == ERROROFFSET) return ERROROFFSET;
 
@@ -278,20 +278,20 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version, Error 
 
     // Check the linear offsets are sane, these must be monotonically increasing.
     assert(m_nClass >= m_nLinear);
-    for (const uint32 *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
+    for (const uint32_t *o = m_classOffsets, * const o_end = o + m_nLinear; o != o_end; ++o)
         if (e.test(o[0] > o[1], E_BADCLASSOFFSET))
             return ERROROFFSET;
 
     // Fortunately the class data is all uint16s so we can decode these now
-    m_classData = gralloc<uint16>(max_off);
+    m_classData = gralloc<uint16_t>(max_off);
     if (e.test(!m_classData, E_OUTOFMEM)) return ERROROFFSET;
-    for (uint16 *d = m_classData, * const d_end = d + max_off; d != d_end; ++d)
-        *d = be::read<uint16>(p);
+    for (uint16_t *d = m_classData, * const d_end = d + max_off; d != d_end; ++d)
+        *d = be::read<uint16_t>(p);
 
     // Check the lookup class invariants for each non-linear class
-    for (const uint32 *o = m_classOffsets + m_nLinear, * const o_end = m_classOffsets + m_nClass; o != o_end; ++o)
+    for (const uint32_t *o = m_classOffsets + m_nLinear, * const o_end = m_classOffsets + m_nClass; o != o_end; ++o)
     {
-        const uint16 * lookup = m_classData + *o;
+        const uint16_t * lookup = m_classData + *o;
         if (e.test(*o + 4 > max_off, E_HIGHCLASSOFFSET)                        // LookupClass doesn't stretch over max_off
          || e.test(lookup[0] == 0                                                   // A LookupClass with no looks is a suspicious thing ...
                     || lookup[0] * 2 + *o + 4 > max_off                             // numIDs lookup pairs fits within (start of LookupClass' lookups array, max_off]
@@ -303,18 +303,18 @@ size_t Silf::readClassMap(const byte *p, size_t data_len, uint32 version, Error 
     return max_off;
 }
 
-uint16 Silf::findPseudo(uint32 uid) const
+uint16_t Silf::findPseudo(uint32_t uid) const
 {
     for (int i = 0; i < m_numPseudo; i++)
         if (m_pseudos[i].uid == uid) return m_pseudos[i].gid;
     return 0;
 }
 
-uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
+uint16_t Silf::findClassIndex(uint16_t cid, uint16_t gid) const
 {
     if (cid > m_nClass) return -1;
 
-    const uint16 * cls = m_classData + m_classOffsets[cid];
+    const uint16_t * cls = m_classData + m_classOffsets[cid];
     if (cid < m_nLinear)        // output class being used for input, shouldn't happen
     {
         for (unsigned int i = 0, n = m_classOffsets[cid + 1] - m_classOffsets[cid]; i < n; ++i, ++cls)
@@ -323,11 +323,11 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     }
     else
     {
-        const uint16 *  min = cls + 4,      // lookups array
-                     *  max = min + cls[0]*2; // lookups aray is numIDs (cls[0]) uint16 pairs long
+        const uint16_t *  min = cls + 4,      // lookups array
+                     *  max = min + cls[0]*2; // lookups aray is numIDs (cls[0]) uint16_t pairs long
         do
         {
-            const uint16 * p = min + (-2 & ((max-min)/2));
+            const uint16_t * p = min + (-2 & ((max-min)/2));
             if  (p[0] > gid)    max = p;
             else                min = p;
         }
@@ -336,11 +336,11 @@ uint16 Silf::findClassIndex(uint16 cid, uint16 gid) const
     }
 }
 
-uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
+uint16_t Silf::getClassGlyph(uint16_t cid, unsigned int index) const
 {
     if (cid > m_nClass) return 0;
 
-    uint32 loc = m_classOffsets[cid];
+    uint32_t loc = m_classOffsets[cid];
     if (cid < m_nLinear)
     {
         if (index < m_classOffsets[cid + 1] - loc)
@@ -355,12 +355,12 @@ uint16 Silf::getClassGlyph(uint16 cid, unsigned int index) const
 }
 
 
-bool Silf::runGraphite(Segment &seg, uint8 firstPass, uint8 lastPass, int dobidi) const
+bool Silf::runGraphite(Segment &seg, uint8_t firstPass, uint8_t lastPass, int dobidi) const
 {
     size_t             maxSize = seg.slotCount() * MAX_SEG_GROWTH_FACTOR;
     ShapingContext     ctxt(seg, m_dir, maxSize);
     vm::Machine        m(ctxt);
-    uint8              lbidi = m_bPass;
+    uint8_t              lbidi = m_bPass;
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = seg.getFace()->logger();
 #endif

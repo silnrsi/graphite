@@ -68,12 +68,12 @@ inline bool is_return(const instr i) {
 
 struct context
 {
-    context(uint8 ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false;}
+    context(uint8_t ref=0) : codeRef(ref) {flags.changed=false; flags.referenced=false;}
     struct {
-        uint8   changed:1,
+        uint8_t   changed:1,
                 referenced:1;
     } flags;
-    uint8       codeRef;
+    uint8_t       codeRef;
 };
 
 } // end namespace
@@ -97,25 +97,25 @@ private:
     void        set_noref(int index) throw();
     void        set_changed(int index) throw();
     opcode      fetch_opcode(const byte * bc);
-    void        analyse_opcode(const opcode, const int8 * const dp) throw();
+    void        analyse_opcode(const opcode, const int8_t * const dp) throw();
     bool        emit_opcode(opcode opc, const byte * & bc);
     bool        validate_opcode(const byte opc, const byte * const bc);
-    bool        valid_upto(const uint16 limit, const uint16 x) const throw();
+    bool        valid_upto(const uint16_t limit, const uint16_t x) const throw();
     bool        test_context() const throw();
-    bool        test_ref(int8 index) const throw();
+    bool        test_ref(int8_t index) const throw();
     bool        test_attr(attrCode attr) const throw();
     void        failure(const status_t s) const throw() { _code.failure(s); }
 
     Code              & _code;
     int                 _out_index;
-    uint16              _out_length;
+    uint16_t              _out_length;
     instr             * _instr;
     byte              * _data;
     limits            & _max;
     enum passtype       _passtype;
     int                 _stack_depth;
     bool                _in_ctxt_item;
-    int16               _slotref;
+    int16_t               _slotref;
     context             _contexts[NUMCONTEXTS];
     byte                _max_ref;
 };
@@ -124,8 +124,8 @@ private:
 struct Machine::Code::decoder::limits
 {
   const byte       * bytecode;
-  const uint8        pre_context;
-  const uint16       rule_length,
+  const uint8_t        pre_context;
+  const uint16_t       rule_length,
                      classes,
                      glyf_attrs,
                      features;
@@ -146,7 +146,7 @@ inline Machine::Code::decoder::decoder(limits & lims, Code &code, enum passtype 
 
 
 Machine::Code::Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-           uint8 pre_context, uint16 rule_length, const Silf & silf, const Face & face,
+           uint8_t pre_context, uint16_t rule_length, const Silf & silf, const Face & face,
            enum passtype pt, byte * * const _out)
  :  _code(0), _data(0), _data_size(0), _instr_count(0), _max_ref(0), _status(loaded),
     _constraint(is_constraint), _modify(false), _delete(false), _own(_out==0)
@@ -259,7 +259,7 @@ bool Machine::Code::decoder::load(const byte * bc, const byte * bc_end)
         if (opc == vm::MAX_OPCODE)
             return false;
 
-        analyse_opcode(opc, reinterpret_cast<const int8 *>(bc));
+        analyse_opcode(opc, reinterpret_cast<const int8_t *>(bc));
 
         if (!emit_opcode(opc, bc))
             return false;
@@ -336,13 +336,13 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             test_context();
             break;
         case PUT_SUBS_8BIT_OBS :
-            test_ref(int8(bc[0]));
+            test_ref(int8_t(bc[0]));
             valid_upto(_max.classes, bc[1]);
             valid_upto(_max.classes, bc[2]);
             test_context();
             break;
         case PUT_COPY :
-            test_ref(int8(bc[0]));
+            test_ref(int8_t(bc[0]));
             test_context();
             break;
         case INSERT :
@@ -366,12 +366,12 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case ASSOC :
             if (bc[0] == 0)
                 failure(out_of_range_data);
-            for (uint8 num = bc[0]; num; --num)
-                test_ref(int8(bc[num]));
+            for (uint8_t num = bc[0]; num; --num)
+                test_ref(int8_t(bc[num]));
             test_context();
             break;
         case CNTXT_ITEM :
-            valid_upto(_max.rule_length, _max.pre_context + int8(bc[0]));
+            valid_upto(_max.rule_length, _max.pre_context + int8_t(bc[0]));
             if (bc + 2 + bc[1] >= _max.bytecode)    failure(jump_past_end);
             if (_in_ctxt_item)                      failure(nested_context_item);
             break;
@@ -398,7 +398,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case PUSH_SLOT_ATTR :
             ++_stack_depth;
             valid_upto(gr_slatMax, bc[0]);
-            test_ref(int8(bc[1]));
+            test_ref(int8_t(bc[1]));
             if (attrCode(bc[0]) == gr_slatUserDefn)     // use IATTR for user attributes
                 failure(out_of_range_data);
             test_attr(attrCode(bc[0]));
@@ -407,25 +407,25 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
         case PUSH_ATT_TO_GATTR_OBS :
             ++_stack_depth;
             valid_upto(_max.glyf_attrs, bc[0]);
-            test_ref(int8(bc[1]));
+            test_ref(int8_t(bc[1]));
             break;
         case PUSH_ATT_TO_GLYPH_METRIC :
         case PUSH_GLYPH_METRIC :
             ++_stack_depth;
             valid_upto(kgmetDescent, bc[0]);
-            test_ref(int8(bc[1]));
+            test_ref(int8_t(bc[1]));
             // level: dp[2] no check necessary
             break;
         case PUSH_FEAT :
             ++_stack_depth;
             valid_upto(_max.features, bc[0]);
-            test_ref(int8(bc[1]));
+            test_ref(int8_t(bc[1]));
             break;
         case PUSH_ISLOT_ATTR :
             ++_stack_depth;
             if (valid_upto(gr_slatMax, bc[0]))
             {
-                test_ref(int8(bc[1]));
+                test_ref(int8_t(bc[1]));
                 valid_upto(_max.attrid[bc[0]], bc[2]);
             }
             test_attr(attrCode(bc[0]));
@@ -456,27 +456,27 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
             ++_stack_depth;
             break;
         case PUT_SUBS :
-            test_ref(int8(bc[0]));
-            valid_upto(_max.classes, uint16(bc[1]<< 8) | bc[2]);
-            valid_upto(_max.classes, uint16(bc[3]<< 8) | bc[4]);
+            test_ref(int8_t(bc[0]));
+            valid_upto(_max.classes, uint16_t(bc[1]<< 8) | bc[2]);
+            valid_upto(_max.classes, uint16_t(bc[3]<< 8) | bc[4]);
             test_context();
             break;
         case PUT_SUBS2 :        // not implemented
         case PUT_SUBS3 :        // not implemented
             break;
         case PUT_GLYPH :
-            valid_upto(_max.classes, uint16(bc[0]<< 8) | bc[1]);
+            valid_upto(_max.classes, uint16_t(bc[0]<< 8) | bc[1]);
             test_context();
             break;
         case PUSH_GLYPH_ATTR :
         case PUSH_ATT_TO_GLYPH_ATTR :
             ++_stack_depth;
-            valid_upto(_max.glyf_attrs, uint16(bc[0]<< 8) | bc[1]);
-            test_ref(int8(bc[2]));
+            valid_upto(_max.glyf_attrs, uint16_t(bc[0]<< 8) | bc[1]);
+            test_ref(int8_t(bc[2]));
             break;
         case SET_FEAT :
             valid_upto(_max.features, bc[0]);
-            test_ref(int8(bc[1]));
+            test_ref(int8_t(bc[1]));
             break;
         default:
             failure(invalid_opcode);
@@ -487,7 +487,7 @@ opcode Machine::Code::decoder::fetch_opcode(const byte * bc)
 }
 
 
-void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg) throw()
+void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8_t  * arg) throw()
 {
   switch (opc)
   {
@@ -496,7 +496,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
       break;
     case ASSOC :
       set_changed(0);
-//      for (uint8 num = arg[0]; num; --num)
+//      for (uint8_t num = arg[0]; num; --num)
 //        _analysis.set_noref(num);
       break;
     case PUT_GLYPH_8BIT_OBS :
@@ -517,7 +517,7 @@ void Machine::Code::decoder::analyse_opcode(const opcode opc, const int8  * arg)
     case NEXT :
     case COPY_NEXT :
       ++_slotref;
-      _contexts[_slotref] = context(uint8(_code._instr_count+1));
+      _contexts[_slotref] = context(uint8_t(_code._instr_count+1));
       // if (_analysis.slotref > _analysis.max_ref) _analysis.max_ref = _analysis.slotref;
       break;
     case INSERT :
@@ -584,8 +584,8 @@ bool Machine::Code::decoder::emit_opcode(opcode opc, const byte * & bc)
     {
         assert(_out_index == 0);
         _in_ctxt_item = true;
-        _out_index = _max.pre_context + int8(_data[-2]);
-        _slotref = int8(_data[-2]);
+        _out_index = _max.pre_context + int8_t(_data[-2]);
+        _slotref = int8_t(_data[-2]);
         _out_length = _max.rule_length;
 
         const size_t ctxt_start = _code._instr_count;
@@ -670,7 +670,7 @@ bool Machine::Code::decoder::validate_opcode(const byte opc, const byte * const 
 }
 
 
-bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) const throw()
+bool Machine::Code::decoder::valid_upto(const uint16_t limit, const uint16_t x) const throw()
 {
     const bool t = (limit != 0) && (x < limit);
     if (!t) failure(out_of_range_data);
@@ -678,7 +678,7 @@ bool Machine::Code::decoder::valid_upto(const uint16 limit, const uint16 x) cons
 }
 
 inline
-bool Machine::Code::decoder::test_ref(int8 index) const throw()
+bool Machine::Code::decoder::test_ref(int8_t index) const throw()
 {
     if (_code._constraint && !_in_ctxt_item)
     {
@@ -765,7 +765,7 @@ void Machine::Code::release_buffers() throw()
 }
 
 
-int32 Machine::Code::run(Machine & m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const
+int32_t Machine::Code::run(Machine & m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const
 {
 //    assert(_own);
     assert(*this);          // Check we are actually runnable

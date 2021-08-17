@@ -27,17 +27,10 @@
 #pragma once
 
 #include <stddef.h>
-
-typedef unsigned char   gr_uint8;
-typedef gr_uint8        gr_byte;
-typedef signed char     gr_int8;
-typedef unsigned short  gr_uint16;
-typedef short           gr_int16;
-typedef unsigned int    gr_uint32;
-typedef int             gr_int32;
+#include <stdint.h>
 
 enum gr_encform {
-  gr_utf8 = 1/*sizeof(uint8)*/, gr_utf16 = 2/*sizeof(uint16)*/, gr_utf32 = 4/*sizeof(uint32)*/
+  gr_utf8 = 1/*sizeof(uint8_t)*/, gr_utf16 = 2/*sizeof(uint16_t)*/, gr_utf32 = 4/*sizeof(uint32_t)*/
 };
 
 

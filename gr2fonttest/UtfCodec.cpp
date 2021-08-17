@@ -33,7 +33,7 @@ namespace graphite2 {
 
 using namespace graphite2;
 
-const int8 _utf_codec<8>::sz_lut[16] =
+const int8_t _utf_codec<8>::sz_lut[16] =
 {
 		1,1,1,1,1,1,1,1,	// 1 byte
 		0,0,0,0,  			// trailing byte

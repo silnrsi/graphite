@@ -248,10 +248,10 @@ json & graphite2::operator << (json & j, const dslot & ds) throw()
     return j << json::close;
 }
 
-void graphite2::objectid::set_name(void const * addr, uint16 generation) noexcept
+void graphite2::objectid::set_name(void const * addr, uint16_t generation) noexcept
 {
-    uint32 const p = uint32(reinterpret_cast<size_t>(addr));
-    sprintf(name, "%.4x-%.2x-%.4hx", uint16(p >> 16), generation, uint16(p));
+    uint32_t const p = uint32_t(reinterpret_cast<size_t>(addr));
+    sprintf(name, "%.4x-%.2x-%.4hx", uint16_t(p >> 16), generation, uint16_t(p));
     name[sizeof name-1] = 0;
 }
 

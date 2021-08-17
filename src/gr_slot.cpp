@@ -147,7 +147,7 @@ unsigned int gr_slot_index(const gr_slot *h/*not NULL*/)
     return p->index();
 }
 
-int gr_slot_attr(const gr_slot* h/*not NULL*/, const gr_segment* pSeg/*not NULL*/, gr_attrCode index, gr_uint8 subindex)
+int gr_slot_attr(const gr_slot* h/*not NULL*/, const gr_segment* pSeg/*not NULL*/, gr_attrCode index, uint8_t subindex)
 {
     assert(h);
     assert(pSeg);

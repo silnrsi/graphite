@@ -11,6 +11,8 @@ endif()
 option(BUILD_SHARED_LIBS "Make library a shared library instead of static" ON)
 
 enable_language(CXX C)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED 99)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 

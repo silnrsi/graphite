@@ -52,7 +52,7 @@ struct objectid
     objectid(SlotBuffer::const_iterator const s) noexcept;
     objectid(Segment const & seg)  noexcept { set_name(&seg, 0); }
 private:
-    void set_name(void const * addr, uint16 generation) noexcept;
+    void set_name(void const * addr, uint16_t generation) noexcept;
 };
 
 inline

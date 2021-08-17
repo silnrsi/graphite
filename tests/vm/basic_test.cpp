@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     // run the program
     auto dummy_segment = grzeroalloc<Segment>(1);
     SlotBuffer sb;
-    uint32 ret = 0;
+    uint32_t ret = 0;
     ShapingContext ctxt(*dummy_segment, 0, 0);
     Machine m(ctxt);
     ctxt.pushSlot(sb.newSlot());

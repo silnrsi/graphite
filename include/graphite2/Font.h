@@ -68,9 +68,9 @@ enum gr_face_options {
 
 /** Holds information about a particular Graphite silf table that has been loaded */
 struct gr_faceinfo {
-    gr_uint16 extra_ascent;     /**< The extra_ascent in the GDL, in design units */
-    gr_uint16 extra_descent;    /**< The extra_descent in the GDL, in design units */
-    gr_uint16 upem;             /**< The design units for the font */
+    uint16_t extra_ascent;     /**< The extra_ascent in the GDL, in design units */
+    uint16_t extra_descent;    /**< The extra_descent in the GDL, in design units */
+    uint16_t upem;             /**< The design units for the font */
     enum gr_space_contextuals {
         gr_space_unknown = 0,       /**< no information is known. */
         gr_space_none = 1,          /**< the space character never occurs in any rules. */
@@ -170,20 +170,20 @@ GR2_DEPRECATED_API gr_face* gr_make_face_with_seg_cache_and_ops(const void* appF
   */
 GR2_DEPRECATED_API gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle, gr_get_table_fn getTable, unsigned int segCacheMaxSize, unsigned int faceOptions);
 
-/** Convert a tag in a string into a gr_uint32
+/** Convert a tag in a string into a uint32_t
   *
-  * @return gr_uint32 tag, zero padded
+  * @return uint32_t tag, zero padded
   * @param str a nul terminated string of which at most the first 4 characters are read
   */
-GR2_API gr_uint32 gr_str_to_tag(const char *str);
+GR2_API uint32_t gr_str_to_tag(const char *str);
 
-/** Convert a gr_uint32 tag into a string
+/** Convert a uint32_t tag into a string
   *
   * @param tag contains the tag to convert
   * @param str is a pointer to a char array of at least size 4 bytes. The first 4 bytes of this array
   *            will be overwritten by this function. No nul is appended.
   */
-GR2_API void gr_tag_to_str(gr_uint32 tag, char *str);
+GR2_API void gr_tag_to_str(uint32_t tag, char *str);
 
 /** Get feature values for a given language or default
   *
@@ -195,7 +195,7 @@ GR2_API void gr_tag_to_str(gr_uint32 tag, char *str);
   *                  langname is right 0 padded and assumes lowercase. Thus the en langauge
   *                  would be 0x656E0000. Langname may also be space padded, thus 0x656E2020.
   */
-GR2_API gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname);
+GR2_API gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, uint32_t langname);
 
 /** Get feature reference for a given feature id from a face
   *
@@ -204,19 +204,19 @@ GR2_API gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uin
   * @param pFace Font face to get information on.
   * @param featId    Feature id tag to get reference to.
   */
-GR2_API const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, gr_uint32 featId);
+GR2_API const gr_feature_ref* gr_face_find_fref(const gr_face* pFace, uint32_t featId);
 
 /** Returns number of feature references in a face **/
-GR2_API gr_uint16 gr_face_n_fref(const gr_face* pFace);
+GR2_API uint16_t gr_face_n_fref(const gr_face* pFace);
 
 /** Returns feature reference at given index in face **/
-GR2_API const gr_feature_ref* gr_face_fref(const gr_face* pFace, gr_uint16 i);
+GR2_API const gr_feature_ref* gr_face_fref(const gr_face* pFace, uint16_t i);
 
 /** Return number of languages the face knows about **/
 GR2_API unsigned short gr_face_n_languages(const gr_face* pFace);
 
 /** Returns a language id corresponding to a language of given index in the face **/
-GR2_API gr_uint32 gr_face_lang_by_index(const gr_face* pFace, gr_uint16 i);
+GR2_API uint32_t gr_face_lang_by_index(const gr_face* pFace, uint16_t i);
 
 /** Destroy the given face and free its memory **/
 GR2_API void gr_face_destroy(gr_face *face);
@@ -225,7 +225,7 @@ GR2_API void gr_face_destroy(gr_face *face);
 GR2_API unsigned short gr_face_n_glyphs(const gr_face* pFace);
 
 /** Returns a faceinfo for the face and script **/
-GR2_API const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script);
+GR2_API const gr_faceinfo *gr_face_info(const gr_face *pFace, uint32_t script);
 
 /** Returns whether the font supports a given Unicode character
   *
@@ -234,7 +234,7 @@ GR2_API const gr_faceinfo *gr_face_info(const gr_face *pFace, gr_uint32 script);
   * @param usv      Unicode Scalar Value of character to test
   * @param script   Tag of script for selecting which set of pseudo glyphs to test. May be NULL.
   */
-GR2_API int gr_face_is_char_supported(const gr_face *pFace, gr_uint32 usv, gr_uint32 script);
+GR2_API int gr_face_is_char_supported(const gr_face *pFace, uint32_t usv, uint32_t script);
 
 #ifndef GRAPHITE2_NFILEFACE
 /** Create gr_face from a font file
@@ -270,7 +270,7 @@ GR2_API gr_font* gr_make_font(float ppm, const gr_face *face);
   * @param appFontHandle is the unique information passed to gr_make_font_with_advance()
   * @param glyphid is the glyph to retireve the hinted advance for.
  */
-typedef float (*gr_advance_fn)(const void* appFontHandle, gr_uint16 glyphid);
+typedef float (*gr_advance_fn)(const void* appFontHandle, uint16_t glyphid);
 
 /** struct housing function pointers to manage font hinted metrics for the
   * graphite engine. */
@@ -326,7 +326,7 @@ GR2_API void gr_font_destroy(gr_font *font);
   * @param pfeatureref   gr_feature_ref to the feature
   * @param feats gr_feature_val containing all the values
   */
-GR2_API gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats);
+GR2_API uint16_t gr_fref_feature_value(const gr_feature_ref* pfeatureref, const gr_feature_val* feats);
 
 /** set a feature value
   *
@@ -335,13 +335,13 @@ GR2_API gr_uint16 gr_fref_feature_value(const gr_feature_ref* pfeatureref, const
   * @param val   value to set the feature to
   * @param pDest the gr_feature_val containing all the values for all the features
   */
-GR2_API int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, gr_uint16 val, gr_feature_val* pDest);
+GR2_API int gr_fref_set_feature_value(const gr_feature_ref* pfeatureref, uint16_t val, gr_feature_val* pDest);
 
 /** Returns the id tag for a gr_feature_ref **/
-GR2_API gr_uint32 gr_fref_id(const gr_feature_ref* pfeatureref);
+GR2_API uint32_t gr_fref_id(const gr_feature_ref* pfeatureref);
 
 /** Returns number of values a feature may take, given a gr_feature_ref **/
-GR2_API gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
+GR2_API uint16_t gr_fref_n_values(const gr_feature_ref* pfeatureref);
 
 /** Returns the value associated with a particular value in a feature
   *
@@ -349,7 +349,7 @@ GR2_API gr_uint16 gr_fref_n_values(const gr_feature_ref* pfeatureref);
   * @param pfeatureref gr_feature_ref of the feature of interest
   * @param settingno   Index up to the return value of gr_fref_n_values() of the value
   */
-GR2_API gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 settingno);
+GR2_API int16_t gr_fref_value(const gr_feature_ref* pfeatureref, uint16_t settingno);
 
 /** Returns a string of the UI name of a feature
   *
@@ -360,7 +360,7 @@ GR2_API gr_int16 gr_fref_value(const gr_feature_ref* pfeatureref, gr_uint16 sett
   * @param utf   Encoding form for the string
   * @param length    Used to return the length of the string returned in bytes.
   */
-GR2_API void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
+GR2_API void* gr_fref_label(const gr_feature_ref* pfeatureref, uint16_t *langId, enum gr_encform utf, uint32_t *length);
 
 /** Return a UI string for a possible value of a feature
   *
@@ -373,7 +373,7 @@ GR2_API void* gr_fref_label(const gr_feature_ref* pfeatureref, gr_uint16 *langId
   * @param utf   Encoding form for the string
   * @param length    Returns the length of the string returned in bytes.
   */
-GR2_API void* gr_fref_value_label(const gr_feature_ref* pfeatureref, gr_uint16 settingno/*rather than a value*/, gr_uint16 *langId, enum gr_encform utf, gr_uint32 *length);
+GR2_API void* gr_fref_value_label(const gr_feature_ref* pfeatureref, uint16_t settingno/*rather than a value*/, uint16_t *langId, enum gr_encform utf, uint32_t *length);
 
 /** Destroy a previously returned label string **/
 GR2_API void gr_label_destroy(void * label);

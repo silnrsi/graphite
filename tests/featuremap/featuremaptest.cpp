@@ -140,27 +140,27 @@ public:
 
 struct FeatHeader
 {
-    _be<gr_uint16> m_major;
-    _be<gr_uint16> m_minor;
-    _be<gr_uint16> m_numFeat;
-    _be<gr_uint16> m_reserved1;
-    _be<gr_uint32> m_reserved2;
+    _be<uint16_t> m_major;
+    _be<uint16_t> m_minor;
+    _be<uint16_t> m_numFeat;
+    _be<uint16_t> m_reserved1;
+    _be<uint32_t> m_reserved2;
 };
 
 struct FeatDefn
 {
-    _be<gr_uint32> m_featId;
-    _be<gr_uint16> m_numFeatSettings;
-    _be<gr_uint16> m_reserved1;
-    _be<gr_uint32> m_settingsOffset;
-    _be<gr_uint16> m_flags;
-    _be<gr_uint16> m_label;
+    _be<uint32_t> m_featId;
+    _be<uint16_t> m_numFeatSettings;
+    _be<uint16_t> m_reserved1;
+    _be<uint32_t> m_settingsOffset;
+    _be<uint16_t> m_flags;
+    _be<uint16_t> m_label;
 };
 
 struct FeatSetting
 {
-    _be<gr_int16>	m_value;
-    _be<gr_uint16>	m_label;
+    _be<int16_t>	m_value;
+    _be<uint16_t>	m_label;
 };
 
 struct FeatTableTestA

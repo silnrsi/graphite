@@ -122,7 +122,7 @@ Pass::~Pass()
 }
 
 bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t subtable_base,
-        GR_MAYBE_UNUSED Face & face, passtype pt, GR_MAYBE_UNUSED uint32 version, Error &e)
+        GR_MAYBE_UNUSED Face & face, passtype pt, GR_MAYBE_UNUSED uint32_t version, Error &e)
 {
     const byte * p              = pass_start,
                * const pass_end = p + pass_length;
@@ -141,19 +141,19 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     m_iMaxLoop = be::read<byte>(p);
     if (m_iMaxLoop < 1) m_iMaxLoop = 1;
     be::skip<byte>(p,2); // skip maxContext & maxBackup
-    m_numRules = be::read<uint16>(p);
+    m_numRules = be::read<uint16_t>(p);
     if (e.test(!m_numRules && m_numCollRuns == 0, E_BADEMPTYPASS)) return face.error(e);
-    be::skip<uint16>(p);   // fsmOffset - not sure why we would want this
-    const byte * const pcCode = pass_start + be::read<uint32>(p) - subtable_base,
-               * const rcCode = pass_start + be::read<uint32>(p) - subtable_base,
-               * const aCode  = pass_start + be::read<uint32>(p) - subtable_base;
-    be::skip<uint32>(p);
-    m_numStates = be::read<uint16>(p);
-    m_numTransition = be::read<uint16>(p);
-    m_numSuccess = be::read<uint16>(p);
-    m_numColumns = be::read<uint16>(p);
-    numRanges = be::read<uint16>(p);
-    be::skip<uint16>(p, 3); // skip searchRange, entrySelector & rangeShift.
+    be::skip<uint16_t>(p);   // fsmOffset - not sure why we would want this
+    const byte * const pcCode = pass_start + be::read<uint32_t>(p) - subtable_base,
+               * const rcCode = pass_start + be::read<uint32_t>(p) - subtable_base,
+               * const aCode  = pass_start + be::read<uint32_t>(p) - subtable_base;
+    be::skip<uint32_t>(p);
+    m_numStates = be::read<uint16_t>(p);
+    m_numTransition = be::read<uint16_t>(p);
+    m_numSuccess = be::read<uint16_t>(p);
+    m_numColumns = be::read<uint16_t>(p);
+    numRanges = be::read<uint16_t>(p);
+    be::skip<uint16_t>(p, 3); // skip searchRange, entrySelector & rangeShift.
     assert(p - pass_start == 40);
     // Perform some sanity checks.
     if ( e.test(m_numTransition > m_numStates, E_BADNUMTRANS)
@@ -164,56 +164,56 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
         return face.error(e);
 
     m_successStart = m_numStates - m_numSuccess;
-    // test for beyond end - 1 to account for reading uint16
+    // test for beyond end - 1 to account for reading uint16_t
     if (e.test(p + numRanges * 6 - 2 > pass_end, E_BADPASSLENGTH)) return face.error(e);
-    m_numGlyphs = be::peek<uint16>(p + numRanges * 6 - 4) + 1;
+    m_numGlyphs = be::peek<uint16_t>(p + numRanges * 6 - 4) + 1;
     // Calculate the start of various arrays.
     const byte * const ranges = p;
-    be::skip<uint16>(p, numRanges*3);
+    be::skip<uint16_t>(p, numRanges*3);
     const byte * const o_rule_map = p;
-    be::skip<uint16>(p, m_numSuccess + 1);
+    be::skip<uint16_t>(p, m_numSuccess + 1);
 
     // More sanity checks
-    if (e.test(reinterpret_cast<const byte *>(o_rule_map + m_numSuccess*sizeof(uint16)) > pass_end
+    if (e.test(reinterpret_cast<const byte *>(o_rule_map + m_numSuccess*sizeof(uint16_t)) > pass_end
             || p > pass_end, E_BADRULEMAPLEN))
         return face.error(e);
-    const size_t numEntries = be::peek<uint16>(o_rule_map + m_numSuccess*sizeof(uint16));
+    const size_t numEntries = be::peek<uint16_t>(o_rule_map + m_numSuccess*sizeof(uint16_t));
     const byte * const   rule_map = p;
-    be::skip<uint16>(p, numEntries);
+    be::skip<uint16_t>(p, numEntries);
 
-    if (e.test(p + 2*sizeof(uint8) > pass_end, E_BADPASSLENGTH)) return face.error(e);
-    m_minPreCtxt = be::read<uint8>(p);
-    m_maxPreCtxt = be::read<uint8>(p);
+    if (e.test(p + 2*sizeof(uint8_t) > pass_end, E_BADPASSLENGTH)) return face.error(e);
+    m_minPreCtxt = be::read<uint8_t>(p);
+    m_maxPreCtxt = be::read<uint8_t>(p);
     if (e.test(m_minPreCtxt > m_maxPreCtxt, E_BADCTXTLENBOUNDS)) return face.error(e);
     const byte * const start_states = p;
-    be::skip<int16>(p, m_maxPreCtxt - m_minPreCtxt + 1);
-    const uint16 * const sort_keys = reinterpret_cast<const uint16 *>(p);
-    be::skip<uint16>(p, m_numRules);
+    be::skip<int16_t>(p, m_maxPreCtxt - m_minPreCtxt + 1);
+    const uint16_t * const sort_keys = reinterpret_cast<const uint16_t *>(p);
+    be::skip<uint16_t>(p, m_numRules);
     const byte * const precontext = p;
     be::skip<byte>(p, m_numRules);
 
-    if (e.test(p + sizeof(uint16) + sizeof(uint8) > pass_end, E_BADCTXTLENS)) return face.error(e);
-    m_colThreshold = be::read<uint8>(p);
+    if (e.test(p + sizeof(uint16_t) + sizeof(uint8_t) > pass_end, E_BADCTXTLENS)) return face.error(e);
+    m_colThreshold = be::read<uint8_t>(p);
     if (m_colThreshold == 0) m_colThreshold = 10;       // A default
-    const size_t pass_constraint_len = be::read<uint16>(p);
+    const size_t pass_constraint_len = be::read<uint16_t>(p);
 
-    const uint16 * const o_constraint = reinterpret_cast<const uint16 *>(p);
-    be::skip<uint16>(p, m_numRules + 1);
-    const uint16 * const o_actions = reinterpret_cast<const uint16 *>(p);
-    be::skip<uint16>(p, m_numRules + 1);
+    const uint16_t * const o_constraint = reinterpret_cast<const uint16_t *>(p);
+    be::skip<uint16_t>(p, m_numRules + 1);
+    const uint16_t * const o_actions = reinterpret_cast<const uint16_t *>(p);
+    be::skip<uint16_t>(p, m_numRules + 1);
     const byte * const states = p;
     if (e.test(2u*m_numTransition*m_numColumns >= (unsigned)(pass_end - p), E_BADPASSLENGTH)
             || e.test(p >= pass_end, E_BADPASSLENGTH))
         return face.error(e);
-    be::skip<int16>(p, m_numTransition*m_numColumns);
-    be::skip<uint8>(p);
+    be::skip<int16_t>(p, m_numTransition*m_numColumns);
+    be::skip<uint8_t>(p);
     if (e.test(p != pcCode, E_BADPASSCCODEPTR)) return face.error(e);
     be::skip<byte>(p, pass_constraint_len);
     if (e.test(p != rcCode, E_BADRULECCODEPTR)
         || e.test(size_t(rcCode - pcCode) != pass_constraint_len, E_BADCCODELEN)) return face.error(e);
-    be::skip<byte>(p, be::peek<uint16>(o_constraint + m_numRules));
+    be::skip<byte>(p, be::peek<uint16_t>(o_constraint + m_numRules));
     if (e.test(p != aCode, E_BADACTIONCODEPTR)) return face.error(e);
-    be::skip<byte>(p, be::peek<uint16>(o_actions + m_numRules));
+    be::skip<byte>(p, be::peek<uint16_t>(o_actions + m_numRules));
 
     // We should be at the end or within the pass
     if (e.test(p > pass_end, E_BADPASSLENGTH)) return face.error(e);
@@ -223,7 +223,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
     {
         face.error_context(face.error_context() + 1);
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len,
-                                  precontext[0], be::peek<uint16>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
+                                  precontext[0], be::peek<uint16_t>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
         if (e.test(!m_cPConstraint, E_OUTOFMEM)
                 || e.test(m_cPConstraint.status() != Code::loaded, m_cPConstraint.status() + E_CODEFAILURE))
             return face.error(e);
@@ -243,13 +243,13 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
 
 
 bool Pass::readRules(const byte * rule_map, const size_t num_entries,
-                     const byte *precontext, const uint16 * sort_key,
-                     const uint16 * o_constraint, const byte *rc_data,
-                     const uint16 * o_action,     const byte * ac_data,
+                     const byte *precontext, const uint16_t * sort_key,
+                     const uint16_t * o_constraint, const byte *rc_data,
+                     const uint16_t * o_action,     const byte * ac_data,
                      Face & face, passtype pt, Error &e)
 {
-    const byte * const ac_data_end = ac_data + be::peek<uint16>(o_action + m_numRules);
-    const byte * const rc_data_end = rc_data + be::peek<uint16>(o_constraint + m_numRules);
+    const byte * const ac_data_end = ac_data + be::peek<uint16_t>(o_action + m_numRules);
+    const byte * const rc_data_end = rc_data + be::peek<uint16_t>(o_constraint + m_numRules);
 
     precontext += m_numRules;
     sort_key   += m_numRules;
@@ -258,16 +258,16 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
 
     // Load rules.
     const byte * ac_begin = 0, * rc_begin = 0,
-               * ac_end = ac_data + be::peek<uint16>(o_action),
-               * rc_end = rc_data + be::peek<uint16>(o_constraint);
+               * ac_end = ac_data + be::peek<uint16_t>(o_action),
+               * rc_end = rc_data + be::peek<uint16_t>(o_constraint);
 
     // Allocate pools
     m_rules = new Rule [m_numRules];
     m_codes = new Code [m_numRules*2];
     int totalSlots = 0;
-    const uint16 *tsort = sort_key;
+    const uint16_t *tsort = sort_key;
     for (int i = 0; i < m_numRules; ++i)
-        totalSlots += be::peek<uint16>(--tsort);
+        totalSlots += be::peek<uint16_t>(--tsort);
     const size_t prog_pool_sz = vm::Machine::Code::estimateCodeDataOut(ac_end - ac_data + rc_end - rc_data, 2 * m_numRules, totalSlots);
     m_progs = gralloc<byte>(prog_pool_sz);
     byte * prog_pool_free = m_progs,
@@ -279,15 +279,15 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     {
         face.error_context((face.error_context() & 0xFFFF00) + EC_ARULE + int((n - 1) << 24));
         r->preContext = *--precontext;
-        r->sort       = be::peek<uint16>(--sort_key);
+        r->sort       = be::peek<uint16_t>(--sort_key);
 #ifndef NDEBUG
-        r->rule_idx   = uint16(n - 1);
+        r->rule_idx   = uint16_t(n - 1);
 #endif
         if (r->sort > 63 || r->preContext >= r->sort || r->preContext > m_maxPreCtxt || r->preContext < m_minPreCtxt)
             return false;
-        ac_begin      = ac_data + be::peek<uint16>(--o_action);
+        ac_begin      = ac_data + be::peek<uint16_t>(--o_action);
         --o_constraint;
-        rc_begin      = be::peek<uint16>(o_constraint) ? rc_data + be::peek<uint16>(o_constraint) : rc_end;
+        rc_begin      = be::peek<uint16_t>(o_constraint) ? rc_data + be::peek<uint16_t>(o_constraint) : rc_end;
 
         if (ac_begin > ac_end || ac_begin > ac_data_end || ac_end > ac_data_end
                 || rc_begin > rc_end || rc_begin > rc_data_end || rc_end > rc_data_end
@@ -327,7 +327,7 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
     if (e.test(!re, E_OUTOFMEM)) return face.error(e);
     for (size_t n = num_entries; n; --n, ++re)
     {
-        const ptrdiff_t rn = be::read<uint16>(rule_map);
+        const ptrdiff_t rn = be::read<uint16_t>(rule_map);
         if (e.test(rn >= m_numRules, E_BADRULENUM))  return face.error(e);
         re->rule = m_rules + rn;
     }
@@ -343,7 +343,7 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::category _states_cat(face.tele.starts);
 #endif
-    m_startStates = gralloc<uint16>(m_maxPreCtxt - m_minPreCtxt + 1);
+    m_startStates = gralloc<uint16_t>(m_maxPreCtxt - m_minPreCtxt + 1);
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::set_category(face.tele.states);
 #endif
@@ -351,14 +351,14 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 #ifdef GRAPHITE2_TELEMETRY
     telemetry::set_category(face.tele.transitions);
 #endif
-    m_transitions      = gralloc<uint16>(m_numTransition * m_numColumns);
+    m_transitions      = gralloc<uint16_t>(m_numTransition * m_numColumns);
 
     if (e.test(!m_startStates || !m_states || !m_transitions, E_OUTOFMEM)) return face.error(e);
     // load start states
-    for (uint16 * s = m_startStates,
+    for (uint16_t * s = m_startStates,
                 * const s_end = s + m_maxPreCtxt - m_minPreCtxt + 1; s != s_end; ++s)
     {
-        *s = be::read<uint16>(starts);
+        *s = be::read<uint16_t>(starts);
         if (e.test(*s >= m_numStates, E_BADSTATE))
         {
             face.error_context((face.error_context() & 0xFFFF00) + EC_ASTARTS + int((s - m_startStates) << 24));
@@ -367,10 +367,10 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
     }
 
     // load state transition table.
-    for (uint16 * t = m_transitions,
+    for (uint16_t * t = m_transitions,
                 * const t_end = t + m_numTransition*m_numColumns; t != t_end; ++t)
     {
-        *t = be::read<uint16>(states);
+        *t = be::read<uint16_t>(states);
         if (e.test(*t >= m_numStates, E_BADSTATE))
         {
             face.error_context((face.error_context() & 0xFFFF00) + EC_ATRANS + int(((t - m_transitions) / m_numColumns) << 8));
@@ -380,11 +380,11 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 
     State * s = m_states,
           * const success_begin = m_states + m_numStates - m_numSuccess;
-    const Rules::Entry * rule_map_end = m_ruleMap + be::peek<uint16>(o_rule_map + m_numSuccess*sizeof(uint16));
+    const Rules::Entry * rule_map_end = m_ruleMap + be::peek<uint16_t>(o_rule_map + m_numSuccess*sizeof(uint16_t));
     for (size_t n = m_numStates; n; --n, ++s)
     {
-        Rules::Entry * const begin = s < success_begin ? 0 : m_ruleMap + be::read<uint16>(o_rule_map),
-                  * const end   = s < success_begin ? 0 : m_ruleMap + be::peek<uint16>(o_rule_map);
+        Rules::Entry * const begin = s < success_begin ? 0 : m_ruleMap + be::read<uint16_t>(o_rule_map),
+                  * const end   = s < success_begin ? 0 : m_ruleMap + be::peek<uint16_t>(o_rule_map);
 
         if (e.test(begin >= rule_map_end || end > rule_map_end || begin > end, E_BADRULEMAPPING))
         {
@@ -403,14 +403,14 @@ bool Pass::readStates(const byte * starts, const byte *states, const byte * o_ru
 
 bool Pass::readRanges(const byte * ranges, size_t num_ranges, Error &e)
 {
-    m_cols = gralloc<uint16>(m_numGlyphs);
+    m_cols = gralloc<uint16_t>(m_numGlyphs);
     if (e.test(!m_cols, E_OUTOFMEM)) return false;
-    memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16));
+    memset(m_cols, 0xFF, m_numGlyphs * sizeof(uint16_t));
     for (size_t n = num_ranges; n; --n)
     {
-        uint16     * ci     = m_cols + be::read<uint16>(ranges),
-                   * ci_end = m_cols + be::read<uint16>(ranges) + 1,
-                     col    = be::read<uint16>(ranges);
+        uint16_t     * ci     = m_cols + be::read<uint16_t>(ranges),
+                   * ci_end = m_cols + be::read<uint16_t>(ranges) + 1,
+                     col    = be::read<uint16_t>(ranges);
 
         if (e.test(ci >= ci_end || ci_end > m_cols+m_numGlyphs || col >= m_numColumns, E_BADRANGE))
             return false;
@@ -493,8 +493,8 @@ bool Pass::runFSM(ShapingContext& ctxt, vm::const_slotref slot, Rules & rules) c
     if (m_maxPreCtxt < m_minPreCtxt)
         return false;
 
-    uint16 state = m_startStates[m_maxPreCtxt - ctxt.context()];
-    uint8  free_slots = ShapingContext::MAX_SLOTS;
+    uint16_t state = m_startStates[m_maxPreCtxt - ctxt.context()];
+    uint8_t  free_slots = ShapingContext::MAX_SLOTS;
     do
     {
         assert(!slot->deleted());
@@ -506,7 +506,7 @@ bool Pass::runFSM(ShapingContext& ctxt, vm::const_slotref slot, Rules & rules) c
          || state >= m_numTransition)
             return free_slots != 0;
 
-        const uint16 * transitions = &m_transitions[state*m_numColumns];
+        const uint16_t * transitions = &m_transitions[state*m_numColumns];
         state = transitions[m_cols[gid]];
         if (state >= m_successStart)
             rules.accumulate_rules(m_states[state]);
@@ -674,7 +674,7 @@ bool Pass::testPassConstraint(Machine & m) const
     ctxt.reset(dummy, 0);
     ctxt.pushSlot(ctxt.segment.slots().begin());
     auto map = ctxt.map.begin();
-    const uint32 ret = m_cPConstraint.run(m, map, dummy);
+    const uint32_t ret = m_cPConstraint.run(m, map, dummy);
 
 #if !defined GRAPHITE2_NTRACING
     json * const dbgout = ctxt.segment.getFace()->logger();
@@ -703,7 +703,7 @@ bool Pass::testConstraint(const Rule & r, Machine & m) const
     {
         if (!map[0].is_valid()) continue;
         auto slot_out = *map;
-        const int32 ret = r.constraint->run(m, map, slot_out);
+        const int32_t ret = r.constraint->run(m, map, slot_out);
         if (!ret || m.status() != Machine::finished)
             return false;
     }
@@ -721,7 +721,7 @@ int Pass::doAction(const Code *codeptr, SlotBuffer::iterator & slot_out, vm::Mac
     slot_out = *map;
     ctxt.highpassed(false);
 
-    int32 ret = codeptr->run(m, map, slot_out);
+    int32_t ret = codeptr->run(m, map, slot_out);
 
     if (m.status() != Machine::finished)
     {

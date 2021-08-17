@@ -52,15 +52,15 @@ struct Slot_data {
     Position    m_attach;   // attachment point on us
     Position    m_with;     // attachment point position on parent
     float       m_just;     // Justification inserted space
-    uint32      m_original; // charinfo that originated this slot (e.g. for feature values)
-    uint32      m_before;   // charinfo index of before association
-    uint32      m_after;    // charinfo index of after association
-    uint32      m_index;    // slot index given to this slot during finalising
-    uint16      m_glyphid;  // glyph id
-    uint16      m_realglyphid;
+    uint32_t      m_original; // charinfo that originated this slot (e.g. for feature values)
+    uint32_t      m_before;   // charinfo index of before association
+    uint32_t      m_after;    // charinfo index of after association
+    uint32_t      m_index;    // slot index given to this slot during finalising
+    uint16_t      m_glyphid;  // glyph id
+    uint16_t      m_realglyphid;
     byte        m_attLevel;    // attachment level
     byte        m_bidiLevel;   // bidirectional level
-    int8        m_bidiCls;     // bidirectional class
+    int8_t        m_bidiCls;     // bidirectional class
     struct {
         bool    deleted: 1,
                 inserted: 1,
@@ -160,8 +160,8 @@ public:
     // Glyph
     uint16_t    gid() const     { return m_glyphid; }
     uint16_t    glyph() const   { return m_realglyphid ? m_realglyphid : m_glyphid; }
-    void        glyph(Segment &seg, uint16 glyphid, const GlyphFace * theGlyph = nullptr);
-//     void setRealGid(uint16 realGid) { m_realglyphid = realGid; }
+    void        glyph(Segment &seg, uint16_t glyphid, const GlyphFace * theGlyph = nullptr);
+//     void setRealGid(uint16_t realGid) { m_realglyphid = realGid; }
 
     // Positioning
     Position const & origin() const { return m_position; }
@@ -179,8 +179,8 @@ public:
 
 
     // Slot ordering
-    uint32  index() const       { return m_index; }
-    void    index(uint32 val)   { m_index = val; }
+    uint32_t  index() const       { return m_index; }
+    void    index(uint32_t val)   { m_index = val; }
     int     before() const      { return m_before; }
     void    before(int ind)     { m_before = ind; }
     int     after() const       { return m_after; }
@@ -203,25 +203,25 @@ public:
     bool clusterhead() const { return m_flags.clusterhead ;}
 
     // Bidi
-    uint8   bidiLevel() const        { return m_bidiLevel; }
-    void    bidiLevel(uint8 level)   { m_bidiLevel = level; }
-    int8    bidiClass() const        { return m_bidiCls; }
-    void    bidiClass(int8 cls)      { m_bidiCls = cls; }
+    uint8_t   bidiLevel() const        { return m_bidiLevel; }
+    void    bidiLevel(uint8_t level)   { m_bidiLevel = level; }
+    int8_t    bidiClass() const        { return m_bidiCls; }
+    void    bidiClass(int8_t cls)      { m_bidiCls = cls; }
 
     // Operations
     Position update_cluster_metric(Segment const & seg, bool const rtl, bool const is_final, float & clsb, float & crsb, unsigned depth=100);
     void update(int numSlots, int numCharInfo, Position &relpos);
-    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8 attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
-    int32 clusterMetric(Segment const & seg, metrics metric, uint8 attrLevel, bool rtl) const;
+    Position finalise(const Segment & seg, const Font* font, Position & base, Rect & bbox, uint8_t attrLevel, float & clusterMin, bool rtl, bool isFinal, int depth = 0);
+    int32_t clusterMetric(Segment const & seg, metrics metric, uint8_t attrLevel, bool rtl) const;
 
     // Attributes
-    void    setAttr(Segment & seg, attrCode ind, uint8 subindex, int16 val, const ShapingContext & map);
-    int     getAttr(const Segment &seg, attrCode ind, uint8 subindex) const;
-    int16 const *userAttrs() const { return m_attrs.user_attributes(); }
+    void    setAttr(Segment & seg, attrCode ind, uint8_t subindex, int16_t val, const ShapingContext & map);
+    int     getAttr(const Segment &seg, attrCode ind, uint8_t subindex) const;
+    int16_t const *userAttrs() const { return m_attrs.user_attributes(); }
 
 //     // Justification
-    int getJustify(const Segment &seg, uint8 level, uint8 subindex) const;
-    void setJustify(Segment &seg, uint8 level, uint8 subindex, int16 value);
+    int getJustify(const Segment &seg, uint8_t level, uint8_t subindex) const;
+    void setJustify(Segment &seg, uint8_t level, uint8_t subindex, int16_t value);
     float just() const { return m_just; }
     void just(float j) { m_just = j; }
 

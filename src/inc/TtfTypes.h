@@ -25,6 +25,7 @@ License, as published by the Free Software Foundation, either version 2
 of the License or (at your option) any later version.
 */
 #pragma once
+#include <cstdint>
 /*--------------------------------------------------------------------*//*:Ignore this sentence.
 
 File: TtfTypes.h
@@ -51,20 +52,15 @@ namespace TtfUtil
 //**********************************************************************************************
 //  Type declarations
 //**********************************************************************************************
-typedef unsigned char   uint8;
-typedef uint8           byte;
-typedef signed char     int8;
-typedef unsigned short  uint16;
-typedef short           int16;
-typedef unsigned int    uint32;
-typedef int             int32;
+typedef uint8_t           byte;
+typedef int             int32_t;
 
-typedef int16   short_frac;
-typedef int32   fixed;
-typedef int16   fword;
-typedef uint16  ufword;
-typedef int16   f2dot14;
-typedef uint32  long_date_time[2];
+typedef int16_t   short_frac;
+typedef int32_t   fixed;
+typedef int16_t   fword;
+typedef uint16_t  ufword;
+typedef int16_t   f2dot14;
+typedef uint32_t  long_date_time[2];
 
 //**********************************************************************************************
 //  Constants and enum types
@@ -86,14 +82,14 @@ namespace Sfnt
 
     struct OffsetSubTable
     {
-        uint32  scaler_type;
-        uint16  num_tables,
+        uint32_t  scaler_type;
+        uint16_t  num_tables,
             search_range,
             entry_selector,
             range_shift;
         struct Entry
         {
-            uint32  tag,
+            uint32_t  tag,
                 checksum,
                 offset,
                 length;
@@ -112,26 +108,26 @@ namespace Sfnt
 
     struct CharacterCodeMap
     {
-        uint16  version,
+        uint16_t  version,
             num_subtables;
         struct
         {
-            uint16  platform_id,
+            uint16_t  platform_id,
                 platform_specific_id;
-            uint32  offset;
+            uint32_t  offset;
         } encoding[1];
     };
 
     struct CmapSubTable
     {
-        uint16  format,
+        uint16_t  format,
             length,
             language;
     };
 
     struct CmapSubTableFormat4 : CmapSubTable
     {
-        uint16  seg_count_x2,
+        uint16_t  seg_count_x2,
             search_range,
             entry_selector,
             range_shift,
@@ -144,12 +140,12 @@ namespace Sfnt
     struct CmapSubTableFormat12
     {
         fixed   format;
-        uint32  length,
+        uint32_t  length,
             language,
             num_groups;
         struct
         {
-            uint32  start_char_code,
+            uint32_t  start_char_code,
                 end_char_code,
                 start_glyph_id;
         } group[1];
@@ -161,9 +157,9 @@ namespace Sfnt
     {
         fixed   version,
             font_revision;
-        uint32  check_sum_adjustment,
+        uint32_t  check_sum_adjustment,
             magic_number;
-        uint16  flags,
+        uint16_t  flags,
             units_per_em;
         long_date_time  created,
                 modified;
@@ -171,9 +167,9 @@ namespace Sfnt
             y_min,
             x_max,
             y_max;
-        uint16  mac_style,
+        uint16_t  mac_style,
             lowest_rec_ppem;
-        int16   font_direction_hint,
+        int16_t   font_direction_hint,
             index_to_loc_format,
             glyph_data_format;
         enum
@@ -193,7 +189,7 @@ namespace Sfnt
             italic_angle;
         fword   underline_position,
             underline_thickness;
-        uint32  is_fixed_pitch,
+        uint32_t  is_fixed_pitch,
             min_mem_type42,
             max_mem_type42,
             min_mem_type1,
@@ -210,21 +206,21 @@ namespace Sfnt
 
     struct PostScriptGlyphName2 : PostScriptGlyphName
     {
-        uint16  number_of_glyphs,
+        uint16_t  number_of_glyphs,
             glyph_name_index[1];
     };
 
     struct PostScriptGlyphName25 : PostScriptGlyphName
     {
-        uint16  number_of_glyphs;
-        int8    offset[1];
+        uint16_t  number_of_glyphs;
+        int8_t    offset[1];
     };
 
     struct PostScriptGlyphName3 : PostScriptGlyphName {};
 
     struct PostScriptGlyphName4 : PostScriptGlyphName
     {
-        uint16 glyph_to_char_map[1];
+        uint16_t glyph_to_char_map[1];
     };
 
 
@@ -238,18 +234,18 @@ namespace Sfnt
         fword   min_left_side_bearing,
             max_left_side_bearing,
             x_max_element;
-        int16   caret_slope_rise,
+        int16_t   caret_slope_rise,
             caret_slope_run;
         fword   caret_offset;
-        int16   reserved[4],
+        int16_t   reserved[4],
             metric_data_format;
-        uint16  num_long_hor_metrics;
+        uint16_t  num_long_hor_metrics;
     };
 
     struct MaximumProfile
     {
         fixed   version;
-        uint16  num_glyphs,
+        uint16_t  num_glyphs,
             max_points,
             max_contours,
             max_component_points,
@@ -270,11 +266,11 @@ namespace Sfnt
 
     struct Compatibility0
     {
-        uint16  version;
-        int16   x_avg_char_width;
-        uint16  weight_class,
+        uint16_t  version;
+        int16_t   x_avg_char_width;
+        uint16_t  weight_class,
             width_class;
-        int16   fs_type,
+        int16_t   fs_type,
             y_subscript_x_size,
             y_subscript_y_size,
             y_subscript_x_offset,
@@ -287,9 +283,9 @@ namespace Sfnt
             y_strikeout_position,
             family_class;
         Panose  panose;
-        uint32  unicode_range[4];
-        int8    ach_vend_id[4];
-        uint16  fs_selection,
+        uint32_t  unicode_range[4];
+        int8_t    ach_vend_id[4];
+        uint16_t  fs_selection,
             fs_first_char_index,
             fs_last_char_index, // Acording to Apple's spec this is where v0 should end
             typo_ascender,
@@ -311,14 +307,14 @@ namespace Sfnt
 
     struct Compatibility1 : Compatibility0
     {
-        uint32  codepage_range[2];
+        uint32_t  codepage_range[2];
     };
 
     struct Compatibility2 : Compatibility1
     {
-            int16   x_height,
+            int16_t   x_height,
                 cap_height;
-            uint16  default_char,
+            uint16_t  default_char,
                 break_char,
                 max_context;
     };
@@ -330,7 +326,7 @@ namespace Sfnt
 
     struct NameRecord
     {
-        uint16  platform_id,
+        uint16_t  platform_id,
             platform_specific_id,
             language_id,
             name_id,
@@ -346,13 +342,13 @@ namespace Sfnt
 
     struct LangTagRecord
     {
-        uint16 length,
+        uint16_t length,
             offset;
     };
 
     struct FontNames
     {
-        uint16  format,
+        uint16_t  format,
             count,
             string_offset;
         NameRecord name_record[1];
@@ -361,14 +357,14 @@ namespace Sfnt
 
     struct HorizontalMetric
     {
-        uint16  advance_width;
-        int16   left_side_bearing;
+        uint16_t  advance_width;
+        int16_t   left_side_bearing;
     };
 
 
     struct Glyph
     {
-        int16   number_of_contours;
+        int16_t   number_of_contours;
         fword   x_min,
             y_min,
             x_max,
@@ -377,7 +373,7 @@ namespace Sfnt
 
     struct SimpleGlyph : Glyph
     {
-        uint16  end_pts_of_contours[1];
+        uint16_t  end_pts_of_contours[1];
         enum
         {
             OnCurve = 0x01,
@@ -393,7 +389,7 @@ namespace Sfnt
 
     struct CompoundGlyph : Glyph
     {
-        uint16  flags,
+        uint16_t  flags,
             glyph_index;
         enum
         {

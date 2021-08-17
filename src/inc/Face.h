@@ -58,7 +58,7 @@ class Face
 
 public:
     class Table;
-    static float default_glyph_advance(const void* face_ptr, gr_uint16 glyphid);
+    static float default_glyph_advance(const void* face_ptr, uint16_t glyphid);
 
     Face(const void* appFaceHandle/*non-NULL*/, const gr_face_ops & ops);
     virtual ~Face();
@@ -66,7 +66,7 @@ public:
     virtual bool        runGraphite(Segment &seg, const Silf *silf) const;
 
 public:
-    bool                readGlyphs(uint32 faceOptions);
+    bool                readGlyphs(uint32_t faceOptions);
     bool                readGraphite(const Table & silf);
     bool                readFeatures();
     void                takeFileFace(FileFace* pFileFace/*takes ownership*/);
@@ -78,17 +78,17 @@ public:
     void                setLogger(FILE *log_file);
     json              * logger() const throw();
 
-    const Silf        * chooseSilf(uint32 script) const;
-    uint16              languageForLocale(const char * locale) const;
+    const Silf        * chooseSilf(uint32_t script) const;
+    uint16_t              languageForLocale(const char * locale) const;
 
     // Features
-    uint16              numFeatures() const;
-    const FeatureRef  * featureById(uint32 id) const;
-    const FeatureRef  * feature(uint16 index) const;
+    uint16_t              numFeatures() const;
+    const FeatureRef  * featureById(uint32_t id) const;
+    const FeatureRef  * feature(uint16_t index) const;
 
     // Glyph related
-    int32  getGlyphMetric(uint16 gid, uint8 metric) const;
-    uint16 findPseudo(uint32 uid) const;
+    int32_t  getGlyphMetric(uint16_t gid, uint8_t metric) const;
+    uint16_t findPseudo(uint32_t uid) const;
 
     // Errors
     unsigned int        error() const { return m_error; }
@@ -110,9 +110,9 @@ private:
     unsigned int            m_errcntxt;
 protected:
     Silf                  * m_silfs;    // silf subtables.
-    uint16                  m_numSilf;  // num silf subtables in the silf table
+    uint16_t                  m_numSilf;  // num silf subtables in the silf table
 private:
-    uint16 m_ascent,
+    uint16_t m_ascent,
            m_descent;
 #ifdef GRAPHITE2_TELEMETRY
 public:
@@ -129,19 +129,19 @@ const SillMap & Face::theSill() const
 }
 
 inline
-uint16 Face::numFeatures() const
+uint16_t Face::numFeatures() const
 {
     return m_Sill.theFeatureMap().numFeats();
 }
 
 inline
-const FeatureRef * Face::featureById(uint32 id) const
+const FeatureRef * Face::featureById(uint32_t id) const
 {
     return m_Sill.theFeatureMap().findFeatureRef(id);
 }
 
 inline
-const FeatureRef *Face::feature(uint16 index) const
+const FeatureRef *Face::feature(uint16_t index) const
 {
     return m_Sill.theFeatureMap().feature(index);
 }
@@ -179,7 +179,7 @@ class Face::Table
 
 public:
     Table() throw();
-    Table(const Face & face, const Tag n, uint32 version=0xffffffff) throw();
+    Table(const Face & face, const Tag n, uint32_t version=0xffffffff) throw();
     ~Table() throw();
     Table(const Table && rhs) throw();
 

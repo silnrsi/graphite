@@ -39,7 +39,7 @@ struct Rule {
   unsigned short   sort;
   byte             preContext;
 #ifndef NDEBUG
-  uint16           rule_idx;
+  uint16_t           rule_idx;
 #endif
 
   Rule();

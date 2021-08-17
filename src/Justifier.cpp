@@ -167,14 +167,14 @@ float Segment::justify(SlotBuffer::iterator pSlot, const Font *font, float width
                 if (!step) step = 1;        // handle lazy font developers
                 if (pref > 0)
                 {
-                    float max = uint16(s->getJustify(*this, i, 0));
+                    float max = uint16_t(s->getJustify(*this, i, 0));
                     if (i == 0) max -= s->just();
                     if (pref > max) pref = max;
                     else tWeight += w;
                 }
                 else
                 {
-                    float max = uint16(s->getJustify(*this, i, 1));
+                    float max = uint16_t(s->getJustify(*this, i, 1));
                     if (i == 0) max += s->just();
                     if (-pref > max) pref = -max;
                     else tWeight += w;
@@ -242,7 +242,7 @@ SlotBuffer::iterator Segment::addLineEnd(SlotBuffer::iterator pos)
     auto eSlot = slots().insert(pos, Slot(numAttrs()));
     if (eSlot == slots().end()) return eSlot;
 
-    const uint16 gid = silf()->endLineGlyphid();
+    const uint16_t gid = silf()->endLineGlyphid();
     const GlyphFace * theGlyph = m_face->glyphs().glyphSafe(gid);
     eSlot->glyph(*this, gid, theGlyph);
 

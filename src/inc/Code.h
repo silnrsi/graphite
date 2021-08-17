@@ -90,7 +90,7 @@ public:
 
     Code() throw();
     Code(bool is_constraint, const byte * bytecode_begin, const byte * const bytecode_end,
-         uint8 pre_context, uint16 rule_length, const Silf &, const Face &,
+         uint8_t pre_context, uint16_t rule_length, const Silf &, const Face &,
          enum passtype pt, byte * * const _out = 0);
     Code(const Machine::Code &) throw();
     ~Code() throw();
@@ -106,7 +106,7 @@ public:
     size_t        maxRef() const throw()            { return _max_ref; }
     void          externalProgramMoved(ptrdiff_t) throw();
 
-    int32 run(Machine &m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const;
+    int32_t run(Machine &m, ShapingContext::map_t::iterator & slot_in, slotref & slot_out) const;
 
     CLASS_NEW_DELETE;
 };

@@ -63,7 +63,7 @@ public:
     json      * const dbgout;
     map_t       map;
     SlotBuffer  in;
-    uint8 const dir;
+    uint8_t const dir;
 
 private:
     const_slotref   _highwater;

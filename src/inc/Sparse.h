@@ -33,7 +33,7 @@ of the License or (at your option) any later version.
 namespace graphite2 {
 
 
-// A read-only packed fast sparse array of uint16 with uint16 keys.
+// A read-only packed fast sparse array of uint16_t with uint16_t keys.
 // Like most container classes this has capacity and size properties and these
 // refer to the number of stored entries and the number of addressable entries
 // as normal. However due the sparse nature the capacity is always <= than the
@@ -41,8 +41,8 @@ namespace graphite2 {
 class sparse
 {
 public:
-    typedef uint16  key_type;
-    typedef uint16  mapped_type;
+    typedef uint16_t  key_type;
+    typedef uint16_t  mapped_type;
     typedef std::pair<const key_type, mapped_type> value_type;
 
 private:

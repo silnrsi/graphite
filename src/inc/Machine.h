@@ -132,7 +132,7 @@ enum opcode {
 struct opcode_t
 {
     instr           impl[2];
-    uint8           param_sz;
+    uint8_t           param_sz;
     char            name[MAX_NAME_LEN];
 };
 
@@ -141,7 +141,7 @@ class Machine
 {
 public:
     struct regbank;
-    typedef int32  stack_t;
+    typedef int32_t  stack_t;
     static size_t const STACK_ORDER  = 10,
                         STACK_MAX    = 1 << STACK_ORDER,
                         STACK_GUARD  = 2;
@@ -189,7 +189,7 @@ struct Machine::regbank  {
     slotref *               is;
     slotref *         const isb;
     slotref                 os;
-    int8                    positioned;
+    int8_t                    positioned;
 };
 
 inline Machine::Machine(ShapingContext & ctxt) throw()

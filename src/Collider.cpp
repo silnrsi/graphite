@@ -480,7 +480,7 @@ bool ShiftCollider::mergeSlot(Segment & seg, Slot & slot, const SlotCollision *c
 
             // Process sub-boxes that are defined for this glyph.
             // We only need to do this if there was in fact a collision with the main octabox.
-            uint8 numsub = gc.numSubBounds(gid);
+            uint8_t numsub = gc.numSubBounds(gid);
             if (numsub > 0)
             {
                 bool anyhits = false;
@@ -762,7 +762,7 @@ static float get_edge(Segment & seg, const Slot & s, const Position &shift, floa
     unsigned short gid = s.gid();
     float sx = s.origin().x + shift.x;
     float sy = s.origin().y + shift.y;
-    uint8 numsub = gc.numSubBounds(gid);
+    uint8_t numsub = gc.numSubBounds(gid);
     float res = isRight ? (float)-1e38 : (float)1e38;
 
     if (numsub > 0)
@@ -1066,15 +1066,15 @@ void SlotCollision::initFromSlot(Segment &seg, Slot &slot)
     // Initialize slot attributes from glyph attributes.
 	// The order here must match the order in the grcompiler code,
 	// GrcSymbolTable::AssignInternalGlyphAttrIDs.
-    uint16 gid = slot.gid();
-    uint16 aCol = seg.silf()->aCollision(); // flags attr ID
+    uint16_t gid = slot.gid();
+    uint16_t aCol = seg.silf()->aCollision(); // flags attr ID
     const GlyphFace * glyphFace = seg.getFace()->glyphs().glyphSafe(gid);
     if (!glyphFace)
         return;
     const sparse &p = glyphFace->attrs();
     _flags = p[aCol];
-    _limit = Rect(Position(int16(p[aCol+1]), int16(p[aCol+2])),
-                  Position(int16(p[aCol+3]), int16(p[aCol+4])));
+    _limit = Rect(Position(int16_t(p[aCol+1]), int16_t(p[aCol+2])),
+                  Position(int16_t(p[aCol+3]), int16_t(p[aCol+4])));
     _margin = p[aCol+5];
     _marginWt = p[aCol+6];
 

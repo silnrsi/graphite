@@ -35,12 +35,12 @@ integers in addition to 32, 16 and 8 bit.
 #include <string>
 #include "inc/Endian.h"
 
-typedef unsigned char 		uint8;
-typedef signed char		     int8;
-typedef short unsigned int 	uint16;
-typedef short signed int 	 int16;
-typedef unsigned int 		uint32;
-typedef signed int 		     int32;
+typedef unsigned char 		uint8_t;
+typedef signed char		     int8_t;
+typedef short unsigned int 	uint16_t;
+typedef short signed int 	 int16_t;
+typedef unsigned int 		uint32_t;
+typedef signed int 		     int32_t;
 #if defined(HAVE_64_LONG)
 typedef long unsigned int 	uint64;
 typedef long signed int 	 int64;
@@ -138,11 +138,11 @@ int main(int argc , char *argv[])
 	const size_t rounds = 1UL << atoi(argv[1]);
 	int r = 0;
 
-    if   (!test_swaps<uint64, uint32, uint16, uint8>()
-       || !test_swaps<int64, int32, int16, int8>())
+    if   (!test_swaps<uint64, uint32_t, uint16_t, uint8_t>()
+       || !test_swaps<int64, int32_t, int16_t, int8_t>())
         return 5;
 
-	if (r == 0) r = test_reads<uint64, uint32, uint16, uint8>(rounds);
-	if (r == 0) r = test_reads<int64, int32, int16, int8>(rounds);
+	if (r == 0) r = test_reads<uint64, uint32_t, uint16_t, uint8_t>(rounds);
+	if (r == 0) r = test_reads<int64, int32_t, int16_t, int8_t>(rounds);
 	return r;
 }

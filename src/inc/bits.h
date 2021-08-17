@@ -41,15 +41,15 @@ inline unsigned int bit_set_count(T v)
 }
 
 template<>
-inline unsigned int bit_set_count(int16 v)
+inline unsigned int bit_set_count(int16_t v)
 {
-    return __builtin_popcount(static_cast<uint16>(v));
+    return __builtin_popcount(static_cast<uint16_t>(v));
 }
 
 template<>
-inline unsigned int bit_set_count(int8 v)
+inline unsigned int bit_set_count(int8_t v)
 {
-    return __builtin_popcount(static_cast<uint8>(v));
+    return __builtin_popcount(static_cast<uint8_t>(v));
 }
 
 template<>
@@ -142,7 +142,7 @@ inline T zero_bytes(const T x, unsigned char n)
 }
 
 #if 0
-inline float float_round(float x, uint32 m)
+inline float float_round(float x, uint32_t m)
 {
     *reinterpret_cast<unsigned int *>(&x) &= m;
     return *reinterpret_cast<float *>(&x);

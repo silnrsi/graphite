@@ -51,8 +51,8 @@ using namespace graphite2;
 #define pat64(b) pat32(b), pat32(ffffffff##b)
 
 #define patterns(bw) \
-    uint##bw const  u##bw##_pat[] = {0, pat##bw(UL) }; \
-    int##bw const * s##bw##_pat   = reinterpret_cast<int##bw const *>(u##bw##_pat)
+    uint##bw##_t const  u##bw##_pat[] = {0, pat##bw(UL) }; \
+    int##bw##_t const * s##bw##_pat   = reinterpret_cast<int##bw##_t const *>(u##bw##_pat)
 
 //#define BENCHMARK 40000000
 #if defined BENCHMARK

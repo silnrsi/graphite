@@ -30,7 +30,7 @@ of the License or (at your option) any later version.
 
 using namespace graphite2;
 
-ShapingContext::ShapingContext(Segment & seg, uint8 direction, size_t maxSize)
+ShapingContext::ShapingContext(Segment & seg, uint8_t direction, size_t maxSize)
 : segment(seg),
   dbgout(seg.getFace() ? seg.getFace()->logger() : nullptr),
   //in(seg.slots().num_user_attrs(), seg.slots().num_just_levels()),
