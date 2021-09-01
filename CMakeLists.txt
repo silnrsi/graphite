@@ -83,7 +83,10 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(tests)
+if (NOT GRAPHITE2_NFILEFACE)
+    # tests cannot be built with GRAPHITE2_NFILEFACE
+    add_subdirectory(tests)
+endif()
 add_subdirectory(doc)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(gr2fonttest)
