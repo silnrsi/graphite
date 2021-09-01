@@ -90,9 +90,10 @@ if (NOT GRAPHITE2_NFILEFACE)
 endif()
 
 set(version 3.0.1)
+set(prefix ${CMAKE_INSTALL_PREFIX})
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
-configure_file(graphite2.pc.in graphite2.pc)
+configure_file(graphite2.pc.in graphite2.pc @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/graphite2.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
