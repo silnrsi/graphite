@@ -29,7 +29,7 @@ if  (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_link_libraries(vm-test-direct vm-test-common)
 endif()
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL ".*Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES ".*BSD" OR ${CMAKE_SYSTEM_NAME} STREQUAL ".*GNU")
 	add_definitions(-fno-rtti -fno-exceptions)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 		add_definitions(-DNDEBUG -fomit-frame-pointer)

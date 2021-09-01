@@ -23,7 +23,7 @@ macro(test_example TESTNAME SRCFILE)
     set_tests_properties(${TESTNAME} PROPERTIES TIMEOUT 3)
 endmacro()
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL ".*Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES ".*BSD" OR ${CMAKE_SYSTEM_NAME} STREQUAL ".*GNU")
     find_package(Freetype)
     if (${FREETYPE_FOUND})
         include_directories(${FREETYPE_INCLUDE_DIRS})

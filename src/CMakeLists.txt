@@ -102,7 +102,7 @@ set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             LT_VERSION_REVISION ${GRAPHITE_API_REVISION}
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL ".*Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES ".*BSD" OR ${CMAKE_SYSTEM_NAME} STREQUAL ".*GNU")
     set_target_properties(graphite2 PROPERTIES
         COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
         LINK_FLAGS      "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
