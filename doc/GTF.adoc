@@ -124,8 +124,8 @@ rectangle is stored elsewhere in the font.
 |===============================================================================
 |Type           |Name          |Description                      |Version notes
 
-|USHORT         |subbox_bitmap |Which subboxes exist on 4x4 grid; +
-                                bit-index = (y-index*4) + x-index   |
+|USHORT         |subbox_bitmap |Which subboxes exist on 4x4 grid;
+                                + bit-index = (y-index*4) + x-index |
 |BYTE           |diag_neg_min  |Defines min negatively-sloped diagonal (di) |
 |BYTE           |diag_neg_max  |Defines max negatively-sloped diagonal (da) |
 |BYTE           |diag_pos_min  |Defines min positively-sloped diagonal (si) |
