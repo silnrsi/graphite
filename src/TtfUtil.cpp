@@ -1211,7 +1211,7 @@ unsigned int CmapSubtable12NextCodepoint(const void *pCmap310, unsigned int nUni
     Technically this method should return an unsigned long but it is unlikely the offset will
         exceed 2^31.
 ----------------------------------------------------------------------------------------------*/
-size_t LocaLookup(gid16 nGlyphId,
+int LocaLookup(gid16 nGlyphId,
         const void * pLoca, size_t lLocaSize,
         const void * pHead) // throw (std::out_of_range)
 {
