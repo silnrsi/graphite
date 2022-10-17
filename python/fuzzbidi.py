@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+# SPDX-License-Identifier: LGPL-2.1-or-later OR MPL-2.0 OR GPL-2.0-or-later
+# Copyright (C) 2013 SIL International
 import graphite2
 import itertools
 import math

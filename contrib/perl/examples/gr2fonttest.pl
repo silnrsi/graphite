@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# SPDX-License-Identifier: Artistic-1.0-Perl
+# Copyright (C) 2011 Simon Cozens
 use Encode qw/encode/;
     $SIG{__WARN__} = sub {
         CORE::dump if $_[0] =~ /uninitialized value in subroutine entry/;

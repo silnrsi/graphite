@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Artistic-1.0-Perl
+# Copyright (C) 2011 Simon Cozens
 use PDF::API2;
 use Text::Gr2;
 use File::Slurp;

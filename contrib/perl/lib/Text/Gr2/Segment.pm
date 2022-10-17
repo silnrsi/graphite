@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Artistic-1.0-Perl
+# Copyright (C) 2011 Simon Cozens
 package Text::Gr2::Segment;
 
 =head1 NAME

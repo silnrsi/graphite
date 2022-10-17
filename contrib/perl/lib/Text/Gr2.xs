@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: Artistic-1.0-Perl
+   Copyright (C) 2011 Simon Cozens */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

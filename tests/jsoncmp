@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: LGPL-2.1-or-later OR MPL-2.0 OR GPL-2.0-or-later
+# Copyright 2012, SIL International, All rights reserved.
 import json
 import operator
 import re
@@ -20,7 +22,8 @@ def walktree(tree, path="", parent=None):
 
 def settreeval(parent, path, value):
     p = path.split("/")[-1]
-    if p.isdigit():  p = int(p)
+    if p.isdigit():
+        p = int(p)
     parent[p] = value
 
 

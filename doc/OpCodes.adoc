@@ -1,4 +1,6 @@
-﻿== Stack Machine Commands ==
+﻿// SPDX-License-Identifier: LGPL-2.1-or-later OR MPL-2.0 OR GPL-2.0-or-later
+// Copyright 2010, SIL International, All rights reserved.
+== Stack Machine Commands ==
 
 This document describes the commands that are defined in Graphite’s stack
 machine, which are used to run rules and test their constraints. By default
