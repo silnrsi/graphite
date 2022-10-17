@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# SPDX-License-Identifier: LGPL-2.1-or-later OR MPL-2.0 OR GPL-2.0-or-later
+# Copyright 2018, SIL International, All rights reserved.
 
 from re import findall
 from os import path
@@ -21,7 +23,7 @@ setup(
     version          = version,
     description      = 'SIL graphite2 smart font system python bindings',
     author           = 'SIL International',
-    license          = 'LGPL-2.1+ OR MPL-1.1+',
+    license          = 'LGPL-2.1+ OR MPL-2.0 OR GPL-2+',
     url              = 'https://github.com/silnrsi/graphite',
     zip_safe         = False,
     package_dir      = {'': 'python'},
@@ -30,8 +32,9 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-        'License :: OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)',
+        'License :: OSI Approved :: GNU Library or Lesser General Public License v2 or later (LGPLv2+)',
+        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
+        'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 2.7',

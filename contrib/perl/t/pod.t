@@ -1,4 +1,6 @@
 #!perl -T
+# SPDX-License-Identifier: Artistic-1.0-Perl
+# Copyright (C) 2011 Simon Cozens
 
 use strict;
 use warnings;

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Artistic-1.0-Perl
+# Copyright (C) 2011 Simon Cozens
 =head1 NAME
 
 Text::Gr2::Slot - Represents a slot within a segment
