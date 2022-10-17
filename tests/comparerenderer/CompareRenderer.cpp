@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-2.1-or-later
+// SPDX-License-Identifier: MIT OR MPL-2.0 OR GPL-2.0-or-later-2.1-or-later
 // Copyright 2010, SIL International, All rights reserved.
 #include <cassert>
 #include <cstddef>
