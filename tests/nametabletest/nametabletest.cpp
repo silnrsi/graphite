@@ -137,7 +137,7 @@ template <class T> T * toBigEndian(T & table)
     bigEndian->m_nameHeader.count = be::swap<uint16>(table.m_nameHeader.count);
     bigEndian->m_nameHeader.string_offset = be::swap<uint16>(table.m_nameHeader.string_offset);
 
-    for (uint16 i = 0; i < table.m_nameHeader.count; i++)
+    for (uint16 i = 0; i < table.m_nameHeader.count - 1; i++)
     {
         bigEndian->m_records[i].platform_id = be::swap<uint16>(table.m_records[i].platform_id);
         bigEndian->m_records[i].platform_specific_id = be::swap<uint16>(table.m_records[i].platform_specific_id);
