@@ -15,7 +15,7 @@ public:
     operator bool() { return (_e != 0); }
     int error() { return _e; }
     void error(int e) { _e = e; }
-    bool test(bool pr, int err) { return (_e = int(pr) * err); }
+    bool test(bool pr, int err) { return (_e = pr ? err : 0); }
 
 private:
     int _e;
@@ -33,7 +33,7 @@ enum errcontext {
     EC_ARULEMAP = 9         // in Silf %d, pass %d, state %d
 };
 
-enum errors {
+enum error {
     E_OUTOFMEM = 1,         // Out of memory
     E_NOGLYPHS = 2,         // There are no glyphs in the font
     E_BADUPEM = 3,          // The units per em for the font is bad (0)
@@ -102,7 +102,7 @@ enum errors {
     E_BADJUMPCODE = 65,     // Code jumps past end of op codes
     E_CODEBADARGS = 66,     // Code arguments exhausted
     E_CODENORETURN = 67,    // Missing return type op code at end of code
-    E_CODENESTEDCTXT = 68,   // Nested context encountered in code
+    E_CODENESTEDCTXT = 68,  // Nested context encountered in code
 // Compression errors
     E_BADSCHEME = 69,
     E_SHRINKERFAILED = 70,

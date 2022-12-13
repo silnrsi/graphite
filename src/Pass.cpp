@@ -171,7 +171,7 @@ bool Pass::readPass(const byte * const pass_start, size_t pass_length, size_t su
         m_cPConstraint = vm::Machine::Code(true, pcCode, pcCode + pass_constraint_len,
                                   precontext[0], be::peek<uint16>(sort_keys), *m_silf, face, PASS_TYPE_UNKNOWN);
         if (e.test(!m_cPConstraint, E_OUTOFMEM)
-                || e.test(m_cPConstraint.status() != Code::loaded, m_cPConstraint.status() + E_CODEFAILURE))
+                || e.test(m_cPConstraint.status() != Code::loaded, int(m_cPConstraint.status()) + E_CODEFAILURE))
             return face.error(e);
         face.error_context(face.error_context() - 1);
     }
@@ -243,8 +243,8 @@ bool Pass::readRules(const byte * rule_map, const size_t num_entries,
         r->constraint = new (m_codes+n*2-1) vm::Machine::Code(true,  rc_begin, rc_end, r->preContext, r->sort, *m_silf, face, pt, &prog_pool_free);
 
         if (e.test(!r->action || !r->constraint, E_OUTOFMEM)
-                || e.test(r->action->status() != Code::loaded, r->action->status() + E_CODEFAILURE)
-                || e.test(r->constraint->status() != Code::loaded, r->constraint->status() + E_CODEFAILURE)
+                || e.test(r->action->status() != Code::loaded, int(r->action->status()) + E_CODEFAILURE)
+                || e.test(r->constraint->status() != Code::loaded, int(r->constraint->status()) + E_CODEFAILURE)
                 || e.test(!r->constraint->immutable(), E_MUTABLECCODE))
             return face.error(e);
     }
