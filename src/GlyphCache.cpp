@@ -21,12 +21,18 @@ namespace
     // variable length structures.
 
     template<typename W>
-    class _glat_iterator : public std::iterator<std::input_iterator_tag, std::pair<sparse::key_type, sparse::mapped_type> >
+    class _glat_iterator
     {
         unsigned short  key() const             { return uint16(be::peek<W>(_e) + _n); }
         unsigned int    run() const             { return be::peek<W>(_e+sizeof(W)); }
         void            advance_entry()         { _n = 0; _e = _v; be::skip<W>(_v,2); }
     public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type = std::pair<sparse::key_type, sparse::mapped_type>;
+        using difference_type = ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+
         _glat_iterator(const void * glat=0) : _e(reinterpret_cast<const byte *>(glat)), _v(_e+2*sizeof(W)), _n(0) {}
 
         _glat_iterator<W> & operator ++ () {
