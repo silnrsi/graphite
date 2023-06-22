@@ -4,7 +4,7 @@ layout: home
 nav_order: 100
 ---
 
-![Caption?](../../assets/images/Gr_home_topic_1.jpg)
+![Caption?](assets/images/Gr_home_topic_1.jpg)
 
 # What is Graphite?
 
@@ -14,15 +14,15 @@ Graphite is a "smart font" system developed specifically to handle the complexit
 * [Why was Graphite developed?](graphite_aboutWhy)
 * [Graphite and OpenType](graphite_aboutOT)
 
-![typing a graphite font](../../assets/images/Gr_home_topic_2.png)
+![typing a graphite font](assets/images/Gr_home_topic_2.png)
 
 # Using Graphite
 
 The following are links to existing Graphite-enabled resources:
 
-* [Applications that suppport Graphite](graphite_apps.html)
-* [Graphite fonts](graphite_fonts.html)
-* [Graphite in Mozilla Firefox](graphite_firefox.html)
+* [Applications that suppport Graphite](graphite_apps)
+* [Graphite fonts](graphite_fonts)
+* [Graphite in Mozilla Firefox](graphite_firefox)
 
 # Developing a Graphite font
 
