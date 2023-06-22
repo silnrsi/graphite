@@ -1,11 +1,11 @@
 ---
 layout: default
 title: Applications that support Graphite
-nav_order: 310
+nav_order: 10
 parent: Using Graphite
 ---
 
-| Firefox 11+ | ![](assets/images/logo_Firefox.jpeg) |
+| ![](assets/images/logo_Firefox.jpeg) | Firefox 11+ |
 
 Mozilla Firefox is a free web browser. Versions 11 and later have Graphite support. It uses the Graphite2 engine.
 
@@ -13,7 +13,7 @@ Mozilla Firefox is a free web browser. Versions 11 and later have Graphite suppo
 
 (Graphite must be enabled to work in early versions of Firefox. See [Using Graphite in Mozilla Firefox.](graphite_firefox))
 
-| LibreOffice 3.4+ | ![](assets/images/logo_LibreOffice.png) |
+![](assets/images/logo_LibreOffice.png) LibreOffice 3.4+
 
 LibreOffice is an open-source suite of tools, including a word-processing program, spreadsheet, and presentation software. Version 3.4 and later support Graphite rendering. It uses the Graphite2 engine.
 

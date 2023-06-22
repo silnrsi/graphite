@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Why was Graphite developed?
-nav_order: 210
+nav_order: 10
 parent: About Graphite
 ---
 

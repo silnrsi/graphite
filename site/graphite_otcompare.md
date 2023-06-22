@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Comparison of OpenType and Graphite shaping speeds in a Nastaliq context
-nav_order: 50
+nav_order: 70
 parent: About Graphite
 ---
 
@@ -42,7 +42,7 @@ The raw test results are:
 
 | Test | Font | usp10 | ot | graphite |
 |:-----|:-----|:------|:---|:---------|
-| en (Charis) | Charis SIL | Regular v5.00 | 12272 | 2178 | 1310 |
+| en (Charis) | Charis SIL Regular v5.00 | 12272 | 2178 | 1310 |
 | yor (Charis) | Charis SIL Regular v.500 | 10298 | 2311 | 1682 |
 | ar (Scheherazade) | Scheherazade v2.100 | 20371 | 4292 | 3630 |
 | nep (Annapurna) | Annapurna SIL v1.202 | 28584 | 6470 | 3378 |
