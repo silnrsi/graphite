@@ -3,6 +3,23 @@ title: Home
 layout: home
 ---
 
+h1:What is Graphite?
+
+Graphite is a "smart font" system developed specifically to handle the complexities of lesser-known languages of the world.
+
+[What is Graphite?](graphite_about)
+[Why was Graphite developed?](graphite_aboutWhy)
+[Graphite and OpenType](graphite_aboutOT)
+
+h1:Using Graphite
+
+The following are links to existing Graphite-enabled resources:
+
+[Applications that suppport Graphite](graphite_apps)
+[Graphite fonts](graphite_fonts)
+[Graphite in Mozilla Firefox](graphite_firefox)
+
+
 This is a *bare-minimum* template to create a Jekyll site that uses the [Just the Docs] theme. You can easily set the created site to be published on [GitHub Pages] – the [README] file explains how to do that, along with other details.
 
 If [Jekyll] is installed on your computer, you can also build and preview the created site *locally*. This lets you test changes before committing them, and avoids waiting for GitHub Pages.[^1] And you will be able to deploy your local build to a different platform than GitHub Pages.
