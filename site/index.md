@@ -1,6 +1,7 @@
 ---
 title: Home
 layout: home
+nav_order: 100
 ---
 
 ![Caption?](../../assets/images/Gr_home_topic_1.png)
@@ -30,7 +31,7 @@ The following are links to existing Graphite-enabled resources:
 
 Any TrueType font can have Graphite support added. The process involves describing the behavior using the Graphite Description Language (GDL), and compiling a new version of the font using the Graphite compiler.
 
-* [Why should I add Graphite support to my font?](graphite_about#whyFont)
+* [Why should I add Graphite support to my font?](graphite_about#why-should-i-add-graphite-to-my-font)
 * How to develop a Graphite font
 * Graphite compiler
 * Graide

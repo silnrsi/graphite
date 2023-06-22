@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Independent Top Level Page
-nav_order: 4
+nav_exclude: true
 ---
 
 This is an independent, top-level page.

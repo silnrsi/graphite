@@ -1,7 +1,7 @@
 ---
 layout: default
 title: About Graphite
-nav_order: 2
+nav_order: 200
 ---
 
 # What is Graphite?
@@ -47,8 +47,6 @@ OpenType is the most prevalent smart font technology. Given the extra costs of s
 Graphite and OpenType are not competing technologies. Applications may support both Graphite and OpenType rendering and fonts may be developed that work with both Graphite and OpenType.
 
 [Read more...](graphite_aboutOT)
-
-`<a name='whyFont'/>`
 
 # Why should I add Graphite to my font?
 

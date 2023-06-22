@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Parent Page
-nav_order: 10
+nav_exclude: 999
 has_children: true
 ---
 
