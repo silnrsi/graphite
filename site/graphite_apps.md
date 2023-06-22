@@ -5,7 +5,7 @@ nav_order: 10
 parent: Using Graphite
 ---
 
-![](assets/images/logo_Firefox.jpeg) Firefox 11+{: .h1}
+![](assets/images/logo_Firefox.jpeg) <span style="h1">Firefox 11+</span>
 
 Mozilla Firefox is a free web browser. Versions 11 and later have Graphite support. It uses the Graphite2 engine.
 
