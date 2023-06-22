@@ -4,39 +4,45 @@ layout: home
 nav_order: 100
 ---
 
-![Caption?](../../assets/images/Gr_home_topic_1.png)
+![Caption?](../../assets/images/Gr_home_topic_1.jpg)
 
 # What is Graphite?
 
 Graphite is a "smart font" system developed specifically to handle the complexities of lesser-known languages of the world.
 
-* [What is Graphite?](graphite_about.md)
-* [Why was Graphite developed?](graphite_aboutWhy.md)
-* [Graphite and OpenType](graphite_aboutOT.md)
+* [What is Graphite?](graphite_about)
+* [Why was Graphite developed?](graphite_aboutWhy)
+* [Graphite and OpenType](graphite_aboutOT)
 
-![](../../assets/images/Gr_home_topic_2.png)
+![typing a graphite font](../../assets/images/Gr_home_topic_2.png)
 
 # Using Graphite
 
 The following are links to existing Graphite-enabled resources:
 
-* [Applications that suppport Graphite](graphite_apps.md)
-* [Graphite fonts](graphite_fonts.md)
-* [Graphite in Mozilla Firefox](graphite_firefox.md)
-
-
-
+* [Applications that suppport Graphite](graphite_apps.html)
+* [Graphite fonts](graphite_fonts.html)
+* [Graphite in Mozilla Firefox](graphite_firefox.html)
 
 # Developing a Graphite font
 
 Any TrueType font can have Graphite support added. The process involves describing the behavior using the Graphite Description Language (GDL), and compiling a new version of the font using the Graphite compiler.
 
 * [Why should I add Graphite support to my font?](graphite_about#why-should-i-add-graphite-to-my-font)
-* How to develop a Graphite font
-* Graphite compiler
-* Graide
-* GDL tutorial
-* GDL documentation
+* [How to develop a Graphite font](graphite_devFont)
+* [Graphite compiler](graphite_devFont#compiler)
+* [Graide](graide)
+* [GDL tutorial](graphite_devFont#tutorial)
+* [GDL documentation](graphite_devFont#fontDev)
+
+# Adding Graphite to your application
+
+Graphite provides an API that allow you to hook the Graphite engine into the text layout routines of an application you are developing.
+
+* [Graphite engine API](graphite_devApp)
+* [System documentation](graphite_devApp)
+
+
 
 ----
 
