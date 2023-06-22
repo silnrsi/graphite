@@ -4,8 +4,6 @@ layout: home
 nav_order: 100
 ---
 
-![Caption?](assets/images/Gr_home_topic_1.jpg)
-
 # What is Graphite?
 
 Graphite is a "smart font" system developed specifically to handle the complexities of lesser-known languages of the world.
@@ -13,8 +11,6 @@ Graphite is a "smart font" system developed specifically to handle the complexit
 * [What is Graphite?](graphite_about)
 * [Why was Graphite developed?](graphite_aboutWhy)
 * [Graphite and OpenType](graphite_aboutOT)
-
-![typing a graphite font](assets/images/Gr_home_topic_2.png)
 
 # Using Graphite
 
@@ -41,8 +37,6 @@ Graphite provides an API that allow you to hook the Graphite engine into the tex
 
 * [Graphite engine API](graphite_devApp)
 * [System documentation](graphite_devApp)
-
-
 
 ----
 

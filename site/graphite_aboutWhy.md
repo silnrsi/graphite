@@ -2,6 +2,7 @@
 layout: default
 title: Why was Graphite developed?
 nav_order: 210
+parent: About Graphite
 ---
 
  [SIL International](https://sil.org){:target="_blank"} is a non-profit organization that works with ethnolinguistic minority communities as they build their capacity for the development of their own languages. SIL's work encompasses areas such as language development, research, training, materials development, translation, and advocacy. Members of SIL are currently working with approximately a thousand language groups on six continents, and increasingly, many of the areas in which we work use scripts that require complex rendering.

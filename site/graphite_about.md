@@ -2,6 +2,7 @@
 layout: default
 title: About Graphite
 nav_order: 200
+has_children: true
 ---
 
 # What is Graphite?
@@ -20,7 +21,7 @@ Examples of complex script behaviors Graphite can handle include:
 * stacking diacritics
 * complex positioning
 
-[Examples of complex rendering](https://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=lu6terdg9u)
+[Examples of complex rendering](https://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=lu6terdg9u){:target="_blank"}
 
 # Graphite system overview
 

@@ -2,6 +2,7 @@
 layout: default
 title: Graphite and OpenType
 nav_order: 220
+parent: About Graphite
 ---
 
 OpenType is the most prevalent smart font technology. Given the extra costs of supporting Graphite in addition to OpenType, what are the gains?
