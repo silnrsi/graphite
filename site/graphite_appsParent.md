@@ -1,7 +1,7 @@
 ---
-title: Home
+title: Using Graphite
 layout: default
-nav_order: 100
+nav_order: 300
 has_children: true
 ---
 
