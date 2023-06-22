@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: docs    
+        working-directory: site    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
