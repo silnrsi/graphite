@@ -5,4 +5,18 @@ theme: just-the-docs
 url: https://silnrsi.github.io/graphite
 
 aux_links:
-  Template Repository: https://github.com/silnrsi/graphite
+  "Repository": 
+    - "https://github.com/silnrsi/graphite"
+
+color_scheme: graphite
+
+# Set a path/url to a favicon that will be displayed by the browser
+favicon_ico: "/assets/images/favicon.ico"
+
+# Heading anchor links appear on hover over h1-h6 tags in page content
+# allowing users to deep link to a particular heading on a page.
+#
+# Supports true (default) or false
+heading_anchors: true
+
+footer_content: "Copyright &copy; 2012-2023 SIL International and released under the <a href=\"http://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike 3.0 license (CC-BY-SA)</a> unless noted otherwise."
