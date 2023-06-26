@@ -7,6 +7,6 @@ parent: Developers
 
 # Graide
 
-Graide stands for GRAphite Integrated Development Environment. It is a tool that can be used for developing Graphite fonts.
+Graide stands for **GRA**phite **I**ntegrated **D**evelopment **E**nvironment. It is a tool that can be used for developing Graphite fonts.
 
 MORE.................

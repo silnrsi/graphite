@@ -2,7 +2,8 @@
 layout: default
 title: Solutions to Tutorial Exercises
 nav_order: 50
-parent: Graphite tutorial
+parent: Graphite Tutorial
+grand_parent: Developers
 ---
 
 # Solutions to tutorial exercises
