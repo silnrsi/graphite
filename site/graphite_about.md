@@ -6,7 +6,9 @@ has_children: true
 has_toc: false
 ---
 
-# What is Graphite?
+# About Graphite
+
+## What is Graphite?
 
 Graphite is a package that can be used to create “smart fonts” capable of displaying writing systems with various complex behaviors. A smart font contains not only letter shapes but also additional instructions indicating how to combine and position the letters in complex ways.
 
@@ -24,7 +26,7 @@ Examples of complex script behaviors Graphite can handle include:
 
 [Examples of complex rendering](https://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=lu6terdg9u){:target="_blank"}
 
-# Graphite system overview
+## Graphite system overview
 
 The Graphite system consists of:
 
@@ -36,13 +38,13 @@ Graphite renders TrueType fonts that have been extended by means of compiling a 
 
 Further technical information is available on the [Graphite technical overview page](graphite_techAbout).
 
-# Why was Graphite developed?
+## Why was Graphite developed?
 
 SIL International is a non-profit organization that performs linguistic research, literacy development, and translation work among ethnic minorities around the world. Our members are currently working with approximately a thousand language groups on six continents, and increasingly, many of the areas in which we work use scripts that require complex rendering.
 
 [Read more...](graphite_aboutWhy)
 
-# Graphite and OpenType
+## Graphite and OpenType
 
 OpenType is the most prevalent smart font technology. Given the extra costs of supporting Graphite in addition to OpenType, what are the gains?
 
@@ -50,7 +52,7 @@ Graphite and OpenType are not competing technologies. Applications may support b
 
 [Read more...](graphite_aboutOT)
 
-# Why should I add Graphite to my font?
+## Why should I add Graphite to my font?
 
 The following are some benefits of including Graphite support in a font:
 
@@ -61,7 +63,7 @@ The following are some benefits of including Graphite support in a font:
 * Graphite permits user-definable features beyond the defined set of OpenType features.
 * Graphite provides consistent smart behavior across all applications.
 
-# What is the current state of the project?
+## What is the current state of the project?
 
 Version 1.2.4 of the Graphite2 engine was released in November 2013. We believe this to be a stable and feature-complete version and do not anticipate much new development in the near future. Future changes are more likely to be made to the compiler rather than the engine, although we certainly plan to fix any bugs that appear.
 

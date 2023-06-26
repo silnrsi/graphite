@@ -1,9 +1,10 @@
 ---
 title: Support
 layout: default
-nav_order: 20
-parent: Download and Support
+nav_order: 800
 ---
+
+# Support
 
 Below are some resources where you can find help in using Graphite.
 

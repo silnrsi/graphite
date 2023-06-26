@@ -5,15 +5,17 @@ nav_order: 70
 parent: About Graphite
 ---
 
+# Comparison of OpenType and Graphite shaping speeds in a Nastaliq context
+
 _Martin Hosken, July 2017_
 
-# Introduction
+## Introduction
 
 This paper examines the speed performance of OpenType and Graphite. For the most part we examine fonts that have similar processing features and have been implemented in both OpenType and Graphite. After a general discussion covering a number of fonts, the paper goes on to examine the implementation of two Arabic Nastaliq fonts.
 
 For the most part, users do not perceive fonts as being too slow. But even a few milliseconds added to a page render time can affect user satisfaction. Many applications speed up rendering by caching the results of text shaping at the word level.
 
-# Comparing Speeds
+## Comparing Speeds
 
 This graph shows the relative speed of various fonts and text in various scripts. In each case the font used is one that has both Graphite and OpenType tables aiming to have identical behaviour. The only exception is for Urdu where Noto Nastaliq Urdu is used for OpenType-based tests and Awami for the Graphite test.
 
@@ -27,7 +29,7 @@ The tests are ordered left to right according to script processing complexity. T
 
 The likely cause for the slowness of complex OpenType fonts is that such fonts include a number of contextual lookups, which are particularly slow in OpenType processing. Graphite, on the other hand, is structured around contextual matching and so works particularly well with such fonts.
 
-# Testing details
+## Testing details
 
 This section may be skipped without loss of understanding. It is included to provide extra detail on the testing procedure and full results data for those interested.
 
@@ -55,7 +57,7 @@ Not all test strings are included, but the most useful example is the string use
 
 چونکہ انسانی حقوق سے لاپروایٔی اور ان کی بے حرمتی اکثر ایسے وحشیانہ افعال کی شکل میں ظاہر ہویٔی ہے جن سے انسانیت کے ضمیر کو سخت صدمے پہنچے ہیں اور عام انسانوں کی بلندترین آرزو یہ رہی ہے کہ ایسی دنیا وجود میں آیٔے جس میں تمام انسانوں کو اپنی بات کہنے اور اپنے عقیدے پر قایٔم رہنے کی آزادی حاصل ہو اور خوف اور احتیاج سے محفوظ رہیں،
 
-# Special Challenges of Nastaliq
+## Special Challenges of Nastaliq
 
 Arabic Nastaliq is, at its heart, Arabic. So why does a Nastaliq font take so much longer to process than a Naskh one (like Scheherazade)? There are two extra actions that a Nastaliq font needs to do in addition to the standard shaping of character forms and basic diacritic/nuqta attachment.
 
@@ -79,7 +81,7 @@ Noto Nastaliq Urdu takes 44604 cycles/character to do its work. Of these, 40657 
 
 Awami is structured differently. It takes 22287 cycles/character to do its work. There is a data conversion overhead to convert the results from Graphite's internal form to fit Harfbuzz's structures. This takes 462 cycles/character (green) and is about the same for all right-to-left fonts. Collision avoidance takes 4739 cycles (red) and word kerning takes 3611 cycles (yellow). This leaves 13475 cycles (blue) for choosing the right glyphs and basic positioning. Notice this is considerably more than the 3630 cycles used in Scheherazade. So not only does a Nastaliq font have to deal with collision avoidance and word kerning, its basic shaping is far more complex than a Naskh font.
 
-# Conclusion
+## Conclusion
 
 The dramatic difference in speed between Awami Nastaliq and Noto Nastaliq Urdu demonstrates that reliance on a large number of OpenType complex contextual rules can considerably slow down shaping and rendering. Graphite’s alternate methods enable Awami Nastaliq to be much more efficient, even given its increased complexity. This speed benefit is not only applicable to extremely complex fonts, but is present through the full range of font complexity.
 

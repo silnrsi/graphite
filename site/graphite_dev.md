@@ -1,11 +1,12 @@
 ---
 layout: default
 title: Developers
-nav_order: 20
-parent: About Graphite
+nav_order: 400
 has_children: true
 has_toc: false
 ---
+
+# Developer information
 
 The Graphite system consists of:
 

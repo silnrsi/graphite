@@ -5,6 +5,7 @@ nav_order: 50
 parent: Developers
 ---
 
+# Adding Graphite to Your Application
  
 ## Graphite system overview
 

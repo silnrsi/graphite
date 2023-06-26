@@ -5,12 +5,14 @@ nav_order: 20
 parent: About Graphite
 ---
 
+# Graphite technical overview
+
 * [Introduction](graphite_techAbout#introduction)
 * [Graphite font tables](graphite_techAbout#graphite-font-tables)
 * [Graphite engine implementation](#graphite-engine-implementation)
 * [Graphite and OpenType](graphite_techAbout#graphite-and-opentype)
 
-# Introduction
+## Introduction
 
 The Graphite system consists of:
 

@@ -5,6 +5,8 @@ nav_order: 20
 parent: About Graphite
 ---
 
+# Graphite and OpenType
+
 OpenType is the most prevalent smart font technology. Given the extra costs of supporting Graphite in addition to OpenType, what are the gains?
 
 Graphite and OpenType are not, strictly speaking, competing technologies. Applications may support both Graphite and OpenType rendering and fonts may be developed that work with both Graphite and OpenType. The application chooses which rendering approach to use for such a font.

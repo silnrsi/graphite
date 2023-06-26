@@ -1,11 +1,12 @@
 ---
 title: Download
 layout: default
-nav_order: 10
-parent: Download and Support
+nav_order: 700
 ---
 
-##Graphite engine source code
+# Download
+
+## Graphite engine source code
 
 Graphite2 is a rework of the original Graphite engine that is faster, smaller, and uses an API that is better suited to the layout architecture of most text-processing applications.
 
