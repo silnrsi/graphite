@@ -1,12 +1,10 @@
 ---
 layout: default
-title: GDL Code Snippets
+title: News
 nav_order: 50
-parent: Developers
+parent: About Graphite
 ---
 
-# GDL Code Snippets
-
-These snippets are intended as a quick reference. For complete documentation of the GDL language, download the reference paper:
+# News
 
 MORE.................

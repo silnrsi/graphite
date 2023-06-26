@@ -102,8 +102,8 @@ If you have a version of Firefox earlier than 28, or 45.0.1 or later, the Graphi
 
 Make sure you have a version of  Mozilla Firefox 11 or later installed, then go through the following steps:
 
-* Type about:config in your address bar.
-* Press Enter.
-* Click on the "I'll be careful, I promise" button. This big warning is to make sure you really know what you are doing when changing any advanced parameters, as you could easily introduce problems with core configuration settings. We will only make a small change to one Graphite-related parameter. (You should be able to go back and toggle parameters off if needed.)
-* Type graphite in your search bar to look for the right parameter. Firefox will show you the following configuration preference name: gfx.font_rendering.graphite.enabled. Alternatively, you can just scroll down the page to find a option called gfx.font_rendering.graphite.enabled.
+* Type `about:config` in your address bar.
+* Press _Enter_.
+* Click on the _"I'll be careful, I promise"_ button. This big warning is to make sure you really know what you are doing when changing any advanced parameters, as you could easily introduce problems with core configuration settings. We will only make a small change to one Graphite-related parameter. (You should be able to go back and toggle parameters off if needed.)
+* Type _graphite_ in your search bar to look for the right parameter. Firefox will show you the following configuration preference name: _gfx.font_rendering.graphite.enabled_. Alternatively, you can just scroll down the page to find an option called _gfx.font_rendering.graphite.enabled_.
 * Double-click on the preference name line to set the value from false to true. You will see the whole line becoming bold.
