@@ -1,9 +1,7 @@
 ---
 layout: default
 title: Graphite Tutorial Without Graide
-nav_order: 10
-parent: Graphite Tutorial
-grand_parent: Developers
+nav_exclude: true
 ---
 
 # Graphite tutorial without Graide
