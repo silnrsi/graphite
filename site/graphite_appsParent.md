@@ -3,6 +3,7 @@ title: Using Graphite
 layout: default
 nav_order: 300
 has_children: true
+has_toc: false
 ---
 
 # Using Graphite

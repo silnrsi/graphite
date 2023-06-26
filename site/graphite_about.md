@@ -3,6 +3,7 @@ layout: default
 title: About Graphite
 nav_order: 200
 has_children: true
+has_toc: false
 ---
 
 # What is Graphite?
