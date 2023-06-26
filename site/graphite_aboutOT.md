@@ -3,6 +3,8 @@ layout: default
 title: Graphite and OpenType
 nav_order: 20
 parent: About Graphite
+has_children: true
+has_toc: false
 ---
 
 # Graphite and OpenType

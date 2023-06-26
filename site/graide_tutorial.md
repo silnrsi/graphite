@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Graphite Tutorial
-nav_order: 70
+nav_order: 50
 parent: Developers
 has_children: true
 has_toc: false
