@@ -20,7 +20,7 @@ The Graphite system consists of:
 * the Graphite compiler - used to compile the GDL program along with a font to generate the Graphite-enabled version of the font
 * the Graphite engine - uses the Graphite font to assist a text-processing application in performing text layout
 
-![Graphite system architecture](graphite_arch_diagram.png)
+![Graphite system architecture](assets/images/graphite_arch_diagram.png)
 
 The compiler takes as input a TrueType font and a GDL program that has been written to correspond to it. The output of the compiler is a font that has been extended by including several tables used by the Graphite engine (see [Graphite font tables below](graphite_techAbout#graphite-font-tables)).
 
