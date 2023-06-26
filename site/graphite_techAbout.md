@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Graphite and OpenType
+title: Graphite technical overview
 nav_order: 20
 parent: About Graphite
 ---
