@@ -2,7 +2,8 @@
 layout: default
 title: Comparison of OpenType and Graphite shaping speeds in a Nastaliq context
 nav_order: 70
-parent: About Graphite
+parent: Graphite and OpenType
+grand_parent: About Graphite
 ---
 
 # Comparison of OpenType and Graphite shaping speeds in a Nastaliq context

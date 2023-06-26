@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Adding Graphite to Your Application
-nav_order: 50
+nav_order: 70
 parent: Developers
 ---
 
