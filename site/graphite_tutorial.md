@@ -2,7 +2,7 @@
 layout: default
 title: Graphite Tutorial Without Graide
 nav_order: 10
-parent: graide_tutorial
+parent: Graphite Tutorial
 grand_parent: Developers
 ---
 

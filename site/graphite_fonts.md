@@ -7,14 +7,30 @@ parent: Using Graphite
 
 # Graphite-enabled fonts
 
-* [Production-quality fonts](production-quality-fonts)
-    * [Arabic](arabic)
-    * [Myanmar (Burmese)](myanmar-burmese)
-* [Experimental fonts](experimental-fonts)
-* [Toy fonts](toy-fonts)
-    * [Simple Graphite Font](simple-graphite-font)
-    * [Pig Latin](pig-latin)
-* [Create your own Graphite font](create-your-own-graphite-font)
+* [Production-quality fonts](graphite_fonts#production-quality-fonts)
+    * [Arabic](graphite_fonts#arabic)
+    * [Myanmar (Burmese)](graphite_fonts#myanmar-burmese)
+    * [Devanagari](graphite_fonts#devanagari)
+    * [Tamil](graphite_fonts#tamil)
+    * [Tamil Brahmi](graphite_fonts#tamil-brahmi)
+    * [Tai Viet](graphite_fonts#tai-viet)
+    * [Greek](graphite_fonts#greek)
+    * [Lanna](graphite_fonts#lanna)
+    * [Coptic](graphite_fonts#coptic)
+    * [Ethiopic](graphite_fonts#ethiopic)
+    * [Dai Banna](graphite_fonts#dai-banna)
+    * [Lepcha](graphite_fonts#lepcha)
+    * [Roman script variations](graphite_fonts#roman-script-variations)
+    * [Blackletter style for Roman text](graphite_fonts#blackletter-style-for-roman-text)
+    * [Cipher Music](graphite_fonts#cipher-music)
+    * [Tengwar](graphite_fonts#tengwar)
+* [Experimental fonts](graphite_fonts#experimental-fonts)
+    * [N'Ko](graphite_fonts#nko)
+    * [Sumero-Akkadian Cuneiform](graphite_fonts#sumero-akkadian-cuneiform)
+* [Toy fonts](graphite_fonts#toy-fonts)
+    * [Simple Graphite Font](graphite_fonts#simple-graphite-font)
+    * [Pig Latin](graphite_fonts#pig-latin)
+* [Create your own Graphite font](graphite_fonts#create-your-own-graphite-font)
 
 ## Production-quality fonts
 
@@ -54,7 +70,7 @@ These fonts also include Latin and Cyrillic.
 
 ### Lanna
 
-[Payap Lanna] (https://software.sil.org/payaplanna/) supports the Tai Tham script of Northern Thailand.
+[Payap Lanna](https://software.sil.org/payaplanna/) supports the Tai Tham script of Northern Thailand.
 
 ### Coptic
 
@@ -110,6 +126,6 @@ Makes all consonants uppercase and all vowels lowercase. Useful for testing Grap
 
 Generates Pig Latin on the fly! The behavior is slightly incomplete and buggy--feel free to improve!
 
-# Create your own Graphite font
+## Create your own Graphite font
 
 > See [resources to help you add Graphite support to your font](graphite_devFont).
