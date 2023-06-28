@@ -45,20 +45,21 @@ table.nav-table td {
 p.caption {
     font-style: italic;
     font-size: 0.9rem;
+    margin.top = 0px;
 }
 
 blockquote.blue-note {
-    background-color: $ltgrayblue;
+    background-color: #CCE0FF;
     border-left: 10px solid #4444cc;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
 blockquote.red-warning {
     background-color: #eebbbb;
-    border-left: 10px solid #ee3355;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    border-left: 10px solid #aa3355;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
 .image-tight {
