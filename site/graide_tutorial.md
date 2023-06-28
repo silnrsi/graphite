@@ -13,15 +13,15 @@ The following exercises are provided to give you an introduction to programming 
 
 The following package includes the fonts to be used for the exercises, solution files, and a PDF of the tutorial.
 
-[Download tutorial materials](assets/resources/GraphiteTutorialPkg_v6.zip)
+[Download tutorial materials](assets/resources/GraphiteTutorialPkg_v6.zip){: .btn .btn-blue }
 
 This tutorial is not intended to be a comprehensive overview of the Graphite system, nor to provide an exhaustive discussion of all the features and syntax of the GDL programming language. For a complete discussion of GDL, see the “Graphite Description Language” document.
 
-DOWNLOAD GDL DOC
+[Download](GDL.pdf){: .btn .btn=blue }
 
-In order to use these tutorials, you will be using the Graide tool (Graide stands for GRAphite Interactive Development Environment). Graide allows you to run the Graphite compiler to create a Graphite enabled font, and test the results of the font using simple test data. It also includes debugging tools to analyze the behavior of your font. (For a version of the tutorial that does not use Graide, see [here](graphite_tutorial).)
+In order to use these tutorials, you will be using the Graide tool (Graide stands for GRAphite Interactive Development Environment). Graide allows you to run the Graphite compiler to create a Graphite enabled font, and test the results of the font using simple test data. It also includes debugging tools to analyze the behavior of your font. (For a version of the tutorial that does not use Graide, see [here](graphite_tutorial_wo_graide).)
 
-[Download Graide](https://github/silnrsi/graide)
+[Download Graide](https://github/silnrsi/graide){: target="_blank" }
 
 If you choose not to try every exercise, you should put priority on the exercises that include a section called “Exploring Graide…”.
 
