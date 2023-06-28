@@ -9,13 +9,13 @@
 
 table.nav-table {
     color: white;
-    background-color: $blue-100;
+    background-color: #227efa;
 }
 
 table.nav-table td {
     text-align: center;
     color: white;
-    background-color: $blue-100;
+    background-color: #227efa;
     font-weight: bold;
 }
 
@@ -28,12 +28,12 @@ table.nav-table td:last-of-type {
 }
 
 table.nav-table a {
-    color: yellow;
+    color: lightcyan;
     text-decoration: none;
 }
 
 table.nav-table a:hover {
-    color: lightcyan;
+    color: yellow;
     text-decoration: none;
 }
 
@@ -45,7 +45,7 @@ table.nav-table td {
 p.caption {
     font-style: italic;
     font-size: 0.9rem;
-    margin.top = 0px;
+    margin-top: 0px;
 }
 
 blockquote.blue-note {

@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x21E6; [Unit 6: Context](graide_tutorial6) | [Contents](../graide_tutorial) | [Unit 8](graide_tutorial8) &#x21E8; |
+| &#x21E6; [Unit 6: Context](graide_tutorial6) | [Contents](../graide_tutorial#contents) | [Unit 8](graide_tutorial8) &#x21E8; |
 
 # Unit 7: Glyph attributes
 
@@ -54,4 +54,3 @@ The Glyph tab will show any glyph attributes that are set in your GDL program. A
 [The Glyph pane showing glyph attributes](graide7_1_glyphAttribute.png)
 
 (If your glyph attributes don’t seem to look the same, it could be because your program is somewhat different than the provided solution.)
-
