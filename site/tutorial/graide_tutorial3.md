@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x2190; [Unit2: A very simple GDL program](graide_tutorial2) | [Contents](../graide_tutorial) | [Unit4: Corresponding glyph classes](graide_tutorial4) &#x2192; |
+| &#x21D0; [Unit2: A very simple GDL program](graide_tutorial2) | [Contents](../graide_tutorial) | [Unit4: Corresponding glyph classes](graide_tutorial4) &#x21D2; |
 
 # Unit 3: The glyph table
 
