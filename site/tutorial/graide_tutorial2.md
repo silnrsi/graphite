@@ -7,9 +7,8 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| << [Unit1: Using Graide](graide_tutorial1) | [Contents](../graide_tutorial) | Next: [Unit3: A very simple GDL program](graide_tutorial3) >> |
+| &#x2190; [Unit1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial) | [Unit3: A very simple GDL program](graide_tutorial3) &#x2192; |
 
------
 # Unit 2: A very simple GDL program
 
 [Exercise](graide_tutorial2#exercise-2)
@@ -84,7 +83,7 @@ Note that adding the new Graphite tables removes the old behavior implemented in
 
 Test your font using some text that includes the dollar sign.
 
-[Solution](../graphite_tut_solutions#exercise-2)
+[Solution](graphite_tut_solutions#exercise-2)
 
 -----
 
