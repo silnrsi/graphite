@@ -31,6 +31,7 @@ Go to [Graphite Font Demo](graphite_fontdemo) to see some sample fonts rendering
 
 It is possible to make use of Graphite font features in an HTML page by specifying them with CSS. To do this you must know the ID of the feature of interest in the font and the value you wish to use. This information should be included in the font documentation.
 
+{: .blue-note }
 > **NOTE**
 >
 > Some earlier Graphite-enabled fonts used numerical feature IDs which will not work in Firefox. The following maintenance releases of SIL's Roman and Cyrillic fonts are available that use 4-character IDs: [Doulos SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=DoulosSIL_download#4112){:target="_blank"}, [Charis SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=CharisSIL_download#4112){:target="_blank"}, [Andika 1.004](https://scripts.sil.org/cms/scripts/page.php?item_id=Andika_download#1004){:target="_blank"}, and [Gentium Plus 1.510](https://scripts.sil.org/cms/scripts/page.php?item_id=Gentium_download#1510){:target="_blank"}; later versions of these fonts will also work.
@@ -94,6 +95,7 @@ This Graphite support has been tested and is known to work on the following plat
 
 ## Switching on Graphite in Firefox 11 and 45.0.1
 
+{: .blue-note }
 > **Note**
 >
 > These instructions to not apply to the FirefoxOS in which Graphite is enabled by default and cannot be disabled.

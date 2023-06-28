@@ -135,7 +135,7 @@ endtable;
 
 Note that this program will generate warnings for the deletion rules.
 
-{: .blue-note }
+{: .red-warning }
 > **NOTE**
 >
 > Linux users have reported compilation errors for this exercise.
@@ -691,6 +691,7 @@ endtable;
 
 ## Exercise 14a
 
+{: .blue-note }
 > **Note**
 >
 > This solution has not been tested. Try at your own risk!

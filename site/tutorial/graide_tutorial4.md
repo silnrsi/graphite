@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Graphite Tutorial Unit 4
+title: Unit 4
 nav_order: 4
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x21D0; [Unit3: The glyph table](graide_tutorial3) | [Contents](../graide_tutorial) | [Unit5: Deletion and insertion](graide_tutorial5) &#x21D2; |
+| &#x21D0; [Unit 3: The glyph table](graide_tutorial3) | [Contents](../graide_tutorial) | [Unit 5: Deletion and insertion](graide_tutorial5) &#x21D2; |
 
 # Unit 4: Corresponding class items
 
@@ -92,6 +92,7 @@ Write a program to create a Greek transliteration of Roman text, using the mappi
 
 Compile your program against the Galatia Graphite Tutorial font (**GalatiaGrTut.ttf**) that is provided with the tutorial materials. It is best to copy the font into your workspace.
 
+{: .blue-note }
 > **Note**
 >
 > If you use lowercase in the hexadecimal numbers representing your Unicode codepoints, you may see a compilation error: "Undefined glyph class: oundingbox". This a bug in the pre-processor, where it interprets the hex digits 'bb' as 'boundingbox'. The work-around is to use 'BB' in instead of 'bb'.

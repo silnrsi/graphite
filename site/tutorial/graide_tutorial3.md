@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Graphite Tutorial Unit 3
+title: Unit 3
 nav_order: 3
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x21D0; [Unit2: A very simple GDL program](graide_tutorial2) | [Contents](../graide_tutorial) | [Unit4: Corresponding glyph classes](graide_tutorial4) &#x21D2; |
+| &#x21E6; [Unit 2: A very simple GDL program](graide_tutorial2) | [Contents](../graide_tutorial) | [Unit 4: Corresponding glyph classes](graide_tutorial4) &#x21E8; |
 
 # Unit 3: The glyph table
 
@@ -135,7 +135,7 @@ Write a program to replace all digits with an asterisk. Use the glyph table to d
 
 ### Exploring Graide: the Passes and Glyph tab
 
-After Exercise 3b is correct, let’s explore another feature of Graide. Enter the following test data: 234.5; click the arrow to render it. The result should be: **\*\*\*.\* **.
+After Exercise 3b is correct, let’s explore another feature of Graide. Enter the following test data: 234.5; click the arrow to render it. The result should be: ** \*\*\*.\* **.
 
 ![Graide Passes tab](../assets/images/graide3_3_PassesTestsTab2.png)
 
