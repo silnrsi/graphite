@@ -17,7 +17,8 @@ grand_parent: Developers
 
 Often it is desirable to include items in your rule that are not modified by the rule but are simply used for matching. These items are specified in the rule context. The syntax for the rule then becomes:
 
-```left-hand-side  >  right-hand-side  /  context;
+```
+left-hand-side  >  right-hand-side  /  context;
 ```
 
 Each item from the left- and right-hand sides is represented by an underscore in the context. (Note that this is a somewhat different meaning of an underscore than we saw in the previous unit for insertions and deletions.)

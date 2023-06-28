@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| [Contents](../graide_tutorial) | [Unit2: A very simple GDL program](graide_tutorial2) &#x21E8; |
+| [Contents](../graide_tutorial) | [Unit 2: A very simple GDL program](graide_tutorial2) &#x21E8; |
 
 -----
 # Unit 1: Running, installing, and debugging with Graide
@@ -44,6 +44,7 @@ Create or locate a workspace folder for this tutorial; this is where your fonts 
 * Set the GDL File to the allcaps.gdl file you copied in Step 1.
 * Set the Tests File to tutorial_tests.xml.
 
+{: .image-tight }
 ![Creating a Graide project](../assets/images/graide1_1_createProject.png)
 
 {: .caption }
@@ -57,6 +58,7 @@ Once your .cfg file exists, you can indicate that Graide should use it initially
 
 **Step 5.** Find the uppercase A in the Fonts tab (on the lower right-hand pane) and double-click on it. The left-hand pane switches to the Glyph tab and displays the information for the A glyph.
 
+{: .image-tight }
 ![Graide Font and Glyph tabs](../assets/images/graide1_2_glyphTab.png)
 
 {: .caption }
@@ -64,11 +66,19 @@ Graide Font and Glyph tabs
 
 **Step 6.** Build the Graphite tables into the font by clicking the gear icon associated with the code pane. In the lower pane, click on the Errors tab to double-check that there were no errors. (Normally the Error tab will be automatically brought into focus if there are errors.) You should see the text **Compilation succeeded – 0 errors, 0 warnings**. Your workspace folder should now contain a file called DoulosGrTut.gdx.
 
+{: .image-tight }
 ![Building a font in Graide](../assets/images/graide1_3_buildSucceed.png)
+
+{: .caption }
+Building a font in Graide 
 
 **Step 7.** Create some test data as follows: Click on the Tests tab again. In the middle (test data) pane, type: Hello world! Click the right-pointing arrow. The bottom (test results) pane shows the results of the Graphite rendering: **HELLO WORLD!**
 
+{: .image-tight }
 ![Running test data in Graide](../assets/images/graide1_4_runHelloWorld.png)
+
+{: .caption }
+Running test data in Graide 
 
 **Step 8.** Graphite will show you which rules were run in the process of rendering. In the case of this font, there is only one rule in the GDL program. If the Passes tab is not selected, click on it. Double click on the box that says **Pass: 1 - substitution**. Then double-click on any box that says **Rule: 0**. Graide will display and highlight the single rule in the code pane:
 
@@ -76,7 +86,11 @@ Graide Font and Glyph tabs
 clsLowerCase > clsUpperCase;
 ```
 
+{: .image-tight }
 ![Highlighting a rule that was fired](../assets/images/graide1_5_clickRule.png)
+
+{: .caption }
+Highlighting a rule that was fired
 
 We will begin to learn about rules in Unit 2.
 

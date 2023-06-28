@@ -49,11 +49,18 @@ p.caption {
 
 blockquote.blue-note {
     background-color: $ltgrayblue;
-    border-left: 10px solid $blue-200;
+    border-left: 10px solid #4444cc;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 blockquote.red-warning {
-    background-color: #ccaaaa;
-    border-left: 10px solid $red-300;
+    background-color: #eebbbb;
+    border-left: 10px solid #ee3355;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
+.image-tight {
+    margin-bottom: 2px;
+}
