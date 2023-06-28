@@ -7,17 +7,35 @@
     color: $grey-dk-200;
 }
 
-tabele.nav-table {
+table.nav-table {
     color: white;
     background-color: $blue-100;
 }
 
 table.nav-table td {
+    text-align: center;
     color: white;
     background-color: $blue-100;
     font-weight: bold;
 }
 
+table.nav-table td:first-of-type {
+    text-align: left;
+}
+
+table.nav-table td:last-of-type {
+    text-align: right;
+}
+
 table.nav-table a {
     color: yellow;
+}
+
+table.nav-table a:hover {
+    color: lightcyan;
+}
+
+table.nav-table td {
+    padding-bottom: 0.4rem;
+    padding-top:    0.4rem;
 }
