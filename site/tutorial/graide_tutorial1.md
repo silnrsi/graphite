@@ -45,8 +45,8 @@ Create or locate a workspace folder for this tutorial; this is where your fonts 
 * Set the Tests File to tutorial_tests.xml.
 
 ![Creating a Graide project](../assets/images/graide1_1_createProject.png)
-{: .caption }
-Creating a Graide project
+
+{: .caption } Creating a Graide project
 
 Click OK. The contents of the **allcaps.gdl** file now appears in the code (upper right-hand) pane. In the lower right-hand pane, the Font tab shows the glyphs in the **DoulosGrTut.ttf** font.
 
@@ -57,8 +57,8 @@ Once your .cfg file exists, you can indicate that Graide should use it initially
 **Step 5.** Find the uppercase A in the Fonts tab (on the lower right-hand pane) and double-click on it. The left-hand pane switches to the Glyph tab and displays the information for the A glyph.
 
 ![Graide Font and Glyph tabs](../assets/images/graide1_2_glyphTab.png)
-{: .caption }
-Graide Font and Glyph tabs
+
+Graide Font and Glyph tabs {: .caption }
 
 **Step 6.** Build the Graphite tables into the font by clicking the gear icon associated with the code pane. In the lower pane, click on the Errors tab to double-check that there were no errors. (Normally the Error tab will be automatically brought into focus if there are errors.) You should see the text **Compilation succeeded – 0 errors, 0 warnings**. Your workspace folder should now contain a file called DoulosGrTut.gdx.
 
