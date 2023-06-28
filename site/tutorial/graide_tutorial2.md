@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x2190; [Unit1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial) | [Unit3: A very simple GDL program](graide_tutorial3) &#x2192; |
+| &#x21D0; [Unit1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial) | [Unit3: A very simple GDL program](graide_tutorial3) &#x21D2; |
 
 # Unit 2: A very simple GDL program
 

@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Graphite Tutorial Unit 2
-nav_order: 2
+title: Graphite Tutorial Unit 3
+nav_order: 3
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
