@@ -3,9 +3,12 @@ layout: default
 title: Graphite Tutorial Unit 1
 nav_order: 1
 parent: Graphite Tutorial
-nav_exclude: true
+grand_parent: Developers
 ---
 
+[Introduction and Contents](../graide_tutorial) | Next: [Unit2: A very simple GDL program >>](graide_tutorial2)
+
+-----
 # Unit 1: Running, installing, and debugging with Graide
 
 [Exercises](graide_tutorial1#exercise-1a)
@@ -24,11 +27,11 @@ Other files that are used or created by Graide include:
 * Debugger (.GDX) file
 * Font compilation error message file (gdlerr.txt)
 
-## Exercise  1a
+## Exercise 1a
 
 **Step 1.** Download the tutorial package.
 
-[Download](../assets/resources/GraphiteTutorialPkg_v6.zip)
+[Download](../assets/resources/GraphiteTutorialPkg_v6.zip){: .btn .btn-blue }
 
 Create or locate a workspace folder for this tutorial; this is where your fonts and source code files will go. Copy the files called **allcaps.gdl** and **DoulosGrTut.ttf** from the tutorial materials folder into that folder. Make sure the file properties are set to read-write.
 
@@ -48,7 +51,7 @@ Click OK. The contents of the **allcaps.gdl** file now appears in the code (uppe
 
 Once your .cfg file exists, you can indicate that Graide should use it initially by including the -p option when you start Graide: `graide -p tutorial.cfg`.
 
-Step 5. Find the uppercase A in the Fonts tab (on the lower right-hand pane) and double-click on it. The left-hand pane switches to the Glyph tab and displays the information for the A glyph.
+**Step 5.** Find the uppercase A in the Fonts tab (on the lower right-hand pane) and double-click on it. The left-hand pane switches to the Glyph tab and displays the information for the A glyph.
 
 ![Graide Font and Glyph tabs](../assets/images/graide1_2_glyphTab.png)
 
@@ -92,12 +95,16 @@ We have now introduced two bugs into the program: a syntactic error (incorrect c
 
 **Step 3.** Build the font by clicking on the gear icon. The Error tab becomes active with an error message indicating the syntax error:
 
-    **allcaps.gdl(23):error(3139): Undefined class name: clsUpperCase**
+**allcaps.gdl(23):error(3139): Undefined class name: clsUpperCase**
 
 Double-click on error message, and the rule with the (now) incorrect class name is highlighted.
 
 **Step 4.** Correct either the class definition or the rule so that the names match. Build again by clicking the gear icon. You should see a message saying **Compilation succeeded**.
 
-**Step 5.** Click on the Tests tab in the left-hand pane. If your test data has disappeared from the middle pane, retype it: Hello world!. Click the right-pointing arrow icon. You will now see the result of Graphite’s rendering which includes the bug that was introduced: **HEXXO WORXD!**
+**Step 5.** Click on the Tests tab in the left-hand pane. If your test data has disappeared from the middle pane, retype it: `Hello world!`. Click the right-pointing arrow icon. You will now see the result of Graphite’s rendering which includes the bug that was introduced: **HEXXO WORXD!**
 
-**Step 6.** If you like, fix the bug in the definition of clsUppercase, rebuild and rerun the test to see the correct results.
+**Step 6.** If you like, fix the bug in the definition of `clsUppercase`, rebuild and rerun the test to see the correct results.
+
+-----
+
+[Introduction and Contents](../graide_tutorial) | Next: [Unit2: A very simple GDL program >>](graide_tutorial2)

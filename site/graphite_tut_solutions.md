@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Solutions to Tutorial Exercises
-nav_order: 50
+nav_order: 99
 parent: Graphite Tutorial
 grand_parent: Developers
 ---

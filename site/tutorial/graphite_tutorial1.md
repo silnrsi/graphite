@@ -2,7 +2,7 @@
 layout: default
 title: Graphite Tutorial Unit 1
 nav_order: 1
-parent: Graphite Tutorial
+parent: Graphite Tutorial Without Graide
 nav_exclude: true
 ---
 
