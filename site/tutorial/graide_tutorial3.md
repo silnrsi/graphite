@@ -137,6 +137,9 @@ Write a program to replace all digits with an asterisk. Use the glyph table to d
 
 After Exercise 3b is correct, let’s explore another feature of Graide. Enter the following test data: 234.5; click the arrow to render it. The result should be: ** \*\*\*.\* **.
 
+**\*\*\*.\***.
+
+
 ![Graide Passes tab](../assets/images/graide3_3_PassesTestsTab2.png)
 
 The Passes pane is displayed automatically. It shows the initial glyphs and the result of Graphite’s rendering for the single pass in this program.

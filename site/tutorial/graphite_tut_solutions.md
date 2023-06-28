@@ -601,6 +601,7 @@ endtable;
 
 ## Exercise 13a
 
+```
 include "stddef.gdh"
 
 table(glyph)

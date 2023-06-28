@@ -49,11 +49,11 @@ p.caption {
 
 blockquote.blue-note {
     background-color: $ltgrayblue;
-    border-left: 10px solid #blue-200;
+    border-left: 10px solid $blue-200;
 }
 
 blockquote.red-warning {
     background-color: #ccaaaa;
-    border-left: 10px solid #red-300;
+    border-left: 10px solid $red-300;
 }
 
