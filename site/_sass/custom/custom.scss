@@ -7,8 +7,17 @@
     color: $grey-dk-200;
 }
 
-.nav-table {
+tabele.nav-table {
+    color: white;
+    background-color: $blue-100;
+}
+
+table.nav-table td {
     color: white;
     background-color: $blue-100;
     font-weight: bold;
+}
+
+table.nav-table a {
+    color: yellow;
 }
