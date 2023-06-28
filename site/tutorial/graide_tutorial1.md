@@ -6,7 +6,8 @@ parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-[Introduction and Contents](../graide_tutorial) | Next: [Unit2: A very simple GDL program >>](graide_tutorial2)
+{: .nav-table }
+| [Introduction and Contents](../graide_tutorial) | Next: [Unit2: A very simple GDL program >>](graide_tutorial2) |
 
 -----
 # Unit 1: Running, installing, and debugging with Graide
