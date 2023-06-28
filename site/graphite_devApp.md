@@ -25,9 +25,7 @@ The Graphite2 engine can be downloaded from the [GitHub release page](https://gi
 
 The source code is located on Git Hub: [https://github.com/silnrsi/graphite](https://github.com/silnrsi/graphite){:target="_blank"}
 
-A manual for integrating Graphite2 into an application:
-
-DOWNLOAD GRAPHITE2 MANUAL
+The GitHub repository includes a [manual for integrating Graphite2 into an application](https://github.com/silnrsi/graphite/blob/master/doc/manual.adoc)
 
 ## SilGraphite
 
@@ -39,8 +37,6 @@ The original Graphite engine, packaged under the name SilGraphite, is used by Op
 
 The source code can be downloaded from: [SilGraphite SourceForge project](http://sourceforge.net/projects/silgraphite/){:target="_blank"}.
 
-DOWNLOAD SILGRAPHITE DOCUMENTATION
-
-DOWNLOAD GRAPHITE APPLICATION PROGRAMMER'S GUIDE
+[SilGraphite Application Programmers Guide](assets/resources/SilGraphite_AppProgGuide.pdf)
 
 (The documents above describe version 2 of the Graphite API; the original API is obsolete.)

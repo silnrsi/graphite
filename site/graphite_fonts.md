@@ -112,7 +112,7 @@ A beta of [Conakry](http://www.evertype.com/fonts/nko/ConakryFont.zip), a font t
 
 ### Sumero-Akkadian Cuneiform
 
-DOWNLOAD HERE
+[Download](assets/resources/CuneiformGraphiteFont.zip)
 
 ## Toy fonts
 
@@ -122,9 +122,13 @@ Just for fun!
 
 Makes all consonants uppercase and all vowels lowercase. Useful for testing Graphite installation.
 
+[Download](assets/resources/SimpleGraphiteFont.zip)
+
 ### Pig Latin
 
 Generates Pig Latin on the fly! The behavior is slightly incomplete and buggy--feel free to improve!
+
+[Download](assets/resources/PigLatinGraphiteFont.zip)
 
 ## Create your own Graphite font
 
