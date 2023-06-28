@@ -35,8 +35,8 @@ Return to [Graphite font development](graphite_devFont)
 
 ## Contents
 
-* [Unit 1: Running, initializing, and debugging with Graide](graide_tutorial1)
-* [Unit 2: A very simple GDL program](graide_tutorial2)
+* [Unit 1: Running, initializing, and debugging with Graide](tutorial/graide_tutorial1)
+* [Unit 2: A very simple GDL program](tutorial/graide_tutorial2)
 * [Unit 3: The glyph table](graide_tutorial3)
 * [Unit 4: Corresponding class items](graide_tutorial4)
 * [Unit 5: Deletion and insertion](graide_tutorial5)

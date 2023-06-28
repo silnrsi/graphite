@@ -17,7 +17,7 @@ Graphite and OpenType take different approaches to the question of smart font sh
 
 While the needs of minorities are economically small, they are real. There are a number of scripts that are liable never to get established OpenType support. Examples among living languages include Tai Tham, Tai Viet, Chakma. Then there are those which are primarily of academic interest, and these are even less likely to be supported: Kharoshti, Linear B, Music, etc. It is also the case that as more is understood about the needs of particular minority groups, the font developer needs to add extra facilities to their fonts. These needs arise out of discussions with users as they interact with existing implementations. If the time between making a comment and being able to interact with a modified implementation is too long, that discussion breaks down and development does not happen or slows dramatically. Even more established scripts can have problems with the needed rendering for minority languages. This is evidenced with Thai, where there are regular complaints that certain sequences needed for minority languages are identified as illegal for the Thai script, when in fact they are only inappropriate for the Thai language.
 
-# Adding Behavior
+## Adding Behavior
 
 Graphite is designed for flexibility of writing system description. Therefore, if an application supports Graphite, it immediately allows for a font developer to create a font to support any script behavior they need without having to change the application or any supporting library.
 
@@ -29,11 +29,11 @@ Graphite allows a font developer to specify all the behavior of a script. This i
 
 In addition, Graphite rendering is only dependent on what is in the font, and so there is no variation in rendering across different engines or implementations. This is not the case for OpenType. While all the different implementations try to do the best they can, in the "edge cases" of script support, different engines will approach things in different ways. In practice this can mean that a font cannot be made to render correctly in all OpenType engines. It also requires that a font is tested in numerous different engines. This greatly increases the costs of OpenType font development.
 
-# User Defined Features
+## User Defined Features
 
 Just as someone may select some text and make it bold or italicize it, smart fonts also make it possible to change other features of the rendering. Perhaps a different style of the letter 'a' is called for, or diacritics should be flattened to take less space. OpenType has a registered set of these features that an application can set when rendering text. Graphite uses an open-ended approach whereby the names, identifiers and effects of each feature is described in the font. Applications are provided a generic approach to allowing the user to choose which features to set and to specify their values. This allows a font developer to give users all kinds of interesting controls over the rendering of the font without having to go through a registration process first and then lobby for those features to get application support.
 
-# Technical Comparison
+## Technical Comparison
 
 The article below is a technical comparison of the performance of Graphite and OpenType, focusing on Nastaliq-style Arabic script.
 

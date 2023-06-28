@@ -1,7 +1,7 @@
 ---
 title: Using Graphite
 layout: default
-nav_order: 300
+nav_order: 400
 has_children: true
 has_toc: false
 ---

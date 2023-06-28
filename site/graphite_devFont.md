@@ -11,9 +11,9 @@ parent: Developers
 
 Adding Graphite support to a font involves:
 
-* writing a program using Graphite Description Language (GDL) describing the behavior of the font
-* compiling the program along with the font to create the Graphite-enabled version of the font
-* testing and debugging your smart font using a Graphite-enabled application
+1. writing a program using Graphite Description Language (GDL) describing the behavior of the font
+2. compiling the program along with the font to create the Graphite-enabled version of the font
+3. testing and debugging your smart font using a Graphite-enabled application
 
 > To add Graphite support to a font, the font's license must grant you permission to modify it.
 
@@ -21,12 +21,12 @@ Adding Graphite support to a font involves:
 
 GDL is a programming language that describes the "smart" behavior of the font. It is written to correspond to a specific font, and includes definitions of the glyphs in the font and rules describing their behavior.
 
-[Download](GDL.pdf){: .btn .btn=blue }
+[Download GDL documentation](GDL.pdf){: .btn .btn-blue }
 
 The following tools can be used to assist in the development of a GDL program:
 
 * make_gdl.pl - a Perl utility that automatically generates some of the necessary GDL code from a font and an XML file of attachment point data. This is included in the SIL [FontUtils](https://scripts.sil.org/FontUtils){:target="_blank"} package.
-* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont/tree/master/scripts){:target="_blank"}
+* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont/tree/master/scripts){:target="_blank"}.
 
 ### 2. Compiling the program
 
