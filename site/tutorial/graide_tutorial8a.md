@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Intermission
-nav_order: 8a
+nav_order: 9
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x21D0; Unit 8: Slot attributes](graide_tutorial8) | [Contents](../graide_tutorial#contents) | [Multiple passes per table &#x21D2;](graide_tutorial9) |
+|  [&#x25C0; Unit 8: Slot attributes](graide_tutorial8) | [Contents](../graide_tutorial#contents) | [Unit 9: Multiple passes per table &#x25B6;](graide_tutorial9) |
 
 # Intermission
 

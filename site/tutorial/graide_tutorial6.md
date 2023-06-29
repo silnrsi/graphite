@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x21D0; [Unit 5: Deletion and insertion](graide_tutorial5) | [Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes](graide_tutorial7) &#x21D2; |
+| [&#x25C0; Unit 5: Deletion and insertion](graide_tutorial5) | [Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes &#x25B6;](graide_tutorial7) |
 
 # Unit 6: Context
 

@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Unit 9
-nav_order: 9
+nav_order: 90
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x21D0; Intermission](graide_tutorial8a) | [Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x21D2;](graide_tutorial10) |
+|  [&#x25C0; Intermission](graide_tutorial8a) | [Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x25B6;](graide_tutorial10) |
 
 # Unit 8: Multiple passes per table
 

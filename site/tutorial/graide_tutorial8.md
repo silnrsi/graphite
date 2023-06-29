@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x21D0; Unit 7: Glyph attributes](graide_tutorial7) | [Contents](../graide_tutorial#contents) | [Intermission &#x21D2;](graide_tutorial8a) |
+|  [&#x25C0; Unit 7: Glyph attributes](graide_tutorial7) | [Contents](../graide_tutorial#contents) | [Intermission &#x25B6;](graide_tutorial8a) |
 
 # Unit 8: Slot attributes
 
