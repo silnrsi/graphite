@@ -7,11 +7,11 @@ grand_parent: Developers
 ---
 
 {: .tut-nav-bar }
-|  [&#x25C0; Unit 14: Ligatures](graide_tutorial12) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 16: Reordering &#x25B6;](graide_tutorial16) |
+|  [&#x25C0; Unit 14: Ligatures](graide_tutorial14) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 16: Reordering &#x25B6;](graide_tutorial16) |
 
 # Unit 15: Bidirectionality
 
-[Exercise](graide_tutorial13#exercise-15)
+[Exercise](graide_tutorial15#exercise-15)
 
 ## Discussion
 

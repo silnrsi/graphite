@@ -11,28 +11,28 @@ grand_parent: Developers
 
 # Unit 11: Glyph metrics
 
-[Exercises](graide_tutorial11#exercise)
+[Exercises](graide_tutorial11#exercise-11)
 
 ## Discussion
 
 To position glyphs correctly, it is often necessary to make use of the glyph’s metrics from within the font. Glyph metrics are numeric values for standard measurements defined for each glyph within the TrueType font. The following metrics can be used in a GDL program:
 
-* boundingbox.top (bb.top)
-* boundingbox.bottom (bb.bottom)
-* boundingbox.right (bb.right)
-* boundingbox.left (bb.left)
-* boundingbox.height (bb.height)
-* boundingbox.width (bb.width)
-* advanceheight (ah)
-* advancewidth (aw)
-* leftsidebearing (lsb)
-* rightsidebearing (rsb)
-* ascent
-* descent
+* `boundingbox.top` (`bb.top`)
+* `boundingbox.bottom` (`bb.bottom`)
+* `boundingbox.right` (`bb.right`)
+* `boundingbox.left` (`bb.left`)
+* `boundingbox.height` (`bb.height`)
+* `boundingbox.width` (`bb.width`)
+* `advanceheight` (`ah`)
+* `advancewidth` (`aw`)
+* `leftsidebearing` (`lsb`)
+* `rightsidebearing` (`rsb`)
+* `ascent`
+* `descent`
 
 Useful abbreviations (as defined in **stddef.gdh**) are shown in parenthesis. Note that `ascent` and `descent` are not metrics of an individual glyph but of the font as a whole.
 
-## Exercise
+## Exercise 11
 
 Use shifting and/or kerning to position diacritics over lowercase vowels. The diacritics should be attached to the previous base character. Here are some diacritics to include:
 

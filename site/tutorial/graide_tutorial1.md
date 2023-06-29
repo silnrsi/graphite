@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Unit 1 - Running Graide
+title: Unit 1
 nav_order: 10
 parent: Graphite Tutorial
 grand_parent: Developers

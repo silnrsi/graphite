@@ -11,7 +11,7 @@ grand_parent: Developers
 
 # Unit 14: Ligatures
 
-[Exercises](graide_tutorial12#exercise-14a)
+[Exercises](graide_tutorial14#exercise-14a)
 
 ## Discussion
 

@@ -11,7 +11,7 @@ grand_parent: Developers
 
 # Unit 9: Multiple passes per table
 
-[Exercise](graide_tutorial9#exercise)
+[Exercise](graide_tutorial9#exercise-9)
 
 ## Discussion
 
@@ -31,7 +31,7 @@ endpass;
 endtable;
 ```
 
-## Exercise
+## Exercise 9
 
 Rewrite your program from Exercises 6a and 7 using slot attributes and two passes. The first pass sets a user-defined slot attribute called “hardC”, based on the context in which the c is encountered. Note: there is no need to include the > syntax when all you are doing is setting a slot attribute. Use the following syntax:
 

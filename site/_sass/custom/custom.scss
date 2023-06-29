@@ -26,11 +26,13 @@ table.tut-nav-bar td {
 table.tut-nav-bar td:first-of-type {
     text-align: left;
     width: 44%;
+    padding-bottom: 0;
 }
 
 table.tut-nav-bar td:last-of-type {
     text-align: right;
     width: 44%
+    padding-bottom: 0;
 }
 
 table.tut-nav-bar a {
@@ -56,7 +58,7 @@ p.caption {
 }
 
 blockquote.blue-note {
-    background-color: #DDF4FF;
+    background-color: #E6F2FF;
     border-left: 10px solid #227efa;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -80,7 +82,7 @@ blockquote.red-warning {
 }
 
 code {
-    line-height: 1.0;
+    line-height: 0.9;
 }
 
 .arabic-sample {
