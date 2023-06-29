@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Unit 3
-nav_order: 3
+nav_order: 30
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-| [&#x25C0; Unit 2: A very simple GDL program](graide_tutorial2) | [Contents](../graide_tutorial#contents) | [Unit 4: Corresponding glyph classes &#x25B6;](graide_tutorial4) |
+| [&#x25C0; Unit 2: A very simple GDL program](graide_tutorial2) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 4: Corresponding glyph classes &#x25B6;](graide_tutorial4) |
 
 # Unit 3: The glyph table
 

@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x25C0; Intermission](graide_tutorial8a) | [Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x25B6;](graide_tutorial10) |
+|  [&#x25C0; Intermission](graide_tutorial8a) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x25B6;](graide_tutorial10) |
 
 # Unit 8: Multiple passes per table
 

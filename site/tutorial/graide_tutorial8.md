@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Unit 8
-nav_order: 8
+nav_order: 80
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x25C0; Unit 7: Glyph attributes](graide_tutorial7) | [Contents](../graide_tutorial#contents) | [Intermission &#x25B6;](graide_tutorial8a) |
+|  [&#x25C0; Unit 7: Glyph attributes](graide_tutorial7) | [&#x25B2; Contents](../graide_tutorial#contents) | [Intermission &#x25B6;](graide_tutorial8a) |
 
 # Unit 8: Slot attributes
 

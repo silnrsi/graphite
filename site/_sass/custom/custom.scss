@@ -17,17 +17,19 @@ table.nav-table td {
     color: white;
     background-color: #227efa;
     font-weight: bold;
-    width: 16%
+    width: 14%;
+    font-size: .95rem;
+    line-height: 1;
 }
 
 table.nav-table td:first-of-type {
     text-align: left;
-    width: 42%;
+    width: 43%;
 }
 
 table.nav-table td:last-of-type {
     text-align: right;
-    width: 42%
+    width: 43%
 }
 
 table.nav-table a {
@@ -36,7 +38,7 @@ table.nav-table a {
 }
 
 table.nav-table a:hover {
-    color: yellow;
+    color: #CCE0FF;
     text-decoration: none;
 }
 
@@ -55,24 +57,24 @@ p.caption {
 blockquote.blue-note {
     background-color: #CCE0FF;
     border-left: 10px solid #4444cc;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 blockquote.red-warning {
     background-color: #eebbbb;
     border-left: 10px solid #aa3355;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
+/* To avoid a lot of space between the image and the caption: */
 .image-tight {
     margin-bottom: 1px;
 }
 
-/* Third of outline */
-.nav-list .nav-list .nav-list > .nav-list-item {
-    background-color: aliceblue;
-    color: yellow;
+/* Third level of outline */
+.nav-list .nav-list .nav-list > .nav-list-item a {
+    font-size: 0.9rem;
 }
 

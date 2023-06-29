@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Unit 2
-nav_order: 2
+nav_order: 20
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-| [&#x25C0; Unit 1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program &#x25B6;](graide_tutorial3) |
+| [&#x25C0; Unit 1: Running Graide](graide_tutorial1) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program &#x25B6;](graide_tutorial3) |
 
 # Unit 2: A very simple GDL program
 

@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Unit 6
-nav_order: 6
+nav_order: 60
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-| [&#x25C0; Unit 5: Deletion and insertion](graide_tutorial5) | [Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes &#x25B6;](graide_tutorial7) |
+| [&#x25C0; Unit 5: Deletion and insertion](graide_tutorial5) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes &#x25B6;](graide_tutorial7) |
 
 # Unit 6: Context
 
