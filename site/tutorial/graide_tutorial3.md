@@ -99,7 +99,10 @@ After Exercise 3a is correct, let’s take a few minutes to explore a couple fea
 
 The Passes pane is displayed automatically. It shows the original glyphs (labeled “Init”) and the result of Graphite’s rendering for each pass. Since there is only one pass in this program, there are two rows in the Passes pane: the original glyphs (“Init”) and the output of Pass 1. The second column shows the glyphs that were output for the pass, and the third column shows the corresponding glyph names.
 
+{: .image-tight }
 ![Passes tab in Graide](../assets/images/graide3_1_passesTestsTabs.png)
+
+<figcaption>Passes tab in Graide</figcaption>
 
 Glyph names are the names given to single glyphs in your GDL program. For instance, if your GDL source code included the line
 
@@ -111,7 +114,10 @@ you will see “gDollar” twice in the third column of the first row.
 
 Click on one instance of “gDollar”, and then click on the Glyph tab. This area shows basic information about the dollar (‘$’) glyph from the font and your GDL program.
 
+{: .image-tight }
 ![Passes and Glyph tab in Graide](../assets/images/graide3_2_passesGlyphTabs.png)
+
+<figcaption>Passes and Glyph tab in Graide</figcaption>
 
 You can also click on the glyph itself in the second column of the Passes tab to select it. But notice that you must carefully click on the black part of the glyph; clicking on white pixels inside or near the glyph will have no effect. (So clicking on the glyph name in the third column may be easier!)
 
@@ -135,14 +141,19 @@ Write a program to replace all digits with an asterisk. Use the glyph table to d
 
 After Exercise 3b is correct, let’s explore another feature of Graide. Enter the following test data: 234.5; click the arrow to render it. The result should be: **\*\*\*.\***.
 
+{: .image-tight }
+![Passes tab in Graide](../assets/images/graide3_3_PassesTestsTab2.png)
 
-![Graide Passes tab](../assets/images/graide3_3_PassesTestsTab2.png)
+<figcaption>Passes tab</figcaption>
 
 The Passes pane is displayed automatically. It shows the initial glyphs and the result of Graphite’s rendering for the single pass in this program.
 
 The row labeled **Pass: 1 – substitution** is highlighted in yellow, indicating that there was at least one rule matched in that pass. When you double-click on the yellow cell, the Rules tab appears. Each row of the Rules pane corresponds to one instance of a rule that was matched in pass 1. For this example, if your code looks like the supplied solution, all the rows are labeled **Rule: 0** since that is the only rule in the program.
 
+{: .image-tight }
 ![Rules tab in Graide](../assets/images/graide3_4_RulesTab.png)
+
+<figcaption>Rules tab</figcaption>
 
 Note that the output of any rule becomes the input to the next rule fired. So the glyphs shown in row 2 are the output of the first application of the rule, but are also the glyphs that are matched in order to fire the rule the second time.
 
@@ -150,7 +161,10 @@ In each row, the glyphs that are generated—that is, modified—by a rule are h
 
 Double-clicking on any of the cells labeled Rule: 0 will highlight the rule in the code pane.
 
+{: .image-tight }
 ![Highlighting a rule from the Rules tab](../assets/images/graide3_5_RulesHighlightRule.png)
+
+<figcaption>Highlighting a rule from the Rules tab</figcaption>
 
 {: .tut-nav-bar }
 | [&#x25C0; Unit 2: A very simple GDL program](graide_tutorial2) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 4: Corresponding glyph classes &#x25B6;](graide_tutorial4) |

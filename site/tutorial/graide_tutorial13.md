@@ -75,7 +75,10 @@ Extend your program from Exercise 10a. Use a feature with three possible setting
 
 You can use Graide's control to set features on test data.
 
+{: .image-tight }
 ![Setting a feature on test data](../assets/images/graide13_1_features.png)
+
+<figcaption>Setting a feature on test data</figcaption>
 
 Note that the feature value(s) you set this way will apply to the entire test string.
 

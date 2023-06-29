@@ -74,7 +74,10 @@ We’ve already seen that user-defined slot attributes are shown in the Slot tab
 
 Run the following test data: H2O. In the Passses tab, click on the ‘2’ or on g_two in the row labeled “Pass: 1 – positioning”. Notice there is a slot attribute in the Slot tab called “shift”. The value indicates that the glyph has been shifted downward (but not horizontally).
 
+{: .image-tight }
 ![A shifted glyph](../assets/images/graide10_1_shifting.png)
+
+<figcaption>A shifted glyph</figcaption>
 
 However, you should see that the value is not (0, -300) as you might expect, but rather (0, -614). This is because the slot attributes have been scaled to match the em-square of the font itself, rather than the em-units used in the GDL program. The em-square of the font is 2048, thus -300 has been converted to -614.
 

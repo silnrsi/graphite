@@ -57,7 +57,10 @@ The program you wrote for Exercise 4b should have at least two rules in it. Ente
 
 Also notice that hovering over the left-hand cell containing the rule number will cause the rule to be displayed near the cursor.
 
+{: .image-tight }
 ![Highlighting one of several rules](../assets/images/graide4_1_rulesMultiple.png)
+
+<figcaption>Highlighting one of several rules</figcaption>
 
 ## Exercise 4c
 

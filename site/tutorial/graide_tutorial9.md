@@ -61,7 +61,10 @@ your slot attribute is number 1 in the list.
 
 The first ‘c’ in “council” is an instance of a hard C. You should have run a rule in your GDL program that sets hardC to true for this glyph. Click on the green-highlighted glyph that was modified by this rule. The value of user attribute #0 should be 1.
 
+{: .image-tight }
 ![Examining a user-defined slot attribute in Graide](../assets/images/graide9_1_userAttr.png)
+
+<figcaption>Examining a user-defined slot attribute in Graide</figcaption>
 
 Now click on the pink-highlighted glyph just above. The value of user attribute #0 now shows as 0. This indicates that the rule changed the value of the slot attribute from 0 to 1.
 

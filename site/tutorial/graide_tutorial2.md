@@ -78,6 +78,8 @@ Use Graide to create and debug your new program. Click on the configuration icon
 {: .image-tight }
 ![Creating a new GDL file](../assets/images/graide2_1_newGdlFile.png)
 
+<figcaption>Creating a new GDL file</figcaption>
+
 Enter a new GDL file name. You can leave the font name the same (DoulosGrTut.ttf). Click OK and a new tab will open in which for you to enter your code. After writing your GDL, click the gear icon to build the Graphite tables and insert them into the font.
 
 Note that adding the new Graphite tables removes the old behavior implemented in Exercise 1. If you want to preserve the old font, make a separate copy of DoulosGrTut.ttf.

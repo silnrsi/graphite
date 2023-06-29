@@ -75,7 +75,10 @@ Another file that has been created is the **ex12a_ap.xml** file; open it in Grai
 
 **Step 2.** _Define some attachment points._ Click on the Font tab and find the lowercase ‘a’. Double click on it, and the Glyph tab will appear displaying the glyph. Click on the “add attachment point” button at the bottom of the pane.
 
+{: .image-tight }
 ![Adding an attachment point](../assets/images/graide12_2_addAP.png)
+
+<figcaption>Adding an attachment point</figcaption>
 
 We are going to define an upper attachment point. So give the new point the name “upperS”. (‘S’ stands for “stationary”, meaning that the base glyph is stationary with respect to the diacritic.) You can enter an initial value of “(0,0)”, or leave the Value field blank, in which case it will default to zeros. Click OK.
 
@@ -108,15 +111,24 @@ Build your program and run the following test data: `a\u0300`. By looking in the
 
 **Step 4.** _Set attachment points visually._ Click on the Attach tab in the left-hand pane. What we are going to do is to create a tree-like structure the represents a cluster of bases and diacritics that attach to them. The root of the tree represents the base, and the leaves are the diacritics. Right-click in the empty space in the pane and choose **Insert Simple Cluster…**. Choose the “upper” attachment point. The other controls are filled in with the glyphs that define this pair of points (only one each so far). Click OK.
 
+{: .image-tight }
 ![Creating a simple cluster for adjusting attachment points](../assets/images/graide12_3_insertCluster.png)
+
+<figcaption>Creating a simple cluster for adjusting attachment points</figcaption>
 
 Notice that a tree structure has appeared, and the Attach tab in the lower pane now displays the two glyphs, ‘a’ and the grave combining mark. Drag the grave to an appropriate position on top of the a glyph. As you hold down the mouse, a green dot appears—the green dot means that you are adjusting the attachment point on the stationary glyph—upperS. The X/Y coordinates of the point are shown in the left-hand column; notice that they change as you drag the grave.
 
+{: .image-tight }
 ![Adjusting an attachment point for a stationary glyph](../assets/images/graide12_4_dragStationary.png)
+
+<figcaption>Adjusting an attachment point for a stationary glyph</figcaption>
 
 Another way to adjust the positioning is to change the coordinates of the grave itself—the upperM attachment point. Hold down the SHIFT key and drag the grave again. A blue dot appears to indicate it is the mobile glyph that is being adjusted. Notice that the X/Y coordinates of the grave are changing, but the coordinates of the ‘a’ are unchanged.
 
+{: .image-tight }
 ![Adjusting an attachment point for a mobile glyph](../assets/images/graide12_5_dragMobile.png)
+
+<figcaption>Adjusting an attachment point for a mobile glyph</figcaption>
 
 You may be wondering about the choice between adjusting the stationary glyph as opposed to the mobile glyph. Keep in mind that when you adjust the coordinates of the base glyph, you are adjusting how all diacritics that use the set of “upper” attachment points will attach to that base. Similarly, when you adjust the coordinates of the diacritic, you are adjusting how that glyph will attach to all bases. So it is important to carefully consider which kind of adjustment you want to make.
 
