@@ -6,7 +6,7 @@ parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 | [&#x25C0; Unit 2: A very simple GDL program](graide_tutorial2) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 4: Corresponding glyph classes &#x25B6;](graide_tutorial4) |
 
 # Unit 3: The glyph table
@@ -152,6 +152,5 @@ Double-clicking on any of the cells labeled Rule: 0 will highlight the rule in t
 
 ![Highlighting a rule from the Rules tab](../assets/images/graide3_5_RulesHighlightRule.png)
 
------
-
-<< Back: [Unit1: Using Graide](graide_tutorial1) | [Introduction and Contents](../graide_tutorial) | Next: [Unit3: A very simple GDL program](graide_tutorial3) >>
+{: .tut-nav-bar }
+| [&#x25C0; Unit 2: A very simple GDL program](graide_tutorial2) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 4: Corresponding glyph classes &#x25B6;](graide_tutorial4) |

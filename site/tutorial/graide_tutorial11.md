@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 11: Glyph metrics
+title: Unit 11
 nav_order: 110
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 |  [&#x25C0; Unit 10: Positioning by shifting](graide_tutorial10) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 12: Positioning by attachment &#x25B6;](graide_tutorial12) |
 
 # Unit 11: Glyph metrics

@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 14: Ligatures
+title: Unit 14
 nav_order: 140
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 |  [&#x25C0; Unit 13: Features](graide_tutorial13) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 15: Bidirectionality &#x25B6;](graide_tutorial15) |
 
 # Unit 14: Ligatures

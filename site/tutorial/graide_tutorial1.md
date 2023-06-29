@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 1
+title: Unit 1 - Running Graide
 nav_order: 10
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 2: A very simple GDL program &#x25B6;](graide_tutorial2) |
 
 -----
@@ -126,5 +126,5 @@ Double-click on error message, and the rule with the (now) incorrect class name 
 
 **Step 6.** If you like, fix the bug in the definition of `clsUppercase`, rebuild and rerun the test to see the correct results.
 
-{: .nav-table }
-| [Contents](../graide_tutorial#contents) | [Unit 2: A very simple GDL program &#x25B6;](graide_tutorial2) |
+{: .tut-nav-bar }
+| [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 2: A very simple GDL program &#x25B6;](graide_tutorial2) |

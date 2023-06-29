@@ -6,7 +6,7 @@ parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 | [&#x25C0; Unit 5: Deletion and insertion](graide_tutorial5) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes &#x25B6;](graide_tutorial7) |
 
 # Unit 6: Context
@@ -57,3 +57,5 @@ Extend your Greek transliteration program from Exercise 4c or 5a to replace a si
 
 [Solution](graphite_tut_solutions#exercise-6c)
 
+{: .tut-nav-bar }
+| [&#x25C0; Unit 5: Deletion and insertion](graide_tutorial5) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 7: Glyph attributes &#x25B6;](graide_tutorial7) |

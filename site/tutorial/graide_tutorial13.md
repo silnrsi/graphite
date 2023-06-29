@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 13: Features
+title: Unit 13
 nav_order: 130
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 |  [&#x25C0; Unit 12: Positioning by attachment](graide_tutorial12) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 14: Ligatures &#x25B6;](graide_tutorial14) |
 
 # Unit 13: Features

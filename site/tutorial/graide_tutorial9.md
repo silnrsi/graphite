@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 9: Multiple Passes Per Table
+title: Unit 9
 nav_order: 90
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 |  [&#x25C0; Intermission](graide_tutorial8a) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x25B6;](graide_tutorial10) |
 
 # Unit 9: Multiple passes per table

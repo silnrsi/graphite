@@ -7,12 +7,12 @@
     color: $grey-dk-200;
 }
 
-table.nav-table {
+table.tut-nav-bar {
     color: white;
     background-color: #227efa;
 }
 
-table.nav-table td {
+table.tut-nav-bar td {
     text-align: center;
     color: white;
     background-color: #227efa;
@@ -20,30 +20,30 @@ table.nav-table td {
     width: 12%;
     font-size: .95rem;
     line-height: 1;
-    padding-top: 3px;
+    padding-bottom: 0;
 }
 
-table.nav-table td:first-of-type {
+table.tut-nav-bar td:first-of-type {
     text-align: left;
     width: 44%;
 }
 
-table.nav-table td:last-of-type {
+table.tut-nav-bar td:last-of-type {
     text-align: right;
     width: 44%
 }
 
-table.nav-table a {
+table.tut-nav-bar a {
     color: white;
     text-decoration: none;
 }
 
-table.nav-table a:hover {
+table.tut-nav-bar a:hover {
     color: #CCE0FF;
     text-decoration: none;
 }
 
-table.nav-table td {
+table.tut-nav-bar td {
     padding-bottom: 0.4rem;
     padding-top:    0.4rem;
 }
@@ -56,8 +56,8 @@ p.caption {
 }
 
 blockquote.blue-note {
-    background-color: #CCE0FF;
-    border-left: 10px solid #4444cc;
+    background-color: #DDF4FF;
+    border-left: 10px solid #227efa;
     padding-top: 2px;
     padding-bottom: 2px;
 }
@@ -79,7 +79,7 @@ blockquote.red-warning {
     font-size: 0.75rem !important;
 }
 
-.code {
+code {
     line-height: 1.0;
 }
 

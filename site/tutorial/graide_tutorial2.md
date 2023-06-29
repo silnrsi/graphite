@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Unit 2
+title: Unit 2 - A Simple GDL Program
 nav_order: 20
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 | [&#x25C0; Unit 1: Running Graide](graide_tutorial1) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program &#x25B6;](graide_tutorial3) |
 
 # Unit 2: A very simple GDL program
@@ -86,6 +86,5 @@ Test your font using some text that includes the dollar sign.
 
 [Solution](graphite_tut_solutions#exercise-2)
 
------
-
-<< Back: [Unit1: Using Graide](graide_tutorial1) | [Introduction and Contents](../graide_tutorial) | Next: [Unit3: A very simple GDL program](graide_tutorial3) >>
+{: .tut-nav-bar }
+| [&#x25C0; Unit 1: Running Graide](graide_tutorial1) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program &#x25B6;](graide_tutorial3) |

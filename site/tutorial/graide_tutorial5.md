@@ -6,7 +6,7 @@ parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .nav-table }
+{: .tut-nav-bar }
 | [&#x25C0; Unit 4: Corresponding glyph classes](graide_tutorial4) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 6: Context &#x25B6;](graide_tutorial6) |
 
 # Unit 5: Deletion and insertion
@@ -61,4 +61,5 @@ Compile this program into the DoulosGrTut.ttf font.
 
 [Solution](graphite_tut_solutions#exercise-3b)
 
-<< Back: [Unit1: Using Graide](graide_tutorial1) | [Introduction and Contents](../graide_tutorial) | Next: [Unit3: A very simple GDL program](graide_tutorial3) >>
+{: .tut-nav-bar }
+| [&#x25C0; Unit 4: Corresponding glyph classes](graide_tutorial4) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 6: Context &#x25B6;](graide_tutorial6) |
