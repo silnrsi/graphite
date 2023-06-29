@@ -17,18 +17,21 @@ table.nav-table td {
     color: white;
     background-color: #227efa;
     font-weight: bold;
+    width: 16%
 }
 
 table.nav-table td:first-of-type {
     text-align: left;
+    width: 42%;
 }
 
 table.nav-table td:last-of-type {
     text-align: right;
+    width: 42%
 }
 
 table.nav-table a {
-    color: lightcyan;
+    color: white;
     text-decoration: none;
 }
 
@@ -46,22 +49,30 @@ p.caption {
     font-style: italic;
     font-size: 0.9rem;
     margin-top: 0px;
+    margin-bottom: 18px;
 }
 
 blockquote.blue-note {
     background-color: #CCE0FF;
     border-left: 10px solid #4444cc;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 blockquote.red-warning {
     background-color: #eebbbb;
     border-left: 10px solid #aa3355;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .image-tight {
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
+
+/* Third of outline */
+.nav-list .nav-list .nav-list > .nav-list-item {
+    background-color: aliceblue;
+    color: yellow;
+}
+

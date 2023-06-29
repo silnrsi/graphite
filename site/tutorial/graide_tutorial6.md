@@ -11,7 +11,7 @@ grand_parent: Developers
 
 # Unit 6: Context
 
-[Exercises](graide_tutorial3#exercise-6a)
+[Exercises](graide_tutorial6#exercise-6a)
 
 ## Discussion
 

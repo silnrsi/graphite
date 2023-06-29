@@ -125,8 +125,6 @@ Notice that some of the glyphs in your test data were not given names in your GD
 | (     | parenleft       | g_parenleft |
 | È     | Egrave          | g__egrave   |
 
-[Solution](graphite_tut_solutions#exercise-3a)
-
 ## Exericse 3b
 
 Write a program to replace all digits with an asterisk. Use the glyph table to define a class containing the digit characters.

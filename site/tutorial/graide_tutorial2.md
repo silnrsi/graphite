@@ -7,7 +7,7 @@ grand_parent: Developers
 ---
 
 {: .nav-table }
-| &#x21E6; [Unit 1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program](graide_tutorial3) &#x21E8; |
+| [&#x25B7; Unit 1: Running Graide](graide_tutorial1) | [Contents](../graide_tutorial#contents) | [Unit 3: A very simple GDL program &#x25B6;](graide_tutorial3) |
 
 # Unit 2: A very simple GDL program
 
@@ -75,6 +75,7 @@ Write a simple GDL program to convert every instance of the dollar character to 
 
 Use Graide to create and debug your new program. Click on the configuration icon to edit the configuration.
 
+{: .image-tight }
 ![Creating a new GDL file](../assets/images/graide2_1_newGdlFile.png)
 
 Enter a new GDL file name. You can leave the font name the same (DoulosGrTut.ttf). Click OK and a new tab will open in which for you to enter your code. After writing your GDL, click the gear icon to build the Graphite tables and insert them into the font.

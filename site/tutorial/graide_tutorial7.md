@@ -11,7 +11,7 @@ grand_parent: Developers
 
 # Unit 7: Glyph attributes
 
-[Exercise](graide_tutorial3#exercise-7)
+[Exercise](graide_tutorial7#exercise-7)
 
 ## Discussion
 
