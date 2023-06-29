@@ -17,19 +17,19 @@ table.nav-table td {
     color: white;
     background-color: #227efa;
     font-weight: bold;
-    width: 14%;
+    width: 12%;
     font-size: .95rem;
     line-height: 1;
 }
 
 table.nav-table td:first-of-type {
     text-align: left;
-    width: 43%;
+    width: 44%;
 }
 
 table.nav-table td:last-of-type {
     text-align: right;
-    width: 43%
+    width: 44%
 }
 
 table.nav-table a {
@@ -75,6 +75,6 @@ blockquote.red-warning {
 
 /* Third level of outline */
 .nav-list .nav-list .nav-list > .nav-list-item a {
-    font-size: 0.9rem;
+    font-size: 0.75rem !important;
 }
 

@@ -9,7 +9,9 @@ grand_parent: Developers
 {: .nav-table }
 |  [&#x25C0; Unit 9: Multiple passes per table](graide_tutorial9) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 11: Glyph metrics &#x25B6;](graide_tutorial9) |
 
-# Positioning by shifting
+# Unit 10: Positioning by shifting
+
+[Exercises](graide_tutorial10#exercise-10a)
 
 ## Discussion
 
