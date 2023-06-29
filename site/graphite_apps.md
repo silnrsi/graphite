@@ -69,8 +69,6 @@ Pale Moon is a web browser built on a fork of Mozilla Firefox.
 
 [Pale Moon home page](palemoon.org){:target="_blank"}
 
------
-
 {: .blue-note }
 > **Integrating Graphite into an application**
 > 

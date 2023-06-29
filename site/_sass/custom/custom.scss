@@ -9,7 +9,11 @@
 
 table.tut-nav-bar {
     color: white;
-    background-color: #227efa;
+    background-color: #227efa; /* same as blue button */
+}
+
+table.tut-nav-bar tbody tr:last-of-type td {
+    padding-bottom: 0;
 }
 
 table.tut-nav-bar td {
@@ -20,19 +24,19 @@ table.tut-nav-bar td {
     width: 12%;
     font-size: .95rem;
     line-height: 1;
-    padding-bottom: 0;
+    /* padding-bottom: 0; */
 }
 
 table.tut-nav-bar td:first-of-type {
     text-align: left;
     width: 44%;
-    padding-bottom: 0;
+    /* padding-bottom: 0; */
 }
 
 table.tut-nav-bar td:last-of-type {
     text-align: right;
     width: 44%;
-    padding-bottom: 0;
+    /* padding-bottom: 0; */
 }
 
 table.tut-nav-bar a {
@@ -59,7 +63,7 @@ p.caption {
 
 blockquote.blue-note {
     background-color: #E6F2FF;
-    border-left: 10px solid #227efa;
+    border-left: 10px solid #227efa;  /* same as blue button */
     padding-top: 2px;
     padding-bottom: 2px;
 }
@@ -78,7 +82,7 @@ blockquote.red-warning {
 
 /* Third level of outline */
 .nav-list .nav-list .nav-list > .nav-list-item a {
-    font-size: 0.75rem !important;
+    font-size: 0.75rem !important;  /* the normal size is 0.88 */
 }
 
 code {

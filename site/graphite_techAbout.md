@@ -22,6 +22,8 @@ The Graphite system consists of:
 
 ![Graphite system architecture](assets/images/graphite_arch_diagram.png)
 
+<figcaption>Graphite system architecture</figcaption>
+
 The compiler takes as input a TrueType font and a GDL program that has been written to correspond to it. The output of the compiler is a font that has been extended by including several tables used by the Graphite engine (see [Graphite font tables below](graphite_techAbout#graphite-font-tables)).
 
 An application makes use of Graphite by hooking the Graphite engine into its text layout module. The Graphite engine uses the font, particularly the Graphite-specific tables, to perform text layout.
