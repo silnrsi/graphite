@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Unit 11
+title: Unit 11: Glyph metrics
 nav_order: 110
 parent: Graphite Tutorial
 grand_parent: Developers
@@ -70,7 +70,7 @@ For instance, to enter X + diaeresis, type the following as test data: `X\u0308`
 
 If you prefer to always see the Unicode codepoints for non-ASCII data, there is a flag in the Configuration properties dialog to indicate this. Open the section called **User Interface** and check the box labeled **Display character entities**.
 
-![Entering non-ASCII text data](../assets/images/graide11_1_nonAsciiText.png.png)
+![Entering non-ASCII text data](../assets/images/graide11_1_nonAsciiText.png)
 
 ### Exploring Graide: Glyph and Slot tabs revisited
 

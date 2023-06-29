@@ -26,10 +26,10 @@ Go to [Graphite font download](graphite_fonts) page.
 
 **GDL documentation** - the main GDL reference paper:
 
-DOWNLOAD GDL DOC PAPER
+[Download GDL.pdf](assets/resources/GDL.pdf){: .btn .btn-blue }
 
-**GDL tutorial - an introduction to GDL programming:
+**GDL tutorial** - an introduction to GDL programming:
 
-DOWNLOAD TUTORIAL PAPER
+[Download Tutorial](assets/resources/GraphiteTutorialPkg_v6.zip){: .btn .btn-blue }
 
 Also see the [online tutorial](graide_tutorial).

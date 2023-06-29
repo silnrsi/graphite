@@ -71,7 +71,7 @@ Pale Moon is a web browser built on a fork of Mozilla Firefox.
 
 -----
 
-{: .note-title }
+{: .blue-note }
 > **Integrating Graphite into an application**
 > 
 > For information on adding Graphite support to an application you are developing, see our [application developer resource](graphite_devApp) page.

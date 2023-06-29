@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Unit 10
+title: Unit 10: Positioning by Shifting
 nav_order: 100
 parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
 {: .nav-table }
-|  [&#x25C0; Unit 9: Multiple passes per table](graide_tutorial9) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 11: Glyph metrics &#x25B6;](graide_tutorial9) |
+|  [&#x25C0; Unit 9: Multiple passes per table](graide_tutorial9) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 11: Glyph metrics &#x25B6;](graide_tutorial11) |
 
 # Unit 10: Positioning by shifting
 

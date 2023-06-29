@@ -38,7 +38,6 @@ Graphite provides an API that allow you to hook the Graphite engine into the tex
 * [Graphite engine API](graphite_devApp)
 * [System documentation](graphite_devApp)
 
-----
 
 [Just the Docs]: https://just-the-docs.github.io/just-the-docs/
 [GitHub Pages]: https://docs.github.com/en/pages

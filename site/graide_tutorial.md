@@ -13,7 +13,7 @@ The following exercises are provided to give you an introduction to programming 
 
 The following package includes the fonts to be used for the exercises, solution files, and a PDF of the tutorial.
 
-[Download tutorial materials](assets/resources/GraphiteTutorialPkg_v6.zip){: .btn .btn-blue }
+[Download Tutorial Materials](assets/resources/GraphiteTutorialPkg_v6.zip){: .btn .btn-blue }
 
 This tutorial is not intended to be a comprehensive overview of the Graphite system, nor to provide an exhaustive discussion of all the features and syntax of the GDL programming language. For a complete discussion of GDL, see the “Graphite Description Language” document.
 

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Unit 9
+title: Unit 9: Multiple Passes Per Table
 nav_order: 90
 parent: Graphite Tutorial
 grand_parent: Developers

@@ -15,6 +15,7 @@ Adding Graphite support to a font involves:
 2. compiling the program along with the font to create the Graphite-enabled version of the font
 3. testing and debugging your smart font using a Graphite-enabled application
 
+{: .blue-note }
 > To add Graphite support to a font, the font's license must grant you permission to modify it.
 
 ### 1. The GDL program

@@ -56,6 +56,7 @@ The raw test results are:
 
 Not all test strings are included, but the most useful example is the string used for the ur:
 
+{: .arabic-sample }
 چونکہ انسانی حقوق سے لاپروایٔی اور ان کی بے حرمتی اکثر ایسے وحشیانہ افعال کی شکل میں ظاہر ہویٔی ہے جن سے انسانیت کے ضمیر کو سخت صدمے پہنچے ہیں اور عام انسانوں کی بلندترین آرزو یہ رہی ہے کہ ایسی دنیا وجود میں آیٔے جس میں تمام انسانوں کو اپنی بات کہنے اور اپنے عقیدے پر قایٔم رہنے کی آزادی حاصل ہو اور خوف اور احتیاج سے محفوظ رہیں،
 
 ## Special Challenges of Nastaliq
