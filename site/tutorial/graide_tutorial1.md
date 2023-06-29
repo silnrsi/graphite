@@ -47,8 +47,7 @@ Create or locate a workspace folder for this tutorial; this is where your fonts 
 {: .image-tight }
 ![Creating a Graide project](../assets/images/graide1_1_createProject.png)
 
-{: .caption }
-Creating a Graide project
+<figcaption>Creating a Graide project</figcaption>
 
 Click OK. The contents of the **allcaps.gdl** file now appears in the code (upper right-hand) pane. In the lower right-hand pane, the Font tab shows the glyphs in the **DoulosGrTut.ttf** font.
 
@@ -61,24 +60,21 @@ Once your .cfg file exists, you can indicate that Graide should use it initially
 {: .image-tight }
 ![Graide Font and Glyph tabs](../assets/images/graide1_2_glyphTab.png)
 
-{: .caption }
-Graide Font and Glyph tabs 
+<figcaption>Graide Font and Glyph tabs </figcaption>>
 
 **Step 6.** Build the Graphite tables into the font by clicking the gear icon associated with the code pane. In the lower pane, click on the Errors tab to double-check that there were no errors. (Normally the Error tab will be automatically brought into focus if there are errors.) You should see the text **Compilation succeeded – 0 errors, 0 warnings**. Your workspace folder should now contain a file called DoulosGrTut.gdx.
 
 {: .image-tight }
 ![Building a font in Graide](../assets/images/graide1_3_buildSucceed.png)
 
-{: .caption }
-Building a font in Graide 
+<figcaption>Building a font in Graide </figcaption>
 
 **Step 7.** Create some test data as follows: Click on the Tests tab again. In the middle (test data) pane, type: Hello world! Click the right-pointing arrow. The bottom (test results) pane shows the results of the Graphite rendering: **HELLO WORLD!**
 
 {: .image-tight }
 ![Running test data in Graide](../assets/images/graide1_4_runHelloWorld.png)
 
-{: .caption }
-Running test data in Graide 
+<figcaption>Running test data in Graide</figcaption>
 
 **Step 8.** Graphite will show you which rules were run in the process of rendering. In the case of this font, there is only one rule in the GDL program. If the Passes tab is not selected, click on it. Double click on the box that says **Pass: 1 - substitution**. Then double-click on any box that says **Rule: 0**. Graide will display and highlight the single rule in the code pane:
 
@@ -89,8 +85,7 @@ clsLowerCase > clsUpperCase;
 {: .image-tight }
 ![Highlighting a rule that was fired](../assets/images/graide1_5_clickRule.png)
 
-{: .caption }
-Highlighting a rule that was fired
+<figcaption>Highlighting a rule that was fired</figcaption>
 
 We will begin to learn about rules in Unit 2.
 
