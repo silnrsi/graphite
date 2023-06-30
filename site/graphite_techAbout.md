@@ -41,7 +41,7 @@ To create a Graphite-enabled font, the compiler adds several TrueType tables to 
 * **Feat** - feature table, similar to Apple's feat table
 * **Sill** - language table, containing mappings between language codes and features
 
-The [compiler package](graphite_compilerDownload) contains more complete documentation of these tables and their formats.
+The [compiler package](https://github.org/silnrsi/grcompiler) contains more complete documentation of these tables and their formats.
 
 ## Graphite engine implementations
 

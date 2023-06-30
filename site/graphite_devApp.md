@@ -29,7 +29,7 @@ The GitHub repository includes a [manual for integrating Graphite2 into an appli
 
 ## SilGraphite
 
-{: .blue-note }
+{: .red-warning }
 > **Note**
 >
 > SilGraphite is deprecated. Further development on the engine is not expected, and it is possible that it may not support fonts developed in the future.

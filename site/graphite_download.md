@@ -16,11 +16,11 @@ The Graphite compiler is a tool that is used to compile together a TrueType font
 
 The package includes the program and various documentation files, such as a description of the Graphite font tables, debugger file documentation, a formal GDL grammar, etc.
 
-DOWNLOAD GRAPHITE COMPILER
+[Graphite compiler repository](https://github.com/silnrsi/grcompiler){:target="_blank"}
 
 ## Fonts
 
-Go to [Graphite font download](graphite_fonts) page.
+Go to [Graphite fonts download](graphite_fonts) page.
 
 ## Documentation and tutorials
 

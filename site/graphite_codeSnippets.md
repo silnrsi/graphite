@@ -11,7 +11,7 @@ parent: Developers
     * [Diacritics with calculated attachment points](graphite_codeSnippets#diacritics-with-calculated-attachment-points)
     * [Stacking diacritics](graphite_codeSnippets#stacking-diacritics)
     * [Bridging diacritics](graphite_codeSnippets#bridging-diacritics)
-* [Ligature (conjunct)](graphite_codeSnippets#ligature-conjunct)
+* [Ligatures (conjuncts)](graphite_codeSnippets#ligatures-conjuncts)
     * [Ligatures with components](graphite_codeSnippets#ligatures-with-components)
 * [Contextual shaping](graphite_codeSnippets#contextual-shaping)
     * [Word-contextual shaping](graphite_codeSnippets#word-contextual-shaping)
@@ -105,7 +105,7 @@ takes_upper  upperdiac {attach {to=@1; at=TopS; with=TopM}} / _ LOWERSEQ  ^ _;
 endtable; // positioning
 ```
 
-### Bridging diacritic
+### Bridging diacritics
 
 Bridging diacritics must be centered over the two bases they bridge and must be higher than the tallest.
 
@@ -128,7 +128,7 @@ endtable; // positioning
 If the base glyphs have other diacritics attached, using @B1.boundingbox.top.1 will give the bounding box of the base plus diacritics.
 ```
 
-## Ligature (conjunct)
+## Ligatures (conjuncts)
 
 Ligatures or conjuncts occur when multiple characters combine to form a single glyph shape.
 
@@ -148,7 +148,7 @@ char1  char2  >  ligature:(1 2)  _ ;
 endtable; // substitution
 ```
 
-### Ligature with components
+### Ligatures with components
 
 Ligature components correspond to sub-regions of the ligature glyph that visually correspond to the original characters. Selecting and manipulating the visual components allows manipulating the underlying characters.
 
