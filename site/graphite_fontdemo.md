@@ -12,12 +12,12 @@ parent: Using Graphite
 >
 > This page requires Firefox 11 or later with Graphite enabled to display correctly. See the [instructions on how to enable Graphite in Firefox](graphite_firefox#switchon). Graphite is also supported in the Pale Moon browser (based on a fork of Firefox).
 
-* [Simple Graphite test](graphite_font_demo#simple-graphite-test)
-* [Padauk font demo](graphite_font_demo#padauk-font-demo)
-    * [Locally installed font](graphite_font_demo#locally-installed-font)
-    * [Normal TrueType font loaded from server](graphite_font_demo#normal-truetype-font-loaded-from-server)
-    * [WOFF font loaded from server](graphite_font_demo#woff-font-loaded-from-a-server)
-* [Awami Nastaliq font demo](graphite_font_demo#awami-nastaliq-font-demo)
+* [Simple Graphite test](graphite_fontdemo#simple-graphite-test)
+* [Padauk font demo](graphite_fontdemo#padauk-font-demo)
+    * [Locally installed font](graphite_fontdemo#locally-installed-font)
+    * [Normal TrueType font loaded from server](graphite_fontdemo#normal-truetype-font-loaded-from-server)
+    * [WOFF font loaded from server](graphite_fontdemo#woff-font-loaded-from-a-server)
+* [Awami Nastaliq font demo](graphite_fontdemo#awami-nastaliq-font-demo)
 
 ## Simple Graphite test
 
