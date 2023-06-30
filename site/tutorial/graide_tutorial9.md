@@ -45,7 +45,7 @@ Have you observed any subtle differences among the results of Exercises 6a, 7, a
 
 [Solution](graphite_tut_solutions#exercise-9)
 
-###Exploring Graide: multiple passes
+### Exploring Graide: multiple passes
 
 As you would expect, when you have multiple passes in your GDL program, extra rows appear in the Passes tab. When there are two passes, there are three rows in the pane, one for the initial input, and one containing the output of each pass. When you double-click on a pass, the label on the Rules tab will indicate which pass the rules belong to.
 

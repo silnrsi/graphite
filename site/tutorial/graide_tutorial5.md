@@ -51,15 +51,13 @@ Delete any instances of the letters “j” and “v”. (How will you handle th
 
 Run the following test data: jack in the box. The output should look like: **αχκ ιν θε βοξ**. Bring up the Rules tab for pass 1. Notice that in the first row, the ‘j’ is highlighted in pink, but there is no corresponding green glyph in the second row. This is because the ‘j’ has been deleted. Also in the seventh row, both the ‘t’ and ‘h’ glyphs are highlighted in pink, but in the following row, only the theta (θ) is shown green.
 
-[Solution](graphite_tut_solutions#exercise-3a)
-
 ## Exericse 5b
 
 Write a program to automatically insert a “u” following every “q”. Use associations to ensure that selecting the “q” will automatically select the “u” as well.
 
 Compile this program into the DoulosGrTut.ttf font.
 
-[Solution](graphite_tut_solutions#exercise-3b)
+[Solution](graphite_tut_solutions#exercise-5b)
 
 {: .tut-nav-bar }
 | [&#x25C0; Unit 4: Corresponding glyph classes](graide_tutorial4) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 6: Context &#x25B6;](graide_tutorial6) |

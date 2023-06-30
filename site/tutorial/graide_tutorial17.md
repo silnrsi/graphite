@@ -6,7 +6,7 @@ parent: Graphite Tutorial
 grand_parent: Developers
 ---
 
-{: .tut-nav-bar }
+{: .tut-nav-bar2 }
 |  [&#x25C0; Unit 16: Ligatures](graide_tutorial16) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 18: Corresponding classes revisited &#x25B6;](graide_tutorial18) |
 
 # Unit 17: Optional items
@@ -51,5 +51,5 @@ Test your program in Graide with data the includes the optional consonants and d
 
 Even though there is a single GDL rule that handle the various optional items, the Graphite compiler actually creates multiple rules corresponding to the presence or absence of the optional items. This is reflected in the numbering of the rules in the Rules tab.
 
-{: .tut-nav-bar }
+{: .tut-nav-bar2 }
 |  [&#x25C0; Unit 16: Ligatures](graide_tutorial16) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 18: Corresponding classes revisited &#x25B6;](graide_tutorial18) |

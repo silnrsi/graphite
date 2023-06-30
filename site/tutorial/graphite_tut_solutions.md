@@ -641,7 +641,11 @@ elseif (supersub == subsc)
 endif;
 
 endtable;
-Exercise 13b
+```
+
+## Exercise 13b
+
+```
 #include "stddef.gdh"
 table(glyph)
   clsAUpper = U+0041;
@@ -665,7 +669,11 @@ if (doKerning)
 endif;
 
 endtable;
-Exercise 13c
+```
+
+## Exercise 13c
+
+```
 #include "stddef.gdh"
 
 table(glyph)

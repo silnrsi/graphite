@@ -248,6 +248,7 @@ endtable; // substitution
 
 Many scripts of south and southeast Asia have characters that are rendered in an order that is different from their order in the data.
 
+```
 table(glyph)
 
 // Define the glyphs or classes:

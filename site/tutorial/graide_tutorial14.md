@@ -68,6 +68,8 @@ Hint: which element of the ligature can be used to uniquely identify the ligatur
 
 Extend your program to create the ligatures only if a feature is turned on.
 
+[Solution](graphite_tut_solutions#exercise-14a)
+
 ## Exercise 14b
 
 Write a program to substitute fraction glyphs for the sequences ‘1/2’ (U+00BD), ‘1/4’ (U+00BC), and ‘3/4’ (U+00BE). Keeping in mind that ligature components can overlap visually, how will you define the components so that they can be selected and edited? If you choose to allow your components to overlap, what kind of behavior do you observe with WorldPad's selection mechanism?

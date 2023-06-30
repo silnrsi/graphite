@@ -9,16 +9,19 @@
 
 /* Tutorial navigation bar */
 
-table.tut-nav-bar {
+table.tut-nav-bar,
+table.tut-nav-bar2 {
     color: white;
     background-color: #227efa; /* same as blue button */
 }
 
-table.tut-nav-bar tbody tr:last-of-type td {
+table.tut-nav-bar  tbody tr:last-of-type td,
+table.tut-nav-bar2 tbody tr:last-of-type td {
     padding-bottom: 6px;  /* override the extra padding at the bottom of a table */
 }
 
-table.tut-nav-bar td {
+table.tut-nav-bar  td,
+table.tut-nav-bar2 td {
     text-align: center;
     color: white;
     background-color: #227efa;
@@ -26,32 +29,41 @@ table.tut-nav-bar td {
     width: 12%;
     font-size: .95rem;
     line-height: 1;
-    /* padding-bottom: 0; */
 }
 
 table.tut-nav-bar td:first-of-type {
     text-align: left;
     width: 44%;
-    /* padding-bottom: 0; */
 }
 
 table.tut-nav-bar td:last-of-type {
     text-align: right;
     width: 44%;
-    /* padding-bottom: 0; */
 }
 
-table.tut-nav-bar a {
+/* tut-nav-bar2 is more flexible about the label lengths */
+table.tut-nav-bar2 td:first-of-type {
+    text-align: left;
+}
+
+table.tut-nav-bar2 td:last-of-type {
+    text-align: right;
+}
+
+table.tut-nav-bar  a
+table.tut-nav-bar2 a {
     color: white;
     text-decoration: none;
 }
 
-table.tut-nav-bar a:hover {
+table.tut-nav-bar  a:hover,
+table.tut-nav-bar2 a:hover {
     color: #CCE0FF;
     text-decoration: none;
 }
 
-table.tut-nav-bar td {
+table.tut-nav-bar  td,
+table.tut-nav-bar2 td {
     padding-bottom: 0.4rem;
     padding-top:    0.4rem;
 }
