@@ -12,7 +12,12 @@ parent: Using Graphite
 >
 > This page requires Firefox 11 or later with Graphite enabled to display correctly. See the [instructions on how to enable Graphite in Firefox](graphite_firefox#switchon). Graphite is also supported in the Pale Moon browser (based on a fork of Firefox).
 
-TOC..........
+* [Simple Graphite test](graphite_font_demo#simple-graphite-test)
+* [Padauk font demo](graphite_font_demo#padauk-font-demo)
+    * [Locally installed font](graphite_font_demo#locally-installed-font)
+    * [Normal TrueType font loaded from server](graphite_font_demo#normal-truetype-font-loaded-from-server)
+    * [WOFF font loaded from server](graphite_font_demo#woff-font-loaded-from-a-server)
+* [Awami Nastaliq font demo](graphite_font_demo#awami-nastaliq-font-demo)
 
 ## Simple Graphite test
 
@@ -38,7 +43,7 @@ Note: you must have Padauk installed on your local computer in order for this sa
 {: .padauk-ttf }
 ၁၉၄၈ ခုနှစ်၊ဒီဇင်ဘာလ ၁၀ ရက်နေ့တွင် ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ညီလာခံ အစည်းအဝေးကြီးက လူ့အခွင့်အရေး ကြေညာစာတမ်းကြီးကို အတည်ပြု၍ ကြေညာလိုက်ရာထိုကြေညာစာတမ်းကြီး၏ စာသားသည်နောက်စာမျက်နှာ များတွင် အပြည့်အစုံပါရှိသည်။ ဤကဲ့သို့ရာဇဝင်တင်မည့် ကြေညာချက်ကို ပြုလုပ်ပြီးနောက် ဤညီလာခံအစည်းအဝေးကြီးက ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ဝင် နိုင်ငံ အားလုံးအား ထိုကြေညာစာတမ်းကြီး၏ စာသားကိုအများပြည်သူတို့ ကြားသိစေရန် ကြေညာပါမည့် အကြောင်းကိုလည်းကောင်း၊ ထို့ပြင်နိုင်ငံများ၊ သို့တည်းမဟုတ် နယ်မြေများ၏ နိုင်ငံရေး အဆင့်အတန်းကို လိုက်၍ ခွဲခြားခြင်း မပြုဘဲအဓိကအားဖြင့် စာသင်ကျောင်းများနှင့် အခြားပညာရေး အဖွဲ့အစည်းများတွင် ထိုကြေညာစာတမ်းကြီးကို ဖြန့်ချိ ဝေငှ စေရန်၊ မြင်သာအောင် ပြသထားစေရန်၊ဖတ်ကြားစေရန်နှင့် အဓိပ္ပါယ်ရှင်းလင်း ဖော်ပြစေရန် ဆောင်ရွက်ပါမည့် အကြောင်းဖြင့် လည်းကောင်း ဆင့်ဆို လိုက်သည်။
 
-### WOFF loaded from a server
+### WOFF font loaded from a server
 
 {: .padauk-woff2 }
 ၁၉၄၈ ခုနှစ်၊ဒီဇင်ဘာလ ၁၀ ရက်နေ့တွင် ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ညီလာခံ အစည်းအဝေးကြီးက လူ့အခွင့်အရေး ကြေညာစာတမ်းကြီးကို အတည်ပြု၍ ကြေညာလိုက်ရာထိုကြေညာစာတမ်းကြီး၏ စာသားသည်နောက်စာမျက်နှာ များတွင် အပြည့်အစုံပါရှိသည်။ ဤကဲ့သို့ရာဇဝင်တင်မည့် ကြေညာချက်ကို ပြုလုပ်ပြီးနောက် ဤညီလာခံအစည်းအဝေးကြီးက ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ဝင် နိုင်ငံ အားလုံးအား ထိုကြေညာစာတမ်းကြီး၏ စာသားကိုအများပြည်သူတို့ ကြားသိစေရန် ကြေညာပါမည့် အကြောင်းကိုလည်းကောင်း၊ ထို့ပြင်နိုင်ငံများ၊ သို့တည်းမဟုတ် နယ်မြေများ၏ နိုင်ငံရေး အဆင့်အတန်းကို လိုက်၍ ခွဲခြားခြင်း မပြုဘဲအဓိကအားဖြင့် စာသင်ကျောင်းများနှင့် အခြားပညာရေး အဖွဲ့အစည်းများတွင် ထိုကြေညာစာတမ်းကြီးကို ဖြန့်ချိ ဝေငှ စေရန်၊ မြင်သာအောင် ပြသထားစေရန်၊ဖတ်ကြားစေရန်နှင့် အဓိပ္ပါယ်ရှင်းလင်း ဖော်ပြစေရန် ဆောင်ရွက်ပါမည့် အကြောင်းဖြင့် လည်းကောင်း ဆင့်ဆို လိုက်သည်။
