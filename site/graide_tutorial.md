@@ -19,7 +19,7 @@ This tutorial is not intended to be a comprehensive overview of the Graphite sys
 
 [Download GDL.pdf](GDL.pdf){: .btn .btn-blue }
 
-In order to use these tutorials, you will be using the Graide tool (Graide stands for GRAphite Interactive Development Environment). Graide allows you to run the Graphite compiler to create a Graphite enabled font, and test the results of the font using simple test data. It also includes debugging tools to analyze the behavior of your font. (The tutorial package contains a PDF of a version that does not use Graide.)
+In order to use these tutorials, you will be using the Graide tool (Graide stands for GRAphite Interactive Development Environment). Graide allows you to run the Graphite compiler to create a Graphite enabled font, and test the results of the font using simple test data. It also includes debugging tools to analyze the behavior of your font. ~~(The tutorial package contains a PDF of a version that does not use Graide.)~~
 
 [Download Graide](https://github/silnrsi/graide){: target="_blank" }
 

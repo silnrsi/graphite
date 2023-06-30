@@ -7,6 +7,8 @@
     color: $grey-dk-200;
 }
 
+/* Tutorial navigation bar */
+
 table.tut-nav-bar {
     color: white;
     background-color: #227efa; /* same as blue button */
@@ -54,12 +56,8 @@ table.tut-nav-bar td {
     padding-top:    0.4rem;
 }
 
-p.caption, figcaption {
-    font-style: italic;
-    font-size: 0.9rem;
-    margin-top: 0px;
-    margin-bottom: 18px;
-}
+
+/* Notes and Warnings */
 
 blockquote.blue-note {
     background-color: #E6F2FF;
@@ -75,18 +73,66 @@ blockquote.red-warning {
     padding-bottom: 2px;
 }
 
+/* Images and captions */
+
 /* To avoid a lot of space between the image and the caption: */
 .image-tight {
     margin-bottom: 1px;
 }
 
+p.caption, figcaption {
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-top: 0px;
+    margin-bottom: 18px;
+}
+
 /* Third level of outline */
+
 .nav-list .nav-list .nav-list > .nav-list-item a {
     font-size: 0.75rem !important;  /* the normal size is 0.88 */
 }
 
 code {
     line-height: 0.9;
+}
+
+/* Language rendering */
+
+@font-face {
+  font-family: AwamiDemoTtf;
+  src: url(assets/fonts/AwamiNastaliq-Demo.ttf);
+}
+
+@font-face {
+  font-family: PadaukDemoTtf;
+  src: url(assets/fonts/Padauk-Demo.ttf);
+}
+
+@font-face {
+    font-family: PadaukDemoWoff2;
+    src: url(assets/fonts/Padauk-Demo.woff2);
+
+
+.awami-ttf {
+    font-family: AwamiDemoTtf;
+    direction: rtl;
+    font-size: 200%;
+}
+
+.padauk-local {
+    font-family: Padauk;
+    font-size: 200%;
+}
+
+.padauk-ttf {
+    font-family: PadaukDemoTtf;
+    font-size: 200%;
+}
+
+.padauk-woff2 {
+    font-family: PadaukDemoWoff2;
+    font-size: 200%;
 }
 
 .arabic-sample {
