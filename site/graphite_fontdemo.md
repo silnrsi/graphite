@@ -28,7 +28,7 @@ Padauk is a Graphite-enabled font that supports the Burmese script. This page de
 
 Note: you must have Padauk installed on your local computer in order for this sample to work correctly.
 
-![Download Padauk](http://software.sil.org/padauk/){:target="_blank"}
+[Download Padauk](http://software.sil.org/padauk/){:target="_blank"}{: .btn .btn-blue }
 
 {: .padauk-local }
 ၁၉၄၈ ခုနှစ်၊ဒီဇင်ဘာလ ၁၀ ရက်နေ့တွင် ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ညီလာခံ အစည်းအဝေးကြီးက လူ့အခွင့်အရေး ကြေညာစာတမ်းကြီးကို အတည်ပြု၍ ကြေညာလိုက်ရာထိုကြေညာစာတမ်းကြီး၏ စာသားသည်နောက်စာမျက်နှာ များတွင် အပြည့်အစုံပါရှိသည်။ ဤကဲ့သို့ရာဇဝင်တင်မည့် ကြေညာချက်ကို ပြုလုပ်ပြီးနောက် ဤညီလာခံအစည်းအဝေးကြီးက ကမ္ဘာ့ကုလသမဂ္ဂအဖွဲ့ဝင် နိုင်ငံ အားလုံးအား ထိုကြေညာစာတမ်းကြီး၏ စာသားကိုအများပြည်သူတို့ ကြားသိစေရန် ကြေညာပါမည့် အကြောင်းကိုလည်းကောင်း၊ ထို့ပြင်နိုင်ငံများ၊ သို့တည်းမဟုတ် နယ်မြေများ၏ နိုင်ငံရေး အဆင့်အတန်းကို လိုက်၍ ခွဲခြားခြင်း မပြုဘဲအဓိကအားဖြင့် စာသင်ကျောင်းများနှင့် အခြားပညာရေး အဖွဲ့အစည်းများတွင် ထိုကြေညာစာတမ်းကြီးကို ဖြန့်ချိ ဝေငှ စေရန်၊ မြင်သာအောင် ပြသထားစေရန်၊ဖတ်ကြားစေရန်နှင့် အဓိပ္ပါယ်ရှင်းလင်း ဖော်ပြစေရန် ဆောင်ရွက်ပါမည့် အကြောင်းဖြင့် လည်းကောင်း ဆင့်ဆို လိုက်သည်။
@@ -54,7 +54,7 @@ The screenshot below shows the expected rendering of the sample text. Notice in 
 Recent versions of Firefox (43 or later), as well as Pale Moon v26+, include support for Graphite's new automatic collision fixing mechanism, used in a new font called Awami Nastaliq. Here is some text that uses this new mechanism.
 
 {: .awami-ttf }
-کم کرن والا ہر شخص منصفانہ تے مناسب معاوضے دا حق رکھیندے۔ جیمبڑ الوندے تے لوندے ٻال بچیاں کیتے عزت دی حیاتی دا ضامن ہووے اتے اوندے وچ ضرورت دے مطابق سماجی تحفظ دے بے ذریاں و لوادھا کیتاو نڄے۔ </p>
+کم کرن والا ہر شخص منصفانہ تے مناسب معاوضے دا حق رکھیندے۔ جیمبڑ الوندے تے لوندے ٻال بچیاں کیتے عزت دی حیاتی دا ضامن ہووے اتے اوندے وچ ضرورت دے مطابق سماجی تحفظ دے بے ذریاں و لوادھا کیتاو نڄے۔
 
 If your browser supports the automatic collision fixing, the text above should look similar to the screenshot below:
 

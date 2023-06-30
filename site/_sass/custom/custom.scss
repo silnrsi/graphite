@@ -117,22 +117,28 @@ code {
 .awami-ttf {
     font-family: AwamiDemoTtf;
     direction: rtl;
-    font-size: 200%;
+    font-size: 150%;
 }
 
 .padauk-local {
     font-family: Padauk;
-    font-size: 200%;
+    font-size: 120%;
+    -moz-font-feature-settings: "wtri=1";
+    -moz-font-feature-settings: "wtri" 1;
 }
 
 .padauk-ttf {
     font-family: PadaukDemoTtf;
-    font-size: 200%;
+    font-size: 120%;
+    -moz-font-feature-settings: "wtri=1";
+    -moz-font-feature-settings: "wtri" 1;
 }
 
 .padauk-woff2 {
     font-family: PadaukDemoWoff2;
-    font-size: 200%;
+    font-size: 120%;
+    -moz-font-feature-settings: "wtri=1";
+    -moz-font-feature-settings: "wtri" 1;
 }
 
 .arabic-sample {
