@@ -93,3 +93,6 @@ Extend your program from Exercise 10b to only perform the kerning when the “ke
 Extend your program from Exercise 4c, 5a, or 6b to either display Roman or Greek text depending on the setting of a feature.
 
 [Solution](graphite_tut_solutions#exercise-13c)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 12: Positioning by attachment](graide_tutorial12) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 14: Ligatures &#x25B6;](graide_tutorial14) |

@@ -90,3 +90,6 @@ Write a program to kern the uppercase A when it follows W or V, and vice versa (
 ### Exploring Graide: shift attribute in Slot tab
 
 Run the following test data: `WAVE`. In the Passses tab, click on the ‘A’ in the row labeled **Pass: 1 – positioning**. Notice there is a slot attribute in the Slot tab called “shift” whose value is an (x,y) pair. The x value should be the value you have chosen to kern by, scaled to the em-square of the font.
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 9: Multiple passes per table](graide_tutorial9) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 11: Glyph metrics &#x25B6;](graide_tutorial11) |

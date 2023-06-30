@@ -39,7 +39,7 @@ XeTeX is a typesetting system based on a merger of Donald Knuth's TeX system wit
 
 [XeTeX home page](https://scripts.sil.org/xetex){:target="_blank"}
 
-[download XeTeX from TeXLive](tug.org/texlive/){:target="_blank"}
+[Download XeTeX from TeXLive](tug.org/texlive/){:target="_blank"}
 
 ![](assets/images/logo_FieldWorks.jpeg) **FieldWorks**
 {: .fs-6 }

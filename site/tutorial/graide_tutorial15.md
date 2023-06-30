@@ -54,3 +54,6 @@ Hint: what is the minimum number of rules that you need?
 Observe how insertion-point and range selections behave with mixed-direction text in LibreOffice. What happens to white space at the line boundaries?
 
 Change the paragraph direction to right-to-left; what differences do you observe?
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 14: Ligatures](graide_tutorial14) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 16: Reordering &#x25B6;](graide_tutorial16) |

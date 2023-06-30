@@ -69,3 +69,6 @@ The first ‘c’ in “council” is an instance of a hard C. You should have r
 Now click on the pink-highlighted glyph just above. The value of user attribute #0 now shows as 0. This indicates that the rule changed the value of the slot attribute from 0 to 1.
 
 (If you are not seeing these results, it could be because your GDL program is substantially different from the supplied solution. It may be helpful to replace your program with the supplied one in order to experiment with Graide.)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Intermission](graide_tutorial8a) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 10: Positioning by shifting &#x25B6;](graide_tutorial10) |

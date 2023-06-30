@@ -153,9 +153,9 @@ endtable; // substitution
 Ligature components correspond to sub-regions of the ligature glyph that visually correspond to the original characters. Selecting and manipulating the visual components allows manipulating the underlying characters.
 
 {: .blue-note }
-**Note**
-
-This feature is only supported by the original Graphite engine; it is not supported by Graphite2.
+> **Note**
+>
+> This feature is only supported by the original Graphite engine; it is not supported by Graphite2.
 
 ```
 table(glyph)
@@ -213,6 +213,7 @@ endtable;
 
 Arabic is an example of a script whose characters take on alternate forms depending on their location within the word: initial, medial, final, isolate.
 
+```
 table(glyph)
 
 // All characters are initially isolate forms.
@@ -372,7 +373,8 @@ endtable; // glyph
 
 table(substitution)
 
-// Note that for mutually exclusive conditions, successive 'if' statements are more efficient than 'elseif'.
+// Note that for mutually exclusive conditions, successive
+// 'if' statements are more efficient than 'elseif'.
 
 if (altk == form1)
 g_k  >  g_k1;

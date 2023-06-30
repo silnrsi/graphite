@@ -47,3 +47,6 @@ In both cases, `@1` causes the base character itself to be passed through unchan
 Extend your program from Exercise 17 to adjust the capitalization of the reordered items. If the original consonant was uppercase, the reordered vowel should be uppercase in the rendering, and the consonant should become lowercase. In other words, “Cup” is rendered as “Ucp”.
 
 [Solution](graphite_tut_solutions#exercise-18)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 17: Optional items](graide_tutorial17) | [&#x25B2; Contents](../graide_tutorial#contents) | [Conclusion &#x25B6;](graide_tutorial_end) |

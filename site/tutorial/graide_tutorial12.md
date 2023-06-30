@@ -175,3 +175,6 @@ Compile your program against the Galatia Graphite Tutorial font (**GalatiaGrTut.
 Extend your program to handle a possible intervening upper diacritic (eg, smooth breathing mark, &#x0313; U+0313 or rough breathing mark, &#x0314; U+0314) between the base character and the lower diacritic.
 
 [Solution](graphite_tut_solutions#exercise-12c)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 11: Glyph metrics](graide_tutorial11) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 13: Features &#x25B6;](graide_tutorial13) |

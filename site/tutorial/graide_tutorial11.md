@@ -78,3 +78,6 @@ If you prefer to always see the Unicode codepoints for non-ASCII data, there is 
 ### Exploring Graide: Glyph and Slot tabs revisited
 
 Run the following data: `m\u0304 I\u0304`. Use the Glyph tab to compare the values of the glyph attributes for m and I. Use the Slot tab to compare the amounts by which the diacritic was shifted.
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 10: Positioning by shifting](graide_tutorial10) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 12: Positioning by attachment &#x25B6;](graide_tutorial12) |

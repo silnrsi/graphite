@@ -19,3 +19,5 @@ Slot attributes are set within rules. Most slot attributes are system-defined (a
 
 Slot attributes can be tested in the context of the rule in the same way that glyph attributes are.
 
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 7: Glyph attributes](graide_tutorial7) | [&#x25B2; Contents](../graide_tutorial#contents) | [Intermission &#x25B6;](graide_tutorial8a) |

@@ -75,3 +75,6 @@ Write a program to substitute fraction glyphs for the sequences ‘1/2’ (U+00B
 Hint: you will probably need to use more than one rule due to the fact that neither the numerator nor the denominator identifies the fraction uniquely. Can you still define the component boxes with a single set of statements?
 
 [Solution](graphite_tut_solutions#exercise-14b)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 13: Features](graide_tutorial13) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 15: Bidirectionality &#x25B6;](graide_tutorial15) |

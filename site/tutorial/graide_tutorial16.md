@@ -32,3 +32,6 @@ The `@` symbol can also be used to copy a glyph with no changes, or with changes
 Write a program to reorder back rounded vowels (o and u) such that they occur before a preceeding consonant. (Remember that reordering is handled in the substitution table.) You may ignore the problem of vowel sequences (unless you feel particularly ambitious).
 
 [Solution](graphite_tut_solutions#exercise-16)
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 15: Bidirectionality](graide_tutorial15) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 17: Optional items &#x25B6;](graide_tutorial17) |

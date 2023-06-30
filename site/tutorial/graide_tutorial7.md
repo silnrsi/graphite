@@ -54,3 +54,6 @@ The Glyph tab will show any glyph attributes that are set in your GDL program. A
 [The Glyph pane showing glyph attributes](graide7_1_glyphAttribute.png)
 
 (If your glyph attributes don’t seem to look the same, it could be because your program is somewhat different than the provided solution.)
+
+{: .tut-nav-bar }
+| [&#x25C0; Unit 6: Context](graide_tutorial6) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 8: Slot attributes &#x25B6;](graide_tutorial8) |

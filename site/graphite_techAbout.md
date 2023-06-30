@@ -9,7 +9,7 @@ parent: About Graphite
 
 * [Introduction](graphite_techAbout#introduction)
 * [Graphite font tables](graphite_techAbout#graphite-font-tables)
-* [Graphite engine implementation](#graphite-engine-implementation)
+* [Graphite engine implementations](#graphite-engine-implementations)
 * [Graphite and OpenType](graphite_techAbout#graphite-and-opentype)
 
 ## Introduction

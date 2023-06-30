@@ -50,3 +50,6 @@ Hint: instead of switching items, you may need to delete the vowel and reinsert 
 Test your program in Graide with data the includes the optional consonants and data that does not, for instance: `so sto stro to tro`. Look at the list of rules in the Rules tab. What do you notice about the numbering of the rules?
 
 Even though there is a single GDL rule that handle the various optional items, the Graphite compiler actually creates multiple rules corresponding to the presence or absence of the optional items. This is reflected in the numbering of the rules in the Rules tab.
+
+{: .tut-nav-bar }
+|  [&#x25C0; Unit 16: Ligatures](graide_tutorial16) | [&#x25B2; Contents](../graide_tutorial#contents) | [Unit 18: Corresponding classes revisited &#x25B6;](graide_tutorial18) |

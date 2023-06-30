@@ -15,8 +15,9 @@ parent: Using Graphite
 * [Simple Graphite test](graphite_fontdemo#simple-graphite-test)
 * [Padauk font demo](graphite_fontdemo#padauk-font-demo)
     * [Locally installed font](graphite_fontdemo#locally-installed-font)
-    * [Normal TrueType font loaded from server](graphite_fontdemo#normal-truetype-font-loaded-from-server)
+    * [Normal TrueType font loaded from server](graphite_fontdemo#normal-truetype-font-loaded-from-a-server)
     * [WOFF font loaded from server](graphite_fontdemo#woff-font-loaded-from-a-server)
+    * [Graphic showing correct rendering](graphite_fontdemo#graphic-showing-correct-rendering)
 * [Awami Nastaliq font demo](graphite_fontdemo#awami-nastaliq-font-demo)
 
 ## Simple Graphite test
