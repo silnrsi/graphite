@@ -100,6 +100,11 @@ code {
 /* Language rendering */
 
 @font-face {
+    font-family: SimpleGraphite;
+    src: url(assets/fonts/Simple-Graphite-Font.ttf);
+}
+
+@font-face {
   font-family: AwamiDemoTtf;
   src: url(assets/fonts/AwamiNastaliq-Demo.ttf);
 }
@@ -112,6 +117,10 @@ code {
 @font-face {
     font-family: PadaukDemoWoff2;
     src: url(assets/fonts/Padauk-Demo.woff2);
+}
+
+.simple-graphite-ttf {
+    font-family: SimpleGraphite;
 }
 
 .awami-ttf {

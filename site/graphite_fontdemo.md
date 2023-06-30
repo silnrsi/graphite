@@ -23,6 +23,7 @@ parent: Using Graphite
 
 Here is a simple test to see if Graphite is working in your browser. If it is, the following sentence will be displayed with all consonants in uppercase and all vowels in lowercase. (If only the words FOX and DOG are capitalized, Graphite is not working.)
 
+{: .simple-graphite-ttf }
 The quick brown FOX jumps over the lazy DOG.
 
 ## Padauk font demo
