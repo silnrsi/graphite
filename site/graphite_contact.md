@@ -6,6 +6,6 @@ nav_order: 900
 
 # Contact
 
-Email: [graphite_intl@sil.org](mailto:graphite_intl@sil.org)
+Email: [&#x2709; graphite_intl@sil.org](mailto:graphite_intl@sil.org)
 
-Please consider supporting the development of Graphite: [Donate to SIL](https://www.charity-pay.com/d/donation.asp?CID=83){:target="_blank"}
+Please consider supporting the development of Graphite: [&#x2197; Donate to SIL](https://give.sil.org/give/482865/#!/donation/checkout){:target="_blank"}

@@ -8,9 +8,9 @@ nav_order: 800
 
 Below are some resources where you can find help in using Graphite.
 
-**Email** - [&#x2709 graphite_intl@sil.org](mailto:graphite_intl@sil.org)
+**Email** - [&#x2709; graphite_intl@sil.org](mailto:graphite_intl@sil.org)
 
-**Font development** - join the [&#x279A; Graphite Font mailing list](https://lists.sourceforge.net/lists/listinfo/silgraphite-fonts){:target="_blank"} to connect with others who are developing Graphite fonts.
+**Font development** - join the [&#x2197; Graphite Font mailing list](https://lists.sourceforge.net/lists/listinfo/silgraphite-fonts){:target="_blank"} to connect with others who are developing Graphite fonts.
 
 **Graphite system development** - join the [&#x279A; Graphite Development mailing list](https://lists.sourceforge.net/lists/listinfo/silgraphite-devel){:target="_blank"} to discuss Graphite system development.
 
