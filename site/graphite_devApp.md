@@ -19,7 +19,7 @@ The Graphite system consists of:
 
 ## Graphite2
 
-The Graphite2 engine represents a rework of the original engine developed for the Graphite package. Implementation began in 2010. It is the package used by LibreOffice 3.4 (and later) and Firefox 11 (and later), and can be integrated into applications on the Android versions 2.2 - 2.3.4.
+The Graphite2 engine represents a rework of the original engine developed for the Graphite package. Implementation began in 2010. It is the package used by LibreOffice 3.4 (and later) and Firefox 11 (and later), and can be integrated into applications on Android versions 2.2 - 2.3.4.
 
 The Graphite2 engine can be downloaded from the [&#x2197; GitHub release page](https://github.com/silnrsi/graphite/releases){:target="_blank"}.
 

@@ -9,7 +9,7 @@ parent: Using Graphite
 
 ## Graphite in Firefox
 
-Mozilla Firefox 11 - 45 versions directly support Graphite on Mac OS X, Linux, Windows and Android platforms. A web page can be rendered using both local and server-based fonts, and specific Graphite font features can be controlled via CSS.
+Versions 11 and later of Mozilla Firefox 11 directly support Graphite on Mac OS X, Linux, Windows and Android platforms. A web page can be rendered using both local and server-based fonts, and specific Graphite font features can be controlled via CSS.
 
 Graphite is automatically activated in Firefox. In early versions this support was not switched on by default and needed to be enabled by the user. If you have a version of Firefox prior to 28, see below for instructions on how to activate it.
 
@@ -17,9 +17,9 @@ To see Graphite in operation, you need a web page uses some CSS referring to a G
 
 Graphite is also supported in Pale Moon, a browser based on a fork of Firefox.
 
-### A menu toggle for the Android
+### A menu toggle for Android
 
-An extension is available that provides [&#x2197; a menu toggle for Graphite support in Firefox on the Android](https://addons.mozilla.org/en-US/android/addon/toggle-graphite-support){:target="_blank"}.
+An extension is available that provides [&#x2197; a menu toggle for Graphite support in Firefox on Android](https://addons.mozilla.org/en-US/android/addon/toggle-graphite-support){:target="_blank"}.
 
 ## Testing Graphite behaviors in Firefox
 
