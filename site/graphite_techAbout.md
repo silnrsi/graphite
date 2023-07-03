@@ -47,7 +47,7 @@ The [compiler package](https://github.org/silnrsi/grcompiler) contains more comp
 
 There are two existing implementations of the Graphite engine. The original engine is packaged under the name "SilGraphite"; the initial implementation was done in 2000. The Graphite2 engine implementation began in 2010.
 
-The  [SilGraphite engine](https://sourceforge.net/projects/silgraphite){:target="_blank"} is currently used by OpenOffice, XeTeX, FieldWorks, and WorldPad. It includes some features not included in Graphite2, but is considerably slower. [Graphite2](https://projects.palaso.org/projects/graphitedev){:target="_blank"} represents a significant (10x) optimization in terms of speed and greatly improved robustness, but does not include a few features such a ligature component handling and cross-line-boundary contextualization. Graphite2 is used by LibreOffice and Firefox.
+The  [&#x279A; SilGraphite engine](https://sourceforge.net/projects/silgraphite){:target="_blank"} is currently used by OpenOffice, XeTeX, FieldWorks, and WorldPad. It includes some features not included in Graphite2, but is considerably slower. [&#x279A; Graphite2](https://projects.palaso.org/projects/graphitedev){:target="_blank"} represents a significant (10x) optimization in terms of speed and greatly improved robustness, but does not include a few features such a ligature component handling and cross-line-boundary contextualization. Graphite2 is used by LibreOffice and Firefox.
 
 The two engines support different APIs. The Graphite2 API was specifically developed to be more compatible with the approach to text layout used by most commercial software. See the [application development page](graphite_devApp) for API documentation.
 
