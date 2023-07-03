@@ -21,11 +21,11 @@ The Graphite system consists of:
 
 The Graphite2 engine represents a rework of the original engine developed for the Graphite package. Implementation began in 2010. It is the package used by LibreOffice 3.4 (and later) and Firefox 11 (and later), and can be integrated into applications on the Android versions 2.2 - 2.3.4.
 
-The Graphite2 engine can be downloaded from the [GitHub release page](https://github.com/silnrsi/graphite/releases){:target="_blank"}.
+The Graphite2 engine can be downloaded from the [&#x2197; GitHub release page](https://github.com/silnrsi/graphite/releases){:target="_blank"}.
 
-The source code is located on Git Hub: [https://github.com/silnrsi/graphite](https://github.com/silnrsi/graphite){:target="_blank"}
+The source code is located on GitHub: [&#x2197; https://github.com/silnrsi/graphite](https://github.com/silnrsi/graphite){:target="_blank"}
 
-The GitHub repository includes a [manual for integrating Graphite2 into an application](https://github.com/silnrsi/graphite/blob/master/doc/manual.adoc)
+The GitHub repository includes a [&#x2197; manual for integrating Graphite2 into an application](https://github.com/silnrsi/graphite/blob/master/doc/manual.adoc)
 
 ## SilGraphite
 
@@ -36,8 +36,8 @@ The GitHub repository includes a [manual for integrating Graphite2 into an appli
 
 The original Graphite engine, packaged under the name SilGraphite, is used by OpenOffice, Fieldworks, and WorldPad.
 
-The source code can be downloaded from: [SilGraphite SourceForge project](http://sourceforge.net/projects/silgraphite/){:target="_blank"}.
+The source code can be downloaded from: [&#x2197; SilGraphite SourceForge project](http://sourceforge.net/projects/silgraphite/){:target="_blank"}.
 
-[SilGraphite Application Programmers Guide](assets/resources/SilGraphite_AppProgGuide.pdf)
+[&#x2197; SilGraphite Application Programmers Guide](assets/resources/SilGraphite_AppProgGuide.pdf)
 
 (The documents above describe version 2 of the Graphite API; the original API is obsolete.)

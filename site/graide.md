@@ -18,7 +18,7 @@ Graide includes the following features:
 
 ## Obtaining Graide
 
-For instructions on installing Graide on your machine, see the [Graide GitHub repository](https://github.com/silnrsi/graide){:target="_blank"}.
+For instructions on installing Graide on your machine, see the [&#x2197; Graide GitHub repository](https://github.com/silnrsi/graide){:target="_blank"}.
 
 The source code is also available from the repository.
 
@@ -26,8 +26,8 @@ The source code is also available from the repository.
 
 Please send feedback to:
 
-* [graphite_intl@sil.org](mailto:graphite_intl@sil.org)
-* [Graide GitHub repository](https://github.com/silnrsi/graide){:target="_blank"}
+* [&#x2709; graphite_intl@sil.org](mailto:graphite_intl@sil.org)
+* [&#x2197; Graide GitHub repository](https://github.com/silnrsi/graide){:target="_blank"}
 
 ## Tutorial
 

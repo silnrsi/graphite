@@ -7,7 +7,7 @@ parent: About Graphite
 
 # Why was Graphite developed?
 
- [SIL International](https://sil.org){:target="_blank"} is a non-profit organization that works with ethnolinguistic minority communities as they build their capacity for the development of their own languages. SIL's work encompasses areas such as language development, research, training, materials development, translation, and advocacy. Members of SIL are currently working with approximately a thousand language groups on six continents, and increasingly, many of the areas in which we work use scripts that require complex rendering.
+ [&#x2197; SIL International](https://sil.org){:target="_blank"} is a non-profit organization that works with ethnolinguistic minority communities as they build their capacity for the development of their own languages. SIL's work encompasses areas such as language development, research, training, materials development, translation, and advocacy. Members of SIL are currently working with approximately a thousand language groups on six continents, and increasingly, many of the areas in which we work use scripts that require complex rendering.
 
 Traditionally, much of our work has been with preliterate groups, or those that are literate only in a national or trade language. In cases where there is no written form for the target language, orthography development is a significant part of our field workers’ literacy promotion efforts. There are a variety of linguistic, sociological, cultural, and political factors that play into the orthography issue, and often it is necessary to adapt the script of the national language for use with minority languages.
 

@@ -19,7 +19,7 @@ Graphite is also supported in Pale Moon, a browser based on a fork of Firefox.
 
 ### A menu toggle for the Android
 
-An extension is available that provides [a menu toggle for Graphite support in Firefox on the Android](https://addons.mozilla.org/en-US/android/addon/toggle-graphite-support){:target="_blank"}.
+An extension is available that provides [&#x2197; a menu toggle for Graphite support in Firefox on the Android](https://addons.mozilla.org/en-US/android/addon/toggle-graphite-support){:target="_blank"}.
 
 ## Testing Graphite behaviors in Firefox
 
@@ -34,7 +34,7 @@ It is possible to make use of Graphite font features in an HTML page by specifyi
 {: .blue-note }
 > **NOTE**
 >
-> Some earlier Graphite-enabled fonts used numerical feature IDs which will not work in Firefox. The following maintenance releases of SIL's Roman and Cyrillic fonts are available that use 4-character IDs: [Doulos SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=DoulosSIL_download#4112){:target="_blank"}, [Charis SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=CharisSIL_download#4112){:target="_blank"}, [Andika 1.004](https://scripts.sil.org/cms/scripts/page.php?item_id=Andika_download#1004){:target="_blank"}, and [Gentium Plus 1.510](https://scripts.sil.org/cms/scripts/page.php?item_id=Gentium_download#1510){:target="_blank"}; later versions of these fonts will also work.
+> Some earlier Graphite-enabled fonts used numerical feature IDs which will not work in Firefox. The following maintenance releases of SIL's Roman and Cyrillic fonts are available that use 4-character IDs: [&#x2197; Doulos SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=DoulosSIL_download#4112){:target="_blank"}, [&#x2197; Charis SIL 4.112](https://scripts.sil.org/cms/scripts/page.php?item_id=CharisSIL_download#4112){:target="_blank"}, [&#x2197; Andika 1.004](https://scripts.sil.org/cms/scripts/page.php?item_id=Andika_download#1004){:target="_blank"}, and [&#x2197; Gentium Plus 1.510](https://scripts.sil.org/cms/scripts/page.php?item_id=Gentium_download#1510){:target="_blank"}; later versions of these fonts will also work.
 
 The CSS syntax is:
 
@@ -80,9 +80,9 @@ To indicate more than one feature, use a comma as a delimiter:
 }
 ```
 
-More complete documentation of feature settings in CSS can be found at [http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings](http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings){:target="_blank"}.
+More complete documentation of feature settings in CSS can be found at [&#x2197; http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings](http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings){:target="_blank"}.
 
-For more detail on how to specify fonts on web pages see (Using SIL Fonts on Web Pages)https://scripts.sil.org/using_web_fonts){: target="_blank"}.
+For more detail on how to specify fonts on web pages see [&#x2197; Using SIL Fonts on Web Pages](https://scripts.sil.org/using_web_fonts){: target="_blank"}.
 
 ## Supported platforms
 This Graphite support has been tested and is known to work on the following platforms:

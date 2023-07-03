@@ -7,6 +7,14 @@
     color: $grey-dk-200;
 }
 
+.nav-list .nav-list .nav-list > .nav-list-item a {
+    font-size: 0.75rem !important;  /* the normal size is 0.88 */
+}
+
+code {
+    line-height: 0.9;  /* doesn't seem to have an effect */
+}
+
 /* Tutorial navigation bar */
 
 table.tut-nav-bar,
@@ -97,16 +105,6 @@ p.caption, figcaption {
     font-size: 0.9rem;
     margin-top: 0px;
     margin-bottom: 18px;
-}
-
-/* Third level of outline */
-
-.nav-list .nav-list .nav-list > .nav-list-item a {
-    font-size: 0.75rem !important;  /* the normal size is 0.88 */
-}
-
-code {
-    line-height: 0.9;
 }
 
 /* Language rendering */

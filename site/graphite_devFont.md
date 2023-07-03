@@ -26,16 +26,16 @@ GDL is a programming language that describes the "smart" behavior of the font. I
 
 The following tools can be used to assist in the development of a GDL program:
 
-* make_gdl.pl - a Perl utility that automatically generates some of the necessary GDL code from a font and an XML file of attachment point data. This is included in the SIL [FontUtils](https://scripts.sil.org/FontUtils){:target="_blank"} package.
-* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont/tree/master/scripts){:target="_blank"}.
+* make_gdl.pl - a Perl utility that automatically generates some of the necessary GDL code from a font and an XML file of attachment point data. This is included in the SIL [&#x2197; FontUtils](https://scripts.sil.org/FontUtils){:target="_blank"} package.
+* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [&#x2197; SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont/tree/master/scripts){:target="_blank"}.
 
 ### 2. Compiling the program
 
 The Graphite compiler takes as input the original font and the GDL program, and outputs a new version of the font with the GDL code converted into special-purpose TrueType tables. These tables are used by the Graphite engine to perform smart rendering.
 
-The Windows executable can be downloaded [here](https://scripts.sil.org/GraphiteCompilerDownload){:target="_blank"}.
+The Windows executable can be downloaded [&#x2197; here](https://scripts.sil.org/GraphiteCompilerDownload){:target="_blank"}.
 
-For Linux systems, the source for the grcompiler program is available from [here](http://sourceforge.net/projects/silgraphite/files/grcompiler){:target="_blank"}. If you are using Ubuntu Linux 12.04, binary packages are available for [64-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_amd64.deb){:target="_blank"} and [32-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_i386.deb){:target="_blank"} systems.
+For Linux systems, the source for the grcompiler program is available from [&#x2197; here](http://sourceforge.net/projects/silgraphite/files/grcompiler){:target="_blank"}. If you are using Ubuntu Linux 12.04, binary packages are available for [64-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_amd64.deb){:target="_blank"} and [32-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_i386.deb){:target="_blank"} systems.
 
 ### 3. Testing the font
 
