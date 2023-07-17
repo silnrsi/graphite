@@ -12,7 +12,7 @@ has_toc: false
 
 Graphite is a package that can be used to create “smart fonts” capable of displaying writing systems with various complex behaviors. A smart font contains not only letter shapes but also additional instructions indicating how to combine and position the letters in complex ways.
 
-Graphite was developed to provide the flexibility needed for minority languages which often need to be written according to slightly different rules than well-known languages that use the same script.
+Graphite was developed to provide the flexibility needed for lesser-known languages which often need to be written according to slightly different rules than well-known languages that use the same script.
 
 Examples of complex script behaviors Graphite can handle include:
 
@@ -30,7 +30,7 @@ Examples of complex script behaviors Graphite can handle include:
 
 The Graphite system consists of:
 
-* a rule-based programming language Graphite Description Language (GDL) that can be used to describe the behavior of a writing system
+* a rule-based programming language called Graphite Description Language (GDL) that can be used to describe the behavior of a writing system
 * a compiler for that language
 * a rendering engine that can serve as the layout component of a text-processing application
 
@@ -57,7 +57,7 @@ Graphite and OpenType are not competing technologies. Applications may support b
 The following are some benefits of including Graphite support in a font:
 
 * Graphite provides a way to support a complex script that is not yet handled by standard software (ie, OpenType drivers such as Uniscribe, ICU rendering, etc.).
-* Graphite permits customized rules for minority languages, and/or serves as a mechanism to easily add them in the future.
+* Graphite permits customized rules for lesser-known languages, and/or serves as a mechanism to easily add them in the future.
 * Graphite supports complex behavior that cannot be handled by OpenType, such as positioning based on the positions and/or sizes of neighboring glyphs, etc.
 * Using Graphite, it is possible to quickly implement a complex set of rules that are feasible but more difficult to handle in OpenType.
 * Graphite permits user-definable features beyond the defined set of OpenType features.
