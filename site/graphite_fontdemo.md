@@ -29,7 +29,7 @@ The quick brown FOX jumps over the lazy DOG.
 
 ## Padauk font demo
 
-Padauk is a Graphite-enabled font that supports the Burmese script. This page demonstrates three ways of using Padauk on a web page. A graphic showing the correct rendering of this text is also shown below.
+Padauk is a Graphite-enabled font that supports the Myanmar (or Burmese) script. This page demonstrates three ways of using Padauk on a web page. A graphic showing the correct rendering of this text is also shown below.
 
 ### Locally installed font
 
