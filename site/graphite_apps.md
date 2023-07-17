@@ -39,35 +39,35 @@ XeTeX is a typesetting system based on a merger of Donald Knuth's TeX system wit
 
 [&#x2197; XeTeX home page](https://scripts.sil.org/xetex){:target="_blank"}
 
-[&#x2197; Download XeTeX from TeXLive](tug.org/texlive/){:target="_blank"}
+[&#x2197; Download XeTeX from TeXLive](https://www.tug.org/xetex/){:target="_blank"}
 
 ![](assets/images/logo_FieldWorks.jpeg) **FieldWorks**
 {: .fs-6 }
 
 FieldWorks is SIL's suite of linguistic applications. It includes tools for dictionary development, translation, and morphological analysis, and text interlinearization. It uses the original SilGraphite engine.
 
-[&#x2197; FieldWorks home page](fieldworks.sil.org){:target="_blank"}
+[&#x2197; FieldWorks home page](https://software.sil.org/fieldworks/){:target="_blank"}
 
 ![](assets/images/logo_Paratext.png) **Paratext**
 {: .fs-6 }
 
 Paratext and related tools are a collection of software programs which allow you to input, edit, check, and publish a translation of the Scriptures, based on the original texts (Greek, Hebrew), and modeled on versions in major languages.
 
-[&#x2197; Paratext home page](paratext.org){:target="_blank"}
+[&#x2197; Paratext home page](https://paratext.org/){:target="_blank"}
 
 ![](assets/images/logo_Bloom.png) **Bloom**
 {: .fs-6 }
 
 Bloom makes it easy to create simple books and translate them into multiple languages.
 
-[&#x2197; Bloom Library page](bloom.org/#/landing){:target="_blank"}
+[&#x2197; Bloom Library page](https://bloomlibrary.org/create){:target="_blank"}
 
 ![](assets/images/logo_PaleMoon.jpeg) **Pale Moon**
 {: .fs-6 }
 
 Pale Moon is a web browser built on a fork of Mozilla Firefox.
 
-[&#x2197; Pale Moon home page](palemoon.org){:target="_blank"}
+[&#x2197; Pale Moon home page](https://www.palemoon.org/){:target="_blank"}
 
 {: .blue-note }
 > **Integrating Graphite into an application**
