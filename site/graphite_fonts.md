@@ -36,15 +36,15 @@ parent: Using Graphite
 
 ### Arabic
 
-[&#x2197; Awami Nastaliq](http://software.sil.org/awami/){:target="_blank"} supports a wide variety of languages of Pakistan that are written with the sloping Nastaliq style.
+[&#x2197; Awami Nastaliq](https://software.sil.org/awami/){:target="_blank"} supports a wide variety of languages of Pakistan that are written with the sloping Nastaliq style.
 
 ### Myanmar (Burmese)
 
-[&#x2197; Padauk](http://software.sil.org/padauk/){:target="_blank"} was developed by SIL to handle the Burmese script. Its Graphite support is particularly useful for minority languages.
+[&#x2197; Padauk](https://software.sil.org/padauk/){:target="_blank"} was developed by SIL to handle the Burmese script. Its Graphite support is particularly useful for lesser-known languages.
 
 ### Devanagari
 
-[&#x2197; Annapurna SIL](http://software.sil.org/annapurna){:target="_blank"} renders Devanagari for languages of north India and Nepal, including support for minority variations.
+[&#x2197; Annapurna SIL](https://software.sil.org/annapurna){:target="_blank"} renders Devanagari for languages of north India and Nepal, including support for lesser-known variations.
 
 ### Tamil
 
@@ -74,19 +74,19 @@ These fonts also include Latin and Cyrillic.
 
 ### Coptic
 
-[&#x2197; Sophia Nubian](http://software.sil.org/sophianubian){:target="_blank"} is a font developed for Nubian languages which use the Coptic Unicode character set.
+[&#x2197; Sophia Nubian](https://software.sil.org/sophianubian){:target="_blank"} is a font developed for Nubian languages which use the Coptic Unicode character set.
 
 ### Ethiopic
 
-The Graphite smarts in [&#x2197; Abyssinica SIL](http://software.sil.org/abyssinica){:target="_blank"} support alternate feature selection of glyph variants as well as gemination combining marks.
+The Graphite smarts in [&#x2197; Abyssinica SIL](https://software.sil.org/abyssinica){:target="_blank"} support alternate feature selection of glyph variants as well as gemination combining marks.
 
 ### Dai Banna
 
-A set of fonts for the Dai Banna or New Tai Lue script can be found [&#x2197; here](https://scripts.sil.org/DaiBannaSIL){:target="_blank"}.
+A set of fonts for the Dai Banna or New Tai Lue script can be found [&#x2197; here](https://software.sil.org/daibanna/){:target="_blank"}.
 
 ### Lepcha
 
-Mingzat, a font for the Lepcha script can be found [&#x2197; here](http://software.sil.org/mingzat){:target="_blank"}.
+Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://software.sil.org/mingzat){:target="_blank"}.
 
 ### Roman script variations
 
@@ -94,11 +94,11 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](http://softwa
 
 ### Blackletter style for Roman text
 
-[&#x2197; Unifraktur] (http://unifraktur.sourceforge.net/){:target="_blank"}
+[&#x2197; Unifraktur](https://unifraktur.sourceforge.net/){:target="_blank"}
 
 ### Cipher Music
 
-[&#x2197; Doulos SIL Cipher](http://software.sil.org/doulos-sil-cipher){:target="_blank"} supports the cipher music notation system that is used in China and Indonesia. The font is still under development.
+[&#x2197; Doulos SIL Cipher](https://software.sil.org/doulos-sil-cipher){:target="_blank"} supports the cipher music notation system that is used in China and Indonesia. The font is still under development.
 
 ### Tengwar
 
@@ -108,7 +108,7 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](http://softwa
 
 ### N'Ko
 
-A beta of [Conakry](http://www.evertype.com/fonts/nko/ConakryFont.zip), a font to support the N'Ko script, is available from  Evertype.
+A beta of [Conakry](https://www.evertype.com/fonts/nko/ConakryFont.zip), a font to support the N'Ko script, is available from Evertype.
 
 ### Sumero-Akkadian Cuneiform
 
