@@ -51,7 +51,7 @@ Try running the data: `city council`. The output should look like: **sity kounsi
 
 The Glyph tab will show any glyph attributes that are set in your GDL program. Again, run the string `city council` and bring up the Rules tab. Select the letter ‘i’ in the first row (either by clicking the black pixels in the glyph or by clicking ‘g_i’ in the third column) and choose the Glyph tab. Notice that there is a glyph attribute listed called ‘followsHardC’ with the value 0 (false). Now select the ‘t’. The same glyph attribute is listed, but the value is 1 (true).
 
-[The Glyph pane showing glyph attributes](graide7_1_glyphAttribute.png)
+[The Glyph pane showing glyph attributes](../assets/images/graide7_1_glyphAttribute.png)
 
 (If your glyph attributes don’t seem to look the same, it could be because your program is somewhat different than the provided solution.)
 
