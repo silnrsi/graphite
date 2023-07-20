@@ -63,8 +63,8 @@ The following are some benefits of including Graphite support in a font:
 * Graphite permits user-definable features beyond the defined set of OpenType features.
 * Graphite provides consistent smart behavior across all applications.
 
-## What is the current state of the project?
+## What is Graide?
 
-Version 1.2.4 of the Graphite2 engine was released in November 2013. We believe this to be a stable and feature-complete version and do not anticipate much new development in the near future. Future changes are more likely to be made to the compiler rather than the engine, although we certainly plan to fix any bugs that appear.
+Graide is a development and debugging tool for use in creating Graphite fonts. It stands for **GRA**phite **I**ntegrated **D**evelopment **E**nvironment.
 
-So please be aware that the lack of a recently released version does not indicate a moribund project, but rather a mature and stable product!
+[Read more...](graide)

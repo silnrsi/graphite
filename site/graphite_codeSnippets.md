@@ -23,7 +23,7 @@ parent: Developers
 
 These snippets are intended as a quick reference. For complete documentation of the GDL language, download the reference paper:
 
-[Download GDL.pdf](GDL.pdf){: .btn .btn-blue }
+[Download GDL.pdf](assets/resources/GDL.pdf){: .btn .btn-blue }
 
 ## Diacritic attachment
 

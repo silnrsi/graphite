@@ -13,7 +13,7 @@ grand_parent: Developers
 
 Congratulations, you have completed the tutorial. If you haven't already, please take this opportunity to download the complete GDL documentation:
 
-[Download GDL.pdf](GDL.pdf){: .btn .btn-blue }
+[Download GDL.pdf](../assets/resources/GDL.pdf){: .btn .btn-blue }
 
 Return to the [Introduction and Table of Contents](../graide_tutorial).
 

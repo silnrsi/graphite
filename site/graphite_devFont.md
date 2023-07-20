@@ -22,12 +22,12 @@ Adding Graphite support to a font involves:
 
 GDL is a programming language that describes the "smart" behavior of the font. It is written to correspond to a specific font, and includes definitions of the glyphs in the font and rules describing their behavior.
 
-[Download GDL documentation](GDL.pdf){: .btn .btn-blue }
+[Download GDL documentation](assets/resources/GDL.pdf){: .btn .btn-blue }
 
 The following tools can be used to assist in the development of a GDL program:
 
 * make_gdl.pl - a Perl utility that automatically generates some of the necessary GDL code from a font and an XML file of attachment point data. This is included in the SIL [&#x2197; FontUtils](https://scripts.sil.org/FontUtils){:target="_blank"} package.
-* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [&#x2197; SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont/tree/master/scripts){:target="_blank"}.
+* FLWriteXml.py - a Python utility that outputs a file of attachment points from FontLab, which can then be used by make_gdl to define attachment points for Graphite. This file can be downloaded from the [&#x2197; SIL Font Utility GitHub repository](https://github.com/silnrsi/pysilfont){:target="_blank"}.
 
 ### 2. Compiling the program
 
@@ -35,7 +35,7 @@ The Graphite compiler takes as input the original font and the GDL program, and 
 
 The Windows executable can be downloaded [&#x2197; here](https://scripts.sil.org/GraphiteCompilerDownload){:target="_blank"}.
 
-For Linux systems, the source for the grcompiler program is available from [&#x2197; here](http://sourceforge.net/projects/silgraphite/files/grcompiler){:target="_blank"}. If you are using Ubuntu Linux 12.04, binary packages are available for [64-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_amd64.deb){:target="_blank"} and [32-bit](http://packages.sil.org/ubuntu/pool/main/g/grcompiler/grcompiler_4.2-1+precise1_i386.deb){:target="_blank"} systems.
+For Linux systems, the source for the grcompiler program is available from [&#x2197; here](http://sourceforge.net/projects/silgraphite/files/grcompiler){:target="_blank"}. You can install it using the package manager: `sudo apt install grcompiler`.
 
 ### 3. Testing the font
 
@@ -45,17 +45,13 @@ If you discover errors in the behavior of the Graphite font, modify the GDL prog
 
 ## Graide
 
-[Graide](graide) is a Graphite font creation tool that is currently under development. Version 1.0 is available.
+[Graide](graide) is a tool for creating Graphite fonts. Version 1.0 is available.
 
 ## Tutorial
 
 The following is a tutorial to help you learn to program using GDL. It includes instructions for using Graide (GRAphite Integrated Development Environment):
 
 [GDL Tutorial](graide_tutorial)
-
-An older version is available that does not use Graide.
-
-[GDL Tutorial Without Graide](graphite_tutorial_wo_graide)
 
 ## GDL code snippets
 

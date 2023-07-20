@@ -17,10 +17,6 @@ To see Graphite in operation, you need a web page uses some CSS referring to a G
 
 Graphite is also supported in Pale Moon, a browser based on a fork of Firefox.
 
-### A menu toggle for Android
-
-An extension is available that provides [&#x2197; a menu toggle for Graphite support in Firefox on Android](https://addons.mozilla.org/en-US/android/addon/toggle-graphite-support){:target="_blank"}.
-
 ## Testing Graphite behaviors in Firefox
 
 Now you can test content relying on smart behaviors in a Graphite-enabled font.
@@ -82,18 +78,17 @@ To indicate more than one feature, use a comma as a delimiter:
 
 More complete documentation of feature settings in CSS can be found at [&#x2197; http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings](http://dev.w3.org/csswg/css3-fonts/#propdef-font-feature-settings){:target="_blank"}.
 
-For more detail on how to specify fonts on web pages see [&#x2197; Using SIL Fonts on Web Pages](https://scripts.sil.org/using_web_fonts){: target="_blank"}.
+For more detail on how to specify fonts on web pages see [&#x2197; Using SIL Fonts on Web Pages](https://software.sil.org/fonts/webfonts){: target="_blank"}.
 
 ## Supported platforms
 This Graphite support has been tested and is known to work on the following platforms:
 
-* Windows 7
-* Windows Vista
+* Windows 10
+* Windows 11
 * Ubuntu 11.10
-* Android 3.2
 * Mac OS X 10.7.3
 
-## Switching on Graphite in Firefox 11 and 45.0.1
+## Switching on Graphite in early versions of Firefox
 
 {: .blue-note }
 > **Note**

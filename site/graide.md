@@ -33,4 +33,4 @@ Please send feedback to:
 
 The following tutorial teaches the basic elements of GDL programming and include instructions for using Graide:
 
-[Graphite tutorial using Graide](graide_tutorial0)
+[Graphite tutorial using Graide](graide_tutorial)
