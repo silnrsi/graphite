@@ -46,21 +46,21 @@ parent: Using Graphite
 
 [&#x2197; Annapurna SIL](https://software.sil.org/annapurna){:target="_blank"} renders Devanagari for languages of north India and Nepal, including support for lesser-known variations.
 
-### Tamil[^1]
+### Tamil[*](#non-sil)
 
 The [&#x2197; Krishna Tamil](https://sourceforge.net/p/silgraphite/mailman/message/29478357/){:target="_blank"} font is a Graphite-enabled font derived from Lohit Tamil. It handles classical Tamil orthogrphy and old Tamil grammatical sequences.
 
 The [&#x2197; ThiruValluvar](https://github.com/nlci/taml-font-thiruvalluvar/releases){:target="_blank"} font also supports Tamil.
 
-### Tamil Brahmi[^1]
+### Tamil Brahmi[*](#non-sil)
 
-The [&#x2193 Adinatha Tamil Brahmi](http://www.virtualvinodh.com/download/Adinatha-Tamil-Brahmi.zip) font provides support for the subset of the historical Brahmi script used in Tamil Nadu.
+The [&#x2193; Adinatha Tamil Brahmi](http://www.virtualvinodh.com/download/Adinatha-Tamil-Brahmi.zip) font provides support for the subset of the historical Brahmi script used in Tamil Nadu.
 
 ### Tai Viet
 
 [&#x2197; Tai Heritage Pro](https://software.sil.org/taiheritage){:target="_blank"} supports the Tai Viet script as used for Tai Dam and related languages of Southeast Asia.
 
-### Greek[^1]
+### Greek[*](#non-sil)
 
 These fonts also include Latin and Cyrillic.
 
@@ -88,11 +88,11 @@ A set of fonts for the Dai Banna or New Tai Lue script can be found [&#x2197; he
 
 Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://software.sil.org/mingzat){:target="_blank"}.
 
-### Roman script variations[^1]
+### Roman script variations[*](#non-sil)
 
 [&#x2197; Magyar Linux Libertine](http://numbertext.org/linux){:target="_blank"} is a Graphite-enabled font with ligatures, small caps, old style numbers, proportional or monospaced numbers, automatic thousand separators, minus sign, real superscript and subscript, German umlaut variants and capital eszett, fractions, number to number name conversion (in 23 languages).
 
-### Blackletter style for Roman text[^1]
+### Blackletter style for Roman text[*](#non-sil)
 
 [&#x2197; Unifraktur](https://unifraktur.sourceforge.net/){:target="_blank"}
 
@@ -100,11 +100,13 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://softw
 
 [&#x2197; Doulos SIL Cipher](https://software.sil.org/doulos-sil-cipher){:target="_blank"} supports the cipher music notation system that is used in China and Indonesia. The font is still under development.
 
-### Tengwar[^1]
+### Tengwar[*](#non-sil)
 
 [&#x2197; Tengwar](http://freetengwar.sourceforge.net/){:target="_blank"} is an "Elvish" script developed by J. R. R. Tolkien.
 
-[^1]: These fonts were not developed by SIL and we cannot guarantee their quality or correctness.
+[]{#non-sil}
+
+*Note: these fonts were not developed by SIL and we cannot guarantee their quality or correctness.
 
 ## Experimental fonts
 
@@ -115,6 +117,8 @@ A beta of [&#x2193; Conakry](https://www.evertype.com/fonts/nko/ConakryFont.zip)
 ### Sumero-Akkadian Cuneiform
 
 [Download](assets/resources/CuneiformGraphiteFont.zip){: .btn .btn-blue }
+
+
 
 ## Toy fonts
 
