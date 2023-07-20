@@ -106,10 +106,10 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://softw
 
 <a name="non-sil"></a>
 
+{: .blue-note }
 > **\*Note**
 >
 > These fonts were not developed by SIL and we cannot guarantee their quality or correctness.
-
 
 
 ## Experimental fonts
