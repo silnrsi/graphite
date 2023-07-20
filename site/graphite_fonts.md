@@ -104,7 +104,7 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://softw
 
 [&#x2197; Tengwar](http://freetengwar.sourceforge.net/){:target="_blank"} is an "Elvish" script developed by J. R. R. Tolkien.
 
-[]{#non-sil}
+<a name="non-sil"></a>
 
 *Note: these fonts were not developed by SIL and we cannot guarantee their quality or correctness.
 
