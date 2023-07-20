@@ -32,7 +32,7 @@ parent: Using Graphite
     * [Pig Latin](graphite_fonts#pig-latin)
 * [Create your own Graphite font](graphite_fonts#create-your-own-graphite-font)
 
-## Production-quality fonts
+## Production-quality fonts[*](#non-sil)
 
 ### Arabic
 
@@ -109,7 +109,7 @@ Mingzat, a font for the Lepcha script can be found [&#x2197; here](https://softw
 {: .blue-note }
 > **\*Note**
 >
-> These fonts were not developed by SIL and we cannot guarantee their quality or correctness.
+> Fonts marked with an asterisk (*) were not developed by SIL and we cannot guarantee their quality or correctness.
 
 
 ## Experimental fonts
