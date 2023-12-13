@@ -28,7 +28,6 @@ setup(
     zip_safe         = False,
     package_dir      = {'': 'python'},
     packages         = ['graphite2'],
-    install_requires = ['future'],
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
@@ -37,7 +36,6 @@ setup(
         'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3'
     ]
 )
