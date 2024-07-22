@@ -5,8 +5,6 @@ supplied test harness against.  This will check each byte in every table of a
 TTF or subset if specified by overwriting with a random or user specified
 value. It can also re-run tests using previous output logs as input.
 '''
-from __future__ import division, print_function, unicode_literals
-
 __version__ = "1.0"
 __date__    = "4 April 2012"
 __author__  = "Tim Eves <tim_eves@sil.org>"
