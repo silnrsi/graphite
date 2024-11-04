@@ -17,7 +17,6 @@ parent: Using Graphite
     * [Greek](graphite_fonts#greek)
     * [Lanna](graphite_fonts#lanna)
     * [Coptic](graphite_fonts#coptic)
-    * [Ethiopic](graphite_fonts#ethiopic)
     * [Dai Banna](graphite_fonts#dai-banna)
     * [Lepcha](graphite_fonts#lepcha)
     * [Roman script variations](graphite_fonts#roman-script-variations)
