@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later
 # Copyright 2010, SIL International, All rights reserved.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)
-cmake_policy(SET CMP0012 NEW)
+cmake_minimum_required(VERSION 3.5.0)
 include(TestBigEndian)
 find_package(PythonInterp 3.6)
 project(graphite2)
