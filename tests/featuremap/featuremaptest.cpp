@@ -8,9 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-
 #include <cstdint>
-
 
 
 #include <graphite2/Font.h>
