@@ -2,7 +2,6 @@
 # Copyright 2010, SIL International, All rights reserved.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 project(graphite2_core)
-cmake_policy(SET CMP0012 NEW)
 INCLUDE(CheckCXXSourceCompiles)
 
 set(GRAPHITE_API_CURRENT 3)
