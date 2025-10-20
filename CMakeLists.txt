@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later
 # Copyright 2010, SIL International, All rights reserved.
-cmake_minimum_required(VERSION 3.16)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.20)
+cmake_policy(SET CMP0012 NEW)
 include(TestBigEndian)
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
@@ -8,7 +9,8 @@ if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif()
 
-option(BUILD_SHARED_LIBS "Make library a shared library instead of static" ON)
+option(BUILD_SHARED_LIBS "Make library a shared library instead of static." ON)
+option(BUILD_TESTING "Build test harnesses along with library." ON)
 
 enable_language(CXX C)
 set(CMAKE_CXX_STANDARD 11)

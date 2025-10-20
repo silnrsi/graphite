@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later
 # Copyright 2010, SIL International, All rights reserved.
-cmake_minimum_required(VERSION 3.16)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 project(graphite2_core)
 INCLUDE(CheckCXXSourceCompiles)
 
