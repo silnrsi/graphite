@@ -3,14 +3,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.20)
 cmake_policy(SET CMP0012 NEW)
 include(TestBigEndian)
-find_package(PythonInterp 3.6)
 project(graphite2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif()
 
-option(BUILD_SHARED_LIBS "Make library a shared library instead of static" ON)
+option(BUILD_SHARED_LIBS "Make library a shared library instead of static." ON)
+option(BUILD_TESTING "Build test harnesses along with library." ON)
 
 enable_language(CXX C)
 set(CMAKE_CXX_STANDARD 11)
@@ -66,15 +66,14 @@ if (GRAPHITE2_VM_TYPE STREQUAL "direct" AND NOT (CMAKE_COMPILER_IS_GNUCXX OR CMA
 endif()
 message(STATUS "Using vm machine type: ${GRAPHITE2_VM_TYPE}")
 
-if (BUILD_SHARED_LIBS)
-    if (PYTHONINTERP_FOUND)
-        EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-            ARGS -c \"import ctypes\; print(ctypes.sizeof(ctypes.c_void_p)) \"
+if (BUILD_TESTING AND BUILD_SHARED_LIBS)
+    find_package(Python3 3.6 REQUIRED COMPONENTS Interpreter)
+    if (TARGET Python3::Interpreter)
+        execute_process(COMMAND ${Python3_EXECUTABLE}
+            -c "import ctypes; print(ctypes.sizeof(ctypes.c_void_p), end=\"\")"
             OUTPUT_VARIABLE PYTHON_SIZEOF_VOID_P)
-        if (NOT (PYTHON_VERSION_MAJOR GREATER 2 AND PYTHON_VERSION_MINOR GREATER 5))
-            message(WARNING "Python version 3.6 or greater required. Disabling some tests.")
-        elseif ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX))
-            set(PYTHON_CTYPES_COMPATBILE TRUE)
+        if ((PYTHON_SIZEOF_VOID_P STREQUAL CMAKE_SIZEOF_VOID_P) AND (NOT GRAPHITE2_NFILEFACE) AND ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX))
+            set(PYTHON_CTYPES_COMPATIBLE TRUE)
         else ()
             if ((NOT GRAPHITE2_SANITIZERS MATCHES "address") OR CMAKE_COMPILER_IS_GNUCXX)
                 message(WARNING "Python ctypes is incompatible with built DLL. Disabling some tests.")
@@ -84,7 +83,9 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(tests)
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 add_subdirectory(doc)
 if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(gr2fonttest)
