@@ -82,12 +82,12 @@ set_target_properties(graphite2 PROPERTIES  PUBLIC_HEADER "${GRAPHITE_HEADERS}"
                                             LT_VERSION_REVISION ${GRAPHITE_API_REVISION}
                                             LT_VERSION_AGE ${GRAPHITE_API_AGE})
 
-if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL ".*Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES ".*BSD" OR ${CMAKE_SYSTEM_NAME} STREQUAL ".*GNU")
     set_target_properties(graphite2 PROPERTIES
         COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wnon-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
         LINK_FLAGS      "-nodefaultlibs ${GRAPHITE_LINK_FLAGS}"
         LINKER_LANGUAGE C)
-    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86")
+    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86|amd64")
         add_definitions(-mfpmath=sse -msse2)
     endif()
     if (CMAKE_COMPILER_IS_GNUCXX)
@@ -111,7 +111,9 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
     endif ()
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-    CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+    if (BUILD_SHARED_LIBS)
+        CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+    endif()
 endif()
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
@@ -119,21 +121,30 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wimplicit-fallthrough -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
         LINK_FLAGS      "-nodefaultlibs"
         LINKER_LANGUAGE C)
-    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86")
+    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86|amd64")
         add_definitions(-mfpmath=sse -msse2)
     endif()
     target_link_libraries(graphite2 c)
     include(Graphite)
-    nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+    if (BUILD_SHARED_LIBS)
+        nolib_test(stdc++ $<TARGET_SONAME_FILE:graphite2>)
+    endif()
     set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-    CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+    if (BUILD_SHARED_LIBS)
+        CREATE_LIBTOOL_FILE(graphite2 "/lib${LIB_SUFFIX}")
+    endif()
 endif()
 
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set_target_properties(graphite2 PROPERTIES
-        COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
+    if (BUILD_SHARED_LIBS)
+        set_target_properties(graphite2 PROPERTIES
+            COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
+    else()
+        set_target_properties(graphite2 PROPERTIES
+            COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_STATIC")
+    endif()
 endif()
 
 
 install(TARGETS graphite2 EXPORT graphite2 LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX} PUBLIC_HEADER DESTINATION include/graphite2 RUNTIME DESTINATION bin)
-install(EXPORT graphite2 DESTINATION share/graphite2 NAMESPACE gr2_)
+install(EXPORT graphite2 DESTINATION lib${LIB_SUFFIX}/graphite2 NAMESPACE gr2_)

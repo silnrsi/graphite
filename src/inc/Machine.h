@@ -23,7 +23,7 @@
 #endif
 #else
 #define     HOT             __attribute__((hot))
-#if defined(__x86_64)
+#if defined(__x86_64) && !defined(__INTEL_COMPILER)
 #define     REGPARM(n)      __attribute__((hot, regparm(n)))
 #else
 #define     REGPARM(n)

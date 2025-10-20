@@ -22,9 +22,9 @@ if libpath is None:
     # find wheel's library
     wheel = os.path.dirname(__file__)
     if os.name == 'nt':
-        libpath = os.path.join(wheel, 'bin', 'graphite2.dll')
+        libpath = os.path.join(wheel, '..', 'bin', 'graphite2.dll')
     else:
-        libpath = os.path.join(wheel, 'lib', 'libgraphite2.so')
+        libpath = os.path.join(wheel, '..', 'lib', 'libgraphite2.so')
 gr2 = ctypes.cdll.LoadLibrary(libpath)
 
 
