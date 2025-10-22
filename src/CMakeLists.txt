@@ -121,7 +121,7 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wimplicit-fallthrough -Wendif-labels -Wshadow -Wno-ctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
         LINK_FLAGS      "-nodefaultlibs"
         LINKER_LANGUAGE C)
-    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86")
+    if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86|i.86" AND NOT "${CMAKE_OSX_ARCHITECTURES}" MATCHES "arm|ppc")
         add_definitions(-mfpmath=sse -msse2)
     endif()
     target_link_libraries(graphite2 c)
