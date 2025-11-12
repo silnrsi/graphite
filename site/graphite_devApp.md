@@ -29,15 +29,15 @@ The GitHub repository includes a [&#x2197; manual for integrating Graphite2 into
 
 ## SilGraphite
 
-{: .red-warning }
-> **Note**
+> [!CAUTION]
 >
 > SilGraphite is deprecated. Further development on the engine is not expected, and it is possible that it may not support fonts developed in the future.
 
-The original Graphite engine, packaged under the name SilGraphite, was once used by OpenOffice, Fieldworks, and WorldPad, which have long since been upgraded to use Graphite2.
+The original Graphite engine, packaged under the name SilGraphite, is used by OpenOffice and WorldPad.
+It was also used in FieldWorks, which has long since been upgraded to use Graphite2.
 
 The source code can be downloaded from: [&#x2197; SilGraphite SourceForge project](http://sourceforge.net/projects/silgraphite/){:target="_blank"}.
 
+This document describes version 2 of the SilGraphite API which is obsolete:
 [&#x2197; SilGraphite Application Programmers Guide](assets/resources/SilGraphite_AppProgGuide.pdf)
 
-(The documents above describe version 2 of the SilGraphite API; the original API is obsolete.)
