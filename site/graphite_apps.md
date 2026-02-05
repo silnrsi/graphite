@@ -60,6 +60,8 @@ Paratext and related tools are a collection of software programs which allow you
 
 Bloom makes it easy to create simple books and translate them into multiple languages.
 
+_Only version 5.4 and previous versions support Graphite._
+
 [&#x2197; Bloom Library page](https://bloomlibrary.org/create){:target="_blank"}
 
 ![](assets/images/logo_PaleMoon.jpeg) **Pale Moon**
