@@ -71,6 +71,13 @@ Pale Moon is a web browser built on a fork of Mozilla Firefox.
 
 [&#x2197; Pale Moon home page](https://www.palemoon.org/){:target="_blank"}
 
+![](assets/images/logo_Godot.png) **Godot**
+{: .fs-6}
+
+Godot is a development platform that is used for gaming applications.
+
+[&#x2197; Godot home page](https://godotengine.org/){:target="_blank"}
+
 {: .blue-note }
 > **Integrating Graphite into an application**
 > 
