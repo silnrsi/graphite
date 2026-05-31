@@ -91,7 +91,7 @@ if (NOT GRAPHITE2_NFILEFACE)
     add_subdirectory(gr2fonttest)
 endif()
 
-set(version 3.0.1)
+get_property(version DIRECTORY src PROPERTY lib_so_version)
 set(libdir ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
