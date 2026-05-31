@@ -8,6 +8,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 if (NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE Release)
 endif()
+include(GNUInstallDirs)
 
 option(BUILD_SHARED_LIBS "Make library a shared library instead of static." ON)
 option(BUILD_TESTING "Build test harnesses along with library." ON)
@@ -92,9 +93,9 @@ if (NOT GRAPHITE2_NFILEFACE)
 endif()
 
 set(version 3.0.1)
-set(libdir ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+set(libdir ${CMAKE_INSTALL_FULL_LIBDIR})
 set(includedir ${CMAKE_INSTALL_PREFIX}/include)
 
 configure_file(graphite2.pc.in graphite2.pc)
 
-install(FILES ${PROJECT_BINARY_DIR}/graphite2.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
+install(FILES ${PROJECT_BINARY_DIR}/graphite2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
