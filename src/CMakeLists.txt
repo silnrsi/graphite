@@ -137,6 +137,19 @@ if  (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     endif()
 endif()
 
+if  (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+    set_target_properties(graphite2 PROPERTIES
+        COMPILE_FLAGS   "-Wall -Wextra -Wno-unknown-pragmas -Wendif-labels -Wshadow -Wctor-dtor-privacy -Wno-non-virtual-dtor -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden"
+        LINK_FLAGS      "-nodefaultlibs"
+        LINKER_LANGUAGE C)
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+        add_definitions(-Wimplicit-fallthrough -Wshorten-64-to-32)
+    endif()
+    target_link_libraries(graphite2 c)
+    include(Graphite)
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+endif()
+
 if  (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set_target_properties(graphite2 PROPERTIES
         COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE;GRAPHITE2_EXPORTING")
