@@ -99,14 +99,8 @@ gr_face* gr_make_face_with_seg_cache(const void* appFaceHandle/*non-NULL*/, gr_g
 gr_uint32 gr_str_to_tag(const char *str)
 {
     uint32 res = 0;
-    switch(max(strlen(str),size_t(4)))
-    {
-        case 4: res |= str[3];       GR_FALLTHROUGH;
-        case 3: res |= str[2] << 8;  GR_FALLTHROUGH;
-        case 2: res |= str[1] << 16; GR_FALLTHROUGH;
-        case 1: res |= str[0] << 24; GR_FALLTHROUGH;
-        default:  break;
-    }
+    for (unsigned int i = 0; i < 4 && str[i]; ++i)
+        res |= uint32(static_cast<unsigned char>(str[i])) << (24 - 8 * i);
     return res;
 }
 
