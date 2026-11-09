@@ -118,7 +118,6 @@ void gr_tag_to_str(gr_uint32 tag, char *str)
     *str++ = char(tag >> 16);
     *str++ = char(tag >> 8);
     *str++ = char(tag);
-    *str = '\0';
 }
 
 gr_feature_val* gr_face_featureval_for_lang(const gr_face* pFace, gr_uint32 langname/*0 means clone default*/) //clones the features. if none for language, clones the default
