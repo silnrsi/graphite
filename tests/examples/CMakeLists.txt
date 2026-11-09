@@ -44,6 +44,7 @@ endmacro()
 
 test_example(simple simple.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf "Hello World!")
 test_example(features features.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf)
+test_example(tag_to_str tag_to_str.c)
 test_example(clusters cluster.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf "စက္ခုန္ဒြေ")
 test_example(linebreak linebreak.c ${testing_SOURCE_DIR}/fonts/charis_r_gr.ttf 120 "This is a long test line that goes on and on and on")
 test_freetype(freetype freetype.c ${testing_SOURCE_DIR}/fonts/Padauk.ttf "Hello World!")
